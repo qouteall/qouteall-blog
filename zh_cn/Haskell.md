@@ -247,3 +247,5 @@ class Eq a where
 
 注意到，Java中要让一个类实现一个接口，必须在定义类的时候写明，不能在类定义完后再实现新的接口，是“侵入式”接口。而Haskell允许类型定义完后让他实现新的接口，甚至允许对别的库里面的类型实现自己的接口，这不仅增强了灵活性还能降低代码的耦合性。Rust、Go也支持非侵入式接口。
 
+下一篇：[Haskell与Monad](https://github.com/qouteall/qouteall-blog/blob/main/zh_cn/Haskell%20Monad.md)
+

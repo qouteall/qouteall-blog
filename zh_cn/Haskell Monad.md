@@ -1,6 +1,6 @@
 ## [学习笔记] Haskell与Monad
 
-
+上一篇：[Haskell](https://github.com/qouteall/qouteall-blog/blob/main/zh_cn/Haskell.md)
 
 ### Functor, Monad
 
