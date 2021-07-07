@@ -1,6 +1,6 @@
 ## [学习笔记] Haskell与Monad
 
-上一篇Haskell语言学习笔记： [GitHub上](https://github.com/qouteall/qouteall-blog/blob/main/zh_cn/Haskell.md) [知乎上](https://github.com/qouteall/qouteall-blog/blob/main/zh_cn/Haskell.md)
+上一篇Haskell语言学习笔记： [GitHub上](https://github.com/qouteall/qouteall-blog/blob/main/zh_cn/Haskell.md) [知乎上](https://zhuanlan.zhihu.com/p/387237772)
 
 ### Functor, Monad
 
@@ -43,7 +43,7 @@ class MyMonad m where
 
 > 注：官方的`flatmap`记作`>>=`，也被称作`bind`（bind是范畴论中的名字），`wrap`记作`return`，`Functor`的`map`记作`fmap`。我认为`flatmap`比`>>=`更直观，`return`名称有误导性。同时，这里map的两个参数的顺序和官方是反的。
 
-这里的`m`泛型参数接受一个泛型，可以是`Optional`或`MyList`，不是具体类型例如`MyList Integer`。`map`输入一个a的容器，和一个a到b的函数，输出b的容器。`flatmap`输入a的容器，和一个a到装b的容器的函数，输出b的容器。`wrap`将一个普通值包装在容器中。（`Optional`在官方叫`Maybe`）
+这里的`m`泛型参数接受一个泛型，可以是`Optional`或`MyList`，不是具体类型例如`MyList Integer`。`map`输入一个a的容器，和一个a到b的函数，输出b的容器。`flatmap`输入a的容器，和一个a到装b的容器的函数，输出b的容器。`wrap`将一个普通值包装在容器中。
 
 对两种容器实现`Functor`和`Monad`
 
@@ -65,9 +65,39 @@ instance MyMonad MyList where
   wrap value = elementToList value
   flatmap EmptyList func = EmptyList
   flatmap (ListNode first rest) func = listConcat (func first) (flatmap rest func)
+  -- listConcat是连接两个列表
 ```
 
 Functor也可以叫做Mappable，Monad也可以叫做FlatMappable。
+
+对应Java代码
+
+```java
+static <A, B> Optional<B> map(Optional<A> a, Function<A, B> f) {
+    if (a.isPresent()) return Optional.of(f.apply(a.get())); else return Optional.empty();
+}
+static <A, B> Optional<B> flatmap(Optional<A> a, Function<A, Optional<B>> f) {
+    if (a.isPresent()) return f.apply(a.get()); else return Optional.empty();
+}
+static <A, B> MyList<B> map(MyList<A> a, Function<A, B> f) {
+    if (a instanceof EmptyList<A>) {
+        return new EmptyList<>();
+    } else {
+        ListNode<A> listNode = (ListNode<A>) a;
+        return new ListNode<>(f.apply(a.first), map(a.rest, f));
+    }
+}
+static <A, B> MyList<B> flatmap(MyList<A> a, Function<A, MyList<B>> f) {
+    if (a instanceof EmptyList<A>) {
+        return new EmptyList<>();
+    } else {
+        ListNode<A> listNode = (ListNode<A>) a;
+        return listConcat(f.apply(a.first), flatmap(a.rest, f));
+    }
+}
+```
+
+
 
 ### 计算过程也是Monad
 
@@ -309,7 +339,7 @@ Monad是一种容器或计算过程，这种容器或计算过程可以进行`fl
 
 * `Writer`，一种单元素容器，这个容器除了内容之外还附加一个字符串记录信息，每次flatmap都添加字符串记录信息。
 * `Either`，一种单元素容器，可以有两种类型的取值。在将第一个泛型参数柯里化后，相当于Optional，也是一种Monad。
-* `Cont`，CPS计算过程。牵扯到CPS变换。
+* `Cont`，CPS计算过程。牵扯到CPS变换。CPS变换学习笔记： [GitHub上](https://github.com/qouteall/qouteall-blog/blob/main/zh_cn/CPS.md) [知乎上](https://zhuanlan.zhihu.com/p/387239708)
 
 **Monad也可以认为是在某个环境(context)下的值**。容器内元素可以用模式匹配取出，容器内的值是在模式匹配下的环境下的值。对于计算过程，我们定义一个函数，函数的参数有计算过程的输入值，那么在这个函数里面的环境下我们可以获得计算过程的输出值。map操作是将这个环境中的值替换成另一个值，flatmap将这个环境中的值替换成另一个同类环境下的值，然后将两个同类环境合并成一个环境。wrap操作将一个值包含在默认环境中。
 
@@ -408,7 +438,7 @@ operation f wrap <=> f
 operation a (operation b c) <=> operation (operation a b) c
 ```
 
-同时这个运算封闭，所以`t -> m t`上的这个运算构成幺半群。不过这个知识对编程没有什么帮助。
+同时这个运算封闭，所以`t -> m t`上的这个运算构成**幺半群**。不过这个知识对编程没有什么帮助。
 
 ### Applicative
 
