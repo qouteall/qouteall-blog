@@ -1,6 +1,6 @@
 ## [学习笔记] Haskell与Monad
 
-上一篇：[Haskell](https://github.com/qouteall/qouteall-blog/blob/main/zh_cn/Haskell.md)
+上一篇Haskell语言学习笔记： [GitHub上](https://github.com/qouteall/qouteall-blog/blob/main/zh_cn/Haskell.md) [知乎上](https://github.com/qouteall/qouteall-blog/blob/main/zh_cn/Haskell.md)
 
 ### Functor, Monad
 
@@ -408,7 +408,7 @@ operation f wrap <=> f
 operation a (operation b c) <=> operation (operation a b) c
 ```
 
-所以`t -> m t`上的这个运算构成幺半群。不过这个知识对编程没有什么帮助。
+同时这个运算封闭，所以`t -> m t`上的这个运算构成幺半群。不过这个知识对编程没有什么帮助。
 
 ### Applicative
 
@@ -447,12 +447,12 @@ class MonadTransformer transformer where
 
 每种Monad都有对应的Monad transformer：
 
-| Monad类型                                                | 对应的Monad Transformer的类型              |
-| -------------------------------------------------------- | ------------------------------------------ |
-| `Optional t`                                             | `m (Optional t)`                           |
-| `MyList t`                                               | `m (MyList t)`                             |
-| `Computation` : `inputType -> outputType`                | `inputType -> (m outputType)`              |
-| `StateTransfer` : `stateType -> (stateType, resultType)` | `stateType -> (m (stateType, resultType))` |
+* `Optional t` 对应 `m (Optional t)`
+* `MyList t` 对应  `m (MyList t)`
+* 函数 `inputType -> outputType`对应 `inputType -> (m outputType)`
+* 状态转移函数 `state -> (state, result)` 对应`state -> (m (state, result))`
+
+> 这里要吐槽一下知乎导入md不支持表格
 
 Monad有两种：容器和计算过程。对于容器，Monad transformer是用新monad将整个容器包住，而对于计算过程，只是将函数的输出包住。
 
@@ -571,4 +571,8 @@ let (SimpleBox_ (newStack2, (newStack1, _))) = getTransferT (getTransferT moveTo
 -- newStack1 = EmptyList
 -- newStack2 = ListNode 2 (ListNode 1 EmptyList)
 ```
+
+
+
+[文章备份](https://github.com/qouteall/qouteall-blog/blob/main/zh_cn/Haskell%20Monad.md)
 
