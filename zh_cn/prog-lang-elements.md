@@ -89,6 +89,8 @@ plus (S k) y = S (plus k y) --k的后继与y相加，得到k+y的后继
 
 子类型可以部分地表达和类型，例如说一个函数返回的内容，要么是`Result`要么是`Error`，有和类型的语言可以直接表达`Result | Error`，而用面向对象子类型也可以表达这一类型，先定义一个`ResultOrError`接口，再定义`Result`和`Error`都实现`ResultOrError`。但面向对象的设计思想是子类型很容易被扩展，可以定义第三个类实现`ResultOrError`接口，导致类型系统无法限定`ResultOrError`的具体取值。
 
+A是B的子类型，就代表A的取值集合是B的取值集合的子集。最大的集合，全集，对应顶部类型(top type)，TypeScript中的`any`类型可以表示任何东西，所有类型都是`any`的子类型，`any`是顶部类型。最小的集合，空集，对应底部类型(bottom type)，TypeScript中的`never`类型是底部类型，`never`类型是任何类型的子类型。TypeScript中`void`和`never`都有“空”的意思，但实际上不同，你可以获得一个`void`值，但是不可能获得一个`never`值。
+
 ##### 鸭子类型(duck typing)
 
 一个生物体，如果看起来像鸭子，走起来像鸭子，叫起来像鸭子，那么它就可以当成鸭子。若标准的鸭子对象有`quack`方法（函数），我定义另一个假鸭子对象也有`quack`方法，那么就可以把假鸭子对象当做鸭子对象用，调用`quack`方法实现多态。动态语言都有鸭子类型特性，动态语言让多态变得更方便。
