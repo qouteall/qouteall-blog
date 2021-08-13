@@ -42,6 +42,8 @@ define可以定义变量或函数
 
 `( let ((a 1) (b 2)) (+ a b) )`相当于JavaScript里的`((a, b) => a + b)(1, 2)` ，let可以在子表达式里声明中间变量。
 
+`(let () a b c)`会依次求值a，b，c，最终取c的值。
+
 `(set! a 1)`相当于`a = 1;`
 
 `(if cond a b)`相当于`cond ? a : b`
@@ -66,7 +68,7 @@ function f(a) {
 
 这里返回的函数捕获了外面的a。Scheme和JavaScript捕获的方式是在函数里面存储**外面的环境的引用**。Java语言和C++语言也有lambda表达式，但是他们捕获的方式是**将捕获的值存储在函数对象里面**，而不是存储对外面环境的引用。
 
-这两种捕获方式的区别在于，Lisp和JavaScript支持修改捕获的变量：
+Lisp和JavaScript支持修改捕获的变量：
 
 ```scheme
 (define (getFunc) 
@@ -222,7 +224,7 @@ Lisp中可以用递归实现循环的效果，例如说，输出0到5：
 (define i 0)
 (define (loop-func) (
     if (< i 6)
-    (begin
+    (let ()
         (display i)
         (set! i (+ i 1))
         (loop-func)
@@ -233,7 +235,7 @@ Lisp中可以用递归实现循环的效果，例如说，输出0到5：
 (loop-func)
 ```
 
-> `begin`的作用是执行一系列操作，并取最后一个表达式的值。可以将多个操作包装成一个表达式。
+
 
 相当于JavaScript中的
 
@@ -256,10 +258,10 @@ Lisp中语言核心不包含while,for等循环结构，但是可以用宏定义�
 ```scheme
 (define-macro my-while
     (lambda (condition body)
-        `(begin
+        (let ()
             (define (loop-func) (
                 if ,condition
-                (begin
+                (let ()
                     ,body
                     (loop-func)
                 )
@@ -293,6 +295,8 @@ Lisp中语言核心不包含while,for等循环结构，但是可以用宏定义�
 )
 ```
 
+> `(begin ... ...)`会依次求值各个表达式，取最后一个表达式的值，跟`(let () ... ...)`类似但是不创建新环境
+
 ###  可变参数的宏
 
 可以改进一下这个宏，让循环体不必用`begin`包成一个表达式。Scheme中可以定义参数数量可变的函数(variadic function)，例如`(lambda (first-arg . rest-args) ...)`，第一个参数为first-arg，剩下的参数组成的列表是rest-args。利用参数可变函数，可以将这个宏改进为：
@@ -300,10 +304,10 @@ Lisp中语言核心不包含while,for等循环结构，但是可以用宏定义�
 ```scheme
 (define-macro my-while
     (lambda (condition . statements)
-        `(begin
+        `(let ()
             (define (loop-func) (
                 if ,condition
-                (begin
+                (let ()
                     ,(cons 'begin statements)
                     (loop-func)
                 )
@@ -329,10 +333,10 @@ Lisp中语言核心不包含while,for等循环结构，但是可以用宏定义�
 (define-macro my-while
     (lambda (condition . statements)
         (define loop-func-id (gensym))
-        `(begin
+        `(let ()
             (define (,loop-func-id) (
                 if ,condition
-                (begin
+                (let ()
                     ,(cons 'begin statements)
                     (,loop-func-id)
                 )
@@ -352,7 +356,7 @@ Lisp中语言核心不包含while,for等循环结构，但是可以用宏定义�
 
 Lisp中允许用`cons`将数据组合成元组，而且可以嵌套，甚至组成列表，但是想取出来就要用`car` `cdr`，有时还要判断里面嵌套的值是不是元组，写起来就比较蛋疼。
 
-希望的模式匹配是这样的：
+希望的模式匹配功能是这样的：
 
 ```scheme
 (pattern-match x
@@ -497,6 +501,12 @@ Lisp中允许用`cons`将数据组合成元组，而且可以嵌套，甚至组�
     )
 )
 ```
+
+
+
+### Call with current continuation
+
+[这篇文章](https://zhuanlan.zhihu.com/p/387239708)讲解了call with current continuation.
 
 
 
