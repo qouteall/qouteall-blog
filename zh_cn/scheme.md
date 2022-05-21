@@ -81,7 +81,7 @@ Lisp和JavaScript支持修改捕获的变量：
 (display ((getFunc)))
 ```
 
-对于JavaScript代码
+对应JavaScript代码
 
 ```javascript
 function getFunc() {
