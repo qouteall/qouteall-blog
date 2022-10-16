@@ -81,10 +81,10 @@ data A = FirstState String | SecondState String
 
 换另一种表示方法，也可以表示为一个布尔值和一个字符串
 
- ```haskell
+```haskell
 data Bool = True | False
 data A = A Bool String
- ```
+```
 
 $$
 A = String + String\\
@@ -165,11 +165,11 @@ $$
 
 例如这是一个树：
 
-![](https://wiki.haskell.org/wikiupload/a/a8/Tree-12-34.png)
+![image.png](https://s2.loli.net/2022/08/20/ftbHe7Sk4zTCIow.png)
 
 扣除一个元素，得到带有一个洞的树：
 
-![](https://wiki.haskell.org/wikiupload/0/08/Context-1X-34.png)
+![image.png](https://s2.loli.net/2022/08/20/qB829JWdRDtHVga.png)
 
 [参考](https://wiki.haskell.org/Zipper)
 
