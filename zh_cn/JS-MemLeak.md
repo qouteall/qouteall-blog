@@ -152,17 +152,36 @@ function () {
 
 局部变量`leak`被`unused`函数捕获，因此不得不将`leak`放在Environment Record中，而`someMethod`的函数也在当前函数内，需要引用当前函数的Environment Record，于是不得不间接引用了`leak`，导致内存泄漏。
 
-对于这种内存泄漏，要怎么解决？解决方案包括：去除不需要的`unused`，在更新`theThing`的时候避免使用旧值，某些值可以通过参数传递而不是通过闭包传递，等等。
+对于这种内存泄漏，要怎么解决？解决方案包括：去除不需要的`unused`，在更新`theThing`的时候避免使用旧值，某些值可以通过参数传递而不是通过闭包传递。
+
+除此之外，还可以通过不同的作用域分开解决：
+
+```javascript
+let theThing = null;
+let replaceThing = function () {
+    let unused;
+    {
+        let leak = theThing;
+        unused = function () {
+            console.log(leak)
+        };
+    }
+    theThing = {
+        someData: new Array(1000000),
+        someMethod: function () {
+            console.log('a');
+        }
+    };
+};
+```
+
+`leak`在里面的一个作用域内，而`someMethod`引用的是外面的作用域，两者分开，避免了内存泄漏。
+
+注：在写JavaScript的时候，尽量使用`let`和`const`，不要使用`var`，因为`var`变量不遵从函数内的作用域，全函数共享同一个变量。
 
 实际上，如果将JavaScript中的闭包实现修改一下，就可以避免这个内存泄露，只需要将每个被捕获的变量都存到单独的一个cell（单元）对象里面，然后闭包引用它使用的cell即可，这样就不会出现引用到不需要的值的情况。不过现在的JavaScript运行时并没有这么去实现，可能原因是在捕获多个变量后有多个cell，对象数量变多会降低性能。也有可能是跟`var`变量的存储方式保持一致。
 
-注：在写JavaScript的时候，尽量使用`let`和`const`，不要使用`var`，因为`var`变量不遵从函数内的作用域。
-
-
-
-为什么Java和Python中没有这个问题？
-
-
+在Java和Python中，只捕获用到的变量，不捕获作用域，因此没有这个问题。
 
 Python中也有跟捕获相关的坑：被捕获变量可以在外面被修改
 
@@ -180,3 +199,43 @@ test()
 
 在Java中，被捕获的变量直接存储在函数对象里，且不能赋值，避免了这种坑。
 
+C#中能对捕获变量自由地修改，在闭包内和闭包外都能修改捕获变量。那么，C#存在JS中的这个内存泄漏问题吗？进行测试：
+
+```C#
+public class Program {
+    public record Thing(int[] someData, Action someMethod) {}
+	
+    public static Thing? TheThing = null;
+	
+    public static void ReplaceThing() {
+        Thing? leak = TheThing;
+        Action unused = () => Console.WriteLine(leak);
+        TheThing = new Thing(new int[1000000], () => Console.WriteLine("a"));
+    }
+	
+    public static void Main() {
+        for (; ; ) {
+            ReplaceThing();
+        }
+    }
+}
+```
+
+C#也没有这个内存泄漏问题。
+
+在C#中，lambda捕获的值默认存在函数对象里面，如果这个被捕获的变量有可能被赋值，那么这个变量将会被单独存在一个堆上的对象，而函数对象引用这个对象。
+
+在C#中也有跟捕获相关的坑：
+
+```C#
+List<Action> actions = new List<Action>();
+for (int i = 0; i < 5; i++) {
+    actions.Add(() => Console.WriteLine(i));
+}
+        
+foreach (var action in actions) {
+    action();
+}
+```
+
+由于捕获的变量`i`发生了变化，`i`将被存在单独堆上对象，`actions`中所有函数都捕获了同一个值。
