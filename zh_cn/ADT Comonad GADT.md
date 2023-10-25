@@ -287,18 +287,34 @@ Zipper是对原有数据结构的另一种表示，但是附加了一点额外�
 例如说我定义列表的Zipper，然后就可以修改（实际上是变换）目前所指的元素，还可以让Zipper向右或向左移动一下：
 
 ```haskell
-data ListWithHole t = ListWithHole (List t) (List t) -- 分别表示前面的部分（倒序）和后面的部分
+-- 自己定义的链表
+data List t = EmptyList | ListNode t (List t)
+
+-- 分别表示前面的部分（倒序）和后面的部分
+data ListWithHole t = ListWithHole (List t) (List t)
+
 data ListZipper t = ListZipper t (ListWithHole t)
 
+-- 和Maybe类似
+data Option t = Some t | None
+
+-- 替换zipper指向元素
 replace :: ListZipper t -> t -> ListZipper t
 replace (ListZipper old ambient) new = ListZipper new ambient
 
-leftOf :: ListZipper t -> ListZipper t
-leftOf (ListZipper mid (ListWithHole (ListNode left ls) rs) = 
-	(ListZipper left (ListWithHole (ls) (ListNode mid rs)))
-rightOf :: ListZipper t -> ListZipper t
-rightOf (ListZipper mid (ListWithHole ls (ListNode right rs)) =
-	(ListZipper right (ListWithHole (ListNode right ls) rs))
+-- zipper左移
+leftOf :: ListZipper t -> Option (ListZipper t)
+-- ls left | mid | rs  --> ls | left | mid rs
+leftOf (ListZipper mid (ListWithHole (ListNode left ls) rs)) = 
+	Some (ListZipper left (ListWithHole (ls) (ListNode mid rs)))
+leftOf (ListZipper mid (ListWithHole (EmptyList) rs)) = None
+
+-- zipper右移
+rightOf :: ListZipper t -> Option (ListZipper t)
+-- ls | mid | right rs --> ls mid | right | rs
+rightOf (ListZipper mid (ListWithHole ls (ListNode right rs))) =
+	Some (ListZipper right (ListWithHole (ListNode mid ls) rs))
+rightOf (ListZipper mid (ListWithHole ls (EmptyList))) = None
 ```
 
 除此之外还可以有添加、删除等操作。树的Zipper也类似。
@@ -334,19 +350,26 @@ unwrap可以将套了一层的数据解开，获得Zipper所指向的元素。�
 为`ListZipper`实现Comonad
 
 ```haskell
-data List t = EmptyList | ListNode t (List t)
-
--- 输入 [1,2,3] 输出 [f 1, f(f 2), f(f(f 3))]
-listIterate :: List t -> (t -> t) -> List t
-listIterate (EmptyList) f = EmptyList
-listIterate :: (ListNode first rest) f = ListNode (f first) (listIterate rest (f . f))
+-- 给定元素beginning和函数f，生成 [f beginning, f (f beginning), f (f (f beginning)) ...]
+-- 直到f返回None
+keepIterating :: t -> (t -> Option t) -> List t
+keepIterating beginning f = case (f beginning) of
+  None -> EmptyList
+  (Some element) -> ListNode element (keepIterating element f)
 
 instance Comonad ListZipper where
+  -- 取出zipper指向元素
   unwrap (ListZipper curr _) = curr
-  duplicate (ListZipper curr (ListWithHole ls rs)) = (ListZipper
-    (ListZipper curr (ListWithHole ls rs))
-    (ListWithHole (listIterate ls leftOf) (listIterate rs rightOf))
-  )
+  
+  -- 将一个zipper对应列表变成zipper的列表的zipper
+  duplicate zipper = (ListZipper
+    -- zipper指向的元素，变换为其zipper本身
+    zipper
+    -- 对zipper不断调用leftOf，产生zipper的列表，右侧同理
+    (ListWithHole
+      (keepIterating zipper leftOf)
+      (keepIterating zipper rightOf)
+    ))
 ```
 
 Comonad的官方定义：(一般来说，Comonad首先是Functor)
