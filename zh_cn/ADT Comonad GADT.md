@@ -361,7 +361,7 @@ instance Comonad ListZipper where
   -- 取出zipper指向元素
   unwrap (ListZipper curr _) = curr
   
-  -- 将一个zipper对应列表变成zipper的列表的zipper
+  -- 将一个zipper对应列表的每个元素替换为zipper，得到zipper的列表的zipper
   duplicate zipper = (ListZipper
     -- zipper指向的元素，变换为其zipper本身
     zipper
