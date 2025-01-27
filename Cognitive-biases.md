@@ -519,7 +519,7 @@ This is related to binary thinking: If the unknown thing is not bad, then it's i
 People tend to idealize the distant past. People tend to forget the past misery. This helps people get out of trauma, and at the same time idealize the past things:
 
 - After a long time since bearing a child, women tend to forget the pain of bearing a child and may want another child.
-- After decades passed since the collapse of Soviet Union, people remember more of the good of the Soviet Union.
+- After decades passed since the collapse of Soviet Union, some people remember more of the good aspects of the Soviet Union.
 
 ### Illusion of understanding
 
