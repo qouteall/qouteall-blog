@@ -312,8 +312,7 @@ Ignoring negative information or warning signs to avoid psychological discomfort
 Examples:
 
 - Not wanting to diagnose health problem.
-- Reluctant to stop-loss for a investment decision that turn out to be bad.
-
+- Reluctant to stop-loss for an investment decision that turn out to be bad.
 
 ## Quick simplified understanding
 
@@ -931,13 +930,11 @@ In investment, mental accounting can happen on different forms:
 
   However, setting stop-loss in each time interval has be good effects. When the current trading strategy does not fit the market, temporarily stopping could get through the current part of cycle that temporarily doesn't suit the strategy. The stopping period also help calming and becoming rational.
 
-- Separate by different specific assets (e.g. stocks). If the mental accounts are separated based on different stocks, after loseing from one stock, one may insist to gain the loss back from the same stock, even if investing in other stocks is better overall.
+- Separate by different specific assets (e.g. stocks). If the mental accounts are separated based on different stocks, after losing from one stock, one may insist to gain the loss back from the same stock, even if investing in other stocks is better overall.
 
 - Separate by different categories of assets. People tend to prefer investing medium risk asset using all money over investing high-risk asset using partial money (barbell strategy), even when the total volatility and expected return are the same, because the invested money is in a different mental account than not-invested money, and risk aversion.
 
-  _The Black Swan_ recommends barbell strategy (90% cash and 10% high-risk asset). A seemingly medium-risk asset could suffer from hidden tail risk
-
-Lipstick effect is related to mental accounting. When the income declines, the mental account of luxury spending still exists, just shrunk. 
+**Lipstick effect** is related to mental accounting. When the income declines, the mental account of luxury spending still exists, just shrunk, so cheaper lipsticks get more sales.
 
 Denomination effect: People like to spend coins rather than \$100 paper money, and like to receive money in \$100 paper money rather than coins. This is related to mental accounting: large-denomination money are intended to be used in large spend, and small-denominaiton money are intended to be used in small spending.
 
