@@ -4,7 +4,7 @@ A summarization of the main cognitive biases, relating to financial trading, com
 
 ## Nonlinear perception
 
-#### Perception of gain and loss
+### Perception of gain and loss
 
 **Diminishing marginal utility**: the first one is more valuable than the second and so on. For example, when drinking a cup of water, the first sip has higher utility than the last sip. 
 
@@ -16,7 +16,7 @@ Corresponding to diminishing marginal utility, the happiness of gaining \$200 is
 
 The same applies to pain. The pain of losing \$100 two times is higher than losing \$200 in one time.
 
-#### Expectation and framing
+### Expectation and framing
 
 The origin of "gain/loss" is **relative to the expectation** (frame of reference). Different people have different expectations in different scenarios.
 
@@ -45,7 +45,7 @@ Expectation management is important. If the outcome is good but doesn't meet the
 
 Procrastination is also related to protective pessimism. If you believe that the outcome will be bad, then reducing cost (time and efforts put into it) is "beneficial".
 
-#### Loss aversion and risk aversion
+### Loss aversion and risk aversion
 
 In real life, some risks are hard to reverse or are irreversible, so avoiding risk is more important than gaining. In investment, losing 10% requires gaining 11.1% to recover, and losing 50% requires gaining 100% to recover. Keep staying in the game is important as it makes one exposed to future opportunities.
 
@@ -55,7 +55,7 @@ People don't intuitively treat avoiding losing one dollar as the same as earning
 
 Note that loss aversion is not uniform in all scenarios. Some risk-takers may be not loss averse.
 
-#### Perception of risk
+### Perception of risk
 
 **We prefer deterministic gain instead of risky gain**. A bird in the hand is worth two in the bush. 
 
@@ -69,7 +69,7 @@ Given 100% chance to lose \$500 or 50% chance to lose \$1100, most people will c
 
 In this case, "no losing" is usually taken as expectation. What if the expectation is "already losing \$500"? Then the two choices become: 1. no change  2. 50% gain \$500 and 50% lose \$600. In this case, people tend to choose the first choice which has lower risk. The expectation point is very important. This is also **sunk cost fallacy**.
 
-#### Time perception
+### Time perception
 
 Telescoping effect: 
 
@@ -367,8 +367,11 @@ Examples:
 Narrative fallacy is introduced in _The Black Swan_:
 
 > We like stories, we like to summarize, and we like to simplify, i.e., to reduce the dimension of matters. 
+> 
 > ...... 
+> 
 > The fallacy is associated with our vulnerability to overinterpretation and our predilection for compact stories over raw truths. It severely distorts our mental representation of the world; it is particularly acute when it comes to the rare events.
+> 
 > — _The Black Swan_
 
 Narrative fallacy correspond to multiple cognitive biases:
@@ -410,6 +413,7 @@ To summarize, most people naturally prefer the learning that:
 It's also hard to learn if the effect of decision is applied to other people, especially for decision-makers:
 
 > It is so easy to be wrong — and to persist in being wrong — when the costs of being wrong are paid by others.
+> 
 > — Thomas Sowell
 
 ### Causal simplification
@@ -421,12 +425,16 @@ Usually, the superficial effect is seen as the reason, instead of the underlying
 Examples of causal oversimplification:
 
 - Oversimplification: "Poor people are poor because they are lazy."
+  
   Nuanced view: Poverty is also influenced by factors such as education access, systemic discrimination, health disparities, job market conditions, and the Matthew effect.
 - Oversimplification: "Immigrants are the cause of unemployment."
+  
   Nuanced view: Unemployment rates are also influenced by factors including manufacturing relocation, automation technologies, economic cycles, skill mismatches, and overall labor market conditions.
 - Oversimplification: "The Great Depression happened because of the stock market crash of 1929."
+  
   Nuanced view: The Great Depression resulted from a combination of factors, including excessive financial risk-taking, lack of regulatory oversight, production overcapacity, wealth inequality, and international economic imbalances.
 - Oversimplification: "That company succeeded because of the CEO."
+  
   Nuanced view: Corporate success also depends on various factors, including market conditions, employee contributions, incentive structures, company culture, government-business relationships, competitive landscape, and the cumulative impact of past leadership decisions.
 
 ### Binary thinking (false dichotomy)
@@ -742,7 +750,7 @@ The same effect happens in other forms:
 > 
 > Obama’s mistake illustrates the illusion of local causal chains—that is, confusing catalysts for causes and assuming that one can know which catalyst will produce which effect.
 > 
-> —  The Black Swan of Cairo; How Suppressing Volatility Makes the World Less Predictable and More Dangerous [Link](https://devl1980.wordpress.com/wp-content/uploads/2011/05/blyth_taleb_pp1signoff.pdf)
+> —  The Black Swan of Cairo; How Suppressing Volatility Makes the World Less Predictable and More Dangerous
 
 ### Scarcity heuristic
 
@@ -842,6 +850,7 @@ It's being empirically observed that, in personal financial trading, higher trad
 Action bias does not contradict with default effect. When one is asked to work and show value, doing action is the default behavior, and not doing action is more risky, as people tend to question the one that does not look like working.
 
 > It's not the things you buy and sell that make you money; it's the things you hold.
+> 
 > — Howard Marks
 
 
@@ -1155,7 +1164,6 @@ Disposition effect:
 
 Disposition effect works well in oscillating markets. However, markets can also exhibit momentum, where a good performing asset is likely to continue performing good and vice versa. Disposition effect is detrimental when facing momentum.
 
----
 
 
 
