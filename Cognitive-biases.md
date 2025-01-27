@@ -200,7 +200,7 @@ People tend to fight the things that oppose their desire. Examples:
 ### Knowing bad truth is not always better
 
 - If one has the ability to overcome difficulties, then the depression of knowing bad truth can facilitate one working harder, choosing more rational decisions and succeed.
-- If one doesn't have the ability to overcome difficulties, then knowing truth merely cause depression.
+- If one doesn't have the ability to overcome difficulties, then knowing truth can cause depression.
 
 The cognitive biases that make human not understanding the truth is sometimes helpful (but not always). **The evolution shapes human's cognitive biases for valid reasons.**
 
@@ -567,7 +567,9 @@ Example: If you recently saw a car crash, you tend to think that traveling by ca
 **Vividness bias**: People tend to believe more from vivid things and stories, over abstract statistical evidences. This is related to **anecdotal fallacy** and **narrative fallacy**.
 
 > **The Italian Toddler**: In the late 1970s, a toddler fell into a well in Italy. The rescue team could not pull him out of the hole and the child stayed at the bottom of the well, helplessly crying. ...... the whole of Italy was concerned with his fate ...... The child's cries produced acute pains of guilt in the powerless rescuers and reporters. His pictures was prominently displayed on magazines and newspapers .....
+> 
 > Meanwhile, the civil war was raging in Lebanon ...... Five miles away, people were dying from the war, citizens where threatened with car bombs, but the fate of the Italian child ranked high among the interests of the population in the Christian quarter of Beirut.
+> 
 > — _The Black Swan_
 
 Enforcing safety measures is usually unappreciated (and hated). Because people only see the visible cost and friction caused by safety measures (concrete), and do not see the consequences of not applying safety measures in a parallel universe (abstract), until an incident really happens (concrete).
@@ -968,6 +970,7 @@ The world is full of randomness. There is no decision that guarantees to be opti
 We tend to regret doing something in short term, but regret not doing something in the long term. [Reference](https://www.anderson.ucla.edu/faculty/keith.chen/negot.%20papers/GilovichMedvec_Regret95.pdf)
 
 > 'I have led a toothless life', he thought. 'A toothless life. I have never bitten into anything. I was waiting. I was reserving myself for later on-and I have just noticed that my teeth have gone. ...'
+> 
 > — Jean-Paul Sartre
 
 ### Risk compensation
