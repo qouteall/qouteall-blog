@@ -387,11 +387,11 @@ Narrative fallacy correspond to multiple cognitive biases:
 
 ### First impression effect (primacy effect)
 
-People tend to judge things **by first impression**. This makes people generate belief by only one observation, which is information-efficient, but is also biased.
+People tend to judge things **by first impression**. This makes people generate belief by only one observation, which is information-efficient, but can also be biased.
 
 ### Outcome bias
 
-People like to judge a decision by its immediate result. However, the real world is full of randomness. A good plan may yield bad result and a bad plan may yield good result. The short-term result can differ to long-term result.
+People like to judge a decision by its immediate result. However, the real world is full of randomness. A good plan may yield bad result and a bad plan may yield good result. And the short-term result can differ to long-term result.
 
 There is no perfect strategy that will guarantee success. Overemphasizing short-term outcomes leads to abandoning good strategies prematurely.
 
@@ -1154,7 +1154,7 @@ In the long term, strategy 2 can greatly outperforms strategy 1, but people pref
 
 - Convex perception. Frequent small gains feels better than a rare huge gain, and frequent small losses feels worse than a rare huge loss.
 - Loss aversion. The loss aversion focused more on recent visible loss rather than potential rare large loss.
-- Availability bias. The frequent small losses are more visible than rare potential big loss.
+- Availability bias and outcome bias. The frequent small losses are more visible than rare potential big loss.
 - Delayed feedback issue and hasty generalization. The rare events usually come late, which delay the feedback. People tend to do hasty generalization, thinking that the strategy that gives frequent gain is better.
 - Regret aversion. Frequent loss can cause a lot of regret.
 - Oddball effect. The time experiencing loss and risk feels longer.
