@@ -18,7 +18,7 @@ The same applies to pain. The pain of losing \$100 two times is higher than losi
 
 ### Expectation and framing
 
-The origin of "gain/loss" is **relative to the expectation** (frame of reference). Different people have different expectations in different scenarios.
+The "gain/loss" is **relative to the expectation** (frame of reference). Different people have different expectations in different scenarios.
 
 Expectation management is important. If the outcome is good but doesn't meet the high expectation, it still causes disappointment. Vice versa.
 
