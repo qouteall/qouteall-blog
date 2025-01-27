@@ -67,7 +67,7 @@ The professions that face uncertain gain, like academic research, where it's com
 
 Given 100% chance to lose \$500 or 50% chance to lose \$1100, most people will choose the latter. The second one has "hope" and the first one means accepting failure.
 
-In this case, "no losing" is usually taken as expectation. What if the expectation is "already losing \$500"? Then the two choices become: 1. no change  2. 50% gain \$500 and 50% lose \$600. In this case, people tend to choose the first choice which has lower risk. The expectation point is very important. This is also **sunk cost fallacy**.
+In this case, "no losing" is usually taken as expectation. What if the expectation is "already losing \$500"? Then the two choices become: 1. no change  2. 50% gain \$500 and 50% lose \$600. In this case, people tend to choose the first choice which has lower risk. The expectation point is very important.
 
 ### Time perception
 
@@ -88,7 +88,7 @@ Reference: [Time perception - Wikipedia](https://en.wikipedia.org/wiki/Time_perc
 
 ## Hedonic treadmill
 
-**Hedonic treadmill**: after some time of happiness, the expectation goes up and happiness reduces. The things that you gained will gradually be taken for granted, and you always pursue for more.
+**Hedonic treadmill**: after some time of happiness, the expectation goes up and happiness reduces. The things that people gained will gradually be taken for granted, and they always pursue for more.
 
 > Do not spoil what you have by desiring what you have not; remember that what you now have was once among the things you only hoped for.
 > 
@@ -104,7 +104,7 @@ Material consumption can give short-term satisfaction, but cannot give long-term
 - novel experiences, and
 - sustainable consumption with temperance.
 
-**Means-end inversion**: one originally want money (means) to improve life quality (end). However, the process of making money can sacrifice life quality. Example: investing all money and leave little for consumption, or choosing a high-paying job with no work-life balance (golden handcuffs).
+**Means-end inversion**: one originally want money (means) to improve life quality (end). However, the process of making money can sacrifice life quality. Examples: investing all money and leave little for consumption, or choosing a high-paying job with no work-life balance (golden handcuffs).
 
 > We al­ready walked too far, down to we had for­got­ten why em­barked.
 
@@ -129,7 +129,13 @@ The overconfidence is useful:
 
 When looking at past, people find past events (including Black Swan events) reasonable and predictable, although they didn't predicted these events in prior.
 
-In a complex world, one event can have multiple contradicting interpretations. People tend to ignore the false interpretations when analyzing history.
+In a complex world, **one event can have two contradicting interpretations**. 
+
+One recent example: (This is written in Janurary 2025) DeepSeek V3 released, the report says that DeepSeek V3's training cost is \$5.5M, significantly lower than other large model training. Subsequent open model DeepSeek R1 has strong performance. And DeepSeek's API price is significantly lower than OpenAI and Anthropic's, creating a price war of AI. There are two different interpretations:
+- Bearish on Nvidia. The low training cost of V3 shows that if the training method is efficient enough then the world doesn't need that much GPUs. And the price war will make AI companies less profitable, reducing their valuations and CapEx.
+- Bullish on Nvidia. The lowering price of AI will create much more demand, according to [Jevons paradox](https://en.m.wikipedia.org/wiki/Jevons_paradox).
+
+Both of the two interpretations makes sense. But only one is correct afterwards. The incorrect one will be ignored when analyzing history.
 
 People make execuses about their prediction failure, such as:
 - See their prediction as "almost" correct. Distort the memory and change the past prediction.
