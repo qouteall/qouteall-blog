@@ -101,8 +101,7 @@ Material consumption can give short-term satisfaction, but cannot give long-term
 - following internal motivation with hard work,
 - meaningful and sustainable relationships,
 - appreciation and awe to the world,
-- novel experiences, and
-- sustainable consumption with temperance.
+- sustainable consumption (of material and information) with temperance.
 
 **Means-end inversion**: one originally want money (means) to improve life quality (end). However, the process of making money can sacrifice life quality. Examples: investing all money and leave little for consumption, or choosing a high-paying job with no work-life balance (golden handcuffs).
 
