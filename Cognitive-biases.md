@@ -271,16 +271,14 @@ At the same time, people generally don't want to be educated by others.
 
 Commitment can be a good thing. A lot of goals require continual time, efforts and resources to achieve. 
 
-However there are investments that turn out to be bad and should be given up to avoid futher loss. All the previous investments become sunk cost. People are reluctant to giving up because they have already invested a lot in them. Doing rational stop-loss signals failure.
+However, there are investments that turn out to be bad and should be given up to avoid futher loss. All the previous investments become sunk cost. People are reluctant to give up because they have already invested a lot in them. Doing stop-loss signals failure. **We want to have hope rather than accepting failure.**
 
 Examples:
 
 - Keep watching a bad movie because you paid it and already spent time watching it.
 - Keeping an unfulfilling relationship because of the past commitments.
 
-This involves both **self-justification** (justify the previous decisions) and **loss aversion** (avoid the signal of failure).
-
-This effect is called **sunk cost fallacy** and **escalation of commitment**. It's also related to **mental accounting** effect.
+This effect is also **escalation of commitment**. It's also related to **mental accounting** effect.
 
 The difference between "good persistence" and "bad obstinacy":
 
@@ -398,7 +396,7 @@ There is no perfect strategy that will guarantee success. Overemphasizing short-
 
 The quicker the feedback gives, the quicker people can learn (this also applies to reinforcement learning AI). But if the feedback delays 6 months, it's hard to learn from it, and people may do **wrong hasty generalization using random coincidents**, before the real feedback comes, thus get fooled by randomness.
 
-Reducing cost by removing safety measures does not cause any visible accidents in the short run, but the benefit of reduced costs are immediately visible. When the accident actually happened because of the removed safety measures, it may be years later.
+Reducing cost by removing safety measures usually does not cause any visible accidents in the short run, but the benefit of reduced costs are immediately visible. When the accident actually happened because of the removed safety measures, it may be years later.
 
 The solution to it is to objectively record the history, and objectively analyze the history.
 
@@ -451,13 +449,13 @@ Examples of binary thinking:
 - "You're either with us or against us.", "Anything less than absolute loyalty is absolute disloyalty."
 - "People are either extroverts or introverts."
 - "You either support free speech absolutely, or you're in favor of censorship."
-- "I do this only for money" / "I do this only due to personal interest, completely irrelevant to money."
 - "Bitcoin is the future." / "Bitcoin is a scam".
 - "This asset is completely safe." / "This bubble is going to collapse tomorrow."
 - FOMO (fear of missing out) / risk averse.
 - "No one understands it better than me." / "I don't understand even a tiny bit of it."
 - "It's very easy to do" / "It's impossible."
 - The idol maintains a perfect image. / Image collapse, true nature exposes.
+- "We will win quickly." / "We will lose quickly."
 
 People's evaluations are anchored on the expectation, and **not meeting an exception could make people's belief turn to another extreme**.
 
@@ -534,7 +532,7 @@ Pure thinking is usually vague and incomplete, but people overestimate the ratio
 
 Even so, writing the idea down may be still not enough, because **natural language is vague**, and **vagueness can hide practical details**. The issues hidden by the vagueness in language will be revealed in real practice (e.g. turning software requirement into code).
 
-Having ideas is easy and cheap. If you search the internet carefully you are likely to find similar ideas to yours. The important is to validate and execute the idea.
+Having ideas is easy and cheap. If you search the internet carefully you are likely to find ideas similar to yours. The important is to validate and execute the idea.
 
 ### Predictive processing
 
