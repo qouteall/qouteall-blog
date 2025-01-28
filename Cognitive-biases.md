@@ -134,7 +134,7 @@ One recent example: (This is written in Janurary 2025) DeepSeek V3 released, the
 - Bearish on Nvidia. The low training cost of V3 shows that if the training method is efficient enough then the world doesn't need that much GPUs. And the price war will make AI companies less profitable, reducing their valuations and CapEx.
 - Bullish on Nvidia. The lowering price of AI will create much more demand, according to [Jevons paradox](https://en.m.wikipedia.org/wiki/Jevons_paradox).
 
-Both of the two interpretations makes sense. But only one is correct afterwards. The incorrect one will be ignored when analyzing history.
+Both of the two interpretations makes sense. But only one is correct afterwards (could also be that the first is correct in short term and the second is correct in long term). The incorrect one will be ignored when analyzing history.
 
 People make execuses about their prediction failure, such as:
 - See their prediction as "almost" correct. Distort the memory and change the past prediction.
