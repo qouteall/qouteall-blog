@@ -376,11 +376,11 @@ Narrative fallacy is introduced in _The Black Swan_:
 > 
 > — _The Black Swan_
 
-Narrative fallacy correspond to multiple cognitive biases:
+Narrative fallacy includes:
 
-- People tend to make the known facts reasonable, by finding reasons or making up reasons. It's related to **need for closure** and **conjunction fallacy**. This helps memory compression.
-- People prefer simpler understanding of the world. This includes **causal simplification**, **binary thinking**. This also helps memory compression.
-- People tend to believe in concrete stories other than abstract statistics, prefer the vivid over the abstract. This is related **anecdotal fallacy**.
+- People tend to make the known facts reasonable, by finding reasons or making up reasons. This can be seen as an information compression mechanism (reasonable facts are easier to remember).
+- People prefer simpler understanding of the world. This is also information compression. This includes **causal simplification**, **binary thinking**. 
+- People tend to believe in concrete things and stories other than abstract statistics. This is related **anecdotal fallacy**.
 
 ### First impression effect (primacy effect)
 
@@ -593,7 +593,7 @@ People tend to attribute one product to one public figure, or attribute a compan
 
 **Opportunity cost**: if you allocate resource (time, money) to one thing, that resource cannot be used in other things that may be better. Opportunity cost is not obvious.
 
-### Familarity bias
+### Familiarity bias
 
 People prefer familiar things. One reason is the availability bias. Another reason is that people self-justifys their previous attention and dedication. This is highly related to availability bias.
 
@@ -643,7 +643,7 @@ Examples:
 
 One related topic is the **law of large numbers**: if there are enough samples of a random event, the average of the results will converge. The law of large numbers focus on the total average, and does not consider exact order. 
 
-The **law of large number works by diluting unevenness rather than correcting unevenness**. For example, a fair coin toss will converge to 1/2 heads and 1/2 tails. Even if the past events contain 90% heads and 10% tails, this does not mean that the future events will contain more heads. The future event will still converge to 50% heads, and the large amount of future events will dilute the finite amount of uneven past events. 
+The **law of large number works by diluting unevenness rather than correcting unevenness**. For example, a fair coin toss will converge to 1/2 heads and 1/2 tails. Even if the past events contain 90% heads and 10% tails, this does not mean that the future events will contain more tails to "correct" past unevenness. The large amount of future samples will dilute the finite amount of uneven past samples, eventually reaching to 50% heads. 
 
 Actually, **gambler's fallacy can be correct in a system with negative feedback loop, where the short-term distribution changes by past samples**. These long-term feedback loops are common in nature, such as the predator-prey amount relation. It also appears in markets with cycles. (Note that in financial markets, some cycles are much longer than expected, forming trends.) In a PvP game with Elo-score-based matching mechanism, losing makes make you more likely to win in the short term.
 
@@ -774,7 +774,7 @@ The correlation of overall samples may be contradictory to the correlation insid
 
 Examples:
 
-- In the COVID-19 pandemic, a developed country have higher overall fatality rate. But in each age group, that country's fatality rate is lower. That country has a larger portion of old population. 
+- In the COVID-19 pandemic, a developed country have higher overall fatality rate than a developing country. But in each age group, the developed country's fatality rate is lower. The developed country has a larger portion of old population. 
 - After improving a product, the overall customer satisfaction score may decrease, because the product gets popular and attracted the customers that don't fit the product, even though the original customers' satisfaction score increases.
 
 ### False consensus (echo chamber, information cocoon)
@@ -786,7 +786,6 @@ This effect is exacerbated by algorithmic recommendation of social medias.
 We also tend to think other people are similar to us in some ways. We learn from very few examples, and that few examples include ourselves.
 
 > We don't see things as they are. We see things as we are.
-
 ### Priming
 
 We use relations to efficiently query information in memory. The brain is good at looking up relations, in an automatically, unintentionally and subconscious way.
@@ -808,7 +807,7 @@ Note that the famous "age priming" effect (walk more slowly after reminding agin
 
 Telling lie too many times may make the liar believe the lie themselves internally. When the liar want to persuade others, the liar make up reasoning for the lie, which may prime the liar into believing the lie themselves.
 
-The placebo is also possibly related with priming.
+The placebo effect is also possibly related with priming.
 
 **Spontaneous trait transfer**: listeners tend to associate what the talker say to the talker, even when talker is talking about another person:
 
@@ -875,56 +874,44 @@ Examples:
 - Only care about the things that can easily measure (KPI, OKR) and ignore the things that cannot be measured (e.g. employee morale, product-market fit, perverse incentives).
 - Streetlight effect: Only search in the places that's easy to search, not the places that the target is in.
 
-This is related to **means-end inversion**. To achieve the root goal (end) we work on a sub-goal (means) that helps root goal. But then we overly focus on the sub-goal that it hurts the root goal.
-
-This is related to default effect.
+This is related to **means-end inversion**. To achieve the root goal (end) we work on a sub-goal (means) that helps root goal. But overly focusing on the sub-goal hurts the root goal.
 
 A similar phenomenon occurs commonly in medicine: treatments usually mainly suppress visible symptoms instead of curing the root cause of illness. This is usually due to technological and budget limitations.
 
 ### Path dependence
 
-In decision making, path dependence means sticking to what worked in the past and avoid changing, even when the paradigm has shifted and the past successful decisions are no longer appropriate.
+Path dependence means sticking to what worked in the past and avoid changing, even when the paradigm has shifted and the past successful decisions are no longer appropriate.
 
-This is related to default effect.
-
-**Law of the instrument**: "If the only tool you have is a hammer, it is tempting to treat everything as if it were a nail." Having successful experiences with one tool (hammer) makes people stick to using that tool, and tend to ignore that the tool is not effective in other domains.
+**Law of the instrument**: "If the only tool you have is a hammer, it is tempting to treat everything as if it were a nail."
 
 ### Herd mentality
 
-One easy way to make decisions is to simply follow the people around us.
+One easy way to make decisions is to simply follow the people around us. This is beneficial in ancient world: for example, if a tiger comes and some people start fleeing, following them is better than spending time recognizing the tiger.
+
+This is related to **social proof heuristic**: assuming that surrounding people know the situation better.
 
 Following the crowd is also a great way of **reducing responsibility**: when everyone is guilty, the law cannot punish everyone. The one that acts independently bears more responsibility.
 
-When many people follow each other, they will confirm each other, creating self-reinforcing momentum. 
+When many people follow each other, they will confirm each other, creating self-reinforcing momentum. This is also a reason of the momentum in markets. People tend to be overconfident when people around them are confident, and vice versa.
 
-This is also a reason of the momentum in markets. People tend to be overconfident in a bull market, when people around them are overconfident, and vice versa.
+The price can grow not because people believe in the asset, but because the amount of people and money believing in the asset increases. Once that amount stop increasing, price tend to drop despite people believing. Profit can come from the expansion of believers. In this case, the asset is a [Veblen good](https://en.wikipedia.org/wiki/Veblen_good), where higher price induce more demand, until the limit is reached.
 
-The price can grow not because people believe in the asset, but because the amount of people and money believing in the asset increases. Once that amount stop increasing, price tend to drop in spite of people's believing. Profit can come from the expansion of believers. In this case, the asset is a [Veblen good](https://en.wikipedia.org/wiki/Veblen_good), where higher price induce more demand, until the limit is reached.
+Measuring people's belief by observing the people around you is inaccurate, because the people near you don't represent all people (representative bias).
 
-At the same time, when observing the belief of herd, we should avoid statistical bias and representative bias (many people around you believe doesn't mean most people believe).
-
-Herd mentality is in some sense a kind of trend following strategy. However, following herd mentality makes most people start tend following too late. Entering too late in a trend cannot profit. 
+Herd mentality is in some sense a kind of trend following strategy. If the trend is some new good technology then following is good regardless of early or late. However, for speculative financial assets, the price grow depends on new people and money entering, so most people will start following too late and cannot profit from it.
 
 Herd mentality is sometimes also called **bandwagon effect**.
-
-This is related to **social proof heuristic**: assuming that surrounding people know the situation better.
 
 One similar effect, **in-group bias**: Favoring investments or opinions from people within one's own group or those who share similar characteristics.
 
 From the cultrual standpoint, herd mentality also facilitates collaboration and society stability.
-
-One related topic is **"Picks and Shovels" strategy**: during the gold rush, selling picks and shovels turn out to be more profitable than mining gold. If one field is hightly competitive, investing in its un-competitive upstream fields may be better.
-
-- In the AI surge, selling AI hardware (GPU) is more profitable than selling AI services (highly competitive).
-- Cloud service (like AWS) is more profitable than most SaaS (highly competitive).
-
 ### Mental accounting
 
 Mental accounting: Treating different parts of money differently, based on their source or intended use.
 
-For example, a consumer may separate the budgets for entertainment, housing and food. It's a simple huristic that can avoid excessive spending: if each part doesn't overspend, then they won't overspend overall.
+For example, one can separate the budgets for entertainment, housing and food. It's a simple huristic that can avoid excessive spending: if each part doesn't overspend, then they won't overspend overall.
 
-Mental accounting effect is related to sunk cost and loss aversion. If one sub-account is low, people tend to be more saving in that sub-account, making **loss aversion** more significant, and the previous waste in that sub-account become **sunk cost**.
+Mental accounting is related to sunk cost and loss aversion. If one sub-account is low, people tend to be more saving in that sub-account, making **loss aversion** more significant, and the previous waste in that sub-account become **sunk cost**.
 
 In investment, mental accounting can happen on different forms:
 
@@ -937,8 +924,6 @@ In investment, mental accounting can happen on different forms:
 - Separate by different categories of assets. People tend to prefer investing medium risk asset using all money over investing high-risk asset using partial money (barbell strategy), even when the total volatility and expected return are the same, because the invested money is in a different mental account than not-invested money, and risk aversion.
 
 **Lipstick effect** is related to mental accounting. When the income declines, the mental account of luxury spending still exists, just shrunk, so cheaper lipsticks get more sales.
-
-Denomination effect: People like to spend coins rather than \$100 paper money, and like to receive money in \$100 paper money rather than coins. This is related to mental accounting: large-denomination money are intended to be used in large spend, and small-denominaiton money are intended to be used in small spending.
 
 Mental accounting is one kind of **narrow framing bias**: 
 
@@ -961,12 +946,12 @@ It should not be simplified to "avoiding risk is bad". The point is to not do ex
 
 People tend to avoid regret. Regret aversion has two aspects:
 
-- For future: people tend to avoid making decisions that may cause regret in the future. This is related to risk aversion: not making optimal decision is also a kind of risk, as **people usually expect themselves to make optimal decisions. (This is a overly high expectation. No one can always make optimal decisions. There will ultimately be bad decisions seen from hindsight.)**
+- For future: people tend to avoid making decisions that may cause regret in the future. This is related to risk aversion: not making optimal decision is also a kind of risk.
 - For past: people tend to avoid regretting their past actions, trying to prove the correctness of their past actions, thus fall into **sunk cost fallacy**.
 
-The world is full of randomness. There is no decision that guarantees to be optimal. We should accept that we cannot always make perfect decisions. Validating the strategy in the long run is more important than result in of individual decisions.
+The world is full of randomness. There is no decision that guarantees to be optimal. **We should accept that we cannot always make perfect decisions**. Validating the strategy in the long run is more important than result in of individual decisions.
 
-We tend to regret doing something in short term, but regret not doing something in the long term. [Reference](https://www.anderson.ucla.edu/faculty/keith.chen/negot.%20papers/GilovichMedvec_Regret95.pdf)
+We tend to regret doing something in short term, but regret not doing something in the long term. [Reference](https://www.anderson.ucla.edu/faculty/keith.chen/negot.%20papers/GilovichMedvec_Regret95.pdf).
 
 > 'I have led a toothless life', he thought. 'A toothless life. I have never bitten into anything. I was waiting. I was reserving myself for later on-and I have just noticed that my teeth have gone. ...'
 > 
@@ -976,7 +961,7 @@ We tend to regret doing something in short term, but regret not doing something 
 
 Having safety measures make people feel safer and take more risks.
 
-For example, drivers may drive faster when safety belt is on, and cyclists ride faster when wearing helmet.
+For example, drivers may drive faster when safety belt is on, and cyclists may ride faster when wearing helmet.
 
 People tend to be overconfident in familiar situations, but that's where accidents likely to occur:
 
@@ -986,16 +971,16 @@ People tend to be overconfident in familiar situations, but that's where acciden
 
 ### Stress and fight-or-flight
 
-"Fight or flight" are the two options for dealing with physical threat (like a tiger) in the ancient world.
+"Fight or flight" are the two options for dealing with physical threat (e.g. a tiger) in the ancient world.
 
-But in the modern world, there are non-physical threats and modern risks (e.g. exam failure, losing job). These modern threats can be dealt with neither concrete fight or flight. So it cause depression, anxiety and immobilization.
+But in the modern world, there are non-physical threats and modern risks (e.g. exam failure, losing job). These modern threats can be dealt with neither concrete fight or flight. So they may cause depression, anxiety and immobilization.
 
 ## Willpower and mental energy
 
-The rational activities (System 2 activities) require mental energy, also known as willpower:
+The rational activities (System 2 activities) require mental energy (willpower):
 - Resisting impulse behavior consumes willpower (e.g. resist eating sweet food when on a diet).
 - Paying attention and thinking hard problems consume willpower.
-- For introverts, social interaction (roleplaying) consumes willpower. For extroverts, staying alone consumes willpower.
+- For introverts, social interaction consumes willpower. But for extroverts, staying alone consumes willpower.
 
 If there is no enough mental energy, one is less likely to resist impulse behaviors or think about hard problems, and possibly have difficulty in social interactions.
 
@@ -1007,6 +992,10 @@ These factors affect mental energy:
 
 Mental resting is different to body resting. Intense thinking when lying on the bed even consumes mental energy. Mental resting involves focusing on simple things with low cognitive demand. Different people may have different preferences. These mental resting activities may include listening to musics, watching simple videos, reading simple books, casual drawing and writing, playing games, meditation, etc.
 
+> Before you try to increase your willpower, try to decrease the friction in your environment.
+> 
+> — James Clear, [Link](https://x.com/JamesClear/status/1883877771618738682)
+
 ## Memory distortion
 
 In the process of self-justification, people's memory may be distorted. **Human memory is actually very unreliable**. People usually cannot notice that their memory has been distorted, and insist that their memory is correct.
@@ -1015,19 +1004,17 @@ People tend to **simplify their memory and fill the gaps using their own beliefs
 
 **Each recall can reshape the memory** according to the existing beliefs. (This is similar to quantum effects: if you observe something, you change it.)
 
-**Information is costly to store, and even more costly to index and query**. Sometimes forgetting is just not being able to query the specific memory that is stored in brain. Forgetting releases the "querying capacity" of the brain.
+**Information is costly to store, and even more costly to index and query**. Sometimes forgetting is just not being able to query the specific memory that is stored in brain (and may be recalled if some cue were found that enables querying it). The "querying capacity" of brain is limited and can be occupied by distracting things.
 
-Side note: the similar principle also applies to computer databases. Just writing information into a log is easy and fast. But indexing the information to make them queryable is hard.
+(Side note: the similar principle also applies to computer databases. Just writing information into a log is easy and fast. But indexing the information to make them queryable is harder.)
 
-Taking notes is one way to mitigate the unreliable memory issue. Of course, taking note and introspecting has the risk of breaking ego, so people tend to not do objective introspection.
+Taking notes is one way to mitigate the unreliable memory issue.
 
-**Every time a messsage is relayed through a person, some of its information gets lost, and some noise gets added**. The person relaying the message will put their own understanding into the message, and omit the information that they think is not important (but can be actually important). This issue is very common in big corporation and governments. **Good communication requires reducing middlemen**.
+**Every time a messsage is relayed through a person, some of its information gets lost, and some noise gets added**. The person relaying the message will add their own understanding (which can be misleading), and omit the information that they think is not important (but can be actually important). This issue is very common in big corporation and governments. **Good communication requires reducing middlemen**.
 
 People usually remember the "special" things well. This is an information compression mechanism that filters out the unimportant details.
 
-People tend to make up reasons to make things reasonable. When the fact becomes reasonable, the information is compressed, and the memory can be simplified. This is related to narrative fallacy.
-
-**Peak-end rule**: People judge an experience largely based on how they felt at its peak (its most intense point) and at its end. The most efficient way to improve user experience is to improve the experience in the peak and the end.
+**Peak-end rule**: People judge an experience largely based on how they felt at its peak (its most intense point) and at its end. The most efficient way to improve user experience is to improve the experience in the peak and in the end (and at the start).
 
 **Serial position effect**: people tend to recall the first and last items in a series best, and the middle items worst. Interestingly, the same effect also applies to LLMs, called "lost in the middle".
 
@@ -1044,7 +1031,7 @@ People seeks information that they are interested in. The seeking of interesting
 
 > Most information in the world is junk.
 > 
-> The best way to think about it is it's like with food. There was a time, like centuries ago in many countries, where food was scarce, so people ate whatever they could get, especially if it was full of fat and sugar. And they thought that more food is always good. Like if you ask your great grandmother, she would "yes more food is always good".
+> The best way to think about it is it's like with food. There was a time, like centuries ago in many countries, where food was scarce, so people ate whatever they could get, especially if it was full of fat and sugar. And they thought that more food is always good. ...
 > 
 > Then we reach a time of abundance in food. We have all these industrialized processed food, which is artificially full of fat and sugar and salt and whatever. It was always been for us that more food is always good. No, definitely not all these junk food.
 > 
@@ -1068,20 +1055,20 @@ Information bias: Seeking out more information even when more information is no 
 
 With confirmation bias, more information lead to higher confidence, but not better accuracy. This is contraty to statistics, where more samples lead to more accurate result (but still suffer from systematic sampling bias).
 
-**Having no information is better than having wrong information**. Wrong information may give wrong first impression, combined with confirmation bias, may cause wildly wrong understanding of world, with fake confidence.
+**Having no information is better than having wrong information**. Wrong information reinforced by confirmation bias can make you stuck in a wrong path.
 
-**Popularity of false information increase the value of true information** (especially in investment). The "carrot problem": during WWII, the British claimed their pilots' night-vision success came from eating carrots, hiding their new radar technology.
+**Popularity of false information increase the value of true information**. The "carrot problem": during WWII, the British claimed their pilots' night-vision success came from eating carrots, hiding their new radar technology. The best way of hiding something is to override it with another thing.
 
 **Browsing social media makes people learn biased distribution of world**. Such as:
 
 - **Overestimating the amount of perfect parters**, who are beautiful/handsome, have high income and does exaggeraged love.
-- Believing in **false consensus**, the consensus that only exists in the information coccon formed by algorithmic recommendation.
+- Believing in **false consensus**, the consensus that only exists on an internet community.
 - Overestimating the proportion of bad news, as **bad news travels fast** in social media, thus facilitating cynicism.
 
 What's more, social media may make people:
 - Get used to interesting easy-to-digest information and become less tolerant to not-so-interesting hard-to-digest information.
 - Get used to moving attention (distraction) and not get used to keeping attention.
-- Have less intention of acquiring new experiences by real world practice. Watching video about a new experience is much easier than experiencing in real life.
+- Have less intention of trying things real world practice. Watching video about a new experience is much easier than experiencing in real life.
 
 ### Natural selection of memes
 
@@ -1099,14 +1086,12 @@ What memes have higher ability to spread?
 
 In the ancient world, when there is no algorithmic recommendataion, there are still "natural selection of cultures".
 
-### Reverse natural selection of antimemes
-
 Memes facilitate being spreaded. On the contrary, **antimemes** resist being spreaded. 
 
 - Antimemes are usually long, complex and nuanced, reflecting the intricacies of real-world complexity, being hard-to-grasp.
 - Antimemes usually don't spur much emotions.
 - Antimemes are usually not controversial.
-- The information that conflicts with existing beliefs and existing behaviors are also antimemes. (confirmation bias)
+- The information that conflicts with existing beliefs are also antimemes. (confirmation bias)
 
 ### Longing for attention
 
@@ -1151,20 +1136,19 @@ In the long term, strategy 2 can greatly outperforms strategy 1, but people pref
 - Convex perception. Frequent small gains feels better than a rare huge gain, and frequent small losses feels worse than a rare huge loss.
 - Loss aversion. The loss aversion focused more on recent visible loss rather than potential rare large loss.
 - Availability bias and outcome bias. The frequent small losses are more visible than rare potential big loss.
-- Delayed feedback issue and hasty generalization. The rare events usually come late, which delay the feedback. People tend to do hasty generalization, thinking that the strategy that gives frequent gain is better.
-- Regret aversion. Frequent loss can cause a lot of regret.
+- Delayed feedback issue. The rare loss in strategy 1 usually come late.
 - Oddball effect. The time experiencing loss and risk feels longer.
 - ...
 
-People usually focus on overall win rate instead of the win rate of few important trades. It's a common misconception that a you need a win rate more than 50% percent to be profitable. However, with a favorable risk-reward ratio, profit is possible despite low win rate. The skew of profit distribution is important.
+It's a common misconception that a you need a win rate more than 50% to be profitable. With a favorable odds, profit is possible despite a low win rate. The skew of profit distribution is important.
 
 Disposition effect:
 
-- Investors tend to sell the asset that increased in value. Selling the risen asset means deterministic gain, while not selling it means uncertain future gain. According to prospect theory, people prefer deterministic gain over uncertain gain. 
-- Investors tend to not sell the asset that dropped in value, hoping them to rebound. For an asset that dropped value, selling it makes the temporal loss become deterministic, and not selling it makes the loss uncertain. People prefer uncertain loss over deterministic loss. 
-  What's more, increasing position to it can reduce the loss rate, which creates an illusion that loss reduces.
+- Investors tend to sell the asset that increased in value (make uncertain profit certain).
+- Investors tend to not sell the asset that dropped in value, hoping them to rebound (prefer having hope instead of making loss certain).
+  What's more, increasing position can amortize the loss rate, which creates an illusion that loss reduces.
 
-Disposition effect works well in oscillating markets. However, markets can also exhibit momentum, where a good performing asset is likely to continue performing good and vice versa. Disposition effect is detrimental when facing momentum.
+Disposition effect works well in oscillating markets. However, markets can also exhibit momentum, where disposition effect is detrimental.
 
 
 
