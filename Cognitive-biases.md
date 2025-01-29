@@ -643,7 +643,7 @@ Examples:
 
 One related topic is the **law of large numbers**: if there are enough samples of a random event, the average of the results will converge. The law of large numbers focus on the total average, and does not consider exact order. 
 
-The total average will converge doesn't mean future event's average will be opposite to past event's average. For example, a fair coin toss will converge to 1/2 heads and 1/2 tails. Even if the past events contain 90% heads and 10% tails, this does not mean that the future events will contain more heads. The future event will still converge to 50% heads, and the large amount of future events will dilute the finite amount of uneven past events.
+The **law of large number works by diluting unevenness rather than correcting unevenness**. For example, a fair coin toss will converge to 1/2 heads and 1/2 tails. Even if the past events contain 90% heads and 10% tails, this does not mean that the future events will contain more heads. The future event will still converge to 50% heads, and the large amount of future events will dilute the finite amount of uneven past events. 
 
 Actually, **gambler's fallacy can be correct in a system with negative feedback loop, where the short-term distribution changes by past samples**. These long-term feedback loops are common in nature, such as the predator-prey amount relation. It also appears in markets with cycles. (Note that in financial markets, some cycles are much longer than expected, forming trends.) In a PvP game with Elo-score-based matching mechanism, losing makes make you more likely to win in the short term.
 
