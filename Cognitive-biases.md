@@ -398,7 +398,7 @@ The quicker the feedback gives, the quicker people can learn (this also applies 
 
 Reducing cost by removing safety measures usually does not cause any visible accidents in the short run, but the benefit of reduced costs are immediately visible. When the accident actually happened because of the removed safety measures, it may be years later.
 
-The solution to it is to objectively record the history, and objectively analyze the history.
+The solution is to take notes and analyze past notes.
 
 **People crave quick feedback**. Successful video games and gambling mechanisms utilize this by providing immediate responses to actions. 
 
@@ -553,7 +553,7 @@ Other examples of survivorship bias:
 
 - Most gamblers are initially lucky, because the unlucky ones tend to quit gambling early.
 - One person can do many different predictions. After the event happened, they pick the right one and delete the wrong ones, giving the illusion of prediction accuracy.
-- "Taleb's rat health club": Feeding poison to a rats increases average health, because the unhealthy ones are more likely to die from poison.
+- "Taleb's rat health club": Feeding poison to rats increases average health, because the unhealthy ones are more likely to die from poison.
 - Social media has more negative news than positive news. Bad news travels fast.
 
 A more generalized version of survivor bias is **selection bias**: When the sampling is not uniform enough and contains selection mechanism (not necessary sample vanishing), there will be bias in the result.
@@ -640,18 +640,17 @@ Examples:
 - When tossing coin, if head appear frequently, people tend to think tail will appear frequently. (If the coin is fair and tosses are statistically independent, this is false. If the coin is biased, it's also false.)
 - When 3 girls were consecutively born by one pair of parents, people think more boys will likely to be born by the same parents.
 - When a stock goes down for a long time, people tend to think it will be more likely to rise.
-- In PvP gaming, when one player consecutively lost many times, they tend to believe that their win rate increases, and tend to continue playing.
 
 One related topic is the **law of large numbers**: if there are enough samples of a random event, the average of the results will converge. The law of large numbers focus on the total average, and does not consider exact order. 
 
 The total average will converge doesn't mean future event's average will be opposite to past event's average. For example, a fair coin toss will converge to 1/2 heads and 1/2 tails. Even if the past events contain 90% heads and 10% tails, this does not mean that the future events will contain more heads. The future event will still converge to 50% heads, and the large amount of future events will dilute the finite amount of uneven past events.
 
-Actually, **gambler's fallacy can be correct in a system with negative feedback loop, where the short-term distribution changes by past samples**. These long-term feedback loops are common in nature, such as the predator-prey amount relation. It also appears in markets with cycles. (Note that in financial markets, some cycles are much longer than expected, forming trends.)
+Actually, **gambler's fallacy can be correct in a system with negative feedback loop, where the short-term distribution changes by past samples**. These long-term feedback loops are common in nature, such as the predator-prey amount relation. It also appears in markets with cycles. (Note that in financial markets, some cycles are much longer than expected, forming trends.) In a PvP game with Elo-score-based matching mechanism, losing makes make you more likely to win in the short term.
 
 One related concept is **regression to the mean**, meaning that, if one sample is higher than average, the next sample is likely to be lower than the **last sample**, and vice versa. Example: if a student's score follows normal distribution with average 80, when that student gets 90 scores, they will likely to get a score worse than 90 in the next exam. 
 
 The difference between gambler's fallacy and regression to the mean:
-- Gambler's fallacy: if the past samples deviate to mean, assume the distribution of future samples have a higher mean. This is wrong when the distribution doesn't change.
+- Gambler's fallacy: if the past samples deviate to mean, assume the distribution of future samples change to "compensate" the deviations. This is wrong when the distribution doesn't change.
 - Regression to the mean: if the last sample is far from the mean, the next sample will likely to be closer to the mean than the last sample. It compares the next sample with the last sample, not the future mean with the past mean.
 
 ### Conjunction fallacy
