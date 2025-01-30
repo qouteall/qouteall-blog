@@ -114,11 +114,12 @@ People tend to maintain their ego by **self-serving bias**:
 ### Overconfidence
 
 People tend to be **overconfident** about themselves:
-  - People overestimate the correctness and rationality of their belief.
-  - **Dunning-Kruger effect**: overestimate capability when low in capability, and understimate when high in capability.
-  - **Restraint bias**: Overestimate the ability of controlling emotion, controlling impulse behaviors and resisting addiction.
-  - **False uniqueness**: We tend to think that we have special talents and special virtues.
-  - **Hindsight bias**: Overconfident in understanding history and the ability to predict.
+- People overestimate the correctness and rationality of their belief.
+- **Dunning-Kruger effect**: overestimate capability when low in capability, and understimate when high in capability.
+-  **Restraint bias**: Overestimate the ability of controlling emotion, controlling impulse behaviors and resisting addiction.
+-  **False uniqueness**: We tend to think that we have special talents and special virtues.
+-  **Hindsight bias**: Overconfident in understanding history and the ability to predict.
+-  **Bias blind spot**: People are hard to recognize their own biases.
 
 The overconfidence is useful:
 - Being confident helps persuading others, increasing social impact.
@@ -147,7 +148,6 @@ People make execuses about their prediction failure, such as:
 - Attribute self failure by external factors (luck, situation, etc.).
 - Attribute other people's success by external factors.
 - Attribute other people's failure by their characteristics.
-- **Bias blind spot**: People are hard to recognize their own biases.
 
 ### Self justification
 
@@ -197,18 +197,10 @@ Self-handicapping is also a way of **reducing responsibility**. This is common i
 People tend to fight the things that oppose their desire. Examples:
 
 - Being disallowed to play videogames makes videogames more fun to play with.
-- Being forced to learn makes one dislike learning. (Internally motivated learning is much more effective.)
+- Being forced to learn makes one dislike learning.
 - People tend to gain more interest in the information being banned by government.
 - When the love is objected by parents, the love strengthens.
 - Restricting buying something make people buy it more eagerly. Same for restricting selling.
-
-### Knowing bad truth is not always better
-
-- If one has the ability to overcome difficulties, then the depression of knowing bad truth can facilitate one working harder, choosing more rational decisions and succeed.
-- If one doesn't have the ability to overcome difficulties, then knowing truth can cause depression.
-
-The cognitive biases that make human not understanding the truth is sometimes helpful (but not always). **The evolution shapes human's cognitive biases for valid reasons.**
-
 
 ## Belief stability
 
@@ -227,7 +219,7 @@ Example: In a failing relationship, a person might attribute their partner's dis
 
 > If you don't have an opinion, resist the pressure to have one. 
 >
-> — N. N. Taleb  [Link](https://x.com/nntaleb/status/1789709702097481773)
+> — N. N. Taleb, [Link](https://x.com/nntaleb/status/1789709702097481773)
 
 **Information cocoon (echo chamber)**: People tend to actively choose to digest the information source that they like, and make friends with the one having similar beliefs.
 
@@ -242,7 +234,7 @@ Example: In a failing relationship, a person might attribute their partner's dis
 
 **Bullshit asymmetry principle**: Refuting misinformation is much harder than producing misinformation. To produce a misinformation and make it spread, you just need to make it follow people's existing beliefs. But to refute a misinformation, you need to find sound evidences. This is also **reversal of the burden of proof**.
 
-The good side of stubborness is to maintain diversity of ideas, helping innovation and overcoming of unknown risks.
+The good side of stubborness is to maintain diversity of ideas in a society, helping innovation and overcoming of unknown risks.
 
 ### Group justification and system justification
 
@@ -253,23 +245,18 @@ Examples:
 - An environmental activist might justify other environmental activists' illegal trespassing because they are deemed to be in the same group.
 - A middle-class tend to believe "the poor are lazy" and "the wealthy work harder".
 
-**Just world hypothesis**: some people tend to think that the world is just and people get what they deserve. The just world hypothesis is shaped by many factors: culture, education, the urge to simplify the world. The just world hypothesis is included in most cultures. It facilitates collaboration, hard-working and society stability.
-
-
 
 ### Urge to persuade others
 
-People love to correct others and persuade others. Some ideas are **memes** that drive people to spread the idea. However, due to belief stability, it's hard to persuade others. This effect is especially common on internet social media.
+People love to correct others and persuade others. Some ideas are **memes** that drive people to spread the idea. However, due to belief stability, it's hard to persuade others, and people dislike being persuaded. This effect is common on internet social media.
 
 > The trouble with having an open mind, of course, is that people will insist on coming along and trying to put things in it.
 >
 > — Terry Pratchett
 
-At the same time, people generally don't want to be educated by others.
-
 ### Sunk cost fallacy
 
-Commitment can be a good thing. A lot of goals require continual time, efforts and resources to achieve. 
+Commitment can be a good thing. A lot of goals require continual time, efforts and resources to achieve.
 
 However, there are investments that turn out to be bad and should be given up to avoid futher loss. All the previous investments become sunk cost. People are reluctant to give up because they have already invested a lot in them. Doing stop-loss signals failure. **We want to have hope rather than accepting failure.**
 
@@ -278,7 +265,7 @@ Examples:
 - Keep watching a bad movie because you paid it and already spent time watching it.
 - Keeping an unfulfilling relationship because of the past commitments.
 
-This effect is also **escalation of commitment**. It's also related to **mental accounting** effect.
+**Opportunity cost**: if you allocate resource (time, money) to one thing, that resource cannot be used in other things that may be better. Opportunity cost is not obvious.
 
 The difference between "good persistence" and "bad obstinacy":
 
@@ -306,8 +293,6 @@ An environment that doesn't tolerant failure makes people not correct mistakes a
 >
 > — Nikita Bier, [Link](https://x.com/nikitabier/status/1753915234794774978)
 
-Programmers often argue about the superiority of the programming language (or framework, code editor, etc.) that they use, even though no one prevent them from using other languages, and they can't profit from arguing. This effect is related to sunk cost (they spent efforts in learning and using the language), self justification (make their decision look smarter, get superiority) and group justification ("defensing" the community of language users).
-
 ### Ostrich effect
 
 Ignoring negative information or warning signs to avoid psychological discomfort.
@@ -315,15 +300,15 @@ Ignoring negative information or warning signs to avoid psychological discomfort
 Examples:
 
 - Not wanting to diagnose health problem.
-- Reluctant to stop-loss for an investment decision that turn out to be bad.
+- Reluctant to check the account after an investment failed.
 
 ## Quick simplified understanding
 
-Human can learn from the world in an **information-efficient** way: learning from very few information quickly. (On the other side, current deep learning technology is information-inefficient, as it requires tons of training data to get good results.)
+We can learn from the world in an **information-efficient** way: learning from very few information quickly. (On the other side, current deep learning technology is information-inefficient, as it requires tons of training data to get good results.)
 
 The flip side of information-efficient learning is **hasty generalization**. We tend to generalize from very few examples quickly, rather than using logical reasoning and statistical evidence, thus easily get fooled by randomness.
 
-**The reality is complex, so we need to simplify things to make them easier to understand and easier to remember. However, the simplification can get wrong.**
+The reality is complex, so **we need to simplify things to make them easier to understand and easier to remember. However, the simplification can get wrong.**
 
 To simplify, we tend to **make up reasons of why things happen**. A reasonable thing is simpler and easier to memorize than raw complex facts.
 
@@ -346,7 +331,7 @@ When statistical analysis shows that A correlates with B, the possible causes ar
 
 Examples of correlation of A and B are actually driven by another factor C:
 
-- The children wearing larger shoe has better reading skills: both driven by age. Just wearing a large shoe won't make you smarter.
+- The children wearing larger shoe has better reading skills: both driven by age. Just wearing a large shoe won't make the kid smarter.
 - Countries with more TVs had longer life expectancy: both driven by economy condition. Just buying a TV won't make you live longer.
 
 > Among my favorite examples of misunderstood fitness markers is a friend of a friend who had heard that grip strength was correlated with health. He bought one of this grip squeeze things, and went crazy with it, eventually developing tendonitis.
@@ -459,9 +444,9 @@ Examples of binary thinking:
 
 People's evaluations are anchored on the expectation, and **not meeting an exception could make people's belief turn to another extreme**.
 
-Technology Hype Cycle:
+[Technology Hype Cycle](https://en.wikipedia.org/wiki/Gartner_hype_cycle):
 
-![](./cog_bias/Hype-Cycle-General.png)
+![](./cog_bias/hype-cycle.png)
 
 Internet has indeed changed the world. But the dot com bubble burst. It's just that the power of Internet required time to unleash, and people placed too much expectation in it too early.
 
@@ -476,11 +461,11 @@ Examples:
 - A person falling in love thinks the partner is flawless.
 - Thinking that a beautiful/handsome person is more intelligent and kind.
 - A person that likes one Apple product thinks that all designs of all Apple products are correct and superior.
-- When a voter likes one opinion of a political candidate, the voter tend to ignore the candidate's shortcomings.
+- When one likes one opinion of a political candidate, one tend to ignore the candidate's shortcomings.
 
 **Horn effect** is the inverse of halo effect: if people dislike one aspect of a thing, they tend to dislike all aspects of that thing and its related things. People tend to judge words by the political stance of the person who said it. **Disaggrement on ideas tend to become insults to people, especially in a competitive environment.**
 
-Halo effect and horn effect is related to **binary thinking**.
+Halo effect and horn effect are related to **binary thinking**.
 
 ### Need for closure
 
@@ -494,26 +479,23 @@ This is related to **narrative fallacy**: people like to make up reasons explain
 >
 > — _The Black Swan_
 
-People dislike uncertain future and want to predict the future, while ignoring their terrible past prediction record (hindsight bias).
+People dislike uncertain future and keep predicting the future, while ignoring their terrible past prediction record (hindsight bias).
 
-When a statistician meets an unknown distribution, they tend to assume that the unknown distribution is gaussian, because gaussian distribution can yield good results, even though not every distribution is gaussian.
+People like to wrongly apply a theory to real world, because applying the theory can give results. Example: assuming that an unknown distribution is gaussian even when it's not.
 
-**Zeigarnik effect**: People focus on uncompleted things more than completed things. When some desire is not fulfilled (when gambling not winning, a PvP game match not winning, browsing social media not seeing wanted content), the desire becomes more significant.
+**Zeigarnik effect**: People focus on uncompleted things more than completed things. When some desire is not fulfilled (gambling not winning, PvP game not winning, browsing social media not seeing wanted content, etc.), the desire becomes more significant.
 
 Need for closure is also related to **curiosity**.
 
 ### Idealization of the unfamiliar
 
-People may idealize the things that they are not familiar with and don't know much:
+People may idealize the things that they are not familiar with:
 
 - People may idealize their partner, until living with the parter for some time.
 - "The grass is greener on the other side" (**Greener grass syndrome**).
-- People may believe that other countries are better than the country that they live in. "外国的月亮更圆 (The moon is more round in foreign countries)".
-- Thinkging that AI is super powerful when not using AI in real working. The more one uses AI in real work, the more one know the limitations of AI.
+- Assuming that another career/lifestyle/country (that you are not familar with) is better than the current one.
 
-This is related to binary thinking: If the unknown thing is not bad, then it's ideal.
-
-People tend to idealize the distant past. People tend to forget the past misery. This helps people get out of trauma, and at the same time idealize the past things:
+People tend to idealize the distant past and forget the past misery. This helps people get out of trauma, and at the same time idealize the past things:
 
 - After a long time since bearing a child, women tend to forget the pain of bearing a child and may want another child.
 - After decades passed since the collapse of Soviet Union, some people remember more of the good aspects of the Soviet Union.
@@ -547,7 +529,7 @@ Survivorship bias means that only consider "survived", observed samples and does
 A popular image of survivorship bias:
 
 ![](./cog_bias/Survivorship-bias.svg)
-In that image, there are places that doesn't have bullet hole. The planes that get hit in these places never come back.
+The planes that get hit in critical places never come back, thus don't get included in the stat of bullet holes, forming the regions missing bullet hole in that image.
 
 Other examples of survivorship bias:
 
@@ -574,24 +556,22 @@ Example: If you recently saw a car crash, you tend to think that traveling by ca
 > 
 > — _The Black Swan_
 
-Enforcing safety measures is usually unappreciated (and hated). Because people only see the visible cost and friction caused by safety measures (concrete), and do not see the consequences of not applying safety measures in a parallel universe (abstract), until an incident really happens (concrete).
+Enforcing safety measures is usually unappreciated. Because people only see the visible cost and friction caused by safety measures (concrete), and do not see the consequences of not applying safety measures in a parallel universe (abstract), until an incident really happens (concrete).
 
-People are more likely to pay terrorism insurance than for plain insurance (that covers terrorism and other things).
+People are more likely to pay terrorism insurance than for plain insurance that covers terrorism and other things.
 
-If people are given some choices, people tend to choose one of the provided choices and ignore the fact that other choices exist. This can also be seen as framing effect.
+If people are given some choices, people tend to choose one of the provided choices and ignore the fact that other choices exist. This is also framing effect.
 
 People tend to attribute one product to one public figure, or attribute a company to its CEO, because that's the name that they know, and because of causal simplification tendency.
 
 > 25 years ago today, SYSTEM SHOCK 2 was first released, designed by [@levine](https://x.com/levine) at Looking Glass.
 >
-> — The Game Awards [Link](https://x.com/thegameawards/status/1822666427083657528)
+> — The Game Awards, [Link](https://x.com/thegameawards/status/1822666427083657528)
 
 > "There's a tendency among the press to attribute the creation of a game to a single person," says Warren Spector, creator of Thief and Deus Ex.
 >
 > [Link](https://www.ign.com/articles/2001/11/12/deus-ex-2)
 
-
-**Opportunity cost**: if you allocate resource (time, money) to one thing, that resource cannot be used in other things that may be better. Opportunity cost is not obvious.
 
 ### Familiarity bias
 
@@ -601,7 +581,7 @@ When making decisions, people tend to focus on what they already know, and ignor
 
 This is related to risk compensation: People tend to take more risk in familiar situations.
 
-**Imprinting**: At young age, people are more likely to embrace new things. At older age, people are more likely to prefer familiar things and avoid taking risk in unfamiliar things. This includes "baby duck syndrome", where people prefer the old software system that they are familar with, like baby ducks following the first "mother" they see.
+**Imprinting**: At young age, people are more likely to embrace new things. At older age, people are more likely to prefer familiar things and avoid taking risk in unfamiliar things. (Baby duck syndrome).
 
 > 1. Anything that is in the world when you’re born is normal and ordinary and is just a natural part of the way the world works.
 > 2. Anything that's invented between when you’re 15 and 35 is new and exciting and revolutionary and you can probably get a career in it.
@@ -611,13 +591,13 @@ This is related to risk compensation: People tend to take more risk in familiar 
 
 ### Frequency illusion
 
-Noticing something more frequently after learning about it, leading to overestimating its prevalence or importance. This is highly related to availability bias and familiarity bias.
+Noticing something more frequently after learning about it, leading to overestimating its prevalence or importance.
 
 Sometimes, one talked about something then sees its ad in social media, thus suspecting that their phone and social media app is recording voice for ad recommendation. Of course that possibility exists, but perception of that possibility is exaggerated by frequency illusion.
 
 ### Representativeness bias
 
-People tend to judge things by stereotypes that comes in mind, and tend to think that one sample is representative to the whole group.
+People tend to judge things by comparing it with examples (stereotypes) that come into mind, and tend to think that one sample is representative to the whole group.
 
 Representative bias can sometimes be misleading:
 
@@ -652,6 +632,8 @@ One related concept is **regression to the mean**, meaning that, if one sample i
 The difference between gambler's fallacy and regression to the mean:
 - Gambler's fallacy: if the past samples deviate to mean, assume the distribution of future samples change to "compensate" the deviations. This is wrong when the distribution doesn't change.
 - Regression to the mean: if the last sample is far from the mean, the next sample will likely to be closer to the mean than the last sample. It compares the next sample with the last sample, not the future mean with the past mean.
+
+**Regression fallacy**: after doing something and regression to the mean happens, people tend to think what they do caused the effect (hasty generalization). Example: the kid gets a bad score; parent criticizes; the kid then get a better score. It's seen that criticizing makes the score get better, although this is just regression to the mean that can happen naturally.
 
 ### Conjunction fallacy
 
@@ -766,16 +748,23 @@ Examples:
 
 People tend to value something only after losing it.
 
-### Simpson's paradox
+### Simpson's paradox and base rate fallacy
 
 The correlation of overall samples may be contradictory to the correlation inside each sub-groups. 
 
 ![](./cog_bias/Simpsons-paradox.gif)
+[Reference](https://en.wikipedia.org/wiki/Simpson%27s_paradox)
 
 Examples:
 
-- In the COVID-19 pandemic, a developed country have higher overall fatality rate than a developing country. But in each age group, the developed country's fatality rate is lower. The developed country has a larger portion of old population. 
+- In the COVID-19 pandemic, a developed country have higher overall fatality rate than a developing country. But in each age group, the developed country's fatality rate is lower. The developed country has a larger portion of old population.
 - After improving a product, the overall customer satisfaction score may decrease, because the product gets popular and attracted the customers that don't fit the product, even though the original customers' satisfaction score increases.
+
+**Base rate fallacy**: there are more vaccinated COVID-19 patients than un-vaccinated COVID-19 patients in hospital, but that doesn't mean vaccine is bad:
+
+![](./cog_bias/base-rate-fallacy.png)
+
+[Reference](https://en.wikipedia.org/wiki/Base_rate_fallacy)
 
 ### False consensus (echo chamber, information cocoon)
 
@@ -828,9 +817,9 @@ In software product design, the default options in software plays a big role in 
 
 - If a software functionality require manually enabling it, much fewer users will know and use that functionality.
 - Just 1 second longer page load time may reduce user conversion by 30%. [Source](https://www.cloudflare.com/learning/performance/more/website-performance-conversion-rates/)
-- Each setup procedure will frustrate a portion of users, making them give up installing the software. Example: when installing a desktop application, some people may give up when cannot find the installer in download folder, give up when seeing safety confirmation, give up in one installer step, or give up when installation requires restart. [Why I’m Done Making Desktop Applications](https://www.kalzumeus.com/2009/09/05/desktop-aps-versus-web-apps/). A good product requires minimal configuration to start working.
+- Each setup procedure will frustrate a portion of users, making them give up installing the software. [Why I’m Done Making Desktop Applications](https://www.kalzumeus.com/2009/09/05/desktop-aps-versus-web-apps/). A good product requires minimal configuration to start working.
 
-**Status quo bias**: tend to maintain status quo. This is related to risk aversion: actively-made decisions could turn out to be worse.
+**Status quo bias**: tend to maintain status quo. This is related to risk aversion, as change may cause risk.
 
 A related concept is **omission bias**: People treats the harm of doing something (commision) higher than the harm of not doing anything (omission). Doing things actively bears more responsibility. In the trolley problem, not doing anything reduces perceived responsibility.
 
