@@ -163,6 +163,8 @@ This is related to Stockholm Syndrome. After experiencing pain in the past, peop
 
 **Foot-in-the-door effect**: One agreed on a small request tend to subsequently agree on a larger request.
 
+**Saying becomes believing**: Telling a lie too many times may make one truly believe in it.
+
 ### Self-handicapping
 
 People want to have a self-image of high capability. But a failure can debunk their self-image. Self-handicapping is one way of protecting the self-image. It's an extension of **protective pessimism**.
@@ -697,7 +699,7 @@ The content creator could emphasize one aspect and downplay another aspect, and 
 The name of a thing affects how people perceive it. Examples:
 - "Collateral damage" / "Death"
 - "Gun control" / "Gun safety"
-- "Government investment" / "Using taxpayer money"
+- "Government subsidy" / "Using taxpayer money"
 
 A **loaded question** is a question that contains an assumption (framing). Following that assumption can lead to a biased answer. Example: "Do you support the attempt by the US to bring freedom and democracy to other places in the world?"
 
@@ -793,8 +795,6 @@ Being exposed to information also changes behavior and attitudes. Examples:
 > — _Think, fast and slow_
 
 Note that the famous "age priming" effect (walk more slowly after reminding aging concepts) failed to be replicated.
-
-Telling lie too many times may make the liar believe the lie themselves internally. When the liar want to persuade others, the liar make up reasoning for the lie, which may prime the liar into believing the lie themselves.
 
 The placebo effect is also possibly related with priming.
 
@@ -1073,13 +1073,14 @@ What memes have higher ability to spread?
 - Exaggerated. Polarized. Utilizes binary thinking.
 - Providing interesting new information. Utilizes information addiction.
 
-In the ancient world, when there is no algorithmic recommendataion, there are still "natural selection of cultures".
+In the ancient world, when there was no algorithmic recommendataion, there was still the "natural selection" of memes (stories, cultures).
 
 Memes facilitate being spreaded. On the contrary, **antimemes** resist being spreaded. 
 
 - Antimemes are usually long, complex and nuanced, reflecting the intricacies of real-world complexity, being hard-to-grasp.
 - Antimemes usually don't spur much emotions.
 - Antimemes are usually not controversial.
+- Antimemes are usually boring and "obvious" (hindsight bias).
 - The information that conflicts with existing beliefs are also antimemes. (confirmation bias)
 
 ### Longing for attention
@@ -1102,7 +1103,7 @@ Examples:
 
 - Gambling
 - PvP gaming (every round has randomly different opponents and outcome)
-- Browsing social media (posts randomly give satisfaction or rage)
+- Browsing social media (random posts)
 - Gacha game (pulling is random)
 
 This is related to information addiction. **Randomized things give more information than deterministic things.**
