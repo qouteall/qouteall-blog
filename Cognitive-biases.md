@@ -777,6 +777,8 @@ This effect is exacerbated by algorithmic recommendation of social medias.
 We also tend to think other people are similar to us in some ways. We learn from very few examples, and that few examples include ourselves.
 
 > We don't see things as they are. We see things as we are.
+
+
 ### Priming
 
 We use relations to efficiently query information in memory. The brain is good at looking up relations, in an automatically, unintentionally and subconscious way.
