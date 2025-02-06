@@ -204,6 +204,8 @@ People tend to fight the things that oppose their desire. Examples:
 - When the love is objected by parents, the love strengthens.
 - Restricting buying something make people buy it more eagerly. Same for restricting selling.
 
+Providing external reward may reduce internal motivation (overjustification effect).
+
 ## Belief stability
 
 - People tend to **keep their belief stable** (being stubborn).
