@@ -129,13 +129,10 @@ The overconfidence is useful:
 
 When looking at past, people find past events (including Black Swan events) reasonable and predictable, although they didn't predicted these events in prior.
 
-In a complex world, **one event can have two contradicting interpretations**. 
+In a complex world, **one event can have two contradicting interpretations**. One recent example: There are two different interpretations after DeepSeek R1 goes popular in Janurary 2025:
 
-One recent example: (This is written in Janurary 2025) DeepSeek V3 released, the report says that DeepSeek V3's training cost is \$5.5M, significantly lower than other large model training. Subsequent open model DeepSeek R1 has strong performance. And DeepSeek's API price is significantly lower than OpenAI and Anthropic's, creating a price war of AI. There are two different interpretations:
-- Bearish on Nvidia. The low training cost of V3 shows that if the training method is efficient enough then the world doesn't need that much GPUs. And the price war will make AI companies less profitable, reducing their valuations and CapEx.
+- Bearish on Nvidia. The low training cost of DeepSeek models shows that if the training method is efficient enough then the world doesn't need that much GPUs. And the "price war" will make AI companies less profitable, reducing their valuations and CapEx.
 - Bullish on Nvidia. The lowering price of AI will create much more demand, according to [Jevons paradox](https://en.m.wikipedia.org/wiki/Jevons_paradox).
-
-Both of the two interpretations makes sense. But only one is correct afterwards (could also be that the first is correct in short term and the second is correct in long term). The incorrect one will be ignored when analyzing history.
 
 People make execuses about their prediction failure, such as:
 - See their prediction as "almost" correct. Distort the memory and change the past prediction.
@@ -672,7 +669,7 @@ Most people are late-trend-following in investment: **not believing in a trend i
 
 ### Recency bias
 
-Overemphasizing recent events and performance, while ignoring long-term trends, causing overreaction.
+Overemphasizing recent events, while ignoring long-term trends.
 
 People tend to
 - **overestimate the short-term effect of a recent event**, and
@@ -680,9 +677,7 @@ People tend to
 
 This is related to **Amara's law**: we tend to overestimate the effect of a technology in the short run and underestimate the effect in the long run.
 
-This is also related to availability bias, where the just-seen events are more obvious and easier to recall than old events and non-obvious underlying trends.
-
-In financial markets, even when a market is in a trend, it still has fluctuations that temporarily deviate from the trend. Overly focusing on recent fluctuations may cause misunderstanding of the trend. Of course, the temporal fluctuation can also be an indication that the trend stops. 
+This is also related to availability bias, where the just-seen events are more obvious and easier to recall than old events and non-obvious underlying trends. This is also related to narrative fallacy: people tend to make up reasons to explain recent events and them believe in their own understanding.
 
 **Normalcy bias means underreact** to new events, but **recency bias means overreact** to new events, which is the opposite of normalcy bias. These two are actually not conflicting. Which one takes effect initially is related to actual situation and existing beliefs (**confirmation bias**). When one person does not believe in a trend but the trend continued for a long time, **binary thinking** may make that person turn their belief 180 degrees and deeply believe in the trend (but it's usually too late).
 
@@ -1057,6 +1052,8 @@ With confirmation bias, more information lead to higher confidence, but not bett
 - **Overestimating the amount of perfect parters**, who are beautiful/handsome, have high income and does exaggeraged love.
 - Believing in **false consensus**, the consensus that only exists on an internet community.
 - Overestimating the proportion of bad news, as **bad news travels fast** in social media, thus facilitating cynicism.
+
+The 80/20 rule also applies to social media: 80% of the voice come from 20% of users. The dominant narrative on internet may not represent most people's views.
 
 What's more, social media may make people:
 - Get used to interesting easy-to-digest information and become less tolerant to not-so-interesting hard-to-digest information.
