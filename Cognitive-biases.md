@@ -53,7 +53,7 @@ So, losses have a larger mental impact than gains of the same size. The pain of 
 
 People don't intuitively treat avoiding losing one dollar as the same as earning one dollar.
 
-Note that loss aversion is not uniform in all scenarios. Some risk-takers may be not loss averse.
+**Relative deprivation** is also a kind of loss that people tend to avoid. For example, when the people near one get rich by investing a bubble asset, one may choose to invest the risky bubble asset to avoid the "relative loss" between one and others.
 
 ### Perception of risk
 
@@ -315,9 +315,15 @@ To simplify, we tend to **make up reasons of why things happen**. A reasonable t
 
 ### Hasty generalization
 
+Examples:
+
 - See a few rude peoples in one city, then conclude that "people from that city are rude".
 - People who only live in one country think that some societal issue is specific to the country that they are in. In fact, most societal issues apply to all countries.
 - **Illusion of control**: A gambler may have the illusion that their behavior can control the random outcomes after seeing occasional coincidents.
+
+People tend to see false pattern from random things. This effect is [apophenia](https://en.wikipedia.org/wiki/Apophenia).
+
+If there are two lights, the first flashes in 70% probability and the second flashes in 30% probability, when asked to predict which light flashes next, people tend to try to find patterns even if the light flash is purely random. The optimal strategy is to not try to predict and always choose the first which has larger probability. [Reference](https://www.jneurosci.org/content/jneuro/20/6/RC64.full.pdf)
 
 ### Confusing correlation as causation
 
@@ -859,7 +865,7 @@ Examples:
 - A parent train child by punishing hard, instead of using scientific training methods.
 - Bikeshedding effect: during meetings, people spend most time talking about trivial matters.
 - Staying in comfort zone. Only learn/practice the familiar things and avoid touching unfamiliar things. Avoiding the unpleasant information when learning.
-- Only care about the things that can easily measure (KPI, OKR) and ignore the things that cannot be measured (e.g. employee morale, product-market fit, perverse incentives).
+- Only care about the visible numbers (KPI, OKR), and ignore the important things behind the numbers, like perverse incentives caused by the KPI, statistical bias, and the validity of interpretations from the numbers.
 - Streetlight effect: Only search in the places that's easy to search, not the places that the target is in.
 
 This is related to **means-end inversion**. To achieve the root goal (end) we work on a sub-goal (means) that helps root goal. But overly focusing on the sub-goal hurts the root goal.
@@ -1124,14 +1130,15 @@ Consider two financial trading strategies:
 
 In the long term, strategy 2 can greatly outperforms strategy 1, but people prefer strategy 1, because of many reasons:
 
+- The first strategy has better Sharpe ratio as long as the rare Black Swan don't come. The second strategy has lower Sharpe ratio because of the high volatility (although volatility has positive skewness).
 - Convex perception. Frequent small gains feels better than a rare huge gain, and frequent small losses feels worse than a rare huge loss.
 - Loss aversion. The loss aversion focused more on recent visible loss rather than potential rare large loss.
 - Availability bias and outcome bias. The frequent small losses are more visible than rare potential big loss.
 - Delayed feedback issue. The rare loss in strategy 1 usually come late.
-- Oddball effect. The time experiencing loss and risk feels longer.
+- Oddball effect. The time experiencing loss feels longer.
 - ...
 
-It's a common misconception that a you need a win rate more than 50% to be profitable. With a favorable odds, profit is possible despite a low win rate. The skew of profit distribution is important.
+It's a common misconception that a you need a win rate more than 50% to be profitable. With a favorable odds, profit is possible despite a low win rate. Similarily, a 99% win rate doesn't necessarily imply profit in the long term. The skewness is important.
 
 Disposition effect:
 
