@@ -1138,7 +1138,7 @@ In the long term, strategy 2 can greatly outperforms strategy 1, but people pref
 - Oddball effect. The time experiencing loss feels longer.
 - ...
 
-It's a common misconception that a you need a win rate more than 50% to be profitable. With a favorable odds, profit is possible despite a low win rate. Similarily, a 99% win rate doesn't necessarily imply profit in the long term. The skewness is important.
+It's a common misconception that a you need a win rate more than 50% to be profitable. With a favorable risk-reward ratio, profit is possible despite a low win rate. Similarily, a 99% win rate doesn't necessarily imply profit in the long term. The skewness is important.
 
 Disposition effect:
 
