@@ -323,7 +323,9 @@ Examples:
 
 People tend to see false pattern from random things. This effect is [apophenia](https://en.wikipedia.org/wiki/Apophenia).
 
-If there are two lights, the first flashes in 70% probability and the second flashes in 30% probability, when asked to predict which light flashes next, people tend to try to find patterns even if the light flash is purely random. The optimal strategy is to not try to predict and always choose the first which has larger probability. [Reference](https://www.jneurosci.org/content/jneuro/20/6/RC64.full.pdf)
+If there are two lights, the first flashes in 70% probability and the second flashes in 30% probability, when asked to predict which light flashes next, people tend to try to find patterns even if the light flash is purely random, having correct rate about 58%. The optimal strategy is to not try to predict and always choose the first which has larger probability, having correct rate 70%. [Reference](https://www.jneurosci.org/content/jneuro/20/6/RC64.full.pdf)
+
+Related: most people cannot actually behave randomly. An example: [Aaronson Oracle](https://people.ischool.berkeley.edu/~nick/aaronson-oracle/).
 
 ### Confusing correlation as causation
 
@@ -678,6 +680,7 @@ Most people are late-trend-following in investment: **not believing in a trend i
 Overemphasizing recent events, while ignoring long-term trends.
 
 People tend to
+
 - **overestimate the short-term effect of a recent event**, and
 - **underestimate the long-term effect of an old event**.
 
@@ -700,6 +703,7 @@ There are many ways to frame one fact.
 The content creator could emphasize one aspect and downplay another aspect, and use different wording or art style to convey different opinions. The people reading the information could be easily influenced by the framing subconsciously.
 
 The name of a thing affects how people perceive it. Examples:
+
 - "Collateral damage" / "Death"
 - "Gun control" / "Gun safety"
 - "Government subsidy" / "Using taxpayer money"
@@ -722,7 +726,7 @@ Just looking confident can often make other people believe. This even applies wh
 
 **Lie by omission**: A person can tell a lot of truth while omitting the important facts, stressing unimportant facts (wrong framing), intentially causing misunderstanding, but at the same time be not lying in literal sense.
 
-The price chart is often drawn by making lowest price at the bottom and highest price at the top. The price range of the chart is also framing. If one stock already have fallen by 30%, the latest price is in the bottom of the chart, so the stock seems cheap, but it may actually be not cheap at all. Reverse also applies: a stock grown by 30% makes its latest price shown on the top but it may be not expensive at all.
+The price chart is often drawn by making lowest price at the bottom and highest price at the top. The offset and scale of the chart is also framing. If one stock already have fallen by 30%, the latest price is in the bottom of the chart, so the stock seems cheap when looking at the chart, but it may actually be not cheap at all, and vice versa.
 
 ### Blame the superficial
 
@@ -787,6 +791,7 @@ We also tend to think other people are similar to us in some ways. We learn from
 We use relations to efficiently query information in memory. The brain is good at looking up relations, in an automatically, unintentionally and subconscious way.
 
 Being exposed to information makes human recognize similar concepts quicker. Examples:
+
 - Reminding "yellow" makes recognizing "banana" faster.
 - Reminding "dog" makes recognizing "cat" faster.
 
@@ -841,26 +846,24 @@ When being judged by other people, people tend to do action to show their value,
 - Financial analysts tend to give a definitive result, even knowing that there isn't enough sound evidences.
 - For high-liquidity assets (e.g. stocks), people tend to do impulsive trading when market exhibit volatility. But for low-liquidity harder-to-trade assets (e.g. real estate) people tend to hold when the market exhibit volatility.
 
-It's being empirically observed that, in personal financial trading, higher trading frequency is correlated with worse profit.
-
 Action bias does not contradict with default effect. When one is asked to work and show value, doing action is the default behavior, and not doing action is more risky, as people tend to question the one that does not look like working.
 
 > It's not the things you buy and sell that make you money; it's the things you hold.
 > 
 > — Howard Marks
 
-
-
 ### Prioritizing the easy and superficial
 
-People like easy solutions and shortcuts. However, some seemingly easy solutions does not address the root cause, having negligible effect or negative effect in the long run. Applying the easy solution gives the fake impression that the problem is being addressed, thus achieving mental comfort.
+Law of least effort: people tend to choose the easiest way to do things, choosing path of least resistance.
+
+Some seemingly easy solutions does not address the root cause, having negligible effect or negative effect in the long run. Applying the easy solution gives the fake impression that the problem is being addressed, achieving mental comfort.
 
 Examples:
 - Focusing on buying exercise equipments instead of exercising. Paying to gym to give an illusion of determination in exercising.
 - Buying supplements instead of adopting healthier lifestyle.
 - Focusing on buying courses, books, study equipments instead of actually studying. Keep bookmarking online learning materials instead of reading them.
 - Musicians focusing on buying instruments (gear acquisition syndrome). This also applies to other fields such as photography.
-- When writing, focusing on the formatting of a document instead of the content.
+- When writing, focusing on the formatting instead of the content.
 - A manager pushing employees to seemingly work hard instead of improving efficiency.
 - A parent train child by punishing hard, instead of using scientific training methods.
 - Bikeshedding effect: during meetings, people spend most time talking about trivial matters.
@@ -868,7 +871,7 @@ Examples:
 - Only care about the visible numbers (KPI, OKR), and ignore the important things behind the numbers, like perverse incentives caused by the KPI, statistical bias, and the validity of interpretations from the numbers.
 - Streetlight effect: Only search in the places that's easy to search, not the places that the target is in.
 
-This is related to **means-end inversion**. To achieve the root goal (end) we work on a sub-goal (means) that helps root goal. But overly focusing on the sub-goal hurts the root goal.
+This is related to **means-end inversion**. To achieve the root goal (end) we work on a sub-goal (means) that helps root goal. But focusing on an easy but unimportant sub-goal hurts the root goal, by taking resources from hard but important sub-goals.
 
 A similar phenomenon occurs commonly in medicine: treatments usually mainly suppress visible symptoms instead of curing the root cause of illness. This is usually due to technological and budget limitations.
 
@@ -890,15 +893,14 @@ When many people follow each other, they will confirm each other, creating self-
 
 The price can grow not because people believe in the asset, but because the amount of people and money believing in the asset increases. Once that amount stop increasing, price tend to drop despite people believing. Profit can come from the expansion of believers. In this case, the asset is a [Veblen good](https://en.wikipedia.org/wiki/Veblen_good), where higher price induce more demand, until the limit is reached.
 
-Measuring people's belief by observing the people around you is inaccurate, because the people near you don't represent all people (representative bias).
+Measuring people's belief by observing the people around you is inaccurate, because the people near you don't necessarily represent all people (representative bias).
 
 Herd mentality is in some sense a kind of trend following strategy. If the trend is some new good technology then following is good regardless of early or late. However, for speculative financial assets, the price grow depends on new people and money entering, so most people will start following too late and cannot profit from it.
-
-Herd mentality is sometimes also called **bandwagon effect**.
 
 One similar effect, **in-group bias**: Favoring investments or opinions from people within one's own group or those who share similar characteristics.
 
 From the cultrual standpoint, herd mentality also facilitates collaboration and society stability.
+
 ### Mental accounting
 
 Mental accounting: Treating different parts of money differently, based on their source or intended use.
@@ -972,6 +974,7 @@ But in the modern world, there are non-physical threats and modern risks (e.g. e
 ## Willpower and mental energy
 
 The rational activities (System 2 activities) require mental energy (willpower):
+
 - Resisting impulse behavior consumes willpower (e.g. resist eating sweet food when on a diet).
 - Paying attention and thinking hard problems consume willpower.
 - For introverts, social interaction consumes willpower. But for extroverts, staying alone consumes willpower.
@@ -1008,9 +1011,9 @@ Taking notes is one way to mitigate the unreliable memory issue.
 
 People usually remember the "special" things well. This is an information compression mechanism that filters out the unimportant details.
 
-**Peak-end rule**: People judge an experience largely based on how they felt at its peak (its most intense point) and at its end. The most efficient way to improve user experience is to improve the experience in the peak and in the end (and at the start).
+**Peak-end rule**: People judge an experience largely based on how they felt at its peak (its most intense point) and at its end. The most efficient way to improve user experience is to improve the experience in the peak and in the end.
 
-**Serial position effect**: people tend to recall the first and last items in a series best, and the middle items worst. Interestingly, the same effect also applies to LLMs, called "lost in the middle".
+**Serial position effect**: people tend to recall the first and last items best, and the middle items worst. Interestingly, the same effect also applies to LLMs, called "lost in the middle".
 
 **Cryptomnesia**: Treating other peoples' idea as own original idea, after forgetting the source of the idea.
 
@@ -1059,9 +1062,14 @@ With confirmation bias, more information lead to higher confidence, but not bett
 - Believing in **false consensus**, the consensus that only exists on an internet community.
 - Overestimating the proportion of bad news, as **bad news travels fast** in social media, thus facilitating cynicism.
 
+> ... the primary function of conversation is not to communicate facts but to reinforce social ties.
+> 
+> — Gurwinder, [Link](https://x.com/G_S_Bhogal/status/1898749727417512281)
+
 The 80/20 rule also applies to social media: 80% of the voice come from 20% of users. The dominant narrative on internet may not represent most people's views.
 
 What's more, social media may make people:
+
 - Get used to interesting easy-to-digest information and become less tolerant to not-so-interesting hard-to-digest information.
 - Get used to moving attention (distraction) and not get used to keeping attention.
 - Have less intention of trying things real world practice. Watching video about a new experience is much easier than experiencing in real life.
