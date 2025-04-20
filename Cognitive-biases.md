@@ -710,6 +710,8 @@ The name of a thing affects how people perceive it. Examples:
 
 A **loaded question** is a question that contains an assumption (framing). Following that assumption can lead to a biased answer. Example: "Do you support the attempt by the US to bring freedom and democracy to other places in the world?"
 
+The current LLMs are trained to satisfy the user. If you ask LLM a loaded question that has a bias, the LLM often follow your bias to please you.
+
 Asking the right question requires the right assumption.
 
 **Mehrabian's rule**: When communicating attitudes and feelings, the impact is 7% verbal (words), 38% vocal (tone of voice), 55% non-verbal (facial expressions, gestures, posture). Note that this doesn't apply to all kinds of communications.
@@ -768,6 +770,7 @@ Examples:
 
 - In the COVID-19 pandemic, a developed country have higher overall fatality rate than a developing country. But in each age group, the developed country's fatality rate is lower. The developed country has a larger portion of old population.
 - After improving a product, the overall customer satisfaction score may decrease, because the product gets popular and attracted the customers that don't fit the product, even though the original customers' satisfaction score increases.
+- You post on internet something that 90% people like and 1% people hate. The people liking the post usually don't direct-message you. But the people hating it often have strong motivation to direct-message you. So your direct message may contain more haters than likers, even though most people like your post.
 
 **Base rate fallacy**: there are more vaccinated COVID-19 patients than un-vaccinated COVID-19 patients in hospital, but that doesn't mean vaccine is bad:
 
@@ -1071,7 +1074,7 @@ The 80/20 rule also applies to social media: 80% of the voice come from 20% of u
 What's more, social media may make people:
 
 - Get used to interesting easy-to-digest information and become less tolerant to not-so-interesting hard-to-digest information.
-- Get used to moving attention (distraction) and not get used to keeping attention.
+- Get used to moving attention (distraction) and not get used to keeping attention. In social media, different posts are usually irrelevant and understanding them require moving attention (forget previous context).
 - Have less intention of trying things real world practice. Watching video about a new experience is much easier than experiencing in real life.
 
 ### Natural selection of memes
