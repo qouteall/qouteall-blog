@@ -6,7 +6,7 @@ A summarization of the main cognitive biases, relating to financial trading, com
 
 ### Perception of gain and loss
 
-**Diminishing marginal utility**: the first one is more valuable than the second and so on. For example, when drinking a cup of water, the first sip has higher utility than the last sip. 
+**Diminishing marginal utility**: For example, one is hungry and then eats 3 pieces of bread, the first piece eaten while hungry is has more utility than the second piece eaten after the first, and so on. The more of something you have, the less utility another such thing has.
 
 Corresponding to diminishing marginal utility, the happiness of gaining \$200 is less than two times of happiness of gaining \$100. The perception of gain is convex.
 
@@ -30,9 +30,9 @@ Expectation management is important. If the outcome is good but doesn't meet the
 
 **Door-in-the-face effect**: Firstly make a large request that will likely be rejected, then make a modest request. The firstly made large request changes expectation to make the subsequent modest request easier to accept.
 
->  譬如你说，这屋子太暗，须在这里开一个窗，大家一定不允许的。但如果你主张拆掉屋顶他们就来调和，愿意开窗了。
+>  ... 譬如你说，这屋子太暗，须在这里开一个窗，大家一定不允许的。但如果你主张拆掉屋顶他们就来调和，愿意开窗了。
 >  
->  If you say, "This room is too dark; we need to open a window here," everyone would definitely refuse. However, if you propose removing the roof, they would come to a compromise and agree to open a window.
+>  ... If you say, "This room is too dark; we need to open a window here," everyone would definitely refuse. However, if you propose removing the roof, they would come to a compromise and agree to open a window.
 >
 > — 鲁迅 LuXun
 
@@ -688,7 +688,7 @@ This is related to **Amara's law**: we tend to overestimate the effect of a tech
 
 This is also related to availability bias, where the just-seen events are more obvious and easier to recall than old events and non-obvious underlying trends. This is also related to narrative fallacy: people tend to make up reasons to explain recent events and them believe in their own understanding.
 
-**Normalcy bias means underreact** to new events, but **recency bias means overreact** to new events, which is the opposite of normalcy bias. These two are actually not conflicting. Which one takes effect initially is related to actual situation and existing beliefs (**confirmation bias**). When one person does not believe in a trend but the trend continued for a long time, **binary thinking** may make that person turn their belief 180 degrees and deeply believe in the trend (but it's usually too late).
+**Normalcy bias means underreact** to new events, but **recency bias means overreact** to new events, which is the opposite of normalcy bias. These two are actually not conflicting. Which one takes effect initially is related to actual situation and existing beliefs (**confirmation bias**). When one person does not believe in a trend but the trend continued for a long time, **binary thinking** may make that person turn their belief 180 degrees and deeply believe in the trend.
 
 
 ### Framing effect
@@ -916,7 +916,7 @@ In investment, mental accounting can happen on different forms:
 
 - Seperate by different time intervals. Setting profit target in each time interval (by month, season or year) can be detrimental in a market with momentum. If the profit in the time interval is meet, stop investing misses large profit from trend. If the profit in the time interval is not meet near the end, then the trader tend to be more nervous and more aggressive, which is dangerous.
 
-  However, setting stop-loss in each time interval has be good effects. When the current trading strategy does not fit the market, temporarily stopping could get through the current part of cycle that temporarily doesn't suit the strategy. The stopping period also help calming and becoming rational.
+  However, setting stop-loss in each time interval may be good. When the current trading strategy does not fit the market, temporarily stopping could get through the current part of cycle that temporarily doesn't suit the strategy. The stopping period also help calming and becoming rational.
 
 - Separate by different specific assets (e.g. stocks). If the mental accounts are separated based on different stocks, after losing from one stock, one may insist to gain the loss back from the same stock, even if investing in other stocks is better overall.
 
@@ -1022,7 +1022,7 @@ People usually remember the "special" things well. This is an information compre
 
 ## Information addiction and curiosity
 
-People seeks information that they are interested in. The seeking of interesting of information drives **both curiosity and information addiction**.
+People seeks information that they are interested in. The seeking of interesting information drives **both curiosity and information addiction**.
 
 > As with food, we spent most of our history deprived of information and craving it; now we have way too much of it to function and manage its entropy and toxicity. 
 >
@@ -1142,12 +1142,14 @@ Consider two financial trading strategies:
 In the long term, strategy 2 can greatly outperforms strategy 1, but people prefer strategy 1, because of many reasons:
 
 - The first strategy has better Sharpe ratio as long as the rare Black Swan don't come. The second strategy has lower Sharpe ratio because of the high volatility (although volatility has positive skewness).
-- Convex perception. Frequent small gains feels better than a rare huge gain, and frequent small losses feels worse than a rare huge loss.
-- Loss aversion. The loss aversion focused more on recent visible loss rather than potential rare large loss.
-- Availability bias and outcome bias. The frequent small losses are more visible than rare potential big loss.
-- Delayed feedback issue. The rare loss in strategy 1 usually come late.
-- Oddball effect. The time experiencing loss feels longer.
-- ...
+- **Moral hazard**: in some places the money manager can take a share of profit but are only slighly punished when the huge asset loss happens (no skin in the game). This incentive structure allow them to use Strategy 1 while transferring tail risk to asset owner.
+- The previously mentioned cognitive biases:
+    - Convex perception. Frequent small gains feels better than a rare huge gain, and frequent small losses feels worse than a rare huge loss.
+    - Loss aversion. The loss aversion focused more on recent visible loss rather than potential rare large loss.
+    - Availability bias and outcome bias. The frequent small losses are more visible than rare potential big loss.
+    - Delayed feedback issue. The rare loss in strategy 1 usually come late.
+    - Oddball effect. The time experiencing loss feels longer.
+    - ...
 
 It's a common misconception that a you need a win rate more than 50% to be profitable. With a favorable risk-reward ratio, profit is possible despite a low win rate. Similarily, a 99% win rate doesn't necessarily imply profit in the long term. The skewness is important.
 
