@@ -129,12 +129,10 @@ The overconfidence is useful:
 
 When looking at past, people find past events (including Black Swan events) reasonable and predictable, although they didn't predicted these events in prior.
 
-In a complex world, **one event can have two contradicting interpretations**. One recent example: There are two different interpretations after DeepSeek R1 goes popular in Janurary 2025:
-
-- Bearish on Nvidia. The low training cost of DeepSeek models shows that if the training method is efficient enough then the world doesn't need that much GPUs. And the "price war" will make AI companies less profitable, reducing their valuations and CapEx.
-- Bullish on Nvidia. The lowering price of AI will create much more demand, according to [Jevons paradox](https://en.m.wikipedia.org/wiki/Jevons_paradox).
+In a complex world, **one event can have two contradicting interpretations**.
 
 People make execuses about their prediction failure, such as:
+
 - See their prediction as "almost" correct. Distort the memory and change the past prediction.
 - Blame prediction failure to outside factors, e.g. the statistical data is being manipulated, conspiracy theories.
 - Blame that they are just unlucky as the Black Swan event is low-probability. (Black Swan events are rare, but you are still likely to encounter multiple Black Swan events in life.)
@@ -171,23 +169,16 @@ People want to have a self-image of high capability. But a failure can debunk th
 | Get good result | Shows a sign of common capability. | Shows a sign of great capability.       |
 | Get bad result  | Shows a sign of low capability.    | Can blame failure to self-handicapping. |
 
-An example of self-handicapping: playing videogames before exam instead of learning.
+Examples of self-handicapping:
 
-- When one learns hard before exam and then gets good result, it's just a "common" result of working hard.
-- If the result is bad despite learning hard, it shows a sign of low capability.
-- If result is good despite playing videogames before exam, it shows a sign of great capability. 
-- If one failed after playing videogame before exam, they can blame failure to playing videogames, instead of low capability.
-
-Self-handicapping can avoid questioning the capability from self. However, other people usually just judge from result, and see self-handicapping as low capability.
-
-Other examples of self-handicapping:
-
+- Playing videogames instead of learning before exam.
 - Procrastination. Reduce the time finishing the task.
-- Staying up late.
 - Refusing help. Refusing medical treatment.
 - Drinking alcohol and using drugs.
 - Choosing difficult conditions and methods.
 - Setting unrealistic high goals.
+
+Self-handicapping can avoid questioning the capability from self. However, other people usually just judge from result, and see self-handicapping as low capability.
 
 Self-handicapping is also a way of **reducing responsibility**. This is common in large corporations and governments: intentionally create reasons of failure to reduce responsibility.
 
@@ -323,9 +314,23 @@ Examples:
 
 People tend to see false pattern from random things. This effect is [apophenia](https://en.wikipedia.org/wiki/Apophenia).
 
-If there are two lights, the first flashes in 70% probability and the second flashes in 30% probability, when asked to predict which light flashes next, people tend to try to find patterns even if the light flash is purely random, having correct rate about 58%. The optimal strategy is to not try to predict and always choose the first which has larger probability, having correct rate 70%. [Reference](https://www.jneurosci.org/content/jneuro/20/6/RC64.full.pdf)
+Related: most people cannot actually behave randomly even if they try to be random. An example: [Aaronson Oracle](https://people.ischool.berkeley.edu/~nick/aaronson-oracle/).
 
-Related: most people cannot actually behave randomly. An example: [Aaronson Oracle](https://people.ischool.berkeley.edu/~nick/aaronson-oracle/).
+#### Frequency matching
+
+If there are two lights, the first flashes in 70% probability and the second flashes in 30% probability. When asked to predict which light flashes next, people tend to try to find patterns even if the light flash is purely random, having correct rate about 58%. 
+
+People tend to do **frequency matching**, the predictions also contain 70% first light and 30% second light.
+
+But in that lab experiment enviornment, the light flash is purely random and the probability stays the same, so the optimal strategy is to not try to predict and always choose the first which has larger probability, having correct rate 70%.
+
+Reference: [The Left Hemisphere’s Role in Hypothesis Formation](https://www.jneurosci.org/content/jneuro/20/6/RC64.full.pdf)
+
+Although the strategy of always choosing the highest-probability choice is optimal in that lab experiment environment, it's not a good strategy in the complex changing real world:
+
+- Making different choices can increase exploration and help discovering new things. Only making one decision reduces exploration.
+- In real world, the distribution may change and the highest-probability choice may change. Always choosing the same choice can be risky, especially when the opponent can learn your behavior.
+- In real world, many things have patterns, so pattern-seeking may be useful.
 
 ### Confusing correlation as causation
 
@@ -572,15 +577,6 @@ People are more likely to pay terrorism insurance than for plain insurance that 
 If people are given some choices, people tend to choose one of the provided choices and ignore the fact that other choices exist. This is also framing effect.
 
 People tend to attribute one product to one public figure, or attribute a company to its CEO, because that's the name that they know, and because of causal simplification tendency.
-
-> 25 years ago today, SYSTEM SHOCK 2 was first released, designed by [@levine](https://x.com/levine) at Looking Glass.
->
-> — The Game Awards, [Link](https://x.com/thegameawards/status/1822666427083657528)
-
-> "There's a tendency among the press to attribute the creation of a game to a single person," says Warren Spector, creator of Thief and Deus Ex.
->
-> [Link](https://www.ign.com/articles/2001/11/12/deus-ex-2)
-
 
 ### Familiarity bias
 
