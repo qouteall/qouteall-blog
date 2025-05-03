@@ -331,6 +331,7 @@ Although the strategy of always choosing the highest-probability choice is optim
 - Making different choices can increase exploration and help discovering new things. Only making one decision reduces exploration.
 - In real world, the distribution may change and the highest-probability choice may change. Always choosing the same choice can be risky, especially when the opponent can learn your behavior.
 - In real world, many things have patterns, so pattern-seeking may be useful.
+- In real world, the "good" is often multi-dimensional. Overly optimizing for one aspect often hurt other aspects. Not choosing the seemingly optimal choice may have hidden benefits.
 
 ### Confusing correlation as causation
 
@@ -795,8 +796,9 @@ Being exposed to information makes human recognize similar concepts quicker. Exa
 - Reminding "dog" makes recognizing "cat" faster.
 
 Being exposed to information also changes behavior and attitudes. Examples:
+
 - Being more likely interpret things as danger signals after watching a horror movie.
-- Red logo in food packaging increases people's intention to buy it.
+- Red in food packaging increases people's intention to buy it.
 - Being familiar with a brand after exposed to its ads, even after trying to ignore ads.
 
 > The main moral of priming research is that our thoughts and our behavior are influenced, much more than we know or want, by the environment of the moment.
@@ -858,6 +860,7 @@ Law of least effort: people tend to choose the easiest way to do things, choosin
 Some seemingly easy solutions does not address the root cause, having negligible effect or negative effect in the long run. Applying the easy solution gives the fake impression that the problem is being addressed, achieving mental comfort.
 
 Examples:
+
 - Focusing on buying exercise equipments instead of exercising. Paying to gym to give an illusion of determination in exercising.
 - Buying supplements instead of adopting healthier lifestyle.
 - Focusing on buying courses, books, study equipments instead of actually studying. Keep bookmarking online learning materials instead of reading them.
@@ -931,6 +934,7 @@ Zero-risk bias: preferring to eliminate one type of risk entirely rather than re
 It's related to risk aversion and availability bias: risk aversion usually focuses the risk that comes to mind, and ignores other kinds of risks. It's also related to binary thinking: thinking that an risk is either completely eliminated or not being taken any action on. The rational decision is to do a tradeoff to reduce overall risk.
 
 Examples:
+
 - Choose to pay off a small debt completely, rather than paying off high-interest-rate debt first, as eliminating one debt feels more satisfying and reduces memory pressure.
 - Enforcing extreme lockdown to eliminate the risk of a pandemic, causing more risk in other diseases (because hospitals are locked down) and more risk in basic living (food supply is constrainted due to extreme lockdown).
 - Wanting to hedge inflation by heavily investing in risky assets, whose risk can be higher than inflation. In a liquidity crisis, cash is more valuable than assets.
