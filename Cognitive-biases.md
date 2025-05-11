@@ -34,7 +34,7 @@ Expectation management is important. If the outcome is good but doesn't meet the
 >  
 >  ... If you say, "This room is too dark; we need to open a window here," everyone would definitely refuse. However, if you propose removing the roof, they would come to a compromise and agree to open a window.
 >
-> — 鲁迅 LuXun
+> \- 鲁迅 LuXun
 
 **Protective pessimism**: Being pessimistic can reduce risk of disappointment.
 
@@ -211,7 +211,7 @@ Example: In a failing relationship, a person might attribute their partner's dis
 
 > If you don't have an opinion, resist the pressure to have one. 
 >
-> — N. N. Taleb, [Link](https://x.com/nntaleb/status/1789709702097481773)
+> \- N. N. Taleb, [Link](https://x.com/nntaleb/status/1789709702097481773)
 
 **Information cocoon (echo chamber)**: People tend to actively choose to digest the information source that they like, and make friends with the one having similar beliefs.
 
@@ -220,7 +220,7 @@ Example: In a failing relationship, a person might attribute their partner's dis
 >
 > I have what I call an iron prescription that helps me keep sane when I naturally drift toward preferring one ideology over another. And that is I say “**I’m not entitled to have an opinion on this subject unless I can state the arguments against my position better than the people do who are supporting it**. I think that only when I reach that stage am I qualified to speak.” 
 >
-> — Charlie Munger
+> \- Charlie Munger
 
 **Belief bias**: if the conclusion confirms people's existing belief, then people tend to believe it, regardless of the reasoning correctness, vice versa.
 
@@ -244,7 +244,7 @@ People love to correct others and persuade others. Some ideas are **memes** that
 
 > The trouble with having an open mind, of course, is that people will insist on coming along and trying to put things in it.
 >
-> — Terry Pratchett
+> \- Terry Pratchett
 
 ### Sunk cost fallacy
 
@@ -268,22 +268,22 @@ The difference between "good persistence" and "bad obstinacy":
 >
 > The persistent are much more attached to points high in the decision tree than to minor ones lower down, while the obstinate spray "don't give up" indiscriminately over the whole tree.
 >
-> — Paul Graham, [The Right Kind of Stubborn](https://paulgraham.com/persistence.html)
+> \- Paul Graham, [The Right Kind of Stubborn](https://paulgraham.com/persistence.html)
 
 
 An environment that doesn't tolerant failure makes people not correct mistakes and be obstinate on the wrong path (especially in authoritarian environments, where loyalty and execution attitude override honesty).
 
 > When you’re in the midst of building a product, you will often randomly stumble across an insight that completely invalidates your original thesis. In many cases, there will be no solution. And now you’re forced to pivot or start over completely.
 >
-> If you’ve only worked at a big company, you will be instinctually compelled to keep going because of how pivoting would reflect on stakeholders. This behavior is essentially ingrained in your subconscious—from years of constantly worrying about how things could jeopardize your performance review, and effectively your compensation.
+> If you’ve only worked at a big company, you will be instinctually compelled to keep going because of how pivoting would reflect on stakeholders. This behavior is essentially ingrained in your subconscious\-from years of constantly worrying about how things could jeopardize your performance review, and effectively your compensation.
 >
 > This is why so many dud products at BigCos will survive with anemic adoption.
 >
-> Instead, it’s important to build an almost academic culture of intellectual honesty—so that being wrong is met with a quick (and stoic) acceptance by everyone.
+> Instead, it’s important to build an almost academic culture of intellectual honesty\-so that being wrong is met with a quick (and stoic) acceptance by everyone.
 >
 > There is nothing worse than a team that continues to chase a mirage.
 >
-> — Nikita Bier, [Link](https://x.com/nikitabier/status/1753915234794774978)
+> \- Nikita Bier, [Link](https://x.com/nikitabier/status/1753915234794774978)
 
 ### Ostrich effect
 
@@ -351,7 +351,7 @@ Examples of correlation of A and B are actually driven by another factor C:
 
 > Among my favorite examples of misunderstood fitness markers is a friend of a friend who had heard that grip strength was correlated with health. He bought one of this grip squeeze things, and went crazy with it, eventually developing tendonitis.
 > 
-> — Paul Kedrosky, [Link](https://x.com/pkedrosky/status/1876018990663041285)
+> \- Paul Kedrosky, [Link](https://x.com/pkedrosky/status/1876018990663041285)
 
 ### Anecdotal fallacy
 
@@ -374,7 +374,7 @@ Narrative fallacy is introduced in _The Black Swan_:
 > 
 > The fallacy is associated with our vulnerability to overinterpretation and our predilection for compact stories over raw truths. It severely distorts our mental representation of the world; it is particularly acute when it comes to the rare events.
 > 
-> — _The Black Swan_
+> \- _The Black Swan_
 
 Narrative fallacy includes:
 
@@ -414,9 +414,9 @@ To summarize, most people naturally prefer the learning that:
 
 It's also hard to learn if the effect of decision is applied to other people, especially for decision-makers:
 
-> It is so easy to be wrong — and to persist in being wrong — when the costs of being wrong are paid by others.
+> It is so easy to be wrong \- and to persist in being wrong \- when the costs of being wrong are paid by others.
 > 
-> — Thomas Sowell
+> \- Thomas Sowell
 
 ### Causal simplification
 
@@ -492,7 +492,7 @@ This is related to **narrative fallacy**: people like to make up reasons explain
 >
 > As these U.S. Treasury bonds fell in price (they fluctuate all day long, so there was nothing special about that) ...... they issued the next bulletin: U.S. TREASURIES FALL; HUSSEIN CAPTURE BOOSTS ALLURE OF RISKY ASSETS.
 >
-> — _The Black Swan_
+> \- _The Black Swan_
 
 People dislike uncertain future and keep predicting the future, while ignoring their terrible past prediction record (hindsight bias).
 
@@ -525,7 +525,7 @@ Pure thinking is usually vague and incomplete, but people overestimate the ratio
 >
 > It feels to them as if they do, especially if they're not in the habit of critically examining their own thinking. Ideas can feel complete. It's only when you try to put them into words that you discover they're not. So if you never subject your ideas to that test, you'll not only never have fully formed ideas, but also never realize it.
 >
-> — Paul Graham, [Link](https://www.paulgraham.com/words.html)
+> \- Paul Graham, [Link](https://www.paulgraham.com/words.html)
 
 Even so, writing the idea down may be still not enough, because **natural language is vague**, and **vagueness can hide practical details**. The issues hidden by the vagueness in language will be revealed in real practice (e.g. turning software requirement into code).
 
@@ -569,7 +569,7 @@ Example: If you recently saw a car crash, you tend to think that traveling by ca
 > 
 > Meanwhile, the civil war was raging in Lebanon ...... Five miles away, people were dying from the war, citizens where threatened with car bombs, but the fate of the Italian child ranked high among the interests of the population in the Christian quarter of Beirut.
 > 
-> — _The Black Swan_
+> \- _The Black Swan_
 
 Enforcing safety measures is usually unappreciated. Because people only see the visible cost and friction caused by safety measures (concrete), and do not see the consequences of not applying safety measures in a parallel universe (abstract), until an incident really happens (concrete).
 
@@ -613,7 +613,7 @@ Representative bias can sometimes be misleading:
 > 
 > Now if I had to pick, I would overcome my sucker-proneness and take the butcher any minute. Even more: I would seek the butcher as a third option if my choice was between two doctors who looked like doctors. Why? Simply the one who doesn’t look the part, conditional on having made a (sort of) successful career in his profession, had to have much to overcome in terms of perception. And if we are lucky enough to have people who do not look the part, it is thanks to the presence of some skin in the game, the contact with reality that filters out incompetence, as reality is blind to looks.
 > 
-> — _Skin in the game_
+> \- _Skin in the game_
 
 Note that the above quote just talks about a hypothetical scenario and should not be simplified to tell that the unprofessional-looking ones are always better.
 
@@ -717,7 +717,7 @@ Just looking confident can often make other people believe. This even applies wh
 
 > A friend sent me MRI brain scan results and I put it through Claude. No other AI would provide a diagnosis, Claude did. Claude found an aggressive tumour. The radiologist report came back clean. I annoyed the radiologists until they re-checked. They did so with 3 radiologists and their own AI. Came back clean, so looks like Claude was wrong. **But looks how convincing Claude sounds!** We're still early...
 >
-> — Misha Saul, [Link](https://x.com/misha_saul/status/1771019329737462232)
+> \- Misha Saul, [Link](https://x.com/misha_saul/status/1771019329737462232)
 
 **Anchoring bias**: People's judgement may be influenced by reference "anchors", even if the reference anchor is irrelevant to decision making. Anchoring is a kind of framing. A salesman may firstly show customers an expensive product, then show cheap products, making customers feel the product being cheaper, utilizing anchoring bias.
 
@@ -741,15 +741,16 @@ The same effect happens in other forms:
 > 
 > As with a crumbling sand pile, it would be foolish to attribute the collapse of a fragile bridge to the last truck that crossed it, and even more foolish to try to predict in advance which truck might bring it down. ...
 > 
-> Obama’s mistake illustrates the illusion of local causal chains—that is, confusing catalysts for causes and assuming that one can know which catalyst will produce which effect.
+> Obama’s mistake illustrates the illusion of local causal chains\-that is, confusing catalysts for causes and assuming that one can know which catalyst will produce which effect.
 > 
-> —  The Black Swan of Cairo; How Suppressing Volatility Makes the World Less Predictable and More Dangerous
+> \-  The Black Swan of Cairo; How Suppressing Volatility Makes the World Less Predictable and More Dangerous
 
 ### Scarcity heuristic
 
 People tend to value scarce things even they are not actually valuable and undervalue good things that are abundant. 
 
 Examples:
+
 - When an online learning material is always there, people have no pressure to learn and often just bookmark it.
 - A thing that's sold in a time-limited or amount-limited way is deemed to be valuable.
 - Restrict buying something make people buy it more eagerly even when they don't need that thing. Same as restricting some information may increase people's perceived value of that information.
@@ -803,7 +804,7 @@ Being exposed to information also changes behavior and attitudes. Examples:
 
 > The main moral of priming research is that our thoughts and our behavior are influenced, much more than we know or want, by the environment of the moment.
 > 
-> — _Think, fast and slow_
+> \- _Think, fast and slow_
 
 Note that the famous "age priming" effect (walk more slowly after reminding aging concepts) failed to be replicated.
 
@@ -851,7 +852,7 @@ Action bias does not contradict with default effect. When one is asked to work a
 
 > It's not the things you buy and sell that make you money; it's the things you hold.
 > 
-> — Howard Marks
+> \- Howard Marks
 
 ### Prioritizing the easy and superficial
 
@@ -954,7 +955,16 @@ We tend to regret doing something in short term, but regret not doing something 
 
 > 'I have led a toothless life', he thought. 'A toothless life. I have never bitten into anything. I was waiting. I was reserving myself for later on-and I have just noticed that my teeth have gone. ...'
 > 
-> — Jean-Paul Sartre
+> \- Jean-Paul Sartre
+
+
+> Some decisions are consequential and irreversible or nearly irreversible – one-way doors – and these decisions must be made methodically, carefully, slowly, with great deliberation and consultation. If you walk through and don’t like what you see on the other side, you can’t get back to where you were before. We can call these Type 1 decisions. 
+> 
+> But most decisions aren’t like that – they are changeable, reversible – they’re two-way doors. If you’ve made a suboptimal Type 2 decision, you don’t have to live with the consequences for that long. You can reopen the door and go back through. Type 2 decisions can and should be made quickly by high judgment individuals or small groups.
+> 
+> As organizations get larger, there seems to be a tendency to use the heavy-weight Type 1 decision-making process on most decisions, including many Type 2 decisions. The end result of this is slowness, unthoughtful risk aversion, failure to experiment sufficiently, and consequently diminished invention.
+> 
+> \- Jeff Bezos
 
 ### Risk compensation
 
@@ -966,7 +976,7 @@ People tend to be overconfident in familiar situations, but that's where acciden
 
 > Most accidents (69%) occurred on slopes that were very familiar to the victims. Fewer accidents occurred on slopes that were somewhat familiar (13%) and unfamiliar (18%) to the victim.
 >
-> — [Evidence of heuristic traps in recreational avalanche accidents](https://web.archive.org/web/20161207115118/https://avalanche-academy.com/uploads/resources/Traps Reprint.pdf)
+> \- [Evidence of heuristic traps in recreational avalanche accidents](https://web.archive.org/web/20161207115118/https://avalanche-academy.com/uploads/resources/Traps Reprint.pdf)
 
 ### Stress and fight-or-flight
 
@@ -994,7 +1004,7 @@ Mental resting is different to body resting. Intense thinking when lying on the 
 
 > Before you try to increase your willpower, try to decrease the friction in your environment.
 > 
-> — James Clear, [Link](https://x.com/JamesClear/status/1883877771618738682)
+> \- James Clear, [Link](https://x.com/JamesClear/status/1883877771618738682)
 
 ## Memory distortion
 
@@ -1026,7 +1036,7 @@ People seeks information that they are interested in. The seeking of interesting
 
 > As with food, we spent most of our history deprived of information and craving it; now we have way too much of it to function and manage its entropy and toxicity. 
 >
-> — N. N. Taleb, [Link](https://twitter.com/nntaleb/status/1705524053618905583)
+> \- N. N. Taleb, [Link](https://twitter.com/nntaleb/status/1705524053618905583)
 
 
 > Most information in the world is junk.
@@ -1049,7 +1059,7 @@ People seeks information that they are interested in. The seeking of interesting
 > 
 > If you want to connect nations, religions, political parties, you often do it with fiction and fantasies.
 > 
-> — Yuval Noah Harari, [Link](https://youtu.be/78YN1e8UXdM?si=u0Bo6I2oBleahXFl&t=1527)
+> \- Yuval Noah Harari, [Link](https://youtu.be/78YN1e8UXdM?si=u0Bo6I2oBleahXFl&t=1527)
 
 Information bias: Seeking out more information even when more information is no longer useful. 
 
@@ -1067,7 +1077,7 @@ With confirmation bias, more information lead to higher confidence, but not bett
 
 > ... the primary function of conversation is not to communicate facts but to reinforce social ties.
 > 
-> — Gurwinder, [Link](https://x.com/G_S_Bhogal/status/1898749727417512281)
+> \- Gurwinder, [Link](https://x.com/G_S_Bhogal/status/1898749727417512281)
 
 The 80/20 rule also applies to social media: 80% of the voice come from 20% of users. The dominant narrative on internet may not represent most people's views.
 
@@ -1111,7 +1121,7 @@ People wants attention from others. Some people try to gain attention by posting
 >
 > Producers who go viral produce 183% more posts per day for the subsequent month.
 >
-> — [Paying attention](https://karthikecon.github.io/karthiksrinivasan.org/paying_attention.pdf) by Karthik Srinivasan
+> \- [Paying attention](https://karthikecon.github.io/karthiksrinivasan.org/paying_attention.pdf) by Karthik Srinivasan
 
 ### Randomized reward
 
