@@ -341,6 +341,7 @@ When statistical analysis shows that A correlates with B, the possible causes ar
 - B caused A.
 - Another factor, C, caused A and B.
 - Self-reinforcement feedback loop. A reinforces B. B reinforces A. Initial random divergence gets amplified.
+- A selection mechanism that favors the combination of A and B (survivorship bias).
 - More complex interactions.
 - The sampling or analyze is biased.
 
