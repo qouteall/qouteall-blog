@@ -302,7 +302,7 @@ The flip side of information-efficient learning is **hasty generalization**. We 
 
 The reality is complex, so **we need to simplify things to make them easier to understand and easier to remember. However, the simplification can get wrong.**
 
-To simplify, we tend to **make up reasons of why things happen**. A reasonable thing is simpler and easier to memorize than raw complex facts. This process is also compression. It has implications in AI: Attempting compression will naturally lead to learning, [which is the core mehanism of why unsupervised learning works](https://www.youtube.com/live/AKMuA_TVz3A?si=IswmwkZj8kBRx9Fv).
+To simplify, we tend to **make up reasons of why things happen**. A reasonable thing is simpler and easier to memorize than raw complex facts. This process is also compression. It has implications in AI: Attempting (lossy) compression will naturally lead to learning, [which is the core mehanism of why unsupervised learning works](https://www.youtube.com/live/AKMuA_TVz3A?si=IswmwkZj8kBRx9Fv).
 
 ### Hasty generalization
 
