@@ -1,8 +1,18 @@
+# _config.yml
+
+title: qouteall blog
+baseurl: "/qouteall-blog" # The name of your repository
+
 markdown: kramdown
 kramdown:
   input: GFM
   hard_wrap: false
-  syntax_highlighter: rouge # This is important for code block styling
+  # REMOVE or ensure 'math_engine: katex' is NOT present.
+  syntax_highlighter: rouge
   syntax_highlighter_opts:
-    css_class: 'highlight' # Default class Rouge uses
-    # You can also try 'span_inline_css: true' if class-based styling isn't perfect
+    css_class: 'highlight'
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-feed
+  - jekyll-katex

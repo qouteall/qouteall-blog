@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>{% if page.title %}{{ page.title }} - {{ site.title | default: "Notes" }}{% else %}{{ site.title | default: "Notes" }}{% endif %}</title>
+    <title>{% if page.title %}{{ page.title }}{% endif %}</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown-light.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- The KaTeX CSS is still needed to style the pre-rendered math -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
 
     <style>
@@ -52,20 +53,6 @@
         .markdown-body table tr { background-color: #ffffff; border-top: 1px solid #d0d7de; }
         .markdown-body table tr:nth-child(2n) { background-color: #f6f8fa; }
     </style>
-
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            renderMathInElement(document.body, {
-                delimiters: [
-                    {left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false},
-                    {left: '\\(', right: '\\)', display: false}, {left: '\\[', right: '\\]', display: true}
-                ],
-                throwOnError: false
-            });
-        });
-    </script>
 </head>
 <body>
     <article class="markdown-body">

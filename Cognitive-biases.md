@@ -1,3 +1,8 @@
+---
+title: Cognitive biases
+layout: default
+---
+
 # Notes about Cognitive Biases
 
 A summarization of the main cognitive biases, relating to financial trading, combined with my own understanding.

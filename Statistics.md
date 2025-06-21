@@ -1,5 +1,11 @@
+---
+title: Some Statistics Knowledge
+layout: default
+---
 
 # Some Statistics Knowledge
+
+{% katexmm %}
 
 ## Basic concepts
 
@@ -2093,3 +2099,4 @@ How to test how overfit a model is?
 - Wrongly remove outliers.
 - ...
 
+{% endkatexmm %}
