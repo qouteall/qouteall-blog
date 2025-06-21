@@ -38,11 +38,8 @@ What's the essence of probability? There are two views:
 
 $P(E|C)$ means the probability of $E$ happening **if** $C$ happens.
 
-$$
-P(E|C) = \frac{P(\overbrace{E \cap C}^\mathclap{E \ and \ C \ both \ happen})}{P(C)}
-\quad\quad\quad\quad\quad
-P(E\cap C) = P(E|C) \cdot P(C)
-$$
+$$P(E|C) = \frac{P(\overbrace{E \cap C}^{\mathclap{\text{E and C both happen}}})}{P(C)} \quad\quad\quad\quad\quad P(E\cap C) = P(E|C) \cdot P(C)$$
+
 
 If E and C are independent, then $P(E \cap C) = P(E)P(C)$, then $P(E|C)=P(E)$.
 
@@ -66,19 +63,14 @@ For that distribution, there are two marginal distributions. If we only care abo
 
 Similarily there is also a marginal distribution of whether the test result is positive.
 
-False negative rate is $P(\text{Test is negative} \ | \ \text{Actually has disease})$, it means the rate of negative test when actually having disease. And false positive rate is $P(\text{Test is positive} \ | \ \text{Actually doesn't have disease})$.
+False negative rate is $P(\text{Test is negative} \ \vert \ \text{Actually has disease})$, it means the rate of negative test when actually having disease. And false positive rate is $P(\text{Test is positive} \ \vert \ \text{Actually doesn't have disease})$.
 
-$$
-\text{False negative rate} = P(\text{Test is negative} \ | \ \text{Actually has disease}) =
-\frac{b}{a + b}
-$$
-$$
-\text{False positive rate} = P(\text{Test is positive} \ | \ \text{Actually doesn't have disease}) = \frac{c}{c + d}
-$$
+$$\text{False negative rate} = P(\text{Test is negative} \ | \ \text{Actually has disease}) = \frac{b}{a + b}$$
+$$\text{False positive rate} = P(\text{Test is positive} \ | \ \text{Actually doesn't have disease}) = \frac{c}{c + d}$$
 
 Some people may intuitively think false negative rate means $P(\text{Test result is false} \ | \ \text{Test is negative})$, which equals $P(\text{Actually has disease} \ | \ \text{Test is negative})$, which equals $\frac{b}{b+d}$. But that's not the official definition of false negative.
 
-Bayes theorem allow "reversing" $P(A|B)$ as $P(B|A)$:
+Bayes theorem allow "reversing" $P(A \vert B)$ as $P(B \vert A)$:
 
 $$
 P(A|B) = \frac{P(A \cap B)}{P(B)} = \frac{P(B|A)\cdot P(A)}{P(B)}
@@ -97,15 +89,11 @@ For discrete case, $E[X]$ is calculated by summing all theoretically possible va
 
 The mean for discrete case:
 
-$$
-\mu = E[X] = \sum_{\underbrace{x} _ \mathclap{consider \ all \ cases \ of \ x}} x \cdot \overbrace{P(X=x)} ^ \mathclap{probability \ of \ that \ case}
-$$
+$$\mu = E[X] = \sum_{\underbrace{x} _ \mathclap{consider \ all \ cases \ of \ x}} x \cdot \overbrace{P(X=x)} ^ \mathclap{probability \ of \ that \ case}$$
 
 The mean for continuous case:
 
-$$
-\mu = E[X] = \int_{-\infty}^{\infty} x \cdot p(x) dx
-$$
+$$\mu = E[X] = \int_{-\infty}^{\infty} x \cdot p(x) dx$$
 
 Some rules related to mean:
 
@@ -177,7 +165,9 @@ If $k$ is a constant:
 $$
 \text{Var}[kX] = k^2 \text{Var}[X]
 $$
+
 $$\text{Var}[X + k] = \text{Var}[X]$$
+
 $$
 \text{Var}[X] = E[X^2] - E[X]^2
 $$
@@ -198,6 +188,7 @@ $$
 \text{Var}[X + Y]=
 E[((X-E[X])+(Y-E[Y]))^2] 
 $$
+
 $$
 = E[(X-E[X])^2 + (Y-E[Y])^2 + 2(X-E[X])(Y-E[Y])] 
 = \text{Var}[X] + \text{Var}[Y] + 2 \cdot \text{cov}[X, Y]
@@ -252,6 +243,7 @@ $$
 (X_i - \mu)^2-2(X_i - \mu)(\hat{\mu} - \mu)+(\hat{\mu} - \mu)^2\right)
 }
 $$
+
 $$
 = \sum_i{(X_i - \mu)^2}
 -2 (\hat{\mu} - \mu) \sum_i{(X_i - \mu)}
@@ -343,7 +335,7 @@ Computing Z-score for a vector can also be seen as a projection:
 - Recall projection: projecting vector $\boldsymbol a$ onto $\boldsymbol b$ is $(\frac{\boldsymbol a \cdot \boldsymbol b}{\boldsymbol b \cdot \boldsymbol b}) \cdot \boldsymbol b$.
 - $(\boldsymbol 1)^2 = n$. So $\frac 1 n (\boldsymbol{x} \cdot \boldsymbol{1}) \cdot \boldsymbol{1}$ is the projection of $\boldsymbol x$ onto $\boldsymbol 1$. 
 - Subtracting it means removing the component in the direction of $\boldsymbol 1$ from $\boldsymbol x$. So $\boldsymbol y$ is orthogonal to $\boldsymbol 1$. $\boldsymbol y$ is in a hyper-plane orthogonal to $\boldsymbol 1$.
-- Standard deviation can be seen as the length of $\boldsymbol y$ divide by $\sqrt{n}$ (or $\sqrt{n-1}$): $\boldsymbol\sigma^2 = \frac 1 n (\boldsymbol y)^2$, $\boldsymbol\sigma = \frac 1 {\sqrt{n}} |\boldsymbol y|$.
+- Standard deviation can be seen as the length of $\boldsymbol y$ divide by $\sqrt{n}$ (or $\sqrt{n-1}$): $\boldsymbol\sigma^2 = \frac 1 n (\boldsymbol y)^2$, $\boldsymbol\sigma = \frac 1 {\sqrt{n}} \vert \boldsymbol y \vert$.
 - Dividing by standard deviation can be seen as projecting it onto unit sphere then multiply by $\sqrt n$ (or $\sqrt{n-1}$).
 - So computing Z-score can be seen as firstly projecting onto a hyper-plane that's orthogonal to $\boldsymbol 1$ and then projecting onto unit sphere then multiply by $\sqrt n$ (or $\sqrt{n-1}$).
 
@@ -428,6 +420,7 @@ $$
 \text{Var}[\hat{E}[X+\lambda(Y-E[Y])]]=\frac{1}{n}\text{Var}[X+\lambda(Y-E[Y])]
 =\frac{1}{n}\text{Var}[X+\lambda Y\underbrace{-\lambda E[Y]}_\text{constant}]
 $$
+
 $$
 =\frac{1}{n}\text{Var}[X+\lambda Y] = \frac{1}{n}(\text{Var}[X]+\text{Var}[\lambda Y] +2\text{cov}[X,\lambda Y])
 = \frac{1}{n}(\text{Var}[X]+\lambda^2 \text{Var}[Y]+2\lambda \text{cov}[X,Y])
@@ -547,7 +540,7 @@ $$
 H(X|Y) =  E_y[H(X|Y=y)] = \sum_{x,y} P(Y=y) P(X=x|Y=y) \log\frac{1}{P(X=x|Y=y)}
 $$
 
-Applying conditional probability rule: $P((X,Y)) = P(X|Y) P(Y)$
+Applying conditional probability rule: $P((X,Y)) = P(X \vert Y) P(Y)$
 
 $$
 = \sum_{x,y} P((X,Y)) \log \frac{1}{P(X=x|Y=y)}
@@ -559,11 +552,12 @@ $$
 H(X|Y) = E_{X,Y}\left[\log\frac{1}{P(X|Y)}\right] = \sum_{x,y} P((X,Y)=(x,y)) \log \frac{1}{P(X=x|Y=y)}
 $$
 
-$P((X, Y)) = P(X|Y) P(Y)$. Similarily, $H((X,Y))=H(X|Y)+H(Y)$. The exact deduction is as follows:
+$P((X, Y)) = P(X \vert Y) P(Y)$. Similarily, $H((X,Y))=H(X \vert Y)+H(Y)$. The exact deduction is as follows:
 
 $$
 H(X|Y) + H(Y) = E_{X,Y}\left[ \log\frac{1}{P(X|Y)} \right] +E_Y\left[\log\frac{1}{P(Y)}\right]=E_{X,Y}\left[ \log\frac{1}{P(X|Y)} \right] +E_{X,Y}\left[\log\frac{1}{P(Y)}\right]
 $$
+
 $$
 =E_{X,Y}\left[ \log\frac{1}{P(X|Y)}+\log\frac{1}{P(Y)} \right]=E_{X,Y}\left[ \log\frac{1}{P(X|Y)P(Y)}\right]=E_{X,Y}\left[ \log \frac{1}{P((X,Y))} \right] = H((X,Y))
 $$
@@ -820,9 +814,9 @@ $H((X,Y))=H(X)+H(Y)-I(X;Y)$, so if X and Y are not independent then $H((X,Y))<H(
 
 Mutual information is symmetric, $I(X;Y)=I(Y;X)$.
 
-As $H((X,Y)) = H(X|Y) + H(Y)$, so $I(X;Y) = H(X) + H(Y) - H((X,Y)) = H(X) - H(X|Y)$.
+As $H((X,Y)) = H(X \vert Y) + H(Y)$, so $I(X;Y) = H(X) + H(Y) - H((X,Y)) = H(X) - H(X \vert Y)$.
 
-If knowing Y completely determines X, knowing Y make the distribution of X collapse to one case with 100% probability, then $H(X|Y) = 0$, then $I(X;Y)=H(X)$.
+If knowing Y completely determines X, knowing Y make the distribution of X collapse to one case with 100% probability, then $H(X \vert Y) = 0$, then $I(X;Y)=H(X)$.
 
 ### Information Bottleneck theory in deep learning
 
@@ -871,13 +865,13 @@ TODO
 
 ## Likelihood
 
-Normally when talking about probability we mean the probability of an outcome under a modelled distribution: $P(\text{outcome} \ | \ \text{modelled distribution})$. But sometimes we have some concrete samples from a distribution but want to know which model suits the best, so we talk about the probability that a model is true given some samples: $P(\text{modelled distribution} | \text{outcome})$. 
+Normally when talking about probability we mean the probability of an outcome under a modelled distribution: $P(\text{outcome} \ \vert \ \text{modelled distribution})$. But sometimes we have some concrete samples from a distribution but want to know which model suits the best, so we talk about the probability that a model is true given some samples: $P(\text{modelled distribution} \vert \text{outcome})$. 
 
 If I have some samples, then some parameters make the samples more **likely** to come from the modelled distribution, and some parameters make the samples less likely to come from the modelled distribution. 
 
 For example, if I model a coin flip using a parameter $\theta$, that  and I observe 10 coin flips have 9 heads and 1 tail, then $\theta=0.9$ is more likely than $\theta=0.5$. That's straightforward for a simple model. But for more complex models, we need to measure likelihood.
 
-Likelihood $L(\theta|x_1,x_2,...,x_n)$ measures:
+Likelihood $L(\theta \vert x_1,x_2,...,x_n)$ measures:
 
 - How likely that we get samples $x_1, x_2, ... , x_n$ from the modelled distribution using parameter $\theta$.
 - how likely a parameter $\theta$ is the real underlying parameter, given some independent samples $x_1,x_2,...,x_n$.
@@ -913,9 +907,9 @@ s(\theta;x) = \frac{\partial \log L(\theta | x)}{\partial \theta}
 = \frac{\partial\log f(x | \theta)}{\partial \theta} = \frac{1}{f(x|\theta)} \cdot  \frac{\partial f(x|\theta)}{\partial \theta}
 $$
 
-If $\theta$ equals true underlying parameter, then mean of likelihood $E_x[L(\theta | x)]$ takes maximum, mean of log-likelihood $E_x[\log L(\theta|x)]$ also takes maximum.
+If $\theta$ equals true underlying parameter, then mean of likelihood $E_x[L(\theta \vert x)]$ takes maximum, mean of log-likelihood $E_x[\log L(\theta \vert x)]$ also takes maximum.
 
-A continuous function's maximum point has zero derivative, so when $\theta$ is true, then the mean of score function $E_x[s(\theta;x)]= \frac{\partial E_x[f(x|\theta)]}{\partial \theta}$ is zero.
+A continuous function's maximum point has zero derivative, so when $\theta$ is true, then the mean of score function $E_x[s(\theta;x)]= \frac{\partial E_x[f(x \vert \theta)]}{\partial \theta}$ is zero.
 
 The **Fisher information** $\mathcal{I}(\theta)$ is the mean of the square of score:
 
@@ -933,7 +927,7 @@ Fisher information measures how much information a sample can tell us about the 
 
 ### Linear score
 
-When the parameter is an offset and the offset is infinitely small, then the score function is called linear score. If the infinitely small offset is $\theta$. The offseted probability density is $f_2(x|\theta) = f(x+\theta)$, then 
+When the parameter is an offset and the offset is infinitely small, then the score function is called linear score. If the infinitely small offset is $\theta$. The offseted probability density is $f_2(x \vert \theta) = f(x+\theta)$, then 
 
 $$
 s_\text{linear}(x)=s(\theta;x) = \frac{\partial f_2(x|\theta)}{\partial \theta} = \frac{\partial \log f(x+\overbrace{\theta}^{\approx 0})}{\partial \theta} = \frac{d\log f(x)}{dx}
