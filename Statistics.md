@@ -36,7 +36,7 @@ What's the essence of probability? There are two views:
 
 ## Conditional probability
 
-$P(E|C)$ means the probability of $E$ happening **if** $C$ happens.
+$P(E \vert C)$ means the probability of $E$ happening **if** $C$ happens.
 
 $$P(E|C) = \frac{P(\overbrace{E \cap C}^{\mathclap{\text{E and C both happen}}})}{P(C)} \quad\quad\quad\quad\quad P(E\cap C) = P(E|C) \cdot P(C)$$
 
@@ -63,7 +63,7 @@ For that distribution, there are two marginal distributions. If we only care abo
 
 Similarily there is also a marginal distribution of whether the test result is positive.
 
-False negative rate is $P(\text{Test is negative} \ \vert \ \text{Actually has disease})$, it means the rate of negative test when actually having disease. And false positive rate is $P(\text{Test is positive} \ \vert \ \text{Actually doesn't have disease})$.
+False negative rate is $P(\text{Test is negative } \vert \text{ Actually has disease})$, it means the rate of negative test when actually having disease. And false positive rate is $P(\text{Test is positive } \vert \text{ Actually doesn't have disease})$.
 
 $$\text{False negative rate} = P(\text{Test is negative} \ | \ \text{Actually has disease}) = \frac{b}{a + b}$$
 $$\text{False positive rate} = P(\text{Test is positive} \ | \ \text{Actually doesn't have disease}) = \frac{c}{c + d}$$
@@ -89,7 +89,7 @@ For discrete case, $E[X]$ is calculated by summing all theoretically possible va
 
 The mean for discrete case:
 
-$$\mu = E[X] = \sum_{\underbrace{x} _ \mathclap{consider \ all \ cases \ of \ x}} x \cdot \overbrace{P(X=x)} ^ \mathclap{probability \ of \ that \ case}$$
+$$\mu = E[X] = \sum_{\underbrace{x} _ {\mathclap{\text{consider all cases of x}}}} x \cdot \overbrace{P(X=x)} ^ {\mathclap{\text{probability of that case}}}$$
 
 The mean for continuous case:
 

@@ -301,80 +301,80 @@ Here:
 - $p_0(x_0)$ is the probability density of original clean value (for image generation, it correspond to the probability distribution of images that we want to generate)
 - $p_1(x_1)$ is the probability density of noise-added value
 - $p_{1|0}(x_1 \vert x_0)$ is the probability density of noise-added value, given clean training data $x_0$. It's a normal distribution given $x_0$. It can also be seen as a function that take two arguments $x_0, x_1$.
-- $p_{0|1}(x_0|x_1)$ is the probability density of the original clean value given noise-added value. It can also be seen as a function that take two arguments $x_0, x_1$.
+- $p_{0|1}(x_0 \vert x_1)$ is the probability density of the original clean value given noise-added value. It can also be seen as a function that take two arguments $x_0, x_1$.
 
-(I use $p_{1|0}(x_1|x_0)$ instead of shorter $p(x_1|x_0)$ is to reduce confusion between different distributions.)
+(I use $p_{1|0}(x_1 \vert x_0)$ instead of shorter $p(x_1|x_0)$ is to reduce confusion between different distributions.)
 
 $p_{1|0}(x_1 | x_0)$ is a normal distribution:
 
 $$
-p_{1|0}(x_1|x_0) = \frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{1}{2}\left( \frac{x1-x_0}{\sigma} \right)^2}
+p_{1|0}(x_1 \vert x_0) = \frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{1}{2}\left( \frac{x1-x_0}{\sigma} \right)^2}
 $$
 
 Take log:
 
 $$
-\log p_{1|0}(x_1|x_0) = -\frac 1 2 \left( \frac{x_1-x_0}{\sigma} \right)^2 + \log \frac 1 {\sqrt{2\pi}\sigma}
+\log p_{1|0}(x_1 \vert x_0) = -\frac 1 2 \left( \frac{x_1-x_0}{\sigma} \right)^2 + \log \frac 1 {\sqrt{2\pi}\sigma}
 $$
 
 The linear score function under condition:
 
 $$
-\frac{\partial \log p_{1|0}(x_1 | x_0)}{\partial x_1} = -\left(\frac{x_1-x_0}{\sigma} \right) \cdot \frac 1 \sigma = - \frac{x_1-x_0}{\sigma^2}
+\frac{\partial \log p_{1|0}(x_1 \vert x_0)}{\partial x_1} = -\left(\frac{x_1-x_0}{\sigma} \right) \cdot \frac 1 \sigma = - \frac{x_1-x_0}{\sigma^2}
 $$
 
 Bayes rule:
 
 $$
-p_{0|1}(x_0 | x_1) = \frac{p_{1|0}(x_1|x_0) p_0(x_0)}{p_1(x_1)}
+p_{0|1}(x_0 \vert x_1) = \frac{p_{1|0}(x_1 \vert x_0) p_0(x_0)}{p_1(x_1)}
 $$
 
 Take log
 
 $$
-\log p_{0|1}(x_0 | x_1) = \log p_{1|0}(x_1|x_0) + \log p_0(x_0) - \log p_1(x_1)
+\log p_{0|1}(x_0 \vert x_1) = \log p_{1|0}(x_1 \vert x_0) + \log p_0(x_0) - \log p_1(x_1)
 $$
 
 Take partial derivative to $x_1$:
 
 $$
-\frac{\partial\log p_{0|1}(x_0 | x_1)}{\partial x_1} = \frac{\partial \log p_{1|0}(x_1|x_0)}{\partial x_1} + \underbrace{\frac{\partial \log p_0(x_0)}{\partial x_1}}_{=0} - \frac{\partial \log p_1(x_1)}{\partial x_1}
+\frac{\partial\log p_{0|1}(x_0 \vert x_1)}{\partial x_1} = \frac{\partial \log p_{1|0}(x_1 \vert x_0)}{\partial x_1} + \underbrace{\frac{\partial \log p_0(x_0)}{\partial x_1}}_{=0} - \frac{\partial \log p_1(x_1)}{\partial x_1}
 $$
 
-Using previous result $\frac{\partial \log p_{1|0}(x_1 | x_0)}{\partial x_1} = - \frac{x_1-x_0}{\sigma^2}$
+Using previous result $\frac{\partial \log p_{1|0}(x_1 \vert x_0)}{\partial x_1} = - \frac{x_1-x_0}{\sigma^2}$
 
 $$
-\frac{\partial\log p_{0|1}(x_0 | x_1)}{\partial x_1}  = - \frac{x_1-x_0}{\sigma^2} - \frac{\partial \log p_1(x_1)}{\partial x_1}
+\frac{\partial\log p_{0|1}(x_0 \vert x_1)}{\partial x_1}  = - \frac{x_1-x_0}{\sigma^2} - \frac{\partial \log p_1(x_1)}{\partial x_1}
 $$
 
 Rearrange:
 
 $$
-\sigma^2 \frac{\partial\log p_{0|1}(x_0 | x_1)}{\partial x_1}  = - x_1+x_0 - \sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1}
+\sigma^2 \frac{\partial\log p_{0|1}(x_0 \vert x_1)}{\partial x_1}  = - x_1+x_0 - \sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1}
 $$
 
 $$
-x_0=\sigma^2 \frac{\partial\log p_{0|1}(x_0 | x_1)}{\partial x_1}+x_1+\sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1}
+x_0=\sigma^2 \frac{\partial\log p_{0|1}(x_0 \vert x_1)}{\partial x_1}+x_1+\sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1}
 $$
 
 Now if we already know the noise-added value $x_1$, but we don't know $x_0$ so $x_0$ is uncertain. We want to compute the expectation of $x_0$ under that condition that $x_1$ is known.
 
 $$
-E[x_0|x_1] = E_{x_0}\left[ \sigma^2 \frac{\partial\log p_{0|1}(x_0 | x_1)}{\partial x_1}+x_1+\sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1}  \biggr| x_1 \right]
+E[x_0 \vert x_1] = E_{x_0}\left[ \sigma^2 \frac{\partial\log p_{0|1}(x_0 \vert x_1)}{\partial x_1}+x_1+\sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1}  \biggr| x_1 \right]
 $$
 
 $$
-= x_1 + E_{x_0}\left[\sigma^2 \frac{\partial\log p_{0|1}(x_0 | x_1)}{\partial x_1}\biggr|x_1\right] + E_{x_0}\left[ \sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1} \biggr|x_1\right]
+= x_1 + E_{x_0}\left[\sigma^2 \frac{\partial\log p_{0|1}(x_0 \vert x_1)}{\partial x_1}\biggr|x_1\right] + E_{x_0}\left[ \sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1} \biggr|x_1\right]
 $$
 
-Within it, $E_{x_0}\left[ \frac{\partial\log p_{0|1}(x_0 | x_1)}{\partial x_1} \biggr| x_1 \right]=0$, because
+Within it, $E_{x_0}\left[ \frac{\partial\log p_{0|1}(x_0 \vert x_1)}{\partial x_1} \biggr| x_1 \right]=0$, because
 
 $$
-E_{x_0}\left[ \frac{\partial\log p_{0|1}(x_0 | x_1)}{\partial x_1} \biggr| x_1 \right]=
-\int p_{0|1}(x_0|x_1) \cdot \frac{\partial \log p_{0|1}(x_0|x_1)}{\partial x_1} dx_0 
+E_{x_0}\left[ \frac{\partial\log p_{0|1}(x_0 \vert x_1)}{\partial x_1} \biggr| x_1 \right]=
+\int p_{0|1}(x_0 \vert x_1) \cdot \frac{\partial \log p_{0|1}(x_0 \vert x_1)}{\partial x_1} dx_0 
 $$
 
-$$= \int p_{0|1}(x_0) \cdot \frac 1 {p_{0|1}(x_0|x_1)} \cdot \frac{\partial p_{0|1}(x_0|x_1)}{\partial x_1} dx_0 = \int \frac{\partial p_{0|1}(x_0|x_1)}{\partial x_1} dx_0 = \frac{\partial \int p_{0|1}(x_0|x_1) dx_0}{\partial x_1} = \frac{\partial 1}{\partial x_1}=0
+$$= \int p_{0|1}(x_0) \cdot \frac 1 {p_{0|1}(x_0 \vert x_1)} \cdot \frac{\partial p_{0|1}(x_0 \vert x_1)}{\partial x_1} dx_0 = \int \frac{\partial p_{0|1}(x_0 \vert x_1)}{\partial x_1} dx_0 = \frac{\partial \int p_{0|1}(x_0 \vert x_1) dx_0}{\partial x_1} = \frac{\partial 1}{\partial x_1}=0
 $$
 
 And $E_{x_0}\left[ \sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1} \biggr|x_1\right] = \sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1}$ because it's unrelated to random $x_0$.
@@ -382,7 +382,7 @@ And $E_{x_0}\left[ \sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1} \biggr|x_
 So 
 
 $$
-E[x_0|x_1] = x_1 + \underbrace{\sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1}}_\text{Train diffusion model to output this}
+E[x_0 \vert x_1] = x_1 + \underbrace{\sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1}}_\text{Train diffusion model to output this}
 $$
 
 That's Tweedie's formula (for 1D case). It can be generalized to many dimensions, where the $x_0, x_1$ are vectors, the distributions $p_0, p_1, p_{0|1}, p_{1|0}$ are joint distributions where different dimensions are not necessarily independent. The gaussian noise added to different dimensions are still independent.
@@ -495,7 +495,7 @@ How to understand memorlessness? For example, a kind of radioactive atom decays 
 Memorylessness means the probability that we still need to wait $\text{needToWait}$ amount of time is irrelevant to how long we have already waited:
 
 $$
-P(t \geq (\text{alreadyWaited} + \text{needToWait}) \ | \ t \geq \text{alreadyWaited}) = P(t \geq \text{needToWait})
+P(t \geq (\text{alreadyWaited} + \text{needToWait}) \ \vert \ t \geq \text{alreadyWaited}) = P(t \geq \text{needToWait})
 $$
 
 (We can also rediscover exponential distrbution from just memorylessness.)
