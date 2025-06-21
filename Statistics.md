@@ -830,7 +830,7 @@ Information Bottleneck theory tells that the training of neural network will lea
 
 ## Convolution
 
-If we have two independent random variablex X and Y, and consider the distribution of the sum $Z=X+Y$, then
+If we have two **independent** random variablex X and Y, and consider the distribution of the sum $Z=X+Y$, then
 
 $$
 P(Z=z)=\sum_{x,y, \ \text{if} \  z=x+y} P(X=x)P(Y=y)
@@ -860,11 +860,13 @@ The convolution operator $*$ can:
 
 - In continuous case, convolution takes two probability density functions, and give a new probability density function.
 - In discrete case, convolution can take two functions and give a new function. Each function inputs an outcome and outputs the probability of that outcome.
-- In discrete case, convolution can take two vectors and give a new vector. Each vector's i-th element is the probability of i-th outcome.
+- In discrete case, convolution can take two vectors and give a new vector. Each vector's i-th element correspond to the probability of i-th outcome.
 
-### Convolutional neural network
+Convolution can also work in 2D or more dimensions. If $X=(x_1,x_2)$ and $Y=(y_1,y_2)$ are 2D random variables (two joint distributions), $Z=X+Y=(z_1,z_2)$ is convolution of X and Y:
 
-TODO
+$$f_z(z_1,z_2) = \int_{-\infty}^\infty \int_{-\infty}^\infty f_X(x_1,x_2) \cdot f_Y(z_1-x_1,z_2-x_2) dx_1dx_2$$
+
+Convolution can also work on cases where the values are not probabilities. Convolutional neural network uses discrete version of convolution on matrices.
 
 ## Likelihood
 
