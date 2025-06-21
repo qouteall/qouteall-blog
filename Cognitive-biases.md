@@ -8,13 +8,13 @@ A summarization of the main cognitive biases, relating to financial trading, com
 
 **Diminishing marginal utility**: For example, one is hungry and then eats 3 pieces of bread, the first piece eaten while hungry is has more utility than the second piece eaten after the first, and so on. The more of something you have, the less utility another such thing has.
 
-Corresponding to diminishing marginal utility, the happiness of gaining \$200 is less than two times of happiness of gaining \$100. The perception of gain is convex.
+Corresponding to diminishing marginal utility, the happiness of gaining `$`200 is less than two times of happiness of gaining `$`100. The perception of gain is convex.
 
 ![](./cog_bias/Value_function.png)
 
 [Reference](https://en.wikipedia.org/wiki/Prospect_theory)
 
-The same applies to pain. The pain of losing \$100 two times is higher than losing \$200 in one time.
+The same applies to pain. The pain of losing `$`100 two times is higher than losing `$`200 in one time.
 
 ### Expectation and framing
 
@@ -49,7 +49,7 @@ Procrastination is also related to protective pessimism. If you believe that the
 
 In real life, some risks are hard to reverse or are irreversible, so avoiding risk is more important than gaining. In investment, losing 10% requires gaining 11.1% to recover, and losing 50% requires gaining 100% to recover. Keep staying in the game is important as it makes one exposed to future opportunities.
 
-So, losses have a larger mental impact than gains of the same size. The pain of losing \$100 is bigger than the happiness of gaining \$100.
+So, losses have a larger mental impact than gains of the same size. The pain of losing `$`100 is bigger than the happiness of gaining `$`100.
 
 People don't intuitively treat avoiding losing one dollar as the same as earning one dollar.
 
@@ -59,15 +59,15 @@ People don't intuitively treat avoiding losing one dollar as the same as earning
 
 **We prefer deterministic gain instead of risky gain**. A bird in the hand is worth two in the bush. 
 
-Given 100% chance to gain \$450 or 50% chance to gain \$1000, people tend to choose the former. 
+Given 100% chance to gain `$`450 or 50% chance to gain `$`1000, people tend to choose the former. 
 
 The professions that face uncertain gain, like academic research, where it's common that researching a problem for years without getting any meaningful result, are not suitable for most people.
 
 **We prefer having hope rather than accepting failure**.
 
-Given 100% chance to lose \$500 or 50% chance to lose \$1100, most people will choose the latter. The second one has "hope" and the first one means accepting failure.
+Given 100% chance to lose `$`500 or 50% chance to lose `$`1100, most people will choose the latter. The second one has "hope" and the first one means accepting failure.
 
-In this case, "no losing" is usually taken as expectation. What if the expectation is "already losing \$500"? Then the two choices become: 1. no change  2. 50% gain \$500 and 50% lose \$600. In this case, people tend to choose the first choice which has lower risk. The expectation point is very important.
+In this case, "no losing" is usually taken as expectation. What if the expectation is "already losing `$`500"? Then the two choices become: 1. no change  2. 50% gain `$`500 and 50% lose `$`600. In this case, people tend to choose the first choice which has lower risk. The expectation point is very important.
 
 ### Time perception
 
