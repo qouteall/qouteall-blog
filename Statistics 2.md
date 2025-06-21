@@ -728,7 +728,7 @@ P(X>t) = n
 \quad\quad\quad
 m^\alpha t^{-\alpha}=p
 \quad\quad\quad
-t= (p m^{-\alpha})^{-\frac {1} {\alpha}} = m p^{-\frac {1} {\alpha}}
+t= (p m^{-\alpha})^{- \frac{1}{\alpha}} = m p^{- \frac{1}{\alpha}}
 $$
 
 Then compute the share
@@ -739,7 +739,7 @@ $$\int_b^{\infty} x f(x)dx = \int_b^{\infty} \alpha m^{-\alpha} x^{-\alpha}dx = 
 
 To make that integration finite, we need $-\alpha+1< 0$, $\alpha > 1$.
 
-$$\text{Share}=\frac{\int_t^{\infty} x f(x)dx}{\int_m^{\infty} x f(x)dx}= \frac{\left(- \alpha m^{-\alpha} \frac 1 {-\alpha+1}\right) t^{-\alpha+1}}{\left(- \alpha m^{-\alpha} \frac 1 {-\alpha+1}\right) m^{-\alpha+1}}= \frac{t^{-\alpha+1}}{m^{-\alpha+1}} = \frac{m^{-\alpha+1} p^{{-\frac {1} {\alpha}}(-\alpha+1)}}{m^{-\alpha+1}}=p^{1-\frac {1} {\alpha}}
+$$\text{Share}=\frac{\int_t^{\infty} x f(x)dx}{\int_m^{\infty} x f(x)dx}= \frac{\left(- \alpha m^{-\alpha} \frac 1 {-\alpha+1}\right) t^{-\alpha+1}}{\left(- \alpha m^{-\alpha} \frac 1 {-\alpha+1}\right) m^{-\alpha+1}}= \frac{t^{-\alpha+1}}{m^{-\alpha+1}} = \frac{m^{-\alpha+1} p^{{- \frac{1}{\alpha}}(-\alpha+1)}}{m^{-\alpha+1}}=p^{1- \frac{1}{\alpha}}
 $$
 
 The share porpotion is irrelevant to $m$.
@@ -875,9 +875,9 @@ How to randomly sample numbers from a Pareto distribution? Firstly we know the c
 
 $$p=1-m^\alpha x^{-\alpha} \quad\quad\quad m^\alpha x^{-\alpha}=1-p \quad\quad\quad x^{-\alpha} = (1-p) m^{-\alpha}$$
 
-$$(x^{-\alpha})^{-\frac {1} {\alpha}} = \left((1-p) m^{-\alpha}\right)^{-\frac {1} {\alpha}}
-\quad\quad\quad x = m (1-p)^{-\frac {1} {\alpha}}
-\quad\quad\quad Q(p) = m (1-p)^{-\frac {1} {\alpha}}
+$$(x^{-\alpha})^{- \frac{1}{\alpha}} = \left((1-p) m^{-\alpha}\right)^{- \frac{1}{\alpha}}
+\quad\quad\quad x = m (1-p)^{- \frac{1}{\alpha}}
+\quad\quad\quad Q(p) = m (1-p)^{- \frac{1}{\alpha}}
 $$
 
 Now we can randomly sample $p$ between 0 and 1 then $Q(p)$ will follow Pareto distribution.
@@ -890,7 +890,7 @@ Because Pareto distribution has a lot of extreme values, directly calculating th
 
 Sampling in log scale:
 
-$$\log x = \log \left(m (1-p)^{-\frac {1} {\alpha}}\right) = \log m -\frac {1} {\alpha} \log (1-p)$$
+$$\log x = \log \left(m (1-p)^{- \frac{1}{\alpha}}\right) = \log m - \frac{1}{\alpha} \log (1-p)$$
 
 Calculating first digit in log scale:
 
