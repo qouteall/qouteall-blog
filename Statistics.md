@@ -1706,19 +1706,23 @@ Pareto distribution maximizes entropy under geometric mean constraint $E[\log X]
 
 If we have constraints $X  \geq m > 0$, $E[\log X] = g$, using largrange multiplier to maximize entropy:
 
-$$\mathcal{L}(f, \lambda_1, \lambda_2)= \begin{cases}\int_m^{\infty} f(x) \log \frac 1 {f(x)} dx \\+ \lambda_1 (\int_m^{\infty} f(x)dx-1) \\+ \lambda_2 (\int_m^{\infty} f(x)\log x dx - g) \end{cases}$$
+$$\mathcal{L}(f, \lambda_1, \lambda_2)= \begin{cases}\int_m^{\infty} f(x) \log \frac 1 {f(x)} dx \\\\ + \lambda_1 (\int_m^{\infty} f(x)dx-1) \\\\ + \lambda_2 (\int_m^{\infty} f(x)\log x dx - g) \end{cases}$$
+
 
 $$
 \mathcal{L}(f, \lambda_1, \lambda_2) = \int_m^{\infty} (\ -f(x)\log f(x) + \lambda_1 f(x) + \lambda_2 f(x) \log x \ ) dx -\lambda_1 - g \lambda_2
 $$
 
+
 $$
 \frac{\partial \mathcal{L}}{\partial f} = -\log f(x) - 1 + \lambda_1 + \lambda_2 \log x
 $$
 
+
 $$
 \frac{\partial \mathcal{L}}{\partial \lambda_1} = \int_m^{\infty} f(x) dx -1
 $$
+
 
 $$
 \frac{\partial \mathcal{L}}{\partial \lambda_2} = \int_m^{\infty} f(x) \log x \ dx-g
