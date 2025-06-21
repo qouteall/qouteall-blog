@@ -360,24 +360,24 @@ $$
 Now if we already know the noise-added value $x_1$, but we don't know $x_0$ so $x_0$ is uncertain. We want to compute the expectation of $x_0$ under that condition that $x_1$ is known.
 
 $$
-E[x_0 \vert x_1] = E_{x_0}\left[ \sigma^2 \frac{\partial\log p_{0|1}(x_0 \vert x_1)}{\partial x_1}+x_1+\sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1}  \biggr| x_1 \right]
+E[x_0 \vert x_1] = E_{x_0}\left[ \sigma^2 \frac{\partial\log p_{0|1}(x_0 \vert x_1)}{\partial x_1}+x_1+\sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1}  \biggr\vert x_1 \right]
 $$
 
 $$
-= x_1 + E_{x_0}\left[\sigma^2 \frac{\partial\log p_{0|1}(x_0 \vert x_1)}{\partial x_1}\biggr|x_1\right] + E_{x_0}\left[ \sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1} \biggr|x_1\right]
+= x_1 + E_{x_0}\left[\sigma^2 \frac{\partial\log p_{0|1}(x_0 \vert x_1)}{\partial x_1}\biggr\vert x_1\right] + E_{x_0}\left[ \sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1} \biggr\vert x_1\right]
 $$
 
-Within it, $E_{x_0}\left[ \frac{\partial\log p_{0|1}(x_0 \vert x_1)}{\partial x_1} \biggr| x_1 \right]=0$, because
+Within it, $E_{x_0}\left[ \frac{\partial\log p_{0|1}(x_0 \vert x_1)}{\partial x_1} \biggr\vert x_1 \right]=0$, because
 
 $$
-E_{x_0}\left[ \frac{\partial\log p_{0|1}(x_0 \vert x_1)}{\partial x_1} \biggr| x_1 \right]=
+E_{x_0}\left[ \frac{\partial\log p_{0|1}(x_0 \vert x_1)}{\partial x_1} \biggr\vert x_1 \right]=
 \int p_{0|1}(x_0 \vert x_1) \cdot \frac{\partial \log p_{0|1}(x_0 \vert x_1)}{\partial x_1} dx_0 
 $$
 
 $$= \int p_{0|1}(x_0) \cdot \frac 1 {p_{0|1}(x_0 \vert x_1)} \cdot \frac{\partial p_{0|1}(x_0 \vert x_1)}{\partial x_1} dx_0 = \int \frac{\partial p_{0|1}(x_0 \vert x_1)}{\partial x_1} dx_0 = \frac{\partial \int p_{0|1}(x_0 \vert x_1) dx_0}{\partial x_1} = \frac{\partial 1}{\partial x_1}=0
 $$
 
-And $E_{x_0}\left[ \sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1} \biggr|x_1\right] = \sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1}$ because it's unrelated to random $x_0$.
+And $E_{x_0}\left[ \sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1} \biggr\vert x_1\right] = \sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1}$ because it's unrelated to random $x_0$.
 
 So 
 
@@ -477,7 +477,7 @@ In the common definition of exponential distribution, $\lambda = \frac 1 \mu$, $
 Its tail function:
 
 $$
-\text{TailFunction}(x) = P(X>x) = \int_x^{\infty} \lambda e^{-\lambda y}dy= \left(-e^{-\lambda y}\right) \biggr|_{y=x}^{y=\infty} = e^{-\lambda x}
+\text{TailFunction}(x) = P(X>x) = \int_x^{\infty} \lambda e^{-\lambda y}dy= \left(-e^{-\lambda y}\right) \biggr\vert_{y=x}^{y=\infty} = e^{-\lambda x}
 $$
 
 If some event is happening in fixed rate ($\lambda$), exponential distribution measures **how long do we need to wait for the next event**, **if how long we will need to wait is irrelevant how long we have aleady waited (memorylessness)**.
@@ -677,7 +677,7 @@ $$
 
 To make $\int_m^{\infty} x^{\lambda_2}dx$ be finite, $\lambda_2 < 0$. 
 
-$$\int_m^{\infty} x^{\lambda_2}dx= \left( \frac{1}{\lambda_2+1}x^{\lambda_2+1} \right) \biggr|^{x=\infty}_{x=m}  =- \frac 1 {\lambda_2+1} m^{\lambda_2 + 1} = e^{1-\lambda_1}$$
+$$\int_m^{\infty} x^{\lambda_2}dx= \left( \frac{1}{\lambda_2+1}x^{\lambda_2+1} \right) \biggr\vert^{x=\infty}_{x=m}  =- \frac 1 {\lambda_2+1} m^{\lambda_2 + 1} = e^{1-\lambda_1}$$
 
 $$\frac{m^{\lambda_2+1}}{\lambda_2+1} = -e^{1-\lambda_1} \tag{1}\quad\quad\quad e^{-1+\lambda_1}=-\frac{\lambda_2+1}{m^{\lambda_2+1}}$$
 
@@ -689,7 +689,7 @@ $$\int_m^{\infty} e^{-1+\lambda_1} \cdot x^{\lambda_2} \log x \ dx=g$$
 
 If we temporarily ignore $e^{-1+\lambda_1}$ and compute $\int_m^{\infty} x^{\lambda_2} \log x \ dx$. Let $u=\log x$, $x=e^u$, $dx = e^udu$:
 
-$$\int_m^{\infty} x^{\lambda_2} \log x \ dx=\int_{\log m}^{\infty} e^{\lambda_2 u} u \ du = \left( \frac 1 {\lambda_2+1} u e^{(\lambda_2+1)u} - \frac 1 {(\lambda_2+1)^2} e^{(\lambda_2+1)u}\right) \biggr|_{u=\log m}^{u=\infty}$$
+$$\int_m^{\infty} x^{\lambda_2} \log x \ dx=\int_{\log m}^{\infty} e^{\lambda_2 u} u \ du = \left( \frac 1 {\lambda_2+1} u e^{(\lambda_2+1)u} - \frac 1 {(\lambda_2+1)^2} e^{(\lambda_2+1)u}\right) \biggr\vert_{u=\log m}^{u=\infty}$$
 
 To make it be finite, $\lambda_2+1 \leq 0$, $\lambda_2 \leq -1$. Then
 
@@ -738,7 +738,7 @@ Then compute the share
 
 $$\text{Share} = \frac{\int_t^{\infty} x N f(x)dx}{\int_m^{\infty} x N f(x)dx}=\frac{\int_t^{\infty} x f(x)dx}{\int_m^{\infty} x f(x)dx}$$
 
-$$\int_b^{\infty} x f(x)dx = \int_b^{\infty} \alpha m^{-\alpha} x^{-\alpha}dx = \alpha m^{-\alpha} \cdot \left( \frac 1 {-\alpha+1} x^{-\alpha+1} \right) \biggr|_{x=b}^{x=\infty} = \left(- \alpha m^{-\alpha} \frac 1 {-\alpha+1}\right) b^{-\alpha+1}$$
+$$\int_b^{\infty} x f(x)dx = \int_b^{\infty} \alpha m^{-\alpha} x^{-\alpha}dx = \alpha m^{-\alpha} \cdot \left( \frac 1 {-\alpha+1} x^{-\alpha+1} \right) \biggr\vert_{x=b}^{x=\infty} = \left(- \alpha m^{-\alpha} \frac 1 {-\alpha+1}\right) b^{-\alpha+1}$$
 
 To make that integration finite, we need $-\alpha+1< 0$, $\alpha > 1$.
 
