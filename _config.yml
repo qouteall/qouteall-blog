@@ -1,6 +1,8 @@
-
 markdown: kramdown
 kramdown:
   input: GFM
   hard_wrap: false
-  math_engine: mathjax
+  syntax_highlighter: rouge # This is important for code block styling
+  syntax_highlighter_opts:
+    css_class: 'highlight' # Default class Rouge uses
+    # You can also try 'span_inline_css: true' if class-based styling isn't perfect

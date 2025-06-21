@@ -1,5 +1,5 @@
 
-# Some Statistics Knowledge
+# Some Statistics Knowledge part 1
 
 ## Basic concepts
 
@@ -1072,3 +1072,6 @@ e^{\lambda_1-1}=\frac 1 {b-a}
 $$
 
 The result is $f(x) = \frac 1 {b-a} \ \ \ (a \leq x \leq b)$. 
+
+
+[Part 2](https://qouteall.fun/qouteall-blog/Statistics%202)

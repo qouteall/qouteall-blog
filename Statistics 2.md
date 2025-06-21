@@ -1,4 +1,5 @@
 
+# Some Statistics Knowledge part 2
 
 ## Normal distribution
 
