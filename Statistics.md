@@ -1704,7 +1704,7 @@ $$
 
 Pareto distribution maximizes entropy under geometric mean constraint $E[\log X]$. 
 
-If we have constraints $X  \geq m > 0$, $E[\log X] = g$, using largrange multiplier to maximize entropy:
+If we have constraints $X \geq m > 0$, $E[\log X] = g$, using largrange multiplier to maximize entropy:
 
 $$\mathcal{L}(f, \lambda_1, \lambda_2)= \begin{cases}\int_m^{\infty} f(x) \log \frac 1 {f(x)} dx \\\\ + \lambda_1 (\int_m^{\infty} f(x)dx-1) \\\\ + \lambda_2 (\int_m^{\infty} f(x)\log x dx - g) \end{cases}$$
 
@@ -1730,9 +1730,15 @@ $$
 
 Solve $\frac{\partial \mathcal{L}}{\partial f}=0$:
 
-$$-\log f(x) - 1 + \lambda_1 + \lambda_2 \log x=0\quad\quad\quad\log f(x) = -1+\lambda_1 + \lambda_2 \log x\quad\quad\quad f(x) = e^{-1+\lambda_1+\lambda_2 \log x}$$
+$$- \log f(x) - 1 + \lambda_1 + \lambda_2 \log x=0$$
+
+$$\log f(x) = -1+\lambda_1 + \lambda_2 \log x$$
+
+$$f(x) = e^{-1+\lambda_1+\lambda_2 \log x}$$
+
 
 $$f(x) = e^{-1+\lambda_1} \cdot (e^{\log x})^{\lambda_2} = e^{-1+\lambda_1} \cdot x^{\lambda_2}$$
+
 
 Solve $\frac{\partial \mathcal{L}}{\partial \lambda_1}=0$:
 
