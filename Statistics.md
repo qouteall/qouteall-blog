@@ -1182,11 +1182,11 @@ $$
 \int_{-\infty}^{\infty} (-x^2)e^{(-x^2)k}dx = -\frac{1}{2}\sqrt{\pi} k^{-\frac{3}{2}}
 $$
 
-So $\int_{-\infty}^\infty x^2e^{-kx^2}dx = \frac{1}{2}\sqrt{\frac{\pi}{k^3}}$
+So $\int_{-\infty}^{\infty} x^2e^{-kx^2}dx = \frac{1}{2}\sqrt{\frac{\pi}{k^3}}$
 
 $$
 \int_{-\infty}^{\infty} x^2e^{(-1+\lambda_1+\lambda_2 x^2)} dx
-=e^{-1+\lambda_1} \int_{-\infty}^\infty e^{\lambda_2x^2}dx
+=e^{-1+\lambda_1} \int_{-\infty}^{\infty} e^{\lambda_2x^2}dx
 =e^{-1+\lambda_1} \cdot \frac{1}{2} \sqrt{\frac{\pi}{-\lambda_2^3}}=\sigma^2
 $$
 
@@ -1481,7 +1481,7 @@ $$
 \quad\quad\quad
 \frac{\partial \mathcal{L}}{\partial \lambda_1}=\int_0^{\infty}f(x)dx-1
 \quad\quad\quad
-\frac{\partial \mathcal{L}}{\partial \lambda_2}=\int_0^\infty xf(x)dx-\mu
+\frac{\partial \mathcal{L}}{\partial \lambda_2}=\int_0^{\infty} xf(x)dx-\mu
 $$
 
 Then solve $\frac{\partial \mathcal{L}}{\partial f}=0$:
@@ -1499,9 +1499,9 @@ Then solve $\frac{\partial \mathcal{L}}{\partial \lambda_1}=0$:
 $$
 \frac{\partial \mathcal{L}}{\partial \lambda_1}=0
 \quad\quad\quad
-\int_0^\infty e^{(-1+\lambda_1)} \cdot e^{\lambda_2 x} dx = 1
+\int_0^{\infty} e^{(-1+\lambda_1)} \cdot e^{\lambda_2 x} dx = 1
 \quad\quad\quad
-\int_0^\infty e^{\lambda_2 x} dx = e^{1-\lambda_1}
+\int_0^{\infty} e^{\lambda_2 x} dx = e^{1-\lambda_1}
 $$
 
 To make that integration finite, $\lambda_2 < 0$.
@@ -1509,7 +1509,7 @@ To make that integration finite, $\lambda_2 < 0$.
 Let $u = \lambda_2 x, \ du = \lambda_2 dx, dx=\frac 1 {\lambda_2} du$, 
 
 $$
-\int_0^\infty e^{\lambda_2 x} dx = \frac 1 {\lambda_2} \int_0^{-\infty} e^udu = -\frac 1 {\lambda_2} = e^{1-\lambda_1}
+\int_0^{\infty} e^{\lambda_2 x} dx = \frac 1 {\lambda_2} \int_0^{-\infty} e^udu = -\frac 1 {\lambda_2} = e^{1-\lambda_1}
 $$
 
 Then solve $\frac{\partial \mathcal{L}}{\partial \lambda_2}=0$:
@@ -1517,13 +1517,13 @@ Then solve $\frac{\partial \mathcal{L}}{\partial \lambda_2}=0$:
 $$
 \frac{\partial \mathcal{L}}{\partial \lambda_2}=0
 \quad\quad\quad
-\int_0^\infty x e^{(-1+\lambda_1+\lambda_2 x)} dx = \mu
+\int_0^{\infty} x e^{(-1+\lambda_1+\lambda_2 x)} dx = \mu
 \quad\quad\quad
-\int_0^\infty x e^{\lambda_2 x} dx = \mu e^{1-\lambda_1}
+\int_0^{\infty} x e^{\lambda_2 x} dx = \mu e^{1-\lambda_1}
 $$
 
 $$
-\int_0^\infty x e^{\lambda_2 x} dx = (\frac 1 {\lambda_2} x e^{\lambda_2 x} - \frac 1 {\lambda_2^2} e^{\lambda_2x}) _0^\infty = \frac 1 {\lambda_2^2}
+\int_0^{\infty} x e^{\lambda_2 x} dx = (\frac 1 {\lambda_2} x e^{\lambda_2 x} - \frac 1 {\lambda_2^2} e^{\lambda_2x}) _0^{\infty} = \frac 1 {\lambda_2^2}
 $$
 
 Now we have
@@ -1547,7 +1547,7 @@ In the common definition of exponential distribution, $\lambda = \frac 1 \mu$, $
 Its tail function:
 
 $$
-\text{TailFunction}(x) = P(X>x) = \int_x^\infty \lambda e^{-\lambda y}dy= \left(-e^{-\lambda y}\right) \biggr|_{y=x}^{y=\infty} = e^{-\lambda x}
+\text{TailFunction}(x) = P(X>x) = \int_x^{\infty} \lambda e^{-\lambda y}dy= \left(-e^{-\lambda y}\right) \biggr|_{y=x}^{y=\infty} = e^{-\lambda x}
 $$
 
 If some event is happening in fixed rate ($\lambda$), exponential distribution measures **how long do we need to wait for the next event**, **if how long we will need to wait is irrelevant how long we have aleady waited (memorylessness)**.
@@ -1588,60 +1588,60 @@ Generalize it, $0.2^k N$ people have $0.8^k W$ wealth ($k$ can be generalized to
 If the wealth variable is $X$ (assume $X > 0$), its probability density function is $f(x)$, and porportion of people correspond to probability, the richest $0.2^k$ porportion of people group have $0.8^kW$ wealth, $t$ is the wealth threshold (minimum wealth) of that group:
 
 $$
-P(X \geq t) = \int_t^\infty f(x)dx = 0.2^k
+P(X \geq t) = \int_t^{\infty} f(x)dx = 0.2^k
 $$
 
 Note that $f(x)$ represents probability density function (PDF), which correspond to density of proportion of people. $N\cdot f(x)$ is people amount density over wealth. Multiplying it with wealth $x$ and integrate gets total wealth in range:
 
 $$
-\int_t^\infty x (N \cdot f(x)) dx = 0.8^k W
+\int_t^{\infty} x (N \cdot f(x)) dx = 0.8^k W
 \quad\quad\quad
-\int_t^\infty x f(x) dx = 0.8^k \frac W N
+\int_t^{\infty} x f(x) dx = 0.8^k \frac W N
 $$
 
 We can rediscover Pareto distribution from these. The first thing to do is extract and eliminate $k$:
 
 $$
-\int_t^\infty f(x)dx = 0.2^k = e^{(\ln 0.2)k} \quad\quad\quad (\ln 0.2) k=\ln\int_t^\infty f(x)dx
+\int_t^{\infty} f(x)dx = 0.2^k = e^{(\ln 0.2)k} \quad\quad\quad (\ln 0.2) k=\ln\int_t^{\infty} f(x)dx
 $$
 
 $$
-\int_t^\infty x f(x) dx = \frac W N 0.8^k = \frac W N e^{(\ln 0.8)k} \quad\quad\quad
-(\ln 0.8)k = \ln \frac{N\int_t^\infty x f(x) dx}{W}
+\int_t^{\infty} x f(x) dx = \frac W N 0.8^k = \frac W N e^{(\ln 0.8)k} \quad\quad\quad
+(\ln 0.8)k = \ln \frac{N\int_t^{\infty} x f(x) dx}{W}
 $$
 
 $$
-k=\frac{\ln\int_t^\infty f(x)dx}{\ln 0.2}=\frac{\ln \frac{N\int_t^\infty x f(x) dx}{W}}{\ln 0.8}
+k=\frac{\ln\int_t^{\infty} f(x)dx}{\ln 0.2}=\frac{\ln \frac{N\int_t^{\infty} x f(x) dx}{W}}{\ln 0.8}
 \quad\quad\quad
-\frac{\ln 0.8}{\ln 0.2} \ln\int_t^\infty f(x)dx = \ln \frac{N\int_t^\infty x f(x) dx}{W}
+\frac{\ln 0.8}{\ln 0.2} \ln\int_t^{\infty} f(x)dx = \ln \frac{N\int_t^{\infty} x f(x) dx}{W}
 $$
 
 $$
-\ln\left(\left(\int_t^\infty f(x)dx\right) ^{\frac{\ln 0.8}{\ln 0.2}} \right) = \ln \frac{N\int_t^\infty x f(x) dx}{W}
+\ln\left(\left(\int_t^{\infty} f(x)dx\right) ^{\frac{\ln 0.8}{\ln 0.2}} \right) = \ln \frac{N\int_t^{\infty} x f(x) dx}{W}
 $$
 
 $$
-\left(\int_t^\infty f(x)dx\right) ^{\frac{\ln 0.8}{\ln 0.2}}  = \frac N W \int_t^\infty x f(x) dx
+\left(\int_t^{\infty} f(x)dx\right) ^{\frac{\ln 0.8}{\ln 0.2}}  = \frac N W \int_t^{\infty} x f(x) dx
 $$
 
 Then we can take derivative to $t$ on two sides:
 
 $$
-\frac{\ln 0.8}{\ln 0.2} \left( \int_t^\infty f(x)dx \right)^{\frac{\ln 0.8}{\ln 0.2}-1} (- f(t)) = \frac N W (-t f(t))
+\frac{\ln 0.8}{\ln 0.2} \left( \int_t^{\infty} f(x)dx \right)^{\frac{\ln 0.8}{\ln 0.2}-1} (- f(t)) = \frac N W (-t f(t))
 $$
 
 $f(t) \neq 0$. Divide two sides by $-f(t)$:
 
 $$
-\frac{\ln 0.8}{\ln 0.2} \left( \int_t^\infty f(x)dx \right)^{\frac{\ln 0.8}{\ln 0.2}-1} = \frac N W t
+\frac{\ln 0.8}{\ln 0.2} \left( \int_t^{\infty} f(x)dx \right)^{\frac{\ln 0.8}{\ln 0.2}-1} = \frac N W t
 $$
 
 $$
-\left( \left( \int_t^\infty f(x)dx \right)^{\frac{\ln 0.8}{\ln 0.2}-1} \right)^{\frac 1 {\frac{\ln 0.8}{\ln 0.2}-1}} = \left(\frac {N\ln 0.2} {W\ln 0.8} t\right)^{\frac 1 {\frac{\ln 0.8}{\ln 0.2}-1}}
+\left( \left( \int_t^{\infty} f(x)dx \right)^{\frac{\ln 0.8}{\ln 0.2}-1} \right)^{\frac 1 {\frac{\ln 0.8}{\ln 0.2}-1}} = \left(\frac {N\ln 0.2} {W\ln 0.8} t\right)^{\frac 1 {\frac{\ln 0.8}{\ln 0.2}-1}}
 $$
 
 $$
-\int_t^\infty f(x)dx = \left( \frac{N\ln 0.2}{W\ln 0.8} t \right)^{\frac 1 {\frac{\ln 0.8}{\ln 0.2}-1}}
+\int_t^{\infty} f(x)dx = \left( \frac{N\ln 0.2}{W\ln 0.8} t \right)^{\frac 1 {\frac{\ln 0.8}{\ln 0.2}-1}}
 = \left( \frac{N\ln 0.2}{W\ln 0.8} t \right)^{\frac {\ln 0.2} {\ln 0.8-\ln 0.2}}
 $$
 
@@ -1660,7 +1660,7 @@ $$
 Now we get the PDF. We still need to make the total probability area to be 1 to make it a valid distribution. But there is no extra unknown parameter in PDF to change. The solution is to crop the range of $X$. If we set the minimum wealth in distribution to be $m$ (but doesn't constraint the maximum wealth), creating constraint $X \geq m$, then using the previous result
 
 $$
-\int_m^\infty f(x)dx = 1 \quad\quad\quad
+\int_m^{\infty} f(x)dx = 1 \quad\quad\quad
 \left( \frac{N\ln 0.2}{W\ln 0.8} m \right)^{\frac {\ln 0.2} {\ln 0.8-\ln 0.2}} = 1
 \quad\quad\quad
 m = \frac{W \ln 0.8}{N \ln 0.2} \approx 0.1386 \frac W N
@@ -1706,16 +1706,10 @@ Pareto distribution maximizes entropy under geometric mean constraint $E[\log X]
 
 If we have constraints $X  \geq m > 0$, $E[\log X] = g$, using largrange multiplier to maximize entropy:
 
-$$
-\mathcal{L}(f, \lambda_1, \lambda_2)= \begin{cases}
-\int_m^\infty f(x) \log \frac 1 {f(x)} dx \\
-+ \lambda_1 (\int_m^\infty f(x)dx-1) \\
-+ \lambda_2 (\int_m^\infty f(x)\log x dx - g) 
-\end{cases}
-$$
+$$\mathcal{L}(f, \lambda_1, \lambda_2)= \begin{cases}\int_m^{\infty} f(x) \log \frac 1 {f(x)} dx \\+ \lambda_1 (\int_m^{\infty} f(x)dx-1) \\+ \lambda_2 (\int_m^{\infty} f(x)\log x dx - g) \end{cases}$$
 
 $$
-\mathcal{L}(f, \lambda_1, \lambda_2) = \int_m^\infty (\ -f(x)\log f(x) + \lambda_1 f(x) + \lambda_2 f(x) \log x \ ) dx -\lambda_1 - g \lambda_2
+\mathcal{L}(f, \lambda_1, \lambda_2) = \int_m^{\infty} (\ -f(x)\log f(x) + \lambda_1 f(x) + \lambda_2 f(x) \log x \ ) dx -\lambda_1 - g \lambda_2
 $$
 
 $$
@@ -1723,11 +1717,11 @@ $$
 $$
 
 $$
-\frac{\partial \mathcal{L}}{\partial \lambda_1} = \int_m^\infty f(x) dx -1
+\frac{\partial \mathcal{L}}{\partial \lambda_1} = \int_m^{\infty} f(x) dx -1
 $$
 
 $$
-\frac{\partial \mathcal{L}}{\partial \lambda_2} = \int_m^\infty f(x) \log x \ dx-g
+\frac{\partial \mathcal{L}}{\partial \lambda_2} = \int_m^{\infty} f(x) \log x \ dx-g
 $$
 
 Solve $\frac{\partial \mathcal{L}}{\partial f}=0$:
@@ -1747,15 +1741,15 @@ $$
 Solve $\frac{\partial \mathcal{L}}{\partial \lambda_1}=0$:
 
 $$
-e^{-1+\lambda_1}\int_m^\infty x^{\lambda_2}dx = 1
+e^{-1+\lambda_1}\int_m^{\infty} x^{\lambda_2}dx = 1
 \quad\quad\quad
-\int_m^\infty x^{\lambda_2}dx = e^{1-\lambda_1}
+\int_m^{\infty} x^{\lambda_2}dx = e^{1-\lambda_1}
 $$
 
-To make $\int_m^\infty x^{\lambda_2}dx$ be finite, $\lambda_2 < 0$. 
+To make $\int_m^{\infty} x^{\lambda_2}dx$ be finite, $\lambda_2 < 0$. 
 
 $$
-\int_m^\infty x^{\lambda_2}dx= \left( \frac{1}{\lambda_2+1}x^{\lambda_2+1} \right) \biggr|^{x=\infty}_{x=m}  =- \frac 1 {\lambda_2+1} m^{\lambda_2 + 1} = e^{1-\lambda_1}
+\int_m^{\infty} x^{\lambda_2}dx= \left( \frac{1}{\lambda_2+1}x^{\lambda_2+1} \right) \biggr|^{x=\infty}_{x=m}  =- \frac 1 {\lambda_2+1} m^{\lambda_2 + 1} = e^{1-\lambda_1}
 $$
 
 $$
@@ -1767,24 +1761,24 @@ $$
 Solve $\frac{\partial \mathcal{L}}{\partial \lambda_2}=0$:
 
 $$
-\int_m^\infty f(x) \log x \ dx=g
+\int_m^{\infty} f(x) \log x \ dx=g
 $$
 
 $$
-\int_m^\infty e^{-1+\lambda_1} \cdot x^{\lambda_2} \log x \ dx=g
+\int_m^{\infty} e^{-1+\lambda_1} \cdot x^{\lambda_2} \log x \ dx=g
 $$
 
-If we temporarily ignore $e^{-1+\lambda_1}$ and compute $\int_m^\infty x^{\lambda_2} \log x \ dx$. Let $u=\log x$, $x=e^u$, $dx = e^udu$:
+If we temporarily ignore $e^{-1+\lambda_1}$ and compute $\int_m^{\infty} x^{\lambda_2} \log x \ dx$. Let $u=\log x$, $x=e^u$, $dx = e^udu$:
 
 $$
-\int_m^\infty x^{\lambda_2} \log x \ dx=\int_{\log m}^\infty e^{\lambda_2 u} u \ du
+\int_m^{\infty} x^{\lambda_2} \log x \ dx=\int_{\log m}^{\infty} e^{\lambda_2 u} u \ du
 = \left( \frac 1 {\lambda_2+1} u e^{(\lambda_2+1)u} - \frac 1 {(\lambda_2+1)^2} e^{(\lambda_2+1)u}\right) \biggr|_{u=\log m}^{u=\infty}
 $$
 
 To make it be finite, $\lambda_2+1 \leq 0$, $\lambda_2 \leq -1$. Then
 
 $$
-\int_m^\infty x^{\lambda_2} \log x \ dx=- \frac 1 {\lambda_2+1} (\log m)  e^{(\lambda_2+1)\log m} + \frac 1 {(\lambda_2+1)^2} e^{(\lambda_2+1)\log m}
+\int_m^{\infty} x^{\lambda_2} \log x \ dx=- \frac 1 {\lambda_2+1} (\log m)  e^{(\lambda_2+1)\log m} + \frac 1 {(\lambda_2+1)^2} e^{(\lambda_2+1)\log m}
 $$
 
 $$
@@ -1794,7 +1788,7 @@ $$
 So
 
 $$
-\int_m^\infty e^{-1+\lambda_1} \cdot x^{\lambda_2} \log x \ dx
+\int_m^{\infty} e^{-1+\lambda_1} \cdot x^{\lambda_2} \log x \ dx
 = e^{-1+\lambda_1} \left(- \frac 1 {\lambda_2+1} (\log m)  m^{(\lambda_2+1)} + \frac 1 {(\lambda_2+1)^2} m^{(\lambda_2+1)} \right)
 $$
 
@@ -1839,18 +1833,18 @@ P(X>t) = n
 \quad\quad\quad
 m^\alpha t^{-\alpha}=p
 \quad\quad\quad
-t= (p m^{-\alpha})^{-\frac 1 \alpha} = m p^{-\frac 1 \alpha}
+t= (p m^{-\alpha})^{-\frac {1} {\alpha}} = m p^{-\frac {1} {\alpha}}
 $$
 
 Then compute the share
 
 $$
-\text{Share} = \frac{\int_t^\infty x N f(x)dx}{\int_m^\infty x N f(x)dx}
-=\frac{\int_t^\infty x f(x)dx}{\int_m^\infty x f(x)dx}
+\text{Share} = \frac{\int_t^{\infty} x N f(x)dx}{\int_m^{\infty} x N f(x)dx}
+=\frac{\int_t^{\infty} x f(x)dx}{\int_m^{\infty} x f(x)dx}
 $$
 
 $$
-\int_b^\infty x f(x)dx = \int_b^\infty \alpha m^{-\alpha} x^{-\alpha}dx
+\int_b^{\infty} x f(x)dx = \int_b^{\infty} \alpha m^{-\alpha} x^{-\alpha}dx
 = \alpha m^{-\alpha} \cdot \left( \frac 1 {-\alpha+1} x^{-\alpha+1} \right) \biggr|_{x=b}^{x=\infty} = \left(- \alpha m^{-\alpha} \frac 1 {-\alpha+1}\right) b^{-\alpha+1}
 $$
 
@@ -1858,7 +1852,7 @@ To make that integration finite, we need $-\alpha+1< 0$, $\alpha > 1$.
 
 $$
 \text{Share}
-=\frac{\int_t^\infty x f(x)dx}{\int_m^\infty x f(x)dx}
+=\frac{\int_t^{\infty} x f(x)dx}{\int_m^{\infty} x f(x)dx}
 = \frac{\left(- \alpha m^{-\alpha} \frac 1 {-\alpha+1}\right) t^{-\alpha+1}}{\left(- \alpha m^{-\alpha} \frac 1 {-\alpha+1}\right) m^{-\alpha+1}}= \frac{t^{-\alpha+1}}{m^{-\alpha+1}} = 
 \frac{m^{-\alpha+1} p^{{-\frac 1 \alpha}(-\alpha+1)}}{m^{-\alpha+1}}
 =p^{1-\frac 1 \alpha}
@@ -1969,12 +1963,12 @@ If the lifetime $T$ follows Pareto distribution, if something keeps living at ti
 (The mean is weighted average. The conditional mean is also weighted average but under condition. But as the total integrated weight is not 1, it need to divide the total integrated weight.)
 
 $$
-E[T | T > t] = \frac{\int_t^\infty xf(x)dx}{\int_t^\infty f(x)dx} =
-\frac{\int_t^\infty x \alpha m^{-\alpha} x^{-\alpha-1} dx }{\int_t^\infty \alpha m^{-\alpha} x^{-\alpha-1} dx}
+E[T | T > t] = \frac{\int_t^{\infty} xf(x)dx}{\int_t^{\infty} f(x)dx} =
+\frac{\int_t^{\infty} x \alpha m^{-\alpha} x^{-\alpha-1} dx }{\int_t^{\infty} \alpha m^{-\alpha} x^{-\alpha-1} dx}
 $$
 
 $$
-= \frac{\int_t^\infty  x^{-\alpha} dx }{\int_t^\infty x^{-\alpha-1} dx}
+= \frac{\int_t^{\infty}  x^{-\alpha} dx }{\int_t^{\infty} x^{-\alpha-1} dx}
 = \frac{ \frac 1 {-\alpha+1} x^{-\alpha+1} |_{x=t}^{x=\infty}}{\frac 1 {-\alpha} x^{-\alpha}|_{x=t}^{x=\infty}} = \frac{-\frac 1 {-\alpha+1} t^{-\alpha+1}}{-\frac 1 {-\alpha} t^{-\alpha}} = \frac{\alpha}{\alpha-1} t
 $$
 
