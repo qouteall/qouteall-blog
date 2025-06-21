@@ -636,6 +636,8 @@ Then $(E[X], E[f(x)])$ can be seen as an **interpolation** between five points $
 
 ![](./stat/jensen_inequality.svg)
 
+{% endkatexmm %}
+
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
@@ -685,6 +687,8 @@ plt.tight_layout()
 plt.savefig("jensen_inequality.svg")
 
 ```
+
+{% katexmm %}
 
 For each point in green polygon $(E[X], E[f(X)])$, the point on function curve with the same X coordinate $(E[X], f(E[X]))$ is above it. So $E[f(X)] \leq f(E[X])$.
 
@@ -1842,6 +1846,8 @@ Some concrete numbers:
 | 2.5      | 38.07%           | 6.31%           |
 | 3        | 34.20%           | 4.64%           |
 
+{% katexmmend %}
+
 ```python
 print("| $\\alpha$ | Share of top 20% | Share of top 1% |\n| - | - | - |\n"+ "\n".join([
     "|"+ "|".join([f"{a}"] + [
@@ -1849,6 +1855,8 @@ print("| $\\alpha$ | Share of top 20% | Share of top 1% |\n| - | - | - |\n"+ "\n
     ]) + "|" for a in [1.001,1.1,1.160964,1.2,1.3,1.5,2,2.5,3]
 ]))
 ```
+
+{% katexmm %}
 
 ### Power law distributions
 
@@ -1990,6 +1998,8 @@ If we fix the min value $m$ as a specific number, like $3$, when $\alpha$ is not
 
 ![](./stat/pareto_benfords_law.svg)
 
+{% endkatexmm %}
+
 
 ```python
 import numpy as np
@@ -2036,7 +2046,7 @@ plt.tight_layout()
 plt.savefig("pareto_benfords_law.svg")
 ```
 
-
+{% katexmm %}
 
 ## Hypothesis testing
 
