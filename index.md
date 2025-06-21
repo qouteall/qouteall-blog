@@ -1,3 +1,9 @@
+---
+title: qouteall notes
+layout: default
+---
+
+
 Email: qouteall@163.com
 
 [GitHub Repository](https://github.com/qouteall/qouteall-blog)
