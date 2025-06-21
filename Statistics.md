@@ -1846,7 +1846,7 @@ Some concrete numbers:
 | 2.5      | 38.07%           | 6.31%           |
 | 3        | 34.20%           | 4.64%           |
 
-{% katexmmend %}
+{% endkatexmm %}
 
 ```python
 print("| $\\alpha$ | Share of top 20% | Share of top 1% |\n| - | - | - |\n"+ "\n".join([
