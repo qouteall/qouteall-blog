@@ -41,7 +41,7 @@ $P(E \vert C)$ means the probability of $E$ happening **if** $C$ happens.
 $$P(E|C) = \frac{P(\overbrace{E \cap C}^{\mathclap{\text{E and C both happen}}})}{P(C)} \quad\quad\quad\quad\quad P(E\cap C) = P(E|C) \cdot P(C)$$
 
 
-If E and C are independent, then $P(E \cap C) = P(E)P(C)$, then $P(E|C)=P(E)$.
+If E and C are independent, then $P(E \cap C) = P(E)P(C)$, then $P(E \vert C)=P(E)$.
 
 For example, there is a medical testing method of a disease. The test result can be positive (indicate having diesase) or negative. But that test is not always accurate.
 
@@ -68,7 +68,7 @@ False negative rate is $P(\text{Test is negative } \vert \text{ Actually has dis
 $$\text{False negative rate} = P(\text{Test is negative} \ | \ \text{Actually has disease}) = \frac{b}{a + b}$$
 $$\text{False positive rate} = P(\text{Test is positive} \ | \ \text{Actually doesn't have disease}) = \frac{c}{c + d}$$
 
-Some people may intuitively think false negative rate means $P(\text{Test result is false} \ | \ \text{Test is negative})$, which equals $P(\text{Actually has disease} \ | \ \text{Test is negative})$, which equals $\frac{b}{b+d}$. But that's not the official definition of false negative.
+Some people may intuitively think false negative rate means $P(\text{Test result is false } \vert \text{ Test is negative})$, which equals $P(\text{Actually has disease } \vert \text{ Test is negative})$, which equals $\frac{b}{b+d}$. But that's not the official definition of false negative.
 
 Bayes theorem allow "reversing" $P(A \vert B)$ as $P(B \vert A)$:
 
