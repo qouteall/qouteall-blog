@@ -1730,91 +1730,55 @@ $$
 
 Solve $\frac{\partial \mathcal{L}}{\partial f}=0$:
 
-$$-\log f(x) - 1 + \lambda_1 + \lambda_2 \log x=0\quad\quad\quad\log f(x) = -1+\lambda_1 + \lambda_2 \log x\quad\quad\quadf(x) = e^{-1+\lambda_1+\lambda_2 \log x}$$
+$$-\log f(x) - 1 + \lambda_1 + \lambda_2 \log x=0\quad\quad\quad\log f(x) = -1+\lambda_1 + \lambda_2 \log x\quad\quad\quad f(x) = e^{-1+\lambda_1+\lambda_2 \log x}$$
 
-$$
-f(x) = e^{-1+\lambda_1} \cdot (e^{\log x})^{\lambda_2} = e^{-1+\lambda_1} \cdot x^{\lambda_2}
-$$
+$$f(x) = e^{-1+\lambda_1} \cdot (e^{\log x})^{\lambda_2} = e^{-1+\lambda_1} \cdot x^{\lambda_2}$$
 
 Solve $\frac{\partial \mathcal{L}}{\partial \lambda_1}=0$:
 
-$$
-e^{-1+\lambda_1}\int_m^{\infty} x^{\lambda_2}dx = 1
-\quad\quad\quad
-\int_m^{\infty} x^{\lambda_2}dx = e^{1-\lambda_1}
+$$e^{-1+\lambda_1}\int_m^{\infty} x^{\lambda_2}dx = 1\quad\quad\quad \int_m^{\infty} x^{\lambda_2}dx = e^{1-\lambda_1}
 $$
 
 To make $\int_m^{\infty} x^{\lambda_2}dx$ be finite, $\lambda_2 < 0$. 
 
-$$
-\int_m^{\infty} x^{\lambda_2}dx= \left( \frac{1}{\lambda_2+1}x^{\lambda_2+1} \right) \biggr|^{x=\infty}_{x=m}  =- \frac 1 {\lambda_2+1} m^{\lambda_2 + 1} = e^{1-\lambda_1}
-$$
+$$\int_m^{\infty} x^{\lambda_2}dx= \left( \frac{1}{\lambda_2+1}x^{\lambda_2+1} \right) \biggr|^{x=\infty}_{x=m}  =- \frac 1 {\lambda_2+1} m^{\lambda_2 + 1} = e^{1-\lambda_1}$$
 
-$$
-\frac{m^{\lambda_2+1}}{\lambda_2+1} = -e^{1-\lambda_1} \tag{1}
-\quad\quad\quad
-e^{-1+\lambda_1}=-\frac{\lambda_2+1}{m^{\lambda_2+1}}
-$$
+$$\frac{m^{\lambda_2+1}}{\lambda_2+1} = -e^{1-\lambda_1} \tag{1}\quad\quad\quad e^{-1+\lambda_1}=-\frac{\lambda_2+1}{m^{\lambda_2+1}}$$
 
 Solve $\frac{\partial \mathcal{L}}{\partial \lambda_2}=0$:
 
-$$
-\int_m^{\infty} f(x) \log x \ dx=g
-$$
+$$\int_m^{\infty} f(x) \log x \ dx=g$$
 
-$$
-\int_m^{\infty} e^{-1+\lambda_1} \cdot x^{\lambda_2} \log x \ dx=g
-$$
+$$\int_m^{\infty} e^{-1+\lambda_1} \cdot x^{\lambda_2} \log x \ dx=g$$
 
 If we temporarily ignore $e^{-1+\lambda_1}$ and compute $\int_m^{\infty} x^{\lambda_2} \log x \ dx$. Let $u=\log x$, $x=e^u$, $dx = e^udu$:
 
-$$
-\int_m^{\infty} x^{\lambda_2} \log x \ dx=\int_{\log m}^{\infty} e^{\lambda_2 u} u \ du
-= \left( \frac 1 {\lambda_2+1} u e^{(\lambda_2+1)u} - \frac 1 {(\lambda_2+1)^2} e^{(\lambda_2+1)u}\right) \biggr|_{u=\log m}^{u=\infty}
-$$
+$$\int_m^{\infty} x^{\lambda_2} \log x \ dx=\int_{\log m}^{\infty} e^{\lambda_2 u} u \ du = \left( \frac 1 {\lambda_2+1} u e^{(\lambda_2+1)u} - \frac 1 {(\lambda_2+1)^2} e^{(\lambda_2+1)u}\right) \biggr|_{u=\log m}^{u=\infty}$$
 
 To make it be finite, $\lambda_2+1 \leq 0$, $\lambda_2 \leq -1$. Then
 
-$$
-\int_m^{\infty} x^{\lambda_2} \log x \ dx=- \frac 1 {\lambda_2+1} (\log m)  e^{(\lambda_2+1)\log m} + \frac 1 {(\lambda_2+1)^2} e^{(\lambda_2+1)\log m}
-$$
+$$\int_m^{\infty} x^{\lambda_2} \log x \ dx=- \frac 1 {\lambda_2+1} (\log m) e^{(\lambda_2+1)\log m} + \frac 1 {(\lambda_2+1)^2} e^{(\lambda_2+1)\log m}$$
 
-$$
-=- \frac 1 {\lambda_2+1} (\log m)  m^{(\lambda_2+1)} + \frac 1 {(\lambda_2+1)^2} m^{(\lambda_2+1)}
-$$
+$$=- \frac 1 {\lambda_2+1} (\log m)  m^{(\lambda_2+1)} + \frac 1 {(\lambda_2+1)^2} m^{(\lambda_2+1)}$$
 
 So
 
-$$
-\int_m^{\infty} e^{-1+\lambda_1} \cdot x^{\lambda_2} \log x \ dx
-= e^{-1+\lambda_1} \left(- \frac 1 {\lambda_2+1} (\log m)  m^{(\lambda_2+1)} + \frac 1 {(\lambda_2+1)^2} m^{(\lambda_2+1)} \right)
-$$
+$$\int_m^{\infty} e^{-1+\lambda_1} \cdot x^{\lambda_2} \log x \ dx
+= e^{-1+\lambda_1} \left(- \frac 1 {\lambda_2+1} (\log m)  m^{(\lambda_2+1)} + \frac 1 {(\lambda_2+1)^2} m^{(\lambda_2+1)} \right)$$
 
 By using (1) $e^{-1+\lambda_1}=-\frac{\lambda_2+1}{m^{\lambda_2+1}}$:
 
-$$
-=- (-\log m + \frac 1 {\lambda_2+1})=\log m - \frac 1 {\lambda_2+1} = g
-$$
+$$=- (-\log m + \frac 1 {\lambda_2+1})=\log m - \frac 1 {\lambda_2+1} = g$$
 
-$$
-\frac 1 {\lambda_2+1} = \log m - g
-\quad\quad\quad
-\lambda_2+1 = \frac 1 {\log m - g}
-$$
+$$\frac 1 {\lambda_2+1} = \log m - g\quad\quad\quad\lambda_2+1 = \frac 1 {\log m - g}$$
 
-$$
-e^{-1+\lambda_1}=-\frac{\lambda_2+1}{m^{\lambda_2+1}} = - \frac{\frac 1 {\log m - g}}{m^{\frac 1 {\log m - g}}}
-$$
+$$e^{-1+\lambda_1}=-\frac{\lambda_2+1}{m^{\lambda_2+1}} = - \frac{\frac 1 {\log m - g}}{m^{\frac 1 {\log m - g}}}$$
 
-$$
-f(x)= e^{-1+\lambda_1} \cdot x^{\lambda_2} = - \frac{\frac 1 {\log m - g}}{m^{\frac 1 {\log m - g}}} x^{(\frac 1 {\log m - g}-1)}
-$$
+$$f(x)= e^{-1+\lambda_1} \cdot x^{\lambda_2} = - \frac{\frac 1 {\log m - g}}{m^{\frac 1 {\log m - g}}} x^{(\frac 1 {\log m - g}-1)}$$
 
 Let $\alpha = -\frac 1 {\log m - g}$, it become:
 
-$$
-f(x) = \alpha m^{\alpha} x^{-\alpha-1} \quad\quad(x>m)
-$$
+$$f(x) = \alpha m^{\alpha} x^{-\alpha-1} \quad\quad(x>m)$$
 
 Now we rediscovered Pareto (Type I) distribution by maximizing entropy.
 
@@ -1836,24 +1800,13 @@ $$
 
 Then compute the share
 
-$$
-\text{Share} = \frac{\int_t^{\infty} x N f(x)dx}{\int_m^{\infty} x N f(x)dx}
-=\frac{\int_t^{\infty} x f(x)dx}{\int_m^{\infty} x f(x)dx}
-$$
+$$\text{Share} = \frac{\int_t^{\infty} x N f(x)dx}{\int_m^{\infty} x N f(x)dx}=\frac{\int_t^{\infty} x f(x)dx}{\int_m^{\infty} x f(x)dx}$$
 
-$$
-\int_b^{\infty} x f(x)dx = \int_b^{\infty} \alpha m^{-\alpha} x^{-\alpha}dx
-= \alpha m^{-\alpha} \cdot \left( \frac 1 {-\alpha+1} x^{-\alpha+1} \right) \biggr|_{x=b}^{x=\infty} = \left(- \alpha m^{-\alpha} \frac 1 {-\alpha+1}\right) b^{-\alpha+1}
-$$
+$$\int_b^{\infty} x f(x)dx = \int_b^{\infty} \alpha m^{-\alpha} x^{-\alpha}dx = \alpha m^{-\alpha} \cdot \left( \frac 1 {-\alpha+1} x^{-\alpha+1} \right) \biggr|_{x=b}^{x=\infty} = \left(- \alpha m^{-\alpha} \frac 1 {-\alpha+1}\right) b^{-\alpha+1}$$
 
 To make that integration finite, we need $-\alpha+1< 0$, $\alpha > 1$.
 
-$$
-\text{Share}
-=\frac{\int_t^{\infty} x f(x)dx}{\int_m^{\infty} x f(x)dx}
-= \frac{\left(- \alpha m^{-\alpha} \frac 1 {-\alpha+1}\right) t^{-\alpha+1}}{\left(- \alpha m^{-\alpha} \frac 1 {-\alpha+1}\right) m^{-\alpha+1}}= \frac{t^{-\alpha+1}}{m^{-\alpha+1}} = 
-\frac{m^{-\alpha+1} p^{{-\frac 1 \alpha}(-\alpha+1)}}{m^{-\alpha+1}}
-=p^{1-\frac 1 \alpha}
+$$\text{Share}=\frac{\int_t^{\infty} x f(x)dx}{\int_m^{\infty} x f(x)dx}= \frac{\left(- \alpha m^{-\alpha} \frac 1 {-\alpha+1}\right) t^{-\alpha+1}}{\left(- \alpha m^{-\alpha} \frac 1 {-\alpha+1}\right) m^{-\alpha+1}}= \frac{t^{-\alpha+1}}{m^{-\alpha+1}} = \frac{m^{-\alpha+1} p^{{-\frac 1 \alpha}(-\alpha+1)}}{m^{-\alpha+1}}=p^{1-\frac 1 \alpha}
 $$
 
 The share porpotion is irrelevant to $m$.
@@ -1946,9 +1899,7 @@ If $Y=a^T$, $a>1$, then
 
 $$P(Y<y) = P(a^T < y) = P\left(T < \frac{\log y}{\log a}\right) = 1- e^{-\lambda \frac{\log y}{\log a}}=1- (e^{\log y})^{-\frac{\lambda}{\log a}}=1-y^{-\frac{\lambda}{\log a}}$$
 
-$$
-\text{TailFunction}(y)=P(Y>y) = 1-P(Y<y) = y^{-\frac{\lambda}{\log a}}
-$$
+$$\text{TailFunction}(y)=P(Y>y) = 1-P(Y<y) = y^{-\frac{\lambda}{\log a}}$$
 
 Because $T\geq 0$, $Y \geq a^0=1$. Now $Y$'s tail function is in the same form as Pareto (Type I) distribution, where $\alpha=\frac{\lambda}{\log a}, \ m =1$.
 
@@ -1960,15 +1911,10 @@ If the lifetime $T$ follows Pareto distribution, if something keeps living at ti
 
 (The mean is weighted average. The conditional mean is also weighted average but under condition. But as the total integrated weight is not 1, it need to divide the total integrated weight.)
 
-$$
-E[T | T > t] = \frac{\int_t^{\infty} xf(x)dx}{\int_t^{\infty} f(x)dx} =
-\frac{\int_t^{\infty} x \alpha m^{-\alpha} x^{-\alpha-1} dx }{\int_t^{\infty} \alpha m^{-\alpha} x^{-\alpha-1} dx}
-$$
+$$E[T | T > t] = \frac{\int_t^{\infty} xf(x)dx}{\int_t^{\infty} f(x)dx} =
+\frac{\int_t^{\infty} x \alpha m^{-\alpha} x^{-\alpha-1} dx }{\int_t^{\infty} \alpha m^{-\alpha} x^{-\alpha-1} dx}$$
 
-$$
-= \frac{\int_t^{\infty}  x^{-\alpha} dx }{\int_t^{\infty} x^{-\alpha-1} dx}
-= \frac{ \frac 1 {-\alpha+1} x^{-\alpha+1} |_{x=t}^{x=\infty}}{\frac 1 {-\alpha} x^{-\alpha}|_{x=t}^{x=\infty}} = \frac{-\frac 1 {-\alpha+1} t^{-\alpha+1}}{-\frac 1 {-\alpha} t^{-\alpha}} = \frac{\alpha}{\alpha-1} t
-$$
+$$= \frac{\int_t^{\infty}  x^{-\alpha} dx }{\int_t^{\infty} x^{-\alpha-1} dx} = \frac{ \frac 1 {-\alpha+1} x^{-\alpha+1} |_{x=t}^{x=\infty}}{\frac 1 {-\alpha} x^{-\alpha}|_{x=t}^{x=\infty}} = \frac{-\frac 1 {-\alpha+1} t^{-\alpha+1}}{-\frac 1 {-\alpha} t^{-\alpha}} = \frac{\alpha}{\alpha-1} t$$
 
 (For that integration to be finite, $-\alpha+1<0$, $\alpha>1$)
 
@@ -1994,49 +1940,32 @@ In this case, doing a Monte Carlo simulation is easier.
 
 How to randomly sample numbers from a Pareto distribution? Firstly we know the cumulative distribution function $F(x) = P(X<x) = 1-P(X>x) = 1- m^\alpha x^{-\alpha}$. We can then get quantile function, which is the inverse of $F$: $F(x)=p, \ \ Q(p) = x$
 
-$$
-p=1-m^\alpha x^{-\alpha}
-\quad\quad\quad m^\alpha x^{-\alpha}=1-p
-\quad\quad\quad x^{-\alpha} = (1-p) m^{-\alpha}
-$$
+$$p=1-m^\alpha x^{-\alpha} \quad\quad\quad m^\alpha x^{-\alpha}=1-p \quad\quad\quad x^{-\alpha} = (1-p) m^{-\alpha}$$
 
-$$
-(x^{-\alpha})^{-\frac 1 \alpha} = \left((1-p) m^{-\alpha}\right)^{-\frac 1 \alpha}
-\quad\quad\quad
-x = m (1-p)^{-\frac 1 \alpha}
-\quad\quad\quad
-Q(p) = m (1-p)^{-\frac 1 \alpha}
+$$(x^{-\alpha})^{-\frac 1 \alpha} = \left((1-p) m^{-\alpha}\right)^{-\frac 1 \alpha}
+\quad\quad\quad x = m (1-p)^{-\frac 1 \alpha}
+\quad\quad\quad Q(p) = m (1-p)^{-\frac 1 \alpha}
 $$
 
 Now we can randomly sample $p$ between 0 and 1 then $Q(p)$ will follow Pareto distribution.
 
 Given $x$ how to calculate its first digit? If $10\leq x<100$ ($1 \leq \log_{10} x < 2$) then first digit is $\lfloor {\frac x {10}} \rfloor$. If $100 \leq x < 1000$ ($2 \leq \log_{10}x < 3$) then the first digit is $\lfloor {\frac x {100}} \rfloor$. Generalize it, the first digit $d$ is:
 
-$$
-d = \left\lfloor \frac {x} {10^{\lfloor \log_{10} x \rfloor}} \right\rfloor
-$$
+$$d = \left\lfloor \frac {x} {10^{\lfloor \log_{10} x \rfloor}} \right\rfloor$$
 
 Because Pareto distribution has a lot of extreme values, directly calculating the sample will likely to exceed floating-point range and give some `inf`. So we need to use log scale. Only calculate using $\log x$ and avoid using $x$ directly.
 
 Sampling in log scale:
 
-$$
-\log x = \log \left(m (1-p)^{-\frac 1 \alpha}\right) = \log m -\frac 1 \alpha \log (1-p)
-$$
+$$\log x = \log \left(m (1-p)^{-\frac 1 \alpha}\right) = \log m -\frac 1 \alpha \log (1-p)$$
 
 Calculating first digit in log scale:
 
-$$
-\log_{10}x = \frac{\log_e x}{\log_e 10}
-$$
+$$\log_{10}x = \frac{\log_e x}{\log_e 10}$$
 
-$$
-\log \frac {x} {10^{\lfloor \log_{10} x \rfloor}} = \log x - \lfloor \log_{10} x \rfloor  \log 10 = \log x - \left\lfloor \frac{\log x}{\log 10} \right\rfloor \log 10
-$$
+$$\log \frac {x} {10^{\lfloor \log_{10} x \rfloor}} = \log x - \lfloor \log_{10} x \rfloor  \log 10 = \log x - \left\lfloor \frac{\log x}{\log 10} \right\rfloor \log 10$$
 
-$$
-d = \left\lfloor e^{\log x - \left\lfloor \frac{\log x}{\log 10} \right\rfloor \log 10} \right\rfloor
-$$
+$$d = \left\lfloor e^{\log x - \left\lfloor \frac{\log x}{\log 10} \right\rfloor \log 10} \right\rfloor$$
 
 When $\alpha$ approaches $0$ it accurately follows Benford's law. The larger $\alpha$ the larger deviation with Benford's law.
 
