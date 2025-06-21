@@ -31,6 +31,7 @@ $$
 \int_{-\infty}^{\infty} f(x) \log\frac{1}{f(x)}dx \\ + \lambda_1 \left(\int_{-\infty}^{\infty} f(x)dx-1\right) \\ + \lambda_2 \left(\int_{-\infty}^{\infty} f(x)x^2dx -\sigma^2\right)
 \end{cases}
 $$
+
 $$
 =\int_{-\infty}^{\infty} (-f(x)\log f(x) + \lambda_1 f(x) + 
 \lambda_2 x^2 f(x) ) dx - \lambda_1 - \lambda_2\sigma^2
@@ -160,6 +161,7 @@ $$
 
 $$=\int f_Y(x) \left(\frac{1}{2}\log(2\pi\sigma^2)+\frac{(x-\mu)^2}{2\sigma^2}\right)dx=\frac{1}{2}\log(2\pi\sigma^2)\underbrace{\int f_Y(x)dx} _ {=1}+
 \frac{1}{2\sigma^2}\underbrace{\int f_Y(x)(x-\mu)^2} _ {=\sigma^2}dx$$
+
 $$=\frac{1}{2}\log(2\pi\sigma^2)+\frac{1}{2}=\frac{1}{2}\log(2\pi e \sigma^2)$$
 
 ### Central limit theorem
@@ -298,7 +300,7 @@ Here:
 
 - $p_0(x_0)$ is the probability density of original clean value (for image generation, it correspond to the probability distribution of images that we want to generate)
 - $p_1(x_1)$ is the probability density of noise-added value
-- $p_{1|0}(x_1 | x_0)$ is the probability density of noise-added value, given clean training data $x_0$. It's a normal distribution given $x_0$. It can also be seen as a function that take two arguments $x_0, x_1$.
+- $p_{1|0}(x_1 \vert x_0)$ is the probability density of noise-added value, given clean training data $x_0$. It's a normal distribution given $x_0$. It can also be seen as a function that take two arguments $x_0, x_1$.
 - $p_{0|1}(x_0|x_1)$ is the probability density of the original clean value given noise-added value. It can also be seen as a function that take two arguments $x_0, x_1$.
 
 (I use $p_{1|0}(x_1|x_0)$ instead of shorter $p(x_1|x_0)$ is to reduce confusion between different distributions.)

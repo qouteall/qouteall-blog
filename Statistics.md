@@ -1010,8 +1010,9 @@ $$
 
 $$
 = \int (-1) \left( \eta(x) \log (f(x)+\epsilon \eta(x)) + \frac{\eta(x)}{f(x)+\epsilon \eta(x)} (f(x)+\epsilon \eta(x)) \right) dx
-= \int \left( -\log(f(x)+\epsilon \eta(x)) - 1 \right) \eta(x) dx
 $$
+
+$$= \int \left( -\log(f(x)+\epsilon \eta(x)) - 1 \right) \eta(x) dx$$
 
 As $\log$ is continuous, and $\epsilon \eta(x)$ is infinitely small, so $\log(f(x)+\epsilon \eta(x))=\log (f(x))$:
 
