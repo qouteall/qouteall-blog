@@ -1,5 +1,5 @@
 
-# Some Statistics Knowledge part 1
+# Some Statistics Knowledge
 
 ## Basic concepts
 
@@ -65,8 +65,9 @@ Similarily there is also a marginal distribution of whether the test result is p
 
 False negative rate is $P(\text{Test is negative } \vert \text{ Actually has disease})$, it means the rate of negative test when actually having disease. And false positive rate is $P(\text{Test is positive } \vert \text{ Actually doesn't have disease})$.
 
-$$\text{False negative rate} = P(\text{Test is negative} \ | \ \text{Actually has disease}) = \frac{b}{a + b}$$
-$$\text{False positive rate} = P(\text{Test is positive} \ | \ \text{Actually doesn't have disease}) = \frac{c}{c + d}$$
+$$\text{False negative rate} = P(\text{Test is negative} | \text{Actually has disease}) = \frac{b}{a + b}$$
+
+$$\text{False positive rate} = P(\text{Test is positive} | \text{Actually doesn't have disease}) = \frac{c}{c + d}$$
 
 Some people may intuitively think false negative rate means $P(\text{Test result is false } \vert \text{ Test is negative})$, which equals $P(\text{Actually has disease } \vert \text{ Test is negative})$, which equals $\frac{b}{b+d}$. But that's not the official definition of false negative.
 
@@ -774,6 +775,8 @@ $$
 {\pi_\text{new}(\text{action}|\text{state})}-1
 \right]
 $$
+
+Update: According to [On a few pitfalls in KL divergence gradient estimation for RL](https://arxiv.org/abs/2506.09477), the gradient of KL divergence behave differently. This section may need to be revised.
 
 ## Mutual information
 
