@@ -303,7 +303,7 @@ Here:
 - $p_{1 \vert 0}(x_1 \vert x_0)$ is the probability density of noise-added value, given clean training data $x_0$. It's a normal distribution given $x_0$. It can also be seen as a function that take two arguments $x_0, x_1$.
 - $p_{0 \vert 1}(x_0 \vert x_1)$ is the probability density of the original clean value given noise-added value. It can also be seen as a function that take two arguments $x_0, x_1$.
 
-(I use $p_{1 \vert 0}(x_1 \vert x_0)$ instead of shorter $p(x_1|x_0)$ is to reduce confusion between different distributions.)
+(I use $p_{1 \vert 0}(x_1 \vert x_0)$ instead of shorter $p(x_1 \vert x_0)$ is to reduce confusion between different distributions.)
 
 $p_{1 \vert 0}(x_1 \vert x_0)$ is a normal distribution:
 
@@ -382,10 +382,10 @@ And $E_{x_0}\left[ \sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1} \biggr\ve
 So 
 
 $$
-E[x_0 \vert x_1] = x_1 + \underbrace{\sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1}}_\mathclap{\text{Train diffusion model to output this}}
+E[x_0 \vert x_1] = x_1 + \underbrace{\sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1}}_{\mathclap{\text{Train diffusion model to output this}}}
 $$
 
-That's Tweedie's formula (for 1D case). It can be generalized to many dimensions, where the $x_0, x_1$ are vectors, the distributions $p_0, p_1, p_{0|1}, p_{1|0}$ are joint distributions where different dimensions are not necessarily independent. The gaussian noise added to different dimensions are still independent.
+That's Tweedie's formula (for 1D case). It can be generalized to many dimensions, where the $x_0, x_1$ are vectors, the distributions $p_0, p_1, p_{0 \vert 1}, p_{1 \vert 0}$ are joint distributions where different dimensions are not necessarily independent. The gaussian noise added to different dimensions are still independent.
 
 The diffusion model is trained to estimate the added noise, which is the same as estimating the linear score.
 
