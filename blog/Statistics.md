@@ -1,11 +1,11 @@
 ---
-title: Some Statistics Knowledge
-layout: default
+date: 2025-06-22
 ---
 
 # Some Statistics Knowledge
 
-{% katexmm %}
+<!-- truncate -->
+
 
 ## Basic concepts
 
@@ -44,7 +44,9 @@ What's the essence of probability? There are two views:
 
 $P(E \vert C)$ means the probability of $E$ happening **if** $C$ happens.
 
-$$P(E|C) = \frac{P(\overbrace{E \cap C}^{\mathclap{\text{E and C both happen}}})}{P(C)} \quad\quad\quad\quad\quad P(E\cap C) = P(E|C) \cdot P(C)$$
+$$
+P(E|C) = \frac{P(\overbrace{E \cap C}^{\mathclap{\text{E and C both happen}}})}{P(C)} \quad\quad\quad\quad\quad P(E\cap C) = P(E|C) \cdot P(C)
+$$
 
 
 If E and C are independent, then $P(E \cap C) = P(E)P(C)$, then $P(E \vert C)=P(E)$.
@@ -71,9 +73,13 @@ Similarily there is also a marginal distribution of whether the test result is p
 
 False negative rate is $P(\text{Test is negative } \vert \text{ Actually has disease})$, it means the rate of negative test when actually having disease. And false positive rate is $P(\text{Test is positive } \vert \text{ Actually doesn't have disease})$.
 
-$$\text{False negative rate} = P(\text{Test is negative} | \text{Actually has disease}) = \frac{b}{a + b}$$
+$$
+\text{False negative rate} = P(\text{Test is negative} | \text{Actually has disease}) = \frac{b}{a + b}
+$$
 
-$$\text{False positive rate} = P(\text{Test is positive} | \text{Actually doesn't have disease}) = \frac{c}{c + d}$$
+$$
+\text{False positive rate} = P(\text{Test is positive} | \text{Actually doesn't have disease}) = \frac{c}{c + d}
+$$
 
 Some people may intuitively think false negative rate means $P(\text{Test result is false } \vert \text{ Test is negative})$, which equals $P(\text{Actually has disease } \vert \text{ Test is negative})$, which equals $\frac{b}{b+d}$. But that's not the official definition of false negative.
 
@@ -96,11 +102,15 @@ For discrete case, $E[X]$ is calculated by summing all theoretically possible va
 
 The mean for discrete case:
 
-$$\mu = E[X] = \sum_{\underbrace{x} _ {\mathclap{\text{consider all cases of x}}}} x \cdot \overbrace{P(X=x)} ^ {\mathclap{\text{probability of that case}}}$$
+$$
+\mu = E[X] = \sum_{\underbrace{x} _ {\mathclap{\text{consider all cases of x}}}} x \cdot \overbrace{P(X=x)} ^ {\mathclap{\text{probability of that case}}}
+$$
 
 The mean for continuous case:
 
-$$\mu = E[X] = \int_{-\infty}^{\infty} x \cdot p(x) dx$$
+$$
+\mu = E[X] = \int_{-\infty}^{\infty} x \cdot p(x) dx
+$$
 
 Some rules related to mean:
 
@@ -115,11 +125,15 @@ $$E[k] = k$$
 
 Another important rule is that, if $X$ and $Y$ are independent, then
 
-$$E[X \cdot Y] = E[X] \cdot E[Y]$$
+$$
+E[X \cdot Y] = E[X] \cdot E[Y]
+$$
 
 Because when $X$ and $Y$ are independent, $P(X=x_i, Y=y_j) = P(X=x_i) \cdot P(Y=y_j)$, then:
 
-$$E[X \cdot Y] = \sum_{i,j}{x_i \cdot y_j \cdot P(X=x_i, Y=y_j)} = \sum_{i,j}{x_i \cdot y_j \cdot P(X=x_i) \cdot P(Y=y_j)}$$
+$$
+E[X \cdot Y] = \sum_{i,j}{x_i \cdot y_j \cdot P(X=x_i, Y=y_j)} = \sum_{i,j}{x_i \cdot y_j \cdot P(X=x_i) \cdot P(Y=y_j)}
+$$
 
 Note that $E[X+Y]=E[X]+E[Y]$ always work regardless of independence, but $E[XY]=E[X]E[Y]$ requires independence.
 
@@ -157,7 +171,9 @@ Some important clarifications:
 
 The mean of estimated mean equals the theoretical mean. 
 
-$$E[\hat{\mu}] = E[\frac{1}{n}\sum_iX_i] = \frac{1}{n} \sum_i E[X_i] = \frac{1}{n} \sum_i E[X] = \frac{1}{n} n \cdot E[X] = \mu$$
+$$
+E[\hat{\mu}] = E[\frac{1}{n}\sum_iX_i] = \frac{1}{n} \sum_i E[X_i] = \frac{1}{n} \sum_i E[X] = \frac{1}{n} n \cdot E[X] = \mu
+$$
 
 Note that if the samples are not independent to each other, or they are taken from different distributions, then the estimation will be possibly biased.
 
@@ -165,7 +181,9 @@ Note that if the samples are not independent to each other, or they are taken fr
 
 The theoretical variance, $\text{Var}[X]$, also denoted as $\sigma ^2$, measures how "spread out" the samples are.
 
-$$\sigma ^2 = \text{Var}[X] = E[(X - \mu)^2]$$
+$$
+\sigma ^2 = \text{Var}[X] = E[(X - \mu)^2]
+$$
 
 If $k$ is a constant:
 
@@ -173,7 +191,9 @@ $$
 \text{Var}[kX] = k^2 \text{Var}[X]
 $$
 
-$$\text{Var}[X + k] = \text{Var}[X]$$
+$$
+\text{Var}[X + k] = \text{Var}[X]
+$$
 
 $$
 \text{Var}[X] = E[X^2] - E[X]^2
@@ -203,10 +223,12 @@ $$
 
 If $X$ and $Y$ are indepdenent, as previouly mentioned $E[XY]=E[X]\cdot E[Y]$, then
 
-$$\text{cov}[X, Y] = E[(X-E[X])(Y-E[Y])] = E[X-E[X]] \cdot E[Y-E[Y]] = 0 \cdot 0 = 0$$
+$$
+\text{cov}[X, Y] = E[(X-E[X])(Y-E[Y])] = E[X-E[X]] \cdot E[Y-E[Y]] = 0 \cdot 0 = 0
+$$
+
 
 so $\text{Var}[X + Y]= \text{Var}[X] + \text{Var}[Y]$
-
 
 The mean is sometimes also called location. The variance is sometimes called dispersion.
 
@@ -215,7 +237,10 @@ If we have some i.i.d samples but don't know the theoretical variance, how to es
 $$
 \hat{\sigma}^2 = \frac{1}{n} \sum_{i}((X_i - \mu)^2)
 $$
-$$E[\hat{\sigma}^2] = \sigma^2$$
+
+$$
+E[\hat{\sigma}^2] = \sigma^2
+$$
 
 However, the theoretical mean is different to the estimated mean. If we don't know the theoretical mean and use the estimated mean, it will be biased, and we need to divide $n-1$ instead of $n$ to avoid bias:
 
@@ -237,8 +262,13 @@ $$
 
 As each sample is independent to other samples. As previously mentioned, if $X$ and $Y$ are independent, adding the variable also adds the variance: $\text{Var}[X + Y]= \text{Var}[X] + \text{Var}[Y]$. So:
 
-$$\text{Var}\left[\sum_i{X_i}\right] = \sum_i{\text{Var}[X_i]} = n\sigma^2$$
-$$\text{Var}[\hat{\mu}] = \frac{1}{n^2} \text{Var}\left[\sum_iX_i\right] = \frac{1}{n^2} \cdot n\sigma^2 = \frac{\sigma^2}{n}$$
+$$
+\text{Var}\left[\sum_i{X_i}\right] = \sum_i{\text{Var}[X_i]} = n\sigma^2
+$$
+
+$$
+\text{Var}[\hat{\mu}] = \frac{1}{n^2} \text{Var}\left[\sum_iX_i\right] = \frac{1}{n^2} \cdot n\sigma^2 = \frac{\sigma^2}{n}
+$$
 
 As previously mentioned $E[\hat{\mu}] = \mu$, then $\text{Var}[\hat{\mu}] = E[(\hat{\mu} - E[\hat{\mu}])^2] = E[(\hat{\mu} - \mu)^2] = \frac{\sigma^2}{n}$. This will be used later.
 
@@ -266,6 +296,7 @@ E\left[\sum _ i{(X_i - \mu)^2}
  -2 (\hat{\mu} - \mu) \sum _ i{(X_i - \mu)}
  +n(\hat{\mu} - \mu)^2\right]
 $$
+
 $$
 =E\left[\sum_i{(X_i - \mu)^2}\right] 
 -2 E\left[(\hat{\mu} - \mu) \sum_i{(X_i - \mu)}\right]
@@ -350,7 +381,9 @@ Computing Z-score for a vector can also be seen as a projection:
 
 Skewness measures which side has more extreme values. 
 
-$$\text{Skew}[X] = E\left[\frac{(X - \mu)^3}{\sigma ^3}\right]$$
+$$
+\text{Skew}[X] = E\left[\frac{(X - \mu)^3}{\sigma ^3}\right]
+$$
 
 A large positive skew means there is a fat tail on positive side (may have positive Black Swans). A large negative skew means fat tail on negative side (may have negative Black Swans). 
 
@@ -385,7 +418,9 @@ But it's still biased, as $E[\frac{X}{Y}]$ doesn't necessarily equal $\frac{E[X]
 
 Larger kurtosis means it has a fatter tail. The more extreme values (Black Swans) it has, the higher its kurtosis.
 
-$$\text{Kurt}[X] = E\left[\frac{(X - \mu)^4}{\sigma ^4}\right] = \frac{E[(X-\mu)^4]}{\sigma^4}$$
+$$
+\text{Kurt}[X] = E\left[\frac{(X - \mu)^4}{\sigma ^4}\right] = \frac{E[(X-\mu)^4]}{\sigma^4}
+$$
 
 Gaussian distributions have kurtosis of 3. Excess kurtosis is the kurtosis minus 3.
 
@@ -636,7 +671,6 @@ Then $(E[X], E[f(x)])$ can be seen as an **interpolation** between five points $
 
 ![](./stat/jensen_inequality.svg)
 
-{% endkatexmm %}
 
 ```python
 import numpy as np
@@ -687,8 +721,6 @@ plt.tight_layout()
 plt.savefig("jensen_inequality.svg")
 
 ```
-
-{% katexmm %}
 
 For each point in green polygon $(E[X], E[f(X)])$, the point on function curve with the same X coordinate $(E[X], f(E[X]))$ is above it. So $E[f(X)] \leq f(E[X])$.
 
@@ -874,7 +906,9 @@ The convolution operator $*$ can:
 
 Convolution can also work in 2D or more dimensions. If $X=(x_1,x_2)$ and $Y=(y_1,y_2)$ are 2D random variables (two joint distributions), $Z=X+Y=(z_1,z_2)$ is convolution of X and Y:
 
-$$f_z(z_1,z_2) = \int_{-\infty}^\infty \int_{-\infty}^\infty f_X(x_1,x_2) \cdot f_Y(z_1-x_1,z_2-x_2) dx_1dx_2$$
+$$
+f_z(z_1,z_2) = \int_{-\infty}^\infty \int_{-\infty}^\infty f_X(x_1,x_2) \cdot f_Y(z_1-x_1,z_2-x_2) dx_1dx_2
+$$
 
 Convolution can also work on cases where the values are not probabilities. Convolutional neural network uses discrete version of convolution on matrices.
 
@@ -1027,7 +1061,9 @@ $$
 = \int (-1) \left( \eta(x) \log (f(x)+\epsilon \eta(x)) + \frac{\eta(x)}{f(x)+\epsilon \eta(x)} (f(x)+\epsilon \eta(x)) \right) dx
 $$
 
-$$= \int \left( -\log(f(x)+\epsilon \eta(x)) - 1 \right) \eta(x) dx$$
+$$
+= \int \left( -\log(f(x)+\epsilon \eta(x)) - 1 \right) \eta(x) dx
+$$
 
 As $\log$ is continuous, and $\epsilon \eta(x)$ is infinitely small, so $\log(f(x)+\epsilon \eta(x))=\log (f(x))$:
 
@@ -1231,12 +1267,19 @@ $$
 
 We can then calculate the entropy of normal distribution:
 
-$$H(X) = \int f(x)\log\frac{1}{f(x)}dx=\int f(x) \log( \sqrt{2\pi\sigma^2}e^{\frac{(x-\mu)^2}{2\sigma^2}})dx$$
+$$
+H(X) = \int f(x)\log\frac{1}{f(x)}dx=\int f(x) \log( \sqrt{2\pi\sigma^2}e^{\frac{(x-\mu)^2}{2\sigma^2}})dx
+$$
 
-$$=\int f(x) \left(\frac{1}{2}\log(2\pi\sigma^2)+\frac{(x-\mu)^2}{2\sigma^2}\right)dx=\frac{1}{2}\log(2\pi\sigma^2)\underbrace{\int f(x)dx} _ {=1}+
-\frac{1}{2\sigma^2}\underbrace{\int f(x)(x-\mu)^2} _ {=\sigma^2}dx$$
+$$
+=\int f(x) \left(\frac{1}{2}\log(2\pi\sigma^2)+\frac{(x-\mu)^2}{2\sigma^2}\right)dx=\frac{1}{2}\log(2\pi\sigma^2)\underbrace{\int f(x)dx} _ {=1}+
+\frac{1}{2\sigma^2}\underbrace{\int f(x)(x-\mu)^2} _ {=\sigma^2}dx
+$$
 
-$$=\frac{1}{2}\log(2\pi\sigma^2)+\frac{1}{2}=\frac{1}{2}\log(2\pi e \sigma^2)$$
+
+$$
+=\frac{1}{2}\log(2\pi\sigma^2)+\frac{1}{2}=\frac{1}{2}\log(2\pi e \sigma^2)
+$$
 
 If X follows normal distribution and Y's distribution that have the same mean and variance, the cross entropy $H(Y,X)$ have the same value: $\frac{1}{2}\log(2\pi e \sigma^2)$, regardless of the exact probability density function of Y. The deduction is similar to the above:
 
@@ -1244,10 +1287,14 @@ $$
 H(Y,X)=\int f_Y(x) \log \frac 1 {f_X(x)} dx = \int f_Y(x) \log( \sqrt{2\pi\sigma^2}e^{\frac{(x-\mu)^2}{2\sigma^2}})dx
 $$
 
-$$=\int f_Y(x) \left(\frac{1}{2}\log(2\pi\sigma^2)+\frac{(x-\mu)^2}{2\sigma^2}\right)dx=\frac{1}{2}\log(2\pi\sigma^2)\underbrace{\int f_Y(x)dx} _ {=1}+
-\frac{1}{2\sigma^2}\underbrace{\int f_Y(x)(x-\mu)^2} _ {=\sigma^2}dx$$
+$$
+=\int f_Y(x) \left(\frac{1}{2}\log(2\pi\sigma^2)+\frac{(x-\mu)^2}{2\sigma^2}\right)dx=\frac{1}{2}\log(2\pi\sigma^2)\underbrace{\int f_Y(x)dx} _ {=1}+
+\frac{1}{2\sigma^2}\underbrace{\int f_Y(x)(x-\mu)^2} _ {=\sigma^2}dx
+$$
 
-$$=\frac{1}{2}\log(2\pi\sigma^2)+\frac{1}{2}=\frac{1}{2}\log(2\pi e \sigma^2)$$
+$$
+=\frac{1}{2}\log(2\pi\sigma^2)+\frac{1}{2}=\frac{1}{2}\log(2\pi e \sigma^2)
+$$
 
 ### Central limit theorem
 
@@ -1392,21 +1439,17 @@ Here:
 
 $p_{1 \vert 0}(x_1 \vert x_0)$ is a normal distribution:
 
-$$
-p_{1 \vert 0}(x_1 \vert x_0) = \frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{1}{2}\left( \frac{x1-x_0}{\sigma} \right)^2}
-$$
+$$p_{1 \vert 0}(x_1 \vert x_0) = \frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{1}{2}\left( \frac{x1-x_0}{\sigma} \right)^2}$$
 
 Take log:
 
-$$
-\log p_{1 \vert 0}(x_1 \vert x_0) = -\frac 1 2 \left( \frac{x_1-x_0}{\sigma} \right)^2 + \log \frac 1 {\sqrt{2\pi}\sigma}
-$$
+$$\log p_{1 \vert 0}(x_1 \vert x_0) = -\frac 1 2 \left( \frac{x_1-x_0}{\sigma} \right)^2 + \log \frac 1 {\sqrt{2\pi}\sigma}$$
 
 The linear score function under condition:
 
+$$\frac{\partial \log p_{1 \vert 0}(x_1 \vert x_0)}{\partial x_1} = -\left(\frac{x_1-x_0}{\sigma} \right) \cdot \frac {1} {\sigma} = -\frac{x_1-x_0}{\sigma^2}
 $$
-\frac{\partial \log p_{1 \vert 0}(x_1 \vert x_0)}{\partial x_1} = -\left(\frac{x_1-x_0}{\sigma} \right) \cdot \frac 1 \sigma = - \frac{x_1-x_0}{\sigma^2}
-$$
+
 
 Bayes rule:
 
@@ -1721,7 +1764,9 @@ Pareto distribution maximizes entropy under geometric mean constraint $E[\log X]
 
 If we have constraints $X \geq m > 0$, $E[\log X] = g$, using largrange multiplier to maximize entropy:
 
-$$\mathcal{L}(f, \lambda_1, \lambda_2)= \begin{cases}\int_m^{\infty} f(x) \log \frac 1 {f(x)} dx \\\\ + \lambda_1 (\int_m^{\infty} f(x)dx-1) \\\\ + \lambda_2 (\int_m^{\infty} f(x)\log x dx - g) \end{cases}$$
+$$
+\mathcal{L}(f, \lambda_1, \lambda_2)= \begin{cases}\int_m^{\infty} f(x) \log \frac 1 {f(x)} dx \\\\ + \lambda_1 (\int_m^{\infty} f(x)dx-1) \\\\ + \lambda_2 (\int_m^{\infty} f(x)\log x dx - g) \end{cases}
+$$
 
 
 $$
@@ -1745,57 +1790,90 @@ $$
 
 Solve $\frac{\partial \mathcal{L}}{\partial f}=0$:
 
-$$- \log f(x) - 1 + \lambda_1 + \lambda_2 \log x=0$$
+$$
+- \log f(x) - 1 + \lambda_1 + \lambda_2 \log x=0
+$$
 
-$$\log f(x) = -1+\lambda_1 + \lambda_2 \log x$$
+$$
+\log f(x) = -1+\lambda_1 + \lambda_2 \log x
+$$
 
-$$f(x) = e^{-1+\lambda_1+\lambda_2 \log x}$$
+$$
+f(x) = e^{-1+\lambda_1+\lambda_2 \log x}
+$$
 
 
-$$f(x) = e^{-1+\lambda_1} \cdot (e^{\log x})^{\lambda_2} = e^{-1+\lambda_1} \cdot x^{\lambda_2}$$
+$$
+f(x) = e^{-1+\lambda_1} \cdot (e^{\log x})^{\lambda_2} = e^{-1+\lambda_1} \cdot x^{\lambda_2}
+$$
 
 
 Solve $\frac{\partial \mathcal{L}}{\partial \lambda_1}=0$:
 
-$$e^{-1+\lambda_1}\int_m^{\infty} x^{\lambda_2}dx = 1\quad\quad\quad \int_m^{\infty} x^{\lambda_2}dx = e^{1-\lambda_1}
+$$
+e^{-1+\lambda_1}\int_m^{\infty} x^{\lambda_2}dx = 1\quad\quad\quad \int_m^{\infty} x^{\lambda_2}dx = e^{1-\lambda_1}
 $$
 
 To make $\int_m^{\infty} x^{\lambda_2}dx$ be finite, $\lambda_2 < 0$. 
 
-$$\int_m^{\infty} x^{\lambda_2}dx= \left( \frac{1}{\lambda_2+1}x^{\lambda_2+1} \right) \biggr\vert^{x=\infty}_{x=m}  =- \frac 1 {\lambda_2+1} m^{\lambda_2 + 1} = e^{1-\lambda_1}$$
+$$
+\int_m^{\infty} x^{\lambda_2}dx= \left( \frac{1}{\lambda_2+1}x^{\lambda_2+1} \right) \biggr\vert^{x=\infty}_{x=m}  =- \frac 1 {\lambda_2+1} m^{\lambda_2 + 1} = e^{1-\lambda_1}
+$$
 
-$$\frac{m^{\lambda_2+1}}{\lambda_2+1} = -e^{1-\lambda_1} \tag{1}\quad\quad\quad e^{-1+\lambda_1}=-\frac{\lambda_2+1}{m^{\lambda_2+1}}$$
+$$
+\frac{m^{\lambda_2+1}}{\lambda_2+1} = -e^{1-\lambda_1} \tag{1}\quad\quad\quad e^{-1+\lambda_1}=-\frac{\lambda_2+1}{m^{\lambda_2+1}}
+$$
 
 Solve $\frac{\partial \mathcal{L}}{\partial \lambda_2}=0$:
 
-$$\int_m^{\infty} f(x) \log x \ dx=g$$
+$$
+\int_m^{\infty} f(x) \log x \ dx=g
+$$
 
-$$\int_m^{\infty} e^{-1+\lambda_1} \cdot x^{\lambda_2} \log x \ dx=g$$
+$$
+\int_m^{\infty} e^{-1+\lambda_1} \cdot x^{\lambda_2} \log x \ dx=g
+$$
 
 If we temporarily ignore $e^{-1+\lambda_1}$ and compute $\int_m^{\infty} x^{\lambda_2} \log x \ dx$. Let $u=\log x$, $x=e^u$, $dx = e^udu$:
 
-$$\int_m^{\infty} x^{\lambda_2} \log x \ dx=\int_{\log m}^{\infty} e^{\lambda_2 u} u \ du = \left( \frac 1 {\lambda_2+1} u e^{(\lambda_2+1)u} - \frac 1 {(\lambda_2+1)^2} e^{(\lambda_2+1)u}\right) \biggr\vert_{u=\log m}^{u=\infty}$$
+$$
+\int_m^{\infty} x^{\lambda_2} \log x \ dx=\int_{\log m}^{\infty} e^{\lambda_2 u} u \ du = \left( \frac 1 {\lambda_2+1} u e^{(\lambda_2+1)u} - \frac 1 {(\lambda_2+1)^2} e^{(\lambda_2+1)u}\right) \biggr\vert_{u=\log m}^{u=\infty}
+$$
 
 To make it be finite, $\lambda_2+1 \leq 0$, $\lambda_2 \leq -1$. Then
 
-$$\int_m^{\infty} x^{\lambda_2} \log x \ dx=- \frac 1 {\lambda_2+1} (\log m) e^{(\lambda_2+1)\log m} + \frac 1 {(\lambda_2+1)^2} e^{(\lambda_2+1)\log m}$$
+$$
+\int_m^{\infty} x^{\lambda_2} \log x \ dx=- \frac 1 {\lambda_2+1} (\log m) e^{(\lambda_2+1)\log m} + \frac 1 {(\lambda_2+1)^2} e^{(\lambda_2+1)\log m}
+$$
 
-$$=- \frac 1 {\lambda_2+1} (\log m)  m^{(\lambda_2+1)} + \frac 1 {(\lambda_2+1)^2} m^{(\lambda_2+1)}$$
+$$
+=- \frac 1 {\lambda_2+1} (\log m)  m^{(\lambda_2+1)} + \frac 1 {(\lambda_2+1)^2} m^{(\lambda_2+1)}
+$$
 
 So
 
-$$\int_m^{\infty} e^{-1+\lambda_1} \cdot x^{\lambda_2} \log x \ dx
-= e^{-1+\lambda_1} \left(- \frac 1 {\lambda_2+1} (\log m)  m^{(\lambda_2+1)} + \frac 1 {(\lambda_2+1)^2} m^{(\lambda_2+1)} \right)$$
+$$
+\int_m^{\infty} e^{-1+\lambda_1} \cdot x^{\lambda_2} \log x \ dx
+= e^{-1+\lambda_1} \left(- \frac 1 {\lambda_2+1} (\log m)  m^{(\lambda_2+1)} + \frac 1 {(\lambda_2+1)^2} m^{(\lambda_2+1)} \right)
+$$
 
 By using (1) $e^{-1+\lambda_1}=-\frac{\lambda_2+1}{m^{\lambda_2+1}}$:
 
-$$=- (-\log m + \frac 1 {\lambda_2+1})=\log m - \frac 1 {\lambda_2+1} = g$$
+$$
+=- (-\log m + \frac 1 {\lambda_2+1})=\log m - \frac 1 {\lambda_2+1} = g
+$$
 
-$$\frac 1 {\lambda_2+1} = \log m - g\quad\quad\quad\lambda_2+1 = \frac 1 {\log m - g}$$
+$$
+\frac 1 {\lambda_2+1} = \log m - g\quad\quad\quad\lambda_2+1 = \frac 1 {\log m - g}
+$$
 
-$$e^{-1+\lambda_1}=-\frac{\lambda_2+1}{m^{\lambda_2+1}} = - \frac{\frac 1 {\log m - g}}{m^{\frac 1 {\log m - g}}}$$
+$$
+e^{-1+\lambda_1}=-\frac{\lambda_2+1}{m^{\lambda_2+1}} = - \frac{\frac 1 {\log m - g}}{m^{\frac 1 {\log m - g}}}
+$$
 
-$$f(x)= e^{-1+\lambda_1} \cdot x^{\lambda_2} = - \frac{\frac 1 {\log m - g}}{m^{\frac 1 {\log m - g}}} x^{(\frac 1 {\log m - g}-1)}$$
+$$
+f(x)= e^{-1+\lambda_1} \cdot x^{\lambda_2} = - \frac{\frac 1 {\log m - g}}{m^{\frac 1 {\log m - g}}} x^{(\frac 1 {\log m - g}-1)}
+$$
 
 Let $\alpha = -\frac 1 {\log m - g}$, it become:
 
@@ -1812,22 +1890,25 @@ For example, if wealth follows Pareto distribution, how to compute the wealth sh
 We firstly need to compute the threshold value $t$ of the top $n$:
 
 $$
-P(X>t) = n
-\quad\quad\quad
-m^\alpha t^{-\alpha}=p
+P(X>t) = n \quad\quad\quad m^\alpha t^{-\alpha}=p
 \quad\quad\quad
 t= (p m^{-\alpha})^{- \frac{1}{\alpha}} = m p^{- \frac{1}{\alpha}}
 $$
 
 Then compute the share
 
-$$\text{Share} = \frac{\int_t^{\infty} x N f(x)dx}{\int_m^{\infty} x N f(x)dx}=\frac{\int_t^{\infty} x f(x)dx}{\int_m^{\infty} x f(x)dx}$$
+$$
+\text{Share} = \frac{\int_t^{\infty} x N f(x)dx}{\int_m^{\infty} x N f(x)dx}=\frac{\int_t^{\infty} x f(x)dx}{\int_m^{\infty} x f(x)dx}
+$$
 
-$$\int_b^{\infty} x f(x)dx = \int_b^{\infty} \alpha m^{-\alpha} x^{-\alpha}dx = \alpha m^{-\alpha} \cdot \left( \frac 1 {-\alpha+1} x^{-\alpha+1} \right) \biggr\vert_{x=b}^{x=\infty} = \left(- \alpha m^{-\alpha} \frac 1 {-\alpha+1}\right) b^{-\alpha+1}$$
+$$
+\int_b^{\infty} x f(x)dx = \int_b^{\infty} \alpha m^{-\alpha} x^{-\alpha}dx = \alpha m^{-\alpha} \cdot \left( \frac 1 {-\alpha+1} x^{-\alpha+1} \right) \biggr\vert_{x=b}^{x=\infty} = \left(- \alpha m^{-\alpha} \frac 1 {-\alpha+1}\right) b^{-\alpha+1}
+$$
 
 To make that integration finite, we need $-\alpha+1< 0$, $\alpha > 1$.
 
-$$\text{Share}=\frac{\int_t^{\infty} x f(x)dx}{\int_m^{\infty} x f(x)dx}= \frac{\left(- \alpha m^{-\alpha} \frac 1 {-\alpha+1}\right) t^{-\alpha+1}}{\left(- \alpha m^{-\alpha} \frac 1 {-\alpha+1}\right) m^{-\alpha+1}}= \frac{t^{-\alpha+1}}{m^{-\alpha+1}} = \frac{m^{-\alpha+1} p^{ - \frac{1}{\alpha} (-\alpha+1)}}{m^{-\alpha+1}}=p^{1- \frac{1}{\alpha}}
+$$
+\text{Share}=\frac{\int_t^{\infty} x f(x)dx}{\int_m^{\infty} x f(x)dx}= \frac{\left(- \alpha m^{-\alpha} \frac 1 {-\alpha+1}\right) t^{-\alpha+1}}{\left(- \alpha m^{-\alpha} \frac 1 {-\alpha+1}\right) m^{-\alpha+1}}= \frac{t^{-\alpha+1}}{m^{-\alpha+1}} = \frac{m^{-\alpha+1} p^{ - \frac{1}{\alpha} (-\alpha+1)}}{m^{-\alpha+1}}=p^{1- \frac{1}{\alpha}}
 $$
 
 The share porpotion is irrelevant to $m$.
@@ -1846,7 +1927,6 @@ Some concrete numbers:
 | 2.5      | 38.07%           | 6.31%           |
 | 3        | 34.20%           | 4.64%           |
 
-{% endkatexmm %}
 
 ```python
 print("| $\\alpha$ | Share of top 20% | Share of top 1% |\n| - | - | - |\n"+ "\n".join([
@@ -1856,7 +1936,6 @@ print("| $\\alpha$ | Share of top 20% | Share of top 1% |\n| - | - | - |\n"+ "\n
 ]))
 ```
 
-{% katexmm %}
 
 ### Power law distributions
 
@@ -1922,9 +2001,13 @@ If $T$ follows exponential distribution, its probability density $f_T(t) = \lamb
 
 If $Y=a^T$, $a>1$, then
 
-$$P(Y<y) = P(a^T < y) = P\left(T < \frac{\log y}{\log a}\right) = 1- e^{-\lambda \frac{\log y}{\log a}}=1- (e^{\log y})^{-\frac{\lambda}{\log a}}=1-y^{-\frac{\lambda}{\log a}}$$
+$$
+P(Y<y) = P(a^T < y) = P\left(T < \frac{\log y}{\log a}\right) = 1- e^{-\lambda \frac{\log y}{\log a}}=1- (e^{\log y})^{-\frac{\lambda}{\log a}}=1-y^{-\frac{\lambda}{\log a}}
+$$
 
-$$\text{TailFunction}(y)=P(Y>y) = 1-P(Y<y) = y^{-\frac{\lambda}{\log a}}$$
+$$
+\text{TailFunction}(y)=P(Y>y) = 1-P(Y<y) = y^{-\frac{\lambda}{\log a}}
+$$
 
 Because $T\geq 0$, $Y \geq a^0=1$. Now $Y$'s tail function is in the same form as Pareto (Type I) distribution, where $\alpha=\frac{\lambda}{\log a}, \ m =1$.
 
@@ -1936,10 +2019,14 @@ If the lifetime $T$ follows Pareto distribution, if something keeps living at ti
 
 (The mean is weighted average. The conditional mean is also weighted average but under condition. But as the total integrated weight is not 1, it need to divide the total integrated weight.)
 
-$$E[T | T > t] = \frac{\int_t^{\infty} xf(x)dx}{\int_t^{\infty} f(x)dx} =
-\frac{\int_t^{\infty} x \alpha m^{-\alpha} x^{-\alpha-1} dx }{\int_t^{\infty} \alpha m^{-\alpha} x^{-\alpha-1} dx}$$
+$$
+E[T | T > t] = \frac{\int_t^{\infty} xf(x)dx}{\int_t^{\infty} f(x)dx} =
+\frac{\int_t^{\infty} x \alpha m^{-\alpha} x^{-\alpha-1} dx }{\int_t^{\infty} \alpha m^{-\alpha} x^{-\alpha-1} dx}
+$$
 
-$$= \frac{\int_t^{\infty}  x^{-\alpha} dx }{\int_t^{\infty} x^{-\alpha-1} dx} = \frac{ \frac 1 {-\alpha+1} x^{-\alpha+1} |_{x=t}^{x=\infty}}{\frac 1 {-\alpha} x^{-\alpha}|_{x=t}^{x=\infty}} = \frac{-\frac 1 {-\alpha+1} t^{-\alpha+1}}{-\frac 1 {-\alpha} t^{-\alpha}} = \frac{\alpha}{\alpha-1} t$$
+$$
+= \frac{\int_t^{\infty}  x^{-\alpha} dx }{\int_t^{\infty} x^{-\alpha-1} dx} = \frac{ \frac 1 {-\alpha+1} x^{-\alpha+1} |_{x=t}^{x=\infty}}{\frac 1 {-\alpha} x^{-\alpha}|_{x=t}^{x=\infty}} = \frac{-\frac 1 {-\alpha+1} t^{-\alpha+1}}{-\frac 1 {-\alpha} t^{-\alpha}} = \frac{\alpha}{\alpha-1} t
+$$
 
 (For that integration to be finite, $-\alpha+1<0$, $\alpha>1$)
 
@@ -1965,9 +2052,12 @@ In this case, doing a Monte Carlo simulation is easier.
 
 How to randomly sample numbers from a Pareto distribution? Firstly we know the cumulative distribution function $F(x) = P(X<x) = 1-P(X>x) = 1- m^\alpha x^{-\alpha}$. We can then get quantile function, which is the inverse of $F$: $F(x)=p, \ \ Q(p) = x$
 
-$$p=1-m^\alpha x^{-\alpha} \quad\quad\quad m^\alpha x^{-\alpha}=1-p \quad\quad\quad x^{-\alpha} = (1-p) m^{-\alpha}$$
+$$
+p=1-m^\alpha x^{-\alpha} \quad\quad\quad m^\alpha x^{-\alpha}=1-p \quad\quad\quad x^{-\alpha} = (1-p) m^{-\alpha}
+$$
 
-$$(x^{-\alpha})^{- \frac{1}{\alpha}} = \left((1-p) m^{-\alpha}\right)^{- \frac{1}{\alpha}}
+$$
+(x^{-\alpha})^{- \frac{1}{\alpha}} = \left((1-p) m^{-\alpha}\right)^{- \frac{1}{\alpha}}
 \quad\quad\quad x = m (1-p)^{- \frac{1}{\alpha}}
 \quad\quad\quad Q(p) = m (1-p)^{- \frac{1}{\alpha}}
 $$
@@ -1976,29 +2066,37 @@ Now we can randomly sample $p$ between 0 and 1 then $Q(p)$ will follow Pareto di
 
 Given $x$ how to calculate its first digit? If $10\leq x<100$ ($1 \leq \log_{10} x < 2$) then first digit is $\lfloor {\frac x {10}} \rfloor$. If $100 \leq x < 1000$ ($2 \leq \log_{10}x < 3$) then the first digit is $\lfloor {\frac x {100}} \rfloor$. Generalize it, the first digit $d$ is:
 
-$$d = \left\lfloor \frac {x} {10^{\lfloor \log_{10} x \rfloor}} \right\rfloor$$
+$$
+d = \left\lfloor \frac {x} {10^{\lfloor \log_{10} x \rfloor}} \right\rfloor
+$$
 
 Because Pareto distribution has a lot of extreme values, directly calculating the sample will likely to exceed floating-point range and give some `inf`. So we need to use log scale. Only calculate using $\log x$ and avoid using $x$ directly.
 
 Sampling in log scale:
 
-$$\log x = \log \left(m (1-p)^{- \frac{1}{\alpha}}\right) = \log m - \frac{1}{\alpha} \log (1-p)$$
+$$
+\log x = \log \left(m (1-p)^{- \frac{1}{\alpha}}\right) = \log m - \frac{1}{\alpha} \log (1-p)
+$$
 
 Calculating first digit in log scale:
 
-$$\log_{10}x = \frac{\log_e x}{\log_e 10}$$
+$$
+\log_{10}x = \frac{\log_e x}{\log_e 10}
+$$
 
-$$\log \frac {x} {10^{\lfloor \log_{10} x \rfloor}} = \log x - \lfloor \log_{10} x \rfloor  \log 10 = \log x - \left\lfloor \frac{\log x}{\log 10} \right\rfloor \log 10$$
+$$
+\log \frac {x} {10^{\lfloor \log_{10} x \rfloor}} = \log x - \lfloor \log_{10} x \rfloor  \log 10 = \log x - \left\lfloor \frac{\log x}{\log 10} \right\rfloor \log 10
+$$
 
-$$d = \left\lfloor e^{\log x - \left\lfloor \frac{\log x}{\log 10} \right\rfloor \log 10} \right\rfloor$$
+$$
+d = \left\lfloor e^{\log x - \left\lfloor \frac{\log x}{\log 10} \right\rfloor \log 10} \right\rfloor
+$$
 
 When $\alpha$ approaches $0$ it accurately follows Benford's law. The larger $\alpha$ the larger deviation with Benford's law.
 
 If we fix the min value $m$ as a specific number, like $3$, when $\alpha$ is not very close to $0$ it significantly deviates with Benford's law. However if we make $m$ a random value between 1 and 10 then it will be close to Benford's law.
 
 ![](./stat/pareto_benfords_law.svg)
-
-{% endkatexmm %}
 
 
 ```python
@@ -2046,7 +2144,6 @@ plt.tight_layout()
 plt.savefig("pareto_benfords_law.svg")
 ```
 
-{% katexmm %}
 
 ## Hypothesis testing
 
@@ -2109,4 +2206,3 @@ How to test how overfit a model is?
 - Wrongly remove outliers.
 - ...
 
-{% endkatexmm %}
