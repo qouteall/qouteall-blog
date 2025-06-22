@@ -990,7 +990,7 @@ But in the modern world, there are non-physical threats and modern risks (e.g. e
 
 Related: **Cortisol** is a kind of hormone that's correlated with stress. Cortisol has many effects, like making you more vigilent and less relax. If the cortisol level keeps being high for long time, there will be health issues like weight gain, weakened immune system, sleep deprivation, digest issues, etc. 
 
-From evolutionary perspective, cortisol makes one more likely to live in a physical threat (e.g. a tiger) at the expense of other aspects. These physical threats are usually quick and short (e.g. either die or flee from tiger). But the modern risks are usually long and chronic (e.g. worry about exam several months before exam), so that cortisol system is not adaptive.
+From evolutionary perspective, cortisol makes one more likely to survive under physical threats (e.g. a tiger) at the expense of other aspects. These physical threats are usually quick and short (e.g. either die or flee from tiger). But the modern risks are usually long and chronic (e.g. worry about exam several months before exam), so that cortisol system is not adaptive.
 
 ## Willpower and mental energy
 
