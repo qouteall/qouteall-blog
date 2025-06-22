@@ -201,12 +201,12 @@ $$
 
 Standard deviation (**stdev**) $\sigma$ is the square root of variance. Multiplying a random variable by a constant also multiplies the standard deviation.
 
-The covariance $\text{cov}[X, Y]$ meansures the "joint variability" of two random variables $X$ and $Y$.
+The covariance $\text{Cov}[X, Y]$ measures the "joint variability" of two random variables $X$ and $Y$.
 
 $$
-\text{cov}[X, Y] = E[(X-E[X])(Y-E[Y])]
+\text{Cov}[X, Y] = E[(X-E[X])(Y-E[Y])]
 \quad\quad\quad
-\text{Var}[X]=\text{cov}[X,X]
+\text{Var}[X]=\text{Cov}[X,X]
 $$
 
 Some rules related to variance:
@@ -218,13 +218,13 @@ $$
 
 $$
 = E[(X-E[X])^2 + (Y-E[Y])^2 + 2(X-E[X])(Y-E[Y])] 
-= \text{Var}[X] + \text{Var}[Y] + 2 \cdot \text{cov}[X, Y]
+= \text{Var}[X] + \text{Var}[Y] + 2 \cdot \text{Cov}[X, Y]
 $$
 
 If $X$ and $Y$ are indepdenent, as previouly mentioned $E[XY]=E[X]\cdot E[Y]$, then
 
 $$
-\text{cov}[X, Y] = E[(X-E[X])(Y-E[Y])] = E[X-E[X]] \cdot E[Y-E[Y]] = 0 \cdot 0 = 0
+\text{Cov}[X, Y] = E[(X-E[X])(Y-E[Y])] = E[X-E[X]] \cdot E[Y-E[Y]] = 0 \cdot 0 = 0
 $$
 
 
@@ -1353,15 +1353,15 @@ To describe a multivariate normal distribution, an important concept is **covari
 Recall covariance: $\text{Cov}[X,Y]=E[(X-E[X])(Y-E[Y])]$. Some rules about covariance:
 
 - It's symmetric: $\text{Cov}[X,Y] = \text{Cov}[Y,X]$
-- If X and Y are independent, $Cov[X,Y]=0$
-- Adding constant $Cov[X+k,Y] = Cov[X,Y]$. Variance is invariant to translation.
+- If X and Y are independent, $\text{Cov}[X,Y]=0$
+- Adding constant $\text{Cov}[X+k,Y] = \text{Cov}[X,Y]$. Variance is invariant to translation.
 - Multiplying constant $\text{Cov}[k\cdot X,Y] = k \cdot \text{Cov}[X,Y]$
-- Addition $Cov[X+Y,Z] = Cov[X,Z]+Cov[Y,Z]$
+- Addition $\text{Cov}[X+Y,Z] = \text{Cov}[X,Z]+\text{Cov}[Y,Z]$
 
 Covariance matrix:
 
 $$
-Cov(\boldsymbol x,\boldsymbol y) = E[(\boldsymbol x - E[\boldsymbol x])(\boldsymbol y-E[\boldsymbol y])^T]
+\text{Cov}(\boldsymbol x,\boldsymbol y) = E[(\boldsymbol x - E[\boldsymbol x])(\boldsymbol y-E[\boldsymbol y])^T]
 $$
 
 Here $E[\boldsymbol x]$ taking mean of each element in $\boldsymbol x$ and output a vector. It's element-wise. $E[\boldsymbol x]_i = E[\boldsymbol x_i]$. Similar for matrix.
@@ -1369,7 +1369,7 @@ Here $E[\boldsymbol x]$ taking mean of each element in $\boldsymbol x$ and outpu
 The covariance matrix written out:
 
 $$
-Cov(\boldsymbol x,\boldsymbol y)=\begin{bmatrix} 
+\text{Cov}(\boldsymbol x,\boldsymbol y)=\begin{bmatrix} 
 \text{Cov}[\boldsymbol x_1,\boldsymbol y_1] &\ \text{Cov}[\boldsymbol x_1,\boldsymbol y_2] &\ ... &\ \text{Cov}[\boldsymbol x_1,\boldsymbol y_n] \\
 \text{Cov}[\boldsymbol x_2,\boldsymbol y_1] &\ \text{Cov}[\boldsymbol x_2,\boldsymbol y_2] &\ ... &\ \text{Cov}[\boldsymbol x_2,\boldsymbol y_n] \\
 \vdots &\ \vdots &\ \ddots &\ \vdots \\
@@ -1382,20 +1382,20 @@ Recall that multiplying constant and addition can be "moved out of $E[]$": $E[kX
 So applying it to covariance matrix:
 
 $$
-Cov(A \cdot \boldsymbol x,\boldsymbol y) = E[(A\cdot \boldsymbol x - E[A\cdot \boldsymbol x])(\boldsymbol y-E[\boldsymbol y])^T] = E[(A\cdot \boldsymbol x - A \cdot E[\boldsymbol x])(\boldsymbol y-E[\boldsymbol y])^T]
+\text{Cov}(A \cdot \boldsymbol x,\boldsymbol y) = E[(A\cdot \boldsymbol x - E[A\cdot \boldsymbol x])(\boldsymbol y-E[\boldsymbol y])^T] = E[(A\cdot \boldsymbol x - A \cdot E[\boldsymbol x])(\boldsymbol y-E[\boldsymbol y])^T]
 $$
 $$
-=A\cdot E[(\boldsymbol x - E[\boldsymbol x])(\boldsymbol y-E[\boldsymbol y])^T] = A \cdot Cov(\boldsymbol x, \boldsymbol y)
+=A\cdot E[(\boldsymbol x - E[\boldsymbol x])(\boldsymbol y-E[\boldsymbol y])^T] = A \cdot \text{Cov}(\boldsymbol x, \boldsymbol y)
 $$
 
-Similarily, $Cov(\boldsymbol x, B \cdot \boldsymbol y) = Cov(\boldsymbol x, \boldsymbol y)  \cdot B^T$.
+Similarily, $\text{Cov}(\boldsymbol x, B \cdot \boldsymbol y) = \text{Cov}(\boldsymbol x, \boldsymbol y)  \cdot B^T$.
 
-If $\boldsymbol x$ follows multivariate normal distribution, it can be described by mean vector $\boldsymbol \mu$ (the mean of each element of $\boldsymbol x$) and covariance matrix $Cov(\boldsymbol x,\boldsymbol x)$.
+If $\boldsymbol x$ follows multivariate normal distribution, it can be described by mean vector $\boldsymbol \mu$ (the mean of each element of $\boldsymbol x$) and covariance matrix $\text{Cov}(\boldsymbol x,\boldsymbol x)$.
 
 Initially, if I have some independent normal variables $x_1, x_2, ... x_n$ with mean values $\mu_1, ..., \mu_n$ and variances $\sigma_1^2, ..., \sigma_n^2$. If we treat them as a multivariate normal distribution, the mean vector $\boldsymbol \mu_x = (\mu_1, ..., \mu_n)$. The covariance matrix will be diagonal as they are independent:
 
 $$
-Cov(\boldsymbol x,\boldsymbol x) = 
+\text{Cov}(\boldsymbol x,\boldsymbol x) = 
 \begin{bmatrix} 
 \sigma_1^2 &\ 0 &\ ... &\ 0 \\
 0  &\ \sigma_2^2 &\ ... &\ 0 \\
@@ -1404,13 +1404,15 @@ Cov(\boldsymbol x,\boldsymbol x) =
 \end{bmatrix}
 $$
 
-Then if we apply an affine transformation $\boldsymbol y = A \boldsymbol x + \boldsymbol b$, then $\boldsymbol \mu_y = A \mu_x + \boldsymbol b$. $Cov(\boldsymbol y,\boldsymbol y) = Cov(A \boldsymbol x + \boldsymbol b,A \boldsymbol x + \boldsymbol b) = Cov(A \boldsymbol x, A \boldsymbol x) = A Cov(\boldsymbol x,\boldsymbol x) A^T$.
+Then if we apply an affine transformation $\boldsymbol y = A \boldsymbol x + \boldsymbol b$, then $\boldsymbol \mu_y = A \mu_x + \boldsymbol b$. $\text{Cov}(\boldsymbol y,\boldsymbol y) = \text{Cov}(A \boldsymbol x + \boldsymbol b,A \boldsymbol x + \boldsymbol b) = \text{Cov}(A \boldsymbol x, A \boldsymbol x) = A \text{Cov}(\boldsymbol x,\boldsymbol x) A^T$.
 
 ### Gaussian splatting
 
 The industry standard of 3D modelling is to model the 3D object as many triangles, called mesh. It only models the visible surface object. It use many triangles to approximate curved surface.
 
-Gaussian splatting provides an alternative method of 3D modelling. The 3D scene is modelled by a lot of mutlivariate (3D) gaussian distributions, called gaussian. When rendering, that 3D gaussian distribution is projected onto a plane (screen) and become a 2D gaussian distribution, now probability density correspond to color opacity.
+Gaussian splatting provides an alternative method of 3D modelling. The 3D scene is modelled by a lot of mutlivariate (3D) gaussian distributions, called gaussian. When rendering, that 3D gaussian distribution is projected onto a plane (screen) and approximately become a 2D gaussian distribution, now probability density correspond to color opacity.
+
+Note that the projection is perspective projection (near things big and far things small). Perspective projection is not linear. After perspective projection the 3D Gaussian distribution, it's no longer strictly a 2D Gaussian distribution, but is very close to a 2D Gaussian distribution, so treated as a 2D gaussian. If the projection is linear then result is still gaussian.
 
 A gaussian's color can be fixed or can change based on different view directions.
 
