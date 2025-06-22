@@ -103,12 +103,7 @@ Reference: [Time perception - Wikipedia](https://en.wikipedia.org/wiki/Time_perc
 
 If happiness can be predicted, some happiness moves earlier. For example, one is originally happy when eating delicious chocolate. Then one become happy just after buying chocolate before eating it, and the happiness of actually eating chocolate reduces. In future the happiness can move earlier into deciding to buy chocolate. This effect is also called **second-order conditioning**.
 
-Material consumption can give short-term satisfaction, but cannot give long-term well-being (paradox of materialism). Long-term well being can better be achieved by:
-
-- following internal motivation with hard work,
-- meaningful and sustainable relationships,
-- appreciation and awe to the world,
-- sustainable consumption (of material and information) with temperance.
+Material consumption can give short-term satisfaction, but cannot give long-term well-being (paradox of materialism). Long-term well being can better be achieved by sustainable consumption with temperance.
 
 **Means-end inversion**: one originally want money (means) to improve life quality (end). However, the process of making money can sacrifice life quality. Examples: investing all money and leave little for consumption, or choosing a high-paying job with no work-life balance (golden handcuffs).
 
@@ -464,6 +459,7 @@ Examples of binary thinking:
 - "It's very easy to do" / "It's impossible."
 - The idol maintains a perfect image. / Image collapse, true nature exposes.
 - "We will win quickly." / "We will lose quickly."
+- "I can do it perfectly." / "I cannot do it perfectly so I will fail."
 
 People's evaluations are anchored on the expectation, and **not meeting an exception could make people's belief turn to another extreme**.
 
@@ -991,6 +987,10 @@ People tend to be overconfident in familiar situations, but that's where acciden
 "Fight or flight" are the two options for dealing with physical threat (e.g. a tiger) in the ancient world.
 
 But in the modern world, there are non-physical threats and modern risks (e.g. exam failure, losing job). These modern threats can be dealt with neither concrete fight or flight. So they may cause depression, anxiety and immobilization.
+
+Related: **Cortisol** is a kind of hormone that's correlated with stress. Cortisol has many effects, like making you more vigilent and less relax. If the cortisol level keeps being high for long time, there will be health issues like weight gain, weakened immune system, sleep deprivation, digest issues, etc. 
+
+From evolutionary perspective, cortisol makes one more likely to live in a physical threat (e.g. a tiger) at the expense of other aspects. These physical threats are usually quick and short (e.g. either die or flee from tiger). But the modern risks are usually long and chronic (e.g. worry about exam several months before exam), so that cortisol system is not adaptive.
 
 ## Willpower and mental energy
 

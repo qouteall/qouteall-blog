@@ -1120,8 +1120,6 @@ $$
 The result is $f(x) = \frac 1 {b-a} \ \ \ (a \leq x \leq b)$. 
 
 
-# Some Statistics Knowledge part 2
-
 ## Normal distribution
 
 The normal distribution, also called Gaussian distribution, is important in statistics. It's the distribution with maximum entropy if we constraint its variance $\sigma^2$ to be a finite value.
