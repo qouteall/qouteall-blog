@@ -1,11 +1,13 @@
 ---
-title: Cognitive biases
-layout: default
+date: 2025-01-27
 ---
 
 # Notes about Cognitive Biases
 
 A summarization of the main cognitive biases, relating to financial trading, combined with my own understanding.
+
+<!-- truncate -->
+
 
 ## Nonlinear perception
 
@@ -982,7 +984,7 @@ People tend to be overconfident in familiar situations, but that's where acciden
 
 > Most accidents (69%) occurred on slopes that were very familiar to the victims. Fewer accidents occurred on slopes that were somewhat familiar (13%) and unfamiliar (18%) to the victim.
 >
-> \- [Evidence of heuristic traps in recreational avalanche accidents](https://web.archive.org/web/20161207115118/https://avalanche-academy.com/uploads/resources/Traps Reprint.pdf)
+> \- [Evidence of heuristic traps in recreational avalanche accidents](https://web.archive.org/web/20161207115118/https://avalanche-academy.com/uploads/resources/Traps%20Reprint.pdf)
 
 ### Stress and fight-or-flight
 
@@ -1146,7 +1148,7 @@ This is related to information addiction. **Randomized things give more informat
 
 Unfortunately, just knowing the cognitive biases is not enough to avoid and overcome them. A lot of cognitive biases originate from the biological basis of human's cognitive function, which cannot change from just knowledge.
 
-Reference: [G.I. Joe Phenomena: Understanding  the Limits of Metacognitive  Awareness on Debiasing](https://www.hbs.edu/ris/Publication Files/21-084_436ebba8-c832-4922-bb6e-49d000a77df3.pdf)
+Reference: [G.I. Joe Phenomena: Understanding  the Limits of Metacognitive  Awareness on Debiasing](https://www.hbs.edu/ris/Publication%20Files/21-084_436ebba8-c832-4922-bb6e-49d000a77df3.pdf)
 
 ## Two trading strategies
 
