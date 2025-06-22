@@ -1439,15 +1439,20 @@ Here:
 
 $p_{1 \vert 0}(x_1 \vert x_0)$ is a normal distribution:
 
-$$p_{1 \vert 0}(x_1 \vert x_0) = \frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{1}{2}\left( \frac{x1-x_0}{\sigma} \right)^2}$$
+$$
+p_{1 \vert 0}(x_1 \vert x_0) = \frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{1}{2}\left( \frac{x1-x_0}{\sigma} \right)^2}
+$$
 
 Take log:
 
-$$\log p_{1 \vert 0}(x_1 \vert x_0) = -\frac 1 2 \left( \frac{x_1-x_0}{\sigma} \right)^2 + \log \frac 1 {\sqrt{2\pi}\sigma}$$
+$$
+\log p_{1 \vert 0}(x_1 \vert x_0) = -\frac 1 2 \left( \frac{x_1-x_0}{\sigma} \right)^2 + \log \frac 1 {\sqrt{2\pi}\sigma}
+$$
 
 The linear score function under condition:
 
-$$\frac{\partial \log p_{1 \vert 0}(x_1 \vert x_0)}{\partial x_1} = -\left(\frac{x_1-x_0}{\sigma} \right) \cdot \frac {1} {\sigma} = -\frac{x_1-x_0}{\sigma^2}
+$$
+\frac{\partial \log p_{1 \vert 0}(x_1 \vert x_0)}{\partial x_1} = -\left(\frac{x_1-x_0}{\sigma} \right) \cdot \frac {1} {\sigma} = -\frac{x_1-x_0}{\sigma^2}
 $$
 
 
@@ -1877,7 +1882,9 @@ $$
 
 Let $\alpha = -\frac 1 {\log m - g}$, it become:
 
-$$f(x) = \alpha m^{\alpha} x^{-\alpha-1} \quad\quad(x>m)$$
+$$
+f(x) = \alpha m^{\alpha} x^{-\alpha-1} \quad\quad(x>m)
+$$
 
 Now we rediscovered Pareto (Type I) distribution by maximizing entropy.
 
