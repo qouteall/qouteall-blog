@@ -311,7 +311,7 @@ To simplify, we tend to **make up reasons of why things happen**. A reasonable t
 Examples:
 
 - See a few rude peoples in one city, then conclude that "people from that city are rude".
-- People who only live in one country think that some societal issue is specific to the country that they are in. In fact, most societal issues apply to all countries.
+- People who only live in one country think that some societal issue is specific to the country that they are in. In fact, most societal issues apply to most countries.
 - **Illusion of control**: A gambler may have the illusion that their behavior can control the random outcomes after seeing occasional coincidents.
 
 People tend to see false pattern from random things. This effect is [apophenia](https://en.wikipedia.org/wiki/Apophenia).

@@ -9,9 +9,12 @@ date: 2025-06-22
 
 ## Basic concepts
 
-Probability is relative to the information you have. 
+What's the essence of probability? There are two views:
 
-Probability is related to sampling assumptions. Example: [Bertrand Paradox](https://en.wikipedia.org/wiki/Bertrand_paradox_(probability)): there are many ways to randoly select a chord on a circle, with different "proability densities".
+- Frequentist: Probability is an objective thing. We can know probability from the result of repeating a random event many times in the same condition.
+- Bayesian: Probability is a subjective thing. Probability means how you think it's likely to happen based on your initial assumptions and the evidences you see. **Probability is relative to the information you have.**
+
+Probability is related to sampling assumptions. Example: [Bertrand Paradox](https://en.wikipedia.org/wiki/Bertrand_paradox_(probability)): there are many ways to randoly select a chord on a circle, with different proability densities of chord.
 
 A distribution tells how likely a random variable will be what value:
 
@@ -31,14 +34,9 @@ A joint distribution tells how likely a combination of multiple variables will b
 
 For a joint distribution of $(X, Y)$, if we only care about X, then the distribution of X is called **marginal** distribution.
 
-You can only add probability when two events are mutually exclusive. 
+You can only add probability when two events are mutually exclusive.
 
-You can only multiply probability when two events are independent or working with conditional probability.
-
-What's the essence of probability? There are two views:
-
-- Frequentist: Probability is an objective thing. We can know probability from the result of repeating a random event many times in the same condition.
-- Bayesian: Probability is a subjective thing. Probability means how you think it's likely to happen based on your initial assumptions and the evidences you see.
+You can only multiply probability when two events are independent, or multiplying a conditional probability with the condition's probability.
 
 ## Conditional probability
 
@@ -1412,7 +1410,7 @@ The industry standard of 3D modelling is to model the 3D object as many triangle
 
 Gaussian splatting provides an alternative method of 3D modelling. The 3D scene is modelled by a lot of mutlivariate (3D) gaussian distributions, called gaussian. When rendering, that 3D gaussian distribution is projected onto a plane (screen) and approximately become a 2D gaussian distribution, now probability density correspond to color opacity.
 
-Note that the projection is perspective projection (near things big and far things small). Perspective projection is not linear. After perspective projection the 3D Gaussian distribution, it's no longer strictly a 2D Gaussian distribution, but is very close to a 2D Gaussian distribution, so treated as a 2D gaussian. If the projection is linear then result is still gaussian.
+Note that the projection is perspective projection (near things big and far things small). Perspective projection is not linear. After perspective projection the 3D Gaussian distribution, it's no longer strictly a 2D Gaussian distribution, but is very close to a 2D Gaussian distribution, so approximated as a 2D gaussian. If the projection is linear then result is still gaussian.
 
 A gaussian's color can be fixed or can change based on different view directions.
 
