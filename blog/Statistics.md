@@ -1314,6 +1314,8 @@ The height of people is affect by many complex factors (nurtrition, health, gene
 
 Although normal distribution is common, not all distributions are normal. There are also many things that follow fat-tail distributions.
 
+Also note that Central Limit Theorem works when $n$ approaches infinity. Even if a distribution's standardized sum approach normal distribution, the **speed of converging** is important: some distribution converge to normal quickly, and some slowly. Some fat-tail distribution has finite variance but their standardized sum converge to normal distribution very slowly.
+
 ### Multivariate normal distribution
 
 In below, bold letter (like $\boldsymbol x$) means column vector:
@@ -1413,6 +1415,8 @@ Gaussian splatting provides an alternative method of 3D modelling. The 3D scene 
 Note that the projection is perspective projection (near things big and far things small). Perspective projection is not linear. After perspective projection the 3D Gaussian distribution, it's no longer strictly a 2D Gaussian distribution, but is very close to a 2D Gaussian distribution, so approximated as a 2D gaussian. If the projection is linear then result is still gaussian.
 
 A gaussian's color can be fixed or can change based on different view directions.
+
+TODO
 
 ### Score-based diffusion model
 

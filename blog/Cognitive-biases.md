@@ -556,6 +556,8 @@ Other examples of survivorship bias:
 - One person can do many different predictions. After the event happened, they pick the right one and delete the wrong ones, giving the illusion of prediction accuracy.
 - "Taleb's rat health club": Feeding poison to rats increases average health, because the unhealthy ones are more likely to die from poison.
 - Social media has more negative news than positive news. Bad news travels fast.
+- The succeded research results are published and the failed attempts are hidden.
+- Only special and interesting cases appear on news. The more representative common but not newsworthy cases are hidden.
 
 A more generalized version of survivor bias is **selection bias**: When the sampling is not uniform enough and contains selection mechanism (not necessary sample vanishing), there will be bias in the result.
 
@@ -566,6 +568,11 @@ Some physicists propose **Anthropic Principle**: the physical laws allow life be
 **Availability bias**: When thinking, the immediate examples that come into mind plays a big role.
 
 Example: If you recently saw a car crash, you tend to think that traveling by car is riskier than traveling by plane. However, if you recently watched a movie about a plane crash, you might feel that planes are more dangerous.
+
+> Nothing in life is as important as you think it is when you are thinking about it.
+> 
+> \- Daniel Kahnman
+
 
 **Vividness bias**: People tend to believe more from vivid things and stories, over abstract statistical evidences. This is related to **anecdotal fallacy** and **narrative fallacy**.
 
@@ -877,6 +884,7 @@ Examples:
 - Staying in comfort zone. Only learn/practice the familiar things and avoid touching unfamiliar things. Avoiding the unpleasant information when learning.
 - Only care about the visible numbers (KPI, OKR), and ignore the important things behind the numbers, like perverse incentives caused by the KPI, statistical bias, and the validity of interpretations from the numbers.
 - Streetlight effect: Only search in the places that's easy to search, not the places that the target is in.
+- Hiding the signal of error instead of diagnosing and solving the error.
 
 This is related to **means-end inversion**. To achieve the root goal (end) we work on a sub-goal (means) that helps root goal. But focusing on an easy but unimportant sub-goal hurts the root goal, by taking resources from hard but important sub-goals.
 
