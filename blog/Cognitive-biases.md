@@ -630,7 +630,7 @@ Representative bias can sometimes be misleading:
 > 
 > \- _Skin in the game_
 
-Note that the above quote just talks about a hypothetical scenario and should not be simplified to tell that the unprofessional-looking ones are always better.
+Note that the above quote should NOT be simplified to tell that "the unprofessional-looking ones are always better". It depends on exact case.
 
 ### Gambler's fallacy
 
@@ -648,7 +648,7 @@ The **law of large number works by diluting unevenness rather than correcting un
 
 Actually, **gambler's fallacy can be correct in a system with negative feedback loop, where the short-term distribution changes by past samples**. These long-term feedback loops are common in nature, such as the predator-prey amount relation. It also appears in markets with cycles. (Note that in financial markets, some cycles are much longer than expected, forming trends.) In a PvP game with Elo-score-based matching mechanism, losing makes make you more likely to win in the short term.
 
-One related concept is **regression to the mean**, meaning that, if one sample is higher than average, the next sample is likely to be lower than the **last sample**, and vice versa. Example: if a student's score follows normal distribution with average 80, when that student gets 90 scores, they will likely to get a score worse than 90 in the next exam. 
+One related concept is **regression to the mean**, meaning that, if one sample is significantly higher than average, the next sample is likely to be lower than the **last sample**, and vice versa. Example: if a student's score follows normal distribution with average 80, when that student gets 90 scores, they will likely to get a score worse than 90 in the next exam. 
 
 The difference between gambler's fallacy and regression to the mean:
 - Gambler's fallacy: if the past samples deviate to mean, assume the distribution of future samples change to "compensate" the deviations. This is wrong when the distribution doesn't change.
@@ -685,7 +685,7 @@ Normalcy bias: Thinking that past trend will always continue. This is partially 
 
 Although the market has trends, and a trend may be much longer than expected, no trend continues forever. Anything that is physically constrained cannot grow forever. Even with Matthew effect, the richest one's wealth cannot grow exponentially forever, as the wealth is physically constrainted.
 
-Most people are late-trend-following in investment: **not believing in a trend in the beginning, then firmly believing in the trend in its late stage**. This is dangerous, because the market has cycles, and some macro-scale cycles can span years or even decades. **The experiences gained in the surge part of the cycle are harmful in the decline part of the cycle**.
+Most people are late-trend-following in investment: **not believing in a trend in the beginning, then firmly believing in the trend in its late stage**. This is dangerous, because the market has cycles, and some macro-scale cycles can span years or even decades. **The experiences gained in the surge part of the cycle are harmful in the decline part of the cycle and vice versa**.
 
 ### Recency bias
 
@@ -722,9 +722,9 @@ The name of a thing affects how people perceive it. Examples:
 
 A **loaded question** is a question that contains an assumption (framing). Following that assumption can lead to a biased answer. Example: "Do you support the attempt by the US to bring freedom and democracy to other places in the world?"
 
-The current LLMs are trained to satisfy the user. If you ask LLM a loaded question that has a bias, the LLM often follow your bias to please you.
+The current LLMs are mostly trained to satisfy the user. If you ask LLM a loaded question that has a bias, the LLM often follow your bias to please you (this effect is smaller in more advanced LLMs).
 
-Asking the right question requires the right assumption.
+**Asking the right question requires the right assumption.**
 
 **Mehrabian's rule**: When communicating attitudes and feelings, the impact is 7% verbal (words), 38% vocal (tone of voice), 55% non-verbal (facial expressions, gestures, posture). Note that this doesn't apply to all kinds of communications.
 
@@ -890,7 +890,7 @@ Examples:
 - Streetlight effect: Only search in the places that's easy to search, not the places that the target is in.
 - Hiding the signal of error instead of diagnosing and solving the error.
 
-This is related to **means-end inversion**. To achieve the root goal (end) we work on a sub-goal (means) that helps root goal. But focusing on an easy but unimportant sub-goal hurts the root goal, by taking resources from hard but important sub-goals.
+This is related to **means-end inversion**. To achieve the root goal (end) we work on a sub-goal (means) that helps root goal. But focusing on an easy but unimportant sub-goal may hurt the root goal, by taking resources from hard but important sub-goals.
 
 A similar phenomenon occurs commonly in medicine: treatments usually mainly suppress visible symptoms instead of curing the root cause of illness. This is usually due to technological and budget limitations.
 
@@ -956,7 +956,7 @@ Examples:
 - Enforcing extreme lockdown to eliminate the risk of a pandemic, causing more risk in other diseases (because hospitals are locked down) and more risk in basic living (food supply is constrainted due to extreme lockdown).
 - Wanting to hedge inflation by heavily investing in risky assets, whose risk can be higher than inflation. In a liquidity crisis, cash is more valuable than assets.
 
-It should not be simplified to "avoiding risk is bad". The point is to not do extreme tradeoffs to eliminte one kind of risk but increase exposure to other kinds of risks.
+It should NOT be simplified to "avoiding risk is bad". The point is to not do extreme tradeoffs to eliminte one kind of risk but increase exposure to other kinds of risks.
 
 ### Regret aversion
 
