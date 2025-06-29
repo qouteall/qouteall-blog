@@ -1028,7 +1028,11 @@ In the process of self-justification, people's memory may be distorted. **Human 
 
 People tend to **simplify their memory and fill the gaps using their own beliefs**. This is also an **information compression** process, at the same time producing wrong memory and biases. 
 
-**Each recall can reshape the memory** according to the existing beliefs. (This is similar to quantum effects: if you observe something, you change it.)
+Memorizing is lossy compression. Recall is lossy decompression, where details can be made up in a congruent way. **Each recall can reshape the memory** according to the existing beliefs. (This is similar to quantum effects: if you observe something, you change it.) 
+
+> I have a pet theory that when people introspect about themselves, their brain sometimes just scrambles to generate relevant content. So they feel like they're gaining insight into deeper parts of themselves when they're actually just inventing it on the fly.
+> 
+> \- Amanda Askell, [Link](https://x.com/AmandaAskell/status/1931786539002105905)
 
 **Information is costly to store, and even more costly to index and query**. Sometimes forgetting is just not being able to query the specific memory that is stored in brain (and may be recalled if some cue were found that enables querying it). The "querying capacity" of brain is limited and can be occupied by distracting things.
 
