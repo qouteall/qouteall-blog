@@ -109,6 +109,10 @@ Material consumption can give short-term satisfaction, but cannot give long-term
 
 > We al­ready walked too far, down to we had for­got­ten why em­barked.
 
+> A man on a thousand mile walk has to forget his goal and say to himself every morning, 'Today I'm going to cover twenty-five miles and then rest up and sleep.
+> 
+> \- Leo Tolstoy, War and Peace
+
 ## Self-serving and self-justification
 
 People tend to maintain their ego by **self-serving bias**:
