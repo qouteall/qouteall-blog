@@ -2,6 +2,8 @@
 date: 2025-07-06
 ---
 
+<!-- truncate -->
+
 Here API means the generalized concept of "API":
 
 - Instruction set is the "API" of CPU. Machine code invokes the "API" of CPUs.
