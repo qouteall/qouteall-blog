@@ -366,8 +366,8 @@ Computing Z-score for a vector can also be seen as a projection:
 
 - The input $\boldsymbol{x} = (x_1,x_2,...,x_n)$
 - The vector of ones: $\boldsymbol{1} = (1, 1, ..., 1)$
-- Computing sample mean can be seen as scaling $\frac 1 n$ then dot product with the vector of ones:  ${\boldsymbol \mu}= \frac 1 n \boldsymbol{x} \cdot \boldsymbol{1}$
-- Subtracting the sample mean can be seen as subtracting $\hat {\boldsymbol \mu} \cdot \boldsymbol{1}$, let's call it $\boldsymbol y$: $\boldsymbol y = \boldsymbol x - {\boldsymbol \mu} \cdot \boldsymbol{1} = \boldsymbol x- \frac 1 n (\boldsymbol{x} \cdot \boldsymbol{1}) \cdot \boldsymbol{1}$
+- Computing sample mean can be seen as scaling $\frac 1 n$ then dot product with the vector of ones:  ${\hat \mu}= \frac 1 n \boldsymbol{x} \cdot \boldsymbol{1}$
+- Subtracting the sample mean can be seen as subtracting $\hat {\mu} \cdot \boldsymbol{1}$, let's call it $\boldsymbol y$: $\boldsymbol y = \boldsymbol x - {\hat \mu} \cdot \boldsymbol{1} = \boldsymbol x- \frac 1 n (\boldsymbol{x} \cdot \boldsymbol{1}) \cdot \boldsymbol{1}$
 - Recall projection: projecting vector $\boldsymbol a$ onto $\boldsymbol b$ is $(\frac{\boldsymbol a \cdot \boldsymbol b}{\boldsymbol b \cdot \boldsymbol b}) \cdot \boldsymbol b$.
 - $(\boldsymbol 1)^2 = n$. So $\frac 1 n (\boldsymbol{x} \cdot \boldsymbol{1}) \cdot \boldsymbol{1}$ is the projection of $\boldsymbol x$ onto $\boldsymbol 1$. 
 - Subtracting it means removing the component in the direction of $\boldsymbol 1$ from $\boldsymbol x$. So $\boldsymbol y$ is orthogonal to $\boldsymbol 1$. $\boldsymbol y$ is in a hyper-plane orthogonal to $\boldsymbol 1$.
