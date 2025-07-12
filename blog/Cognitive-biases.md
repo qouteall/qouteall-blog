@@ -345,7 +345,7 @@ When statistical analysis shows that A correlates with B, the possible causes ar
 
 - A caused B.
 - B caused A.
-- Another factor, C, caused A and B.
+- Another factor, C, caused A and B. (confounding variable)
 - Self-reinforcement feedback loop. A reinforces B. B reinforces A. Initial random divergence gets amplified.
 - A selection mechanism that favors the combination of A and B (survivorship bias).
 - More complex interactions.
@@ -355,6 +355,7 @@ Examples of correlation of A and B are actually driven by another factor C:
 
 - The children wearing larger shoe has better reading skills: both driven by age. Just wearing a large shoe won't make the kid smarter.
 - Countries with more TVs had longer life expectancy: both driven by economy condition. Just buying a TV won't make you live longer.
+- Ice cream sales increases at the same time drowning incidents increase: both driven by summer.
 
 > Among my favorite examples of misunderstood fitness markers is a friend of a friend who had heard that grip strength was correlated with health. He bought one of this grip squeeze things, and went crazy with it, eventually developing tendonitis.
 > 
@@ -804,6 +805,8 @@ Examples:
 ![](./cog_bias/base-rate-fallacy.png)
 
 [Reference](https://en.wikipedia.org/wiki/Base_rate_fallacy)
+
+In these cases, **confounding variable** correspond to which subgroup the sample is in. **Statified analysis** means analyzing separately in each subgroup, controlling the confounding variable.
 
 ### False consensus (echo chamber, information cocoon)
 
