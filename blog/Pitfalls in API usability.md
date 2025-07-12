@@ -8,6 +8,7 @@ Here API means the generalized concept of "API":
 
 - Instruction set is the "API" of CPU. Machine code invokes the "API" of CPUs.
 - Source code invokes the "API" of programming languages.
+- Functions and types are API.
 - Networking protocols (IP, TCP, UDP, HTTP, etc.) are the "API" of the internet. Restful APIs.
 - Data formats and configuration formats are also "API".
 - All the contracts and protocols between different parts of software/hardware are in the broader sense of "API".
@@ -36,6 +37,7 @@ API usability is important to developer productivity.
 - Doesn't tell error early. Only tell error if some functionality is used. This may make some configuration bugs become unnoticed until some condition is met. 
 - Doesn't tell error in the correct stage of computing. A wrong configuration of stage 1 may not give error in stage 1, but gives error in stage 2 when stage 2 processes invalid data from stage 1, which make the error message more obsecure because the context in stage 1 is lost.
 - The tool does too many "magic" under the hood. The API seems simple but is actually complex. The "magic" sometimes make things more convenient, but sometimes cause unwanted behavior.
+  - Try to use heuristics to "fix error". This makes the true error hidden and not fixed (make the app eventually accumulate many errors unnoticed). The heuristics cannot fully fix the error and malfunction in some edge cases.
 - A convenience feature causes security vulnerability. (e.g. some JSON libraries store class name in JSON to support polymorphic objects, but trusting class name from user is insecure.)
 - Too many downstream errors hiding the root error. 
   An example is log spam in log file, where only the first error is meaningful and all subsequent spam errors are side-effects of the first error. 
