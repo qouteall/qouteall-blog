@@ -160,7 +160,7 @@ This is related to Stockholm Syndrome. After experiencing pain in the past, peop
 
 **Ben Franklin effect**: People like someone more after doing a favor for them.
 
-**Endowment effect**: We value more on the things that we own. Investors tend to be biased to positive information of the stock they own.
+**Endowment effect**: We value more on the things that we own (including ideas). Investors tend to be biased to positive information of the stock they own.
 
 **Foot-in-the-door effect**: One agreed on a small request tend to subsequently agree on a larger request.
 
@@ -868,7 +868,7 @@ In software product design, the default options in software plays a big role in 
 
 A related concept is **omission bias**: People treats the harm of doing something (commision) higher than the harm of not doing anything (omission). Doing things actively bears more responsibility. In the trolley problem, not doing anything reduces perceived responsibility.
 
-
+If there is an option to postpone some work, the work may eventually never be done.
 
 ### Action bias
 
