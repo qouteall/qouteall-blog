@@ -545,6 +545,18 @@ According to [predictive processing theory](https://en.wikipedia.org/wiki/Predic
 
 [Body transfer illusion (fake hand experiment)](https://x.com/visualfeastwang/status/1788507432961839469)
 
+Related: **free energy principle**. The brain tries to minimize free energy:
+
+
+$$
+\text{Free Energy} = \overbrace{\text{Surprise}}^{\mathclap{\text{difference between perception and prediction}}} + \underbrace{\text{Change of Belief}}_{\mathclap{\text{how much belief changes to improve prediction}}}
+$$
+
+The two ways of reducing free energy:
+
+- Passive: Change the belief (understanding of the world).
+- Active: Use action (change environment, move to another environment, etc.) to make the perception better match prediction.
+
 ### Survivorship bias
 
 Survivorship bias means that only consider "survived", observed samples and does not consider "silent", "dead", unobserved samples, neglecting the selection mechanism of samples.
