@@ -750,6 +750,8 @@ Just looking confident can often make other people believe. This even applies wh
 
 [The Anchoring Bias and its Effect on Judges](https://www.thelawproject.com.au/insights/anchoring-bias-in-the-courtroom).
 
+**Decoy effect**: Adding a new worse option to make another option look relatively better.
+
 **Lie by omission**: A person can tell a lot of truth while omitting the important facts, stressing unimportant facts (wrong framing), intentially causing misunderstanding, but at the same time be not lying in literal sense.
 
 The price chart is often drawn by making lowest price at the bottom and highest price at the top. The offset and scale of the chart is also framing. If one stock already have fallen by 30%, the latest price is in the bottom of the chart, so the stock seems cheap when looking at the chart, but it may actually be not cheap at all, and vice versa.
@@ -857,6 +859,7 @@ In software product design, the default options in software plays a big role in 
 - If a software functionality require manually enabling it, much fewer users will know and use that functionality.
 - Just 1 second longer page load time may reduce user conversion by 30%. [Source](https://www.cloudflare.com/learning/performance/more/website-performance-conversion-rates/)
 - Each setup procedure will frustrate a portion of users, making them give up installing the software. [Why I’m Done Making Desktop Applications](https://www.kalzumeus.com/2009/09/05/desktop-aps-versus-web-apps/). A good product requires minimal configuration to start working.
+- [Ask for no, don’t ask for yes](https://www.mooreds.com/wordpress/archives/3518)
 
 **Status quo bias**: tend to maintain status quo. This is related to risk aversion, as change may cause risk.
 

@@ -22,6 +22,7 @@ A lot of debate happen because same word has different meanings to different peo
 - Synchronization. In some places, specifying memory ordering and accessing Java volatile are called "synchronization". In some places these are not called synchronization.
 - In English, synchronzied can mean "happen at the same time", which contradicts the fact that caller waiting for the service working. Asynchronous can mean "not happening at the same time", which contradicts the fact that the caller calling an asynchronous interface can run with the called service at the same time.
 - "Low-level". Normally "low-level" usually means entry-level, junior-level. But in programming "low-level" can mean very deep things involving things like OS and hardware internal, which require high-level skill. We can use "deep-level", "infrastructure-level" instead of "low-level" to avoid misunderstanding.
+- Predict. Normally "predict" means figuring out what happens in the future. But in AI, "predict" means estimating something, not necessarily the things in future. For example: "predict masked token", "predict noise".
 
 
 
