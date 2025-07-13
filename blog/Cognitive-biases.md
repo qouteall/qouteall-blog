@@ -546,12 +546,12 @@ According to [predictive processing theory](https://en.wikipedia.org/wiki/Predic
 
 [Body transfer illusion (fake hand experiment)](https://x.com/visualfeastwang/status/1788507432961839469)
 
-Related: **free energy principle**. The brain tries to minimize free energy:
+Related: **free energy principle**. The brain tries to minimize free energy.
 
+Free energy = Surprise + Change of Belief
 
-$$
-\text{Free Energy} = \overbrace{\text{Surprise}}^{\mathclap{\text{difference between perception and prediction}}} + \underbrace{\text{Change of Belief}}_{\mathclap{\text{how much belief changes to improve prediction}}}
-$$
+- Surprise is the difference between perception and prediction.
+- Change of Belief is how much belief changes to improve prediction.
 
 The two ways of reducing free energy:
 
