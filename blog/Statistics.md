@@ -1821,7 +1821,7 @@ $$
 e^{-1+\lambda_1}\int_m^{\infty} x^{\lambda_2}dx = 1\quad\quad\quad \int_m^{\infty} x^{\lambda_2}dx = e^{1-\lambda_1}
 $$
 
-To make $\int_m^{\infty} x^{\lambda_2}dx$ be finite, $\lambda_2 < 0$. 
+To make $\int_m^{\infty} x^{\lambda_2}dx$ be finite, $\lambda_2 < -1$. 
 
 $$
 \int_m^{\infty} x^{\lambda_2}dx= \left( \frac{1}{\lambda_2+1}x^{\lambda_2+1} \right) \biggr\vert^{x=\infty}_{x=m}  =- \frac 1 {\lambda_2+1} m^{\lambda_2 + 1} = e^{1-\lambda_1}
@@ -1847,7 +1847,7 @@ $$
 \int_m^{\infty} x^{\lambda_2} \log x \ dx=\int_{\log m}^{\infty} e^{\lambda_2 u} u \ du = \left( \frac 1 {\lambda_2+1} u e^{(\lambda_2+1)u} - \frac 1 {(\lambda_2+1)^2} e^{(\lambda_2+1)u}\right) \biggr\vert_{u=\log m}^{u=\infty}
 $$
 
-To make it be finite, $\lambda_2+1 \leq 0$, $\lambda_2 \leq -1$. Then
+Then
 
 $$
 \int_m^{\infty} x^{\lambda_2} \log x \ dx=- \frac 1 {\lambda_2+1} (\log m) e^{(\lambda_2+1)\log m} + \frac 1 {(\lambda_2+1)^2} e^{(\lambda_2+1)\log m}
@@ -1890,7 +1890,7 @@ $$
 
 Now we rediscovered Pareto (Type I) distribution by maximizing entropy.
 
-In the process we have $\lambda_2 \leq -1$. From $\lambda_2+1 = \frac 1 {\log m - g}$ we know $\log m - g <0$, which is $m < e^g$.
+In the process we have $\lambda_2 \lt -1$. From $\lambda_2+1 = \frac 1 {\log m - g}$ we know $\log m - g <0$, which is $m < e^g$.
 
 ### Share of top $p$ porportion
 
