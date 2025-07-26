@@ -23,6 +23,10 @@ A lot of debate happen because same word has different meanings to different peo
 - In English, synchronzied can mean "happen at the same time", which contradicts the fact that caller waiting for the service working. Asynchronous can mean "not happening at the same time", which contradicts the fact that the caller calling an asynchronous interface can run with the called service at the same time.
 - "Low-level". Normally "low-level" usually means entry-level, junior-level. But in programming "low-level" can mean very deep things involving things like OS and hardware internal, which require high-level skill. We can use "deep-level", "infrastructure-level" instead of "low-level" to avoid misunderstanding.
 - Predict. Normally "predict" means figuring out what happens in the future. But in AI, "predict" means estimating something, not necessarily the things in future. For example: "predict masked token", "predict noise".
+- KB, MB, GB. 
+  - Most commonly, 1 KB = 1024 bytes, 1MB = 1024 KB, 1GB = 1024 MB. (Formally they should be written as KiB, MiB, GiB.)
+  - In disk manufactuers' descriptions, 1 KB = 1000 bytes, 1MB = 1000 KB, 1GB = 1000 MB. 
+  - In networking speed, 1 Kbps = 1000 bits per second, 1Mbps = 1000 Kbps, 1Gbps = 1000 Mbps.
 
 
 
@@ -34,8 +38,8 @@ Oxymoron naming:
 - Safe unsafe Rust code. (unsafe Rust code wrapped in a safe way)
 - Asynchronous synchronization. (non-blocking replication)
 - Lock-free deadlock. (deadlock can happen in message-passing systems, without any explicit lock)
-- Transparent opacity. (an opacity value that's less than 1.0, making it transparent)
+- Transparent opacity. (an opacity value that's less than 1.0, making it semi-transparent)
 - Static animation. (the animation data is hard-coded)
-- Unlogged log in. (the log in event is not written to record)
+- Unlogged log in. (the log-in event is not written to record)
 
 
