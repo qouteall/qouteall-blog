@@ -27,9 +27,7 @@ date: 2025-07-13
 
 Extracting function is regularization, while inlining function is de-regularization. Extracting function turns duplicated code into a shared function, and inlining turns shared function into duplicated code.
 
-Extracting function can utilize regularity and simplifies code. When the requirement changes and the regularity doesn't hold, inlining is the way of de-regularize function call and allow easier code changing. If the requirement changes but you don't inline the unsuitable function, you may add boolean flags to that function, introducing accidental complexity.
-
-| Regularize                                                                                   | De-regularize                                                                 |
+| Regularization                                                                               | De-regularization                                                             |
 | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
 | Extract function                                                                             | Inline function                                                               |
 | Extract generic parameter                                                                    | Inline generics / type erasure                                                |
@@ -43,19 +41,21 @@ Extracting function can utilize regularity and simplifies code. When the require
 | Easier to implement requirements that follow regularity.                                     | Harder to implement requirements that follow regularity. (duplicated changes) |
 | Harder to implement requirements that breaks regularity. (add complex special-case handling) | Easier to implement requirements that breaks regularity.                      |
 
-Why we specialize instead of generalize sometimes:
+
+
+Why we sometimes specialize instead of generalizing:
 
 - Generalization introduces new concepts and **adds cognitive load**. Sometimes, not adding these is better, depending on how useful the abstraction is.
-- The requirement can break the assumption or regularity that the generalization is based on. **New exceptions break generalization**.
+- A new requirement can break the assumption or regularity that the generalization is based on. **New exceptions break generalization**.
 
 About leaky abstraction: Abstraction aim to hide details and make things simpler. But some abstractions are **leaky**: to use it correctly you need to understand the details that it tries to hide. The more leaky an abstraction is, the less useful it is.
 
-If a new requirement follows the regularity that the abstraction uses, then the abstraction is good and makes things simpler. 
+If a new requirement follows the regularity that the abstraction uses, then the abstraction is good and makes things simpler.
 
 But when the new requirement change breaks the regularity, then abstraction hinders the developer. The developer will be left with two choices:
 
 - De-regularize the abstraction and do the change accordingly. (And create new abstractions that follow the new regularity. This is refactoring.)
-- Add special case handlings within the current abstraction. This will make things more complex. The exceptions will break orthogonality, making the previously unrelated things related again. It will often involve new boolean flags that control internal behavior, weird data relaying, new state sharing, new concurrency handling, etc.
+- Add special case handlings within the current abstraction. The exceptions can **make the previously unrelated things related again** (break orthogonality), **increasing (accidental) complexity**. It will often involve new boolean flags that control internal behavior, weird data relaying, new state sharing, new concurrency handling, etc.
 
 **Every abstraction makes some things easier AND make other things harder. It's a tradeoff.**
 
@@ -63,6 +63,52 @@ But when the new requirement change breaks the regularity, then abstraction hind
 > 
 > \- Tyler Glaiel, [Link](https://x.com/TylerGlaiel/status/1880340558767702377)
 
+## "Simple" requirements that are hard to implement
+
+Sometimes a seemingly simple requirement is actually hard to implement, because the new requirement breaks existing abstraction.
+
+Examples:
+
+### Change of data modelling
+
+- You use user name as id of user. But a new requirement comes: the user must be able to change the user name. 
+  (Using name as id is usually a bad design because it's incompatible with name changing.)
+- In a game, if an entity dies, you delete that entity. But a new requirement comes: a dead entity can be resurrected by a new magic.
+  To implement that, you cannot delete the dead entity and you need to add dead entity into data modelling. For example, add a boolean flag of whether it's living, and check that flag in every logic of living entity.
+- Your app supports one language. And the event log is recorded using simple strings. But a new requirement comes: make the app support multiple languages. The user can switch language at any time and see the event log in their language.
+  To implement that, you cannot store the text as string and should store the text as translatable template.
+
+
+### Change to dataflow and source-of-truth
+
+- You built a singleplayer game. All game logic runs locally. All game data are in memoery and you manually load/save from file. But a new requirement comes: make it multiplayer.
+  In singleplayer game, the in-memory data can be source-of-truth, but in multiplayer the server is source-of-truth. Every non-client operation now requires packet sending and receiving. What's more, to reduce visible latency, the client side game must guess future game state and correct the guess from server packets (add rollback mechanism).
+- You built a todo list app. All data are loaded from server. All edits also go through server. But a new requirement comes: make the app work offline and sync when it connects with internet.
+
+### Adding edge cases into simple logic
+
+- You have a permission system where different functionalities form a tree: if one user have the permission of parent node then the user has the permissions of the child nodes. But a new requirement comes: one functionality moves category, so that node's parent changes. You must also keep the existing users' permissions the same as before.
+- Some functionality require some permission. You use user token to authenticate. But a new requirement comes: allow non-logged-in users access a part of the functionality.
+- A new requirement comes: add bot as a new type of user, and the bot user has different authentication logic than normal user.
+
+### Adding a lot of flexibility into the system
+
+- You have a fixed workflow. A new requirement comes: allow the user to configure and customize the workflow.
+  (Developing specially for each enterprise customer is actually easier than creating a configurable flexible "rules engine". The custom "rules engine" will be more complex and harder to debug than just code. [The Configuration Complexity Clock](https://mikehadlow.blogspot.com/2012/05/configuration-complexity-clock.html))
+- Allow formatting like bold and color in username.
+- Adding a plugin system.
+
+### Working on full data to working on partially known data
+
+- You built a data visualization UI. Originally, it firstly loads all data from server then render. But when the data size become huge, loading becomes slow and you need break the data into parts, dynamically load parts and visualize loaded parts.
+- A game has loading screen when switching scene. A new requirement comes: make the loading seamless and remove the loading screen.
+- You load all data from database and then compute things using programming language. One day the data become so big that cannot be held in memory or it exceeds database query limit. You need to either 
+  - Load partial data into memory, compute separately and then merge the result, or
+  - rewrite logic into SQL and let database compute it 
+
+### Migrating to incompatible APIs
+
+Migrating the libraries/framework/OS/database/game engine/other components whose API is not compatible with the old. From a normal user's perspective, the migration does not add any new feature, takes a long time and can introduce new bugs.
 
 ## Simple interface = hardcoded defaults = less customizability
 
