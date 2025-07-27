@@ -38,7 +38,7 @@ API usability is important to developer productivity.
 - Doesn't tell error in the correct stage of computing. A wrong configuration of stage 1 may not give error in stage 1, but gives error in stage 2 when stage 2 processes invalid data from stage 1, which make the error message more obsecure because the context in stage 1 is lost.
 - The tool does too many "magic" under the hood. The API seems simple but is actually complex. The "magic" sometimes make things more convenient, but sometimes cause unwanted behavior.
   - Try to use heuristics to "fix error". This makes the true error hidden and not fixed (make the app eventually accumulate many errors unnoticed). The heuristics cannot fully fix the error and malfunction in some edge cases.
-  - Another example is layouting in CSS. Most layout-related attributes in CSS are very versatile. Each attribute usually have many side effects. The designer try to make layout work with very few CSS attributes. But they become very complex overall.
+  - Another example is layouting in CSS. Most layout-related attributes in CSS are very versatile. Each attribute usually have many side effects. CSS aims to make layout work with very few CSS attributes, but result in a complex system that's hard-to-understand.
 - A convenience feature causes security vulnerability. (e.g. some JSON libraries store class name in JSON to support polymorphic objects, but trusting class name from user is insecure.)
 - Too many downstream errors hiding the root error. 
   An example is log spam in log file, where only the first error is meaningful and all subsequent spam errors are side-effects of the first error. 
