@@ -487,13 +487,13 @@ Information entropy measures:
 - How **uncertain** a distribution is.
 - **How much information** a sample in that distribution carries.
 
-If we want to measure the amount of information of a specific event, an event $E$ 's amount of information as $I(E)$, we can define these axioms:
+If we want to measure the amount of information of a specific event, an event $E$ 's amount of information as $I(E)$, there are 3 axioms:
 
 - If that event always happens, then it carries zero information. $I(E) = 0$ if $P(E) = 1$.
 - The more rare an event is, the larger information (more surprise) it carries. $I(E)$ increases as $P(E)$ decreases.
 - The information of two independent events happen together is the sum of the information of each event. Here I use $(X, Y)$ to denote the combination of $X$ and $Y$. That means $I((X, Y)) = I(X) + I(Y)$ if $P((X, Y)) = P(X) \cdot P(Y)$. This implies the usage of logarithm.
 
-Then according to the three axioms, the definition of $I$ is:
+Then according to the three axioms, the definition of $I$ (self information) is:
 
 $$
 I(E) = \log_b \frac{1}{P(E)} = - \log_b P(E)
@@ -531,12 +531,12 @@ $$
 
 In continuous case the base is often $e$ rather than 2. Here $\log$ by default means $\log_e$.
 
-In discrete case, $0<=P(x)<=1$, $\log \frac{1}{P(x)} > 0$, so entropy can never be negative. But in continuous case, probability density function can take value larger than 1, so entropy may be negative.
+In discrete case, $0 \leq P(x) \leq 1$, $\log \frac{1}{P(x)} > 0$, so entropy can never be negative. But in continuous case, probability density function can take value larger than 1, so entropy may be negative.
 
-- A fair coin toss with two cases has 1 bit of information entropy: $0.5 \cdot log_2(\frac{1}{0.5}) + 0.5 \cdot log_2(\frac{1}{0.5}) = 1$ bit.
-- If the coin is biased, for example the head has 90% probability and tail 10%, then its entropy is: $0.9 \cdot log_2(\frac{1}{0.9}) + 0.1 \cdot log_2(\frac{1}{0.1}) \approx 0.47$ bits.
-- If it's even more biased, having 99.99% probability of head and 0.01% probability of tail, then its entropy is: $0.9999 \cdot log_2(\frac{1}{0.9999}) + 0.0001 \cdot log_2(\frac{1}{0.0001}) \approx 0.0015$ bits.
-- If a coin toss is fair but has 0.01% percent of standing up on the table, having 3 cases each with probability 0.0001, 0.49995, 0.49995, then its entropy is $0.0001 \cdot log_2(\frac{1}{0.0001}) + 0.49995 \cdot log_2(\frac{1}{0.49995}) + 0.49995 \cdot log_2(\frac{1}{0.49995}) \approx 1.0014$ bits. (The standing up event itself has about 13.3 bits of information, but its probability is low so it contributed small in information entropy)
+- A fair coin toss with two cases has 1 bit of information entropy: $0.5 \cdot \log_2(\frac{1}{0.5}) + 0.5 \cdot \log_2(\frac{1}{0.5}) = 1$ bit.
+- If the coin is biased, for example the head has 90% probability and tail 10%, then its entropy is: $0.9 \cdot \log_2(\frac{1}{0.9}) + 0.1 \cdot \log_2(\frac{1}{0.1}) \approx 0.47$ bits.
+- If it's even more biased, having 99.99% probability of head and 0.01% probability of tail, then its entropy is: $0.9999 \cdot \log_2(\frac{1}{0.9999}) + 0.0001 \cdot \log_2(\frac{1}{0.0001}) \approx 0.0015$ bits.
+- If a coin toss is fair but has 0.01% percent of standing up on the table, having 3 cases each with probability 0.0001, 0.49995, 0.49995, then its entropy is $0.0001 \cdot \log_2(\frac{1}{0.0001}) + 0.49995 \cdot \log_2(\frac{1}{0.49995}) + 0.49995 \cdot \log_2(\frac{1}{0.49995}) \approx 1.0014$ bits. (The standing up event itself has about 13.3 bits of information, but its probability is low so it contributed small in information entropy)
 
 If X and Y are independent, then $H((X,Y))=E[I((X,Y))]=E[I(X)+I(Y)]=E[I(X)]+E[I(Y)]=H(X)+H(Y)$. If one fair coin toss has 1 bit entropy, then n independent tosses has n bit entropy.
 
@@ -551,11 +551,11 @@ Y=kX \quad (k>0) \quad \quad
 f_Y(y) = \frac{1}{k}f_X(\frac{y}{k})
 $$
 $$
-H(Y) = \int {f_Y(y) \cdot \log\frac{1}{f_Y(y)}} dy=\int{\frac{1}{k}f_X(x)\log\frac{1}{\frac{1}{k}f_X(x)}} d(kx)
-=\int f_X(x) \left(\log\frac{1}{f_X(x)} + \log k \right) dx
+H(Y) = \int_\mathbb{Y} {f_Y(y) \cdot \log\frac{1}{f_Y(y)}} dy=\int_\mathbb{Y}{\frac{1}{k}f_X(x)\log\frac{1}{\frac{1}{k}f_X(x)}} d(kx)
+=\int_\mathbb{X} f_X(x) \left(\log\frac{1}{f_X(x)} + \log k \right) dx
 $$
 $$
-=\int f_X(x) \log \frac{1}{f_X(x)}dx + (\log k) \int f_X(x) dx = H(X) + \log k
+=\int_\mathbb{X} f_X(x) \log \frac{1}{f_X(x)}dx + (\log k) \int_\mathbb{X} f_X(x) dx = H(X) + \log k
 $$
 
 Entropy is invariant to offset of random variable. $H(X+k)=H(X)$
@@ -861,6 +861,8 @@ As $H((X,Y)) = H(X \vert Y) + H(Y)$, so $I(X;Y) = H(X) + H(Y) - H((X,Y)) = H(X) 
 
 If knowing Y completely determines X, knowing Y make the distribution of X collapse to one case with 100% probability, then $H(X \vert Y) = 0$, then $I(X;Y)=H(X)$.
 
+Some places use correlation factor $\frac{\text{Cov}[X,Y]}{\sqrt{\text{Var}[X]\text{Var}[Y]}}$ to measure the correlation between two variables. But correlation factor is not accurate in non-linear cases. Mutual information is more accurate in measuring correlation.
+
 ### Information Bottleneck theory in deep learning
 
 Information Bottleneck theory tells that the training of neural network will learn an intermediary representation that:
@@ -912,7 +914,7 @@ Convolution can also work on cases where the values are not probabilities. Convo
 
 ## Likelihood
 
-Normally when talking about probability we mean the probability of an outcome under a modelled distribution: $P(\text{outcome} \ \vert \ \text{modelled distribution})$. But sometimes we have some concrete samples from a distribution but want to know which model suits the best, so we talk about the probability that a model is true given some samples: $P(\text{modelled distribution} \vert \text{outcome})$. 
+Normally when talking about probability we mean the probability of an outcome under a modelled distribution: $P(\text{outcome} \ \vert \ \text{modelled distribution})$. But sometimes we have some concrete samples from a distribution but want to know which model suits the best, so we talk about the probability that a model is true given some samples: $P(\text{modelled distribution} \ \vert \ \text{outcome})$. 
 
 If I have some samples, then some parameters make the samples more **likely** to come from the modelled distribution, and some parameters make the samples less likely to come from the modelled distribution. 
 
@@ -984,7 +986,7 @@ In the places that use score function (and Fisher information) but doesn not spe
 
 ## Max-entropy distributions
 
-Recall that if we make probability distribution more "spread out" the entropy will increase. If there is no constraint, maximizing entropy of real-number distribution will get a distribution that's "infinitely spread out over all real numbers". But if there are constraints, maximizing entropy will give some common and important distributions:
+Recall that if we make probability distribution more "spread out" the entropy will increase. If there is no constraint, maximizing entropy of real-number distribution will be "infinitely spread out over all real numbers" (which is not well-defined). But if there are constraints, maximizing entropy will give some common and important distributions:
 
 | Constraint                          | Max-entropy distribution     |
 | ----------------------------------- | ---------------------------- |
@@ -1369,11 +1371,11 @@ Here $E[\boldsymbol x]$ taking mean of each element in $\boldsymbol x$ and outpu
 The covariance matrix written out:
 
 $$
-\text{Cov}(\boldsymbol x,\boldsymbol y)=\begin{bmatrix} 
-\text{Cov}[\boldsymbol x_1,\boldsymbol y_1] &\ \text{Cov}[\boldsymbol x_1,\boldsymbol y_2] &\ ... &\ \text{Cov}[\boldsymbol x_1,\boldsymbol y_n] \\
-\text{Cov}[\boldsymbol x_2,\boldsymbol y_1] &\ \text{Cov}[\boldsymbol x_2,\boldsymbol y_2] &\ ... &\ \text{Cov}[\boldsymbol x_2,\boldsymbol y_n] \\
+\text{Cov}( x, y)=\begin{bmatrix} 
+\text{Cov}[ x_1, y_1] &\ \text{Cov}[ x_1, y_2] &\ ... &\ \text{Cov}[ x_1, y_n] \\
+\text{Cov}[ x_2, y_1] &\ \text{Cov}[ x_2, y_2] &\ ... &\ \text{Cov}[ x_2, y_n] \\
 \vdots &\ \vdots &\ \ddots &\ \vdots \\
-\text{Cov}[\boldsymbol x_n,\boldsymbol y_1] &\ \text{Cov}[\boldsymbol x_n,\boldsymbol y_2] &\ ... &\ \text{Cov}[\boldsymbol x_n,\boldsymbol y_n]
+\text{Cov}[ x_n, y_1] &\ \text{Cov}[ x_n, y_2] &\ ... &\ \text{Cov}[ x_n, y_n]
 \end{bmatrix}
 $$
 
@@ -1412,11 +1414,13 @@ The industry standard of 3D modelling is to model the 3D object as many triangle
 
 Gaussian splatting provides an alternative method of 3D modelling. The 3D scene is modelled by a lot of mutlivariate (3D) gaussian distributions, called gaussian. When rendering, that 3D gaussian distribution is projected onto a plane (screen) and approximately become a 2D gaussian distribution, now probability density correspond to color opacity.
 
-Note that the projection is perspective projection (near things big and far things small). Perspective projection is not linear. After perspective projection the 3D Gaussian distribution, it's no longer strictly a 2D Gaussian distribution, but is very close to a 2D Gaussian distribution, so approximated as a 2D gaussian. If the projection is linear then result is still gaussian.
+Note that the projection is perspective projection (near things big and far things small). Perspective projection is not linear. After perspective projection, the 3D Gaussian distribution is no longer strictly a 2D Gaussian distribution, can be approximated by a 2D Gaussian distribution.
+
+Triangle mesh is often modelled by people. But gaussian splatting scene is often trained from photos of different perspectives of a scene.
 
 A gaussian's color can be fixed or can change based on different view directions.
 
-TODO
+Gaussian splatting also works in 4D by adding a time dimension.
 
 ### Score-based diffusion model
 
