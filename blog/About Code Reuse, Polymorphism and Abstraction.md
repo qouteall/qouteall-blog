@@ -71,17 +71,23 @@ Sometimes a seemingly simple requirement is actually hard to implement. Examples
 ### Large change of data modelling
 
 - You use user name as id of user. But a new requirement comes: the user must be able to change the user name. 
+  
   (Using name as id is usually a bad design because it's incompatible with name changing.)
 - In a game, if an entity dies, you delete that entity. But a new requirement comes: a dead entity can be resurrected by a new magic.
+  
   To implement that, you cannot delete the dead entity and you need to add dead entity into data modelling. For example, add a boolean flag of whether it's living, and check that flag in every logic of living entity.
 - Your app supports one language. And the event log is recorded using simple strings. But a new requirement comes: make the app support multiple languages. The user can switch language at any time and see the event log in their language.
+  
   To implement that, you cannot store the text as string and should store the text as translatable template. (A "dumber" way is to store the strings for every supported language.)
 
 
 ### Large change of dataflow and source-of-truth
 
 - You built a singleplayer game. All game logic runs locally. All game data are in memoery and you manually load/save from file. But a new requirement comes: make it multiplayer.
-  In singleplayer game, the in-memory data can be source-of-truth, but in multiplayer the server is source-of-truth. Every non-client operation now requires packet sending and receiving. What's more, to reduce visible latency, the client side game must guess future game state and correct the guess from server packets (add rollback mechanism).
+  
+  In singleplayer game, the in-memory data can be source-of-truth, but in multiplayer the server is source-of-truth. Every non-client operation now requires packet sending and receiving.
+  
+  What's more, to reduce visible latency, the client side game must guess future game state and correct the guess from server packets (add rollback mechanism).
 - You built a todo list app. All data are loaded from server. All edits also go through server. But a new requirement comes: make the app work offline and sync when it connects with internet.
 
 ### Adding edge cases into simple logic
@@ -93,6 +99,7 @@ Sometimes a seemingly simple requirement is actually hard to implement. Examples
 ### Adding a lot of flexibility
 
 - You have a fixed workflow. A new requirement comes: allow the user to configure and customize the workflow.
+  
   (Developing specially for each enterprise customer is actually easier than creating a configurable flexible "rules engine". The custom "rules engine" will be more complex and harder to debug than just code. [The Configuration Complexity Clock](https://mikehadlow.blogspot.com/2012/05/configuration-complexity-clock.html))
 - Allow formatting like bold and color in username.
 - Adding a plugin system.
