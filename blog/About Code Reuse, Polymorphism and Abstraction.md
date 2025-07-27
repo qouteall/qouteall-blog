@@ -21,7 +21,7 @@ date: 2025-07-13
 | Generic function (parametric polymorphism)                            | Execution code block | Types                                                         | Generic function                         | Type parameters (usually inferred)                                    | Use type parameter                                                       |
 | Type erasure                                                          | Code block           | Values in different types, or works with different types      | Function (can be constructor)            | Value of top type (`any`, `Object`), with type information at runtime | Pass value, check type, cast type, reflection, etc.                      |
 | Duck typing (row polymorphism), structural typing                     | Execution code block | Object field accesses, method calls                           | Field access or method call by name      | Different values with common fields or methods                        | Use common fields/methods by name                                        |
-| Macro                                                                 | Code fragment        | Code fragments                                                | Macro                                    | Code fragments                                                        | Use macro argument (string concat)                                       |
+| Macro                                                                 | Code fragment        | Code fragments                                                | Macro                                    | Code fragments                                                        | Use macro argument                                                       |
 
 
 ## Regularize and de-regularize
@@ -68,7 +68,7 @@ But when the new requirement change breaks the regularity, then abstraction hind
 
 Sometimes a seemingly simple requirement is actually hard to implement. Examples:
 
-### Large change of data modelling
+### Major change of data modelling
 
 - You use user name as id of user. But a new requirement comes: the user must be able to change the user name. 
   
@@ -81,7 +81,7 @@ Sometimes a seemingly simple requirement is actually hard to implement. Examples
   To implement that, you cannot store the text as string and should store the text as translatable template. (A "dumber" way is to store the strings for every supported language.)
 
 
-### Large change of dataflow and source-of-truth
+### Major change of dataflow and source-of-truth
 
 - You built a singleplayer game. All game logic runs locally. All game data are in memoery and you manually load/save from file. But a new requirement comes: make it multiplayer.
   
@@ -118,11 +118,44 @@ Migrating the libraries/framework/OS/database/game engine/other components whose
 
 ## Simple interface = hardcoded defaults = less customizability
 
-Real world is complex. Doing things require making decision on a lot of details.
+Real world is complex. Building software require making decision on a lot of details.
 
 If some tool has a simple interface, it must have hardcoded a lot of detail decisions inside. If the interface exposes these detail decisions, the interface won't be simple.
 
-This even applies if you treat LLM as an abstraction layer. When you write a vague prompt and LLM generates a whole application/feature for you, the generated code contains many optionated detail decisions that's made by LLM, not you. (Of course you can prompt the LLM to customize a detail later. the point is that LLM make decisions for you to fill the unspecified things in the prompt).
+This also applies to AI coding. When you write a vague prompt and LLM generates a whole application/feature for you, the generated code contains many opinionated detail decisions that's made by LLM, not you (of course you can then prompt the LLM to change a detail).
+
+Some important decisions that need to made:
+
+## Important architectural decisions
+
+- Data modelling:
+  - Which data to store? Which data to compute?
+  - How and when is ID allocated?
+  - What lookup acceleration structure or redundant data do we have?
+  - How to migrate schema?
+- Constraints:
+  - What can change and what cannot change?
+  - What can duplicate (overlap) and what cannot?
+  - Does this ID always point to a valid object?
+  - What constraints does business logic require?
+  - Does this allow concurrency? Will concurrency break the constraints?
+- Dataflow:
+  - Which data is source of truth?
+  - Which data is derived from source of truth?
+  - How is change of source of truth broadcasted to derived data? How is the cache invalidated? How is the lookup acceleration structure maintained to be consistent with source of truth?
+  - What data should we expose to client side?
+  - How and when to validate external data?
+- Separate of responsibility (concern) and encapsulation:
+  - What module is responsible for updating this data?
+  - Should this data be encapsulated or let other modules access?
+  - What module is responsible for keeping that derived data to be consistent with source of truth?
+  - What module is responsible for kepping that constraint?
+- Tradeoffs: 
+  - What tradeoff do we make to simplify it?
+  - What tradeoff do we make to optimize performance?
+  - What tradeoff do we make to maintain compatibility?
+  - What work must be done immediately? What work can be deferred?
+  - What data can be stale? What data cannot be stale?
 
 ## Orthogonality: separate things that can combine easily
 
