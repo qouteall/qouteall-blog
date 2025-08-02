@@ -1,5 +1,7 @@
 ---
 date: 2025-06-22
+tags:
+  - "Statistics"
 ---
 
 # Some Statistics Knowledge

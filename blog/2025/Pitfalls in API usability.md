@@ -1,6 +1,10 @@
 ---
 date: 2025-07-06
+tags:
+  - Programming
 ---
+
+# Pitfalls in API usability
 
 <!-- truncate -->
 

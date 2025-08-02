@@ -1,5 +1,7 @@
 ---
 date: 2025-01-27
+tags:
+  - Psychology
 ---
 
 # Notes about Cognitive Biases

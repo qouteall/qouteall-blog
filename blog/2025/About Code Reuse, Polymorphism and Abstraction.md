@@ -1,6 +1,8 @@
 ---
 date: 2025-07-13
+tags: ["Programming"]
 ---
+# About Code Reuse, Polymorphism and Abstraction
 
 <!-- truncate -->
 

@@ -1,7 +1,9 @@
 ---
 date: 2025-07-06
+tags:
+  - Programming
 ---
-
+# Term Ambiguity
 
 A lot of debate happen because same word has different meanings to different people. Some ambiguities related to programming:
 
