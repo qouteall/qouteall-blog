@@ -114,13 +114,17 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 ### HTML and CSS
 
 - Whitespace collapse. [HTML Whitespace is Broken](https://blog.dwac.dev/posts/html-whitespace/)
-- `position: relative` is not relative to the nearest parent that 
+- `position: absolute` is not based on its parent. It's based on its nearest positioned ancestor (the nearest parent that has `position` be `relative`, `absolute`, `fixed` or `sticky` or has `transform`).
+- Normally `position: fixed` positions relative to viewport. However, if its parent (or ancestor) has `transform` then its position is relative to transformed ancestor, not viewport. The same happens when one of its ancestor has `perspective` or `filter`.
 - If you don't specify `min-with`, it will be `auto`, and min width will be determined by content. It has higher priority than many other CSS attributes. With it, `flex-shrink` may not work, `overflow: hidden` may not work, `width: 0` may not work, `max-width: 100%` may not work. It's recommended to set `min-width: 0`.
-- blur https://www.joshwcomeau.com/css/backdrop-filter/#the-issue
 - `width: auto` tries fill available space in parent. But `height: auto` tries to just expand to fit content.
 - Horizontal margin is different to vertical margin. `margin: 0 auto` centers horizontally. But `margin: auto 0` normally become `margin: 0 0` (in a flexbox with `flex-direction: column`, `margin: auto 0` can center vertically).
 - Margin collapse. One way to avoid margin collapse is `display: flow-root` which creates a BFC (Block formatting context).
 - On mobile Safari, the top address bar and bottom navigation bar can go out of screen when you scroll down. `100vh` correspond to the height when top bar and bottom bar gets out of screen, which is larger than the height when the two bars are on screen. The solution is `100dvh` (may not be supported in old browsers).
+- [Blur issue](https://www.joshwcomeau.com/css/backdrop-filter/#the-issue)
+- TODO `transform` has side effects on `z-index`, `position: absolute`, `overflow: visible`, `background-attachment: fixed`, subpixel antialiasing, `%` values, `position: sticky`, hit testing.
+- TODO `border` `padding` `overflow` `display: table` `display: inline-block` can affect `margin`
+- TODO `position: absolute` affects `float`
 
 ### Git
 
