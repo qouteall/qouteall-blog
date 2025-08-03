@@ -1339,7 +1339,7 @@ Normal distribution has linear properties:
 - if you multiply a constant, the result still follow normal distribution. $X \sim N \rightarrow \ kX \sim N$
 - if you add a constant, the result still follow normal distribution. $X \sim N \rightarrow (X+k) \sim N$
 - If you add up two independent normal random variables, the result still follows normal distribution. $X \sim N, Y \sim N \rightarrow (X+Y) \sim N$
-- A linear combination of many normal distributions also follow normal distribution. $X_1 \sim N, X_2 \sim N, ... X_n \sim N \rightarrow (k_1X_1 + k_2X_2 + ... + k_nX_n) \sim N$
+- A linear combination of many independent normal distributions also follow normal distribution. $X_1 \sim N, X_2 \sim N, ... X_n \sim N \rightarrow (k_1X_1 + k_2X_2 + ... + k_nX_n) \sim N$
 
 If:
 
@@ -1515,7 +1515,8 @@ E_{x_0}\left[ \frac{\partial\log p_{0 \vert 1}(x_0 \vert x_1)}{\partial x_1} \bi
 \int p_{0 \vert 1}(x_0 \vert x_1) \cdot \frac{\partial \log p_{0 \vert 1}(x_0 \vert x_1)}{\partial x_1} dx_0 
 $$
 
-$$= \int p_{0 \vert 1}(x_0) \cdot \frac 1 {p_{0 \vert 1}(x_0 \vert x_1)} \cdot \frac{\partial p_{0 \vert 1}(x_0 \vert x_1)}{\partial x_1} dx_0 = \int \frac{\partial p_{0 \vert 1}(x_0 \vert x_1)}{\partial x_1} dx_0 = \frac{\partial \int p_{0 \vert 1}(x_0 \vert x_1) dx_0}{\partial x_1} = \frac{\partial 1}{\partial x_1}=0
+$$
+= \int p_{0 \vert 1}(x_0) \cdot \frac 1 {p_{0 \vert 1}(x_0 \vert x_1)} \cdot \frac{\partial p_{0 \vert 1}(x_0 \vert x_1)}{\partial x_1} dx_0 = \int \frac{\partial p_{0 \vert 1}(x_0 \vert x_1)}{\partial x_1} dx_0 = \frac{\partial \int p_{0 \vert 1}(x_0 \vert x_1) dx_0}{\partial x_1} = \frac{\partial 1}{\partial x_1}=0
 $$
 
 And $E_{x_0}\left[ \sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1} \biggr\vert x_1\right] = \sigma^2\frac{\partial \log p_1(x_1)}{\partial x_1}$ because it's unrelated to random $x_0$.

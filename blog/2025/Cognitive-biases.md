@@ -469,7 +469,7 @@ Examples of binary thinking:
 - "We will win quickly." / "We will lose quickly."
 - "I can do it perfectly." / "I cannot do it perfectly so I will fail."
 
-People's evaluations are anchored on the expectation, and **not meeting an exception could make people's belief turn to another extreme**.
+People's evaluations are anchored on the expectation, and **not meeting an expectation could make people's belief turn to another extreme**.
 
 [Technology Hype Cycle](https://en.wikipedia.org/wiki/Gartner_hype_cycle):
 
