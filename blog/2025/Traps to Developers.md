@@ -24,7 +24,7 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 
 ### Golang
 
-- `append()` may reuse underlying array if capacity allows. Appending to a subslice can overwrite parent if they share capacity. `s[:len(s):len(s)]` creates a new slice with capacity equal to its length, preventing this.
+- `append()` may reuse underlying array if capacity allows. Appending to a subslice can overwrite parent if they share memory region. `s[:len(s):len(s)]` creates a new slice with capacity equal to its length, preventing this.
 - `defer` executes when the function returns, not when the lexical scope exits.
 - `defer` capture mutable variable.
 - There are nil slice and empty slice (the two are different). But there is no nil string, only empty string.
@@ -35,7 +35,7 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 
 ### C/C++
 
-- Storing a pointer of an element inside `vector` and then grow the vector.
+- Storing a pointer of an element inside `std::vector` and then grow the vector, `vector` may re-allocate content and the previous element pointer may no longer be valid.
 - All `std::string` created from literal string are temporary. Taking `c_str()` from a temporary string is wrong.
 - Iterator invalidation. Modifying a container when looping on it.
 - `std::remove` doesn't remove but just rearrange elements. `erase` actually removes.
@@ -51,7 +51,7 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 - Forge to check for null.
 - Multithreading data race.
 - Modifying a container when for looping on it. Single-thread "data race".
-- Unintended sharing of mutable data. In Python `[[0] * 10] * 10` does not create a proper 2D array.
+- Unintended sharing of mutable data. For example in Python `[[0] * 10] * 10` does not create a proper 2D array.
 - A number starting with 0 will be seen as octonary number (`0123` is 83).
 - For integer `(low + high) / 2` may overflow. A safer way is `low + (high - low) / 2`
 - When using profiler: the profiler may by default only include CPU time which excludes waiting time. If your app spends 90% time waiting on database, the flamegraph may not include that 90% which is misleading.
@@ -82,6 +82,7 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 - Foreign key may cause implicit locking, which may cause deadlock.
 - Locking may break repeatable read isolation (it's database-specific).
 - Distributed SQL database may doesn't support locking or have weird locking behaviors. It's database-specific.
+- If the backend has N+1 query issue, the slowness may won't be shown in slow query log, because the backend does many small queries serially and each individual query is fast.
 
 
 
