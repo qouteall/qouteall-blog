@@ -2,6 +2,7 @@
 date: 2025-01-27
 tags:
   - Psychology
+slug: /Cognitive-biases
 ---
 
 # Notes about Cognitive Biases

@@ -1,5 +1,7 @@
 ---
 date: 2025-08-02
+tags:
+  - Miscellaneous
 ---
 # Some Fancy Words
 
