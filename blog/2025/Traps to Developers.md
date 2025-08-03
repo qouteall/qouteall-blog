@@ -158,7 +158,7 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
   - In UTF-16, a code point can be 2 bytes or 4 bytes (surrogate pair).
   - The standard doesn't put an upper limit on how much code point can a grapheme cluster contain. But implementations usually impose a limit for performance concerns.
 - Different in-memory string behaviors in different languages:
-  - Rust use UTF-8 for in-memory string. `s.len()` gives byte count. Rust does not allow directly indexing on a `str`. `s.chars().count()` gives code point count. Rust is strict in UTF-8 validity (for example Rust doesn't allow subslice to cut on invalid code point boundary).
+  - Rust use UTF-8 for in-memory string. `s.len()` gives byte count. Rust does not allow directly indexing on a `str`. `s.chars().count()` gives code point count. Rust is strict in UTF-8 code point validity (for example Rust doesn't allow subslice to cut on invalid code point boundary).
   - Golang use UTF-8 for in-memory string. `len(s)` gives byte count. `s[i]` works same as byte array. `utf8.RuneCountInString(s)` gives code point count.
   - Java, C#, JS use UTF-16-like encoding for in-memory string. UTF-16 works on 2-byte-units. But a code point can be 1 2-byte-unit or 2 2-byte-units (surrogate pair). Length of string is the unit count, not code point count. Indexing works on 2-byte-units.
   - In Python, `len(s)` gives code point count. Indexing gives a string that contains one code point.

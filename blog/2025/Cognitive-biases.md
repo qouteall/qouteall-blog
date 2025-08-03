@@ -479,6 +479,11 @@ Internet has indeed changed the world. But the dot com bubble burst. It's just t
 
 **Neglect of probability**: either neglect a risk entirely or overreact to the risk. 
 
+**Strawman argument** is a technique in debating: refute a changed version of opponent's idea. It often utilizes binary thinking: **refute a more extreme version of opponent's idea**. Examples:
+
+- A: "We should increase investment for renewable energy." B: "You want to ban oil, gas, and coal, removing millions of jobs and crash the economy?"
+- A: "The history curriculum should include more perspectives to present a more objective and nuanced view of our nation." B: "So you want to rewrite history to make our children hate their own country?"
+
 ### Halo effect and horn effect
 
 **Halo effect**: Liking one aspect of a thing cause liking all aspects of that thing and its related things. (爱屋及乌) 
