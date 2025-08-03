@@ -1674,71 +1674,71 @@ $$
 We can rediscover Pareto distribution from these. The first thing to do is extract and eliminate $k$:
 
 $$
-\int_t^{\infty} f(x)dx = 0.2^k = e^{(\ln 0.2)k} \quad\quad\quad (\ln 0.2) k=\ln\int_t^{\infty} f(x)dx
+\int_t^{\infty} f(x)dx = 0.2^k = e^{(\log 0.2)k} \quad\quad\quad (\log 0.2) k=\log\int_t^{\infty} f(x)dx
 $$
 
 $$
-\int_t^{\infty} x f(x) dx = \frac W N 0.8^k = \frac W N e^{(\ln 0.8)k} \quad\quad\quad
-(\ln 0.8)k = \ln \frac{N\int_t^{\infty} x f(x) dx}{W}
+\int_t^{\infty} x f(x) dx = \frac W N 0.8^k = \frac W N e^{(\log 0.8)k} \quad\quad\quad
+(\log 0.8)k = \log \frac{N\int_t^{\infty} x f(x) dx}{W}
 $$
 
 $$
-k=\frac{\ln\int_t^{\infty} f(x)dx}{\ln 0.2}=\frac{\ln \frac{N\int_t^{\infty} x f(x) dx}{W}}{\ln 0.8}
+k=\frac{\log\int_t^{\infty} f(x)dx}{\log 0.2}=\frac{\log \frac{N\int_t^{\infty} x f(x) dx}{W}}{\log 0.8}
 \quad\quad\quad
-\frac{\ln 0.8}{\ln 0.2} \ln\int_t^{\infty} f(x)dx = \ln \frac{N\int_t^{\infty} x f(x) dx}{W}
+\frac{\log 0.8}{\log 0.2} \log\int_t^{\infty} f(x)dx = \log \frac{N\int_t^{\infty} x f(x) dx}{W}
 $$
 
 $$
-\ln\left(\left(\int_t^{\infty} f(x)dx\right) ^{\frac{\ln 0.8}{\ln 0.2}} \right) = \ln \frac{N\int_t^{\infty} x f(x) dx}{W}
+\log\left(\left(\int_t^{\infty} f(x)dx\right) ^{\frac{\log 0.8}{\log 0.2}} \right) = \log \frac{N\int_t^{\infty} x f(x) dx}{W}
 $$
 
 $$
-\left(\int_t^{\infty} f(x)dx\right) ^{\frac{\ln 0.8}{\ln 0.2}}  = \frac N W \int_t^{\infty} x f(x) dx
+\left(\int_t^{\infty} f(x)dx\right) ^{\frac{\log 0.8}{\log 0.2}}  = \frac N W \int_t^{\infty} x f(x) dx
 $$
 
 Then we can take derivative to $t$ on two sides:
 
 $$
-\frac{\ln 0.8}{\ln 0.2} \left( \int_t^{\infty} f(x)dx \right)^{\frac{\ln 0.8}{\ln 0.2}-1} (- f(t)) = \frac N W (-t f(t))
+\frac{\log 0.8}{\log 0.2} \left( \int_t^{\infty} f(x)dx \right)^{\frac{\log 0.8}{\log 0.2}-1} (- f(t)) = \frac N W (-t f(t))
 $$
 
 $f(t) \neq 0$. Divide two sides by $-f(t)$:
 
 $$
-\frac{\ln 0.8}{\ln 0.2} \left( \int_t^{\infty} f(x)dx \right)^{\frac{\ln 0.8}{\ln 0.2}-1} = \frac N W t
+\frac{\log 0.8}{\log 0.2} \left( \int_t^{\infty} f(x)dx \right)^{\frac{\log 0.8}{\log 0.2}-1} = \frac N W t
 $$
 
 $$
-\left( \left( \int_t^{\infty} f(x)dx \right)^{\frac{\ln 0.8}{\ln 0.2}-1} \right)^{\frac 1 {\frac{\ln 0.8}{\ln 0.2}-1}} = \left(\frac {N\ln 0.2} {W\ln 0.8} t\right)^{\frac 1 {\frac{\ln 0.8}{\ln 0.2}-1}}
+\left( \left( \int_t^{\infty} f(x)dx \right)^{\frac{\log 0.8}{\log 0.2}-1} \right)^{\frac 1 {\frac{\log 0.8}{\log 0.2}-1}} = \left(\frac {N\log 0.2} {W\log 0.8} t\right)^{\frac 1 {\frac{\log 0.8}{\log 0.2}-1}}
 $$
 
 $$
-\int_t^{\infty} f(x)dx = \left( \frac{N\ln 0.2}{W\ln 0.8} t \right)^{\frac 1 {\frac{\ln 0.8}{\ln 0.2}-1}}
-= \left( \frac{N\ln 0.2}{W\ln 0.8} t \right)^{\frac {\ln 0.2} {\ln 0.8-\ln 0.2}}
+\int_t^{\infty} f(x)dx = \left( \frac{N\log 0.2}{W\log 0.8} t \right)^{\frac 1 {\frac{\log 0.8}{\log 0.2}-1}}
+= \left( \frac{N\log 0.2}{W\log 0.8} t \right)^{\frac {\log 0.2} {\log 0.8-\log 0.2}}
 $$
 
 Take derivative to $t$ on two sides again:
 
 $$
--f(t) = \frac {\ln 0.2} {\ln 0.8-\ln 0.2} \left( \frac{N\ln 0.2}{W\ln 0.8} t \right)^{\frac {\ln 0.2} {\ln 0.8-\ln 0.2} - 1} \cdot \frac{N\ln 0.2}{W\ln 0.8}
+-f(t) = \frac {\log 0.2} {\log 0.8-\log 0.2} \left( \frac{N\log 0.2}{W\log 0.8} t \right)^{\frac {\log 0.2} {\log 0.8-\log 0.2} - 1} \cdot \frac{N\log 0.2}{W\log 0.8}
 $$
 
 Now $t$ is an argument and can be renamed to $x$. And do some adjustments:
 
 $$
-f(x) = -\frac {\ln 0.2} {\ln 0.8-\ln 0.2} \left(\frac{N\ln 0.2}{W\ln 0.8}\right)^{\frac {\ln 0.2} {\ln 0.8-\ln 0.2} } \cdot x ^{\frac {\ln 0.2} {\ln 0.8-\ln 0.2} - 1}
+f(x) = -\frac {\log 0.2} {\log 0.8-\log 0.2} \left(\frac{N\log 0.2}{W\log 0.8}\right)^{\frac {\log 0.2} {\log 0.8-\log 0.2} } \cdot x ^{\frac {\log 0.2} {\log 0.8-\log 0.2} - 1}
 $$
 
 Now we get the PDF. We still need to make the total probability area to be 1 to make it a valid distribution. But there is no extra unknown parameter in PDF to change. The solution is to crop the range of $X$. If we set the minimum wealth in distribution to be $m$ (but doesn't constraint the maximum wealth), creating constraint $X \geq m$, then using the previous result
 
 $$
 \int_m^{\infty} f(x)dx = 1 \quad\quad\quad
-\left( \frac{N\ln 0.2}{W\ln 0.8} m \right)^{\frac {\ln 0.2} {\ln 0.8-\ln 0.2}} = 1
+\left( \frac{N\log 0.2}{W\log 0.8} m \right)^{\frac {\log 0.2} {\log 0.8-\log 0.2}} = 1
 \quad\quad\quad
-m = \frac{W \ln 0.8}{N \ln 0.2} \approx 0.1386 \frac W N
+m = \frac{W \log 0.8}{N \log 0.2} \approx 0.1386 \frac W N
 $$
 
-Now we rediscovered (a special case of) Pareto distribution from just fractal 80/20 rule. We can generalize it further for other cases like 90/10 rule, 80/10 rule, etc. and get Pareto (Type I) distribution. It has two parameters, shape parameter $\alpha$ (correspond to $-\frac {\ln 0.2} {\ln 0.8-\ln 0.2} = \frac{\ln 5}{\ln 4} \approx 1.161$) and minimum value $m$:
+Now we rediscovered (a special case of) Pareto distribution from just fractal 80/20 rule. We can generalize it further for other cases like 90/10 rule, 80/10 rule, etc. and get Pareto (Type I) distribution. It has two parameters, shape parameter $\alpha$ (correspond to $-\frac {\log 0.2} {\log 0.8-\log 0.2} = \frac{\log 5}{\log 4} \approx 1.161$) and minimum value $m$:
 
 $$
 f(x) = \begin{cases}
