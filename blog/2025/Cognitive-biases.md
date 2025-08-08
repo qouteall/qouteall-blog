@@ -458,7 +458,6 @@ Examples of binary thinking:
 
 - "That person is a good person." / "That person is a bad person."
 - "You're either with us or against us.", "Anything less than absolute loyalty is absolute disloyalty."
-- "People are either extroverts or introverts."
 - "You either support free speech absolutely, or you're in favor of censorship."
 - "Bitcoin is the future." / "Bitcoin is a scam".
 - "This asset is completely safe." / "This bubble is going to collapse tomorrow."
@@ -468,6 +467,7 @@ Examples of binary thinking:
 - The idol maintains a perfect image. / Image collapse, true nature exposes.
 - "We will win quickly." / "We will lose quickly."
 - "I can do it perfectly." / "I cannot do it perfectly so I will fail."
+- "X is the best thing and everyone should use it." / "X has this drawback so it's completely useless."
 
 People's evaluations are anchored on the expectation, and **not meeting an expectation could make people's belief turn to another extreme**.
 
@@ -919,6 +919,13 @@ Examples:
 This is related to **means-end inversion**. To achieve the root goal (end) we work on a sub-goal (means) that helps root goal. But focusing on an easy but unimportant sub-goal may hurt the root goal, by taking resources from hard but important sub-goals.
 
 A similar phenomenon occurs commonly in medicine: treatments usually mainly suppress visible symptoms instead of curing the root cause of illness. This is usually due to technological and budget limitations.
+
+Pepole tend to spend much time making decision on small things but spend very few time making decisions on big things (e.g. buy house with mortgage, change career, big investment):
+
+- As the big decision is important, people tend to be nervous when thinking about it.
+- Thinking about big decisions is tiresome, as the future is uncertain, and there are many factors to analyze.
+- So people tend to procrastinate to avoid the unpleasant feeling of thinking about big decisions, or simply follow others (herd metality).
+- The small decisions (e.g. choosing item in shop, choosing restaurant) require less mental efforts and cause less nervous feeling. Thinking on these decisions can give feeling of control. These decisions usually have quick feedback (human crave quick feedback).
 
 ### Path dependence
 

@@ -11,6 +11,102 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 
 ## Summarazation of traps
 
+### Unicode and text encoding
+
+- It's recommended to use UTF-8 for all files and communications to avoid troubles related to encoding.
+- Two concepts: code point (rune), grapheme cluster:
+  - Grapheme cluster is the "unit of character" in GUI.
+  - For visible ascii characters, a character is a code point, a character is a grapheme cluster.
+  - An emoji is a grapheme cluster, but it may consist of many code points.
+  - In UTF-8, a code point can be 1 byte, 2 bytes or 4 bytes. The byte number does not necessarily represent code point number.
+  - In UTF-16, a code point can be 2 bytes or 4 bytes (surrogate pair).
+  - The standard doesn't put an upper limit on how much code point can a grapheme cluster contain. But implementations usually impose a limit for performance concerns.
+- Different in-memory string behaviors in different languages:
+  - Rust use UTF-8 for in-memory string. `s.len()` gives byte count. Rust does not allow directly indexing on a `str`. `s.chars().count()` gives code point count. Rust is strict in UTF-8 code point validity (for example Rust doesn't allow subslice to cut on invalid code point boundary).
+  - Golang use UTF-8 for in-memory string. `len(s)` gives byte count. `s[i]` works same as byte array. `utf8.RuneCountInString(s)` gives code point count.
+  - Java, C#, JS use UTF-16-like encoding for in-memory string. UTF-16 works on 2-byte-units. But a code point can be 1 2-byte-unit or 2 2-byte-units (surrogate pair). Length of string is the unit count, not code point count. Indexing works on 2-byte-units.
+  - In Python, `len(s)` gives code point count. Indexing gives a string that contains one code point.
+  - No language mentioned above do string length and indexing based on grapheme cluster.
+- Some text files have byte order mark (BOM) at the beginning. For example, EF BB BF is a BOM that denotes the file is in UTF-8 encoding. It's mainly used in Windows. Some non-Windows software does not handle BOM.
+- [Confusable characters](https://github.com/unicode-org/icu/blob/main/icu4c/source/data/unidata/confusables.txt).
+- Normalization. é can be U+00E9 or U+0065 U+0301
+- [Zero-width characters](https://ptiglobal.com/the-beauty-of-unicode-zero-width-characters/), [Invisible characters](https://invisible-characters.com/)
+
+
+### Floating point
+
+- NaN. Floating point NaN is not equal to any number including itself. NaN always give false in comarision. Computing on NaN usually gives NaN.
+- There are +Inf and -Inf. They are not NaN. 
+- There is a negative zero -0.0 which is different to normal zero. The negative zero equals zero when using floating point comparision. Normal zero is treated as "positive".
+- Directly compare equality may fail. Compare equality by things like `abs(a - b) < 0.0001`
+- JS use floating point for all numbers. The max safe integer is $2^{53}-1$ if not using BigInteger. If a JSON contains an integer larger than that, and JS deserializes it using `JSON.parse`, the number in result will be inaccurate. The workaround is to use other ways of deserializing JSON or use string for large integer.
+- Avoid accumulating error. For example, if you rotate 1 degree per frame: don't multiply one 1-degree-rotation matrix cumulatively per frame. Compute angle from time and then compute rotation matrix every frame.
+- Associativity law and distribution law doesn't strictly hold because of inaccuracy. Parallelizing matrix multiplication and sum can be non-deterministic. https://github.com/pytorch/pytorch/issues/75240 https://www.twosigma.com/articles/a-workaround-for-non-determinism-in-tensorflow/
+- Division is usually much slower than multiplication.
+
+
+### Time
+
+- Leap second. Unix timestamp is "transparent" to leap second, which means that converting between unix timestamp and UTC time ignores the existence of leap second. The time measured in unix timestamp will stretch or squeeze near a leap second.
+- Time zone. UTC and Unix timestamp is globally uniform and doesn't care about time zone. But human-readable time is time-zone-dependent. It's recommended to store timestamp in database and convert to human-readable time in UI instead of storing human-readable time in database.
+- Daylight Saving Time (DST): In some region people adjust clock forward by one hour in warm seasons.
+- Time may "go backward" due to NTP sync.
+- It's recommended to configure the server's time zone as UTC. Different nodes having different time zones will cause trouble in distributed system. After changing system time zone, the database may need to be reconfigured or restarted.
+
+
+### HTML and CSS
+
+- If you don't specify `min-with`, it will be `auto`, and min width will be determined by content. It has higher priority than many other CSS attributes. With it, `flex-shrink` may not work, `overflow: hidden` may not work, `width: 0` may not work, `max-width: 100%` may not work. It's recommended to set `min-width: 0`.
+- Horizontal and vertical are different in CSS:
+  - Normally `width: auto` tries fill available space in parent. But `height: auto` normally tries to just expand to fit content.
+  - For inline elements, inline-block elements and float elements, `width: atuo` does not try to expand.
+  - `margin: 0 auto` centers horizontally. But `margin: auto 0` normally become `margin: 0 0` which does not center vertically. In a flexbox with `flex-direction: column`, `margin: auto 0` can center vertically.
+  - Margin collapse happens vertically but not horizontally.
+  - The above flips when layout direction flips (e.g. `writing-mode: vertial-rl`)
+- Block formatting context (BFC):
+  - `display: flow-root` creates a BFC.
+    (There are other ways to create BFC, like `overflow: hidden`, `overflow: auto`, `overflow: scroll`, `display:table`, but with side effects)
+  - Margin collapse. Two vertically touching elements will overlap the margin. This can be avoided by BFC. If `border` or `padding` is specified, it will also avoid margin collapse. 
+  - Child margin can leak outside of parent. This can be avoided by BFC.
+- Stacking context.
+  These things will create a new stacking context:
+  - `transform`
+  - `filter`
+  - `perspective`
+  - `mix-blend-mode`
+  - `clip-path` `mask`
+  - `contain`
+  - `isolation`
+  - When `z-index` is specified as an integer, and
+    - `position` is `absolute`, `relative`, `fixed` or `sticky`, or
+    - `display` is `flex` or `grid`
+  - When `opacity` is specified as a value less than 1
+  - `overflow` is `scroll` or `auto` in some cases
+  - `will-change` has `transform`, `opacity` or `filter`
+  
+  Stacking context will change behaviors:
+  - `z-index` doesn't work across stacking contexts.
+  - `position: absolute` or `fixed` will use coordinate based on stacking context, instead of viewport.
+  - `position: sticky` doesn't work across stacking context.
+  - `overflow: visible` will still be clipped by stacking context
+  - `background-attachment: fixed` will position based on stacking context
+
+- On mobile browsers, the top address bar and bottom navigation bar can go out of screen when you scroll down. `100vh` correspond to the height when top bar and bottom bar gets out of screen, which is larger than the height when the two bars are on screen. The modern solution is `100dvh`.
+- `position: absolute` is not based on its parent. It's based on its nearest positioned ancestor (the nearest ancestor that has `position` be `relative`, `absolute`, `fixed` or `sticky` or has stacking context).
+- [Blur does not consider ambient things](https://www.joshwcomeau.com/css/backdrop-filter/#the-issue).
+- About `float`:
+  - If a parent only contains floating children, the parent's height will collapse to 0. It can be fixed by `display: flow-root` which creates a BFC (Block formatting context). 
+  - If the parent's `display` is `flex` or `grid`, then the child's `float` has no effect
+- If the parent's width/height is not pre-determined, then percent width/height (e.g. `width: 50%`, `height: 100%`) doesn't work. (If parent height is determined by content, but content height is determined by parent, it will be circular dependency.)
+- `display: inline` ignores `width` `height` and `margin-top` `margin-bottom`
+- Whitespace collapse. [HTML Whitespace is Broken](https://blog.dwac.dev/posts/html-whitespace/)
+  - By default, newlines in html are treated as spaces. Multiple spaces together collapse into one. 
+  - `<pre>` can avoid collapsing whitespace but has weird behavior in the beginning and end of content.
+  - Often the spaces in the beginning and end of content are ignored, but this doesn't happen in `<a>`.
+  - Any space or line break between two `display: inline-block` elements will be rendered as spacing. This doesn't happen in flexbox or grid.
+- `text-align` aligns text and inline things, but doesn't align block elements (e.g. normal divs).
+- [Cumulative Layout Shift](https://web.dev/articles/cls). It's recommended to specify `width` and `height` attribute in `<img>` to avoid layout shift due to image loading delay.
+
 ### Java
 
 - `==` compares object reference, not content. 
@@ -49,24 +145,13 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 ### Common in many languages
 
 - Forge to check for null.
-- Multithreading data race.
+- Concurrency issue and data race.
+  - Time-of-Check to time-of-use (TOCTOU).
 - Modifying a container when for looping on it. Single-thread "data race".
 - Unintended sharing of mutable data. For example in Python `[[0] * 10] * 10` does not create a proper 2D array.
 - A number starting with 0 will be seen as octonary number (`0123` is 83).
 - For integer `(low + high) / 2` may overflow. A safer way is `low + (high - low) / 2`
 - When using profiler: the profiler may by default only include CPU time which excludes waiting time. If your app spends 90% time waiting on database, the flamegraph may not include that 90% which is misleading.
-
-### Floating point
-
-- NaN. Floating point NaN is not equal to any number including itself. NaN always give false in comarision. Computing on NaN usually gives NaN.
-- There are +Inf and -Inf. They are not NaN. 
-- There is a negative zero -0 which is different to normal zero. The negative zero equals zero when using floating point comparision.
-- Directly compare equality may fail. Compare equality by things like `abs(a - b) < 0.0001`
-- JS use floating point for all numbers. The max safe integer is $2^{53}-1$ if not using BigInteger. If a JSON contains an integer larger than that, and JS deserializes it using `JSON.parse`, the number in result will be inaccurate. The workaround is to use other ways of deserializing JSON or use string for large integer.
-- Avoid accumulating error. For example, if you rotate 1 degree per frame: don't multiply one 1-degree-rotation matrix cumulatively per frame. Compute angle from time and then compute rotation matrix every frame.
-- Associativity law and distribution law doesn't strictly hold because of inaccuracy. Parallelizing matrix multiplication and sum can be non-deterministic. https://github.com/pytorch/pytorch/issues/75240 https://www.twosigma.com/articles/a-workaround-for-non-determinism-in-tensorflow/
-- Division is usually much slower than multiplication.
-
 
 ### SQL Databases
 
@@ -112,21 +197,6 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 
 
 
-### HTML and CSS
-
-- Whitespace collapse. [HTML Whitespace is Broken](https://blog.dwac.dev/posts/html-whitespace/)
-- `position: absolute` is not based on its parent. It's based on its nearest positioned ancestor (the nearest parent that has `position` be `relative`, `absolute`, `fixed` or `sticky` or has `transform`).
-- Normally `position: fixed` positions relative to viewport. However, if its parent (or ancestor) has `transform` then its position is relative to transformed ancestor, not viewport. The same happens when one of its ancestor has `perspective` or `filter`.
-- If you don't specify `min-with`, it will be `auto`, and min width will be determined by content. It has higher priority than many other CSS attributes. With it, `flex-shrink` may not work, `overflow: hidden` may not work, `width: 0` may not work, `max-width: 100%` may not work. It's recommended to set `min-width: 0`.
-- `width: auto` tries fill available space in parent. But `height: auto` tries to just expand to fit content.
-- Horizontal margin is different to vertical margin. `margin: 0 auto` centers horizontally. But `margin: auto 0` normally become `margin: 0 0` (in a flexbox with `flex-direction: column`, `margin: auto 0` can center vertically).
-- Margin collapse. One way to avoid margin collapse is `display: flow-root` which creates a BFC (Block formatting context).
-- On mobile Safari, the top address bar and bottom navigation bar can go out of screen when you scroll down. `100vh` correspond to the height when top bar and bottom bar gets out of screen, which is larger than the height when the two bars are on screen. The solution is `100dvh` (may not be supported in old browsers).
-- [Blur issue](https://www.joshwcomeau.com/css/backdrop-filter/#the-issue)
-- TODO `transform` has side effects on `z-index`, `position: absolute`, `overflow: visible`, `background-attachment: fixed`, subpixel antialiasing, `%` values, `position: sticky`, hit testing.
-- TODO `border` `padding` `overflow` `display: table` `display: inline-block` can affect `margin`
-- TODO `position: absolute` affects `float`
-
 ### Git
 
 - Rebase rewrites history. Rebase should be used with force push (because it rewrites history). If a branch was force pushed, pulling should use rebase.
@@ -146,37 +216,6 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 - CORS (cross-origin resource sharing). When sending HTTP(S) request to another website (origin), the browser will stop JS to get response unless the server's response contains header `Access-Control-Allow-Origin` and it matches client website. This requires configuring the backend. If you want to pass cookie to another website it involves more configuration. CORS is complex and has many details.
   
   Generally, if your frontend and backend are in the same website (same domain name and port) then there is no CORS issue.
-
-### Unicode and text encoding
-
-- It's recommended to use UTF-8 for all files and communications to avoid troubles related to encoding.
-- Two concepts: code point (rune), grapheme cluster:
-  - Grapheme cluster is the "unit of character" in GUI.
-  - For ascii characters, a character is a code point, a character is a grapheme cluster.
-  - An emoji is a grapheme cluster, but it may consist of many code points.
-  - In UTF-8, a code point can be 1 byte, 2 bytes or 4 bytes. The byte number does not necessarily represent code point number.
-  - In UTF-16, a code point can be 2 bytes or 4 bytes (surrogate pair).
-  - The standard doesn't put an upper limit on how much code point can a grapheme cluster contain. But implementations usually impose a limit for performance concerns.
-- Different in-memory string behaviors in different languages:
-  - Rust use UTF-8 for in-memory string. `s.len()` gives byte count. Rust does not allow directly indexing on a `str`. `s.chars().count()` gives code point count. Rust is strict in UTF-8 code point validity (for example Rust doesn't allow subslice to cut on invalid code point boundary).
-  - Golang use UTF-8 for in-memory string. `len(s)` gives byte count. `s[i]` works same as byte array. `utf8.RuneCountInString(s)` gives code point count.
-  - Java, C#, JS use UTF-16-like encoding for in-memory string. UTF-16 works on 2-byte-units. But a code point can be 1 2-byte-unit or 2 2-byte-units (surrogate pair). Length of string is the unit count, not code point count. Indexing works on 2-byte-units.
-  - In Python, `len(s)` gives code point count. Indexing gives a string that contains one code point.
-  - No language mentioned above do string length and indexing based on grapheme cluster.
-- Some text files have byte order mark (BOM) at the beginning. For example, EF BB BF is a BOM that denotes the file is in UTF-8 encoding. It's mainly used in Windows. Some non-Windows software does not handle BOM.
-- [Confusable characters](https://github.com/unicode-org/icu/blob/main/icu4c/source/data/unidata/confusables.txt).
-- Normalization. é can be U+00E9 or U+0065 U+0301
-- [Zero-width characters](https://ptiglobal.com/the-beauty-of-unicode-zero-width-characters/), [Invisible characters](https://invisible-characters.com/)
-
-
-### Time
-
-- Leap second. Unix timestamp is "transparent" to leap second, which means that converting between unix timestamp and UTC time ignores the existence of leap second. The time measured in unix timestamp will stretch or squeeze near a leap second.
-- Time zone. UTC and Unix timestamp is globally uniform and doesn't care about time zone. But human-readable time is time-zone-dependent. It's recommended to store timestamp in database and convert to human-readable time in UI instead of storing human-readable time in database.
-- Daylight Saving Time (DST): In some region people adjust clock forward by one hour in warm seasons.
-- Time may "go backward" due to NTP sync.
-- It's recommended to configure the server's time zone as UTC. Different nodes having different time zones will cause trouble in distributed system. After changing system time zone, the database may need to be reconfigured or restarted.
-
 
 ### Other
 

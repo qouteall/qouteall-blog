@@ -29,6 +29,7 @@ A lot of debate happen because same word has different meanings to different peo
   - Most commonly, 1 KB = 1024 bytes, 1MB = 1024 KB, 1GB = 1024 MB. (Formally they should be written as KiB, MiB, GiB.)
   - In disk manufactuers' descriptions, 1 KB = 1000 bytes, 1MB = 1000 KB, 1GB = 1000 MB. 
   - In networking speed, 1 Kbps = 1000 bits per second, 1Mbps = 1000 Kbps, 1Gbps = 1000 Mbps.
+- Verbal. Sometimes mean spoken words. Sometimes includes both written text and spoken words.
 
 
 
