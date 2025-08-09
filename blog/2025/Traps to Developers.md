@@ -13,7 +13,6 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 
 ### Unicode and text encoding
 
-- It's recommended to use UTF-8 for all files and communications to avoid troubles related to encoding.
 - Two concepts: code point (rune), grapheme cluster:
   - Grapheme cluster is the "unit of character" in GUI.
   - For visible ascii characters, a character is a code point, a character is a grapheme cluster.
@@ -24,10 +23,12 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 - Different in-memory string behaviors in different languages:
   - Rust use UTF-8 for in-memory string. `s.len()` gives byte count. Rust does not allow directly indexing on a `str`. `s.chars().count()` gives code point count. Rust is strict in UTF-8 code point validity (for example Rust doesn't allow subslice to cut on invalid code point boundary).
   - Golang use UTF-8 for in-memory string. `len(s)` gives byte count. `s[i]` works same as byte array. `utf8.RuneCountInString(s)` gives code point count.
-  - Java, C#, JS use UTF-16-like encoding for in-memory string. UTF-16 works on 2-byte-units. But a code point can be 1 2-byte-unit or 2 2-byte-units (surrogate pair). Length of string is the unit count, not code point count. Indexing works on 2-byte-units.
+  - Java, C# and JS use UTF-16-like encoding for in-memory string. UTF-16 works on 2-byte-units. But a code point can be 1 2-byte-unit or 2 2-byte-units (surrogate pair). Length of string is the unit count, not code point count. Indexing works on 2-byte-units.
   - In Python, `len(s)` gives code point count. Indexing gives a string that contains one code point.
+  - In C++, `std::string` has no constraint of encoding. It can be seen as a wrapper of `std::vector<char>`. String length and indexing is based on bytes.
   - No language mentioned above do string length and indexing based on grapheme cluster.
 - Some text files have byte order mark (BOM) at the beginning. For example, EF BB BF is a BOM that denotes the file is in UTF-8 encoding. It's mainly used in Windows. Some non-Windows software does not handle BOM.
+- When converting binary data to string, often the invalid places are replaced by � (U+FFFD)
 - [Confusable characters](https://github.com/unicode-org/icu/blob/main/icu4c/source/data/unidata/confusables.txt).
 - Normalization. é can be U+00E9 or U+0065 U+0301
 - [Zero-width characters](https://ptiglobal.com/the-beauty-of-unicode-zero-width-characters/), [Invisible characters](https://invisible-characters.com/)
@@ -37,21 +38,37 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 
 - NaN. Floating point NaN is not equal to any number including itself. NaN always give false in comarision. Computing on NaN usually gives NaN.
 - There are +Inf and -Inf. They are not NaN. 
-- There is a negative zero -0.0 which is different to normal zero. The negative zero equals zero when using floating point comparision. Normal zero is treated as "positive".
+- There is a negative zero -0.0 which is different to normal zero. The negative zero equals zero when using floating point comparision. Normal zero is treated as "positive zero".
 - Directly compare equality may fail. Compare equality by things like `abs(a - b) < 0.0001`
-- JS use floating point for all numbers. The max safe integer is $2^{53}-1$ if not using BigInteger. If a JSON contains an integer larger than that, and JS deserializes it using `JSON.parse`, the number in result will be inaccurate. The workaround is to use other ways of deserializing JSON or use string for large integer.
+- JS use floating point for all numbers. The max accurate integer is $2^{53}-1$ if not using `BigInt`. If a JSON contains an integer larger than that, and JS deserializes it using `JSON.parse`, the number in result will be inaccurate. The workaround is to use other ways of deserializing JSON or use string for large integer. 
+  
+  (JS can deserialize millisecond timestamp in integer in JSON fine as millisecond timestamp exceeds limit in year 287396. But JS deserializing nanosecond timestamp in integer in JSON is not fine.)
 - Avoid accumulating error. For example, if you rotate 1 degree per frame: don't multiply one 1-degree-rotation matrix cumulatively per frame. Compute angle from time and then compute rotation matrix every frame.
-- Associativity law and distribution law doesn't strictly hold because of inaccuracy. Parallelizing matrix multiplication and sum can be non-deterministic. https://github.com/pytorch/pytorch/issues/75240 https://www.twosigma.com/articles/a-workaround-for-non-determinism-in-tensorflow/
+- Associativity law and distribution law doesn't strictly hold because of inaccuracy. Parallelizing matrix multiplication and sum dynamically using these laws can be non-deterministic. https://github.com/pytorch/pytorch/issues/75240 https://www.twosigma.com/articles/a-workaround-for-non-determinism-in-tensorflow/
 - Division is usually much slower than multiplication.
+- These things can make different hardware have different floating point computation results:
+  - Hardware FMA (fused multiply-add) support. `fma(a, b, c) = a + b * c`. Most modern hardware make intermediary result in FMA to have higher precision. Some old hardware or embedded systems don't do that and treat it as normal multiply and add.
+  - Floating point has a [Subnormal range](https://en.wikipedia.org/wiki/Subnormal_number) to make very-close-to-zero numbers more accurate. Most mondern hardware can handle them, but some old hardware and embedded system treat subnormals as zero.
+  - Rounding mode. The standard allows different rounding modes like round-to-nearest-ties-to-even (RNTE) or round-toward-zero (RTZ). 
+    - In X86 and ARM rounding mode is thread-local mutable state can be set by special instructions. It's not recommended to touch the rounding mode as it can affect other code.
+    - In GPU there is no mutable state for rounding mode. Rasterization often use RNTE rounding mode. In CUDA different rounding modes are associated by different instructions.
+  - Different hardware may have different behaviors on math functions like sin, log.
+  - X86 has legacy FPU which has 80-bit floating point registers and per-core rounding mode state. It's recommended to not use them.
+  - ... There are many other factors that cause difference of floating point computation.
+- How to increase precision in floating point computation:
+  - Make computation graph shallower. For example, 3-layer computation `a * (b * (c * d))` can be less accurate than 2-layer-computation `(a * b) * (c * d)` (depends on exact case).
+  - Avoid temporary result to have very large absolute value or very close-to-zero value.
+  - Utilizing hardware fused operations like FMA (fused multiply-add).
 
 
 ### Time
 
-- Leap second. Unix timestamp is "transparent" to leap second, which means that converting between unix timestamp and UTC time ignores the existence of leap second. The time measured in unix timestamp will stretch or squeeze near a leap second.
+- Leap second. Unix timestamp is "transparent" to leap second, which means that converting between unix timestamp and UTC time ignores the existence of leap second. The time measured in unix timestamp will stretch or squeeze near a leap second (leap smear) to hide existence of leap second.
 - Time zone. UTC and Unix timestamp is globally uniform and doesn't care about time zone. But human-readable time is time-zone-dependent. It's recommended to store timestamp in database and convert to human-readable time in UI instead of storing human-readable time in database.
 - Daylight Saving Time (DST): In some region people adjust clock forward by one hour in warm seasons.
 - Time may "go backward" due to NTP sync.
 - It's recommended to configure the server's time zone as UTC. Different nodes having different time zones will cause trouble in distributed system. After changing system time zone, the database may need to be reconfigured or restarted.
+- There are two clocks: hardware clock and system clock. The hardware clock itself doesn't care about time zone. Linux treats it as UTC by default. Windows treats it as local time by default.
 
 
 ### HTML and CSS
@@ -68,36 +85,32 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
     (There are other ways to create BFC, like `overflow: hidden`, `overflow: auto`, `overflow: scroll`, `display:table`, but with side effects)
   - Margin collapse. Two vertically touching elements will overlap the margin. This can be avoided by BFC. If `border` or `padding` is specified, it will also avoid margin collapse. 
   - Child margin can leak outside of parent. This can be avoided by BFC.
-- Stacking context.
-  These things will create a new stacking context:
-  - `transform`
-  - `filter`
-  - `perspective`
-  - `mix-blend-mode`
-  - `clip-path` `mask`
-  - `contain`
-  - `isolation`
-  - When `z-index` is specified as an integer, and
-    - `position` is `absolute`, `relative`, `fixed` or `sticky`, or
-    - `display` is `flex` or `grid`
-  - When `opacity` is specified as a value less than 1
-  - `overflow` is `scroll` or `auto` in some cases
-  - `will-change` has `transform`, `opacity` or `filter`
+- [Stacking context](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_positioned_layout/Stacking_context).
   
-  Stacking context will change behaviors:
-  - `z-index` doesn't work across stacking contexts.
+  In these cases, it will start a new stacking context:
+  
+  - The attributes that give special rendering effects (`transform`, `filter`, `perspective`, `mask`, `opacity` etc.) will create a new stacking context
+  - `position: fixed` or `position: sticky` creates a stacking context
+  - Specifies `z-index` and `position` is `absolute` or `relative`
+  - Specifies `z-index` and the element is inside flexbox or grid
+  - `isolation: isolate`
+  - ...
+  
+  Stacking context can cause these behaviors:
+  
+  - `z-index` doesn't work across stacking contexts. It only works within a stacking context.
   - `position: absolute` or `fixed` will use coordinate based on stacking context, instead of viewport.
   - `position: sticky` doesn't work across stacking context.
   - `overflow: visible` will still be clipped by stacking context
   - `background-attachment: fixed` will position based on stacking context
 
 - On mobile browsers, the top address bar and bottom navigation bar can go out of screen when you scroll down. `100vh` correspond to the height when top bar and bottom bar gets out of screen, which is larger than the height when the two bars are on screen. The modern solution is `100dvh`.
-- `position: absolute` is not based on its parent. It's based on its nearest positioned ancestor (the nearest ancestor that has `position` be `relative`, `absolute`, `fixed` or `sticky` or has stacking context).
+- `position: absolute` is not based on its parent. It's based on its nearest positioned ancestor (the nearest ancestor that has `position` be `relative`, `absolute` or has stacking context).
 - [Blur does not consider ambient things](https://www.joshwcomeau.com/css/backdrop-filter/#the-issue).
 - About `float`:
   - If a parent only contains floating children, the parent's height will collapse to 0. It can be fixed by `display: flow-root` which creates a BFC (Block formatting context). 
   - If the parent's `display` is `flex` or `grid`, then the child's `float` has no effect
-- If the parent's width/height is not pre-determined, then percent width/height (e.g. `width: 50%`, `height: 100%`) doesn't work. (If parent height is determined by content, but content height is determined by parent, it will be circular dependency.)
+- If the parent's width/height is not pre-determined, then percent width/height (e.g. `width: 50%`, `height: 100%`) doesn't work. (It avoids circular dependency where parent height is determined by content height, but content height is determined by parent height.)
 - `display: inline` ignores `width` `height` and `margin-top` `margin-bottom`
 - Whitespace collapse. [HTML Whitespace is Broken](https://blog.dwac.dev/posts/html-whitespace/)
   - By default, newlines in html are treated as spaces. Multiple spaces together collapse into one. 
@@ -176,10 +189,11 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 - If the current directory is moved, `pwd` still shows the original path. `pwd -P` shows the real path.
 - `cmd > file 2>&1` make both stdout and stderr go to file. But `cmd 2>&1 > file` only make stdout go to file but don't redirect stderr.
 - File name is case sensitive (unlike Windows).
-- An alternative file permission system. `getcap`
+- There is a capability system for executables, apart from file permission sytem. Use `getcap` to see capability.
 - Unset variables. If `DIR` is unset, `rm -rf $DIR/` becomes `rm -rf /`
-- If you want a script to add variables and aliases to current shell, it should be executed by using `source script.sh`, instead of directly executing.
+- If you want a script to add variables and aliases to current shell, it should be executed by using `source script.sh`, instead of directly executing. But the effect of `source` is not permanent and doesn't apply after re-login. It can be made permanent by putting into `~/.bashrc`.
 - Bash has caching between command name and file path of command. If you move one file in `$PATH` then using that command gives ENOENT. Refresh cache using `hash -r`
+- Using a variable unquoted will make its line breaks treated as space.
 
 
 
@@ -199,8 +213,8 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 
 ### Git
 
-- Rebase rewrites history. Rebase should be used with force push (because it rewrites history). If a branch was force pushed, pulling should use rebase.
-- Reverting a merge doesn't cancel the effect of the merge. If you merge B to A and then revert, merging B to A again has no effect.
+- Rebase can rewrite history. After rebasing local branch, normal push will give weird result (because history is written). Rebase should be used with force push. If remote branch's history is rewritten, pulling should use `--rebase`.
+- Reverting a merge doesn't fully cancel the effect of the merge. If you merge B to A and then revert, merging B to A again has no effect. One solution is to revert the revert of merge. (A cleaner way to cancel a merge, instead of reverting merge, is to backup the branch, then hard reset to commit before merge, then cherry pick commits after merge, then force push.)
 - In GitHub, if you accidentally commited secret (e.g. API key) and pushed to public, even if you override it using force push, GitHub will still record that secret. [Guest Post: How I Scanned all of GitHub’s “Oops Commits” for Leaked Secrets](https://trufflesecurity.com/blog/guest-post-how-i-scanned-all-of-github-s-oops-commits-for-leaked-secrets) [Example activity tab](https://github.com/SharonBrizinov/test-oops-commit/compare/e6533c7bd729957b2eb31e88065c5158d1317c5e...9eedfa00983b7269a75d76ec5e008565c2eff2ef)
 
 ### Networking
