@@ -9,7 +9,7 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 
 <!-- truncate -->
 
-## Summarazation of traps
+## Summarization of traps
 
 ### Unicode and text encoding
 
@@ -17,7 +17,7 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
   - Grapheme cluster is the "unit of character" in GUI.
   - For visible ascii characters, a character is a code point, a character is a grapheme cluster.
   - An emoji is a grapheme cluster, but it may consist of many code points.
-  - In UTF-8, a code point can be 1 byte, 2 bytes or 4 bytes. The byte number does not necessarily represent code point number.
+  - In UTF-8, a code point can be 1, 2, 3 or 4 bytes. The byte number does not necessarily represent code point number.
   - In UTF-16, a code point can be 2 bytes or 4 bytes (surrogate pair).
   - The standard doesn't put an upper limit on how much code point can a grapheme cluster contain. But implementations usually impose a limit for performance concerns.
 - Different in-memory string behaviors in different languages:
@@ -36,18 +36,17 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 
 ### Floating point
 
-- NaN. Floating point NaN is not equal to any number including itself. NaN always give false in comarision. Computing on NaN usually gives NaN.
+- NaN. Floating point NaN is not equal to any number including itself. NaN == NaN is always false (even if the bits are the same). NaN != NaN is always true. Computing on NaN usually gives NaN (it can "contaminate" computation).
 - There are +Inf and -Inf. They are not NaN. 
 - There is a negative zero -0.0 which is different to normal zero. The negative zero equals zero when using floating point comparision. Normal zero is treated as "positive zero".
 - Directly compare equality may fail. Compare equality by things like `abs(a - b) < 0.0001`
 - JS use floating point for all numbers. The max accurate integer is $2^{53}-1$ if not using `BigInt`. If a JSON contains an integer larger than that, and JS deserializes it using `JSON.parse`, the number in result will be inaccurate. The workaround is to use other ways of deserializing JSON or use string for large integer. 
   
-  (JS can deserialize millisecond timestamp in integer in JSON fine as millisecond timestamp exceeds limit in year 287396. But JS deserializing nanosecond timestamp in integer in JSON is not fine.)
-- Avoid accumulating error. For example, if you rotate 1 degree per frame: don't multiply one 1-degree-rotation matrix cumulatively per frame. Compute angle from time and then compute rotation matrix every frame.
-- Associativity law and distribution law doesn't strictly hold because of inaccuracy. Parallelizing matrix multiplication and sum dynamically using these laws can be non-deterministic. https://github.com/pytorch/pytorch/issues/75240 https://www.twosigma.com/articles/a-workaround-for-non-determinism-in-tensorflow/
+  (Putting millisecond timestamp integer in JSON fine, as millisecond timestamp exceeds limit in year 287396. But nanosecond timestamp suffers from that issue.)
+- Associativity law and distribution law doesn't strictly hold because of inaccuracy. Parallelizing matrix multiplication and sum dynamically using these laws can be non-deterministic. [Example](https://github.com/pytorch/pytorch/issues/75240) [Example](https://www.twosigma.com/articles/a-workaround-for-non-determinism-in-tensorflow/)
 - Division is usually much slower than multiplication.
 - These things can make different hardware have different floating point computation results:
-  - Hardware FMA (fused multiply-add) support. `fma(a, b, c) = a + b * c`. Most modern hardware make intermediary result in FMA to have higher precision. Some old hardware or embedded systems don't do that and treat it as normal multiply and add.
+  - Hardware FMA (fused multiply-add) support. `fma(a, b, c) = a * b + c` (in some places `a + b * c`). Most modern hardware make intermediary result in FMA to have higher precision. Some old hardware or embedded systems don't do that and treat it as normal multiply and add.
   - Floating point has a [Subnormal range](https://en.wikipedia.org/wiki/Subnormal_number) to make very-close-to-zero numbers more accurate. Most mondern hardware can handle them, but some old hardware and embedded system treat subnormals as zero.
   - Rounding mode. The standard allows different rounding modes like round-to-nearest-ties-to-even (RNTE) or round-toward-zero (RTZ). 
     - In X86 and ARM rounding mode is thread-local mutable state can be set by special instructions. It's not recommended to touch the rounding mode as it can affect other code.
@@ -73,13 +72,13 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 
 ### HTML and CSS
 
-- If you don't specify `min-with`, it will be `auto`, and min width will be determined by content. It has higher priority than many other CSS attributes. With it, `flex-shrink` may not work, `overflow: hidden` may not work, `width: 0` may not work, `max-width: 100%` may not work. It's recommended to set `min-width: 0`.
+- If you don't specify `min-width`, it will be `auto`, and min width will be determined by content. It has higher priority than many other CSS attributes. With it, `flex-shrink` may not work, `overflow: hidden` may not work, `width: 0` may not work, `max-width: 100%` may not work. It's recommended to set `min-width: 0`.
 - Horizontal and vertical are different in CSS:
   - Normally `width: auto` tries fill available space in parent. But `height: auto` normally tries to just expand to fit content.
   - For inline elements, inline-block elements and float elements, `width: atuo` does not try to expand.
   - `margin: 0 auto` centers horizontally. But `margin: auto 0` normally become `margin: 0 0` which does not center vertically. In a flexbox with `flex-direction: column`, `margin: auto 0` can center vertically.
   - Margin collapse happens vertically but not horizontally.
-  - The above flips when layout direction flips (e.g. `writing-mode: vertial-rl`)
+  - The above flips when layout direction flips (e.g. `writing-mode: vertical-rl`)
 - Block formatting context (BFC):
   - `display: flow-root` creates a BFC.
     (There are other ways to create BFC, like `overflow: hidden`, `overflow: auto`, `overflow: scroll`, `display:table`, but with side effects)
@@ -99,7 +98,7 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
   Stacking context can cause these behaviors:
   
   - `z-index` doesn't work across stacking contexts. It only works within a stacking context.
-  - `position: absolute` or `fixed` will use coordinate based on stacking context, instead of viewport.
+  - `position: absolute` or `fixed` use coordinate based on nearest positioned ancestor. Stacking context is positioned, which can affect that.
   - `position: sticky` doesn't work across stacking context.
   - `overflow: visible` will still be clipped by stacking context
   - `background-attachment: fixed` will position based on stacking context
@@ -122,7 +121,7 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 
 ### Java
 
-- `==` compares object reference, not content. 
+- `==` compares object reference. Should use `.equals` to compare object content. 
 - Forget to override `equals` and `hashcode`. It will use object identity equality by default in map key and set.
 - Mutate the content of map key object (or set element object) makes the container malfunciton.
 - A method that returns `List<T>` may sometimes return mutable `ArrayList`, but sometimes return `Collections.emptyList()` which is immutable. Trying to modify on `Collections.emptyList()` throws `UnsupportedOperationException`.
@@ -133,7 +132,7 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 
 ### Golang
 
-- `append()` may reuse underlying array if capacity allows. Appending to a subslice can overwrite parent if they share memory region. `s[:len(s):len(s)]` creates a new slice with capacity equal to its length, preventing this.
+- `append()` may reuse underlying array if capacity allows. Appending to a subslice can overwrite parent if they share memory region.
 - `defer` executes when the function returns, not when the lexical scope exits.
 - `defer` capture mutable variable.
 - There are nil slice and empty slice (the two are different). But there is no nil string, only empty string.
@@ -145,7 +144,7 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 ### C/C++
 
 - Storing a pointer of an element inside `std::vector` and then grow the vector, `vector` may re-allocate content and the previous element pointer may no longer be valid.
-- All `std::string` created from literal string are temporary. Taking `c_str()` from a temporary string is wrong.
+- `std::string` created from literal string may be temporary. Taking `c_str()` from a temporary string is wrong.
 - Iterator invalidation. Modifying a container when looping on it.
 - `std::remove` doesn't remove but just rearrange elements. `erase` actually removes.
 - Unsigned integers can underflow.
@@ -153,7 +152,7 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 ### Python
 
 - Default argument is a stored value that will not be re-created on every call.
-- Numpy and Pytorch has different transpose.
+- There are subtle differences between numpy and pytorch.
 
 ### Common in many languages
 
@@ -168,7 +167,7 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 
 ### SQL Databases
 
-- Null is special. `x = null` doesn't work. `x is null` works. Unique index allows duplicating null. But `select distinct` may treat nulls as the same (this is database-specific).
+- Null is special. `x = null` doesn't work. `x is null` works. Unique index allows duplicating null (except in Microsoft SQL server). But `select distinct` may treat nulls as the same (this is database-specific).
 - Date implicit conversion can be timezone-dependent.
 - Complex join with disctinct may be slower than nested query. [Don't use DISTINCT as a "join-fixer"](https://www.red-gate.com/simple-talk/databases/sql-server/t-sql-programming-sql-server/dont-use-distinct-as-a-join-fixer/)
 - In MySQL, if string field doesn't have `character set utf8mb4` then it will error if you try to insert a text containing 4-byte UTF-8 code point.
@@ -190,7 +189,7 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 - `cmd > file 2>&1` make both stdout and stderr go to file. But `cmd 2>&1 > file` only make stdout go to file but don't redirect stderr.
 - File name is case sensitive (unlike Windows).
 - There is a capability system for executables, apart from file permission sytem. Use `getcap` to see capability.
-- Unset variables. If `DIR` is unset, `rm -rf $DIR/` becomes `rm -rf /`
+- Unset variables. If `DIR` is unset, `rm -rf $DIR/` becomes `rm -rf /`. Using `set -u` can make bash error when encountering unset variable.
 - If you want a script to add variables and aliases to current shell, it should be executed by using `source script.sh`, instead of directly executing. But the effect of `source` is not permanent and doesn't apply after re-login. It can be made permanent by putting into `~/.bashrc`.
 - Bash has caching between command name and file path of command. If you move one file in `$PATH` then using that command gives ENOENT. Refresh cache using `hash -r`
 - Using a variable unquoted will make its line breaks treated as space.
