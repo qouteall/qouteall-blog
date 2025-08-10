@@ -104,7 +104,7 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
   - `background-attachment: fixed` will position based on stacking context
 
 - On mobile browsers, the top address bar and bottom navigation bar can go out of screen when you scroll down. `100vh` correspond to the height when top bar and bottom bar gets out of screen, which is larger than the height when the two bars are on screen. The modern solution is `100dvh`.
-- `position: absolute` is not based on its parent. It's based on its nearest positioned ancestor (the nearest ancestor that has `position` be `relative`, `absolute` or has stacking context).
+- `position: absolute` is not based on its parent. It's based on its nearest positioned ancestor (the nearest ancestor that has `position` be `relative`, `absolute` or creates stacking context).
 - [Blur does not consider ambient things](https://www.joshwcomeau.com/css/backdrop-filter/#the-issue).
 - About `float`:
   - If a parent only contains floating children, the parent's height will collapse to 0. It can be fixed by `display: flow-root` which creates a BFC (Block formatting context). 
@@ -117,6 +117,7 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
   - Often the spaces in the beginning and end of content are ignored, but this doesn't happen in `<a>`.
   - Any space or line break between two `display: inline-block` elements will be rendered as spacing. This doesn't happen in flexbox or grid.
 - `text-align` aligns text and inline things, but doesn't align block elements (e.g. normal divs).
+- By default `width` and `height` doesn't include padding and border. `width: 100%` with `padding: 10px` can still overflow the parent. `box-sizing: content-box` make the width/height include border and padding.
 - [Cumulative Layout Shift](https://web.dev/articles/cls). It's recommended to specify `width` and `height` attribute in `<img>` to avoid layout shift due to image loading delay.
 
 ### Java
@@ -148,6 +149,8 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 - Iterator invalidation. Modifying a container when looping on it.
 - `std::remove` doesn't remove but just rearrange elements. `erase` actually removes.
 - Unsigned integers can underflow.
+- Undefined behaviors:
+  - 
 
 ### Python
 
@@ -164,10 +167,15 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 - A number starting with 0 will be seen as octonary number (`0123` is 83).
 - For integer `(low + high) / 2` may overflow. A safer way is `low + (high - low) / 2`
 - When using profiler: the profiler may by default only include CPU time which excludes waiting time. If your app spends 90% time waiting on database, the flamegraph may not include that 90% which is misleading.
+- Short circuit. `a() || b()` will not run `b()` if `a()` returns true. `a() && b()` will not run `b()` when `a()` returns false.
 
 ### SQL Databases
 
-- Null is special. `x = null` doesn't work. `x is null` works. Unique index allows duplicating null (except in Microsoft SQL server). But `select distinct` may treat nulls as the same (this is database-specific).
+- Null is special. 
+  - `x = null` doesn't work. `x is null` works. Null does not equal itself, similar to NaN.
+  - Unique index allows duplicating null (except in Microsoft SQL server). 
+  - `select distinct` may treat nulls as the same (this is database-specific). 
+  - `count(x)` and `count(distinct x)` ignores rows where `x` is null.
 - Date implicit conversion can be timezone-dependent.
 - Complex join with disctinct may be slower than nested query. [Don't use DISTINCT as a "join-fixer"](https://www.red-gate.com/simple-talk/databases/sql-server/t-sql-programming-sql-server/dont-use-distinct-as-a-join-fixer/)
 - In MySQL, if string field doesn't have `character set utf8mb4` then it will error if you try to insert a text containing 4-byte UTF-8 code point.
@@ -215,6 +223,7 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 - Rebase can rewrite history. After rebasing local branch, normal push will give weird result (because history is written). Rebase should be used with force push. If remote branch's history is rewritten, pulling should use `--rebase`.
 - Reverting a merge doesn't fully cancel the effect of the merge. If you merge B to A and then revert, merging B to A again has no effect. One solution is to revert the revert of merge. (A cleaner way to cancel a merge, instead of reverting merge, is to backup the branch, then hard reset to commit before merge, then cherry pick commits after merge, then force push.)
 - In GitHub, if you accidentally commited secret (e.g. API key) and pushed to public, even if you override it using force push, GitHub will still record that secret. [Guest Post: How I Scanned all of GitHub’s “Oops Commits” for Leaked Secrets](https://trufflesecurity.com/blog/guest-post-how-i-scanned-all-of-github-s-oops-commits-for-leaked-secrets) [Example activity tab](https://github.com/SharonBrizinov/test-oops-commit/compare/e6533c7bd729957b2eb31e88065c5158d1317c5e...9eedfa00983b7269a75d76ec5e008565c2eff2ef)
+- `git stash pop` does not drop the stash if there is a conflict.
 
 ### Networking
 

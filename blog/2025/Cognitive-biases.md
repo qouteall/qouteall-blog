@@ -450,6 +450,10 @@ Examples of causal oversimplification:
   
   Nuanced view: Corporate success also depends on various factors, including market conditions, employee contributions, incentive structures, company culture, government-business relationships, competitive landscape, and the cumulative impact of past leadership decisions.
 
+> For every complex problem there is an answer that is clear, simple, and wrong.
+> 
+> \- H. L. Mencken
+
 ### Binary thinking (false dichotomy)
 
 We tend to simplify things. One way of simplification is to ignore the grey-zone and complex nuance, reducing things into two simple extremes.
