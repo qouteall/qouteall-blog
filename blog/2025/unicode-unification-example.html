@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Font Language Variant Rendering</title>
+    <style>
+        /* 
+         * Import specific fonts from Google Fonts. This is the key to ensuring
+         * everyone sees the correct, distinct glyphs for each language.
+        */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif&family=Noto+Serif+JP&family=Noto+Serif+SC&display=swap');
+
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 2em auto;
+            padding: 0 1em;
+        }
+        h1, h2 {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 0.3em;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5em;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 1em;
+            text-align: center;
+            vertical-align: middle;
+        }
+        th {
+            background-color: #f7f7f7;
+        }
+        /* The box that tightly wraps the character */
+        .char-box {
+            font-size: 4em; /* Make character large for easy comparison */
+            border: 2px solid #e74c3c; /* Red border to highlight dimensions */
+            display: inline-block; /* Allows border to wrap tightly */
+            padding: 0.1em;
+            line-height: 1; /* Ensure tight vertical fit */
+            background-color: #fdf2f2;
+        }
+        
+        /* --- KEY FIX: Force specific fonts based on the lang attribute --- */
+
+        /* For Chinese, use a font with Simplified Chinese glyphs and full-width punctuation */
+        .char-box[lang="zh"] {
+            font-family: 'Noto Serif SC', serif;
+        }
+
+        /* For Japanese, use a font with Japanese standard glyphs */
+        .char-box[lang="ja"] {
+            font-family: 'Noto Serif JP', serif;
+        }
+
+        /* For English, use a standard Latin font with proportional (narrow) punctuation */
+        .char-box[lang="en"] {
+            font-family: 'Noto Serif', serif;
+        }
+        
+        .description {
+            text-align: left;
+            font-size: 0.9em;
+            color: #555;
+        }
+        code {
+            background-color: #eee;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <!-- ======== COMPARISON 1: Han Character '語' ======== -->
+    <h2>U+8A9E</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Locale</th>
+                <th>Rendered Character</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Chinese font variant</td>
+                <td>
+                    <span class="char-box" lang="zh">語</span>
+                </td>
+            </tr>
+            <tr>
+                <td>Japanese font variant</td>
+                <td>
+                    <span class="char-box" lang="ja">語</span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- ======== COMPARISON 2: Quotation Mark '“' ======== -->
+    <h2>U+201C</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Locale</th>
+                <th>Rendered Character</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Default font variant</td>
+                <td>
+                    <span class="char-box" lang="en">“</span>
+                </td>
+            </tr>
+            <tr>
+                <td>Chinese font variant</td>
+                <td>
+                    <span class="char-box" lang="zh">“</span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+</html>
