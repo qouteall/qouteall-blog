@@ -32,7 +32,7 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 - [Confusable characters](https://github.com/unicode-org/icu/blob/main/icu4c/source/data/unidata/confusables.txt).
 - Normalization. é can be U+00E9 or U+0065 U+0301
 - [Zero-width characters](https://ptiglobal.com/the-beauty-of-unicode-zero-width-characters/), [Invisible characters](https://invisible-characters.com/)
-- Unicode unification. Different characters in different language use the same code point. Different languages' font variants render the same code point differently. ![](unicode_unification_example.png)
+- Unicode unification. Different characters in different language use the same code point. Different languages' font variants render the same code point differently. [HTML code](https://github.com/qouteall/qouteall-blog/blob/main/blog/2025/unicode-unification-example.html) ![](unicode_unification_example.png)
 
 
 
