@@ -117,7 +117,7 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
   - Often the spaces in the beginning and end of content are ignored, but this doesn't happen in `<a>`.
   - Any space or line break between two `display: inline-block` elements will be rendered as spacing. This doesn't happen in flexbox or grid.
 - `text-align` aligns text and inline things, but doesn't align block elements (e.g. normal divs).
-- By default `width` and `height` doesn't include padding and border. `width: 100%` with `padding: 10px` can still overflow the parent. `box-sizing: content-box` make the width/height include border and padding.
+- By default `width` and `height` doesn't include padding and border. `width: 100%` with `padding: 10px` can still overflow the parent. `box-sizing: border-box` make the width/height include border and padding.
 - [Cumulative Layout Shift](https://web.dev/articles/cls). It's recommended to specify `width` and `height` attribute in `<img>` to avoid layout shift due to image loading delay.
 
 ### Java
@@ -130,6 +130,7 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 - Return in `finally` block swallows any exception thrown in the `try` or `catch` block. The method will return the value from `finally`.
 - Interrupt. Some libraries ignore interrupt. Interrupt may break class initialization that contains IO.
 - Thread pool does not log exception of tasks by default. You can only get exception from the future object. Don't discard the future. And `scheduleAtFixedRate` task silently stop if exception is thrown.
+- Literal number starting with 0 will be treated as octal number. (`0123` is 83)
 
 ### Golang
 
@@ -137,7 +138,6 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 - `defer` executes when the function returns, not when the lexical scope exits.
 - `defer` capture mutable variable.
 - There are nil slice and empty slice (the two are different). But there is no nil string, only empty string.
-- Json deserialization field name is case-insensitive.
 - Interface `nil` weird behavior. Interface pointer is a fat pointer containing type info and data pointer. If the data pointer is null but type info is not null, then it will not equal `nil`.
 - Dead wait. [Understanding Real-World Concurrency Bugs in Go](https://songlh.github.io/paper/go-study.pdf)
 
@@ -149,8 +149,8 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 - Iterator invalidation. Modifying a container when looping on it.
 - `std::remove` doesn't remove but just rearrange elements. `erase` actually removes.
 - Unsigned integers can underflow.
-- Undefined behaviors:
-  - 
+- Literal number starting with 0 will be treated as octal number. (`0123` is 83)
+- Undefined behaviors (TODO)
 
 ### Python
 
@@ -164,7 +164,6 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
   - Time-of-Check to time-of-use (TOCTOU).
 - Modifying a container when for looping on it. Single-thread "data race".
 - Unintended sharing of mutable data. For example in Python `[[0] * 10] * 10` does not create a proper 2D array.
-- A number starting with 0 will be seen as octonary number (`0123` is 83).
 - For integer `(low + high) / 2` may overflow. A safer way is `low + (high - low) / 2`
 - When using profiler: the profiler may by default only include CPU time which excludes waiting time. If your app spends 90% time waiting on database, the flamegraph may not include that 90% which is misleading.
 - Short circuit. `a() || b()` will not run `b()` if `a()` returns true. `a() && b()` will not run `b()` when `a()` returns false.
@@ -221,7 +220,7 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 ### Git
 
 - Rebase can rewrite history. After rebasing local branch, normal push will give weird result (because history is written). Rebase should be used with force push. If remote branch's history is rewritten, pulling should use `--rebase`.
-- Reverting a merge doesn't fully cancel the effect of the merge. If you merge B to A and then revert, merging B to A again has no effect. One solution is to revert the revert of merge. (A cleaner way to cancel a merge, instead of reverting merge, is to backup the branch, then hard reset to commit before merge, then cherry pick commits after merge, then force push.)
+- Reverting a merge doesn't fully cancel the side effect of the merge. If you merge B to A and then revert, merging B to A again has no effect. One solution is to revert the revert of merge. (A cleaner way to cancel a merge, instead of reverting merge, is to backup the branch, then hard reset to commit before merge, then cherry pick commits after merge, then force push.)
 - In GitHub, if you accidentally commited secret (e.g. API key) and pushed to public, even if you override it using force push, GitHub will still record that secret. [Guest Post: How I Scanned all of GitHub’s “Oops Commits” for Leaked Secrets](https://trufflesecurity.com/blog/guest-post-how-i-scanned-all-of-github-s-oops-commits-for-leaked-secrets) [Example activity tab](https://github.com/SharonBrizinov/test-oops-commit/compare/e6533c7bd729957b2eb31e88065c5158d1317c5e...9eedfa00983b7269a75d76ec5e008565c2eff2ef)
 - `git stash pop` does not drop the stash if there is a conflict.
 
