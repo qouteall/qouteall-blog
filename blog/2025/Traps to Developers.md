@@ -5,7 +5,7 @@ tags:
 ---
 # Traps to Developers
 
-A lot of bugs come from developer not knowing the trap in the tool they use. Here are the summarization of some traps I know:
+A summarization of some traps to developers. There traps are unintuitive things that are easily misunderstood and cause bugs.
 
 <!-- truncate -->
 
@@ -88,8 +88,8 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
 
 ### Floating point
 
-- NaN. Floating point NaN is not equal to any number including itself. NaN == NaN is always false (even if the bits are the same). NaN != NaN is always true. Computing on NaN usually gives NaN (it can "contaminate" computation).
-- There are +Inf and -Inf. They are not NaN. 
+- NaN. Floating point NaN is not equal to any number including itself. NaN == NaN is always false (even if the bits are same). NaN != NaN is always true. Computing on NaN usually gives NaN (it can "contaminate" computation).
+- There are +Inf and -Inf. They are not NaN.
 - There is a negative zero -0.0 which is different to normal zero. The negative zero equals zero when using floating point comparision. Normal zero is treated as "positive zero".
 - Directly compare equality may fail. Compare equality by things like `abs(a - b) < 0.00001`
 - JS use floating point for all numbers. The max accurate integer is $2^{53}-1$ if not using `BigInt`. If a JSON contains an integer larger than that, and JS deserializes it using `JSON.parse`, the number in result will be inaccurate. The workaround is to use other ways of deserializing JSON or use string for large integer. 
@@ -144,7 +144,7 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
   - There are nil slice and empty slice (the two are different). But there is no nil string, only empty string. The nil map can be read like an empty map, but nil map cannot be written.
   - Interface `nil` weird behavior. Interface pointer is a fat pointer containing type info and data pointer. If the data pointer is null but type info is not null, then it will not equal `nil`.
 - Dead wait. [Understanding Real-World Concurrency Bugs in Go](https://songlh.github.io/paper/go-study.pdf)
-- Timeout [The complete guide to Go net/http timeouts](https://blog.cloudflare.com/the-complete-guide-to-golang-net-http-timeouts/) TODO
+- Different kinds of timeout. [The complete guide to Go net/http timeouts](https://blog.cloudflare.com/the-complete-guide-to-golang-net-http-timeouts/)
 
 
 ### C/C++
@@ -197,8 +197,8 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
   - `mysqldump` used without `--single-transaction` cause whole-table read lock.
   - In PostgreSQL, `create unique index` or `alter table ... add foreign key` cause whole-table read-lock. To avoid that, use `create unique index concurrently` to add unique index. For foreign key, use `alter table ... add foreign key ... not valid;` then `alter table ... validate constraint ...`.
 - About ranges:
-  - If you store non-overlapping ranges and have index of start point, querying `select ... from ranges where p >= start and p <= end` is inefficient. The DB doesn't know ranges cannot overlap and will scan large portions of index. A better way of querying the range containing a point: `select * from (select ... from ranges where start <= p order by start desc limit 1) where end >= p`.
-  - For overlappable ranges, B-tree is not sufficient for efficient querying. It's recommended to use spatial index in MySQL and GiST in PostgreSQL.
+  - If you store non-overlapping ranges, querying the range containing a point by `select ... from ranges where p >= start and p <= end` is inefficient (even when having composite index of `(start, end)`). An efficient way: `select * from (select ... from ranges where start <= p order by start desc limit 1) where end >= p` (only require index of `start` column).
+  - For overlappable ranges, normal B-tree index is not sufficient for efficient querying. It's recommended to use spatial index in MySQL and GiST in PostgreSQL.
 
 
 
@@ -213,12 +213,12 @@ A lot of bugs come from developer not knowing the trap in the tool they use. Her
   - In C#, `volatile` accesses have release-aquire ordering (CLR will use memory barrier instruction if needed)
   - `volatile` can avoid wrong optimization related to reordering and merging memory reads/writes.
 - Time-of-check to time-of-use (TOCTOU).
-- In SQL database, for special uniqueness constraint that doesn't fit simple unique index (e.g. unique across two tables, unique with soft-delete, unique within time range), and constraint is enforced by application, then:
+- In SQL database, for special uniqueness constraint that doesn't fit simple unique index (e.g. unique across two tables, conditional unique, unique within time range), and constraint is enforced by application, then:
   - In MySQL (InnoDB), if in repeatable read level, application checks using `select ... for update` then insert, and the unique-checking column has index, then it works due to gap lock. (Note that gap lock may cause deadlock under high concurrency, ensure deadlock detection is on and use retrying).
   - In PostgreSQL, if in repeatable read level, application checks using `select ... for update` then insert, it's not sufficient to enforce constraint under concurrency (due to write skew). Some solutions:
     - Use serializable level
     - Don't rely on application to enforce constraint:
-      - For unique with soft-delete case, use partial unique index. 
+      - For conditional unique, use partial unique index. 
       - For uniqueness across two tables case, insert redundant data into one extra table with unique index.
       - For time range exclusiveness case, use range type and exclude constraint.
 - Atomic reference counting (`Arc`, `shared_ptr`) is slow when many threads frequently change the same counter. [See also](https://pkolaczk.github.io/server-slower-than-a-laptop/)
