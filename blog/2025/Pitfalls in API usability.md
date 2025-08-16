@@ -62,4 +62,5 @@ API usability is important to developer productivity.
 - Duplicated configuration. When a configuration is duplicated 3 times, changing it requries changing all of the 3 places.
 - Overly flexible config file. A config file is a plain text file that does not support rich features provided by a normal programming language, such as variables, conditions and repetition. **Trying to make the config file more flexible and expressive eventually turn it into a DSL that's hard to use** (existing debugging and logging tools cannot be used on it, existing libraries cannot be used on it, and it usually lacks IDE support).
 - Have to maintain consistency between the data managed by library and the data managed by your code. Each one can update the other one (no single source of truth). If the two pices of data are not kept in sync, weird issues will happen.
+- The library provides the functionality except for an important detail. Then you cannot use the library and have to re-implement. (Example: fine-grained text layout control is hard to do in HTML/CSS so a lot of web apps are forced to do in-canvas rendering for all texts.)
 

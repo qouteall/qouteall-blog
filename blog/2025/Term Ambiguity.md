@@ -30,6 +30,7 @@ A lot of debate happen because same word has different meanings to different peo
   - In disk manufactuers' descriptions, 1 KB = 1000 bytes, 1MB = 1000 KB, 1GB = 1000 MB. 
   - In networking speed, 1 Kbps = 1000 bits per second, 1Mbps = 1000 Kbps, 1Gbps = 1000 Mbps.
 - Verbal. Sometimes mean spoken words. Sometimes includes both written text and spoken words.
+- "Last" can mean "previous" or "final"
 
 
 

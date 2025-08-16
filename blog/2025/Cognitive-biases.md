@@ -859,6 +859,8 @@ The placebo effect is also possibly related with priming.
 - If you praise another person, the listeners tend to think that you are good.
 - If you say something bad about another person, the listeners tend to think that you are also bad.
 
+Flattering subcounciously increase favorability, even when knowing it's flattering. Saying harsh criticism subcounciously reduce favorability, even when knowing the criticism is beneficial. Placebo still works even when knowing it's placebo.
+
 ## Efficient decision making
 
 When making decisions, human tend to **follow intuitions, which is quick and energy-efficient**, but also less accurate.
@@ -1171,6 +1173,8 @@ Memes facilitate being spreaded. On the contrary, **antimemes** resist being spr
 - Antimemes are usually not controversial.
 - Antimemes are usually boring and "obvious" (hindsight bias).
 - The information that conflicts with existing beliefs are also antimemes. (confirmation bias)
+
+Antimemes are easier to be forgotten than memes. Some antimemes are worth reviewing.
 
 ### Longing for attention
 

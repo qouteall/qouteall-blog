@@ -73,7 +73,7 @@ tags:
 - "cannot change" ⟶  "static", "pre-defined", "axiomatic", "deterministic", "conserved", "invariant", "immutable", "constant"
 - "it doesn't change now" ⟶ "equilbrium", "balance", "homeostasis", "fixed point"
 - "trap" ⟶ "absorption barrier", "local minima", "potential well"
-- "fake" ⟶ "proxy", "surrogate", "dissimulation", "virtual", "Trojan"
+- "fake" ⟶ "proxy", "surrogate", "dissimulation", "virtual", "Trojan", "incognito"
 - "real" ⟶ "genuine", "authentic"
 - "can change" ⟶ "dynamic", "volatile", "stateful", "mutable"
 - "can change by me" ⟶ "flexibility", "elasticity", "plasticity", "malleability", "scalability"
@@ -166,7 +166,7 @@ tags:
 - "get rid of something" ⟶ "exclude", "expulse", "discard", "eradicate", "expunge"
 - "actually use something" ⟶ "application", "operationalization", "adoption", "deployment", "reification", "implementation", "utilization", "exploitation", "activation"
 - "very good" ⟶ "supreme", "preeminent", "consummate", "quintessential", "sublime"
-- "on the top" ⟶ "peak", "pinnacle", "apex", "zenith", "apogee", "summit", "empyrean"
+- "on the top" ⟶ "peak", "pinnacle", "apex", "zenith", "apogee", "summit", "empyrean", "climax"
 - "on the bottom" ⟶ "nadir", "baseline", "bedrock"
 - "it's complex" ⟶ "nuance", "intrincate", "subtle", "cognitive load", "sophistication", "nonlinearity"
 - "it's simple" ⟶ "trivial"
@@ -178,6 +178,7 @@ tags:
 - "balance" ⟶ "goldilocks"
 - "care about results" ⟶ "teleological"
 - "beautiful" ⟶ "aesthetics"
+- "many things" ⟶ "repertoire"
 
 
 

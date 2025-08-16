@@ -66,58 +66,6 @@ But when the new requirement change breaks the regularity, then abstraction hind
 > 
 > \- Tyler Glaiel, [Link](https://x.com/TylerGlaiel/status/1880340558767702377)
 
-## "Simple" requirements that are hard to implement
-
-Sometimes a seemingly simple requirement is actually hard to implement. Examples:
-
-### Major change of data modelling
-
-- You use user name as id of user. But a new requirement comes: the user must be able to change the user name. 
-  
-  (Using name as id is usually a bad design because it's incompatible with name changing.)
-- In a game, if an entity dies, you delete that entity. But a new requirement comes: a dead entity can be resurrected by a new magic.
-  
-  To implement that, you cannot delete the dead entity and you need to add dead entity into data modelling. For example, add a boolean flag of whether it's living, and check that flag in every logic of living entity.
-- Your app supports one language. And the event log is recorded using simple strings. But a new requirement comes: make the app support multiple languages. The user can switch language at any time and see the event log in their language.
-  
-  To implement that, you cannot store the text as string and should store the text as translatable template. (A "dumber" way is to store the strings for every supported language.)
-
-
-### Major change of dataflow and source-of-truth
-
-- You built a singleplayer game. All game logic runs locally. All game data are in memoery and you manually load/save from file. But a new requirement comes: make it multiplayer.
-  
-  In singleplayer game, the in-memory data can be source-of-truth, but in multiplayer the server is source-of-truth. Every non-client operation now requires packet sending and receiving.
-  
-  What's more, to reduce visible latency, the client side game must guess future game state and correct the guess from server packets (add rollback mechanism).
-- You built a todo list app. All data are loaded from server. All edits also go through server. But a new requirement comes: make the app work offline and sync when it connects with internet.
-
-### Adding edge cases into simple logic
-
-- You have a permission system where different functionalities form a tree: if one user have the permission of parent node then the user has the permissions of the child nodes. But a new requirement comes: one functionality moves category, so that node's parent changes. You must also keep the existing users' permissions the same as before.
-- Some functionality require some permission. You use user token to authenticate. But a new requirement comes: allow non-logged-in users access a part of the functionality.
-- A new requirement comes: add bot as a new type of user, and the bot user has different authentication logic than normal user.
-
-### Adding a lot of flexibility
-
-- You have a fixed workflow. A new requirement comes: allow the user to configure and customize the workflow.
-  
-  (Developing specially for each enterprise customer is actually easier than creating a configurable flexible "rules engine". The custom "rules engine" will be more complex and harder to debug than just code. [The Configuration Complexity Clock](https://mikehadlow.blogspot.com/2012/05/configuration-complexity-clock.html))
-- Allow formatting like bold and color in username.
-- Adding a plugin system.
-
-### Working on full data to working on partially known data
-
-- You built a data visualization UI. Originally, it firstly loads all data from server then render. But when the data size become huge, loading becomes slow and you need break the data into parts, dynamically load parts and visualize loaded parts.
-- A game has loading screen when switching scene. A new requirement comes: make the loading seamless and remove the loading screen.
-- You load all data from database and then compute things using programming language. One day the data become so big that cannot be held in memory or it exceeds database query limit. You need to either 
-  - Load partial data into memory, compute separately and then merge the result, or
-  - rewrite logic into SQL and let database compute it 
-
-### Migrating to incompatible APIs
-
-Migrating the libraries/framework/OS/database/game engine/other components whose API is not compatible with the old. From a normal user's perspective, the migration does not add any new feature, takes a long time and can introduce new bugs.
-
 ## Simple interface = hardcoded defaults = less customizability
 
 Real world is complex. Building software require making decision on a lot of details.
@@ -184,4 +132,63 @@ Another case is that the software provides orthogonality in interface, and actua
 > If you consider it as a library, you can use Windows linker functionality X in combination with Unix linker functionality Y, but there was no precedent for what the linker should behave in such a case. Even worse, in many situations, it was not obvious what would be the “right” behavior. We spent a lot of time discussing to define the semantics that would make sense for all possible feature combinations, and we carefully wrote complex code to support all targets simultaneously. However, in hindsight, this was probably not a good way to spend time because no one really wanted to use such hypothetical feature combinations. lld v1 probably didn't have any real users.
 >
 > \- [My story on “worse is better”](https://www.sigbus.info/worse-is-better)
+
+
+## "Simple" requirements that are hard to implement
+
+Sometimes a seemingly simple requirement is actually hard to implement. Examples:
+
+### Major change of data modelling
+
+- You use user name as id of user. But a new requirement comes: the user must be able to change the user name. 
+  
+  (Using name as id is usually a bad design because it's incompatible with name changing.)
+- In a game, if an entity dies, you delete that entity. But a new requirement comes: a dead entity can be resurrected by a new magic.
+  
+  To implement that, you cannot delete the dead entity and you need to add dead entity into data modelling. For example, add a boolean flag of whether it's living, and check that flag in every logic of living entity.
+- Your app supports one language. And the event log is recorded using simple strings. But a new requirement comes: make the app support multiple languages. The user can switch language at any time and see the event log in their language.
+  
+  To implement that, you cannot store the text as string and should store the text as translatable template. (A "dumber" way is to store the strings for every supported language.)
+
+
+### Major change of dataflow and source-of-truth
+
+- You built a singleplayer game. All game logic runs locally. All game data are in memoery and you manually load/save from file. But a new requirement comes: make it multiplayer.
+  
+  In singleplayer game, the in-memory data can be source-of-truth, but in multiplayer the server is source-of-truth. Every non-client operation now requires packet sending and receiving.
+  
+  What's more, to reduce visible latency, the client side game must guess future game state and correct the guess from server packets (add rollback mechanism).
+- You built a todo list app. All data are loaded from server. All edits also go through server. But a new requirement comes: make the app work offline and sync when it connects with internet.
+
+- In a GUI, previously there is a long running task that changes GUI state, and user cannot operate the GUI while task is running. Now, to improve user experience, you need to allow operating the GUI while task is running. Both the background task and user can now change the mutable state. [User interfaces are hard - why?](https://happyfellow.bearblog.dev/user-interfaces-are-hard-why/)
+
+
+### Making previously unrelated things related (break separation of concern)
+
+- Two previously separated UI components now need to share mutable state. [The complexity that lives in the GUI | RoyalSloth](https://blog.royalsloth.eu/posts/the-complexity-that-lives-in-the-gui/)
+
+### Corner case explosion
+
+- You have a fixed workflow. A new requirement comes: allow the user to configure and customize the workflow. The new flexible system allow much more ways of configuring and introduce many corner cases.
+  
+  (Developing specially for each enterprise customer may be actually easier than creating a configurable flexible "rules engine". The custom "rules engine" will be more complex and harder to debug than just code. You can still share common code when developing separately. [The Configuration Complexity Clock](https://mikehadlow.blogspot.com/2012/05/configuration-complexity-clock.html))
+
+- You have a permission system where different functionalities form a tree: if one user have the permission of parent node then the user has the permissions of the child nodes. But a new requirement comes: one functionality moves category, so that node's parent changes. You must also keep the existing users' permissions the same as before.
+- Some functionality require some permission. You use user token to authenticate. But a new requirement comes: allow non-logged-in users access a part of the functionality.
+- A new requirement comes: add bot as a new type of user, and the bot user has different authentication logic than normal user.
+- Two systems A and B need to work together, but A and B's API both change across versions. However every version of A must work with every version of B. 
+
+
+### Working on full data to working on partially known data
+
+- You built a data visualization UI. Originally, it firstly loads all data from server then render. But when the data size become huge, loading becomes slow and you need break the data into parts, dynamically load parts and visualize loaded parts.
+- A game has loading screen when switching scene. A new requirement comes: make the loading seamless and remove the loading screen.
+- You load all data from database and then compute things using programming language. One day the data become so big that cannot be held in memory. You need to either 
+  - load partial data into memory, compute separately and then merge the result, or
+  - rewrite logic into SQL and let database compute it 
+
+### Migrating to incompatible APIs
+
+Migrating the libraries/framework/OS/database/game engine/other components whose API is not compatible with the old. **From non-developer perspective, the migration does not add any new feature, but it takes a long time, (possibly) remove existing features and (possibly) introduces new bugs.**
+
 
