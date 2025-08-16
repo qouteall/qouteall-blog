@@ -155,17 +155,19 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - `std::remove` doesn't remove but just rearrange elements. `erase` actually removes.
 - Literal number starting with 0 will be treated as octal number. (`0123` is 83)
 - Undefined behaviors. The compiler optimization aim to keep defined behavior the same, but can freely change undefined behavior. Relying on undefined behavior can make program break under optimization. [See also](https://russellw.github.io/undefined-behavior)
-  - Accessing uninitialized memory is undefined behavior. If you have a `char*`, converting to a struct pointer then use it is seen as using uninitialized memory.
+  - Accessing uninitialized memory is undefined behavior. Converting a `char*` to struct pointer can be seem as accessing uninitialized memory, because the object lifetime hasn't started. It's recommended to put the struct elsewhere and use `memcpy` to initialize it.
   - Accessing invalid memory (e.g. null pointer) is undefined behavior.
   - Integer overflow/underflow is undefined behavior. Note that unsigned integer can underflow below 0.
   - Aliasing.
     - Aliasing means multiple pointers point to the same place in memory.
-    - Strict aliasing rule: If there are two pointers with type `A*` and `B*`, then compiler assumes two pointer can never equal. If they equal, it's undefined behavior. Except in two cases: 1. `A` and `B` has subtyping relation 2. `A` or `B` is `char`, `unsigned char` or `std::byte`.
+    - Strict aliasing rule: If there are two pointers with type `A*` and `B*`, then compiler assumes two pointer can never equal. If they equal, it's undefined behavior. Except in two cases: 1. `A` and `B` has subtyping relation 2. converting pointer to byte pointer (`char*`, `unsigned char*` or `std::byte*`) (the reverse does not apply).
     - To do force conversion, the safe ways are `memcpy` or `std::bit_cast`
+  - Unaligned memory access is undefined behavior.
 - Alignment.
   - For example, 64-bit integer's address need to be disivible by 8. In ARM, accessing memory in unaligned way can cause crash.
   - Directly treating a part of byte buffer as a struct may cause alignment issue.
   - Alignment can cause padding in struct that waste space.
+  - Some SIMD instructions only work with aligned data. For example, AVX instructions usually require 32-byte alignment.
 
 ### Python
 
@@ -178,12 +180,12 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - `x = null` doesn't work. `x is null` works. Null does not equal itself, similar to NaN.
   - Unique index allows duplicating null (except in Microsoft SQL server). 
   - `select distinct` may treat nulls as the same (this is database-specific). 
-  - `count(x)` and `count(distinct x)` ignores rows where `x` is null.
+  - `count(x)` and `count(distinct x)` ignore rows where `x` is null.
 - Date implicit conversion can be timezone-dependent.
-- Complex join with disctinct may be slower than nested query. [Don't use DISTINCT as a "join-fixer"](https://www.red-gate.com/simple-talk/databases/sql-server/t-sql-programming-sql-server/dont-use-distinct-as-a-join-fixer/)
+- Complex join with disctinct may be slower than nested query. [See also](https://www.red-gate.com/simple-talk/databases/sql-server/t-sql-programming-sql-server/dont-use-distinct-as-a-join-fixer/)
 - In MySQL (InnoDB), if string field doesn't have `character set utf8mb4` then it will error if you try to insert a text containing 4-byte UTF-8 code point.
 - MySQL (InnoDB) default to case-insensitive.
-- MySQL (InnoDB) can do implicit conversion by default. `SELECT '123abc' + 1;` gives 124.
+- MySQL (InnoDB) can do implicit conversion by default. `select '123abc' + 1;` gives 124.
 - MySQL (InnoDB) gap lock may cause deadlock.
 - In MySQL (InnoDB) you can select a field and group by another field. It gives nondeterministic result.
 - In SQLite the field type doesn't matter unless the table is `strict`.
@@ -214,7 +216,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - `volatile` can avoid wrong optimization related to reordering and merging memory reads/writes.
 - Time-of-check to time-of-use (TOCTOU).
 - In SQL database, for special uniqueness constraint that doesn't fit simple unique index (e.g. unique across two tables, conditional unique, unique within time range), and constraint is enforced by application, then:
-  - In MySQL (InnoDB), if in repeatable read level, application checks using `select ... for update` then insert, and the unique-checking column has index, then it works due to gap lock. (Note that gap lock may cause deadlock under high concurrency, ensure deadlock detection is on and use retrying).
+  - In MySQL (InnoDB), if in repeatable read level, application checks using `select ... for update` then insert, and the unique-checked column has index, then it works due to gap lock. (Note that gap lock may cause deadlock under high concurrency, ensure deadlock detection is on and use retrying).
   - In PostgreSQL, if in repeatable read level, application checks using `select ... for update` then insert, it's not sufficient to enforce constraint under concurrency (due to write skew). Some solutions:
     - Use serializable level
     - Don't rely on application to enforce constraint:
