@@ -71,8 +71,8 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - In UTF-16, a code point can be 2 bytes or 4 bytes (surrogate pair).
   - The standard doesn't put an upper limit on how much code point can a grapheme cluster contain. But implementations usually impose a limit for performance concerns.
 - Different in-memory string behaviors in different languages:
-  - Rust use UTF-8 for in-memory string. `s.len()` gives byte count. Rust does not allow directly indexing on a `str`. `s.chars().count()` gives code point count. Rust is strict in UTF-8 code point validity (for example Rust doesn't allow subslice to cut on invalid code point boundary).
-  - Golang string has no constraint of encoding and is similar to byte array in language level. String length and indexing works same as byte array. But the most common encoding is UTF-8. [See also](https://go.dev/blog/strings)
+  - Rust use UTF-8 for in-memory string. `s.len()` gives byte count. Rust does not allow directly indexing on a `str` (but allows subslicing). `s.chars().count()` gives code point count. Rust is strict in UTF-8 code point validity (for example Rust doesn't allow subslice to cut on invalid code point boundary).
+  - Golang string has no constraint of encoding and is similar to byte array. String length and indexing works same as byte array. But the most common encoding is UTF-8. [See also](https://go.dev/blog/strings)
   - Java, C# and JS's string conceptually use UTF-16 encoding. UTF-16 works on 2-byte-units. But a code point can be 1 2-byte-unit or 2 2-byte-units (surrogate pair). Length of string is the 2-byte-unit count, not code point count. Indexing works on 2-byte-units.
   - In Python, `len(s)` gives code point count. Indexing gives a string that contains one code point.
   - In C++, `std::string` has no constraint of encoding. It can be seen as a wrapper of `std::vector<char>`. String length and indexing is based on bytes.
@@ -80,10 +80,10 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Some text files have byte order mark (BOM) at the beginning. For example, EF BB BF is a BOM that denotes the file is in UTF-8 encoding. It's mainly used in Windows. Some non-Windows software does not handle BOM.
 - When converting binary data to string, often the invalid places are replaced by � (U+FFFD)
 - [Confusable characters](https://github.com/unicode-org/icu/blob/main/icu4c/source/data/unidata/confusables.txt).
-- Normalization. é can be U+00E9 or U+0065 U+0301
+- Normalization. For example é can be U+00E9 (one code point) or U+0065 U+0301 (two code points).
 - [Zero-width characters](https://ptiglobal.com/the-beauty-of-unicode-zero-width-characters/), [Invisible characters](https://invisible-characters.com/)
 - Line break. Windows often use CRLF `\r\n` for line break. Linux and MacOS often use LF `\n` for line break.
-- [Han unification](https://en.wikipedia.org/wiki/Han_unification). Different characters in different language use the same code point. Different languages' font variants render the same character differently. Choosing the correct font variant is needed for internationalization. [HTML code](https://github.com/qouteall/qouteall-blog/blob/main/blog/2025/unicode-unification-example.html) ![](unicode_unification_example.png)
+- [Han unification](https://en.wikipedia.org/wiki/Han_unification). Some characters in different language with slightly different appearance use the same code point. Usually a font will contain variants for different languages that render these characters differently. Choosing the correct font variant is needed for internationalization. [HTML code](https://github.com/qouteall/qouteall-blog/blob/main/blog/2025/unicode-unification-example.html) ![](unicode_unification_example.png)
 
 
 
@@ -91,7 +91,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 
 - NaN. Floating point NaN is not equal to any number including itself. NaN == NaN is always false (even if the bits are same). NaN != NaN is always true. Computing on NaN usually gives NaN (it can "contaminate" computation).
 - There are +Inf and -Inf. They are not NaN.
-- There is a negative zero -0.0 which is different to normal zero. The negative zero equals zero when using floating point comparision. Normal zero is treated as "positive zero".
+- There is a negative zero -0.0 which is different to normal zero. The negative zero equals zero when using floating point comparision. Normal zero is treated as "positive zero". The two zeros behave differently in some computations (e.g. `1.0 / +0.0 == +Inf`, `1.0 / -0.0 == -Inf`)
 - Directly compare equality may fail. Compare equality by things like `abs(a - b) < 0.00001`
 - JS use floating point for all numbers. The max "safe" integer is $2^{53}-1$. The "safe" here means every integer in range can be accurately represented. Outside of the same range, some integers will become accurate. For large integer it's recommended to use `BigInt`.
   
@@ -226,14 +226,14 @@ A summarization of some traps to developers. There traps are unintuitive things 
       - For uniqueness across two tables case, insert redundant data into one extra table with unique index.
       - For time range exclusiveness case, use range type and exclude constraint.
 - Atomic reference counting (`Arc`, `shared_ptr`) is slow when many threads frequently change the same counter. [See also](https://pkolaczk.github.io/server-slower-than-a-laptop/)
-- About read-write lock: some read-write locks doesn't support upgrading from read lock to write lock. Try to write lock when holding read lock may deadlock.
+- About read-write lock: some read-write lock implementations doesn't support upgrading from read lock to write lock, and trying to write lock when holding read lock may deadlock.
 
 ### Common in many languages
 
 - Forget to check for null/None/nil.
 - Modifying a container when for looping on it. Single-thread "data race".
 - Unintended sharing of mutable data. For example in Python `[[0] * 10] * 10` does not create a proper 2D array.
-- For integer `(low + high) / 2` may overflow. A safer way is `low + (high - low) / 2` (it works when `low` and `high` are non-negative)
+- For non-negative integer `(low + high) / 2` may overflow. A safer way is `low + (high - low) / 2`.
 - Short circuit. `a() || b()` will not run `b()` if `a()` returns true. `a() && b()` will not run `b()` when `a()` returns false.
 - When using profiler: the profiler may by default only include CPU time which excludes waiting time. If your app spends 90% time waiting on database, the flamegraph may not include that 90% which is misleading.
 - There are many different "dialects" of regular expression. Don't assume a regular expression that works in JS can work in Java.
