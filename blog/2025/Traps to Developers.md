@@ -16,7 +16,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Inside flexbox or grid, `min-width` is `auto` by default. `min-width: auto` makes min width determined by content. It has higher priority than many other CSS attributes including `flex-shrink`, `overflow: hidden`, `width: 0` and `max-width: 100%`. It's recommended to set `min-width: 0`.
 - Horizontal and vertical are different in CSS:
   - Normally `width: auto` tries fill available space in parent. But `height: auto` normally tries to just expand to fit content.
-  - For inline elements, inline-block elements and float elements, `width: atuo` does not try to expand.
+  - For inline elements, inline-block elements and float elements, `width: auto` does not try to expand.
   - `margin: 0 auto` centers horizontally. But `margin: auto 0` normally become `margin: 0 0` which does not center vertically. In a flexbox with `flex-direction: column`, `margin: auto 0` can center vertically.
   - Margin collapse happens vertically but not horizontally.
   - The above flips when layout direction flips (e.g. `writing-mode: vertical-rl`)
