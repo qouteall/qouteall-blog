@@ -13,7 +13,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 
 ### HTML and CSS
 
-- `min-width` is `auto` by default. `min-width: auto` makes min width determined by content. It has higher priority than many other CSS attributes including `flex-shrink`, `overflow: hidden`, `width: 0` and `max-width: 100%`. It's recommended to set `min-width: 0`.
+- Inside flexbox or grid, `min-width` is `auto` by default. `min-width: auto` makes min width determined by content. It has higher priority than many other CSS attributes including `flex-shrink`, `overflow: hidden`, `width: 0` and `max-width: 100%`. It's recommended to set `min-width: 0`.
 - Horizontal and vertical are different in CSS:
   - Normally `width: auto` tries fill available space in parent. But `height: auto` normally tries to just expand to fit content.
   - For inline elements, inline-block elements and float elements, `width: atuo` does not try to expand.
@@ -72,8 +72,8 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - The standard doesn't put an upper limit on how much code point can a grapheme cluster contain. But implementations usually impose a limit for performance concerns.
 - Different in-memory string behaviors in different languages:
   - Rust use UTF-8 for in-memory string. `s.len()` gives byte count. Rust does not allow directly indexing on a `str`. `s.chars().count()` gives code point count. Rust is strict in UTF-8 code point validity (for example Rust doesn't allow subslice to cut on invalid code point boundary).
-  - Golang use UTF-8 for in-memory string. `len(s)` gives byte count. `s[i]` works same as byte array. `utf8.RuneCountInString(s)` gives code point count.
-  - Java, C# and JS use UTF-16-like encoding for in-memory string. UTF-16 works on 2-byte-units. But a code point can be 1 2-byte-unit or 2 2-byte-units (surrogate pair). Length of string is the unit count, not code point count. Indexing works on 2-byte-units.
+  - Golang string has no constraint of encoding and is treated as byte array in language level. String length and indexing works same as byte array. But the most common encoding is UTF-8. `utf8.RuneCountInString(s)` gives code point count. [See also](https://go.dev/blog/strings)
+  - Java, C# and JS's string conceptually use UTF-16 encoding. UTF-16 works on 2-byte-units. But a code point can be 1 2-byte-unit or 2 2-byte-units (surrogate pair). Length of string is the 2-byte-unit count, not code point count. Indexing works on 2-byte-units.
   - In Python, `len(s)` gives code point count. Indexing gives a string that contains one code point.
   - In C++, `std::string` has no constraint of encoding. It can be seen as a wrapper of `std::vector<char>`. String length and indexing is based on bytes.
   - No language mentioned above do string length and indexing based on grapheme cluster.
@@ -82,7 +82,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - [Confusable characters](https://github.com/unicode-org/icu/blob/main/icu4c/source/data/unidata/confusables.txt).
 - Normalization. é can be U+00E9 or U+0065 U+0301
 - [Zero-width characters](https://ptiglobal.com/the-beauty-of-unicode-zero-width-characters/), [Invisible characters](https://invisible-characters.com/)
-- Unicode unification. Different characters in different language use the same code point. Different languages' font variants render the same code point differently. [HTML code](https://github.com/qouteall/qouteall-blog/blob/main/blog/2025/unicode-unification-example.html) ![](unicode_unification_example.png)
+- [Han unification](https://en.wikipedia.org/wiki/Han_unification). Different characters in different language use the same code point. Different languages' font variants render the same character differently. Choosing the correct font variant is needed for internationalization. [HTML code](https://github.com/qouteall/qouteall-blog/blob/main/blog/2025/unicode-unification-example.html) ![](unicode_unification_example.png)
 
 
 
@@ -92,7 +92,9 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - There are +Inf and -Inf. They are not NaN.
 - There is a negative zero -0.0 which is different to normal zero. The negative zero equals zero when using floating point comparision. Normal zero is treated as "positive zero".
 - Directly compare equality may fail. Compare equality by things like `abs(a - b) < 0.00001`
-- JS use floating point for all numbers. The max accurate integer is $2^{53}-1$ if not using `BigInt`. If a JSON contains an integer larger than that, and JS deserializes it using `JSON.parse`, the number in result will be inaccurate. The workaround is to use other ways of deserializing JSON or use string for large integer. 
+- JS use floating point for all numbers. The max "safe" integer is $2^{53}-1$. The "safe" here means every integer in range can be accurately represented. Outside of the same range, some integers will become accurate. For large integer it's recommended to use `BigInt`.
+  
+  If a JSON contains an integer larger than that, and JS deserializes it using `JSON.parse`, the number in result will be inaccurate. The workaround is to use other ways of deserializing JSON or use string for large integer. 
   
   (Putting millisecond timestamp integer in JSON fine, as millisecond timestamp exceeds limit in year 287396. But nanosecond timestamp suffers from that issue.)
 - Associativity law and distribution law doesn't strictly hold because of inaccuracy. Parallelizing matrix multiplication and sum dynamically using these laws can be non-deterministic. [Example](https://github.com/pytorch/pytorch/issues/75240) [Example](https://www.twosigma.com/articles/a-workaround-for-non-determinism-in-tensorflow/)
@@ -172,7 +174,6 @@ A summarization of some traps to developers. There traps are unintuitive things 
 ### Python
 
 - Default argument is a stored value that will not be re-created on every call.
-- There are subtle differences between numpy and pytorch.
 
 ### SQL Databases
 
@@ -209,7 +210,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 
 - `volatile`:
   - `volatile` itself cannot replace locks. `volatile` itself doesn't provide atomicity.
-  - If you already use locking, no `volatile` needed.
+  - You don't need `volatile` for data protected by lock. Locking can already establish memory order and prevent some wrong optimizations.
   - In C/C++, `volatile` only avoids some wrong optimizations, and won't automatically add memory barrier instruction for `volatile` access.
   - In Java, `volatile` accesses have sequentially-consistent ordering (JVM will use memory barrier instruction if needed)
   - In C#, `volatile` accesses have release-aquire ordering (CLR will use memory barrier instruction if needed)
@@ -231,7 +232,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Forget to check for null/None/nil.
 - Modifying a container when for looping on it. Single-thread "data race".
 - Unintended sharing of mutable data. For example in Python `[[0] * 10] * 10` does not create a proper 2D array.
-- For integer `(low + high) / 2` may overflow. A safer way is `low + (high - low) / 2`
+- For integer `(low + high) / 2` may overflow. A safer way is `low + (high - low) / 2` (it works when `low` and `high` are non-negative)
 - Short circuit. `a() || b()` will not run `b()` if `a()` returns true. `a() && b()` will not run `b()` when `a()` returns false.
 - When using profiler: the profiler may by default only include CPU time which excludes waiting time. If your app spends 90% time waiting on database, the flamegraph may not include that 90% which is misleading.
 
@@ -274,7 +275,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 
 ### Networking
 
-- Some routers and firewall silently kill idle TCP connections without telling application. Some code (like HTTP client libraries, database clients) keep a pool of TCP connections for reuse, which can be silently invalidated. To solve it you can configure system TCP keepalive. For HTTP you can use `Connection: keep-alive` `Keep-Alive: timeout=30, max=1000` header.
+- Some routers and firewall silently kill idle TCP connections without telling application. Some code (like HTTP client libraries, database clients) keep a pool of TCP connections for reuse, which can be silently invalidated. To solve it you can configure system TCP keepalive.
 - The result of `traceroute` is not reliable. [Traceroute isn't real](https://gekk.info/articles/traceroute.htm). Sometimes [tcptraceroute](https://linux.die.net/man/1/tcptraceroute) can be useful.
 - TCP slow start can increase latency. Can be fixed by disabling `tcp_slow_start_after_idle`. [See also](https://ably.com/blog/optimizing-global-message-transit-latency-a-journey-through-tcp-configuration)
 - TCP sticky packet. Nagle's algorithm delays packet sending. It will increase latency. Can be fixed by enabling `TCP_NODELAY`. [See also](https://brooker.co.za/blog/2024/05/09/nagle.html) 
