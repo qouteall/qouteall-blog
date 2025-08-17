@@ -93,9 +93,9 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - There are +Inf and -Inf. They are not NaN.
 - There is a negative zero -0.0 which is different to normal zero. The negative zero equals zero when using floating point comparision. Normal zero is treated as "positive zero". The two zeros behave differently in some computations (e.g. `1.0 / +0.0 == +Inf`, `1.0 / -0.0 == -Inf`)
 - Directly compare equality may fail. Compare equality by things like `abs(a - b) < 0.00001`
-- JS use floating point for all numbers. The max "safe" integer is $2^{53}-1$. The "safe" here means every integer in range can be accurately represented. Outside of the same range, some integers will become accurate. For large integer it's recommended to use `BigInt`.
+- JS use floating point for all numbers. The max "safe" integer is $2^{53}-1$. The "safe" here means every integer in range can be accurately represented. Outside of the safe range, most integers will become accurate. For large integer it's recommended to use `BigInt`.
   
-  If a JSON contains an integer larger than that, and JS deserializes it using `JSON.parse`, the number in result will be inaccurate. The workaround is to use other ways of deserializing JSON or use string for large integer. 
+  If a JSON contains an integer larger than that, and JS deserializes it using `JSON.parse`, the number in result will be likely inaccurate. The workaround is to use other ways of deserializing JSON or use string for large integer. 
   
   (Putting millisecond timestamp integer in JSON fine, as millisecond timestamp exceeds limit in year 287396. But nanosecond timestamp suffers from that issue.)
 - Associativity law and distribution law doesn't strictly hold because of precision loss. Parallelizing matrix multiplication and sum dynamically using these laws can be non-deterministic. [Example](https://github.com/pytorch/pytorch/issues/75240) [Example](https://www.twosigma.com/articles/a-workaround-for-non-determinism-in-tensorflow/)
@@ -248,6 +248,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - If you want a script to add variables and aliases to current shell, it should be executed by using `source script.sh`, instead of directly executing. But the effect of `source` is not permanent and doesn't apply after re-login. It can be made permanent by putting into `~/.bashrc`.
 - Bash has caching between command name and file path of command. If you move one file in `$PATH` then using that command gives ENOENT. Refresh cache using `hash -r`
 - Using a variable unquoted will make its line breaks treated as space.
+- `set -e` can make the script exit immediately when a sub-command fails, but it doesn't work inside function whose result is condition-checked (e.g. the left side of `||`, `&&`, condition of `if`). [See also](https://stratus3d.com/blog/2019/11/29/bash-errexit-inconsistency/)
 - K8s `livenessProbe` used with debugger. Breakpoint debugger usually block the whole application, making it unable to respond health check request, so it can be killed by K8s `livenessProbe`.
 
 
@@ -291,7 +292,10 @@ A summarization of some traps to developers. There traps are unintuitive things 
 
 ### Other
 
-- YAML is space-sensitive, unlike JSON. `key:value` is wrong. `key: value` is correct.
+- YAML:
+  - YAML is space-sensitive, unlike JSON. `key:value` is wrong. `key: value` is correct.
+  - [Norway country code `NO` become false if unquoted](https://www.bram.us/2022/01/11/yaml-the-norway-problem/).
+  - [Git commit hash may become number if unquoted](https://tmendez.dev/posts/rng-git-hash-bug/).
 - When using Microsoft Excel to open a CSV file, Excel will do a lot of conversions, such as date conversion (e.g. turn `1/2` and `1-2` into `2-Jan`) and Excel won't show you the original string. [The gene SEPT1 was renamed due to this Excel issue](https://en.wikipedia.org/wiki/SEPTIN1). Excel will also make large numbers inaccurate (e.g. turn `12345678901234567890` into `12345678901234500000`) and won't show you the original accurate number, because Excel internally use floating point for number.
 
 
