@@ -92,7 +92,11 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - NaN. Floating point NaN is not equal to any number including itself. NaN == NaN is always false (even if the bits are same). NaN != NaN is always true. Computing on NaN usually gives NaN (it can "contaminate" computation).
 - There are +Inf and -Inf. They are not NaN.
 - There is a negative zero -0.0 which is different to normal zero. The negative zero equals zero when using floating point comparision. Normal zero is treated as "positive zero". The two zeros behave differently in some computations (e.g. `1.0 / +0.0 == +Inf`, `1.0 / -0.0 == -Inf`)
-- Directly compare equality may fail. Compare equality by things like `abs(a - b) < 0.00001`
+- JSON standard doesn't allow NaN or Inf:
+  - JS `JSON.stringify` turns NaN and Inf to null.
+  - Python `json.dumps(...)` will directly write `NaN`, `Infinity` into result, which is not compliant to JSON standard. `json.dumps(..., allow_nan=False)` will raise `ValueError` if has NaN or Inf.
+  - Golang `json.Marshal` will give error if has NaN or Inf.
+- Directly compare equality for floating point may fail. Compare equality by things like `abs(a - b) < 0.00001`
 - JS use floating point for all numbers. The max "safe" integer is $2^{53}-1$. The "safe" here means every integer in range can be accurately represented. Outside of the safe range, most integers will become accurate. For large integer it's recommended to use `BigInt`.
   
   If a JSON contains an integer larger than that, and JS deserializes it using `JSON.parse`, the number in result will be likely inaccurate. The workaround is to use other ways of deserializing JSON or use string for large integer. 
