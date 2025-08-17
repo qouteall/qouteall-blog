@@ -98,7 +98,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
   If a JSON contains an integer larger than that, and JS deserializes it using `JSON.parse`, the number in result will be inaccurate. The workaround is to use other ways of deserializing JSON or use string for large integer. 
   
   (Putting millisecond timestamp integer in JSON fine, as millisecond timestamp exceeds limit in year 287396. But nanosecond timestamp suffers from that issue.)
-- Associativity law and distribution law doesn't strictly hold because of inaccuracy. Parallelizing matrix multiplication and sum dynamically using these laws can be non-deterministic. [Example](https://github.com/pytorch/pytorch/issues/75240) [Example](https://www.twosigma.com/articles/a-workaround-for-non-determinism-in-tensorflow/)
+- Associativity law and distribution law doesn't strictly hold because of precision loss. Parallelizing matrix multiplication and sum dynamically using these laws can be non-deterministic. [Example](https://github.com/pytorch/pytorch/issues/75240) [Example](https://www.twosigma.com/articles/a-workaround-for-non-determinism-in-tensorflow/)
 - Division is much slower than multiplication (unless using approximation). Dividing many numbers with one number can be optimized by firstly computing reciprocal then multiply by reciprocal.
 - These things can make different hardware have different floating point computation results:
   - Hardware FMA (fused multiply-add) support. `fma(a, b, c) = a * b + c` (in some places `a + b * c`). Most modern hardware make intermediary result in FMA have higher precision. Some old hardware or embedded processors don't do that and treat it as normal multiply and add.
@@ -131,7 +131,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Forget to override `equals` and `hashcode`. It will use object identity equality by default in map key and set.
 - Mutate the content of map key object (or set element object) makes the container malfunciton.
 - A method that returns `List<T>` may sometimes return mutable `ArrayList`, but sometimes return `Collections.emptyList()` which is immutable. Trying to modify on `Collections.emptyList()` throws `UnsupportedOperationException`.
-- A method that returns `Optional<T>` may return `null`.
+- A method that returns `Optional<T>` may return `null` (this is not recommended, but this do exist in real codebases).
 - Return in `finally` block swallows any exception thrown in the `try` or `catch` block. The method will return the value from `finally`.
 - Interrupt. Some libraries ignore interrupt. Interrupt may break class initialization that contains IO.
 - Thread pool does not log exception of tasks sent by `.submit()` by default. You can only get exception from the future returned by `.submit()`. Don't discard the future. And `scheduleAtFixedRate` task silently stop if exception is thrown.
