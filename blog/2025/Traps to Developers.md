@@ -72,7 +72,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - The standard doesn't put an upper limit on how much code point can a grapheme cluster contain. But implementations usually impose a limit for performance concerns.
 - Different in-memory string behaviors in different languages:
   - Rust use UTF-8 for in-memory string. `s.len()` gives byte count. Rust does not allow directly indexing on a `str`. `s.chars().count()` gives code point count. Rust is strict in UTF-8 code point validity (for example Rust doesn't allow subslice to cut on invalid code point boundary).
-  - Golang string has no constraint of encoding and is treated as byte array in language level. String length and indexing works same as byte array. But the most common encoding is UTF-8. `utf8.RuneCountInString(s)` gives code point count. [See also](https://go.dev/blog/strings)
+  - Golang string has no constraint of encoding and is similar to byte array in language level. String length and indexing works same as byte array. But the most common encoding is UTF-8. [See also](https://go.dev/blog/strings)
   - Java, C# and JS's string conceptually use UTF-16 encoding. UTF-16 works on 2-byte-units. But a code point can be 1 2-byte-unit or 2 2-byte-units (surrogate pair). Length of string is the 2-byte-unit count, not code point count. Indexing works on 2-byte-units.
   - In Python, `len(s)` gives code point count. Indexing gives a string that contains one code point.
   - In C++, `std::string` has no constraint of encoding. It can be seen as a wrapper of `std::vector<char>`. String length and indexing is based on bytes.
@@ -82,6 +82,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - [Confusable characters](https://github.com/unicode-org/icu/blob/main/icu4c/source/data/unidata/confusables.txt).
 - Normalization. é can be U+00E9 or U+0065 U+0301
 - [Zero-width characters](https://ptiglobal.com/the-beauty-of-unicode-zero-width-characters/), [Invisible characters](https://invisible-characters.com/)
+- Line break. Windows often use CRLF `\r\n` for line break. Linux and MacOS often use LF `\n` for line break.
 - [Han unification](https://en.wikipedia.org/wiki/Han_unification). Different characters in different language use the same code point. Different languages' font variants render the same character differently. Choosing the correct font variant is needed for internationalization. [HTML code](https://github.com/qouteall/qouteall-blog/blob/main/blog/2025/unicode-unification-example.html) ![](unicode_unification_example.png)
 
 
@@ -235,6 +236,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - For integer `(low + high) / 2` may overflow. A safer way is `low + (high - low) / 2` (it works when `low` and `high` are non-negative)
 - Short circuit. `a() || b()` will not run `b()` if `a()` returns true. `a() && b()` will not run `b()` when `a()` returns false.
 - When using profiler: the profiler may by default only include CPU time which excludes waiting time. If your app spends 90% time waiting on database, the flamegraph may not include that 90% which is misleading.
+- There are many different "dialects" of regular expression. Don't assume a regular expression that works in JS can work in Java.
 
 ### Linux and bash
 
