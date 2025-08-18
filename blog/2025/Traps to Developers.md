@@ -9,6 +9,8 @@ A summarization of some traps to developers. There traps are unintuitive things 
 
 <!-- truncate -->
 
+This article spans a wide range of knowledge. If you find a mistake or have a suggestion, please leave a comment in [GitHub discussion](https://github.com/qouteall/qouteall-blog/discussions).
+
 ## Summarization of traps
 
 ### HTML and CSS
@@ -36,7 +38,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - `isolation: isolate`
   - ...
   
-  Stacking context can cause these behaviors:
+   Stacking context can cause these behaviors:
   
   - `z-index` doesn't work across stacking contexts. It only works within a stacking context.
   - `position: absolute` or `fixed` use coordinate based on nearest positioned ancestor. Stacking context is positioned, which can affect that.
@@ -45,12 +47,13 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - `background-attachment: fixed` will position based on stacking context
 
 - On mobile browsers, the top address bar and bottom navigation bar can go out of screen when you scroll down. `100vh` correspond to the height when top bar and bottom bar gets out of screen, which is larger than the height when the two bars are on screen. The modern solution is `100dvh`.
+- `width: 100vw` makes the width-that-excludes-scrollbar to be `100vw`, which can make the total width (including scrollbar) to horizontally overflow. `width: 100%` can avoid that issue.
 - `position: absolute` is not based on its parent. It's based on its nearest positioned ancestor (the nearest ancestor that has `position` be `relative`, `absolute` or creates stacking context).
-- [Blur does not consider ambient things](https://www.joshwcomeau.com/css/backdrop-filter/#the-issue).
+- [`backdrop-filter: blur` does not consider ambient things](https://www.joshwcomeau.com/css/backdrop-filter/#the-issue).
 - If the parent's `display` is `flex` or `grid`, then the child's `float` has no effect
 - If the parent's width/height is not pre-determined, then percent width/height (e.g. `width: 50%`, `height: 100%`) doesn't work. (It avoids circular dependency where parent height is determined by content height, but content height is determined by parent height.)
 - `display: inline` ignores `width` `height` and `margin-top` `margin-bottom`
-- Whitespace collapse. [HTML Whitespace is Broken](https://blog.dwac.dev/posts/html-whitespace/)
+- Whitespace collapse. [See also](https://blog.dwac.dev/posts/html-whitespace/)
   - By default, newlines in html are treated as spaces. Multiple spaces together collapse into one. 
   - `<pre>` can avoid collapsing whitespace but has weird behavior in the beginning and end of content.
   - Often the spaces in the beginning and end of content are ignored, but this doesn't happen in `<a>`.
@@ -61,31 +64,33 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - File download request is not shown in Chrome dev tool because the it only shows networking in current tab, but file download is treated as in another tab. To inspect file download request, use `chrome://net-export/`.
 - JS-in-HTML may interfere with HTML parsing. For example `<script>console.log('</script>')</script>` makes browser treat the first `</script>` as ending tag. [See also](https://sirre.al/2025/08/06/safe-json-in-script-tags-how-not-to-break-a-site/)
 
-### Unicode and text encoding
+### Unicode and text
 
-- Two concepts: code point (rune), grapheme cluster:
+- Two concepts: code point, grapheme cluster:
   - Grapheme cluster is the "unit of character" in GUI.
   - For visible ascii characters, a character is a code point, a character is a grapheme cluster.
   - An emoji is a grapheme cluster, but it may consist of many code points.
-  - In UTF-8, a code point can be 1, 2, 3 or 4 bytes. The byte number does not necessarily represent code point number.
-  - In UTF-16, a code point can be 2 bytes or 4 bytes (surrogate pair).
+  - In UTF-8, a code point can be 1, 2, 3 or 4 bytes. The byte number does not necessarily represent code point number. A UTF-8 code unit is 1 byte.
+  - In UTF-16, each UTF-16 code unit is 2 bytes. A code point can be 1 code unit (2 bytes) or 2 code units (4 bytes, surrogate pair).
+  - [WTF-16](https://simonsapin.github.io/wtf-8/#ill-formed-utf-16) is similar to UTF-16 but allows invalid surrogate pairs.
   - The standard doesn't put an upper limit on how much code point can a grapheme cluster contain. But implementations usually impose a limit for performance concerns.
 - Different in-memory string behaviors in different languages:
   - Rust use UTF-8 for in-memory string. `s.len()` gives byte count. Rust does not allow directly indexing on a `str` (but allows subslicing). `s.chars().count()` gives code point count. Rust is strict in UTF-8 code point validity (for example Rust doesn't allow subslice to cut on invalid code point boundary).
-  - Golang string has no constraint of encoding and is similar to byte array. String length and indexing works same as byte array. But the most common encoding is UTF-8. [See also](https://go.dev/blog/strings)
-  - Java, C# and JS's string conceptually use UTF-16 encoding. UTF-16 works on 2-byte-units. But a code point can be 1 2-byte-unit or 2 2-byte-units (surrogate pair). Length of string is the 2-byte-unit count, not code point count. Indexing works on 2-byte-units.
+  - Java, C# and JS's string conceptually use WTF-16 encoding [^string_encoding_optimization]. String length is code unit count, not code point count. Indexing works on code units. Each code unit is 2 bytes. One code point can be 1 code unit or 2 code units.
   - In Python, `len(s)` gives code point count. Indexing gives a string that contains one code point.
-  - In C++, `std::string` has no constraint of encoding. It can be seen as a wrapper of `std::vector<char>`. String length and indexing is based on bytes.
+  - Golang string has no constraint of encoding and is similar to byte array. String length and indexing works same as byte array. But the most commonly used encoding is UTF-8. (In Golang terminilogy, a code point is called a "rune") [See also](https://go.dev/blog/strings)
+  - In C++, `std::string` has no constraint of encoding and is similar to byte array. String length and indexing is based on bytes.
   - No language mentioned above do string length and indexing based on grapheme cluster.
-- Some text files have byte order mark (BOM) at the beginning. For example, EF BB BF is a BOM that denotes the file is in UTF-8 encoding. It's mainly used in Windows. Some non-Windows software does not handle BOM.
+- Some text files have byte order mark (BOM) at the beginning. For example, FE FF means file is in big-endian UTF-16 encoding. EF BB BF means file is in UTF-8 encoding. It's mainly used in Windows. Some non-Windows software does not handle BOM.
 - When converting binary data to string, often the invalid places are replaced by � (U+FFFD)
 - [Confusable characters](https://github.com/unicode-org/icu/blob/main/icu4c/source/data/unidata/confusables.txt).
 - Normalization. For example é can be U+00E9 (one code point) or U+0065 U+0301 (two code points).
 - [Zero-width characters](https://ptiglobal.com/the-beauty-of-unicode-zero-width-characters/), [Invisible characters](https://invisible-characters.com/)
 - Line break. Windows often use CRLF `\r\n` for line break. Linux and MacOS often use LF `\n` for line break.
-- [Han unification](https://en.wikipedia.org/wiki/Han_unification). Some characters in different language with slightly different appearance use the same code point. Usually a font will contain variants for different languages that render these characters differently. Choosing the correct font variant is needed for internationalization. [HTML code](https://github.com/qouteall/qouteall-blog/blob/main/blog/2025/unicode-unification-example.html) ![](unicode_unification_example.png)
+- [Han unification](https://en.wikipedia.org/wiki/Han_unification). Some characters in different language with slightly different appearance use the same code point. Usually a font will contain variants for different languages that render these characters differently. [HTML code](https://github.com/qouteall/qouteall-blog/blob/main/blog/2025/unicode-unification-example.html) ![](unicode_unification_example.png)
 
 
+[^string_encoding_optimization]: Java has an optimization that use Latin-1 encoding (1 byte per code point) for in-memory string if possible. But the API of `String` still works on WTF-16. Similar things can happen in other languages. 
 
 ### Floating point
 
@@ -179,6 +184,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 ### Python
 
 - Default argument is a stored value that will not be re-created on every call.
+- Be careful about indentation when copying and pasting Python code.
 
 ### SQL Databases
 
@@ -218,10 +224,10 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - You don't need `volatile` for data protected by lock. Locking can already establish memory order and prevent some wrong optimizations.
   - In C/C++, `volatile` only avoids some wrong optimizations, and won't automatically add memory barrier instruction for `volatile` access.
   - In Java, `volatile` accesses have sequentially-consistent ordering (JVM will use memory barrier instruction if needed)
-  - In C#, `volatile` accesses have release-aquire ordering (CLR will use memory barrier instruction if needed)
-  - `volatile` can avoid wrong optimization related to reordering and merging memory reads/writes.
-- Time-of-check to time-of-use (TOCTOU).
-- In SQL database, for special uniqueness constraint that doesn't fit simple unique index (e.g. unique across two tables, conditional unique, unique within time range), and constraint is enforced by application, then:
+  - In C#, accesses to the same `volatile` value have release-aquire ordering (CLR will use memory barrier instruction if needed)
+  - `volatile` can avoid wrong optimization related to reordering and merging memory reads/writes. (Compiler can merge reads by caching a value in register. Compiler can merge writes by only writing to register and delaying writing to memory).
+- Time-of-check to time-of-use ([TOCTOU](https://en.wikipedia.org/wiki/Time-of-check_to_time-of-use)).
+- In SQL database, for special uniqueness constraints that doesn't fit simple unique index (e.g. unique across two tables, conditional unique, unique within time range), if the constraint is enforced by application, then:
   - In MySQL (InnoDB), if in repeatable read level, application checks using `select ... for update` then insert, and the unique-checked column has index, then it works due to gap lock. (Note that gap lock may cause deadlock under high concurrency, ensure deadlock detection is on and use retrying).
   - In PostgreSQL, if in repeatable read level, application checks using `select ... for update` then insert, it's not sufficient to enforce constraint under concurrency (due to write skew). Some solutions:
     - Use serializable level
@@ -229,7 +235,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
       - For conditional unique, use partial unique index. 
       - For uniqueness across two tables case, insert redundant data into one extra table with unique index.
       - For time range exclusiveness case, use range type and exclude constraint.
-- Atomic reference counting (`Arc`, `shared_ptr`) is slow when many threads frequently change the same counter. [See also](https://pkolaczk.github.io/server-slower-than-a-laptop/)
+- Atomic reference counting (`Arc`, `shared_ptr`) can be slow when many threads frequently change the same counter. [See also](https://pkolaczk.github.io/server-slower-than-a-laptop/)
 - About read-write lock: some read-write lock implementations doesn't support upgrading from read lock to write lock, and trying to write lock when holding read lock may deadlock.
 
 ### Common in many languages
@@ -298,6 +304,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 
 - YAML:
   - YAML is space-sensitive, unlike JSON. `key:value` is wrong. `key: value` is correct.
+  - YAML doesn't allow using tab for indentation.
   - [Norway country code `NO` become false if unquoted](https://www.bram.us/2022/01/11/yaml-the-norway-problem/).
   - [Git commit hash may become number if unquoted](https://tmendez.dev/posts/rng-git-hash-bug/).
 - When using Microsoft Excel to open a CSV file, Excel will do a lot of conversions, such as date conversion (e.g. turn `1/2` and `1-2` into `2-Jan`) and Excel won't show you the original string. [The gene SEPT1 was renamed due to this Excel issue](https://en.wikipedia.org/wiki/SEPTIN1). Excel will also make large numbers inaccurate (e.g. turn `12345678901234567890` into `12345678901234500000`) and won't show you the original accurate number, because Excel internally use floating point for number.
