@@ -70,7 +70,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
   - Grapheme cluster is the "unit of character" in GUI.
   - For visible ascii characters, a character is a code point, a character is a grapheme cluster.
   - An emoji is a grapheme cluster, but it may consist of many code points.
-  - In UTF-8, a code point can be 1, 2, 3 or 4 bytes. The byte number does not necessarily represent code point number. A UTF-8 code unit is 1 byte.
+  - In UTF-8, a code point can be 1, 2, 3 or 4 bytes. The byte number does not necessarily represent code point number.
   - In UTF-16, each UTF-16 code unit is 2 bytes. A code point can be 1 code unit (2 bytes) or 2 code units (4 bytes, surrogate pair).
   - [WTF-16](https://simonsapin.github.io/wtf-8/#ill-formed-utf-16) is similar to UTF-16 but allows invalid surrogate pairs.
   - The standard doesn't put an upper limit on how much code point can a grapheme cluster contain. But implementations usually impose a limit for performance concerns.
@@ -87,7 +87,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - Normalization. For example é can be U+00E9 (one code point) or U+0065 U+0301 (two code points).
 - [Zero-width characters](https://ptiglobal.com/the-beauty-of-unicode-zero-width-characters/), [Invisible characters](https://invisible-characters.com/)
 - Line break. Windows often use CRLF `\r\n` for line break. Linux and MacOS often use LF `\n` for line break.
-- [Han unification](https://en.wikipedia.org/wiki/Han_unification). Some characters in different language with slightly different appearance use the same code point. Usually a font will contain variants for different languages that render these characters differently. [HTML code](https://github.com/qouteall/qouteall-blog/blob/main/blog/2025/unicode-unification-example.html) ![](unicode_unification_example.png)
+- Locale ([elaborated below](#locale)).
 
 
 [^string_encoding_optimization]: Java has an optimization that use Latin-1 encoding (1 byte per code point) for in-memory string if possible. But the API of `String` still works on WTF-16. Similar things can happen in other languages. 
@@ -299,6 +299,15 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - CORS (cross-origin resource sharing). For requests to another website (origin), the browser will prevent JS from getting response, unless the server's response contains header `Access-Control-Allow-Origin` and it matches client website. This requires configuring the backend. If you want to pass cookie to another website it involves more configuration.
   
   Generally, if your frontend and backend are in the same website (same domain name and port) then there is no CORS issue.
+
+### Locale
+
+- Regular expression behavior can be locale-dependent (depending on which regular expression engine).
+- The upper case and lower case can be different in other natural languages. In Turkish (tr-TR) lowercase of `I` is `ı` and upper case of `i` is `İ`. The `\w` (word char) in regular expression can be locale-dependent.
+- Letter ordering can be different in other natural languages. Regular expression `[a-z]` may malfunction in other locale.
+- Text representation of floating-point number is locale-dependent. `1,234.56` in US correspond to `1.234,56` in Germany.
+- CSV use normally use `,` as spearator, but use `;` as separator in German locale.
+- [Han unification](https://en.wikipedia.org/wiki/Han_unification). Some characters in different language with slightly different appearance use the same code point. Usually a font will contain variants for different languages that render these characters differently. [HTML code](https://github.com/qouteall/qouteall-blog/blob/main/blog/2025/unicode-unification-example.html) ![](unicode_unification_example.png)
 
 ### Other
 
