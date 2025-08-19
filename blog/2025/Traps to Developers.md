@@ -72,13 +72,11 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
   - An emoji is a grapheme cluster, but it may consist of many code points.
   - In UTF-8, a code point can be 1, 2, 3 or 4 bytes. The byte number does not necessarily represent code point number.
   - In UTF-16, each UTF-16 code unit is 2 bytes. A code point can be 1 code unit (2 bytes) or 2 code units (4 bytes, surrogate pair).
-  - [WTF-16](https://simonsapin.github.io/wtf-8/#ill-formed-utf-16) is similar to UTF-16 but allows invalid surrogate pairs.
-  - The standard doesn't put an upper limit on how much code point can a grapheme cluster contain. But implementations usually impose a limit for performance concerns.
 - Different in-memory string behaviors in different languages:
   - Rust use UTF-8 for in-memory string. `s.len()` gives byte count. Rust does not allow directly indexing on a `str` (but allows subslicing). `s.chars().count()` gives code point count. Rust is strict in UTF-8 code point validity (for example Rust doesn't allow subslice to cut on invalid code point boundary).
-  - Java, C# and JS's string conceptually use WTF-16 encoding [^string_encoding_optimization]. String length is code unit count, not code point count. Indexing works on code units. Each code unit is 2 bytes. One code point can be 1 code unit or 2 code units.
+  - Java, C# and JS's string encoding is similar to UTF-16 [^string_encoding]. String length is code unit count, not code point count. Indexing works on code units. Each code unit is 2 bytes. One code point can be 1 code unit or 2 code units.
   - In Python, `len(s)` gives code point count. Indexing gives a string that contains one code point.
-  - Golang string has no constraint of encoding and is similar to byte array. String length and indexing works same as byte array. But the most commonly used encoding is UTF-8. (In Golang terminilogy, a code point is called a "rune") [See also](https://go.dev/blog/strings)
+  - Golang string has no constraint of encoding and is similar to byte array. String length and indexing works same as byte array. But the most commonly used encoding is UTF-8. [See also](https://go.dev/blog/strings)
   - In C++, `std::string` has no constraint of encoding and is similar to byte array. String length and indexing is based on bytes.
   - No language mentioned above do string length and indexing based on grapheme cluster.
 - Some text files have byte order mark (BOM) at the beginning. For example, FE FF means file is in big-endian UTF-16 encoding. EF BB BF means file is in UTF-8 encoding. It's mainly used in Windows. Some non-Windows software does not handle BOM.
@@ -90,44 +88,42 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - Locale ([elaborated below](#locale)).
 
 
-[^string_encoding_optimization]: Java has an optimization that use Latin-1 encoding (1 byte per code point) for in-memory string if possible. But the API of `String` still works on WTF-16. Similar things can happen in other languages. 
+[^string_encoding]: Strictly speaking, they use [WTF-16](https://simonsapin.github.io/wtf-8/#ill-formed-utf-16) encoding, which is similar to UTF-16 but allows invalid surrogate pairs. Also, Java has an optimization that use Latin-1 encoding (1 byte per code point) for in-memory string if possible. But the API of `String` still works on WTF-16 code units. Similar things may happen in C# and JS. 
 
 ### Floating point
 
 - NaN. Floating point NaN is not equal to any number including itself. NaN == NaN is always false (even if the bits are same). NaN != NaN is always true. Computing on NaN usually gives NaN (it can "contaminate" computation).
 - There are +Inf and -Inf. They are not NaN.
-- There is a negative zero -0.0 which is different to normal zero. The negative zero equals zero when using floating point comparision. Normal zero is treated as "positive zero". The two zeros behave differently in some computations (e.g. `1.0 / +0.0 == +Inf`, `1.0 / -0.0 == -Inf`)
+- There is a negative zero -0.0 which is different to normal zero. The negative zero equals zero when using floating point comparision. Normal zero is treated as "positive zero". The two zeros behave differently in some computations (e.g. `1.0 / 0.0 == Inf`, `1.0 / -0.0 == -Inf`, `log(0.0) == -Inf`, `log(-0.0)` is NaN)
 - JSON standard doesn't allow NaN or Inf:
   - JS `JSON.stringify` turns NaN and Inf to null.
   - Python `json.dumps(...)` will directly write `NaN`, `Infinity` into result, which is not compliant to JSON standard. `json.dumps(..., allow_nan=False)` will raise `ValueError` if has NaN or Inf.
   - Golang `json.Marshal` will give error if has NaN or Inf.
-- Directly compare equality for floating point may fail. Compare equality by things like `abs(a - b) < 0.00001`
+- Directly compare equality for floating point may fail due to precision loss. Compare equality by things like `abs(a - b) < 0.00001`
 - JS use floating point for all numbers. The max "safe" integer is $2^{53}-1$. The "safe" here means every integer in range can be accurately represented. Outside of the safe range, most integers will be inaccurate. For large integer it's recommended to use `BigInt`.
   
   If a JSON contains an integer larger than that, and JS deserializes it using `JSON.parse`, the number in result will be likely inaccurate. The workaround is to use other ways of deserializing JSON or use string for large integer. 
   
   (Putting millisecond timestamp integer in JSON fine, as millisecond timestamp exceeds limit in year 287396. But nanosecond timestamp suffers from that issue.)
-- Associativity law and distribution law doesn't strictly hold because of precision loss. Parallelizing matrix multiplication and sum dynamically using these laws can be non-deterministic. [Example](https://github.com/pytorch/pytorch/issues/75240) [Example](https://www.twosigma.com/articles/a-workaround-for-non-determinism-in-tensorflow/)
+- Associativity law and distribution law doesn't strictly hold because of precision loss. Parallelizing matrix multiplication and sum dynamically using these laws can be non-deterministic. [Example1](https://github.com/pytorch/pytorch/issues/75240) [Example2](https://www.twosigma.com/articles/a-workaround-for-non-determinism-in-tensorflow/)
 - Division is much slower than multiplication (unless using approximation). Dividing many numbers with one number can be optimized by firstly computing reciprocal then multiply by reciprocal.
 - These things can make different hardware have different floating point computation results:
   - Hardware FMA (fused multiply-add) support. `fma(a, b, c) = a * b + c` (in some places `a + b * c`). Most modern hardware make intermediary result in FMA have higher precision. Some old hardware or embedded processors don't do that and treat it as normal multiply and add.
   - Floating point has a [Subnormal range](https://en.wikipedia.org/wiki/Subnormal_number) to make very-close-to-zero numbers more accurate. Most mondern hardware can handle them, but some old hardware and embedded processors treat subnormals as zero.
   - Rounding mode. The standard allows different rounding modes like round-to-nearest-ties-to-even (RNTE) or round-toward-zero (RTZ). 
-    - In X86 and ARM rounding mode is thread-local mutable state can be set by special instructions. It's not recommended to touch the rounding mode as it can affect other code.
-    - In GPU there is no mutable state for rounding mode. Rasterization often use RNTE rounding mode. In CUDA different rounding modes are associated by different instructions.
-  - Different hardware may have different behaviors on math functions like sin, log.
+    - In X86 and ARM, rounding mode is thread-local mutable state can be set by special instructions. It's not recommended to touch the rounding mode as it can affect other code.
+    - In GPU, there is no mutable state for rounding mode. Rasterization often use RNTE rounding mode. In CUDA different rounding modes are associated by different instructions.
+  - Math functions (e.g. sin, log) may be less accurate in some embedded hardware or old hardware.
   - X86 has legacy FPU which has 80-bit floating point registers and per-core rounding mode state. It's recommended to not use them.
-  - ... There are many other factors that cause difference of floating point computation.
-- How to increase precision in floating point computation:
-  - Make computation graph shallower. For example, 3-layer computation `a * (b * (c * d))` can be less accurate than 2-layer-computation `(a * b) * (c * d)` (depends on exact case).
-  - Avoid temporary result to have very large absolute value or very close-to-zero value.
-  - Utilizing hardware fused operations like FMA (fused multiply-add).
+  - ......
+- Floating point accuracy is low for values with very large absolute value or values very close to zero. It's recommended to avoid temporary result to have very large absolute value or be very close-to-zero.
+- Iteration can cause error accumulation. For example, if something need to rotate 1 degree every frame, don't cache the matrix and multiply 1-degree rotation matrix every frame. Compute angle based on time then re-calculate rotation matrix from angle.
 
 
 ### Time
 
-- Leap second. Unix timestamp is "transparent" to leap second, which means that converting between unix timestamp and UTC time ignores leap second. The time measured in unix timestamp will stretch or squeeze near a leap second (leap smear) to hide existence of leap second.
-- Time zone. UTC and Unix timestamp is globally uniform and doesn't care about time zone. But human-readable time is time-zone-dependent. It's recommended to store timestamp in database and convert to human-readable time in UI instead of storing human-readable time in database.
+- [Leap second]([Leap second - Wikipedia](https://en.wikipedia.org/wiki/Leap_second)). Unix timestamp is "transparent" to leap second, which means converting between Unix timestamp and UTC time ignores leap second. A common solution is leap smear: make the time measured in Unix timestamp stretch or squeeze near a leap second.
+- Time zone. UTC and Unix timestamp is globally uniform. But human-readable time is time-zone-dependent. It's recommended to store timestamp in database and convert to human-readable time in UI, instead of storing human-readable time in database.
 - Daylight Saving Time (DST): In some region people adjust clock forward by one hour in warm seasons.
 - Time may "go backward" due to NTP sync.
 - It's recommended to configure the server's time zone as UTC. Different nodes having different time zones will cause trouble in distributed system. After changing system time zone, the database may need to be reconfigured or restarted.
@@ -173,7 +169,6 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
   - Aliasing.
     - Aliasing means multiple pointers point to the same place in memory.
     - Strict aliasing rule: If there are two pointers with type `A*` and `B*`, then compiler assumes two pointer can never equal. If they equal, it's undefined behavior. Except in two cases: 1. `A` and `B` has subtyping relation 2. converting pointer to byte pointer (`char*`, `unsigned char*` or `std::byte*`) (the reverse does not apply).
-    - To do force conversion, the safe ways are `memcpy` or `std::bit_cast`
   - Unaligned memory access is undefined behavior.
 - Alignment.
   - For example, 64-bit integer's address need to be disivible by 8. In ARM, accessing memory in unaligned way can cause crash.
@@ -284,12 +279,13 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - In GitHub, if you accidentally commited secret (e.g. API key) and pushed to public, even if you override it using force push, GitHub will still record that secret. [Guest Post: How I Scanned all of GitHub’s “Oops Commits” for Leaked Secrets](https://trufflesecurity.com/blog/guest-post-how-i-scanned-all-of-github-s-oops-commits-for-leaked-secrets) [Example activity tab](https://github.com/SharonBrizinov/test-oops-commit/compare/e6533c7bd729957b2eb31e88065c5158d1317c5e...9eedfa00983b7269a75d76ec5e008565c2eff2ef)
 - In GitHub, if there is a private repo A and you forked it as B (also private), then when A become public, the private repo B's content is also publicly accessible, even after deleting B. [See also](https://trufflesecurity.com/blog/anyone-can-access-deleted-and-private-repo-data-github). 
 - `git stash pop` does not drop the stash if there is a conflict.
-- It's recommended to add `**/.DS_Store` into `.gitignore` because MacOS auto adds `.DS_Store` files into every folder.
+- MacOS auto adds `.DS_Store` files into every folder. It's recommended to add `**/.DS_Store` into `.gitignore`.
 
 ### Networking
 
-- Some routers and firewall silently kill idle TCP connections without telling application. Some code (like HTTP client libraries, database clients) keep a pool of TCP connections for reuse, which can be silently invalidated. To solve it you can configure system TCP keepalive.
-- The result of `traceroute` is not reliable. [Traceroute isn't real](https://gekk.info/articles/traceroute.htm). Sometimes [tcptraceroute](https://linux.die.net/man/1/tcptraceroute) can be useful.
+- Some routers and firewall silently kill idle TCP connections without telling application. Some code (like HTTP client libraries, database clients) keep a pool of TCP connections for reuse, which can be silently invalidated (using these TCP connection will get RST). To solve it, configure system TCP keepalive. [See also](https://tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO/)
+  - Note that [HTTP/1.0 Keep-Alive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Keep-Alive) is different to TCP keepalive.
+- The result of `traceroute` is not reliable. [See also](https://gekk.info/articles/traceroute.htm). Sometimes [tcptraceroute](https://linux.die.net/man/1/tcptraceroute) is useful.
 - TCP slow start can increase latency. Can be fixed by disabling `tcp_slow_start_after_idle`. [See also](https://ably.com/blog/optimizing-global-message-transit-latency-a-journey-through-tcp-configuration)
 - TCP sticky packet. Nagle's algorithm delays packet sending. It will increase latency. Can be fixed by enabling `TCP_NODELAY`. [See also](https://brooker.co.za/blog/2024/05/09/nagle.html) 
 - If you put your backend behind Nginx, you need to configure connection reuse, otherwise under high concurrency, connection between nginx and backend may fail, due to not having enough internal ports.
@@ -305,7 +301,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - Regular expression behavior can be locale-dependent (depending on which regular expression engine).
 - The upper case and lower case can be different in other natural languages. In Turkish (tr-TR) lowercase of `I` is `ı` and upper case of `i` is `İ`. The `\w` (word char) in regular expression can be locale-dependent.
 - Letter ordering can be different in other natural languages. Regular expression `[a-z]` may malfunction in other locale.
-- Text representation of floating-point number is locale-dependent. `1,234.56` in US correspond to `1.234,56` in Germany.
+- Text notation of floating-point number is locale-dependent. `1,234.56` in US correspond to `1.234,56` in Germany.
 - CSV use normally use `,` as spearator, but use `;` as separator in German locale.
 - [Han unification](https://en.wikipedia.org/wiki/Han_unification). Some characters in different language with slightly different appearance use the same code point. Usually a font will contain variants for different languages that render these characters differently. [HTML code](https://github.com/qouteall/qouteall-blog/blob/main/blog/2025/unicode-unification-example.html) ![](unicode_unification_example.png)
 
