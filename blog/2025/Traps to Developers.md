@@ -15,7 +15,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 
 ### HTML and CSS
 
-- Inside flexbox or grid, `min-width` is `auto` by default. `min-width: auto` makes min width determined by content. It has higher priority than many other CSS attributes including `flex-shrink`, `overflow: hidden`, `width: 0` and `max-width: 100%`. It's recommended to set `min-width: 0`.
+- `min-width` is `auto` by default. Inside flexbox or grid, `min-width: auto` often makes min width determined by content. It has higher priority than many other CSS attributes including `flex-shrink`, `width: 0` and `max-width: 100%`. It's recommended to set `min-width: 0`. [See also](https://developer.mozilla.org/en-US/docs/Web/CSS/min-width)
 - Horizontal and vertical are different in CSS:
   - Normally `width: auto` tries fill available space in parent. But `height: auto` normally tries to just expand to fit content.
   - For inline elements, inline-block elements and float elements, `width: auto` does not try to expand.
@@ -41,7 +41,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
    Stacking context can cause these behaviors:
   
   - `z-index` doesn't work across stacking contexts. It only works within a stacking context.
-  - `position: absolute` or `fixed` use coordinate based on nearest positioned ancestor. Stacking context is positioned, which can affect that.
+  - Stacking context can affect the coordinate of `position: absolute` or `fixed`. (The underlying logic is complex, [see also](https://developer.mozilla.org/en-US/docs/Web/CSS/position) )
   - `position: sticky` doesn't work across stacking context.
   - `overflow: visible` will still be clipped by stacking context
   - `background-attachment: fixed` will position based on stacking context
