@@ -122,7 +122,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 
 ### Time
 
-- [Leap second]([Leap second - Wikipedia](https://en.wikipedia.org/wiki/Leap_second)). Unix timestamp is "transparent" to leap second, which means converting between Unix timestamp and UTC time ignores leap second. A common solution is leap smear: make the time measured in Unix timestamp stretch or squeeze near a leap second.
+- [Leap second](https://en.wikipedia.org/wiki/Leap_second). Unix timestamp is "transparent" to leap second, which means converting between Unix timestamp and UTC time ignores leap second. A common solution is leap smear: make the time measured in Unix timestamp stretch or squeeze near a leap second.
 - Time zone. UTC and Unix timestamp is globally uniform. But human-readable time is time-zone-dependent. It's recommended to store timestamp in database and convert to human-readable time in UI, instead of storing human-readable time in database.
 - Daylight Saving Time (DST): In some region people adjust clock forward by one hour in warm seasons.
 - Time may "go backward" due to NTP sync.
