@@ -249,7 +249,9 @@ Examples:
 
 ### Urge to persuade others
 
-People love to correct others and persuade others. Some ideas are **memes** that drive people to spread the idea. However, due to belief stability, it's hard to persuade others, and people dislike being persuaded. This effect is common on internet social media.
+People love to correct others and persuade others. Some ideas are **memes** that drive people to spread the idea. Correcting others also provide superiority satisfaction. 
+
+However, due to belief stability, it's hard to persuade/teach others. People dislike being persuaded/teached. This effect is common on internet social media.
 
 > The trouble with having an open mind, of course, is that people will insist on coming along and trying to put things in it.
 >
