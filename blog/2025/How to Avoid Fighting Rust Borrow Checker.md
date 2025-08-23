@@ -1,6 +1,8 @@
 
 # How to Avoid Fighting Rust Borrow Checker
 
+<!-- truncate -->
+
 It's unproductive to fight with Rust borrow checker, by changing some code, try to compile, then change other code, try to compile, and so on. Rust developers should clearly knowing what things are not allowed by borrow checker, or hard to do under borrow checker in advance.
 
 The 3 important facts in Rust:
@@ -106,7 +108,7 @@ This code is totally memory-safe: the `.add_score()` only touch the `total_score
 - The for loop indirectly borrows the result of `parent.get_children()` which indirectly borrows `parent`.
 - In `fn add_score(&mut self, score: u32) { self.total_score += score; }`, the function body only mutably borrowed `total_score` field, but the argument `&mut self` borrows the whole `Parent`, not just one field.
 
-The core problem is that you just want to borrow one field, but forced to borrow the whole object. And due to mutable borrow exclusiveness, this doesn't compile. (It often works fine in immutable case, because immutable borrows can co-exist.)
+The core problem is that you just want to borrow one field, but forced to borrow the whole object. And due to mutable borrow exclusiveness, this doesn't compile. (It often works fine in immutable case, because immutable borrows can co-exist for same object.)
 
 What if I just inline `get_children` and `add_score`? Then it compiles fine:
 
@@ -137,7 +139,7 @@ The deeper cause is that:
 
 The workarounds:
 
-- The contagious borrow issue is unfriendly to abstrations that work with references. So one solution is to **remove abstraction**, or **redesign abstraction to avoid contagious borrow issue** ([refactor at the most inconvenient times](https://loglog.games/blog/leaving-rust-gamedev/#once-you-get-good-at-rust-all-of-these-problems-will-go-away)).
+- The contagious borrow issue is unfriendly to abstrations that work with references. So one solution is to **remove abstraction**. Another solution is to **redesign abstraction to avoid contagious borrow issue** ([refactor at the most inconvenient times](https://loglog.games/blog/leaving-rust-gamedev/#once-you-get-good-at-rust-all-of-these-problems-will-go-away)).
 - Use ID/handle to replace reference.
 - Other workarounds like `Arc<QCell<>>` `Arc<RwLock<>>`, etc.
 - **Avoid mutation** or **defer mutation**:
@@ -152,21 +154,23 @@ Unfortunately, **mutate-by-recreate is also contagious**: if you recreated a new
 
 Mutate-by-recreate can be useful for cases like:
 
-- Safely sharing data in multithreading (Read-copy-update, RCU)
+- Safely sharing data in multithreading (related: Read-copy-update(RCU), copy-on-write (COW))
 - Take snapshot and rollback efficiently
+
+Mutate-by-recreate can be optimized by sharing unchanged sub-structures. See also: [Persistent data structure](https://en.wikipedia.org/wiki/Persistent_data_structure), [Rope](https://en.wikipedia.org/wiki/Rope_(data_structure)).
 
 Another solution is to **treat mutation as data**. When you want to mutate something, you **append a mutation command into command queue** (the command can also be called "event" or "log"). Then execute the mutation commands at once. 
 
 - In the process of creating new commands, it only do immutable borrow to base data, and only one mutable borrow to the command queue. 
 - When executing the commands, it only do one mutable borrow to base data at a time.
 
-What if I want to read the latest state before execute the commands in queue? Then you need to inspect both the command queue and base data to get latest state (LSM tree does similar things).
+What if I want to read the latest state before execute the commands in queue? Then you need to inspect both the command queue and base data to get latest state ([LSM tree](https://en.wikipedia.org/wiki/Log-structured_merge-tree) does similar things).
 
 Treating mutation as data also has other benefits:
 
 - The mutation can be serialized, and sent via network or saved to disk.
-- The mutation can be inspected for debugging and observability.
-- You can post-process the command list, such as sorting and filtering.
+- The mutation can be inspected for debugging and logging.
+- You can post-process the command list, such as sorting, filtering. If the data is sharded, the mutation command can dispatch to specific shard.
 - In distributed system, there is a log (command list) that's synchronized between nodes using a consensus protocol (like Raft). And the log is source-of-truth: the mutable state is completely derived from the log (and previous state checkpoints).
 - The idea of turning operations into data is also adopted by [io_uring](https://en.wikipedia.org/wiki/Io_uring) and modern graphics APIs (Vulkan, Metal, WebGPU).
 
@@ -215,9 +219,53 @@ fn main() {
 
 ## About circular reference
 
-### Circular reference use cases
+### Circular reference in mathematics
 
-Circular reference is common in some OOP code. Some common use cases:
+Some may argue that "Circular reference is a bad thing. Look how much trouble do circular references create in mathematics":
+
+- [Circular proof](https://en.wikipedia.org/wiki/Circular_reasoning): if A then B, if B then A. Circular proof is wrong. It can prove neither A nor B.
+- The set that indirectly includes itself cause [Russel's paradox](https://en.wikipedia.org/wiki/Russell%27s_paradox): Let R be the set of all sets that are not members of themselves. R contains R deduces R should not contain R, and vice versa. Set theory carefully avoids cirular reference.
+- [Halting problem](https://en.wikipedia.org/wiki/Halting_problem) is proved impossible to solve, by using circular reference:
+  
+  Assume there exists a function `halts(program, input)`, which takes in a `program` and `input` data, and outputs a boolean telling whether `program(input)` will eventually halt.
+  
+  Then construct a paradox program `paradox`: 
+
+```pseudocode
+fn paradox(program: Program) {
+    if halts(program, program) {
+        while true {} // dead loop
+    } else {
+        return; // halts
+    }
+}
+```
+
+  Then `halts(paradox, paradox)` will cause a paradox. If it returns true, then `paradox(paradox)` halts, but in `paradox`'s definition it should deadloop.
+
+- [Gödel's incomplete theorem](https://en.wikipedia.org/wiki/G%C3%B6del%27s_incompleteness_theorems). 
+  - Firstly encode symbols, statements and proofs into data [^godel_integer]. The statements that contain free variables (e.g. x is a free variable in "x is an even number") can also be encoded (it can represent "functions" and even "higher-order functions").
+  - There is a function `is_proof(theory, proof)` that determines whether a proof successfully proves a theory. 
+  - Then `provable(theory)` is defined as whether there exists a `proof` that satisfies `is_proof(theory, proof)`.
+  - Negating its result tests whether a theory is unprovable: `unprovable(theory) = ¬provable(theory)`
+  - Let `H(x) = unprovable(x(x))` [^godel_substitution]. `H` itself is also encoded as data, so we can construct `G = H(H) = unprovable(H(H)) = unprovable(G)`, which creates a self-referencial statement: `G`  means `G` is not provable. If `G` is true, then `G` is not provable. If `G` is false, then `G` is provable, which is a paradox.
+
+[^godel_integer]: Specifically, Gödel encodes symbols, statements and proofs into integer, called Gödel number. There exists many ways of encoding symbols/statements/proofs as data, and which exact way is not important. For simplicity, I will treat them all as data, and ignore the conversion between data and symbol/statements/proofs.
+
+[^godel_substitution]: Here `x(x)` is symbol substitution. `substitute(formula, variable, replacement)` finds all `variable` in `formula` and replace them as `replacement`. `x(x)` is `substitute(x, 'x', x)`. The validity of `x(x)` involves existence of fixed point. The original theorem is very complex and this article just describes a simplified version.
+
+There is something in common between Halting problem, Russel's paradox and Gödel's incomplete theorem: they all self-reference and "negate" itself, causing paradox.
+
+### Circular reference in programming
+
+Circular reference being bad in mathematics does NOT mean they are also bad in programming. The circular reference in math theories are different to circular reference in data. There are many valid cases of circular references in programming (e.g. there are doublely-linked list running in Linux kernel and still works fine).
+
+But circular reference do add risks to memory management:
+
+- In C/C++, circular reference need to be carefully handled to avoid use-after-free.
+- In GC languages, circular reference has memory leak risk. If a child references parent, and parent references child, then referencing any child will keep the whole structure alive.
+
+Here are some common use cases of circular reference:
 
 - Case 1: The parent references a child. The child references its parent, just for convenience. (Referencing to parent is not necessary, parent can be passed by argument)
 - Case 2: In a variable-depth tree structure, the child references parent which carries important information (not just for convenience). Having a reference to a node gives a path from that node to root node. (Parent referencing is important, without it, you cannot get a path from a node to root just using one node reference).
@@ -232,54 +280,6 @@ That convenience in OOP languages will lead to troubles in Rust. It's recommende
 
 Note that due to previously mentioned contagious borrow issue, you cannot mutably borrow child and parent at the same time. The workaround is to **do a split borrow on parent and pass the individual components of parent**. The Rust code will have to pass more arguments and be more verbose than in other languages.
 
-
-### Circular reference is bad in mathematics
-
-Some may argue that "Circular reference is a bad thing. Look how much trouble do circular references create in mathematics":
-
-- [Circular proof](https://en.wikipedia.org/wiki/Circular_reasoning): if A then B, if B then A. Circular proof is wrong. It can prove neither A nor B.
-- The set that indirectly includes itself cause [Russel's paradox](https://en.wikipedia.org/wiki/Russell%27s_paradox): Let R be the set of all sets that are not members of themselves. R contains R deduces R should not contain R, and vice versa. Set theory carefully avoids cirular reference.
-- [Halting problem](https://en.wikipedia.org/wiki/Halting_problem) is proved impossible to solve, by using circular reference:
-  
-  Assume there exists a function `halts(program, input)`, which takes in a `program` and `input` data, and outputs a boolean telling whether the argument `program` will eventually halt given `input`.
-  
-  Then construct a paradox program `paradox`: 
-
-```
-fn paradox(program: Program) {
-    if (halts(program, program)) {
-        while (true) {} // dead loop
-    } else {
-        return; // halts
-    }
-}
-```
-
-  Then `halts(paradox, paradox)` will cause a paradox. If it returns true, then `paradox(paradox)` halts, but in `paradox`'s definition it should deadloop.
-
-- [Gödel's incomplete theorem](https://en.wikipedia.org/wiki/G%C3%B6del%27s_incompleteness_theorems). 
-  - Firstly encode symbols, statements and proofs into data [^godel_integer]. The statements that contain free variables (e.g. x is a free variable in "x is an even number") can also be encoded (it can represent "functions" and even "higher-order functions").
-  - There is a function `is_proof(theory, proof)` that determines whether a proof successfully proves a theory. 
-  - Then `provable(theory)` is defined as whether there exists a `proof` that satisfies `is_proof(theory, proof)`.
-  - Negating its result tests whether a theory is unprovable: `unprovable(theory) = !provable(theory)`
-  - Let `G(x) = unprovable(x(x))` [^godel_substitution]. `G` itself is also encoded as data, so we can construct `G(G)` [^godel_pass_itself], which creates a self-referencial statement: `G`  means `G` is not provable. If `G` is provable, then `G` is not provable, which is a paradox.
-
-[^godel_integer]: Specifically, Gödel encodes symbols, statements and proofs into integer. There exists many different ways of encoding things into data.
-
-[^godel_substitution]: Specifically, the "function calling" `x(x)` is symbol substitution. `substitute(formula, variable, replacement)` finds all `variable` in `formula` and replace them as `replacement`. `x(x)` is `substitute(x, 'x', x)`. 
-
-[^godel_pass_itself]: There involves complex theories explaining why passing `G` to itself is allowed. The explanation in this article is just a simplified version.
-
-There is something in common between Halting problem, Russel's paradox and Gödel's incomplete theorem: they all self-reference and "negate" itself, causing paradox.
-
-### Circular reference in programming
-
-Circular reference being bad in mathematics does NOT mean they are also bad in programming. The circular reference in math theories are different to circular reference in data. There are many valid cases of circular references in programming (e.g. there are doublely-linked list running in Linux kernel and still works fine).
-
-But circular reference do add risks to memory management. 
-
-- In C/C++, circular reference need to be carefully handled to avoid use-after-free.
-- In GC languages, if a child references parent, and parent references child, then referencing any child will keep the whole structure alive, which has memory leak risk.
 
 ## Use handle/ID to replace reference
 
