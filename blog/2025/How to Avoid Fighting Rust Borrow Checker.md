@@ -1,0 +1,354 @@
+
+# How to Avoid Fighting Rust Borrow Checker
+
+It's unproductive to fight with Rust borrow checker, by changing some code, try to compile, then change other code, try to compile, and so on. Rust developers should clearly knowing what things are not allowed by borrow checker, or hard to do under borrow checker in advance.
+
+The 3 important facts in Rust:
+
+- **Tree-shaped ownership**. In Rust's ownership system, one object can own many children or no chlld, but must be owned by **exactly one parent**. Ownership relations form a tree. [^about_sharing]
+- **Mutable borrow exclusiveness**. If there exists one mutable borrow for an object, then no other reference to that object can exist. Mutable borrow is exclusive.
+- **Borrow is contagious**. If you borrow a child, you indirectly borrow the parent (and parent's parent, and so on) **if crossing function boundary**. Just borrowing one wheel of a car makes you borrow the whole car. Combined with previous point, it can cause troubles for mutable data, and can be solved using **split borrow** (that does not cross function boundary).
+
+[^about_sharing]: Reference counting (`Rc`, `Arc`) allows sharing, but they are not "native" Rust ownership. The implementation of `Rc` and `Arc` uses `unsafe`. 
+
+Rust applies **local** constraints. Here **local** means it doesn't analyze the whole application's code, and just analyze within individual scopes, using types to encode information. Outside of the current scope, all information that's not encoded into type are not considered.
+
+Unfortunately the constraints limit expressiveness of referencing[^limit_expressiveness]. Safe Rust will reject some safe programs.
+
+[^limit_expressiveness]: Safe Rust limits expressiveness related to referencing and memory layout. But safe Rust is still expressive enough to be Turing-complete.
+
+## Considering reference shape
+
+Firstly consider the reference [^about_reference] shape of your in-memory data.
+
+[^about_reference]: Note that here "reference" here means reference in general OOP context (where there is no distinction between ownership and non-owning reference, think about reference in Java/C#/JS/Python). This is different to the Rust reference. I will use "borrow" for Rust reference in this article.
+
+![](rust_reference_shape.drawio.png)
+
+- If the reference is tree-shaped, then it's simple and natural in Rust. 
+- If the reference shape has **sharing**, things become a little complicated.
+    - Sharing means there are two or more references to the same object.
+    - If shared object is immutable:
+        - If the sharing is scoped (only temporarily shared), then you can use immutable borrow. You may need lifetime annotation.
+        - If the sharing is not scoped (may share for a long time, not bounded within a scope), you need to use reference counting (`Rc` in singlethreaded case, `Arc` in possibly-multithreaded case)
+    - If shared object is mutable, then it's in **borrow-check-unfriendly case**. Solutions elaborated below.
+- If the reference shape has **cycle**, then it's also in **borrow-check-unfriendly case**. Solutions elaborated below.
+
+The most fighting with borrow checker happens in the **borrow-check-unfriendly cases**.
+
+## Summarize solutions
+
+The solutions in borrow-checker-unfriendly cases (will elaborate below):
+
+- Avoid contagious borrow.
+- Try to refactor reference structure.
+- Use ID/handle to replace reference.
+- Avoid mutation (pure-functional-style).
+- `Arc<QCell<T>>`
+- `Arc<RwLock<T>>`
+- Use unsafe and raw pointer.
+
+## Contagious borrow issue
+
+The previously mentioned two important facts:
+
+- **Mutable borrow exclusiveness**. If you mutable borrow it, others cannot borrow it.
+- **Borrow is contagious**. Just borrowing one wheel of a car makes you borrow the whole car, if the borrow crosses function boundary. (unless using split borrow that works within one scope)
+
+A simple example: [^about_code_example]
+
+```rust
+pub struct Parent {  
+    total_score: u32,  
+    children: Vec<Child>  
+}
+pub struct Child {  
+    score: u32  
+}
+
+impl Parent {  
+    fn get_children(&self) -> &Vec<Child> {  
+        &self.children  
+    }  
+  
+    fn add_score(&mut self, score: u32) {  
+        self.total_score += score;  
+    }  
+}
+
+fn main() {  
+    let mut parent = Parent{total_score: 0, children: vec![]};  
+  
+    for child in parent.get_children() {  
+        parent.add_score(child.score);  
+    }
+}
+```
+
+[^about_code_example]: This simplified code example is just for illustrating contagious borrow issue. Ignore issues like children vec is empty, total score doesn't need to be a field, etc.
+
+Compile error:
+
+```
+25 |     for child in parent.get_children() {
+   |                  ---------------------
+   |                  |
+   |                  immutable borrow occurs here
+   |                  immutable borrow later used here
+26 |         parent.add_score(child.score);
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ mutable borrow occurs here
+```
+
+This code is totally memory-safe: the `.add_score()` only touch the `total_score` field, and `.get_children()` only touch the `children` field. They work on separate data, they still clashes, because of **contagious borrow**:
+
+- In `fn get_children(&self) -> &Vec<Child> { &self.children }`, although the method body just borrows `children` field, the returned reference indirectly borrows the whole `self`.
+- `parent.get_children()` immutably borrows `parent`. It borrows the whole `parent`, not just a field in `parent`. The borrow checker works **locally** (just checked function signature) and doesn't check the body of `get_children`.
+- The for loop indirectly borrows the result of `parent.get_children()` which indirectly borrows `parent`.
+- In `fn add_score(&mut self, score: u32) { self.total_score += score; }`, the function body only mutably borrowed `total_score` field, but the argument `&mut self` borrows the whole `Parent`, not just one field.
+
+The core problem is that you just want to borrow one field, but forced to borrow the whole object. And due to mutable borrow exclusiveness, this doesn't compile. (It often works fine in immutable case, because immutable borrows can co-exist.)
+
+What if I just inline `get_children` and `add_score`? Then it compiles fine:
+
+```rust
+pub struct Parent {  
+    total_score: u32,  
+    children: Vec<Child>  
+}
+pub struct Child {  
+    score: u32  
+}
+fn main() {  
+    let mut parent = Parent{total_score: 0, children: vec![]};  
+  
+    for child in &parent.children {  
+        let score = child.score;  
+        parent.total_score += score;  
+    }  
+}
+```
+
+Why that compiles? Because it does a **split borrow**: the compiler sees borrowing of individual fields in `main()` function, and don't do contagious borrow.
+
+The deeper cause is that:
+
+- **Borrow checker works locally**: when seeing a function call, it **only checks function signature**, instead of checking code inside the function. (Its benefit is to make borrow checking faster and simpler. Doing whole-program analysis is hard and slow, and doesn't work with things like dynamic linking.)
+- **Information is lost in function signature**: the borrowing information becomes coarse-grained and is simplified in function signature. The type system does not allow expressing borrowing only one field, and can only express borrowing the whole object. [There are propsed solutions](https://smallcultfollowing.com/babysteps/blog/2025/02/25/view-types-redux/).
+
+The workarounds:
+
+- The contagious borrow issue is unfriendly to abstrations that work with references. So one solution is to **remove abstraction**, or **redesign abstraction to avoid contagious borrow issue** ([refactor at the most inconvenient times](https://loglog.games/blog/leaving-rust-gamedev/#once-you-get-good-at-rust-all-of-these-problems-will-go-away)).
+- Use ID/handle to replace reference.
+- Other workarounds like `Arc<QCell<>>` `Arc<RwLock<>>`, etc.
+- **Avoid mutation** or **defer mutation**:
+
+## Avoid mutation or defer mutation
+
+The previous problem occurs partially due to mutable borrow exclusiveness. If all borrows are immutable, then contagious borrow is usually not a problem.
+
+The common way of avoiding mutation is **mutate-by-recreate**: All data is immutable. When you want to mutate something, you create a new version of it. Just like in pure functional language (e.g. Haskell).
+
+Unfortunately, **mutate-by-recreate is also contagious**: if you recreated a new version of a child, you need to also recreate a new version of parent that holds the new child, and parent's parent, and so on. In functional languages there are abstractions like [lens](https://hackage.haskell.org/package/lens) to make this kind of cascade-recreate simpler.
+
+Mutate-by-recreate can be useful for cases like:
+
+- Safely sharing data in multithreading (Read-copy-update, RCU)
+- Take snapshot and rollback efficiently
+
+Another solution is to **treat mutation as data**. When you want to mutate something, you **append a mutation command into command queue** (the command can also be called "event" or "log"). Then execute the mutation commands at once. 
+
+- In the process of creating new commands, it only do immutable borrow to base data, and only one mutable borrow to the command queue. 
+- When executing the commands, it only do one mutable borrow to base data at a time.
+
+What if I want to read the latest state before execute the commands in queue? Then you need to inspect both the command queue and base data to get latest state (LSM tree does similar things).
+
+Treating mutation as data also has other benefits:
+
+- The mutation can be serialized, and sent via network or saved to disk.
+- The mutation can be inspected for debugging and observability.
+- You can post-process the command list, such as sorting and filtering.
+- In distributed system, there is a log (command list) that's synchronized between nodes using a consensus protocol (like Raft). And the log is source-of-truth: the mutable state is completely derived from the log (and previous state checkpoints).
+- The idea of turning operations into data is also adopted by [io_uring](https://en.wikipedia.org/wiki/Io_uring) and modern graphics APIs (Vulkan, Metal, WebGPU).
+
+The previous code rewritten using deferred mutation:
+
+```rust
+pub struct Parent {  
+    total_score: u32,  
+    children: Vec<Child>  
+}  
+pub struct Child {  
+    score: u32  
+}  
+pub enum Command {  
+    AddTotalScore(u32),  
+    // can add more kinds of commands  
+}  
+  
+impl Parent {  
+    fn get_children(&self) -> &Vec<Child> {  
+        &self.children  
+    }  
+  
+    fn add_score(&mut self, score: u32) {  
+        self.total_score += score;  
+    }  
+}  
+  
+fn main() {  
+    let mut parent = Parent{total_score: 0, children: vec![]};  
+    let mut commands: Vec<Command> = Vec::new();  
+  
+    for child in parent.get_children() {  
+        commands.push(Command::AddTotalScore(child.score));  
+    }  
+  
+    for command in commands {  
+        match command {  
+            Command::AddTotalScore(num) => {  
+                parent.add_score(num);  
+            }  
+        };  
+    }  
+}
+```
+
+## About circular reference
+
+### Circular reference use cases
+
+Circular reference is common in some OOP code. Some common use cases:
+
+- Case 1: The parent references a child. The child references its parent, just for convenience. (Referencing to parent is not necessary, parent can be passed by argument)
+- Case 2: In a variable-depth tree structure, the child references parent which carries important information (not just for convenience). Having a reference to a node gives a path from that node to root node. (Parent referencing is important, without it, you cannot get a path from a node to root just using one node reference).
+- Case 3: The parent registers a callback to child. When something happened on child, the callback is called, and parent do something. It that case, parent references child, child references callback, callback references parent (e.g. lambda capture).
+- Case 4: The data is inherently a graph structure that can contain cycles.
+
+### Avoid "just-for-convenience" circular reference in Rust
+
+In the case 1 above: The child references parent, just for convenience. In OOP code. If you just have a reference to a child object, and you want to use some data in parent, child referencing parent would be convenient. Without it, the parent also need to be passed as argument. 
+
+That convenience in OOP languages will lead to troubles in Rust. It's recommended to pass extra arguments instead of having circular reference.
+
+Note that due to previously mentioned contagious borrow issue, you cannot mutably borrow child and parent at the same time. The workaround is to **do a split borrow on parent and pass the individual components of parent**. The Rust code will have to pass more arguments and be more verbose than in other languages.
+
+
+### Circular reference is bad in mathematics
+
+Some may argue that "Circular reference is a bad thing. Look how much trouble do circular references create in mathematics":
+
+- [Circular proof](https://en.wikipedia.org/wiki/Circular_reasoning): if A then B, if B then A. Circular proof is wrong. It can prove neither A nor B.
+- The set that indirectly includes itself cause [Russel's paradox](https://en.wikipedia.org/wiki/Russell%27s_paradox): Let R be the set of all sets that are not members of themselves. R contains R deduces R should not contain R, and vice versa. Set theory carefully avoids cirular reference.
+- [Halting problem](https://en.wikipedia.org/wiki/Halting_problem) is proved impossible to solve, by using circular reference:
+  
+  Assume there exists a function `halts(program, input)`, which takes in a `program` and `input` data, and outputs a boolean telling whether the argument `program` will eventually halt given `input`.
+  
+  Then construct a paradox program `paradox`: 
+
+```
+fn paradox(program: Program) {
+    if (halts(program, program)) {
+        while (true) {} // dead loop
+    } else {
+        return; // halts
+    }
+}
+```
+
+  Then `halts(paradox, paradox)` will cause a paradox. If it returns true, then `paradox(paradox)` halts, but in `paradox`'s definition it should deadloop.
+
+- [Gödel's incomplete theorem](https://en.wikipedia.org/wiki/G%C3%B6del%27s_incompleteness_theorems). 
+  - Firstly encode symbols, statements and proofs into data [^godel_integer]. The statements that contain free variables (e.g. x is a free variable in "x is an even number") can also be encoded (it can represent "functions" and even "higher-order functions").
+  - There is a function `is_proof(theory, proof)` that determines whether a proof successfully proves a theory. 
+  - Then `provable(theory)` is defined as whether there exists a `proof` that satisfies `is_proof(theory, proof)`.
+  - Negating its result tests whether a theory is unprovable: `unprovable(theory) = !provable(theory)`
+  - Let `G(x) = unprovable(x(x))` [^godel_substitution]. `G` itself is also encoded as data, so we can construct `G(G)` [^godel_pass_itself], which creates a self-referencial statement: `G`  means `G` is not provable. If `G` is provable, then `G` is not provable, which is a paradox.
+
+[^godel_integer]: Specifically, Gödel encodes symbols, statements and proofs into integer. There exists many different ways of encoding things into data.
+
+[^godel_substitution]: Specifically, the "function calling" `x(x)` is symbol substitution. `substitute(formula, variable, replacement)` finds all `variable` in `formula` and replace them as `replacement`. `x(x)` is `substitute(x, 'x', x)`. 
+
+[^godel_pass_itself]: There involves complex theories explaining why passing `G` to itself is allowed. The explanation in this article is just a simplified version.
+
+There is something in common between Halting problem, Russel's paradox and Gödel's incomplete theorem: they all self-reference and "negate" itself, causing paradox.
+
+### Circular reference in programming
+
+Circular reference being bad in mathematics does NOT mean they are also bad in programming. The circular reference in math theories are different to circular reference in data. There are many valid cases of circular references in programming (e.g. there are doublely-linked list running in Linux kernel and still works fine).
+
+But circular reference do add risks to memory management. 
+
+- In C/C++, circular reference need to be carefully handled to avoid use-after-free.
+- In GC languages, if a child references parent, and parent references child, then referencing any child will keep the whole structure alive, which has memory leak risk.
+
+## Use handle/ID to replace reference
+
+
+---
+
+
+How to solve the problem?
+
+- Use ID to replace reference.
+  - Arena [slotmap](https://docs.rs/slotmap/latest/slotmap/). Slotmap is an array where each element also has a version. The key to element is index + version. If index is same but version is not same, it will not match.
+  - Hash map, tree map, etc.
+- Use `Arc<QCell<>>` `Weak<QCell<>>`. [qcell - Rust](https://docs.rs/qcell/latest/qcell/). QCell has an internal ID. QCellOwner is also an ID. You can only use QCell via QCellOwner. Using it require passing reference to QCellOwner everywhere.
+  
+  [GPUI](https://zed.dev/blog/gpui-ownership)'s `Model<T>` is similar to `Rc<QCell<T>>`, where GPUI's `AppContext` correspond to `QCellOwner`.
+- Use `Arc<Rwlock<>>`. Note that locking can have overhead, also deadlock risk.
+- Simply clone the data.
+- Use `unsafe`. Generally not recommended unless really necessary.
+
+## Avoid child referencing parent
+
+A common practice in OOP is that **parent references child, child references parent**. This can be convenient: sometimes you only have a reference to child, and you can use parent's data. But in Rust, this kind of circular reference is hard and unnatural (requires things like `Arc<Mutex<>>` or `unsafe`).
+
+One solution is that parent owns child, child doesn't reference parent, and parent data is passed as argument when working with child.
+
+## Circular reference from callback
+
+If parent component owns child component, but child component has a **callback**: when something happened in child, the callback is called to do something to parent.
+
+This kind of callback creates circular reference: parent references child, child references callback, callback references parent.
+
+## Split borrow
+
+Borrow is contagious. If you borrow one field, then the parent object is also indirectly borrowed.
+
+[View types redux and abstract fields · baby steps](https://smallcultfollowing.com/babysteps/blog/2025/02/25/view-types-redux/)
+
+Solution: pass references of individual components of an object, instead of passing a reference of whole object. this will of course make code more verbose and less clear. e.g. in OOP code passing one reference is fine, but in Rust you need to pass the 5 arguments corresponding to 5 components of the object.
+
+## Self-reference
+
+Using self reference usually require `Pin` and `unsafe`.
+
+workaround: store id/index instead of interior pointer.
+
+## A current borrow checker issue
+
+[Polonius update | Inside Rust Blog](https://blog.rust-lang.org/inside-rust/2023/10/06/polonius-update/)
+
+## Question the constraints
+
+> _Mutation xor sharing_ is, in some sense, neither necessary nor sufficient. It’s not _necessary_ because there are many programs (like every program written in Java) that share data like crazy and yet still work fine. It’s also not _sufficient_ in that there are many problems that demand some amount of sharing – which is why Rust has “backdoors” like `Arc<Mutex<T>>`, `AtomicU32`, and—the ultimate backdoor of them all—`unsafe`.
+> 
+> https://smallcultfollowing.com/babysteps/blog/2024/06/02/the-borrow-checker-within/
+
+
+## Delayed mutation
+
+Instead of directly mutate things, just create new "mutation commands" into a queue, then run these mutation commands later. It's more friendly to borrow checker. It also has benefits apart from that:
+
+- C
+
+## Rust lock is non-reentrant
+
+
+
+## Tokio require future to be `Send + Sync + 'static`
+
+The lifetime `'static`'s name is unintuitive. In C, `static` can create global-variable-within-function. In OOP languages like CC++, Java, C#, `static` means global variable.
+
+In Rust, `'static` inlcudes reference to global variable. But `'static` also includes the non-reference types that itself has ownership.
+
