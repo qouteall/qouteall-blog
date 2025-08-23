@@ -666,7 +666,6 @@ When an event has occured frequently, people tend to believe that it will occur 
 Examples:
 
 - When tossing coin, if head appear frequently, people tend to think tail will appear frequently. (If the coin is fair and tosses are statistically independent, this is false. If the coin is biased, it's also false.)
-- When 3 girls were consecutively born by one pair of parents, people think more boys will likely to be born by the same parents.
 - When a stock goes down for a long time, people tend to think it will be more likely to rise.
 
 One related topic is the **law of large numbers**: if there are enough samples of a random event, the average of the results will converge. The law of large numbers focus on the total average, and does not consider exact order. 
