@@ -137,9 +137,12 @@ The deeper cause is that:
 - **Borrow checker works locally**: when seeing a function call, it **only checks function signature**, instead of checking code inside the function. (Its benefit is to make borrow checking faster and simpler. Doing whole-program analysis is hard and slow, and doesn't work with things like dynamic linking.)
 - **Information is lost in function signature**: the borrowing information becomes coarse-grained and is simplified in function signature. The type system does not allow expressing borrowing only one field, and can only express borrowing the whole object. [There are propsed solutions](https://smallcultfollowing.com/babysteps/blog/2025/02/25/view-types-redux/).
 
-The workarounds:
+The solutions:
 
-- The contagious borrow issue is unfriendly to abstrations that work with references. So one solution is to **remove abstraction**. Another solution is to **redesign abstraction to avoid contagious borrow issue** ([refactor at the most inconvenient times](https://loglog.games/blog/leaving-rust-gamedev/#once-you-get-good-at-rust-all-of-these-problems-will-go-away)).
+- **Avoid OOP-style getter and setter** (just make fields public), unless really necessary.
+  - For getter, if the getter returns reference which cause contagious borrow. The getter that returns cloned/copied value is fine. For immutable data, getter returning reference is also usually fine.
+  - For setter, it must pass `&mut self` which cause contagious borrow.
+  - **Data-oriented** design (DOD).
 - Use ID/handle to replace reference.
 - Other workarounds like `Arc<QCell<>>` `Arc<RwLock<>>`, etc.
 - **Avoid mutation** or **defer mutation**:
@@ -301,25 +304,8 @@ How to solve the problem?
 - Simply clone the data.
 - Use `unsafe`. Generally not recommended unless really necessary.
 
-## Avoid child referencing parent
 
-A common practice in OOP is that **parent references child, child references parent**. This can be convenient: sometimes you only have a reference to child, and you can use parent's data. But in Rust, this kind of circular reference is hard and unnatural (requires things like `Arc<Mutex<>>` or `unsafe`).
 
-One solution is that parent owns child, child doesn't reference parent, and parent data is passed as argument when working with child.
-
-## Circular reference from callback
-
-If parent component owns child component, but child component has a **callback**: when something happened in child, the callback is called to do something to parent.
-
-This kind of callback creates circular reference: parent references child, child references callback, callback references parent.
-
-## Split borrow
-
-Borrow is contagious. If you borrow one field, then the parent object is also indirectly borrowed.
-
-[View types redux and abstract fields · baby steps](https://smallcultfollowing.com/babysteps/blog/2025/02/25/view-types-redux/)
-
-Solution: pass references of individual components of an object, instead of passing a reference of whole object. this will of course make code more verbose and less clear. e.g. in OOP code passing one reference is fine, but in Rust you need to pass the 5 arguments corresponding to 5 components of the object.
 
 ## Self-reference
 
@@ -338,11 +324,6 @@ workaround: store id/index instead of interior pointer.
 > https://smallcultfollowing.com/babysteps/blog/2024/06/02/the-borrow-checker-within/
 
 
-## Delayed mutation
-
-Instead of directly mutate things, just create new "mutation commands" into a queue, then run these mutation commands later. It's more friendly to borrow checker. It also has benefits apart from that:
-
-- C
 
 ## Rust lock is non-reentrant
 
