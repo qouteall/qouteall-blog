@@ -310,6 +310,56 @@ Solutions:
 
 ## Use handle/ID to replace reference
 
+Data-oriented design:
+
+- Try to pack data into contagious array, (instead of objects laid out sparsely managed by allocator).
+- Use handle (e.g. array index) or ID to replace reference.
+- The different fields of the same object doesn't necessarily need to be together in memory. The one field of many objects can be put together (parallel array).
+- Manage memory based on **arenas**.
+
+One kind of arena is [slotmap](https://docs.rs/slotmap/latest/slotmap/):
+
+- Slotmap is basically an array of elements, but each element has a version integer. 
+- Each handle (key) has an index and a version. 
+- When accessing the slotmap, it firstly does a bound check, then checks version. 
+- After removing element, the version increments. The previous handle cannot get the new element at the same index, because of version mismatch.
+- The handle (key) are just `Copy`-able data that's not restricted by borrow checker.
+- Although memory safe, it still has the equivalent of "use-after-free": using a handle of an already-removed object cannot get element from the slotmap [^slotmap_uniqueness]. Each get element operation may fail.
+
+[^slotmap_uniqueness]: Each slotmap ensures key uniqueness, but if you mix keys of different slotmaps, the different keys of different slotmap may duplicate in value. Using the wrong key may successfully get an element but logically wrong.
+
+Other map structure, like `HashMap` or `TreeMap` can also be arenas. If no element can be removed from arena, then a `Vec` can also be an areana.
+
+One important fact: when we use ID/handle to replace reference, the borrow checker no longer ensure that the ID/handle will point to a living object.
+
+### Generalized reference and two reference semantics
+
+The concept of **generalized reference**:
+
+- The reference in GC languages is generalized reference.
+- Borrowing in Rust is generalized reference.
+- Ownership in Rust is also considered as generalized reference.
+- Smart pointer (`Rc`, `Arc`, `Weak`, `Box` in Rust, `shared_ptr`, `weak_ptr`, `unique_ptr` in C++, etc.) are generalized reference.
+- **ID**s are generalized reference. (It includes all kinds of IDs, including **handles**, UUID, string id, integer id, primary key, URL, and all kinds of identification information).
+
+The generalized reference is separated into two kinds: strong and weak:
+
+- Strong generalized reference: The system **ensures it always points to a living object**. 
+  
+  It contains: normal references in GC languages (when not null), Rust borrow and ownership, strong reference counting (`Rc`, `Arc`, `shared_ptr` when not null), and **ID in database with foreign key constraint**.
+- Weak generalized reference: The system **does NOT ensure it points to a living object**.
+  
+  It contains: ID (no foreign key constraint), handles, weak reference in GC languages, weak reference counting (`Weak`, `weak_ptr`).
+
+The major differences:
+
+- For weak generalized references, **every data access may fail, and requires error handling**.
+- For strong generalized reference, the **lifetime of referenced object is tightly coupled with the existence of reference**:
+  - In Rust, the coupling comes from borrow checker. The borrow is limited by lifetime and other constraints.
+  - In GC langauges, the coupling comes from GC. The existence of a strong reference keeps the object alive. Note that in GC languages there are **live-but-unusable objects** (like a `File` already closed in Java).
+  - In reference counting, the coupling of course comes from runtime reference counting.
+- For weak generalized reference, the **lifetime of object is decoupled from referces to it**.
+
 
 
 ## Interior mutability: `RefCell`, locks, `QCell`
@@ -320,11 +370,6 @@ Solutions:
 ---
 
 
-How to solve the problem?
-
-- Use ID to replace reference.
-  - Arena [slotmap](https://docs.rs/slotmap/latest/slotmap/). Slotmap is an array where each element also has a version. The key to element is index + version. If index is same but version is not same, it will not match.
-  - Hash map, tree map, etc.
 - Use `Arc<QCell<>>` `Weak<QCell<>>`. [qcell - Rust](https://docs.rs/qcell/latest/qcell/). QCell has an internal ID. QCellOwner is also an ID. You can only use QCell via QCellOwner. Using it require passing reference to QCellOwner everywhere.
   
   [GPUI](https://zed.dev/blog/gpui-ownership)'s `Model<T>` is similar to `Rc<QCell<T>>`, where GPUI's `AppContext` correspond to `QCellOwner`.
