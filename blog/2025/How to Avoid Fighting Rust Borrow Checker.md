@@ -43,7 +43,7 @@ The most fighting with borrow checker happens in the **borrow-check-unfriendly c
 The solutions in borrow-checker-unfriendly cases (will elaborate below):
 
 - Avoid contagious borrow.
-- Try to refactor reference structure.
+- Try to refactor reference structure. Use data-oriented design instead of OOP design.
 - Use ID/handle to replace reference.
 - Avoid mutation (pure-functional-style).
 - `Arc<QCell<T>>`
@@ -162,7 +162,7 @@ Mutate-by-recreate can be useful for cases like:
 
 Mutate-by-recreate can be optimized by sharing unchanged sub-structures. See also: [Persistent data structure](https://en.wikipedia.org/wiki/Persistent_data_structure), [Rope](https://en.wikipedia.org/wiki/Rope_(data_structure)).
 
-Another solution is to **treat mutation as data**. When you want to mutate something, you **append a mutation command into command queue** (the command can also be called "event" or "log"). Then execute the mutation commands at once. 
+Another solution is to **treat mutation as data**. When you want to mutate something, you **append a mutation command into command queue** (the command can also be called "event" or "log"). Then execute the mutation commands at once. (Note that command should not indirectly reference base data.)
 
 - In the process of creating new commands, it only do immutable borrow to base data, and only one mutable borrow to the command queue. 
 - When executing the commands, it only do one mutable borrow to base data at a time.
@@ -273,8 +273,8 @@ But circular reference do add risks to memory management:
 Here are some common use cases of circular reference:
 
 - Case 1: The parent references a child. The child references its parent, just for convenience. (Referencing to parent is not necessary, parent can be passed by argument)
-- Case 2: In a variable-depth tree structure, the child references parent which carries important information (not just for convenience). Having a reference to a node gives a path from that node to root node. (Parent referencing is important, without it, you cannot get a path from a node to root just using one node reference).
-- Case 3: The parent registers a callback to child. When something happened on child, the callback is called, and parent do something. It that case, parent references child, child references callback, callback references parent (e.g. lambda capture).
+- Case 2: The parent registers a callback to child. When something happened on child, the callback is called, and parent do something. It that case, parent references child, child references callback, callback references parent (e.g. lambda capture).
+- Case 3: In a tree structure, the child references parent allows getting the path from one node to root node. Without it, you cannot get the path from just one node reference, and need to store variable-length path information.
 - Case 4: The data is inherently a graph structure that can contain cycles.
 
 ### Avoid "just-for-convenience" circular reference in Rust
@@ -283,10 +283,38 @@ In the case 1 above: The child references parent, just for convenience. In OOP c
 
 That convenience in OOP languages will lead to troubles in Rust. It's recommended to pass extra arguments instead of having circular reference.
 
-Note that due to previously mentioned contagious borrow issue, you cannot mutably borrow child and parent at the same time. The workaround is to **do a split borrow on parent and pass the individual components of parent**. The Rust code will have to pass more arguments and be more verbose than in other languages.
+Note that due to previously mentioned contagious borrow issue, you cannot mutably borrow child and parent at the same time (except using interior mutability). The workaround is to 1. do a split borrow on parent and pass the individual components of parent (pass more arguments and be more verbose than in other languages) 2. use interior mutability (e.g. `RefCell`, `Mutex`, `QCell`).
 
+### The callback circular reference
+
+**Observer pattern** is commonly used in GUI and other dynamic reactive systems. When a parent owns a child, but parent want to be notified when some event happens on child, the parent register callback to child, and child calls callback when event happens.
+
+However, as the callback need to tell parent, the callback function object have to reference the parent. Then it creates circular reference: **parent references child, child references callback, callback references parent**, as mentioned previously in case 2.
+
+Solutions:
+
+- Use reference counting and interior mutability. The classical ones: `Rc<RefCell<T>>` (singlethreaded), `Arc<RwLock<T>>` (multithreaded). I also recommend using [`QCell`](https://docs.rs/qcell/latest/qcell/) (elaborated below): `Rc<QCell<T>>`, `Arc<QCell<T>>`.
+  
+  The back-reference (callback to parent, child to parent) should use `Weak` to avoid memory leak.
+- Use event bus to replace callbacks. Similar to the previous deferred mutation, we turn event into data. Each component listen to specific "event channel" or "event topic". When something happens, put the event into event bus, then event bus notifies components.
+- Use ID/handle to replace reference (elaborated later).
+
+### The circular reference that's inherent in data structure
+
+In the previously mentioned case 3 and case 4, circular reference is needed in data structure.
+
+Solutions:
+
+- Use reference counting and interior mutability (previously mentioned). This is **recommended when there are many different types of components and you want to add new types easily** (like in GUI).
+- Use ID/handle to replace reference (elaborated later). This is **recommended when you want more compact memory layout, and you rarely need to add new types into data** (suitable for data-intensive cases, can obtain better performance due to cache-friendliness).
 
 ## Use handle/ID to replace reference
+
+
+
+## Interior mutability: `RefCell`, locks, `QCell`
+
+
 
 
 ---
