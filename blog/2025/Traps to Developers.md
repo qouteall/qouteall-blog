@@ -233,6 +233,9 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
       - For time range exclusiveness case, use range type and exclude constraint.
 - Atomic reference counting (`Arc`, `shared_ptr`) can be slow when many threads frequently change the same counter. [See also](https://pkolaczk.github.io/server-slower-than-a-laptop/)
 - About read-write lock: trying to write lock when holding read lock can deadlock. The correct way is to firstly release the read lock, then acquire write lock, and the conditions that were checked in read lock need to be re-checked.
+- Reentrant lock:
+  - Reentrant means one thread can lock twice (and unlock twice) without deadlocking. Java's `synchronized` and `ReentrantLock` are reentrant.
+  - Non-reentrant means if one thread lock twice, it will deadlock. Rust `Mutex` and Golang `sync.Mutex` are not reentrant.
 
 ### Common in many languages
 

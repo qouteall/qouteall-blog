@@ -143,7 +143,7 @@ The solutions:
   - For getter, if the getter returns reference which cause contagious borrow. The getter that returns cloned/copied value is fine. For immutable data, getter returning reference is also usually fine.
   - For setter, it must pass `&mut self` which cause contagious borrow.
   - **Data-oriented** design (DOD).
-- Use ID/handle to replace reference.
+- Use ID/handle to replace reference. (Entity component system (ECS) is one solution.)
 - Other workarounds like `Arc<QCell<>>` `Arc<RwLock<>>`, etc.
 - **Avoid mutation** or **defer mutation**:
 
@@ -337,10 +337,11 @@ One important fact: when we use ID/handle to replace reference, the borrow check
 The concept of **generalized reference**:
 
 - The reference in GC languages is generalized reference.
+- Pointer is generalized reference.
 - Borrowing in Rust is generalized reference.
 - Ownership in Rust is also considered as generalized reference.
 - Smart pointer (`Rc`, `Arc`, `Weak`, `Box` in Rust, `shared_ptr`, `weak_ptr`, `unique_ptr` in C++, etc.) are generalized reference.
-- **ID**s are generalized reference. (It includes all kinds of IDs, including **handles**, UUID, string id, integer id, primary key, URL, and all kinds of identification information).
+- **ID**s are generalized reference. (It includes all kinds of IDs, including **handles**, UUID, string id (URL, file path, username, etc.), integer id, primary key, and all kinds of identification information).
 
 The generalized reference is separated into two kinds: strong and weak:
 
@@ -362,21 +363,198 @@ The major differences:
 
 
 
-## Interior mutability: `RefCell`, locks, `QCell`
+## Mutable borrow exclusiveness
 
+As previously mentioned, Rust has **mutable borrow exclusiveness**:
 
+- A mutable borrow to one object cannot co-exist with any other borrow to the same object. Two mutable borrows cannot co-exist. One mutable and one immutable also cannot co-exist.
+- Multiple immutable borrows for one object can co-exist.
 
+That is also called "mutation xor sharing", as mutation and sharing cannot co-exist.
 
----
+In multi-threading case, this is natural: multiple threads read the same immutable data is fine. As long as one thread mutates the data, other thread cannot safely read or write it without other synchronization (atomics, locks, etc.).
 
+But in single-threaded case, this restriction is not natural at all. No mainstream language (other than Rust) has this restriction.
 
-- Use `Arc<QCell<>>` `Weak<QCell<>>`. [qcell - Rust](https://docs.rs/qcell/latest/qcell/). QCell has an internal ID. QCellOwner is also an ID. You can only use QCell via QCellOwner. Using it require passing reference to QCellOwner everywhere.
+> _Mutation xor sharing_ is, in some sense, neither necessary nor sufficient. It’s not _necessary_ because there are many programs (like every program written in Java) that share data like crazy and yet still work fine. It’s also not _sufficient_ in that there are many problems that demand some amount of sharing – which is why Rust has “backdoors” like `Arc<Mutex<T>>`, `AtomicU32`, and—the ultimate backdoor of them all—`unsafe`.
+> 
+> https://smallcultfollowing.com/babysteps/blog/2024/06/02/the-borrow-checker-within/
+
+In Rust, mutable borrow exclusiveness is still useful in single-threaded case, for safety of **interior pointer**.
+
+### Interior pointer
+
+Interior pointer are the pointers that point into data inside another object. 
+
+For example, you can take pointer of an element in `Vec`. If the `Vec` grows, it may allocate new memory and copy existing data to new memory, thus the interior pointer to it can become invalid. Mutable borrow exclusiveness can prevent this issue from happening:
+
+```rust
+fn main() {  
+    let mut vec: Vec<u32> = vec!(1, 2, 3);  
+    let interior_pointer: &u32 = &vec[0];  
+    vec.push(4);  
+    print!("{}", *interior_pointer);  
+}
+```
+
+Compile error:
+
+```
+3 |     let interior_pointer: &u32 = &vec[0];
+  |                                   --- immutable borrow occurs here
+4 |     vec.push(4);
+  |     ^^^^^^^^^^^ mutable borrow occurs here
+5 |     print!("{}", *interior_pointer);
+  |                  ----------------- immutable borrow later used here
+```
+
+Another example is about `enum`: interior pointer pointing inside `enum` can also be invalidated, because different enum variants has different memory layout:
+
+```rust
+enum DifferentMemoryLayout {  
+    A(u64, u64),  
+    B(String)  
+}  
   
-  [GPUI](https://zed.dev/blog/gpui-ownership)'s `Model<T>` is similar to `Rc<QCell<T>>`, where GPUI's `AppContext` correspond to `QCellOwner`.
-- Use `Arc<Rwlock<>>`. Note that locking can have overhead, also deadlock risk.
-- Simply clone the data.
-- Use `unsafe`. Generally not recommended unless really necessary.
+fn main() {  
+    let mut v: DifferentMemoryLayout = DifferentMemoryLayout::A(1, 2);  
+    let interior_pointer: &u64 = match v {  
+        DifferentMemoryLayout::A(ref a, ref b) => {a}  
+        DifferentMemoryLayout::B(_) => { panic!() }  
+    };  
+    v = DifferentMemoryLayout::B("hello".to_string());  
+    println!("{}", *interior_pointer);  
+}
+```
 
+Compile error:
+
+```
+9  |         DifferentMemoryLayout::A(ref a, ref b) => {a}
+   |                                  ----- `v` is borrowed here
+...
+12 |     v = DifferentMemoryLayout::B("hello".to_string());
+   |     ^ `v` is assigned to here but it was already borrowed
+13 |     println!("{}", *interior_pointer);
+   |                    ----------------- borrow later used here
+```
+
+Because that a mutation can invalidate the memory layout that interior pointer depends on, mutable borrow exclusiveness is still important for memory safety in single-threaded case.
+
+### Interior pointer in other languages
+
+Note that Golang also supports interior pointer, but doesn't have such restriction. For example, interior pointer into slice:
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	slice := []int{1, 2, 3}
+	interiorPointer := &slice[0]
+	slice = append(slice, 4)
+	fmt.Printf("%v\n", *interiorPointer)
+	fmt.Printf("old interior pointer: %p  new interior pointer: %p\n", interiorPointer, &slice[0])
+}
+```
+
+Output
+
+```
+1
+old interior pointer: 0xc0000ac000  new interior pointer: 0xc0000ae000
+```
+
+Because after re-allocating the slice, the old slice still exists in memory. If there is an interior pointer into the old slice, the old slice won't be freed by GC.
+
+Golang also doesn't have sum type, so there is no equivalent to enum memory layout change in the previous example.
+
+Also, Golang's doesn't allow taking interior pointer to map element value, but Rust allows.
+
+In Java, there is no interior pointer. But there is one thing logically similar to interior pointer: `Iterator`. Mutating a container can cause iterator invalidation:
+
+```java
+public class Main {  
+    public static void main(String[] args) {  
+        List<Integer> list = new ArrayList<>();  
+        list.add(1);  
+  
+        Iterator<Integer> iterator = list.iterator();  
+        while (iterator.hasNext()) {  
+            Integer value = iterator.next();  
+            if (value < 3) {  
+                list.remove(0);  
+            }  
+        }  
+    }  
+}
+```
+
+That will get `java.util.ConcurrentModificationException`. Java's `ArrayList` has an internal version counter that's incremented every time it changes. The iterator code checks concurrent modification using version counter. (Even without the version check, it will still be memory-safe because array access is range-checked.)
+
+### Interior mutability
+
+As previously mentioned, mutable borrow exclusiveness is still important in single-threaded case, because of interior pointer.
+
+**But if we don't use any interior pointer, and code is single-threaded, then mutable borrow exclusiveness is simply not needed at all**.
+
+That's why mainstream languages has no mutable borrow exclusiveness, and still works fine in single-threaded case. Java, JS and Python has no interior pointer. Golang and C# have interior pointer, they have GC and restrict interior pointer, so memory safe is still kept without mutable borrow exclusiveness.
+
+The benefit of interior pointer is to allow tight memory layout, without having to do extra heap allocation just to get a reference some inner data.
+
+Because that mutable borrow exclusiveness is overly restrictive, there is **interior mutability** that allows getting rid of that constraint.
+
+Interior mutability allows you to mutate something from an immutable reference to it. (Because of that, immutable reference doesn't necessarily mean the referenced data is actually immutable. This can cause some confusion.)
+
+Ways of interior mutability:
+
+- `Cell<T>`, for simple copy-able types like integer.
+- `RefCell<T>`, for single-threaded case.
+  
+  It has internal counters tracking how many immutable borrow and mutable borrow currently exist. If it detects violation of mutable borrow exclusiveness, `.borrow()` or `.borrow_mut()` will panic.
+  
+  It can cause crash if there is nested borrow that involves mutation. [See also](https://loglog.games/blog/leaving-rust-gamedev/#dynamic-borrow-checking-causes-unexpected-crashes-after-refactorings)
+- `Mutex<T>` `RwLock<T>`, for locking in multi-threaded case. Note that unnecessary locking can cost performance, and has risk of deadlock. It's not recommended to overuse `Arc<Mutex<T>>` just because it can satisfy the borrow checker.
+- [`QCell<T>`](https://docs.rs/qcell/latest/qcell/). This is special. `QCell` has an internal ID. `QCellOwner` is also an ID. You can only use `QCell` via `QCellOwner`. The borrowing to `QCellOwner` ensures mutable borrow exclusiveness. Using it require passing reference of `QCellOwner` in argument everywhere.
+  
+   [GPUI](https://zed.dev/blog/gpui-ownership)'s `Model<T>` is similar to `Rc<QCell<T>>`, where GPUI's `AppContext` correspond to `QCellOwner`.
+   
+   QCell will fail to borrow if the owner ID doesn't mismatch. Different to `RefCell`, if owner ID matches, it won't panic just because nested borrow.
+   
+   It can also work in multithreading, by having `RwLock<QCellOwner>`. This can allow one lock to protect many pieces of data in different places [^lock_granularity].
+   
+   [Ghost cell](https://docs.rs/ghost-cell/latest/ghost_cell/) is similar to QCell, but zero-cost, and more restrictive (use closure lifetime as owner id).
+
+[^lock_granularity]: Sometimes, having fine-grained lock is slower because of more lock/unlock operations. But sometimes having fine-grained lock is faster because it allows higher parallelism. Sometimes fine-grained lock can cause deadlock but coarse-grained lock won't deadlock. It depends on exact case.
+
+They are usually used inside reference counting (`Arc<...>`, `Rc<...>`).
+
+## Rust lock is non-reentrant
+
+`MutexGuard` drops at the end of scope, not drop on the last use. NLL doesn't apply.
+
+
+
+## Just clone the data
+
+For example, if borrow checker has trouble with a string borrowing, you can just clone the string. It's usually fine as long as it's not performance bottleneck.
+
+## Summarize the contagious things
+
+- Borrowing that cross function boundary is contagious. Just borrowing a wheel of car can indirectly borrow the whole car.
+- Mutate-by-recreate is contagious. Recreating child require also recreating parent that holds the new child, and parent's parent, and so on.
+- Lifetime annotation is contagious. If some type has a lifetime parameter `'a`, then every type that holds it and every function that processes it must also have the lifetime parameter `'a`. Refactoring that adds/remove lifetime parameter may be a huge work.
+- In current borrow checker, one branch's borrowing is contagious to the whole branching scope.
+
+
+## Using unsafe
+
+By using unsafe you can freely manipulate pointers and are not restricted by borrow checker. But writing unsafe Rust is harder than just writing C, because you need to carefully avoid breaking the constraints that safe Rust code relies on. A bug in unsafe code can cause issue in safe code. Also be wary about undefined behaviors that may cause wrong optimization. Writing unsafe Rust correctly is a hard topic.
+
+
+
+## Entity component system
 
 
 
@@ -386,25 +564,41 @@ Using self reference usually require `Pin` and `unsafe`.
 
 workaround: store id/index instead of interior pointer.
 
-## A current borrow checker issue
+## Contagious borrowing between branches
 
-[Polonius update | Inside Rust Blog](https://blog.rust-lang.org/inside-rust/2023/10/06/polonius-update/)
+Current borrow checker does coarse-grained analysis on branch. One branch's borrowing is **contagious** to another branch. This will be fixed by Polonius.
 
-## Question the constraints
+According to [Polonius update](https://blog.rust-lang.org/inside-rust/2023/10/06/polonius-update/):
 
-> _Mutation xor sharing_ is, in some sense, neither necessary nor sufficient. It’s not _necessary_ because there are many programs (like every program written in Java) that share data like crazy and yet still work fine. It’s also not _sufficient_ in that there are many problems that demand some amount of sharing – which is why Rust has “backdoors” like `Arc<Mutex<T>>`, `AtomicU32`, and—the ultimate backdoor of them all—`unsafe`.
-> 
-> https://smallcultfollowing.com/babysteps/blog/2024/06/02/the-borrow-checker-within/
+This won't compile:
 
+```rust
+fn get_default<'r, K: Hash + Eq + Copy, V: Default>(
+    map: &'r mut HashMap<K, V>,
+    key: K,
+) -> &'r mut V {
+    match map.get_mut(&key) { // -------------+ 'r
+        Some(value) => value,              // |
+        None => {                          // |
+            map.insert(key, V::default()); // |
+            //  ^~~~~~ ERROR               // |
+            map.get_mut(&key).unwrap()     // |
+        }                                  // |
+    }                                      // |
+}   
+```
 
-
-## Rust lock is non-reentrant
-
-
+Becaue the first branch `Some(value) => ...`'s output value indirectly mutably borrows `map`, the second branch has to also indirectly mutably borrow `map`, which conflicts with another mutable borrow in scope.
 
 ## Tokio require future to be `Send + Sync + 'static`
 
-The lifetime `'static`'s name is unintuitive. In C, `static` can create global-variable-within-function. In OOP languages like CC++, Java, C#, `static` means global variable.
+The lifetime `'static`'s name is unintuitive. In C, `static` can create global-variable-within-function. In OOP languages like C/C++, Java, C#, `static` means global variable.
 
 In Rust, `'static` inlcudes reference to global variable. But `'static` also includes the non-reference types that itself has ownership.
+
+## Extracting variable and inlining variable has side effect
+
+Reborrow [haibane_tenshi's blog - Obscure Rust: reborrowing is a half-baked feature](https://haibane-tenshi.github.io/rust-reborrowing/) extracting variable makes reborrow not working
+
+Take reference into temporary value. inlining make it not compile (temporary value drop right after use, local variables drop at the end of scope, except NLL)
 
