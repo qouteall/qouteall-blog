@@ -362,6 +362,9 @@ The major differences:
 - For weak generalized reference, the **lifetime of object is decoupled from referces to it**.
 
 
+### Entity component system
+
+
 
 ## Mutable borrow exclusiveness
 
@@ -554,9 +557,6 @@ By using unsafe you can freely manipulate pointers and are not restricted by bor
 
 
 
-## Entity component system
-
-
 
 ## Self-reference
 
@@ -599,6 +599,8 @@ In Rust, `'static` inlcudes reference to global variable. But `'static` also inc
 ## Extracting variable and inlining variable has side effect
 
 Reborrow [haibane_tenshi's blog - Obscure Rust: reborrowing is a half-baked feature](https://haibane-tenshi.github.io/rust-reborrowing/) extracting variable makes reborrow not working
+
+[better documentation of reborrowing · Issue #788 · rust-lang/reference](https://github.com/rust-lang/reference/issues/788)
 
 Take reference into temporary value. inlining make it not compile (temporary value drop right after use, local variables drop at the end of scope, except NLL)
 
