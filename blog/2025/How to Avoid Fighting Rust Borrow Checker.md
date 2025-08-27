@@ -9,9 +9,9 @@ The 3 important facts in Rust:
 
 - **Tree-shaped ownership**. In Rust's ownership system, one object can own many children or no chlld, but must be owned by **exactly one parent**. Ownership relations form a tree. [^about_sharing]
 - **Mutable borrow exclusiveness**. If there exists one mutable borrow for an object, then no other reference to that object can exist. Mutable borrow is exclusive.
-- **Borrow is contagious**. If you borrow a child, you indirectly borrow the parent (and parent's parent, and so on) **if crossing function boundary**. Just borrowing one wheel of a car makes you borrow the whole car. Combined with previous point, it can cause troubles for mutable data, and can be solved using **split borrow** (that does not cross function boundary).
+- **Borrow is contagious**. If you borrow a child, you indirectly borrow the parent (and parent's parent, and so on) **if crossing function boundary**. Just borrowing one wheel of a car makes you borrow the whole car. Combined with previous point, it can cause troubles for mutable data.
 
-[^about_sharing]: Reference counting (`Rc`, `Arc`) allows sharing, but they are not "native" Rust ownership. The implementation of `Rc` and `Arc` uses `unsafe`. 
+[^about_sharing]: Reference counting (`Rc`, `Arc`) allows sharing. Here I mean "native" Rust ownership relation form a tree.
 
 Rust applies **local** constraints. Here **local** means it doesn't analyze the whole application's code, and just analyze within individual scopes, using types to encode information. Outside of the current scope, all information that's not encoded into type are not considered.
 
@@ -139,11 +139,11 @@ The deeper cause is that:
 
 The solutions:
 
-- **Avoid OOP-style getter and setter** (just make fields public), unless really necessary.
-  - For getter, if the getter returns reference which cause contagious borrow. The getter that returns cloned/copied value is fine. For immutable data, getter returning reference is also usually fine.
-  - For setter, it must pass `&mut self` which cause contagious borrow.
-  - **Data-oriented** design (DOD).
-- Use ID/handle to replace reference. (Entity component system (ECS) is one solution.)
+- **Avoid OOP-style getter and setter** (just make fields public), unless necessary.
+  - **Data-oriented** design (DOD). Just directly work on data and make fields public.
+  - If you design a library and want encapsulation, it's recommended to use ID/handle to replace reference (elaborated below).
+  - The getter that returns cloned/copied value is fine. If data is immutable, getter is also usually fine.
+- Use ID/handle to replace reference.
 - Other workarounds like `Arc<QCell<>>` `Arc<RwLock<>>`, etc.
 - **Avoid mutation** or **defer mutation**:
 
@@ -253,7 +253,7 @@ fn paradox(program: Program) {
   - There is a function `is_proof(theory, proof)` that determines whether a proof successfully proves a theory. 
   - Then `provable(theory)` is defined as whether there exists a `proof` that satisfies `is_proof(theory, proof)`.
   - Negating its result tests whether a theory is unprovable: `unprovable(theory) = ¬provable(theory)`
-  - Let `H(x) = unprovable(x(x))` [^godel_substitution]. `H` itself is also encoded as data, so we can construct `G = H(H) = unprovable(H(H)) = unprovable(G)`, which creates a self-referencial statement: `G`  means `G` is not provable. If `G` is true, then `G` is not provable. If `G` is false, then `G` is provable, which is a paradox.
+  - Let `H(x) = unprovable(x(x))` [^godel_substitution]. `H` itself is also encoded as data, so we can construct `G = H(H) = unprovable(H(H)) = unprovable(G)`, which creates a self-referencial statement: `G`  means `G` is not provable. If `G` is true, then `G` is not provable, then `G` is false, which is a paradox.
 
 [^godel_integer]: Specifically, Gödel encodes symbols, statements and proofs into integer, called Gödel number. There exists many ways of encoding symbols/statements/proofs as data, and which exact way is not important. For simplicity, I will treat them all as data, and ignore the conversion between data and symbol/statements/proofs.
 
@@ -325,12 +325,21 @@ One kind of arena is [slotmap](https://docs.rs/slotmap/latest/slotmap/):
 - After removing element, the version increments. The previous handle cannot get the new element at the same index, because of version mismatch.
 - The handle (key) are just `Copy`-able data that's not restricted by borrow checker.
 - Although memory safe, it still has the equivalent of "use-after-free": using a handle of an already-removed object cannot get element from the slotmap [^slotmap_uniqueness]. Each get element operation may fail.
+- Note that slotmap is not efficient when there are many unused empty space between elements. Slotmap offers two other variants for sparce case.
 
-[^slotmap_uniqueness]: Each slotmap ensures key uniqueness, but if you mix keys of different slotmaps, the different keys of different slotmap may duplicate in value. Using the wrong key may successfully get an element but logically wrong.
+[^slotmap_uniqueness]: Each slotmap ensures key uniqueness, but if you mix keys of different slotmaps, the different keys of different slotmap may duplicate. Using the wrong key may successfully get an element but logically wrong.
 
-Other map structure, like `HashMap` or `TreeMap` can also be arenas. If no element can be removed from arena, then a `Vec` can also be an areana.
+Other map structure, like `HashMap` or `TreeMap` can also be arenas. 
+
+If no element can be removed from arena, then a `Vec` can also be an areana.
 
 One important fact: when we use ID/handle to replace reference, the borrow checker no longer ensure that the ID/handle will point to a living object.
+
+### Entity component system
+
+Entity component system (ECS) is a way of organizing data that's different to OOP. In OOP, an object's fields are laid together in memory. But in ECS, each object is separated into components. The same kind of components for different objects are managed together (often laid together in memory). It can improve cache-friendliness.
+
+ECS also favors composition over inheritance.
 
 ### Generalized reference and two reference semantics
 
@@ -357,13 +366,16 @@ The major differences:
 - For weak generalized references, **every data access may fail, and requires error handling**.
 - For strong generalized reference, the **lifetime of referenced object is tightly coupled with the existence of reference**:
   - In Rust, the coupling comes from borrow checker. The borrow is limited by lifetime and other constraints.
-  - In GC langauges, the coupling comes from GC. The existence of a strong reference keeps the object alive. Note that in GC languages there are **live-but-unusable objects** (like a `File` already closed in Java).
+  - In GC langauges, the coupling comes from GC. The existence of a strong reference keeps the object alive. Note that in GC languages there are **live-but-unusable objects** (e.g. Java `FileInputStream` is unusable after closing).
   - In reference counting, the coupling of course comes from runtime reference counting.
 - For weak generalized reference, the **lifetime of object is decoupled from referces to it**.
 
+If you want to design an abstraction that **decouples** object lifetime and how these objects are referenced, it's recommended to either:
 
-### Entity component system
-
+- Use weak generalized reference, such as ID and handle. The object can be freed without having to consider how its IDs are held.
+- Use strong generalized reference, but **add a new usability state that's decoupled with object lifetime**. This is common in GC languages. Examples:
+  - In JS, if you send an `ArrayBuffer` to another web worker, the `ArrayBuffer` object can still be referenced and kept alive, but the binary content is no longer accessible from that `ArrayBuffer` object.
+  - In Java, the IO-related objects (e.g. `FileInputStream`, `FileOutputStream`) can no longer be used after closing, even these objects are still referenced and still alive.
 
 
 ## Mutable borrow exclusiveness
@@ -553,16 +565,30 @@ For example, if borrow checker has trouble with a string borrowing, you can just
 
 ## Using unsafe
 
-By using unsafe you can freely manipulate pointers and are not restricted by borrow checker. But writing unsafe Rust is harder than just writing C, because you need to carefully avoid breaking the constraints that safe Rust code relies on. A bug in unsafe code can cause issue in safe code. Also be wary about undefined behaviors that may cause wrong optimization. Writing unsafe Rust correctly is a hard topic.
+By using unsafe you can freely manipulate pointers and are not restricted by borrow checker. But writing unsafe Rust is harder than just writing C, because you need to carefully avoid breaking the constraints that safe Rust code relies on. A bug in unsafe code can cause issue in safe code. Also be wary about undefined behaviors that may cause wrong optimization. 
+
+Writing unsafe Rust correctly is a hard topic. Here are some traps in unsafe:
+
+- Don't violate mutable borrow exclusiveness. 
+  - A `&mut` cannot overlap with any other borrow that overlaps.
+  - Overlap: two borrows to the same object overlaps. One borrow to parent and another borrow to child inside by parent also overlaps.
+  - Violating that rule cause undefined behavior and can cause wrong optimization. Rust adds `noalias` attribute for mutable borrows into LLVM IR. LLVM will heavily optimize based on `noalias` (e.g. merging and reorder reads/writes). [See also](https://doc.rust-lang.org/nomicon/aliasing.html)
+  - Use raw pointer `*mut T` if you want to alias and mutate.
+- Using `a = b` will drop the original object in place of `a`. If `a` is uninitialized, then it will drop an unitialized object which is undefined behavior. Use `addr_of_mut!(...).write(...)` [See also](https://lucumr.pocoo.org/2022/1/30/unsafe-rust/)
+- Handle panic unwinding.
+- ...
+
+[Unsafe Rust Is Harder Than C | Chad Austin](https://chadaustin.me/2024/10/intrusive-linked-list-in-rust/)
+
+[When Zig is safer and faster than Rust](https://web.archive.org/web/20230307172822/https://zackoverflow.dev/writing/unsafe-rust-vs-zig/)
+
+A lot of syntax cannot be used on pointers:
+
+- If `p` is a raw pointer, you cannot write `p->field` (like in C/C++), and can only write `(*p).field`
+- Raw pointer cannot be method receiver (self).
+- There is no "slice using raw pointer".
 
 
-
-
-## Self-reference
-
-Using self reference usually require `Pin` and `unsafe`.
-
-workaround: store id/index instead of interior pointer.
 
 ## Contagious borrowing between branches
 
@@ -592,15 +618,33 @@ Becaue the first branch `Some(value) => ...`'s output value indirectly mutably b
 
 ## Tokio require future to be `Send + Sync + 'static`
 
-The lifetime `'static`'s name is unintuitive. In C, `static` can create global-variable-within-function. In OOP languages like C/C++, Java, C#, `static` means global variable.
-
-In Rust, `'static` inlcudes reference to global variable. But `'static` also includes the non-reference types that itself has ownership.
+The lifetime `'static`'s name is unintuitive. In C, `static` can create global-variable-within-function. In OOP languages like C/C++, Java, C#, `static` means global variable. In Rust, `'static` inlcudes reference to global variable. But `'static` also includes the non-reference types that itself has ownership.
 
 ## Extracting variable and inlining variable has side effect
+
+In GC languages, extracting an expression into a local variable usually doesn't change program semantics (other than execution order change). And inlining a variable that's used only once doesn't change semantics (other than execution order change).
+
+But in Rust it's different:
+
+- A temporary value drops immediately after evaluating, unless it's put into a local variable.
+- A value (including borrows) that doesn't implement `Drop` will drop after its last use (except when TODO). This is called NLL (non-lexical lifetime).
+- A value that implements `Drop` will drop at the end of scope.
+
+Inlining a local variable can turn it into a temporary value that's dropped early, thus cause issues with borrow checker.
+
+There is also a feature called **reborrow**. Normally mutable reference `&mut T` can only be moved and cannot be copied. But reborrow can sometimes allow you to use a mutable reference twice.
 
 Reborrow [haibane_tenshi's blog - Obscure Rust: reborrowing is a half-baked feature](https://haibane-tenshi.github.io/rust-reborrowing/) extracting variable makes reborrow not working
 
 [better documentation of reborrowing · Issue #788 · rust-lang/reference](https://github.com/rust-lang/reference/issues/788)
 
-Take reference into temporary value. inlining make it not compile (temporary value drop right after use, local variables drop at the end of scope, except NLL)
+## `mem::replace`
 
+
+## Self-reference
+
+Using self reference usually require `Pin` and `unsafe`.
+
+Normal rust mutable borrow allow moving the value out, by `mem::replace`, or swap. `Pin` disallows that.
+
+workaround: store id/index instead of interior pointer.
