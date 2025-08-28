@@ -8,7 +8,7 @@ It's unproductive to fight with Rust borrow checker, by changing some code, try 
 The 3 important facts in Rust:
 
 - **Tree-shaped ownership**. In Rust's ownership system, one object can own many children or no chlld, but must be owned by **exactly one parent**. Ownership relations form a tree. [^about_sharing]
-- **Mutable borrow exclusiveness**. If there exists one mutable borrow for an object, then no other reference to that object can exist. Mutable borrow is exclusive.
+- **Mutable borrow exclusiveness**. If there exists one mutable borrow for an object, then no other borrow to that object can exist. Mutable borrow is exclusive.
 - **Borrow is contagious**. If you borrow a child, you indirectly borrow the parent (and parent's parent, and so on) **if crossing function boundary**. Just borrowing one wheel of a car makes you borrow the whole car. Combined with previous point, it can cause troubles for mutable data.
 
 [^about_sharing]: Reference counting (`Rc`, `Arc`) allows sharing. Here I mean "native" Rust ownership relation form a tree.
@@ -44,7 +44,7 @@ The solutions in borrow-checker-unfriendly cases (will elaborate below):
 
 - Avoid contagious borrow.
 - Try to refactor reference structure. Use data-oriented design instead of OOP design.
-- Use ID/handle to replace reference.
+- Use ID/handle to replace borrow.
 - Avoid mutation (pure-functional-style).
 - `Arc<QCell<T>>`
 - `Arc<RwLock<T>>`
@@ -103,7 +103,7 @@ Compile error:
 
 This code is totally memory-safe: the `.add_score()` only touch the `total_score` field, and `.get_children()` only touch the `children` field. They work on separate data, they still clashes, because of **contagious borrow**:
 
-- In `fn get_children(&self) -> &Vec<Child> { &self.children }`, although the method body just borrows `children` field, the returned reference indirectly borrows the whole `self`.
+- In `fn get_children(&self) -> &Vec<Child> { &self.children }`, although the method body just borrows `children` field, the return value indirectly borrows the whole `self`.
 - `parent.get_children()` immutably borrows `parent`. It borrows the whole `parent`, not just a field in `parent`. The borrow checker works **locally** (just checked function signature) and doesn't check the body of `get_children`.
 - The for loop indirectly borrows the result of `parent.get_children()` which indirectly borrows `parent`.
 - In `fn add_score(&mut self, score: u32) { self.total_score += score; }`, the function body only mutably borrowed `total_score` field, but the argument `&mut self` borrows the whole `Parent`, not just one field.
@@ -141,9 +141,9 @@ The solutions:
 
 - **Avoid OOP-style getter and setter** (just make fields public), unless necessary.
   - **Data-oriented** design (DOD). Just directly work on data and make fields public.
-  - If you design a library and want encapsulation, it's recommended to use ID/handle to replace reference (elaborated below).
+  - If you design a library and want encapsulation, it's recommended to use ID/handle to replace borrow (elaborated below).
   - The getter that returns cloned/copied value is fine. If data is immutable, getter is also usually fine.
-- Use ID/handle to replace reference.
+- Use ID/handle to replace borrow.
 - Other workarounds like `Arc<QCell<>>` `Arc<RwLock<>>`, etc.
 - **Avoid mutation** or **defer mutation**:
 
@@ -162,7 +162,7 @@ Mutate-by-recreate can be useful for cases like:
 
 Mutate-by-recreate can be optimized by sharing unchanged sub-structures. See also: [Persistent data structure](https://en.wikipedia.org/wiki/Persistent_data_structure), [Rope](https://en.wikipedia.org/wiki/Rope_(data_structure)).
 
-Another solution is to **treat mutation as data**. When you want to mutate something, you **append a mutation command into command queue** (the command can also be called "event" or "log"). Then execute the mutation commands at once. (Note that command should not indirectly reference base data.)
+Another solution is to **treat mutation as data**. When you want to mutate something, you **append a mutation command into command queue** (the command can also be called "event" or "log"). Then execute the mutation commands at once. (Note that command should not indirectly borrow base data.)
 
 - In the process of creating new commands, it only do immutable borrow to base data, and only one mutable borrow to the command queue. 
 - When executing the commands, it only do one mutable borrow to base data at a time.
@@ -297,7 +297,7 @@ Solutions:
   
   The back-reference (callback to parent, child to parent) should use `Weak` to avoid memory leak.
 - Use event bus to replace callbacks. Similar to the previous deferred mutation, we turn event into data. Each component listen to specific "event channel" or "event topic". When something happens, put the event into event bus, then event bus notifies components.
-- Use ID/handle to replace reference (elaborated later).
+- Use ID/handle to replace borrow (elaborated later).
 
 ### The circular reference that's inherent in data structure
 
@@ -306,9 +306,9 @@ In the previously mentioned case 3 and case 4, circular reference is needed in d
 Solutions:
 
 - Use reference counting and interior mutability (previously mentioned). This is **recommended when there are many different types of components and you want to add new types easily** (like in GUI).
-- Use ID/handle to replace reference (elaborated later). This is **recommended when you want more compact memory layout, and you rarely need to add new types into data** (suitable for data-intensive cases, can obtain better performance due to cache-friendliness).
+- Use ID/handle to replace borrow (elaborated later). This is **recommended when you want more compact memory layout, and you rarely need to add new types into data** (suitable for data-intensive cases, can obtain better performance due to cache-friendliness).
 
-## Use handle/ID to replace reference
+## Use handle/ID to replace borrow
 
 Data-oriented design:
 
@@ -323,7 +323,7 @@ One kind of arena is [slotmap](https://docs.rs/slotmap/latest/slotmap/):
 - Each handle (key) has an index and a version. 
 - When accessing the slotmap, it firstly does a bound check, then checks version. 
 - After removing element, the version increments. The previous handle cannot get the new element at the same index, because of version mismatch.
-- The handle (key) are just `Copy`-able data that's not restricted by borrow checker.
+- The handles (keys) are just `Copy`-able data that's not restricted by borrow checker.
 - Although memory safe, it still has the equivalent of "use-after-free": using a handle of an already-removed object cannot get element from the slotmap [^slotmap_uniqueness]. Each get element operation may fail.
 - Note that slotmap is not efficient when there are many unused empty space between elements. Slotmap offers two other variants for sparce case.
 
@@ -333,7 +333,7 @@ Other map structure, like `HashMap` or `TreeMap` can also be arenas.
 
 If no element can be removed from arena, then a `Vec` can also be an areana.
 
-One important fact: when we use ID/handle to replace reference, the borrow checker no longer ensure that the ID/handle will point to a living object.
+One important fact: when we use ID/handle to replace borrow, the borrow checker no longer ensure that the ID/handle will point to a living object.
 
 ### Entity component system
 
@@ -356,7 +356,7 @@ The generalized reference is separated into two kinds: strong and weak:
 
 - Strong generalized reference: The system **ensures it always points to a living object**. 
   
-  It contains: normal references in GC languages (when not null), Rust borrow and ownership, strong reference counting (`Rc`, `Arc`, `shared_ptr` when not null), and **ID in database with foreign key constraint**.
+  It contains: normal references in GC languages (when not null), Rust borrow and ownership, strong reference counting (`Rc`, `Arc`, `shared_ptr` when not null), and ID in database with foreign key constraint.
 - Weak generalized reference: The system **does NOT ensure it points to a living object**.
   
   It contains: ID (no foreign key constraint), handles, weak reference in GC languages, weak reference counting (`Weak`, `weak_ptr`).
@@ -395,11 +395,11 @@ But in single-threaded case, this restriction is not natural at all. No mainstre
 > 
 > https://smallcultfollowing.com/babysteps/blog/2024/06/02/the-borrow-checker-within/
 
-In Rust, mutable borrow exclusiveness is still useful in single-threaded case, for safety of **interior pointer**.
+Rust has free **interior pointer** so that mutable borrow exclusiveness is still important for memory safety:
 
 ### Interior pointer
 
-Interior pointer are the pointers that point into data inside another object. 
+Interior pointer are the pointers that point into some data inside another object. 
 
 For example, you can take pointer of an element in `Vec`. If the `Vec` grows, it may allocate new memory and copy existing data to new memory, thus the interior pointer to it can become invalid. Mutable borrow exclusiveness can prevent this issue from happening:
 
@@ -454,7 +454,7 @@ Compile error:
    |                    ----------------- borrow later used here
 ```
 
-Because that a mutation can invalidate the memory layout that interior pointer depends on, mutable borrow exclusiveness is still important for memory safety in single-threaded case.
+A **mutation can invalidate the memory layout that interior pointer points to**, mutable borrow exclusiveness is still important for memory safety in single-threaded case.
 
 ### Interior pointer in other languages
 
@@ -481,13 +481,15 @@ Output
 old interior pointer: 0xc0000ac000  new interior pointer: 0xc0000ae000
 ```
 
-Because after re-allocating the slice, the old slice still exists in memory. If there is an interior pointer into the old slice, the old slice won't be freed by GC.
+Because after re-allocating the slice, the old slice still exists in memory (not immediately freed). If there is an interior pointer into the old slice, the old slice won't be freed by GC. The interior pointer will always be memory-safe (but may point to stale data).
 
-Golang also doesn't have sum type, so there is no equivalent to enum memory layout change in the previous example.
+Golang also doesn't have sum type, so there is no equivalent to enum memory layout change in the previous Rust example.
 
-Also, Golang's doesn't allow taking interior pointer to map element value, but Rust allows.
+Also, Golang's doesn't allow taking interior pointer to map element value, but Rust allows. Rust's interior pointer is more powerful than Golang's.
 
-In Java, there is no interior pointer. But there is one thing logically similar to interior pointer: `Iterator`. Mutating a container can cause iterator invalidation:
+In Java, there is no interior pointer. So no memory safety issue caused by interior pointer.
+
+But in Java there is one thing logically similar to interior pointer: `Iterator`. Mutating a container can cause iterator invalidation:
 
 ```java
 public class Main {  
@@ -506,21 +508,27 @@ public class Main {
 }
 ```
 
-That will get `java.util.ConcurrentModificationException`. Java's `ArrayList` has an internal version counter that's incremented every time it changes. The iterator code checks concurrent modification using version counter. (Even without the version check, it will still be memory-safe because array access is range-checked.)
+That will get `java.util.ConcurrentModificationException`. Java's `ArrayList` has an internal version counter that's incremented every time it changes. The iterator code checks concurrent modification using version counter. 
 
-### Interior mutability
+Even without the version check, it will still be memory-safe because array access is range-checked.
 
-As previously mentioned, mutable borrow exclusiveness is still important in single-threaded case, because of interior pointer.
+In Java, you can remove element via the iterator, then the iterator will update together with container, then there will be no iterator invalidation.
 
-**But if we don't use any interior pointer, and code is single-threaded, then mutable borrow exclusiveness is simply not needed at all**.
+Note that iteration invalidation is logic error, no matter whether it's memory safe.
+
+Mutable borrow exclusiveness is still important in single-threaded case, because of interior pointer. **But if we don't use any interior pointer, then mutable borrow exclusiveness is not necessary for memory safety in single-thread case**.
 
 That's why mainstream languages has no mutable borrow exclusiveness, and still works fine in single-threaded case. Java, JS and Python has no interior pointer. Golang and C# have interior pointer, they have GC and restrict interior pointer, so memory safe is still kept without mutable borrow exclusiveness.
 
 The benefit of interior pointer is to allow tight memory layout, without having to do extra heap allocation just to get a reference some inner data.
 
-Because that mutable borrow exclusiveness is overly restrictive, there is **interior mutability** that allows getting rid of that constraint.
+Also note that, even when using interior pointer, mutation doesn't always invalidte pointers. For example, we take an interior pointer `&mut u32` to an element in `Vec<u32>`, then assigning one element of vec (this won't cause re-allocate) is still memory-safe.
 
-Interior mutability allows you to mutate something from an immutable reference to it. (Because of that, immutable reference doesn't necessarily mean the referenced data is actually immutable. This can cause some confusion.)
+### Interior mutability
+
+Mutable borrow exclusiveness is overly restrictive. It is not necessary for memory safety in single-threaded code. It's also . there is **interior mutability** that allows getting rid of that constraint.
+
+Interior mutability allows you to mutate something from an immutable reference to it. (Because of that, immutable borrow doesn't necessarily mean the pointed data is actually immutable. This can cause some confusion.)
 
 Ways of interior mutability:
 
@@ -531,7 +539,7 @@ Ways of interior mutability:
   
   It can cause crash if there is nested borrow that involves mutation. [See also](https://loglog.games/blog/leaving-rust-gamedev/#dynamic-borrow-checking-causes-unexpected-crashes-after-refactorings)
 - `Mutex<T>` `RwLock<T>`, for locking in multi-threaded case. Note that unnecessary locking can cost performance, and has risk of deadlock. It's not recommended to overuse `Arc<Mutex<T>>` just because it can satisfy the borrow checker.
-- [`QCell<T>`](https://docs.rs/qcell/latest/qcell/). This is special. `QCell` has an internal ID. `QCellOwner` is also an ID. You can only use `QCell` via `QCellOwner`. The borrowing to `QCellOwner` ensures mutable borrow exclusiveness. Using it require passing reference of `QCellOwner` in argument everywhere.
+- [`QCell<T>`](https://docs.rs/qcell/latest/qcell/). This is special. `QCell` has an internal ID. `QCellOwner` is also an ID. You can only use `QCell` via `QCellOwner`. The borrowing to `QCellOwner` ensures mutable borrow exclusiveness. Using it require passing borrow of `QCellOwner` in argument everywhere.
   
    [GPUI](https://zed.dev/blog/gpui-ownership)'s `Model<T>` is similar to `Rc<QCell<T>>`, where GPUI's `AppContext` correspond to `QCellOwner`.
    
@@ -618,7 +626,11 @@ Becaue the first branch `Some(value) => ...`'s output value indirectly mutably b
 
 ## Tokio require future to be `Send + Sync + 'static`
 
-The lifetime `'static`'s name is unintuitive. In C, `static` can create global-variable-within-function. In OOP languages like C/C++, Java, C#, `static` means global variable. In Rust, `'static` inlcudes reference to global variable. But `'static` also includes the non-reference types that itself has ownership.
+Tokio is a popular async runtime. Submitting task require task to be `Send + Sync + 'static`. In an `async` function, passing data across suspend point also require `Send + Sync + 'static`.
+
+The lifetime `'static`'s name is unintuitive. In C, `static` can create global-variable-within-function. In OOP languages like C/C++, Java, C#, `static` means global variable. In Rust, `'static` inlcudes borrow to global variable. But `'static` also includes the non-borrow types that itself has ownership.
+
+
 
 ## Extracting variable and inlining variable has side effect
 
@@ -632,7 +644,7 @@ But in Rust it's different:
 
 Inlining a local variable can turn it into a temporary value that's dropped early, thus cause issues with borrow checker.
 
-There is also a feature called **reborrow**. Normally mutable reference `&mut T` can only be moved and cannot be copied. But reborrow can sometimes allow you to use a mutable reference twice.
+There is also a feature called **reborrow**. Normally mutable borrow `&mut T` can only be moved and cannot be copied. But reborrow can sometimes allow you to use a mutable borrow twice.
 
 Reborrow [haibane_tenshi's blog - Obscure Rust: reborrowing is a half-baked feature](https://haibane-tenshi.github.io/rust-reborrowing/) extracting variable makes reborrow not working
 
