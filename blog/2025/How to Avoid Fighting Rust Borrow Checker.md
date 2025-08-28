@@ -538,6 +538,90 @@ Ways of interior mutability:
   It has internal counters tracking how many immutable borrow and mutable borrow currently exist. If it detects violation of mutable borrow exclusiveness, `.borrow()` or `.borrow_mut()` will panic.
   
   It can cause crash if there is nested borrow that involves mutation. [See also](https://loglog.games/blog/leaving-rust-gamedev/#dynamic-borrow-checking-causes-unexpected-crashes-after-refactorings)
+
+Note that in previous contagious borrow case, wrapping parent in `RefCell<>` doesn't solve the problem: it just turns compile error into runtime panic:
+
+```rust
+use std::cell::RefCell;  
+pub struct Parent { total_score: u32,  children: Vec<Child> }  
+pub struct Child { score: u32 }  
+impl Parent {  
+    fn get_children(&self) -> &Vec<Child> {  
+        &self.children  
+    }  
+    fn add_score(&mut self, score: u32) {  
+        self.total_score += score;  
+    }  
+}  
+fn main() {  
+    let parent: RefCell<Parent> = RefCell::new(Parent{total_score: 0, children: vec![Child{score: 2}]});  
+    for child in parent.borrow().get_children() {  
+        parent.borrow_mut().add_score(child.score);  
+    }  
+}
+```
+
+It will panic with `RefCell already borrowed` error.
+
+If you wrap the `children` field into `RefCell` (without using `Rc`) then you cannot return a reference. Because the reference borrowed from `RefCell` is not normal reference, it's actually `Ref`. `Ref` implements `Deref` so it can be similar to a normal borrow. But it's different to a normal borrow.
+
+```rust
+pub struct Parent {  
+    total_score: Cell<u32>,  
+    children: RefCell<Vec<Child>>  
+}  
+pub struct Child {   score: u32  }  
+impl Parent {  
+    fn get_children(&self) -> &Vec<Child> {  
+        self.children.borrow()  
+    }  
+}
+```
+
+```
+13 |     fn get_children(&self) -> &Vec<Child> {
+   |                               ----------- expected `&Vec<Child>` because of return type
+14 |         self.children.borrow()
+   |         ^^^^^^^^^^^^^^^^^^^^^^ expected `&Vec<Child>`, found `Ref<'_, Vec<Child>>`
+   |
+   = note: expected reference `&Vec<_>`
+                 found struct `Ref<'_, Vec<_>>`
+help: consider borrowing here
+   |
+14 |         &self.children.borrow()
+   |         +
+```
+
+(The "consider borrowing here" suggestion won't solve the compiler error. If you follow its instruction you will get new compile error "returns a reference to data owned by the current function". Don't be too focused in the suggestion of compiler message.)
+
+It can be workarounded fully using `Rc<RefCell<>>`
+
+```rust
+use std::cell::{Cell, RefCell};  
+use std::rc::Rc;  
+pub struct Parent {  
+    total_score: Cell<u32>,  
+    children: Rc<RefCell<Vec<Child>>>  
+}  
+pub struct Child {   score: u32  }  
+impl Parent {  
+    fn get_children(&self) -> Rc<RefCell<Vec<Child>>> {  
+        self.children.clone()  
+    }  
+    fn add_score(&self, score: u32) {  
+        self.total_score.set(self.total_score.get() + score);  
+    }  
+}  
+fn main() {  
+    let parent: Parent = Parent{total_score: Cell::new(0), children: Rc::new(RefCell::new(vec![Child{score: 2}]))};  
+    for child in &*parent.get_children().borrow() {  
+        parent.add_score(child.score);  
+    }  
+}
+```
+
+But it's not recommended to use `Rc<RefCell<>>` unless necessary. `Rc` and `RefCell` has performance cost. And using them introduce many "noise" like `.borrow()` `.borrow_mut()`.
+
 - `Mutex<T>` `RwLock<T>`, for locking in multi-threaded case. Note that unnecessary locking can cost performance, and has risk of deadlock. It's not recommended to overuse `Arc<Mutex<T>>` just because it can satisfy the borrow checker.
 - [`QCell<T>`](https://docs.rs/qcell/latest/qcell/). This is special. `QCell` has an internal ID. `QCellOwner` is also an ID. You can only use `QCell` via `QCellOwner`. The borrowing to `QCellOwner` ensures mutable borrow exclusiveness. Using it require passing borrow of `QCellOwner` in argument everywhere.
   
