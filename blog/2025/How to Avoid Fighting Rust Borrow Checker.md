@@ -79,7 +79,7 @@ impl Parent {
 }
 
 fn main() {  
-    let mut parent = Parent{total_score: 0, children: vec![]};  
+    let mut parent = Parent{total_score: 0, children: vec![Child{score: 2}]};  
   
     for child in parent.get_children() {  
         parent.add_score(child.score);  
@@ -87,7 +87,7 @@ fn main() {
 }
 ```
 
-[^about_code_example]: This simplified code example is just for illustrating contagious borrow issue. Ignore issues like children vec is empty, total score doesn't need to be a field, etc.
+[^about_code_example]: This simplified code example is just for illustrating contagious borrow issue. The total score doesn't need to be a mutable field. It's analogous a complex state that will exist in real applications. 
 
 Compile error:
 
@@ -121,7 +121,7 @@ pub struct Child {
     score: u32  
 }
 fn main() {  
-    let mut parent = Parent{total_score: 0, children: vec![]};  
+    let mut parent = Parent{total_score: 0, children: vec![Child{score: 2}]};  
   
     for child in &parent.children {  
         let score = child.score;  
@@ -203,7 +203,7 @@ impl Parent {
 }  
   
 fn main() {  
-    let mut parent = Parent{total_score: 0, children: vec![]};  
+    let mut parent = Parent{total_score: 0, children: vec![Child{score: 2}]};  
     let mut commands: Vec<Command> = Vec::new();  
   
     for child in parent.get_children() {  
@@ -225,6 +225,8 @@ fn main() {
 ### Circular reference in mathematics
 
 Some may argue that "Circular reference is a bad thing. Look how much trouble do circular references create in mathematics":
+
+<details>
 
 - [Circular proof](https://en.wikipedia.org/wiki/Circular_reasoning): if A then B, if B then A. Circular proof is wrong. It can prove neither A nor B.
 - The set that indirectly includes itself cause [Russel's paradox](https://en.wikipedia.org/wiki/Russell%27s_paradox): Let R be the set of all sets that are not members of themselves. R contains R deduces R should not contain R, and vice versa. Set theory carefully avoids cirular reference.
@@ -250,16 +252,18 @@ fn paradox(program: Program) {
 
 - [Gödel's incomplete theorem](https://en.wikipedia.org/wiki/G%C3%B6del%27s_incompleteness_theorems). 
   - Firstly encode symbols, statements and proofs into data [^godel_integer]. The statements that contain free variables (e.g. x is a free variable in "x is an even number") can also be encoded (it can represent "functions" and even "higher-order functions").
-  - There is a function `is_proof(theory, proof)` that determines whether a proof successfully proves a theory. 
+  - There `is_proof(theory, proof)` allows determining whether a proof successfully proves a theory. 
   - Then `provable(theory)` is defined as whether there exists a `proof` that satisfies `is_proof(theory, proof)`.
   - Negating its result tests whether a theory is unprovable: `unprovable(theory) = ¬provable(theory)`
-  - Let `H(x) = unprovable(x(x))` [^godel_substitution]. `H` itself is also encoded as data, so we can construct `G = H(H) = unprovable(H(H)) = unprovable(G)`, which creates a self-referencial statement: `G`  means `G` is not provable. If `G` is true, then `G` is not provable, then `G` is false, which is a paradox.
+  - Let `H(x) = unprovable(x(x))`. Then let `G = H(H) = unprovable(H(H)) = unprovable(G)` [^godel_substitution], which creates a self-referencial statement: `G`  means `G` is not provable. If `G` is true, then `G` is not provable, then `G` is false, which is a paradox.
 
 [^godel_integer]: Specifically, Gödel encodes symbols, statements and proofs into integer, called Gödel number. There exists many ways of encoding symbols/statements/proofs as data, and which exact way is not important. For simplicity, I will treat them all as data, and ignore the conversion between data and symbol/statements/proofs.
 
-[^godel_substitution]: Here `x(x)` is symbol substitution. `substitute(formula, variable, replacement)` finds all `variable` in `formula` and replace them as `replacement`. `x(x)` is `substitute(x, 'x', x)`. The validity of `x(x)` involves existence of fixed point. The original theorem is very complex and this article just describes a simplified version.
+[^godel_substitution]: Here `x(x)` is symbol substitution. replacing the free variable `x` with `x`, while avoid making two different variables same name by renaming when necessary. `x(x)` is `substitute(x, 'x', x)`. It's also similar to Y combinator: `Y = f -> (x -> f(x(x))) (x -> f(x(x)))`. In that case `f = unprovable`, `H = x -> f(x(x))`, `Y(f) = H(H)`, `Y(f)` is a fixed point of `f`: `f(Y(f)) = Y(f)`. `G = Y(f)`, `f(G) = G`
 
 There is something in common between Halting problem, Russel's paradox and Gödel's incomplete theorem: they all self-reference and "negate" itself, causing paradox.
+
+</details>
 
 ### Circular reference in programming
 
@@ -524,7 +528,7 @@ The benefit of interior pointer is to allow tight memory layout, without having 
 
 Also note that, even when using interior pointer, mutation doesn't always invalidte pointers. For example, we take an interior pointer `&mut u32` to an element in `Vec<u32>`, then assigning one element of vec (this won't cause re-allocate) is still memory-safe.
 
-### Interior mutability
+### Interior mutability summary
 
 Mutable borrow exclusiveness is overly restrictive. It is not necessary for memory safety in single-threaded code. It's also . there is **interior mutability** that allows getting rid of that constraint.
 
@@ -532,14 +536,18 @@ Interior mutability allows you to mutate something from an immutable reference t
 
 Ways of interior mutability:
 
-- `Cell<T>`, for simple copy-able types like integer.
-- `RefCell<T>`, for single-threaded case.
-  
-  It has internal counters tracking how many immutable borrow and mutable borrow currently exist. If it detects violation of mutable borrow exclusiveness, `.borrow()` or `.borrow_mut()` will panic.
-  
-  It can cause crash if there is nested borrow that involves mutation. [See also](https://loglog.games/blog/leaving-rust-gamedev/#dynamic-borrow-checking-causes-unexpected-crashes-after-refactorings)
+- `Cell<T>`. It's suitable for simple copy-able types like integer. In the previous contagious borrow example, if the `total_score` is replaced with `Cell<u32>` then mutating it doesn't need mutable borrow of parent thus avoid the issue. `Cell<T>` only supports replacing the whole `T` at once, and doesn't support getting a mutable borrow.
+- `RefCell<T>`, for single-threaded case.It has internal counters tracking how many immutable borrow and mutable borrow currently exist. If it detects violation of mutable borrow exclusiveness, `.borrow()` or `.borrow_mut()` will panic.It can cause crash if there is nested borrow that involves mutation. [See also](https://loglog.games/blog/leaving-rust-gamedev/#dynamic-borrow-checking-causes-unexpected-crashes-after-refactorings)
+- `Mutex<T>` `RwLock<T>`, for locking in multi-threaded case. Note that unnecessary locking can cost performance, and has risk of deadlock. It's not recommended to overuse `Arc<Mutex<T>>` just because it can satisfy the borrow checker.
+- [`QCell<T>`](https://docs.rs/qcell/latest/qcell/). Elaborated below.
 
-Note that in previous contagious borrow case, wrapping parent in `RefCell<>` doesn't solve the problem: it just turns compile error into runtime panic:
+[^lock_granularity]: Sometimes, having fine-grained lock is slower because of more lock/unlock operations. But sometimes having fine-grained lock is faster because it allows higher parallelism. Sometimes fine-grained lock can cause deadlock but coarse-grained lock won't deadlock. It depends on exact case.
+
+They are usually used inside reference counting (`Arc<...>`, `Rc<...>`).
+
+### `RefCell` is not panacea
+
+In the previous contagious borrow case, wrapping parent in `RefCell<>` can make the code compile. However it doesn't fix the issue. It just turns compile error into runtime panic:
 
 ```rust
 use std::cell::RefCell;  
@@ -563,67 +571,156 @@ fn main() {
 
 It will panic with `RefCell already borrowed` error.
 
-If you wrap the `children` field into `RefCell` (without using `Rc`) then you cannot return a reference. Because the reference borrowed from `RefCell` is not normal reference, it's actually `Ref`. `Ref` implements `Deref` so it can be similar to a normal borrow. But it's different to a normal borrow.
+In Rust, just having a mutable borrow `&mut T`, **Rust assumes that you can use it at any time**. **But holding the reference is different to using reference**. It's entirely possible that I have two `&mut T` for same object, but I only use one at a time. This is the use case that `RefCell` solves.
+
+`RefCell` still follows mutable borrow exclusiveness rule. In previous contagious borrow example, the `Parent` is borrowed one immutablely and one mutable, thus `RefCell` will still panic at runtime.
+
+Another problem: It's hard to return a reference borrowed from `RefCell`.
+
+As the previous example can be fixed by `Cell`, without `RefCell`, here is another contagious borrow exampleL
 
 ```rust
+use std::collections::HashMap;  
 pub struct Parent {  
-    total_score: Cell<u32>,  
-    children: RefCell<Vec<Child>>  
+    entries: HashMap<String, Entry>,  
+    passed_names: Vec<String>  
 }  
-pub struct Child {   score: u32  }  
+pub struct Entry {  score: u32  }  
 impl Parent {  
-    fn get_children(&self) -> &Vec<Child> {  
-        self.children.borrow()  
+    fn get_entries(&self) -> &HashMap<String, Entry> {  
+        &self.entries  
     }  
-}
-```
-
-```
-13 |     fn get_children(&self) -> &Vec<Child> {
-   |                               ----------- expected `&Vec<Child>` because of return type
-14 |         self.children.borrow()
-   |         ^^^^^^^^^^^^^^^^^^^^^^ expected `&Vec<Child>`, found `Ref<'_, Vec<Child>>`
-   |
-   = note: expected reference `&Vec<_>`
-                 found struct `Ref<'_, Vec<_>>`
-help: consider borrowing here
-   |
-14 |         &self.children.borrow()
-   |         +
-```
-
-(The "consider borrowing here" suggestion won't solve the compiler error. If you follow its instruction you will get new compile error "returns a reference to data owned by the current function". Don't be too focused in the suggestion of compiler message.)
-
-It can be workarounded fully using `Rc<RefCell<>>`
-
-```rust
-use std::cell::{Cell, RefCell};  
-use std::rc::Rc;  
-pub struct Parent {  
-    total_score: Cell<u32>,  
-    children: Rc<RefCell<Vec<Child>>>  
-}  
-pub struct Child {   score: u32  }  
-impl Parent {  
-    fn get_children(&self) -> Rc<RefCell<Vec<Child>>> {  
-        self.children.clone()  
-    }  
-    fn add_score(&self, score: u32) {  
-        self.total_score.set(self.total_score.get() + score);  
+    fn add_name(&mut self, name: &str) {  
+        self.passed_names.push(name.to_string());  
     }  
 }  
 fn main() {  
-    let parent: Parent = Parent{total_score: Cell::new(0), children: Rc::new(RefCell::new(vec![Child{score: 2}]))};  
-    for child in &*parent.get_children().borrow() {  
-        parent.add_score(child.score);  
+    let mut map: HashMap<String, Entry> = HashMap::new();  
+    map.insert("a".to_string(), Entry { score: 100 });  
+    let mut parent = Parent {  
+        entries: map, passed_names: vec![]  
+    };  
+    for (name, entry) in parent.get_entries() {  
+        if (entry.score > 20) {  
+            parent.add_name(name);  
+        }  
     }  
 }
 ```
 
-But it's not recommended to use `Rc<RefCell<>>` unless necessary. `Rc` and `RefCell` has performance cost. And using them introduce many "noise" like `.borrow()` `.borrow_mut()`.
+Compile error
 
-- `Mutex<T>` `RwLock<T>`, for locking in multi-threaded case. Note that unnecessary locking can cost performance, and has risk of deadlock. It's not recommended to overuse `Arc<Mutex<T>>` just because it can satisfy the borrow checker.
-- [`QCell<T>`](https://docs.rs/qcell/latest/qcell/). This is special. `QCell` has an internal ID. `QCellOwner` is also an ID. You can only use `QCell` via `QCellOwner`. The borrowing to `QCellOwner` ensures mutable borrow exclusiveness. Using it require passing borrow of `QCellOwner` in argument everywhere.
+```
+22 |     for (name, entry) in parent.get_entries() {
+   |                          --------------------
+   |                          |
+   |                          immutable borrow occurs here
+   |                          immutable borrow later used here
+23 |         if (entry.score > 20) {
+24 |             parent.add_name(name);
+   |             ^^^^^^^^^^^^^^^^^^^^^ mutable borrow occurs here
+```
+
+Then let's try to fix it using `RefCell`. As previously mentioned, wrapping `Parent` in `RefCell` doesn't work. We need to wrap two fields of parent into `RefCell`:
+
+```rust
+pub struct Parent {  
+    entries: RefCell<HashMap<String, Entry>>,  
+    passed_names: RefCell<Vec<String>>  
+}  
+pub struct Entry {  score: u32  }  
+impl Parent {  
+    fn get_entries(&self) -> &HashMap<String, Entry> {  
+        self.entries.borrow()  
+    }  
+    fn add_name(&self, name: &str) {  
+        self.passed_names.borrow_mut().push(name.to_string());  
+    }  
+}
+```
+
+But returning a reference in `RefCell` is not that simple:
+
+```
+error[E0308]: mismatched types
+  --> src\main.rs:10:9
+   |
+9  |     fn get_entries(&self) -> &HashMap<String, Entry> {
+   |                              ----------------------- expected `&HashMap<String, Entry>` because of return type
+10 |         self.entries.borrow()
+   |         ^^^^^^^^^^^^^^^^^^^^^ expected `&HashMap<String, Entry>`, found `Ref<'_, HashMap<String, Entry>>`
+   |
+   = note: expected reference `&HashMap<_, _>`
+                 found struct `Ref<'_, HashMap<_, _>>`
+help: consider borrowing here
+   |
+10 |         &self.entries.borrow()
+   |         +
+```
+
+Because the reference borrowed from `RefCell` is not normal reference, it's actually `Ref`. `Ref` implements `Deref` so it can be used similar to a normal borrow. But it's different to a normal borrow.
+
+The "help: consider borrowing here" suggestion won't solve the compiler error. If you follow its instruction you will get new compile error "returns a reference to data owned by the current function". It's important that **compiler's suggestion may be misleading**. Don't focus too much on compiler's suggestion.
+
+Returning `Ref` works:
+
+```rust
+use std::cell::{Ref, RefCell};  
+use std::collections::HashMap;  
+pub struct Parent {  
+    entries: RefCell<HashMap<String, Entry>>,  
+    passed_names: RefCell<Vec<String>>  
+}  
+pub struct Entry {  score: u32  }  
+impl Parent {  
+    fn get_entries(&self) -> Ref<HashMap<String, Entry>> {  
+        self.entries.borrow()  
+    }  
+    fn add_name(&self, name: &str) {  
+        self.passed_names.borrow_mut().push(name.to_string());  
+    }  
+}  
+fn main() {  
+    let mut map: HashMap<String, Entry> = HashMap::new();  
+    map.insert("a".to_string(), Entry { score: 100 });  
+    let mut parent = Parent {  
+        entries: RefCell::new(map), passed_names: RefCell::new(vec![])  
+    };  
+    for (name, entry) in &*parent.get_entries() {  
+        if (entry.score > 20) {  
+            parent.add_name(name);  
+        }  
+    }  
+}
+```
+
+But returning `Ref` defats the purpose of getter abstraction. `Ref` is tightly coupled with `RefCell`. For example, if one day the value returned by `get_entries` become data that's computed on demand:
+
+```rust
+impl Parent {  
+    fn get_entries(&self) -> Ref<HashMap<String, Entry>> {  
+        let mut map: HashMap<String, Entry> = HashMap::new();  
+        map.insert("a".to_string(), Entry { score: 100 });  
+        RefCell::new(map).borrow()  
+    }  
+}
+```
+
+Then
+
+```
+12 |         RefCell::new(map).borrow()
+   |         -----------------^^^^^^^^^
+   |         |
+   |         returns a value referencing data owned by the current function
+   |         temporary value created here
+```
+
+A more general approach is to return `Rc<RefCell<...>>`.
+
+### `QCell`
+
+`QCell` has an internal ID. `QCellOwner` is also an ID. You can only use `QCell` via `QCellOwner`. The borrowing to `QCellOwner` ensures mutable borrow exclusiveness. Using it require passing borrow of `QCellOwner` in argument everywhere.
   
    [GPUI](https://zed.dev/blog/gpui-ownership)'s `Model<T>` is similar to `Rc<QCell<T>>`, where GPUI's `AppContext` correspond to `QCellOwner`.
    
@@ -632,10 +729,6 @@ But it's not recommended to use `Rc<RefCell<>>` unless necessary. `Rc` and `RefC
    It can also work in multithreading, by having `RwLock<QCellOwner>`. This can allow one lock to protect many pieces of data in different places [^lock_granularity].
    
    [Ghost cell](https://docs.rs/ghost-cell/latest/ghost_cell/) is similar to QCell, but zero-cost, and more restrictive (use closure lifetime as owner id).
-
-[^lock_granularity]: Sometimes, having fine-grained lock is slower because of more lock/unlock operations. But sometimes having fine-grained lock is faster because it allows higher parallelism. Sometimes fine-grained lock can cause deadlock but coarse-grained lock won't deadlock. It depends on exact case.
-
-They are usually used inside reference counting (`Arc<...>`, `Rc<...>`).
 
 ## Rust lock is non-reentrant
 
