@@ -397,15 +397,15 @@ But in single-threaded case, this restriction is not natural at all. No mainstre
 
 > _Mutation xor sharing_ is, in some sense, neither necessary nor sufficient. It’s not _necessary_ because there are many programs (like every program written in Java) that share data like crazy and yet still work fine. It’s also not _sufficient_ in that there are many problems that demand some amount of sharing – which is why Rust has “backdoors” like `Arc<Mutex<T>>`, `AtomicU32`, and—the ultimate backdoor of them all—`unsafe`.
 > 
-> https://smallcultfollowing.com/babysteps/blog/2024/06/02/the-borrow-checker-within/
+> \- [The borrow checker within](https://smallcultfollowing.com/babysteps/blog/2024/06/02/the-borrow-checker-within/)
 
-Rust has free **interior pointer** so that mutable borrow exclusiveness is still important for memory safety:
+Rust has **interior pointer**. A **mutation can invalidate the memory layout that interior pointer points to**. So that mutable borrow exclusiveness is still important for memory safety in single thread:
 
 ### Interior pointer
 
 Interior pointer are the pointers that point into some data inside another object. 
 
-For example, you can take pointer of an element in `Vec`. If the `Vec` grows, it may allocate new memory and copy existing data to new memory, thus the interior pointer to it can become invalid. Mutable borrow exclusiveness can prevent this issue from happening:
+For example, you can take pointer of an element in `Vec`. If the `Vec` grows, it may allocate new memory and copy existing data to new memory, thus the interior pointer to it can become invalid (break the memory layout that interior pointer points to). Mutable borrow exclusiveness can prevent this issue from happening:
 
 ```rust
 fn main() {  
@@ -458,11 +458,11 @@ Compile error:
    |                    ----------------- borrow later used here
 ```
 
-A **mutation can invalidate the memory layout that interior pointer points to**, mutable borrow exclusiveness is still important for memory safety in single-threaded case.
+Note that sometimes mutating can keep validity of interior pointer. For example, changing an element in `Vec<u32>` doesn't invalidate interior pointer to elements, because there is no memory layout change. But Rust by default prevents all mutation when interior pointer exists (unless using interior mutability).
 
 ### Interior pointer in other languages
 
-Note that Golang also supports interior pointer, but doesn't have such restriction. For example, interior pointer into slice:
+Golang also supports interior pointer, but doesn't have such restriction. For example, interior pointer into slice:
 
 ```go
 package main
@@ -489,7 +489,7 @@ Because after re-allocating the slice, the old slice still exists in memory (not
 
 Golang also doesn't have sum type, so there is no equivalent to enum memory layout change in the previous Rust example.
 
-Also, Golang's doesn't allow taking interior pointer to map element value, but Rust allows. Rust's interior pointer is more powerful than Golang's.
+Also, Golang's doesn't allow taking interior pointer to map entry value, but Rust allows. Rust's interior pointer is more powerful than Golang's.
 
 In Java, there is no interior pointer. So no memory safety issue caused by interior pointer.
 
@@ -524,9 +524,7 @@ Mutable borrow exclusiveness is still important in single-threaded case, because
 
 That's why mainstream languages has no mutable borrow exclusiveness, and still works fine in single-threaded case. Java, JS and Python has no interior pointer. Golang and C# have interior pointer, they have GC and restrict interior pointer, so memory safe is still kept without mutable borrow exclusiveness.
 
-The benefit of interior pointer is to allow tight memory layout, without having to do extra heap allocation just to get a reference some inner data.
-
-Also note that, even when using interior pointer, mutation doesn't always invalidte pointers. For example, we take an interior pointer `&mut u32` to an element in `Vec<u32>`, then assigning one element of vec (this won't cause re-allocate) is still memory-safe.
+One benefit of interior pointer is to allow tight memory layout, without having to do extra heap allocation just to get a reference some inner data.
 
 ### Interior mutability summary
 
@@ -537,7 +535,7 @@ Interior mutability allows you to mutate something from an immutable reference t
 Ways of interior mutability:
 
 - `Cell<T>`. It's suitable for simple copy-able types like integer. In the previous contagious borrow example, if the `total_score` is replaced with `Cell<u32>` then mutating it doesn't need mutable borrow of parent thus avoid the issue. `Cell<T>` only supports replacing the whole `T` at once, and doesn't support getting a mutable borrow.
-- `RefCell<T>`, for single-threaded case.It has internal counters tracking how many immutable borrow and mutable borrow currently exist. If it detects violation of mutable borrow exclusiveness, `.borrow()` or `.borrow_mut()` will panic.It can cause crash if there is nested borrow that involves mutation. [See also](https://loglog.games/blog/leaving-rust-gamedev/#dynamic-borrow-checking-causes-unexpected-crashes-after-refactorings)
+- `RefCell<T>`, for single-threaded case.It has internal counters tracking how many immutable borrow and mutable borrow currently exist. If it detects violation of mutable borrow exclusiveness, `.borrow()` or `.borrow_mut()` will panic.It can cause crash if there is nested borrow that involves mutation. 
 - `Mutex<T>` `RwLock<T>`, for locking in multi-threaded case. Note that unnecessary locking can cost performance, and has risk of deadlock. It's not recommended to overuse `Arc<Mutex<T>>` just because it can satisfy the borrow checker.
 - [`QCell<T>`](https://docs.rs/qcell/latest/qcell/). Elaborated below.
 
@@ -665,36 +663,14 @@ The "help: consider borrowing here" suggestion won't solve the compiler error. I
 Returning `Ref` works:
 
 ```rust
-use std::cell::{Ref, RefCell};  
-use std::collections::HashMap;  
-pub struct Parent {  
-    entries: RefCell<HashMap<String, Entry>>,  
-    passed_names: RefCell<Vec<String>>  
-}  
-pub struct Entry {  score: u32  }  
 impl Parent {  
     fn get_entries(&self) -> Ref<HashMap<String, Entry>> {  
         self.entries.borrow()  
-    }  
-    fn add_name(&self, name: &str) {  
-        self.passed_names.borrow_mut().push(name.to_string());  
-    }  
+    }
 }  
-fn main() {  
-    let mut map: HashMap<String, Entry> = HashMap::new();  
-    map.insert("a".to_string(), Entry { score: 100 });  
-    let mut parent = Parent {  
-        entries: RefCell::new(map), passed_names: RefCell::new(vec![])  
-    };  
-    for (name, entry) in &*parent.get_entries() {  
-        if (entry.score > 20) {  
-            parent.add_name(name);  
-        }  
-    }  
-}
 ```
 
-But returning `Ref` defats the purpose of getter abstraction. `Ref` is tightly coupled with `RefCell`. For example, if one day the value returned by `get_entries` become data that's computed on demand:
+But returning `Ref` defeats the purpose of getter abstraction. `Ref` is tightly coupled with `RefCell`. For example, if one day the value returned by `get_entries` become data that's computed on demand:
 
 ```rust
 impl Parent {  
@@ -716,7 +692,14 @@ Then
    |         temporary value created here
 ```
 
-A more general approach is to return `Rc<RefCell<...>>`.
+A more "adaptive" approach is to save referenced data as `Rc<RefCell<...>>`. But it's not recommended to overuse `Rc<RefCell<>>`, because:
+
+- It has performance cost. Reference counting and borrow counting costs peformance.
+- `Rc` has memory leak risk (need to use `Weak` to cut loop)
+- `RefCell` has runtime panic risk. A previous example already shows. [See also](https://loglog.games/blog/leaving-rust-gamedev/#dynamic-borrow-checking-causes-unexpected-crashes-after-refactorings)
+- Its syntax ergonomic is not good. The code will have a lot of "noise" like `.borrow().borrow_mut()` etc.
+
+Similarily, `Arc` is the multi-threaded version of `Rc`.
 
 ### `QCell`
 
