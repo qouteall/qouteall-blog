@@ -399,11 +399,9 @@ But in single-threaded case, this restriction is not natural at all. No mainstre
 > 
 > \- [The borrow checker within](https://smallcultfollowing.com/babysteps/blog/2024/06/02/the-borrow-checker-within/)
 
-Rust has **interior pointer**. A **mutation can invalidate the memory layout that interior pointer points to**. So that mutable borrow exclusiveness is still important for memory safety in single thread:
-
 ### Interior pointer
 
-Interior pointer are the pointers that point into some data inside another object. 
+Rust has **interior pointer**. Interior pointer are the pointers that point into some data inside another object. A **mutation can invalidate the memory layout that interior pointer points to**. So that mutable borrow exclusiveness is still important for memory safety in single thread:
 
 For example, you can take pointer of an element in `Vec`. If the `Vec` grows, it may allocate new memory and copy existing data to new memory, thus the interior pointer to it can become invalid (break the memory layout that interior pointer points to). Mutable borrow exclusiveness can prevent this issue from happening:
 
@@ -427,7 +425,9 @@ Compile error:
   |                  ----------------- immutable borrow later used here
 ```
 
-Another example is about `enum`: interior pointer pointing inside `enum` can also be invalidated, because different enum variants has different memory layout:
+Another example is about `enum`: interior pointer pointing inside `enum` can also be invalidated, because different enum variants has different memory layout [^memory_layout]. In one layout the first 8 bytes is integer, in another layout the first 8 bytes may be a pointer. Treating an integer as a pointer is definitely not memory-safe.
+
+[^memory_layout]: The memory layout here means **how we map between information and in-memory binary data**. It's not just the placement of fields of a struct.
 
 ```rust
 enum DifferentMemoryLayout {  
@@ -535,11 +535,10 @@ Interior mutability allows you to mutate something from an immutable reference t
 Ways of interior mutability:
 
 - `Cell<T>`. It's suitable for simple copy-able types like integer. In the previous contagious borrow example, if the `total_score` is replaced with `Cell<u32>` then mutating it doesn't need mutable borrow of parent thus avoid the issue. `Cell<T>` only supports replacing the whole `T` at once, and doesn't support getting a mutable borrow.
-- `RefCell<T>`, for single-threaded case.It has internal counters tracking how many immutable borrow and mutable borrow currently exist. If it detects violation of mutable borrow exclusiveness, `.borrow()` or `.borrow_mut()` will panic.It can cause crash if there is nested borrow that involves mutation. 
-- `Mutex<T>` `RwLock<T>`, for locking in multi-threaded case. Note that unnecessary locking can cost performance, and has risk of deadlock. It's not recommended to overuse `Arc<Mutex<T>>` just because it can satisfy the borrow checker.
+- `RefCell<T>`, suitable for data structure that does incremental mutation, in single-threaded cases. It has internal counters tracking how many immutable borrow and mutable borrow currently exist. If it detects violation of mutable borrow exclusiveness, `.borrow()` or `.borrow_mut()` will panic.It can cause crash if there is nested borrow that involves mutation. 
+- `Mutex<T>` `RwLock<T>`, for locking in multi-threaded case. Its functionality is similar to `RefCell`. Note that unnecessary locking can cost performance, and has risk of deadlock. It's not recommended to overuse `Arc<Mutex<T>>` just because it can satisfy the borrow checker.
 - [`QCell<T>`](https://docs.rs/qcell/latest/qcell/). Elaborated below.
 
-[^lock_granularity]: Sometimes, having fine-grained lock is slower because of more lock/unlock operations. But sometimes having fine-grained lock is faster because it allows higher parallelism. Sometimes fine-grained lock can cause deadlock but coarse-grained lock won't deadlock. It depends on exact case.
 
 They are usually used inside reference counting (`Arc<...>`, `Rc<...>`).
 
@@ -692,32 +691,116 @@ Then
    |         temporary value created here
 ```
 
-A more "adaptive" approach is to save referenced data as `Rc<RefCell<...>>`. But it's not recommended to overuse `Rc<RefCell<>>`, because:
+A more "adaptive" approach is to save referenced data as `Rc<RefCell<...>>`. But it's NOT recommended to overuse `Rc<RefCell<>>`, because:
 
-- It has performance cost. Reference counting and borrow counting costs peformance.
+- It has (relatively small) performance cost. `Rc` Reference counting and `RefCell` borrow counting costs peformance. (Performance is affected by many factors. It depends on exact case.)
 - `Rc` has memory leak risk (need to use `Weak` to cut loop)
 - `RefCell` has runtime panic risk. A previous example already shows. [See also](https://loglog.games/blog/leaving-rust-gamedev/#dynamic-borrow-checking-causes-unexpected-crashes-after-refactorings)
 - Its syntax ergonomic is not good. The code will have a lot of "noise" like `.borrow().borrow_mut()` etc.
 
-Similarily, `Arc` is the multi-threaded version of `Rc`.
+Similarily, `Arc` is the multi-threaded version of `Rc`. `Mutex` `RwLock` are the multi-threaded version of `RefCell`. It's also not recommended to overuse things like `Arc<Mutex<T>>`:
+
+- `Arc`'s performance cost is larger than `Rc` because it involves atomic operation. When many threads change the same counter in parallel, it can be slow. Atomic operations require the CPU core to hold "exclusive ownership" [^cache_contention] to cache line which can cause cache contention. 
+- `Mutex` `RwLock`'s performance cost is larger than `RefCell` because locking also involves atomic operation, can reduce parallelism and can cause context switch.
+- `Arc` also has memory leak risk (need to use `Weak` to cut loop)
+- `Mutex` and `RwLock` have deadlock risk.
+- Its syntax ergonomic is not good either.
+
+[^cache_contention]: It's actually more complicated and depends on which hardware. [See also](https://en.wikipedia.org/wiki/MOESI_protocol).
 
 ### `QCell`
 
-`QCell` has an internal ID. `QCellOwner` is also an ID. You can only use `QCell` via `QCellOwner`. The borrowing to `QCellOwner` ensures mutable borrow exclusiveness. Using it require passing borrow of `QCellOwner` in argument everywhere.
-  
-   [GPUI](https://zed.dev/blog/gpui-ownership)'s `Model<T>` is similar to `Rc<QCell<T>>`, where GPUI's `AppContext` correspond to `QCellOwner`.
-   
-   QCell will fail to borrow if the owner ID doesn't mismatch. Different to `RefCell`, if owner ID matches, it won't panic just because nested borrow.
-   
-   It can also work in multithreading, by having `RwLock<QCellOwner>`. This can allow one lock to protect many pieces of data in different places [^lock_granularity].
-   
-   [Ghost cell](https://docs.rs/ghost-cell/latest/ghost_cell/) is similar to QCell, but zero-cost, and more restrictive (use closure lifetime as owner id).
+[`QCell<T>`](https://docs.rs/qcell/latest/qcell/) has an internal ID. `QCellOwner` is also an ID. You can only use `QCell` via an `QCellOwner` that has matched ID. 
+
+The borrowing to `QCellOwner` "centralizes" the borrowing of many `QCell`s associated with it, ensureing mutable borrow exclusiveness. Using it require passing borrow of `QCellOwner` in argument everywhere it's used.
+
+QCell will fail to borrow if the owner ID doesn't mismatch. Different to `RefCell`, if owner ID matches, it won't panic just because nested borrow.
+
+Its runtime cost is low: just check whether cell's id matches owner's id.
+
+One advantage of `QCell` is that the duplicated borrow will be compile-time error instead of runtime panic, which helps catch error earlier. If I change the previous `RefCell` panic example into `QCell`:
+
+```rust
+pub struct Parent { total_score: u32, children: Vec<Child> }
+pub struct Child { score: u32 }
+impl Parent {
+    fn get_children(&self) -> &Vec<Child> { &self.children }
+    fn add_score(&mut self, score: u32) { self.total_score += score; }
+}
+fn main() {
+    let owner: QCellOwner = QCellOwner::new();
+    let parent: QCell<Parent> = QCell::new(&owner, Parent{total_score: 0, children: vec![Child{score: 2}]});
+    for child in parent.ro(&owner).get_children() {
+        parent.rw(&mut owner).add_score(child.score);
+    }
+}
+```
+
+Compile error:
+
+```
+17 |     for child in parent.ro(&owner).get_children() {
+   |                  --------------------------------
+   |                  |         |
+   |                  |         immutable borrow occurs here
+   |                  immutable borrow later used here
+18 |         parent.rw(&mut owner).add_score(child.score);
+   |                   ^^^^^^^^^^ mutable borrow occurs here
+
+```
+
+[GPUI](https://zed.dev/blog/gpui-ownership)'s `Model<T>` is similar to `Rc<QCell<T>>`, where GPUI's `AppContext` correspond to `QCellOwner`.
+
+It can also work in multithreading, by having `RwLock<QCellOwner>`. This can allow one lock to protect many pieces of data in different places [^lock_granularity].
+
+[^lock_granularity]: Sometimes, having fine-grained lock is slower because of more lock/unlock operations. But sometimes having fine-grained lock is faster because it allows higher parallelism. Sometimes fine-grained lock can cause deadlock but coarse-grained lock won't deadlock. It depends on exact case.
+
+[Ghost cell](https://docs.rs/ghost-cell/latest/ghost_cell/) and [LCell](https://docs.rs/qcell/latest/qcell/struct.LCell.html) are similar to QCell, but use closure lifetime as owner id. They are zero-cost, and more restrictive (use closure lifetime as owner id).
 
 ## Rust lock is non-reentrant
 
-`MutexGuard` drops at the end of scope, not drop on the last use. NLL doesn't apply.
+Re-entrant lock means one thread can lock one lock, then lock it again, then unlock twice, without deadlocking. 
 
+For example, in Java, the two-layer locking doesn't deadlock:
 
+```java
+public class Main {  
+    public static void main(String[] args) {  
+        Object lock = new Object();  
+        synchronized (lock) {  
+            synchronized (lock) {  
+                System.out.println("within two layers of locking");  
+            }  
+        }  
+        System.out.println("finish");  
+    }  
+}
+```
+
+But in Rust the equivalent will deadlock:
+
+```rust
+fn main() {  
+    let mutex: Mutex<u64> = Mutex::new(0);  
+    {  
+        let mut g1: MutexGuard<u64> = mutex.lock().unwrap();  
+        {  
+            println!("going to do second-layer lock");  
+            let mut g2 = mutex.lock().unwrap();  
+            println!("within two layers of locking");  
+        }  
+    }  
+    println!("finish");  
+}
+```
+
+It prints `going to do second-layer lock` then deadlocks.
+
+In Rust, it's important to know which scope is responsible for locking. You cannot just casually do locking like in Java.
+
+Another important thing is that Rust only unlocks at the end of scope by default. When `mutex.lock().unwrap()`, it gives a `MutexGuard<T>`. `MutexGuard` implements `Drop`, so it will drop at the end of scope.
+
+For the local variables whose type doesn't implement `Drop`, they are dropped after their last use. This is called NLL (non-lexical lifetime).
 
 ## Just clone the data
 
