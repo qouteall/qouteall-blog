@@ -25,6 +25,7 @@ API usability is important to developer productivity.
 
 - Missing documentation details about exact format of input/output data or missing examples. The document writer, under **curse of knowledge**, may assume the user know, but most users don't know.
 - Doesn't provide example usages. Examples are valuable because **a working example cannot omit details**. Without detailed documentation, developers usually test the API manually to figure out details. **Tweaking (tinkering) a working example makes learning more proactive and efficient**.
+- The document lacks clearifications. Many words are ambiuous. For example "immutable" can mean 1. reference is immutable, referenced object is mutable 2. reference is mutable, referenced object is immutable 3. reference and referenced object are both immutable 4. it's just read-only, the referenced object can be mutated by other ways ...
 - Is very hard to do manual testing. No simple REPL. Cannot easily setup virtual environments. Cannot easily take and load snapshots. Cannot call from simple commands. Cannot easily undo mistakes made in testing. Cannot easily use curl to test a Restful API.
 - Lacking debugging and visualization tools. Doesn't allow easily check internal state or intermediary data. Doesn't allow easy profiling. 
   An example is using efficient binary data format instead of text format, but lack tools to inspect and edit the binary data (one main advantage of text-based data format is that it's easy to inspect and edit without special tools for the format).

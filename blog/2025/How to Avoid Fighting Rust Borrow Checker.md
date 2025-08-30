@@ -1,9 +1,12 @@
+---
+date: 2025-08-30
+tags:
+  - Programming
+---
 
 # How to Avoid Fighting Rust Borrow Checker
 
 <!-- truncate -->
-
-It's unproductive to fight with Rust borrow checker, by changing some code, try to compile, then change other code, try to compile, and so on. Rust developers should clearly knowing what things are not allowed by borrow checker, or hard to do under borrow checker in advance.
 
 The 3 important facts in Rust:
 
@@ -13,11 +16,7 @@ The 3 important facts in Rust:
 
 [^about_sharing]: Reference counting (`Rc`, `Arc`) allows sharing. Here I mean "native" Rust ownership relation form a tree.
 
-Rust applies **local** constraints. Here **local** means it doesn't analyze the whole application's code, and just analyze within individual scopes, using types to encode information. Outside of the current scope, all information that's not encoded into type are not considered.
-
-Unfortunately the constraints limit expressiveness of referencing[^limit_expressiveness]. Safe Rust will reject some safe programs.
-
-[^limit_expressiveness]: Safe Rust limits expressiveness related to referencing and memory layout. But safe Rust is still expressive enough to be Turing-complete.
+Note that Rust borrow checker can reject some incorrect programs but also reject some correct programs.
 
 ## Considering reference shape
 
@@ -42,12 +41,11 @@ The most fighting with borrow checker happens in the **borrow-check-unfriendly c
 
 The solutions in borrow-checker-unfriendly cases (will elaborate below):
 
-- Avoid contagious borrow.
-- Try to refactor reference structure. Use data-oriented design instead of OOP design.
+- Data-oriented design. Avoid unnecessary getter and setter. Use split borrow to avoid contagious borrow issue.
+- Avoid just-for-convenience circular reference.
 - Use ID/handle to replace borrow.
-- Avoid mutation (pure-functional-style).
-- `Arc<QCell<T>>`
-- `Arc<RwLock<T>>`
+- Avoid mutation or defer mutation.
+- `Arc<QCell<T>>`, `Arc<RwLock<T>>`
 - Use unsafe and raw pointer.
 
 ## Contagious borrow issue
@@ -162,7 +160,7 @@ Mutate-by-recreate can be useful for cases like:
 
 Mutate-by-recreate can be optimized by sharing unchanged sub-structures. See also: [Persistent data structure](https://en.wikipedia.org/wiki/Persistent_data_structure), [Rope](https://en.wikipedia.org/wiki/Rope_(data_structure)).
 
-Another solution is to **treat mutation as data**. When you want to mutate something, you **append a mutation command into command queue** (the command can also be called "event" or "log"). Then execute the mutation commands at once. (Note that command should not indirectly borrow base data.)
+Another solution is to **treat mutation as data**. When you want to mutate something, you **append a mutation command into command queue**. Then execute the mutation commands at once. (Note that command should not indirectly borrow base data.)
 
 - In the process of creating new commands, it only do immutable borrow to base data, and only one mutable borrow to the command queue. 
 - When executing the commands, it only do one mutable borrow to base data at a time.
@@ -280,6 +278,7 @@ Here are some common use cases of circular reference:
 - Case 2: The parent registers a callback to child. When something happened on child, the callback is called, and parent do something. It that case, parent references child, child references callback, callback references parent (e.g. lambda capture).
 - Case 3: In a tree structure, the child references parent allows getting the path from one node to root node. Without it, you cannot get the path from just one node reference, and need to store variable-length path information.
 - Case 4: The data is inherently a graph structure that can contain cycles.
+- Case 5: The data requires self-reference.
 
 ### Avoid "just-for-convenience" circular reference in Rust
 
@@ -312,14 +311,23 @@ Solutions:
 - Use reference counting and interior mutability (previously mentioned). This is **recommended when there are many different types of components and you want to add new types easily** (like in GUI).
 - Use ID/handle to replace borrow (elaborated later). This is **recommended when you want more compact memory layout, and you rarely need to add new types into data** (suitable for data-intensive cases, can obtain better performance due to cache-friendliness).
 
+### Self-reference
+
+Self-reference means a struct contains an interior pointer to another part of data that it owns.
+
+Zero-cost self reference requires `Pin` and `unsafe`. Normal Rust mutable borrow allow moving the value out (by `mem::replace`, or `mem::swap`, etc.). `Pin` disallows that, as self-reference pointer can be invalidated by moving. They are complex and hard to use. Workarounds includes separating child and use reference counting so it's no longer self-reference. 
+
 ## Use handle/ID to replace borrow
 
 Data-oriented design:
 
 - Try to pack data into contagious array, (instead of objects laid out sparsely managed by allocator).
 - Use handle (e.g. array index) or ID to replace reference.
+- **Decouple object ID with memory address**. An ID can be serialized (save to disk and sent via network) but a pointer cannot [^pointer_serialize].
 - The different fields of the same object doesn't necessarily need to be together in memory. The one field of many objects can be put together (parallel array).
 - Manage memory based on **arenas**.
+
+[^pointer_serialize]: Actually, pointer is integer and can serialize, but you cannot use the same address in another process (or after process restart), because there may be other data in the same address.
 
 One kind of arena is [slotmap](https://docs.rs/slotmap/latest/slotmap/):
 
@@ -341,9 +349,11 @@ One important fact: when we use ID/handle to replace borrow, the borrow checker 
 
 ### Entity component system
 
-Entity component system (ECS) is a way of organizing data that's different to OOP. In OOP, an object's fields are laid together in memory. But in ECS, each object is separated into components. The same kind of components for different objects are managed together (often laid together in memory). It can improve cache-friendliness.
+Entity component system (ECS) is a way of organizing data that's different to OOP. In OOP, an object's fields are laid together in memory. But in ECS, each object is separated into components. The same kind of components for different entities are managed together (often laid together in memory). It can improve cache-friendliness. (Note that performance is affected by many factors and depends on exact case.)
 
-ECS also favors composition over inheritance.
+ECS also favors composition over inheritance. Inheritance tend to bind code with specific types that cannot easily compose.
+
+(For example, in an OOP game, `Player` extends `Entity`, `Enemy` extends `Entity`. There is a special enemy `Ghost` that ignores collision and also extends `Enemy`. But one day if you want to add a new player skill that temporarily ignores collision like `Ghost`, you cannot make `Player` extend `Ghost` and have to duplicate code. In ECS that can be solved by just combining special collision component.)
 
 ### Generalized reference and two reference semantics
 
@@ -367,7 +377,7 @@ The generalized reference is separated into two kinds: strong and weak:
 
 The major differences:
 
-- For weak generalized references, **every data access may fail, and requires error handling**.
+- For weak generalized references, **every data access may fail, and requires error handling**. (just panic is also a kind of error handling)
 - For strong generalized reference, the **lifetime of referenced object is tightly coupled with the existence of reference**:
   - In Rust, the coupling comes from borrow checker. The borrow is limited by lifetime and other constraints.
   - In GC langauges, the coupling comes from GC. The existence of a strong reference keeps the object alive. Note that in GC languages there are **live-but-unusable objects** (e.g. Java `FileInputStream` is unusable after closing).
@@ -757,9 +767,9 @@ It can also work in multithreading, by having `RwLock<QCellOwner>`. This can all
 
 [Ghost cell](https://docs.rs/ghost-cell/latest/ghost_cell/) and [LCell](https://docs.rs/qcell/latest/qcell/struct.LCell.html) are similar to QCell, but use closure lifetime as owner id. They are zero-cost, and more restrictive (use closure lifetime as owner id).
 
-## Rust lock is non-reentrant
+### Rust lock is not re-entrant
 
-Re-entrant lock means one thread can lock one lock, then lock it again, then unlock twice, without deadlocking. 
+Re-entrant lock means one thread can lock one lock, then lock it again, then unlock twice, without deadlocking. Rust lock is not re-entrant. (Rust lock is also responsible for keeping mutable borrow exclusiveness. Allowing re-entrant can produce two `&mut` for same object.)
 
 For example, in Java, the two-layer locking doesn't deadlock:
 
@@ -796,50 +806,49 @@ fn main() {
 
 It prints `going to do second-layer lock` then deadlocks.
 
-In Rust, it's important to know which scope is responsible for locking. You cannot just casually do locking like in Java.
+In Rust, it's important to **be clear about which scope holds lock**. You cannot just casually do locking like in Java/C# (this method touch that shared data so add `synchronized` [^casual_locking]). Golang lock is also not re-entrant.
 
-Another important thing is that Rust only unlocks at the end of scope by default. When `mutex.lock().unwrap()`, it gives a `MutexGuard<T>`. `MutexGuard` implements `Drop`, so it will drop at the end of scope.
+[^casual_locking]: Although re-entrant lock is more tolerant to this kind of casual locking, not being clear about locking means risk of deadlock. Casual locking is not recommended even in Java.
 
-For the local variables whose type doesn't implement `Drop`, they are dropped after their last use. This is called NLL (non-lexical lifetime).
+Another important thing is that Rust only unlocks at the end of scope by default. `mutex.lock().unwrap()` gives a `MutexGuard<T>`. `MutexGuard` implements `Drop`, so it will drop at the end of scope. It's different to the local variables whose type doesn't implement `Drop`, they are dropped after their last use (unless borrowed). This is called NLL (non-lexical lifetime).
 
 ## Just clone the data
 
 For example, if borrow checker has trouble with a string borrowing, you can just clone the string. It's usually fine as long as it's not performance bottleneck.
 
-## Summarize the contagious things
+Note that there are two different kinds of data:
 
-- Borrowing that cross function boundary is contagious. Just borrowing a wheel of car can indirectly borrow the whole car.
-- Mutate-by-recreate is contagious. Recreating child require also recreating parent that holds the new child, and parent's parent, and so on.
-- Lifetime annotation is contagious. If some type has a lifetime parameter `'a`, then every type that holds it and every function that processes it must also have the lifetime parameter `'a`. Refactoring that adds/remove lifetime parameter may be a huge work.
-- In current borrow checker, one branch's borrowing is contagious to the whole branching scope.
-
+- The identity of object is important. Cloning it is treated as adding a new entity into the system.
+- The identity of object is not important. Only object content matters. Cloning doesn't affect semantics. Cloning is fine.
 
 ## Using unsafe
 
-By using unsafe you can freely manipulate pointers and are not restricted by borrow checker. But writing unsafe Rust is harder than just writing C, because you need to carefully avoid breaking the constraints that safe Rust code relies on. A bug in unsafe code can cause issue in safe code. Also be wary about undefined behaviors that may cause wrong optimization. 
+By using unsafe you can freely manipulate pointers and are not restricted by borrow checker. But writing unsafe Rust is harder than just writing C, because you need to **carefully avoid breaking the constraints that safe Rust code relies on**. A bug in unsafe code can cause issue in safe code.
 
-Writing unsafe Rust correctly is a hard topic. Here are some traps in unsafe:
+Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
 
 - Don't violate mutable borrow exclusiveness. 
   - A `&mut` cannot overlap with any other borrow that overlaps.
-  - Overlap: two borrows to the same object overlaps. One borrow to parent and another borrow to child inside by parent also overlaps.
+  - The overlap here also includes interior pointer. A `&mut` to an object cannot co-exist with any other borrow into any part of that object.
   - Violating that rule cause undefined behavior and can cause wrong optimization. Rust adds `noalias` attribute for mutable borrows into LLVM IR. LLVM will heavily optimize based on `noalias` (e.g. merging and reorder reads/writes). [See also](https://doc.rust-lang.org/nomicon/aliasing.html)
-  - Use raw pointer `*mut T` if you want to alias and mutate.
-- Using `a = b` will drop the original object in place of `a`. If `a` is uninitialized, then it will drop an unitialized object which is undefined behavior. Use `addr_of_mut!(...).write(...)` [See also](https://lucumr.pocoo.org/2022/1/30/unsafe-rust/)
+  - The above rule doesn't apply to raw pointer `*mut T`.
+  - It's very easy to accidentally violate that rule when using borrows in unsafe. It's recommended to always use raw pointer and avoid using borrow (including slice borrow) in unsafe code. [Related1](https://chadaustin.me/2024/10/intrusive-linked-list-in-rust/), [Related2](https://web.archive.org/web/20230307172822/https://zackoverflow.dev/writing/unsafe-rust-vs-zig/)
+- Pointer provenance.
+  - Two pointers created from two provenance is considered to never alias. If their address equals, it's undefined behavior.
+  - Converting an integer to pointer gets a pointer with no provenance, which is undefined behavior, unless the integer was converted from a pointer.
+  - Adding a pointer with an integer doesn't change provenance.
+- Using uninitialized memory is undefined behavior.
+- `a = b` will drop the original object in place of `a`. If `a` is uninitialized, then it will drop an unitialized object, which is undefined behavior. Use `addr_of_mut!(...).write(...)` [Related](https://lucumr.pocoo.org/2022/1/30/unsafe-rust/)
 - Handle panic unwinding.
 - ...
 
-[Unsafe Rust Is Harder Than C | Chad Austin](https://chadaustin.me/2024/10/intrusive-linked-list-in-rust/)
+Modern compilers tries to optimize as much as possible. **To optimize as much as possible, the compiler makes assumptions as much as possible. Breaking any of these assumption can lead to wrong optimization.** That's why it's so complex. [See also](https://queue.acm.org/detail.cfm?id=3212479)
 
-[When Zig is safer and faster than Rust](https://web.archive.org/web/20230307172822/https://zackoverflow.dev/writing/unsafe-rust-vs-zig/)
-
-A lot of syntax cannot be used on pointers:
+Unfortunately Rust's syntax ergonomics on raw pointer is currently not good:
 
 - If `p` is a raw pointer, you cannot write `p->field` (like in C/C++), and can only write `(*p).field`
 - Raw pointer cannot be method receiver (self).
-- There is no "slice using raw pointer".
-
-
+- There is no "raw pointer to slice". You need to manually `.add()` pointer and dereference. Bound checking is also manual.
 
 ## Contagious borrowing between branches
 
@@ -867,39 +876,188 @@ fn get_default<'r, K: Hash + Eq + Copy, V: Default>(
 
 Becaue the first branch `Some(value) => ...`'s output value indirectly mutably borrows `map`, the second branch has to also indirectly mutably borrow `map`, which conflicts with another mutable borrow in scope.
 
-## Tokio require future to be `Send + Sync + 'static`
+## Summarize the contagious things
 
-Tokio is a popular async runtime. Submitting task require task to be `Send + Sync + 'static`. In an `async` function, passing data across suspend point also require `Send + Sync + 'static`.
-
-The lifetime `'static`'s name is unintuitive. In C, `static` can create global-variable-within-function. In OOP languages like C/C++, Java, C#, `static` means global variable. In Rust, `'static` inlcudes borrow to global variable. But `'static` also includes the non-borrow types that itself has ownership.
-
-
-
-## Extracting variable and inlining variable has side effect
-
-In GC languages, extracting an expression into a local variable usually doesn't change program semantics (other than execution order change). And inlining a variable that's used only once doesn't change semantics (other than execution order change).
-
-But in Rust it's different:
-
-- A temporary value drops immediately after evaluating, unless it's put into a local variable.
-- A value (including borrows) that doesn't implement `Drop` will drop after its last use (except when TODO). This is called NLL (non-lexical lifetime).
-- A value that implements `Drop` will drop at the end of scope.
-
-Inlining a local variable can turn it into a temporary value that's dropped early, thus cause issues with borrow checker.
-
-There is also a feature called **reborrow**. Normally mutable borrow `&mut T` can only be moved and cannot be copied. But reborrow can sometimes allow you to use a mutable borrow twice.
-
-Reborrow [haibane_tenshi's blog - Obscure Rust: reborrowing is a half-baked feature](https://haibane-tenshi.github.io/rust-reborrowing/) extracting variable makes reborrow not working
-
-[better documentation of reborrowing · Issue #788 · rust-lang/reference](https://github.com/rust-lang/reference/issues/788)
-
-## `mem::replace`
+- Borrowing that cross function boundary is contagious. Just borrowing a wheel of car can indirectly borrow the whole car.
+- Mutate-by-recreate is contagious. Recreating child require also recreating parent that holds the new child, and parent's parent, and so on.
+- Lifetime annotation is contagious. If some type has a lifetime parameter `'a`, then every type that holds it and every function that processes it must also have the lifetime parameter `'a`. Refactoring that adds/remove lifetime parameter may be a huge work.
+- In current borrow checker, one branch's borrowing is contagious to the whole branching scope.
 
 
-## Self-reference
+## `Send` and `Sync`
 
-Using self reference usually require `Pin` and `unsafe`.
+Rust favors tree-shaped ownership. Each object is owned by exactly one place. If you send something to another thread, only one thread can access it, so it's thread-safe. No risk of data race.
 
-Normal rust mutable borrow allow moving the value out, by `mem::replace`, or swap. `Pin` disallows that.
+Sending an immutable borrow to another thread is also fine as long as the shared data is actually immutable.
 
-workaround: store id/index instead of interior pointer.
+But there are exceptions. One exception is interior mutability, like `Cell` and `RefCell`. Because interior mutability, the data pointed by immutable borrow `&T` may no longer actually be immutable. So Rust prevents sharing `&Cell<T>` and `&RefCell<T>` by making `Cell<T>` and `RefCell<T>` not `Sync`. If `X` is `Sync` then `&X` is `Send`. If `X` is not `Sync` then `&X` is not `Send`. This prevents `Cell` and `RefCell` from being shared across threads. 
+
+But `&Mutex<T>` can be shared because lock protects them. Also immutable reference to atomic cells like `&AtomicU32` can be shared because of atomicity. `Mutex<T>` and `AtomicU32` are `Sync` so `&Mutex<T>` and `&AtomicU32` are `Send`.
+
+There are things that are `Sync` but not `Send`, like `MutexGuard`. If something is already locked, sharing its reference to other threads temporarily is fine. But moving a `MutexGuard` to another thread is not fine because locking is tied to thread.
+
+## When using async runtime
+
+Tokio is a popular async runtime. 
+
+In Tokio, submitting a task require the future to be `Send` and `'static`.
+
+```rust
+pub fn spawn<F>(future: F) -> JoinHandle<F::Output>  
+where  
+    F: Future + Send + 'static,  
+    F::Output: Send + 'static,
+```
+
+It requires the future need to be `Send` and `'static`:
+
+- `'static` means that the future is standalone and doesn't borrow other things. If the future need to share data with outside, pass `Arc<T>` into (not `&Arc<T>`). (Note that the "static" here is different to "static" in C/C++/Java/C#. In Rust, borrowing global variable is `'static` but standalone values are also `'static`.)
+- `Send` means that the future can be sent across threads. Tokio use work-stealing, which means that one thread's task can be stolen by other threads that currently have no work.
+
+Another important trap is that, the normal sleep `std::thread::sleep` and normal locking `std::sync::Mutex` should not be used when using async runtime, because they block using OS functionality without telling async runtime, so they will block the async runtime's scheduling thread. In Tokio, use `tokio::sync::Mutex` and `tokio::time::sleep`.
+
+## Side effect of extracting and inlining variable
+
+In C and GC languages:
+
+- If a variable is used only once, you can inline that variable. This will only change execution order (except in short-circuit [^short_circuit]).
+- Extracting a variable will only change execution order (except when variable is used twice or in short-circuit).
+
+[^short_circuit]: `a() || b()` will not execute `b()` if `a()` returns true. `a() && b()` will not execute `b()` if `a()` returns false.
+
+But in Rust it's different. 
+
+### Lifetime of temporary value
+
+- A temporary value drops immediately after evaluating, except when there is a borrow to it, its lifetime extends by the borrow. It's called temporary lifetime extension. 
+  - There are implicit ways of creating borrow. `DeRef` can implicitly borrow, `a.b()` can implicitly borrow `a`
+  - `match`, `if let` or `while let` can also borrow which extend the lifetime
+  - Sometimes temporary lifetime extension doesn't work, such as `let guard = Mutex::new(0).lock().unwrap();`
+- A value that's put into a local variable:
+  - If its type implements `Drop`, then it will drop at the end of scope (one example is `MutexGuard`).
+  - If its type doesn't implement `Drop`, then it will drop after its last use. This is called NLL (non-lexical lifetime).
+
+Simplify: 
+
+- Putting a temporary value to local variable usually make it live longer.
+- Inlining a local variable usually make it live shorter.
+
+### Reborrow
+
+Normally mutable borrow `&mut T` can only be moved and cannot be copied. 
+
+But **reborrow** is a feature that sometimes allow you to use a mutable borrow multiple times. Reborrow is very common in real-world Rust code. [Reborrow is not explicitly documented](https://github.com/rust-lang/reference/issues/788). [See also](https://haibane-tenshi.github.io/rust-reborrowing/)
+
+Example:
+
+```rust
+fn mutate(i: &mut u32) -> &mut u32 {  
+    *i += 1;  
+    i  
+}  
+fn mutate_twice(i: &mut u32) -> &mut u32 {  
+    mutate(i);  
+    mutate(i)  
+}
+```
+
+That works. Rust will implicitly treat `mutate(i)` as `mutate(&mut *i)` so that `i` is not moved into and become usable again.
+
+But extracting the second `i` into a local variable early make it not compile:
+
+```rust
+fn mutate_twice(i: &mut u32) -> &mut u32 {  
+    let j: &mut u32 = i;  
+    mutate(i);  
+    mutate(j)  
+}
+```
+
+```
+7  | fn mutate_twice(i: &mut u32) -> &mut u32 {
+   |                    - let's call the lifetime of this reference `'1`
+8  |     let j: &mut u32 = i;
+   |                       - first mutable borrow occurs here
+9  |     mutate(i);
+   |            ^ second mutable borrow occurs here
+10 |     mutate(j)
+   |     --------- returning this value requires that `*i` is borrowed for `'1`
+```
+
+### Move cloned data into closure
+
+`tokio::spawn` require future to be standalone and doesn't borrow other things (`'static`). 
+
+Implicitly passing it is passing `&Arc<T>` makes the future borrow other things and be not standalone.
+
+```rust
+#[tokio::main]  
+async fn main() {  
+    let data: Arc<u64> = Arc::new(1);  
+  
+    let task1_handle = tokio::spawn(async move {  
+        println!("From task: Data: {}", *data);  
+    });  
+  
+    println!("From main thread: Data: {}", *data);  
+}
+```
+
+Compile error
+
+```
+6    |     let data: Arc<u64> = Arc::new(1);
+     |         ---- move occurs because `data` has type `Arc<u64>`, which does not implement the `Copy` trait
+7    |
+8    |     let task1_handle = tokio::spawn(async move {
+     |                                     ---------- value moved here
+9    |         println!("From task: Data: {}", *data);
+     |                                          ---- variable moved due to use in coroutine
+...
+12   |     println!("From main thread: Data: {}", *data);
+     |                                             ^^^^ value borrowed here after move
+```
+
+Manually clone the `Arc<T>` and put it into local variable works. It will make the cloned version to move into future:
+
+```rust
+#[tokio::main]  
+async fn main() {  
+    let data: Arc<u64> = Arc::new(1);  
+  
+    let data2 = data.clone(); // this is necessary
+    let task1_handle = tokio::spawn(async move {  
+        println!("From task: Data: {}", *data2);  
+    });  
+  
+    println!("From main thread: Data: {}", *data);  
+}
+```
+
+Note that inlining `data2` local variable make it not compile:
+
+```rust
+#[tokio::main]  
+async fn main() {  
+    let data: Arc<u64> = Arc::new(1);  
+    let task1_handle = tokio::spawn(async move {  
+        println!("From task: Data: {}", *data.clone());  
+    });  
+    println!("From main thread: Data: {}", *data);  
+}
+```
+
+```
+5    |     let data: Arc<u64> = Arc::new(1);
+     |         ---- move occurs because `data` has type `Arc<u64>`, which does not implement the `Copy` trait
+6    |     let task1_handle = tokio::spawn(async move {
+     |                                     ---------- value moved here
+7    |         println!("From task: Data: {}", *data.clone());
+     |                                          ---- variable moved due to use in coroutine
+8    |     });
+9    |     println!("From main thread: Data: {}", *data);
+     |                                             ^^^^ value borrowed here after move
+```
+
+[There is a proposal on improving syntax ergonomic of it.](https://rust-lang.github.io/rust-project-goals/2024h2/ergonomic-rc.html)
+
