@@ -719,25 +719,6 @@ Similarily, `Arc` is the multi-threaded version of `Rc`. `Mutex` `RwLock` are th
 
 [^cache_contention]: It's actually more complicated and depends on which hardware. 
 
-### `Arc` is not always fast
-
-`Arc` use atomic operations to change its reference count.
-
-However, when many threads frequently change the same atomically counter, performance can degrade. The more threads touching it, the slower it is.
-
-Modern CPUs use cache coherency protocol (e.g. [MOESI](https://en.wikipedia.org/wiki/MOESI_protocol)). **Atomic operations often require the CPU core to hold "exclusive ownership" to cache line** (this may vary between different hardware). Many threads frequently doing so cause cache contention, similar to locking, but on hardware.
-
-[Example 1](https://web.archive.org/web/20250708051211/https://www.conviva.com/platform/the-concurrency-trap-how-an-atomic-counter-stalled-a-pipeline/), [Example 2](https://pkolaczk.github.io/server-slower-than-a-laptop/)
-
-Solutions:
-
-- Avoid sharing the same reference count. Copying data is sometimes better.
-- [arc_swap](https://docs.rs/arc-swap/latest/arc_swap/). It uses [hazard pointer](https://en.wikipedia.org/wiki/Hazard_pointer) and other mechanics to increase performance.
-- [trc](https://docs.rs/trc/1.2.4/trc/) and [hybrid_rc](https://docs.rs/hybrid-rc/latest/hybrid_rc/). They use per-thread not-atomic counter, and another global counter for how many threads use it. This can make changing shared refernce count be less frequent, getting higher performance.
-- [aarc](https://docs.rs/aarc/latest/aarc/) and [crossbeam_epoch](https://docs.rs/crossbeam-epoch/latest/crossbeam_epoch/). Use epoch-based memory reclamation.
-
- These deferred memory reclamation techniques (hazard pointer, epoch-based) are also used in lock-free data structures. If one thread can read an element while another thread removes and frees the same element in parallel, it will not be memory-safe (this issue doesn't exist in GC languages).
-
 ### `QCell`
 
 [`QCell<T>`](https://docs.rs/qcell/latest/qcell/) has an internal ID. `QCellOwner` is also an ID. You can only use `QCell` via an `QCellOwner` that has matched ID. 
@@ -841,6 +822,27 @@ Note that there are two different kinds of data:
 - The identity of object is important. Cloning it is treated as adding a new entity into the system.
 - The identity of object is not important. Only object content matters. Cloning doesn't affect semantics. Cloning is fine.
 
+
+## `Arc` is not always fast
+
+`Arc` uses atomic operations to change its reference count.
+
+However, when many threads frequently change the same atomic counter, performance can degrade. The more threads touching it, the slower it is.
+
+Modern CPUs use cache coherency protocol (e.g. [MOESI](https://en.wikipedia.org/wiki/MOESI_protocol)). **Atomic operations often require the CPU core to hold "exclusive ownership" to cache line** (this may vary between different hardware). Many threads frequently doing so cause cache contention, similar to locking, but on hardware.
+
+[Example 1](https://web.archive.org/web/20250708051211/https://www.conviva.com/platform/the-concurrency-trap-how-an-atomic-counter-stalled-a-pipeline/), [Example 2](https://pkolaczk.github.io/server-slower-than-a-laptop/)
+
+Solutions:
+
+- Avoid sharing the same reference count. Copying data is sometimes better.
+- [arc_swap](https://docs.rs/arc-swap/latest/arc_swap/). It uses [hazard pointer](https://en.wikipedia.org/wiki/Hazard_pointer) and other mechanics to reduce atomic operations.
+- [trc](https://docs.rs/trc/1.2.4/trc/) and [hybrid_rc](https://docs.rs/hybrid-rc/latest/hybrid_rc/). They use per-thread non-atomic counter, and another global atomic counter for how many threads use it. This can make atomic operations be less frequent, getting higher performance.
+- [aarc](https://docs.rs/aarc/latest/aarc/) and [crossbeam_epoch](https://docs.rs/crossbeam-epoch/latest/crossbeam_epoch/). Use epoch-based memory reclamation.
+
+ These deferred memory reclamation techniques (hazard pointer, epoch-based) are also used in lock-free data structures. If one thread can read an element while another thread removes and frees the same element in parallel, it will not be memory-safe (this issue doesn't exist in GC languages).
+
+
 ## Using unsafe
 
 By using unsafe you can freely manipulate pointers and are not restricted by borrow checker. But writing unsafe Rust is harder than just writing C, because you need to **carefully avoid breaking the constraints that safe Rust code relies on**. A bug in unsafe code can cause issue in safe code.
@@ -850,7 +852,7 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
 - Don't violate mutable borrow exclusiveness. 
   - A `&mut` cannot overlap with any other borrow that overlaps.
   - The overlap here also includes interior pointer. A `&mut` to an object cannot co-exist with any other borrow into any part of that object.
-  - Violating that rule cause undefined behavior and can cause wrong optimization. Rust adds `noalias` attribute for mutable borrows into LLVM IR. LLVM will heavily optimize based on `noalias` (e.g. merging and reorder reads/writes). [See also](https://doc.rust-lang.org/nomicon/aliasing.html)
+  - Violating that rule cause undefined behavior and can cause wrong optimization. Rust adds `noalias` attribute for mutable borrows into LLVM IR. LLVM will heavily optimize based on `noalias` (including merging and reorder reads/writes. Being able to merge and reorder reads/writes enables a lot of optimization.). [See also](https://doc.rust-lang.org/nomicon/aliasing.html)
   - The above rule doesn't apply to raw pointer `*mut T`.
   - It's very easy to accidentally violate that rule when using borrows in unsafe. It's recommended to always use raw pointer and avoid using borrow (including slice borrow) in unsafe code. [Related1](https://chadaustin.me/2024/10/intrusive-linked-list-in-rust/), [Related2](https://web.archive.org/web/20230307172822/https://zackoverflow.dev/writing/unsafe-rust-vs-zig/)
 - Pointer provenance.
