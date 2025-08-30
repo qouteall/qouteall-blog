@@ -1,4 +1,5 @@
 .obsidian
+**/*.bkp
 
 # Dependencies
 /node_modules

@@ -250,14 +250,14 @@ fn paradox(program: Program) {
 
 - [Gödel's incomplete theorem](https://en.wikipedia.org/wiki/G%C3%B6del%27s_incompleteness_theorems). 
   - Firstly encode symbols, statements and proofs into data [^godel_integer]. The statements that contain free variables (e.g. x is a free variable in "x is an even number") can also be encoded (it can represent "functions" and even "higher-order functions").
-  - There `is_proof(theory, proof)` allows determining whether a proof successfully proves a theory. 
+  - `is_proof(theory, proof)` allows determining whether a proof successfully proves a theory. 
   - Then `provable(theory)` is defined as whether there exists a `proof` that satisfies `is_proof(theory, proof)`.
-  - Negating its result tests whether a theory is unprovable: `unprovable(theory) = ¬provable(theory)`
+  - Unprovable is inverse of provable: `unprovable(theory) = !provable(theory)`
   - Let `H(x) = unprovable(x(x))`. Then let `G = H(H) = unprovable(H(H)) = unprovable(G)` [^godel_substitution], which creates a self-referencial statement: `G`  means `G` is not provable. If `G` is true, then `G` is not provable, then `G` is false, which is a paradox.
 
 [^godel_integer]: Specifically, Gödel encodes symbols, statements and proofs into integer, called Gödel number. There exists many ways of encoding symbols/statements/proofs as data, and which exact way is not important. For simplicity, I will treat them all as data, and ignore the conversion between data and symbol/statements/proofs.
 
-[^godel_substitution]: Here `x(x)` is symbol substitution. replacing the free variable `x` with `x`, while avoid making two different variables same name by renaming when necessary. `x(x)` is `substitute(x, 'x', x)`. It's also similar to Y combinator: `Y = f -> (x -> f(x(x))) (x -> f(x(x)))`. In that case `f = unprovable`, `H = x -> f(x(x))`, `Y(f) = H(H)`, `Y(f)` is a fixed point of `f`: `f(Y(f)) = Y(f)`. `G = Y(f)`, `f(G) = G`
+[^godel_substitution]: Here `x(x)` is symbol substitution. replacing the free variable `x` with `x`, while avoid making two different variables same name by renaming when necessary. It's also similar to Y combinator: `Y = f -> (x -> f(x(x))) (x -> f(x(x)))`. In that case `f = unprovable`, `H = x -> f(x(x))`, `Y(f) = H(H)`, `Y(f)` is a fixed point of `f`: `f(Y(f)) = Y(f)`. `G = Y(f)`, `f(G) = G`
 
 There is something in common between Halting problem, Russel's paradox and Gödel's incomplete theorem: they all self-reference and "negate" itself, causing paradox.
 
@@ -265,7 +265,7 @@ There is something in common between Halting problem, Russel's paradox and Göde
 
 ### Circular reference in programming
 
-Circular reference being bad in mathematics does NOT mean they are also bad in programming. The circular reference in math theories are different to circular reference in data. There are many valid cases of circular references in programming (e.g. there are doublely-linked list running in Linux kernel and still works fine).
+Circular reference being bad in mathematics does NOT mean they are also bad in programming. The circular reference in math theories are different to circular reference in data. There are many valid cases of circular references in programming (e.g. there are doublely-linked list running in Linux kernel that works fine).
 
 But circular reference do add risks to memory management:
 
@@ -290,9 +290,9 @@ Note that due to previously mentioned contagious borrow issue, you cannot mutabl
 
 ### The callback circular reference
 
-**Observer pattern** is commonly used in GUI and other dynamic reactive systems. When a parent owns a child, but parent want to be notified when some event happens on child, the parent register callback to child, and child calls callback when event happens.
+**Observer pattern** is commonly used in GUI and other dynamic reactive systems. If parent want to be notified when some event happens on child, the parent register callback to child, and child calls callback when event happens.
 
-However, as the callback need to tell parent, the callback function object have to reference the parent. Then it creates circular reference: **parent references child, child references callback, callback references parent**, as mentioned previously in case 2.
+However, the callback function object often have to reference the parent (because it need to use parent's data). Then it creates circular reference: **parent references child, child references callback, callback references parent**, as mentioned previously in case 2.
 
 Solutions:
 
@@ -852,11 +852,9 @@ Unfortunately Rust's syntax ergonomics on raw pointer is currently not good:
 
 ## Contagious borrowing between branches
 
-Current borrow checker does coarse-grained analysis on branch. One branch's borrowing is **contagious** to another branch. This will be fixed by Polonius.
+Current borrow checker does coarse-grained analysis on branch. One branch's borrowing is **contagious** to another branch.
 
-According to [Polonius update](https://blog.rust-lang.org/inside-rust/2023/10/06/polonius-update/):
-
-This won't compile:
+Currently, this won't compile ([see also](https://blog.rust-lang.org/inside-rust/2023/10/06/polonius-update/)):
 
 ```rust
 fn get_default<'r, K: Hash + Eq + Copy, V: Default>(
@@ -876,11 +874,13 @@ fn get_default<'r, K: Hash + Eq + Copy, V: Default>(
 
 Becaue the first branch `Some(value) => ...`'s output value indirectly mutably borrows `map`, the second branch has to also indirectly mutably borrow `map`, which conflicts with another mutable borrow in scope.
 
+This will be fixed by [Polonius](https://rust-lang.github.io/polonius/current_status.html) borrow checker. Currently (2025 Aug) it's available in nightly Rust and can be enabled by an option.
+
 ## Summarize the contagious things
 
 - Borrowing that cross function boundary is contagious. Just borrowing a wheel of car can indirectly borrow the whole car.
 - Mutate-by-recreate is contagious. Recreating child require also recreating parent that holds the new child, and parent's parent, and so on.
-- Lifetime annotation is contagious. If some type has a lifetime parameter `'a`, then every type that holds it and every function that processes it must also have the lifetime parameter `'a`. Refactoring that adds/remove lifetime parameter may be a huge work.
+- Lifetime annotation is contagious. If some type has a lifetime parameter `'a`, then every type that holds it and every function that processes it must also have the lifetime parameter `'a` (some may be auto-inferred but not all). Refactoring that adds/remove lifetime parameter may be a huge work.
 - In current borrow checker, one branch's borrowing is contagious to the whole branching scope.
 
 
