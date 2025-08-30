@@ -102,12 +102,11 @@ Compile error:
 
 This code is totally memory-safe: the `.add_score()` only touch the `total_score` field, and `.get_children()` only touch the `children` field. They work on separate data, they still clashes, because of **contagious borrow**:
 
-- In `fn get_children(&self) -> &Vec<Child> { &self.children }`, although the method body just borrows `children` field, the return value indirectly borrows the whole `self`.
-- `parent.get_children()` immutably borrows `parent`. It borrows the whole `parent`, not just a field in `parent`. The borrow checker works **locally** (just checked function signature) and doesn't check the body of `get_children`.
-- The for loop indirectly borrows the result of `parent.get_children()` which indirectly borrows `parent`.
+- In `fn get_children(&self) -> &Vec<Child> { &self.children }`, although the method body just borrows `children` field, the return value indirectly borrows the whole `self`, not just one field.
 - In `fn add_score(&mut self, score: u32) { self.total_score += score; }`, the function body only mutably borrowed `total_score` field, but the argument `&mut self` borrows the whole `Parent`, not just one field.
+- Inside the loop, one immutable borrow to the whole `Parent` and one mutable borrow to the whole `Parent` overlaps in lifetime.
 
-The core problem is that you just want to borrow one field, but forced to borrow the whole object. And due to mutable borrow exclusiveness, this doesn't compile. (It often works fine in immutable case, because immutable borrows can co-exist for same object.)
+The core problem is that you just want to borrow one field, but forced to borrow the whole object.
 
 What if I just inline `get_children` and `add_score`? Then it compiles fine:
 
@@ -129,7 +128,7 @@ fn main() {
 }
 ```
 
-Why that compiles? Because it does a **split borrow**: the compiler sees borrowing of individual fields in `main()` function, and don't do contagious borrow.
+Why that compiles? Because it does a **split borrow**: the compiler sees borrowing of individual fields in one function (`main()`), and don't do contagious borrow.
 
 The deeper cause is that:
 
@@ -143,7 +142,7 @@ The solutions:
   - If you design a library and want encapsulation, it's recommended to use ID/handle to replace borrow (elaborated below).
   - The getter that returns cloned/copied value is fine. If data is immutable, getter is also usually fine.
 - Use ID/handle to replace borrow.
-- Other workarounds like `Arc<QCell<>>` `Arc<RwLock<>>`, etc.
+- Other workarounds like `Arc<QCell<T>>` `Arc<RwLock<T>>`, etc.
 - **Avoid mutation** or **defer mutation**:
 
 ## Avoid mutation or defer mutation
@@ -152,11 +151,11 @@ The previous problem occurs partially due to mutable borrow exclusiveness. If al
 
 The common way of avoiding mutation is **mutate-by-recreate**: All data is immutable. When you want to mutate something, you create a new version of it. Just like in pure functional language (e.g. Haskell).
 
-Unfortunately, **mutate-by-recreate is also contagious**: if you recreated a new version of a child, you need to also recreate a new version of parent that holds the new child, and parent's parent, and so on. In functional languages there are abstractions like [lens](https://hackage.haskell.org/package/lens) to make this kind of cascade-recreate more convenient.
+Unfortunately, **mutate-by-recreate is also contagious**: if you recreated a new version of a child, you need to also recreate a new version of parent that holds the new child, and parent's parent, and so on. There are abstractions like [lens](https://hackage.haskell.org/package/lens) to make this kind of cascade-recreate more convenient.
 
 Mutate-by-recreate can be useful for cases like:
 
-- Safely sharing data in multithreading (read-copy-update(RCU), copy-on-write (COW))
+- Safely sharing data in multithreading (read-copy-update (RCU), copy-on-write (COW))
 - Take snapshot and rollback efficiently
 
 Mutate-by-recreate can be optimized by sharing unchanged sub-structures. See also: [Persistent data structure](https://en.wikipedia.org/wiki/Persistent_data_structure), [Rope](https://en.wikipedia.org/wiki/Rope_(data_structure)).
@@ -166,7 +165,7 @@ Another solution is to **treat mutation as data**. To mutate something, **append
 - In the process of creating new commands, it only do immutable borrow to base data, and only one mutable borrow to the command queue. 
 - When executing the commands, it only do one mutable borrow to base data at a time.
 
-What if I need the latest state before executing the commands in queue? Then inspect both the command queue and base data to get latest state ([LSM tree](https://en.wikipedia.org/wiki/Log-structured_merge-tree) does similar things). This seems inconvenient, but can be often avoided by turning it into multiple stages, each stage only sees result of previous stage.
+What if I need the latest state before executing the commands in queue? Then inspect both the command queue and base data to get latest state ([LSM tree](https://en.wikipedia.org/wiki/Log-structured_merge-tree) does similar things). You can often avoid needing to getting latest state during processing, by separating it into multiple stages.
 
 Treating mutation as data also has other benefits:
 
@@ -324,11 +323,9 @@ Data-oriented design:
 
 - Try to pack data into contagious array, (instead of objects laid out sparsely managed by allocator).
 - Use handle (e.g. array index) or ID to replace reference.
-- **Decouple object ID with memory address**. An ID can be serialized (save to disk and sent via network) but a pointer cannot [^pointer_serialize].
+- **Decouple object ID with memory address**. An ID can be save to disk and sent via network, but a pointer cannot (the same address cannot be used in another process or after process restart, because there may be other data in the same address).
 - The different fields of the same object doesn't necessarily need to be together in memory. The one field of many objects can be put together (parallel array).
 - Manage memory based on **arenas**.
-
-[^pointer_serialize]: Actually, pointer is integer and can serialize, but you cannot use the same address in another process (or after process restart), because there may be other data in the same address.
 
 One kind of arena is [slotmap](https://docs.rs/slotmap/latest/slotmap/):
 
@@ -836,9 +833,9 @@ Modern CPUs use cache coherency protocol (e.g. [MOESI](https://en.wikipedia.org/
 Solutions:
 
 - Avoid sharing the same reference count. Copying data is sometimes better.
-- [arc_swap](https://docs.rs/arc-swap/latest/arc_swap/). It uses [hazard pointer](https://en.wikipedia.org/wiki/Hazard_pointer) and other mechanics to reduce atomic operations.
-- [trc](https://docs.rs/trc/1.2.4/trc/) and [hybrid_rc](https://docs.rs/hybrid-rc/latest/hybrid_rc/). They use per-thread non-atomic counter, and another global atomic counter for how many threads use it. This can make atomic operations be less frequent, getting higher performance.
-- [aarc](https://docs.rs/aarc/latest/aarc/) and [crossbeam_epoch](https://docs.rs/crossbeam-epoch/latest/crossbeam_epoch/). Use epoch-based memory reclamation.
+- [arc_swap](https://docs.rs/arc-swap/latest/arc_swap/). It uses [hazard pointer](https://en.wikipedia.org/wiki/Hazard_pointer) and other mechanics to improve performance.
+- [trc](https://docs.rs/trc/1.2.4/trc/) and [hybrid_rc](https://docs.rs/hybrid-rc/latest/hybrid_rc/). They use per-thread non-atomic counter, and another shared atomic counter for how many threads use it. This can make atomic operations be less frequent, getting higher performance.
+- [aarc](https://docs.rs/aarc/latest/aarc/) and [crossbeam_epoch](https://docs.rs/crossbeam-epoch/latest/crossbeam_epoch/). Use [epoch-based memory reclamation](https://aturon.github.io/blog/2015/08/27/epoch/#epoch-based-reclamation).
 
  These deferred memory reclamation techniques (hazard pointer, epoch-based) are also used in lock-free data structures. If one thread can read an element while another thread removes and frees the same element in parallel, it will not be memory-safe (this issue doesn't exist in GC languages).
 
@@ -1004,7 +1001,7 @@ fn mutate_twice(i: &mut u32) -> &mut u32 {
 
 `tokio::spawn` require future to be standalone and doesn't borrow other things (`'static`). 
 
-Implicitly passing it is passing `&Arc<T>` makes the future borrow other things and be not standalone.
+Passing passing an `Arc` (that's used later) into moved closure makes closure borrow the `Arc`. The data that contains borrow is not standalone (not `'static`).
 
 ```rust
 #[tokio::main]  
