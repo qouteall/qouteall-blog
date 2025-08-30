@@ -33,6 +33,7 @@ Firstly consider the reference [^about_reference] shape of your in-memory data.
         - If the sharing is scoped (only temporarily shared), then you can use immutable borrow. You may need lifetime annotation.
         - If the sharing is not scoped (may share for a long time, not bounded within a scope), you need to use reference counting (`Rc` in singlethreaded case, `Arc` in possibly-multithreaded case)
     - If shared object is mutable, then it's in **borrow-check-unfriendly case**. Solutions elaborated below.
+    - Contagious borrow can cause unwanted sharing (elaborated below).
 - If the reference shape has **cycle**, then it's also in **borrow-check-unfriendly case**. Solutions elaborated below.
 
 The most fighting with borrow checker happens in the **borrow-check-unfriendly cases**.
@@ -41,7 +42,7 @@ The most fighting with borrow checker happens in the **borrow-check-unfriendly c
 
 The solutions in borrow-checker-unfriendly cases (will elaborate below):
 
-- Data-oriented design. Avoid unnecessary getter and setter. Use split borrow to avoid contagious borrow issue.
+- Data-oriented design. Avoid unnecessary getter and setter. Split borrow.
 - Avoid just-for-convenience circular reference.
 - Use ID/handle to replace borrow.
 - Avoid mutation or defer mutation.
@@ -151,28 +152,28 @@ The previous problem occurs partially due to mutable borrow exclusiveness. If al
 
 The common way of avoiding mutation is **mutate-by-recreate**: All data is immutable. When you want to mutate something, you create a new version of it. Just like in pure functional language (e.g. Haskell).
 
-Unfortunately, **mutate-by-recreate is also contagious**: if you recreated a new version of a child, you need to also recreate a new version of parent that holds the new child, and parent's parent, and so on. In functional languages there are abstractions like [lens](https://hackage.haskell.org/package/lens) to make this kind of cascade-recreate simpler.
+Unfortunately, **mutate-by-recreate is also contagious**: if you recreated a new version of a child, you need to also recreate a new version of parent that holds the new child, and parent's parent, and so on. In functional languages there are abstractions like [lens](https://hackage.haskell.org/package/lens) to make this kind of cascade-recreate more convenient.
 
 Mutate-by-recreate can be useful for cases like:
 
-- Safely sharing data in multithreading (related: Read-copy-update(RCU), copy-on-write (COW))
+- Safely sharing data in multithreading (read-copy-update(RCU), copy-on-write (COW))
 - Take snapshot and rollback efficiently
 
 Mutate-by-recreate can be optimized by sharing unchanged sub-structures. See also: [Persistent data structure](https://en.wikipedia.org/wiki/Persistent_data_structure), [Rope](https://en.wikipedia.org/wiki/Rope_(data_structure)).
 
-Another solution is to **treat mutation as data**. When you want to mutate something, you **append a mutation command into command queue**. Then execute the mutation commands at once. (Note that command should not indirectly borrow base data.)
+Another solution is to **treat mutation as data**. To mutate something, **append a mutation command into command queue**. Then execute the mutation commands at once. (Note that command should not indirectly borrow base data.)
 
 - In the process of creating new commands, it only do immutable borrow to base data, and only one mutable borrow to the command queue. 
 - When executing the commands, it only do one mutable borrow to base data at a time.
 
-What if I want to read the latest state before execute the commands in queue? Then you need to inspect both the command queue and base data to get latest state ([LSM tree](https://en.wikipedia.org/wiki/Log-structured_merge-tree) does similar things).
+What if I need the latest state before executing the commands in queue? Then inspect both the command queue and base data to get latest state ([LSM tree](https://en.wikipedia.org/wiki/Log-structured_merge-tree) does similar things). This seems inconvenient, but can be often avoided by turning it into multiple stages, each stage only sees result of previous stage.
 
 Treating mutation as data also has other benefits:
 
 - The mutation can be serialized, and sent via network or saved to disk.
 - The mutation can be inspected for debugging and logging.
 - You can post-process the command list, such as sorting, filtering. If the data is sharded, the mutation command can dispatch to specific shard.
-- In distributed system, there is a log (command list) that's synchronized between nodes using a consensus protocol (like Raft). And the log is source-of-truth: the mutable state is completely derived from the log (and previous state checkpoints).
+- In distributed system, there is a log (command list) that's synchronized between nodes using a consensus protocol (like Raft). The log is source-of-truth: the mutable state is completely derived from the log (and previous state checkpoints).
 - The idea of turning operations into data is also adopted by [io_uring](https://en.wikipedia.org/wiki/Io_uring) and modern graphics APIs (Vulkan, Metal, WebGPU).
 
 The previous code rewritten using deferred mutation:
@@ -270,12 +271,12 @@ Circular reference being bad in mathematics does NOT mean they are also bad in p
 But circular reference do add risks to memory management:
 
 - In C/C++, circular reference need to be carefully handled to avoid use-after-free.
-- In GC languages, circular reference has memory leak risk. If a child references parent, and parent references child, then referencing any child will keep the whole structure alive.
+- In GC languages, circular reference has memory leak risk. If all children references parents, and parents references children, then referencing any child will keep the whole structure alive.
 
 Here are some common use cases of circular reference:
 
 - Case 1: The parent references a child. The child references its parent, just for convenience. (Referencing to parent is not necessary, parent can be passed by argument)
-- Case 2: The parent registers a callback to child. When something happened on child, the callback is called, and parent do something. It that case, parent references child, child references callback, callback references parent (e.g. lambda capture).
+- Case 2: The parent registers a callback to child. When something happened on child, the callback is called, and parent do something. It that case, parent references child, child references callback, callback references parent.
 - Case 3: In a tree structure, the child references parent allows getting the path from one node to root node. Without it, you cannot get the path from just one node reference, and need to store variable-length path information.
 - Case 4: The data is inherently a graph structure that can contain cycles.
 - Case 5: The data requires self-reference.
@@ -389,7 +390,7 @@ If you want to design an abstraction that **decouples** object lifetime and how 
 - Use weak generalized reference, such as ID and handle. The object can be freed without having to consider how its IDs are held.
 - Use strong generalized reference, but **add a new usability state that's decoupled with object lifetime**. This is common in GC languages. Examples:
   - In JS, if you send an `ArrayBuffer` to another web worker, the `ArrayBuffer` object can still be referenced and kept alive, but the binary content is no longer accessible from that `ArrayBuffer` object.
-  - In Java, the IO-related objects (e.g. `FileInputStream`, `FileOutputStream`) can no longer be used after closing, even these objects are still referenced and still alive.
+  - In Java, the IO-related objects (e.g. `FileInputStream`) can no longer be used after closing, even these objects are still referenced and still alive.
 
 
 ## Mutable borrow exclusiveness
@@ -526,9 +527,9 @@ That will get `java.util.ConcurrentModificationException`. Java's `ArrayList` ha
 
 Even without the version check, it will still be memory-safe because array access is range-checked.
 
-In Java, you can remove element via the iterator, then the iterator will update together with container, then there will be no iterator invalidation.
+Note that **iteration invalidation is logic error**, no matter whether it's memory-safe or not.
 
-Note that iteration invalidation is logic error, no matter whether it's memory safe.
+In Java, you can remove element via the iterator, then the iterator will update together with container, and no longer invalidate. Or use `removeIf` that avoids managing iterator.
 
 Mutable borrow exclusiveness is still important in single-threaded case, because of interior pointer. **But if we don't use any interior pointer, then mutable borrow exclusiveness is not necessary for memory safety in single-thread case**.
 
@@ -710,13 +711,32 @@ A more "adaptive" approach is to save referenced data as `Rc<RefCell<...>>`. But
 
 Similarily, `Arc` is the multi-threaded version of `Rc`. `Mutex` `RwLock` are the multi-threaded version of `RefCell`. It's also not recommended to overuse things like `Arc<Mutex<T>>`:
 
-- `Arc`'s performance cost is larger than `Rc` because it involves atomic operation. When many threads change the same counter in parallel, it can be slow. Atomic operations require the CPU core to hold "exclusive ownership" [^cache_contention] to cache line which can cause cache contention. 
+- `Arc`'s performance cost is larger than `Rc` because it involves atomic operation. Elaborated below.
 - `Mutex` `RwLock`'s performance cost is larger than `RefCell` because locking also involves atomic operation, can reduce parallelism and can cause context switch.
 - `Arc` also has memory leak risk (need to use `Weak` to cut loop)
 - `Mutex` and `RwLock` have deadlock risk.
 - Its syntax ergonomic is not good either.
 
-[^cache_contention]: It's actually more complicated and depends on which hardware. [See also](https://en.wikipedia.org/wiki/MOESI_protocol).
+[^cache_contention]: It's actually more complicated and depends on which hardware. 
+
+### `Arc` is not always fast
+
+`Arc` use atomic operations to change its reference count.
+
+However, when many threads frequently change the same atomically counter, performance can degrade. The more threads touching it, the slower it is.
+
+Modern CPUs use cache coherency protocol (e.g. [MOESI](https://en.wikipedia.org/wiki/MOESI_protocol)). **Atomic operations often require the CPU core to hold "exclusive ownership" to cache line** (this may vary between different hardware). Many threads frequently doing so cause cache contention, similar to locking, but on hardware.
+
+[Example 1](https://web.archive.org/web/20250708051211/https://www.conviva.com/platform/the-concurrency-trap-how-an-atomic-counter-stalled-a-pipeline/), [Example 2](https://pkolaczk.github.io/server-slower-than-a-laptop/)
+
+Solutions:
+
+- Avoid sharing the same reference count. Copying data is sometimes better.
+- [arc_swap](https://docs.rs/arc-swap/latest/arc_swap/). It uses [hazard pointer](https://en.wikipedia.org/wiki/Hazard_pointer) and other mechanics to increase performance.
+- [trc](https://docs.rs/trc/1.2.4/trc/) and [hybrid_rc](https://docs.rs/hybrid-rc/latest/hybrid_rc/). They use per-thread not-atomic counter, and another global counter for how many threads use it. This can make changing shared refernce count be less frequent, getting higher performance.
+- [aarc](https://docs.rs/aarc/latest/aarc/) and [crossbeam_epoch](https://docs.rs/crossbeam-epoch/latest/crossbeam_epoch/). Use epoch-based memory reclamation.
+
+ These deferred memory reclamation techniques (hazard pointer, epoch-based) are also used in lock-free data structures. If one thread can read an element while another thread removes and frees the same element in parallel, it will not be memory-safe (this issue doesn't exist in GC languages).
 
 ### `QCell`
 
@@ -876,21 +896,15 @@ Becaue the first branch `Some(value) => ...`'s output value indirectly mutably b
 
 This will be fixed by [Polonius](https://rust-lang.github.io/polonius/current_status.html) borrow checker. Currently (2025 Aug) it's available in nightly Rust and can be enabled by an option.
 
-## Summarize the contagious things
-
-- Borrowing that cross function boundary is contagious. Just borrowing a wheel of car can indirectly borrow the whole car.
-- Mutate-by-recreate is contagious. Recreating child require also recreating parent that holds the new child, and parent's parent, and so on.
-- Lifetime annotation is contagious. If some type has a lifetime parameter `'a`, then every type that holds it and every function that processes it must also have the lifetime parameter `'a` (some may be auto-inferred but not all). Refactoring that adds/remove lifetime parameter may be a huge work.
-- In current borrow checker, one branch's borrowing is contagious to the whole branching scope.
-
-
 ## `Send` and `Sync`
 
 Rust favors tree-shaped ownership. Each object is owned by exactly one place. If you send something to another thread, only one thread can access it, so it's thread-safe. No risk of data race.
 
 Sending an immutable borrow to another thread is also fine as long as the shared data is actually immutable.
 
-But there are exceptions. One exception is interior mutability, like `Cell` and `RefCell`. Because interior mutability, the data pointed by immutable borrow `&T` may no longer actually be immutable. So Rust prevents sharing `&Cell<T>` and `&RefCell<T>` by making `Cell<T>` and `RefCell<T>` not `Sync`. If `X` is `Sync` then `&X` is `Send`. If `X` is not `Sync` then `&X` is not `Send`. This prevents `Cell` and `RefCell` from being shared across threads. 
+But there are exceptions. One exception is interior mutability, like `Cell` and `RefCell`. Because interior mutability, the data pointed by immutable borrow `&T` may no longer actually be immutable. So Rust prevents sharing `&Cell<T>` and `&RefCell<T>` by making `Cell<T>` and `RefCell<T>` not `Sync`. If `X` is `Sync` then `&X` is `Send`. If `X` is not `Sync` then `&X` is not `Send`. This prevents `Cell` and `RefCell` from being shared across threads.
+
+`Rc`'s reference counter is not atomic, so `Rc` is neither `Send` or `Sync`.
 
 But `&Mutex<T>` can be shared because lock protects them. Also immutable reference to atomic cells like `&AtomicU32` can be shared because of atomicity. `Mutex<T>` and `AtomicU32` are `Sync` so `&Mutex<T>` and `&AtomicU32` are `Send`.
 
@@ -1060,4 +1074,15 @@ async fn main() {
 ```
 
 [There is a proposal on improving syntax ergonomic of it.](https://rust-lang.github.io/rust-project-goals/2024h2/ergonomic-rc.html)
+
+## Summarize the contagious things
+
+- Borrowing that cross function boundary is contagious. Just borrowing a wheel of car can indirectly borrow the whole car.
+- Mutate-by-recreate is contagious. Recreating child require also recreating parent that holds the new child, and parent's parent, and so on.
+- Lifetime annotation is contagious. If some type has a lifetime parameter `'a`, then every type that holds it and every function signature that use it must also have the lifetime parameter `'a` (some may be auto-inferred, but not all). Refactoring that adds/remove lifetime parameter can be a huge work.
+- In current borrow checker, one branch's borrowing is contagious to the whole branching scope.
+- `async` is contagious. `async` function can call normal function. Normal function cannot easily call `async` function (but it's possible to call by blocking).
+- Being not `Sync`/`Send` is contagious. A struct that indirectly owns a non-`Sync` data is not `Sync`. A struct that indirectly owns a non-`Send` data is not `Send`.
+- Error passing is contagious. If panic is not acceptable, then all functions that indirectly call a fallible function must return `Result`.
+
 
