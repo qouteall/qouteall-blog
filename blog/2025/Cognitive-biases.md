@@ -846,6 +846,7 @@ Being exposed to information also changes behavior and attitudes. Examples:
 - Being more likely interpret things as danger signals after watching a horror movie.
 - Red in food packaging increases people's intention to buy it.
 - Being familiar with a brand after exposed to its ads, even after trying to ignore ads.
+- Sleeper effect: After exposed to persuation, people that don't initially agree may gradually agree after time passes.
 
 > The main moral of priming research is that our thoughts and our behavior are influenced, much more than we know or want, by the environment of the moment.
 > 
@@ -860,7 +861,7 @@ The placebo effect is also possibly related with priming.
 - If you praise another person, the listeners tend to think that you are good.
 - If you say something bad about another person, the listeners tend to think that you are also bad.
 
-Flattering subcounciously increase favorability, even when knowing it's flattering. Saying harsh criticism subcounciously reduce favorability, even when knowing the criticism is beneficial. Placebo still works even when knowing it's placebo.
+Flattering subcounciously increase favorability, even when knowing it's flattering (this even applies to sycophant AI). Saying harsh criticism subcounciously reduce favorability, even when knowing the criticism is beneficial. Placebo still works even when knowing it's placebo.
 
 ## Efficient decision making
 
@@ -1093,6 +1094,8 @@ People usually remember the "special" things well. This is an information compre
 **Serial position effect**: people tend to recall the first and last items best, and the middle items worst. Interestingly, the same effect also applies to LLMs, called "lost in the middle".
 
 **Cryptomnesia**: Treating other peoples' idea as own original idea, after forgetting the source of the idea.
+
+**Sleeper effect**: After exposed to persuation, some people initially don't agree because of some reasons. But after time passes, people may forget the reasons why they initially disagree, and may gradually aggree to it. Persuations that don't work immediately may still have long-term effects.
 
 ## Information addiction and curiosity
 
