@@ -198,6 +198,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - MySQL (InnoDB) gap lock may cause deadlock.
 - In MySQL (InnoDB) you can select a field and group by another field. It gives nondeterministic result.
 - In SQLite the field type doesn't matter unless the table is `strict`.
+- SQLite by default does not do vacuum. The file size only increases and won't shrink. To make it shrink you need to either manually `vacuum;` or enable `auto_vacuum`.
 - Foreign key may cause implicit locking, which may cause deadlock.
 - Locking may break repeatable read isolation (it's database-specific).
 - Distributed SQL database may doesn't support locking or have weird locking behaviors. It's database-specific.
