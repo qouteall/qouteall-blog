@@ -536,7 +536,7 @@ One benefit of interior pointer is to allow tight memory layout, without having 
 
 ### Interior mutability summary
 
-Mutable borrow exclusiveness is overly restrictive. It is not necessary for memory safety in single-threaded code. It's also . there is **interior mutability** that allows getting rid of that constraint.
+Mutable borrow exclusiveness is overly restrictive. It is not necessary for memory safety in single-threaded code when not using interior pointer. There is **interior mutability** that allows getting rid of that constraint.
 
 Interior mutability allows you to mutate something from an immutable reference to it. (Because of that, immutable borrow doesn't necessarily mean the pointed data is actually immutable. This can cause some confusion.)
 
@@ -582,7 +582,7 @@ In Rust, just having a mutable borrow `&mut T`, **Rust assumes that you can use 
 
 Another problem: It's hard to return a reference borrowed from `RefCell`.
 
-As the previous example can be fixed by `Cell`, without `RefCell`, here is another contagious borrow exampleL
+As the previous example can be fixed by `Cell`, without `RefCell`, here is another contagious borrow example:
 
 ```rust
 use std::collections::HashMap;  
@@ -720,11 +720,11 @@ Similarily, `Arc` is the multi-threaded version of `Rc`. `Mutex` `RwLock` are th
 
 [`QCell<T>`](https://docs.rs/qcell/latest/qcell/) has an internal ID. `QCellOwner` is also an ID. You can only use `QCell` via an `QCellOwner` that has matched ID. 
 
-The borrowing to `QCellOwner` "centralizes" the borrowing of many `QCell`s associated with it, ensureing mutable borrow exclusiveness. Using it require passing borrow of `QCellOwner` in argument everywhere it's used.
+The borrowing to `QCellOwner` "centralizes" the borrowing of many `QCell`s associated with it, ensuring mutable borrow exclusiveness. Using it require passing borrow of `QCellOwner` in argument everywhere it's used.
 
-QCell will fail to borrow if the owner ID doesn't mismatch. Different to `RefCell`, if owner ID matches, it won't panic just because nested borrow.
+QCell will fail to borrow if the owner ID doesn't match. Different to `RefCell`, if owner ID matches, it won't panic just because nested borrow.
 
-Its runtime cost is low: just check whether cell's id matches owner's id.
+Its runtime cost is low. When borrowing, it just checks whether cell's id matches owner's id. It has memory cost of owner ID per cell.
 
 One advantage of `QCell` is that the duplicated borrow will be compile-time error instead of runtime panic, which helps catch error earlier. If I change the previous `RefCell` panic example into `QCell`:
 
@@ -924,7 +924,15 @@ where
 
 It requires the future need to be `Send` and `'static`:
 
-- `'static` means that the future is standalone and doesn't borrow other things. If the future need to share data with outside, pass `Arc<T>` into (not `&Arc<T>`). (Note that the "static" here is different to "static" in C/C++/Java/C#. In Rust, borrowing global variable is `'static` but standalone values are also `'static`.)
+- `'static` means:
+  - it's a standalone value that doesn't borrow other things, or
+  - it references a global value that will always live when program is running, or
+  - it only borrows global values
+  
+  The future being `'static` often require the future be standalone and doesn't borrow other things. If the future need to share data with outside, pass `Arc<T>` into (not `&Arc<T>`). 
+
+  Note that the "static" in C/C++/Java/C# often mean global value. But in Rust, `'static` can also mean mean standalone (owned) value that's not global.
+  
 - `Send` means that the future can be sent across threads. Tokio use work-stealing, which means that one thread's task can be stolen by other threads that currently have no work.
 
 Another important trap is that, the normal sleep `std::thread::sleep` and normal locking `std::sync::Mutex` should not be used when using async runtime, because they block using OS functionality without telling async runtime, so they will block the async runtime's scheduling thread. In Tokio, use `tokio::sync::Mutex` and `tokio::time::sleep`.
