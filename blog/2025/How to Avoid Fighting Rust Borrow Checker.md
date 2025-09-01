@@ -145,7 +145,7 @@ The solutions:
 - Other workarounds like `Arc<QCell<T>>` `Arc<RwLock<T>>`, etc.
 - **Avoid mutation** or **defer mutation**:
 
-## Avoid mutation or defer mutation
+## Avoid mutation
 
 The previous problem occurs partially due to mutable borrow exclusiveness. If all borrows are immutable, then contagious borrow is usually not a problem.
 
@@ -159,6 +159,8 @@ Mutate-by-recreate can be useful for cases like:
 - Take snapshot and rollback efficiently
 
 Mutate-by-recreate can be optimized by sharing unchanged sub-structures. See also: [Persistent data structure](https://en.wikipedia.org/wiki/Persistent_data_structure), [Rope](https://en.wikipedia.org/wiki/Rope_(data_structure)).
+
+### Defer mutation. Mutation-as-data
 
 Another solution is to **treat mutation as data**. To mutate something, **append a mutation command into command queue**. Then execute the mutation commands at once. (Note that command should not indirectly borrow base data.)
 
@@ -174,6 +176,7 @@ Treating mutation as data also has other benefits:
 - You can post-process the command list, such as sorting, filtering. If the data is sharded, the mutation command can dispatch to specific shard.
 - In distributed system, there is a log (command list) that's synchronized between nodes using a consensus protocol (like Raft). The log is source-of-truth: the mutable state is completely derived from the log (and previous state checkpoints).
 - The idea of turning operations into data is also adopted by [io_uring](https://en.wikipedia.org/wiki/Io_uring) and modern graphics APIs (Vulkan, Metal, WebGPU).
+- The idea of turning mutation into insertion is also adopted by ClickHouse. In ClickHouse, direct mutaiton is not performant. Mutate-by-insert is faster, but querying require aggregate both the old data and new mutations.
 
 The previous code rewritten using deferred mutation:
 
@@ -532,7 +535,10 @@ Mutable borrow exclusiveness is still important in single-threaded case, because
 
 That's why mainstream languages has no mutable borrow exclusiveness, and still works fine in single-threaded case. Java, JS and Python has no interior pointer. Golang and C# have interior pointer, they have GC and restrict interior pointer, so memory safe is still kept without mutable borrow exclusiveness.
 
-One benefit of interior pointer is to allow tight memory layout, without having to do extra heap allocation just to get a reference some inner data.
+Rust's mutable borrow exclusiveness creates a lot of troubles in single-threaded cases. But it also has **benefits** in signle-threaded cases:
+
+- Make the borrow more universal. In Rust, map entry value can be borrowed. But in Golang you cannot take interior pointer to map value. This makes abstractions that work with borrows more general.
+- Mutable borrow is exclusive, so Rust can emit `noalias` attribute to LLVM. `noalias` allows aggressively merging and reordering reads/writes, which then enables a lot of optimizations. Without `noalias`, the optimizer will "worry" about optimization affecting other code that also reads/writes current data, so that much fewer optimizations can be done.
 
 ### Interior mutability summary
 
