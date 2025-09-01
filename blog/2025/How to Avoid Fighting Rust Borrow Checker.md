@@ -45,7 +45,8 @@ The solutions in borrow-checker-unfriendly cases (will elaborate below):
 - Data-oriented design. Avoid unnecessary getter and setter. Split borrow.
 - Avoid just-for-convenience circular reference.
 - Use ID/handle to replace borrow.
-- Avoid mutation or defer mutation.
+- Avoid mutation. Mutate-by-recreate.
+- Defer mutation. Mutation-as-data.
 - `Arc<QCell<T>>`, `Arc<RwLock<T>>`
 - Use unsafe and raw pointer.
 
@@ -160,12 +161,12 @@ Mutate-by-recreate can be useful for cases like:
 
 Mutate-by-recreate can be optimized by sharing unchanged sub-structures. See also: [Persistent data structure](https://en.wikipedia.org/wiki/Persistent_data_structure), [Rope](https://en.wikipedia.org/wiki/Rope_(data_structure)).
 
-### Defer mutation. Mutation-as-data
+## Defer mutation. Mutation-as-data
 
 Another solution is to **treat mutation as data**. To mutate something, **append a mutation command into command queue**. Then execute the mutation commands at once. (Note that command should not indirectly borrow base data.)
 
-- In the process of creating new commands, it only do immutable borrow to base data, and only one mutable borrow to the command queue. 
-- When executing the commands, it only do one mutable borrow to base data at a time.
+- In the process of creating new commands, it only do immutable borrow to base data, and only one mutable borrow to the command queue at a time. 
+- When executing the commands, it only do one mutable borrow to base data, and one mutable borrow to command queue at a time.
 
 What if I need the latest state before executing the commands in queue? Then inspect both the command queue and base data to get latest state ([LSM tree](https://en.wikipedia.org/wiki/Log-structured_merge-tree) does similar things). You can often avoid needing to getting latest state during processing, by separating it into multiple stages.
 
@@ -535,7 +536,7 @@ Mutable borrow exclusiveness is still important in single-threaded case, because
 
 That's why mainstream languages has no mutable borrow exclusiveness, and still works fine in single-threaded case. Java, JS and Python has no interior pointer. Golang and C# have interior pointer, they have GC and restrict interior pointer, so memory safe is still kept without mutable borrow exclusiveness.
 
-Rust's mutable borrow exclusiveness creates a lot of troubles in single-threaded cases. But it also has **benefits** in signle-threaded cases:
+Rust's mutable borrow exclusiveness creates a lot of troubles in single-threaded cases. But it also has **benefits** (even in signle-threaded cases):
 
 - Make the borrow more universal. In Rust, map entry value can be borrowed. But in Golang you cannot take interior pointer to map value. This makes abstractions that work with borrows more general.
 - Mutable borrow is exclusive, so Rust can emit `noalias` attribute to LLVM. `noalias` allows aggressively merging and reordering reads/writes, which then enables a lot of optimizations. Without `noalias`, the optimizer will "worry" about optimization affecting other code that also reads/writes current data, so that much fewer optimizations can be done.
