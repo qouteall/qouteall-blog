@@ -33,7 +33,7 @@ Mutation can be represented as data. Data can be interpreted as mutation.
 - Instead of just doing in-place mutation, we can enqueue a command to do mutation later. The command is then processed to do actual mutation.
 - In a transactional database, modifying things in a transaction adds mutation records instead of just modify in-place. The mutation is persisted when transaction commits. With snapshot isolation, mutation in one transaction is invisible to another except for locking, but mutation in current transaction is visible to own.
 - In a client-side GUI application, modifying a thing requires sending a request to the server. That request is data. The server's response is also data, which may confirm or deny the modification. The client can display modified data before server responds to reduce latency, but need to rollback temporary changes when the server denies the modification (in multiplayer cases, one player's modification can invalidate another player's modification).
-- In Raft, all modification are in the log, and the latest state is derived from the log.
+- Derive latest state from a log. Examples: Database WAL, Raft, Lambda architecture.
 
 Instead of doing in-place modification, we can:
 - Defer mutation. Put updates in some queue and mutate in a deferred way.
@@ -51,6 +51,8 @@ The benefits:
 
 In some places, we have a new state and need to compute the mutation (diff). Examples: Git, React. In Git and React, there is one commonality that the state itself is outside of their control and calculating the diff is how they "sync" the mutation to other systems (sync change to DOM in React, sync changes to other machines in Git).
 
+- Store both the latest state and mutation log. Bitemporal modelling.
+
 ## Move computation between stages
 
 Partial computation: only compute some parts of the data, and keep the structure of the whole computation:
@@ -58,12 +60,44 @@ Partial computation: only compute some parts of the data, and keep the structure
 - In lazy evaluation, the unobserved data is not computed.
 - In multi-stage programming, some data are fixed while some data are unknown. The fixed data can be used for optimization. It can be seen as runtime constant value folding. JIT can be seen as treating bytecode as runtime constant and fold them in interpreter code.
 - Replacing a value with a function that produces value or AST helps handling the currently-unknown data.
+- Using a future (promise) object to represent a pending computation.
 - In proof language (e.g. Idris, Lean), having a hole and inspecting the type of hole can help proving.
-- 
+- Compiletime-runtime duality: a computation (or a check) can be in compile-time or runtime. It can be even before compile-time (code generation). It can also be after first application run (profile-guided optimization).
+
+
 
 ## View
+
+Views in SQL databases are "fake" tables that are derived from other tables. 
+
+Here I **generalize** the concept of view: View converts one information model into another information model.
+
+The generalized view can be understood as:
+
+- Encapsulating information. Hiding you the true underlying information and only expose derived information.
+- Faking and lying information.
+
+Examples of the generalized view concept:
+
+- Bits are views of voltage in circuits
+- Integers are views of bits
+- Characters are views of integers. Strings are views of characters.
+- Other complex data structures are views to binary data.
+- A functions is a view of a mapping.
+- Caches are views to underlying data/computation.
+
+More generally:
+
+- The mapping between binary data and information is view. Information is bits+context. The context is how the bits are mapped between information.
+- Abstraction involves viewing different things as the same things.
 
 
 
 ## Invariant production, grow, and maintenance
+
+Most algorithms use the idea of producing invariant, growing invariant and maintaining invariant:
+
+- Initially, create invariant in the smallest scale.
+- Then incrementally make small invariant be larger, until the invariant become big enough to finish the task.
+- For a data structure that has an invariant, every mutaiton to it need to maintain invariant.
 
