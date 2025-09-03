@@ -7,9 +7,7 @@
 
 ## Computation-data duality
 
-Code (machine code, bytecode, programming language code, etc.) can represent computation. Code already is data.
-
-Turn action into data. Replace raw execution code with an interpreter.
+It's often beneficial to turn an action into data, then replace the raw action code into an interpreter.
 
 By turning action into code, the raw action code is split into two parts: the one generating action and the one executing action. (It's also related to moving computation stages)
 
@@ -55,9 +53,11 @@ In some places, we have a new state and need to compute the mutation (diff). Exa
 
 ## Move computation between stages
 
-Partial computation: only compute some parts of the data, and keep the structure of the whole computation:
+Partial computation: only compute some parts of the data, and keep the structure of the whole computation.
 
 - In lazy evaluation, the unobserved data is not computed.
+- Deferred mutation. Relates to mutation-data duality.
+- Replace immediately executed code with data (expression tree, DSL, etc.) that will be executed (interpreted) later. Relates to computation-data duality.
 - In multi-stage programming, some data are fixed while some data are unknown. The fixed data can be used for optimization. It can be seen as runtime constant value folding. JIT can be seen as treating bytecode as runtime constant and fold them in interpreter code.
 - Replacing a value with a function that produces value or AST helps handling the currently-unknown data.
 - Using a future (promise) object to represent a pending computation.
@@ -97,7 +97,15 @@ More generally:
 
 Most algorithms use the idea of producing invariant, growing invariant and maintaining invariant:
 
-- Initially, create invariant in the smallest scale.
+- Initially, create invariant at the smallest scale (in the simplest case).
 - Then incrementally make small invariant be larger, until the invariant become big enough to finish the task.
 - For a data structure that has an invariant, every mutaiton to it need to maintain invariant.
 
+Examples:
+
+- Merge sort. Create sorted sub-sequence in smallest scale (e.g. two elements). Then merge two sorted sub-sequences into a bigger one, and continue. The invariant of sorted-ness grows up to the whole sequence.
+- Quick sort. Select a pivot. Then partition the sequence into a part that's smaller than pivot and a part that's larger than pivot (and a part that equals pivot) [^quick_sort_equal_pivot]. By partitioning, it creates invariant $\text{LeftPartElements} < \text{Pivot} < \text{RightPartElements}$. By recursively creating such invariants until to the smallest scale (individual elements), the whole sequence is sorted.
+- Binary search tree. It creates invariant $\text{LeftSubtreeElements} < \text{ParentNode} < \text{RightSubtreeElements}$. When there is only one node, the invariant is produced at the smallest scale. Every insertion then follows that invariant and then grows and maintains that invariant.
+
+
+[^quick_sort_equal_pivot]: About the elements that equals the pivot, how exactly to treat them is implementation-specific. Some put them into the first partition. Some put then into another third partition.
