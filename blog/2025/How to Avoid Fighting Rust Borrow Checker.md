@@ -175,6 +175,7 @@ Treating mutation as data also has other benefits:
 - The mutation can be serialized, and sent via network or saved to disk.
 - The mutation can be inspected for debugging and logging.
 - You can post-process the command list, such as sorting, filtering. If the data is sharded, the mutation command can dispatch to specific shard.
+- Transactional databases often use write-ahead log (WAL) to help atomicity of transactions. Database writs all mutations into WAL. Then after some time the mutations in WAL will be merged to base data in disk. Database often keep the latest mutated data in memory for querying.
 - In distributed system, there is a log (command list) that's synchronized between nodes using a consensus protocol (like Raft). The log is source-of-truth: the mutable state is completely derived from the log (and previous state checkpoints).
 - The idea of turning operations into data is also adopted by [io_uring](https://en.wikipedia.org/wiki/Io_uring) and modern graphics APIs (Vulkan, Metal, WebGPU).
 - The idea of turning mutation into insertion is also adopted by ClickHouse. In ClickHouse, direct mutaiton is not performant. Mutate-by-insert is faster, but querying require aggregate both the old data and new mutations.

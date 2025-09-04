@@ -1,8 +1,10 @@
 
+# Higher-Level Design Pattern
+
 - Computation-data duality.
 - Mutation-data duality.
 - Move computation between stages.
-- View.
+- Generalized View.
 - Invariant production, grow, and maintenance.
 
 ## Computation-data duality
@@ -17,12 +19,25 @@ Some benefits:
 - Serialization: Explicit execution state can be serialized and deserialized, thus be stored to database and sent across network.
 - Suspension: Explicit execution state allows temporarily suspending execution and resume it later. Suspending thread is harder (to avoid suspending the whole process, you need to run it in a separate thread) and less efficient (current OS is not optimized for one million threads). (Turning execution state as data. It's related to mutation-data duality)
 - Modification: Explicit execution state can be modified. It makes cancellation and rollback easier. While modifying running code control flow is harder.
-- Forking: Allows forking control flow, which can simplify some logic (not common in practice).
+- Forking: Allows forking control flow, which can be useful in some kinds of simulations.
 
 The idea is to use data to represent computation (includes logic and strategy). 
 
 - Higher-order functions. A function value is a piece of code with data that can be called. Functional programming encourage building complex logic by composing simple building blocks.
 - Control-flow-state-machine duality. A suspendable control flow (async, generator) can be turned into a state machine. (Restate does serialization of control flow)
+
+### Algebraic effect and execution state
+
+**Algebraic effect**: An effect handler executes some code in a scope. Some code is executed under an effect handler. When it performs an effect, the control flow jumps to the effect handler, and the execution state (delimited continuation) (up to the effect handler's scope) is also saved. The effect handler can then resume using the execution state. [A more detailed introduction to Algebraic effects](https://overreacted.io/algebraic-effects-for-the-rest-of-us/)
+
+The applications of algebraic effect idea:
+
+- Async/await
+- Generator
+- React `Suspense`
+- [Restate](https://restate.dev/). Normal async/await saves execution state in memory. Restate supports serializing the execution state, so that it can be saved to disk and sent via network.
+
+One core idea is to **save the execution state, allowing resuming execution later**. 
 
 ## Mutation-data duality
 
@@ -41,15 +56,16 @@ Instead of doing in-place modification, we can:
 - Layered filesystem (in Docker).
 
 The benefits:
-- Easier to debug and track mutations, because mutations are explicit data, not implicit history.
+- Easier to inspect and debug mutations, because mutations are explicit data, not implicit execution history.
 - Avoid data race issues under parallelism (copy-on-write, reading old snapshot, make mutation command processing sequential).
 - Make rollback and undo easier. Rollback is common in transactional databases (transaction can rollback), editing software (need to support undo) and multiplayer client (one player's edit can be invalidated by another player or other server-driven events, but the client edit need to display immediatey).
-- Make forking and tree-search easier. Sometimes we need to inspect result of different mutations applied to the same data, creating "forks" or "parallel universes". The modifications can form a tree (or a graph), and we can search on it. Expressing the new state as a view of old state + mutations can reduce copying cost.
 - Allow merging mutations in distributed systems (like Git).
 
 In some places, we have a new state and need to compute the mutation (diff). Examples: Git, React. In Git and React, there is one commonality that the state itself is outside of their control and calculating the diff is how they "sync" the mutation to other systems (sync change to DOM in React, sync changes to other machines in Git).
 
 - Store both the latest state and mutation log. Bitemporal modelling.
+
+Bitemporal modelling: 
 
 ## Move computation between stages
 
@@ -62,15 +78,18 @@ Partial computation: only compute some parts of the data, and keep the structure
 - Replacing a value with a function that produces value or AST helps handling the currently-unknown data.
 - Using a future (promise) object to represent a pending computation.
 - In proof language (e.g. Idris, Lean), having a hole and inspecting the type of hole can help proving.
-- Compiletime-runtime duality: a computation (or a check) can be in compile-time or runtime. It can be even before compile-time (code generation). It can also be after first application run (profile-guided optimization).
+- Compiletime-runtime duality: a computation (or a check) can be in compile-time or runtime. It can be even before compile-time (code generation). It can be during running (e.g. JIT compilation). It can also be after first application run (e.g. profile-guided optimization).
 
+Batched compuation vs immediate compuation:
 
+- Immediately free memory vs GC
+- ...
 
-## View
+## Generalized View
 
 Views in SQL databases are "fake" tables that are derived from other tables. 
 
-Here I **generalize** the concept of view: View converts one information model into another information model.
+The **generalized** concept of view: View takes one information model and present it as another information model, and allow operating as another information model.
 
 The generalized view can be understood as:
 
@@ -84,14 +103,21 @@ Examples of the generalized view concept:
 - Characters are views of integers. Strings are views of characters.
 - Other complex data structures are views to binary data.
 - A functions is a view of a mapping.
-- Caches are views to underlying data/computation.
+- Index (and lookup acceleration structure) are also views to underlying data.
+- Cache is view to underlying data/computation.
 
 More generally:
 
 - The mapping between binary data and information is view. Information is bits+context. The context is how the bits are mapped between information.
 - Abstraction involves viewing different things as the same things.
 
+### Dynamically-typed languages also have "types"
 
+Dynamically-typed languages also have "types". The "type" here is **the mapping between in-memory data and information**, and the **constraint of in-memory data**.
+
+Even in dynamic languages, the data still has "shape" at runtime. The program only works with specific "shapes" of data. It cannot work with arbitrary data.
+
+Mainstream languages often have relatively simpler and less expressive type systems. Some "shape" of data are complex and cannot be easily expressed in mainstram languages' type system (without type erasure). Dynamic languages are better in these cases: they avoid the shackle of unexpressive type system, and can get rid of syntax inconvenience related to type erasure (using type erasure in static languages require inconvenient things like type conversion).
 
 ## Invariant production, grow, and maintenance
 
