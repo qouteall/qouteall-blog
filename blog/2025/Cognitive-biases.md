@@ -26,7 +26,7 @@ Corresponding to diminishing marginal utility, the happiness of gaining \$200 is
 
 The same applies to pain. The pain of losing \$100 two times is higher than losing \$200 in one time.
 
-Weber-Fechner law: Human's sensor perception (to temperature etc.) is roughly logarithmic to the actual value.
+Weber-Fechner law: Human's sensor perception is roughly logarithmic to the actual value.
 
 ### Expectation and framing
 
@@ -216,8 +216,6 @@ Providing external reward may reduce internal motivation (overjustification effe
 
 **Motivated reasoning**: when they does not want to accept contradictory evidences, they may make up and believe low-probability assumptions to explain the evidence in a way that follows the original belief.
 
-Example: In a failing relationship, a person might attribute their partner's distant behavior to work stress or other external factors, rather than accepting the possibility that their partner's feelings have changed.
-
 **With confirimation bias, more information increases confidence, but doesn't lead to better understanding**.
 
 > If you don't have an opinion, resist the pressure to have one. 
@@ -313,7 +311,7 @@ We can learn from the world in an **information-efficient** way: learning from v
 
 The flip side of information-efficient learning is **hasty generalization**. We tend to generalize from very few examples quickly, rather than using logical reasoning and statistical evidence, thus easily get fooled by randomness.
 
-The reality is complex, so **we need to simplify things to make them easier to understand and easier to remember. However, the simplification can get wrong.**
+The reality is complex, so **we need to simplify things to make them easier to understand and easier to remember. However, the simplification can get wrong.** There are too many informations in the world. We have some heuristics for filtering information.
 
 To simplify, we tend to **make up reasons of why things happen**. A reasonable thing is simpler and easier to memorize than raw complex facts. This process is also compression. It has implications in AI: Attempting (lossy) compression will naturally lead to learning, [which is the core mehanism of why unsupervised learning works](https://www.youtube.com/live/AKMuA_TVz3A?si=IswmwkZj8kBRx9Fv).
 
@@ -401,7 +399,9 @@ Narrative fallacy includes:
 
 People tend to judge things **by first impression**. This makes people generate belief by only one observation, which is information-efficient, but can also be biased.
 
-**Nominal fallacy**: Understand one thing just by its names. Examples:
+### Nominal fallacy
+
+Nominal fallacy: Understand one thing just by its names. Examples:
 
 - Knowing that LLM has "temperature" so think LLM is based on thermodynamics. [Link](https://x.com/KeyTryer/status/1962589192124309974)
 - Knowing that LLM has "token" so think LLM is a Web3 crypto thing.
@@ -449,16 +449,16 @@ Examples of causal oversimplification:
 
 - Oversimplification: "Poor people are poor because they are lazy."
   
-  Nuanced view: Poverty is also influenced by factors such as education access, systemic discrimination, health disparities, job market conditions, and the Matthew effect.
+  Other related factors: Education access, systemic discrimination, health disparities, job market conditions, the Matthew effect, etc.
 - Oversimplification: "Immigrants are the cause of unemployment."
   
-  Nuanced view: Unemployment rates are also influenced by factors including manufacturing relocation, automation technologies, economic cycles, skill mismatches, and overall labor market conditions.
+  Other related factors: Manufacturing relocation, automation technologies, economic cycles, skill mismatches, overall labor market conditions, etc.
 - Oversimplification: "The Great Depression happened because of the stock market crash of 1929."
   
-  Nuanced view: The Great Depression resulted from a combination of factors, including excessive financial risk-taking, lack of regulatory oversight, production overcapacity, wealth inequality, and international economic imbalances.
+  Other related factors: Excessive financial risk-taking, lack of regulatory oversight, production overcapacity, wealth inequality, and international economic imbalances, etc.
 - Oversimplification: "That company succeeded because of the CEO."
   
-  Nuanced view: Corporate success also depends on various factors, including market conditions, employee contributions, incentive structures, company culture, government-business relationships, competitive landscape, and the cumulative impact of past leadership decisions.
+  Other related factors: Market conditions, employee contributions, incentive structures, company culture, government-business relationships, competitive landscape, and the cumulative impact of past leadership decisions, etc.
 
 > For every complex problem there is an answer that is clear, simple, and wrong.
 > 
@@ -481,7 +481,8 @@ Examples of binary thinking:
 - The idol maintains a perfect image. / Image collapse, true nature exposes.
 - "We will win quickly." / "We will lose quickly."
 - "I can do it perfectly." / "I cannot do it perfectly so I will fail."
-- "X is the best thing and everyone should use it." / "X has this drawback so it's completely useless."
+- "X is the best thing and everyone should use it." / "X has this drawback so it's not only useless but also harmful."
+- Doesn't admit tradeoffs exist.
 
 People's evaluations are anchored on the expectation, and **not meeting an expectation could make people's belief turn to another extreme**.
 
@@ -599,6 +600,8 @@ Other examples of survivorship bias:
 - Only special and interesting cases appear on news. The more representative common but not newsworthy cases are hidden.
 
 A more generalized version of survivor bias is **selection bias**: When the sampling is not uniform enough and contains selection mechanism (not necessary sample vanishing), there will be bias in the result.
+
+The opinions on social media does not necessarily represent most peoples' view. There are several selection mechanisms in it: 1. not all people use social media 2. the people using social media may not post opinions 3. not all posted opinions will be seen by you due to algorithmic recommendation.
 
 Some physicists propose **Anthropic Principle**: the physical laws allow life because the existence of life "selects" the physical law. The speciality of the physical laws come from survivorship bias.
 
@@ -741,10 +744,12 @@ This is also related to availability bias, where the just-seen events are more o
 
 People tend to make decisions based on how information is presented (framed) rather than objective facts.
 
-There are many ways to frame one fact. 
+There are many ways to frame one fact. For example, one from positive aspect, one from negative aspect:
 
-- "90% of people survive this surgery" feels different to "10% of people die from this surgery". 
-- "15% of smokers get lung cancer" feels different to "80% of people with lung cancer smoke"
+- "90% of people survive this surgery" / "10% of people die from this surgery". 
+- "This ground beef is 80% lean" / "This ground beef is 20% fat".
+- "Save $20 by buying now!" / "You'll lose the $20 discount if you wait".
+- "99.9% effective against germs" / "Fails to kill 0.1% of germs".
 
 The content creator could emphasize one aspect and downplay another aspect, and use different wording or art style to convey different opinions. The people reading the information could be easily influenced by the framing subconsciously.
 
@@ -766,7 +771,7 @@ Just looking confident can often make other people believe. This even applies wh
 
 > A friend sent me MRI brain scan results and I put it through Claude. No other AI would provide a diagnosis, Claude did. Claude found an aggressive tumour. The radiologist report came back clean. I annoyed the radiologists until they re-checked. They did so with 3 radiologists and their own AI. Came back clean, so looks like Claude was wrong. **But looks how convincing Claude sounds!** We're still early...
 >
-> \- Misha Saul, [Link](https://x.com/misha_saul/status/1771019329737462232)
+> \- [Link](https://x.com/misha_saul/status/1771019329737462232)
 
 **Anchoring bias**: People's judgement may be influenced by reference "anchors", even if the reference anchor is irrelevant to decision making. Anchoring is a kind of framing. A salesman may firstly show customers an expensive product, then show cheap products, making customers feel the product being cheaper, utilizing anchoring bias.
 
@@ -866,8 +871,8 @@ The placebo effect is also possibly related with priming.
 
 **Spontaneous trait transfer**: listeners tend to associate what the talker say to the talker, even when talker is talking about another person:
 
-- If you praise another person, the listeners tend to think that you are good.
-- If you say something bad about another person, the listeners tend to think that you are also bad.
+- If you praise another person, the listeners tend to subcounciously think that you are also good.
+- If you say something bad about another person, the listeners tend to subcounciously think you are also bad.
 
 Flattering subcounciously increase favorability, even when knowing it's flattering (this even applies to sycophant AI). Saying harsh criticism subcounciously reduce favorability, even when knowing the criticism is beneficial. Placebo still works even when knowing it's placebo.
 
@@ -1030,6 +1035,8 @@ We tend to regret doing something in short term, but regret not doing something 
 > As organizations get larger, there seems to be a tendency to use the heavy-weight Type 1 decision-making process on most decisions, including many Type 2 decisions. The end result of this is slowness, unthoughtful risk aversion, failure to experiment sufficiently, and consequently diminished invention.
 > 
 > \- Jeff Bezos
+
+**The more non-trivial things you do, the more mistakes you will make**. No one can make no mistakes when doing many non-trivial things. However, **company KPIs often has large weight on punishing mistakes** (loss aversion in KPI design). This cause veteran employees learn to do non-trivial things as few as possible and as conservative as possible. 
 
 ### Risk compensation
 

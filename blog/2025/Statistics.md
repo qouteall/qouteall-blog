@@ -468,7 +468,7 @@ $$
 = \frac{1}{n}(\text{Var}[X]+\lambda^2 \text{Var}[Y]+2\lambda \text{cov}[X,Y])
 $$
 
-We want to minimize the variance of estimatory by choosing a $\lambda$. We want to find a $\lambda$ that minimizes $\text{Var}[Y] \lambda^2 + 2\text{cov}[X,Y] \lambda$. Quadratic funciton knowledge tells $ax^2+bx+c \ \ (a>0)$ minimizes when $x=\frac{-b}{2a}$, then the optimal lambda is:
+We want to minimize the variance of estimator by choosing a $\lambda$. We want to find a $\lambda$ that minimizes $\text{Var}[Y] \lambda^2 + 2\text{cov}[X,Y] \lambda$. Quadratic funciton knowledge tells $ax^2+bx+c \ \ (a>0)$ minimizes when $x=\frac{-b}{2a}$, then the optimal lambda is:
 
 $$
 \lambda = - \frac{\text{cov}[X,Y]}{\text{Var}[Y]}
@@ -1128,7 +1128,7 @@ The normal distribution, also called Gaussian distribution, is important in stat
 
 It has two parameters: the mean $\mu$ and the standard deviation $\sigma$. $N(\mu, \sigma^2)$ denotes a normal distribution. Changing $\mu$ moves the PDF alone X axis. Changing $\sigma$ scales PDF along X axis.
 
-We can rediscover normal distribution by maximizing entropy under variance constraint. To do that there are two prerequisite concepts: Largrange multiplier and functional derivative.
+We can rediscover normal distribution by maximizing entropy under variance constraint.
 
 ### Rediscover normal distribution by maximizing entropy with variance constraint
 
