@@ -26,6 +26,8 @@ Corresponding to diminishing marginal utility, the happiness of gaining \$200 is
 
 The same applies to pain. The pain of losing \$100 two times is higher than losing \$200 in one time.
 
+Weber-Fechner law: Human's sensor perception (to temperature etc.) is roughly logarithmic to the actual value.
+
 ### Expectation and framing
 
 The "gain/loss" is **relative to the expectation** (frame of reference). Different people have different expectations in different scenarios.
@@ -63,7 +65,7 @@ So, losses have a larger mental impact than gains of the same size. The pain of 
 
 People don't intuitively treat avoiding losing one dollar as the same as earning one dollar.
 
-**Relative deprivation** is also a kind of loss that people tend to avoid. For example, when the people near one get rich by investing a bubble asset, one may choose to invest the risky bubble asset to avoid the "relative loss" between one and others.
+**Relative deprivation** is also a kind of loss that people tend to avoid. For example, when the people near one get rich by investing a bubble asset, one may also choose to invest the bubble asset to avoid the "relative loss" between one and others.
 
 ### Perception of risk
 
@@ -398,6 +400,12 @@ Narrative fallacy includes:
 ### First impression effect (primacy effect)
 
 People tend to judge things **by first impression**. This makes people generate belief by only one observation, which is information-efficient, but can also be biased.
+
+**Nominal fallacy**: Understand one thing just by its names. Examples:
+
+- Knowing that LLM has "temperature" so think LLM is based on thermodynamics. [Link](https://x.com/KeyTryer/status/1962589192124309974)
+- Knowing that LLM has "token" so think LLM is a Web3 crypto thing.
+- "How can you be against Patriot Act/Safety Bill/Responsible Disclosure? Do you hate your country/want to kill people/be not responsible?" [Link](https://x.com/onehappyfellow/status/1952258485024084118)
 
 ### Outcome bias
 

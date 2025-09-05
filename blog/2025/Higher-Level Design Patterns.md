@@ -1,6 +1,8 @@
 
 # Higher-Level Design Pattern
 
+<!-- truncate -->
+
 - Computation-data duality.
 - Mutation-data duality.
 - Move computation between stages.
@@ -15,16 +17,13 @@ By turning action into code, the raw action code is split into two parts: the on
 
 Some benefits:
 
+- Higher-order functions. It allows [reusing a piece of code along with captured data](./About%20Code%20Reuse,%20Polymorphism%20and%20Abstraction#code-reuse-mechanisms). 
 - Inspection: Explicit execution state is easier to inspect and display (than stackframe and code execution position).
 - Serialization: Explicit execution state can be serialized and deserialized, thus be stored to database and sent across network.
 - Suspension: Explicit execution state allows temporarily suspending execution and resume it later. Suspending thread is harder (to avoid suspending the whole process, you need to run it in a separate thread) and less efficient (current OS is not optimized for one million threads). (Turning execution state as data. It's related to mutation-data duality)
-- Modification: Explicit execution state can be modified. It makes cancellation and rollback easier. While modifying running code control flow is harder.
+- Modification: Explicit execution state can be modified. It makes cancellation and rollback easier. (Modifying execution stack and execution state is harder, and it's not supported by many mainstream languages.)
 - Forking: Allows forking control flow, which can be useful in some kinds of simulations.
 
-The idea is to use data to represent computation (includes logic and strategy). 
-
-- Higher-order functions. A function value is a piece of code with data that can be called. Functional programming encourage building complex logic by composing simple building blocks.
-- Control-flow-state-machine duality. A suspendable control flow (async, generator) can be turned into a state machine. (Restate does serialization of control flow)
 
 ### Algebraic effect and execution state
 
@@ -35,7 +34,7 @@ The applications of algebraic effect idea:
 - Async/await
 - Generator
 - React `Suspense`
-- [Restate](https://restate.dev/). Normal async/await saves execution state in memory. Restate supports serializing the execution state, so that it can be saved to disk and sent via network.
+- Serializing saved execution state so that it can be saved to disk or sent via network. Example: Restate.
 
 One core idea is to **save the execution state, allowing resuming execution later**. 
 
@@ -63,9 +62,7 @@ The benefits:
 
 In some places, we have a new state and need to compute the mutation (diff). Examples: Git, React. In Git and React, there is one commonality that the state itself is outside of their control and calculating the diff is how they "sync" the mutation to other systems (sync change to DOM in React, sync changes to other machines in Git).
 
-- Store both the latest state and mutation log. Bitemporal modelling.
-
-Bitemporal modelling: 
+Bitemporal modelling: Store two pieces of records. One records the data and time updated to database. Another records the data and time that reflect the reality. (Sometimes the reality changes but database doesn't edit immediately. Sometimes database contains wrong informaiton that's corrected later.) 
 
 ## Move computation between stages
 
@@ -98,13 +95,16 @@ The generalized view can be understood as:
 
 Examples of the generalized view concept:
 
-- Bits are views of voltage in circuits
+- Bits are views of voltage in circuits. [^bits_view]
 - Integers are views of bits
 - Characters are views of integers. Strings are views of characters.
 - Other complex data structures are views to binary data.
 - A functions is a view of a mapping.
 - Index (and lookup acceleration structure) are also views to underlying data.
 - Cache is view to underlying data/computation.
+- **Type contains viewing from binary data to information**.
+
+[^bits_view]: Also: In hard disk, magnetic field is viewed as bits. In CD, the pits and lands are viewed as bits. In SSD, the electron's position in floating gate is viewed as bits. In fiber optics, light pulses are viewed as bits. In quantum computer, the quantum state (like spin of electron) can be viewed as bits. ......
 
 More generally:
 
