@@ -23,6 +23,7 @@ Some benefits:
 - Suspension: Explicit execution state allows temporarily suspending execution and resume it later. Suspending thread is harder (to avoid suspending the whole process, you need to run it in a separate thread) and less efficient (current OS is not optimized for one million threads). (Turning execution state as data. It's related to mutation-data duality)
 - Modification: Explicit execution state can be modified. It makes cancellation and rollback easier. (Modifying execution stack and execution state is harder, and it's not supported by many mainstream languages.)
 - Forking: Allows forking control flow, which can be useful in some kinds of simulations.
+- Composition. The logic that's turned to data can be more easily composed. Functional programming encourages having simple building blocks and compose them into complex logic.
 
 
 ### Algebraic effect and execution state
@@ -38,6 +39,11 @@ The applications of algebraic effect idea:
 
 One core idea is to **save the execution state, allowing resuming execution later**. 
 
+### Don't always go too far on DSL
+
+Configuration complexity clock https://mikehadlow.blogspot.com/2012/05/configuration-complexity-clock.html
+
+
 ## Mutation-data duality
 
 Mutation can be represented as data. Data can be interpreted as mutation.
@@ -45,7 +51,7 @@ Mutation can be represented as data. Data can be interpreted as mutation.
 - Instead of just doing in-place mutation, we can enqueue a command to do mutation later. The command is then processed to do actual mutation.
 - In a transactional database, modifying things in a transaction adds mutation records instead of just modify in-place. The mutation is persisted when transaction commits. With snapshot isolation, mutation in one transaction is invisible to another except for locking, but mutation in current transaction is visible to own.
 - In a client-side GUI application, modifying a thing requires sending a request to the server. That request is data. The server's response is also data, which may confirm or deny the modification. The client can display modified data before server responds to reduce latency, but need to rollback temporary changes when the server denies the modification (in multiplayer cases, one player's modification can invalidate another player's modification).
-- Derive latest state from a log. Examples: Database WAL, Raft, Lambda architecture.
+- **Event sourcing**. Derive latest state from a log. Examples: Database WAL, Raft, Lambda architecture.
 
 Instead of doing in-place modification, we can:
 - Defer mutation. Put updates in some queue and mutate in a deferred way.
@@ -55,12 +61,16 @@ Instead of doing in-place modification, we can:
 - Layered filesystem (in Docker).
 
 The benefits:
-- Easier to inspect and debug mutations, because mutations are explicit data, not implicit execution history.
+- Easier to inspect and debug mutations, because mutations are explicit data, not implicit execution history. Easier to audit and replay.
 - Avoid data race issues under parallelism (copy-on-write, reading old snapshot, make mutation command processing sequential).
 - Make rollback and undo easier. Rollback is common in transactional databases (transaction can rollback), editing software (need to support undo) and multiplayer client (one player's edit can be invalidated by another player or other server-driven events, but the client edit need to display immediatey).
 - Allow merging mutations in distributed systems (like Git).
 
-In some places, we have a new state and need to compute the mutation (diff). Examples: Git, React. In Git and React, there is one commonality that the state itself is outside of their control and calculating the diff is how they "sync" the mutation to other systems (sync change to DOM in React, sync changes to other machines in Git).
+In some places, we specify a new state and need to compute the mutation (diff). Examples:
+
+- Git. Compute diff based on file snapshots. Manipulating and merging diffs. Sync change across different machines.
+- React. Compute diff from virtual data structure and apply to actual DOM. Sync change from virtual data structure to actual DOM.
+- Kubernetes. You specify how much nodes/services it has. Kubernetes found the diff and do actions (e.g. launch new service) to cover the diff. 
 
 Bitemporal modelling: Store two pieces of records. One records the data and time updated to database. Another records the data and time that reflect the reality. (Sometimes the reality changes but database doesn't edit immediately. Sometimes database contains wrong informaiton that's corrected later.) 
 
@@ -76,6 +86,13 @@ Partial computation: only compute some parts of the data, and keep the structure
 - Using a future (promise) object to represent a pending computation.
 - In proof language (e.g. Idris, Lean), having a hole and inspecting the type of hole can help proving.
 - Compiletime-runtime duality: a computation (or a check) can be in compile-time or runtime. It can be even before compile-time (code generation). It can be during running (e.g. JIT compilation). It can also be after first application run (e.g. profile-guided optimization).
+
+The stages of a program: 
+
+- Pre-compile. (Code generation etc.)
+- Compile. (Compilet-time computation)
+- Running. (JIT compilation)
+- After first run. (Profile-guided optimization etc.)
 
 Batched compuation vs immediate compuation:
 
@@ -102,14 +119,22 @@ Examples of the generalized view concept:
 - A functions is a view of a mapping.
 - Index (and lookup acceleration structure) are also views to underlying data.
 - Cache is view to underlying data/computation.
-- **Type contains viewing from binary data to information**.
+- Virtual memory is a view to physical memory.
+- File system is a view to data on disk. The not-on-disk data can also be viewed as files (Unix everything-is-file philosophy).
+- Symbolic link in file systems is a view to other point in file system.
+- Database provides generalized views of in-disk/in-memory data.
+- Linux namespaces, hypervisors, sandboxes, etc. provides view of aspects of the system.
+- Proxy, NAT, firewall, virtualized networking etc. provides view of network.
+- Transaction isolation in databases provide views of data (e.g. snapshot isolation).
+- Replicated data and redundant data are views to the original data.
 
 [^bits_view]: Also: In hard disk, magnetic field is viewed as bits. In CD, the pits and lands are viewed as bits. In SSD, the electron's position in floating gate is viewed as bits. In fiber optics, light pulses are viewed as bits. In quantum computer, the quantum state (like spin of electron) can be viewed as bits. ......
 
 More generally:
 
-- The mapping between binary data and information is view. Information is bits+context. The context is how the bits are mapped between information.
+- The mapping between binary data and information is view. Information is bits+context. The context is how the bits are mapped between information. **Type contains viewing from binary data to information**.
 - Abstraction involves viewing different things as the same things.
+
 
 ### Dynamically-typed languages also have "types"
 
@@ -134,6 +159,7 @@ Examples:
 - Merge sort. Create sorted sub-sequence in smallest scale (e.g. two elements). Then merge two sorted sub-sequences into a bigger one, and continue. The invariant of sorted-ness grows up to the whole sequence.
 - Quick sort. Select a pivot. Then partition the sequence into a part that's smaller than pivot and a part that's larger than pivot (and a part that equals pivot) [^quick_sort_equal_pivot]. By partitioning, it creates invariant $\text{LeftPartElements} < \text{Pivot} < \text{RightPartElements}$. By recursively creating such invariants until to the smallest scale (individual elements), the whole sequence is sorted.
 - Binary search tree. It creates invariant $\text{LeftSubtreeElements} < \text{ParentNode} < \text{RightSubtreeElements}$. When there is only one node, the invariant is produced at the smallest scale. Every insertion then follows that invariant and then grows and maintains that invariant.
+- Dijkstra algorithm. The visited nodes are the nodes whose shortest path from source are known. By using the nodes that we know shortest path, it "expand" on graph, knowing new node's shortest path from source. The algorithm iteratively add new nodes into the invariant, until it spans the whole graph.
 
 
 [^quick_sort_equal_pivot]: About the elements that equals the pivot, how exactly to treat them is implementation-specific. Some put them into the first partition. Some put then into another third partition.
