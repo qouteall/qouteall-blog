@@ -296,6 +296,8 @@ An environment that doesn't tolerant failure makes people not correct mistakes a
 >
 > \- Nikita Bier, [Link](https://x.com/nikitabier/status/1753915234794774978)
 
+Drip pricing: Only show extra price (e.g. service fee) when the customer has already decided to buy. The customer that already spent efforts in deciding tend to keep the decision.
+
 ### Ostrich effect
 
 Ignoring negative information or warning signs to avoid psychological discomfort.
@@ -632,6 +634,12 @@ If people are given some choices, people tend to choose one of the provided choi
 
 People tend to attribute one product to one public figure, or attribute a company to its CEO, because that's the name that they know, and because of causal simplification tendency.
 
+People often think the quality of new movies/games/novels declines, worse than the ones produced in "golden age" before. However it's mainly due to people only remember good ones and neglect the bad ones filtered by time.
+
+Interestingly, LLMs also seem to have availability bias: the information mentioned before in context can guide or mislead subsequent output. The knowledge that's "implicit" in LLM may be suppressed by context.
+
+When reviewing a document, most reviews tend to nitpick on the most easy-to-understand places, like diagram, or summarization, while not reading subsequent text that explain the nuances.
+
 ### Familiarity bias
 
 People prefer familiar things. One reason is the availability bias. Another reason is that people self-justifys their previous attention and dedication. This is highly related to availability bias.
@@ -761,7 +769,7 @@ The name of a thing affects how people perceive it. Examples:
 
 A **loaded question** is a question that contains an assumption (framing). Following that assumption can lead to a biased answer. Example: "Do you support the attempt by the US to bring freedom and democracy to other places in the world?"
 
-The current LLMs are mostly trained to satisfy the user. If you ask LLM a loaded question that has a bias, the LLM often follow your bias to please you (this effect is smaller in more advanced LLMs).
+The current LLMs are mostly trained to satisfy the user. If you ask LLM a loaded question that has a bias, the LLM often follow your bias to please you.
 
 **Asking the right question requires the right assumption.**
 
@@ -1058,7 +1066,7 @@ But in the modern world, there are non-physical threats and modern risks (e.g. e
 
 Related: **Cortisol** is a kind of hormone that's correlated with stress. Cortisol has many effects, like making you more vigilent and less relax. If the cortisol level keeps being high for long time, there will be health issues like weight gain, weakened immune system, sleep deprivation, digest issues, etc. 
 
-From evolutionary perspective, cortisol makes one more likely to survive under physical threats (e.g. a tiger) at the expense of other aspects. These physical threats are usually quick and short (e.g. either die or flee from tiger). But the modern risks are usually long and chronic (e.g. worry about exam several months before exam), so that cortisol system is not adaptive.
+From evolutionary perspective, cortisol makes one more likely to survive under physical threats (e.g. a tiger) at the expense of other aspects. These physical threats are usually quick and short (e.g. either die or flee from tiger). But the modern risks are usually long and chronic (e.g. worry about exam several months before exam, worry about job loss during economic recession every day), so that cortisol system is not adaptive.
 
 ## Willpower and mental energy
 
