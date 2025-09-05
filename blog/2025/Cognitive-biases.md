@@ -1191,7 +1191,7 @@ What memes have higher ability to spread?
 - Exaggerated. Polarized. Utilizes binary thinking.
 - Providing interesting new information. Utilizes information addiction.
 
-In the ancient world, when there was no algorithmic recommendataion, there was still the "natural selection" of memes (stories, cultures).
+In the ancient world, when there was no algorithmic recommendataion, there was still the "natural selection" of memes (stories, cultures) but slower.
 
 Memes facilitate being spreaded. On the contrary, **antimemes** resist being spreaded. 
 

@@ -27,7 +27,7 @@ Some benefits:
 
 ### Algebraic effect and execution state
 
-**Algebraic effect**: An effect handler executes some code in a scope. Some code is executed under an effect handler. When it performs an effect, the control flow jumps to the effect handler, and the execution state (delimited continuation) (up to the effect handler's scope) is also saved. The effect handler can then resume using the execution state. [A more detailed introduction to Algebraic effects](https://overreacted.io/algebraic-effects-for-the-rest-of-us/)
+**Algebraic effect**: An effect handler executes some code in a scope. Some code is executed under an effect handler. When it performs an effect, the control flow jumps to the effect handler, and the execution state (delimited continuation) (up to the effect handler's scope) is also saved. The effect handler can then resume using the execution state. [A simple introduction to Algebraic effects](https://overreacted.io/algebraic-effects-for-the-rest-of-us/)
 
 The applications of algebraic effect idea:
 
@@ -113,11 +113,13 @@ More generally:
 
 ### Dynamically-typed languages also have "types"
 
-Dynamically-typed languages also have "types". The "type" here is **the mapping between in-memory data and information**, and the **constraint of in-memory data**.
+Dynamically-typed languages also have "types". The "type" here is **the mapping between in-memory data and information**.
 
-Even in dynamic languages, the data still has "shape" at runtime. The program only works with specific "shapes" of data. It cannot work with arbitrary data.
+Even in dynamic languages, the **data still has "shape" at runtime**. **The program only works with specific "shapes" of data**. It cannot work with arbitrary data. The code that computes number cannot work when you give it a file object. The code that requires a field cannot work when that field is missing.
 
-Mainstream languages often have relatively simpler and less expressive type systems. Some "shape" of data are complex and cannot be easily expressed in mainstram languages' type system (without type erasure). Dynamic languages are better in these cases: they avoid the shackle of unexpressive type system, and can get rid of syntax inconvenience related to type erasure (using type erasure in static languages require inconvenient things like type conversion).
+Mainstream languages often have relatively simpler and less expressive type systems. Some "shape" of data are complex and cannot be easily expressed in mainstram languages' type system (without type erasure).
+
+Dynamic languages are better in avoiding the shackle of unexpressive type system, and getting rid of syntax inconvenience related to type erasure (type erasure in typed languages require inconvenient things like type conversion).
 
 ## Invariant production, grow, and maintenance
 
