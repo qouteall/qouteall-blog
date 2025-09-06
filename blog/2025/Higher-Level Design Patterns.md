@@ -22,7 +22,7 @@ It involves two different aspects:
 
 The benefit of turning logic and action into data:
 
-- Higher-order functions. It allows [reusing a piece of code along with captured data](./About%20Code%20Reuse,%20Polymorphism%20and%20Abstraction#code-reuse-mechanisms). 
+- Closure (lambda expression). A function along with captured data. It allows [reusing a piece of code along with captured data](./About%20Code%20Reuse,%20Polymorphism%20and%20Abstraction#code-reuse-mechanisms). 
 - Composition. The logic that's turned to data can be more easily composed. Functional programming encourages having simple building blocks and compose them into complex logic.
 
 The benefit of turning execution state into explicit data:
@@ -33,7 +33,7 @@ The benefit of turning execution state into explicit data:
 - Modification: Explicit execution state can be modified. It makes cancellation and rollback easier. (Modifying execution stack and execution state is harder, and it's not supported by many mainstream languages.)
 - Forking: Allows forking control flow, which can be useful in some kinds of simulations.
 
-Actually the distinction between computation and execution state is blurry. An execution state can be seen as a **continuation**, which is also a computation.
+The distinction between computation and execution state is blurry. A closure can capture data. An execution state can be seen as a **continuation**, which is also a computation.
 
 ### Algebraic effect and execution state
 
@@ -45,6 +45,7 @@ The applications of algebraic effect idea:
 - Generator
 - React `Suspense`
 - Serializing saved execution state so that it can be saved to disk or sent via network. Related: Restate.
+- Control flow forking. 
 
 ### Don't always go too far on DSL
 
@@ -103,7 +104,7 @@ Partial computation: only compute some parts of the data, and keep the structure
 - Deferred mutation. Relates to mutation-data duality.
 - Replace immediately executed code with data (expression tree, DSL, etc.) that will be executed (interpreted) later. Relates to computation-data duality.
 - In multi-stage programming, some data are fixed while some data are unknown. The fixed data can be used for optimization. It can be seen as runtime constant value folding. JIT can be seen as treating bytecode as runtime constant and fold them in interpreter code.
-- Replacing a value with a function that produces value or AST helps handling the currently-unknown data.
+- Replacing a value with a function or expression tree helps handling the currently-unknown data.
 - Using a future (promise) object to represent a pending computation.
 - In Idris, having a hole and inspecting the type of hole can help proving.
 
@@ -123,7 +124,7 @@ Deferred compuation vs immediate compuation:
 
 ## Generalized View
 
-Views in SQL databases are "fake" tables that are derived from other tables. 
+Views in SQL databases are "fake" tables that represents the result of a query. The view's data is derived from other tables (or views). 
 
 The **generalized** concept of view: View takes one information model and present it as another information model, and allow operating as another information model.
 
