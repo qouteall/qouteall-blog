@@ -598,12 +598,12 @@ Other examples of survivorship bias:
 - One person can do many different predictions. After the event happened, they pick the right one and delete the wrong ones, giving the illusion of prediction accuracy.
 - "Taleb's rat health club": Feeding poison to rats increases average health, because the unhealthy ones are more likely to die from poison.
 - Social media has more negative news than positive news. Bad news travels fast.
-- The succeded research results are published and the failed attempts are hidden.
+- The succeded research results are published and the failed attempts are hidden (P-hacking).
 - Only special and interesting cases appear on news. The more representative common but not newsworthy cases are hidden.
 
 A more generalized version of survivor bias is **selection bias**: When the sampling is not uniform enough and contains selection mechanism (not necessary sample vanishing), there will be bias in the result.
 
-The opinions on social media does not necessarily represent most peoples' view. There are several selection mechanisms in it: 1. not all people use social media 2. the people using social media may not post opinions 3. not all posted opinions will be seen by you due to algorithmic recommendation.
+The opinions on social media does not necessarily represent most peoples' view. There are several selection mechanisms in it: 1. not all people use the same social media platform 2. the people using social media may not post opinions 3. not all posted opinions will be seen by you due to algorithmic recommendation.
 
 Some physicists propose **Anthropic Principle**: the physical laws allow life because the existence of life "selects" the physical law. The speciality of the physical laws come from survivorship bias.
 
@@ -654,7 +654,7 @@ This is related to risk compensation: People tend to take more risk in familiar 
 > 2. Anything that's invented between when you’re 15 and 35 is new and exciting and revolutionary and you can probably get a career in it.
 > 3. Anything invented after you're 35 is against the natural order of things.
 >
-> ― Douglas Adams
+> - Douglas Adams
 
 ### Frequency illusion
 
@@ -887,6 +887,10 @@ Flattering subcounciously increase favorability, even when knowing it's flatteri
 ## Efficient decision making
 
 When making decisions, human tend to **follow intuitions, which is quick and energy-efficient**, but also less accurate.
+
+- Sometimes quickly making decision is more important than correctness of decision.
+- Often quickly making decision before having complete information is better than waiting for complete investination.
+- Sometime multiple decisions both can fulfill the goal. The important is to do rather than which decision.
 
 _Thinking, Fast and Slow_ proposes that human mind has two systems: System 1 thinks by intuition and heuristics, which is fast and efficient, but inaccurate and biased; System 2: thinks by rational logical reasoning, which is slower and requires more efforts, but is more accurate. Most thinking mainly uses System 1 while being unnoticed.
 
@@ -1201,15 +1205,15 @@ Memes facilitate being spreaded. On the contrary, **antimemes** resist being spr
 - Antimemes are usually boring and "obvious" (hindsight bias).
 - The information that conflicts with existing beliefs are also antimemes. (confirmation bias)
 
-Antimemes are easier to be forgotten than memes. Some antimemes are worth reviewing.
+Antimemes are easier to be forgotten than other information. Some antimemes are worth reviewing periodically.
 
 ### Longing for attention
 
 People wants attention from others. Some people try to gain attention by posting things on the internet.
 
-> Attention is a psychological commodity which people value inherently.
+> **Attention is a psychological commodity which people value inherently**.
 >
-> ...
+> ......
 >
 > Producers who go viral produce 183% more posts per day for the subsequent month.
 >
@@ -1234,7 +1238,7 @@ Unfortunately, just knowing the cognitive biases is not enough to avoid and over
 
 Reference: [G.I. Joe Phenomena: Understanding  the Limits of Metacognitive  Awareness on Debiasing](https://www.hbs.edu/ris/Publication%20Files/21-084_436ebba8-c832-4922-bb6e-49d000a77df3.pdf)
 
-Note that the **cognitive biases are not necessarily negative things**. They are tradeoffs. 
+Note that the **cognitive biases are not necessarily negative things**. They are tradeoffs: sometimes worse, sometimes better.
 
 ## Between leaders and scholars/engineers
 
@@ -1256,8 +1260,8 @@ The attributes of charismatic leaders:
 
 On the other hand, scholars and engineers:
 
-- They often fear of being wrong. They often talk in **conservative tone**. It's much less effective than the leader's confident and assertive tone.
-- They often care about logic and evidence in debating. They often fail debating with the ones that don't care about logic and evidence, but are good at eliciting emotions. (The debate opponents often **reverse the burden of proof** to them.)
+- They often fear of being wrong. They often talk in **conservative tone**. It's much less persuasive than the leader's confident and assertive tone.
+- They often care about logic and evidence in debating. They often fail debating with the ones that don't care about logic and evidence, but are good at eliciting emotions. The debate opponents often **reverse the burden of proof** to them.
 - They often fear of their work being misunderstood, downplayed and ignored. They can often easily fall for a leader that gives only verbal respect and recognition to them (often the leader doesn't really understand their work).
 - Although being more smart in their expert domain, they are often less smart in social and politics and more susceptible to manipulation.
 
