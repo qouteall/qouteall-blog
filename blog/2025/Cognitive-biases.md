@@ -1228,11 +1228,38 @@ Examples:
 
 This is related to information addiction. **Randomized things give more information than deterministic things.**
 
-## Knowing the biases is not enough to overcome them
+## Knowing the biases may be not enough
 
 Unfortunately, just knowing the cognitive biases is not enough to avoid and overcome them. A lot of cognitive biases originate from the biological basis of human's cognitive function, which cannot change from just knowledge.
 
 Reference: [G.I. Joe Phenomena: Understanding  the Limits of Metacognitive  Awareness on Debiasing](https://www.hbs.edu/ris/Publication%20Files/21-084_436ebba8-c832-4922-bb6e-49d000a77df3.pdf)
+
+Note that the **cognitive biases are not necessarily negative things**. They are tradeoffs. 
+
+## The intuition-driven and rationality-driven
+
+In real world, it's often that intellectual experts (e.g. scientists, engineers) are managed and persuaded by intuition-driven people (e.g. political leaders, CEOs).
+
+The intellectual experts often have desires:
+
+- Intellectual experts want to feel respected. They want their intelligence be valued. They want their intelligence be properly utilized for meaningful things and big missions.
+- They fear of their work being misunderstood, downplayed and ignored.
+- They fear of being wrong.
+
+The intellectual experts are more smart in their expert domain than the leaders. However, "smart" is multi-dimensional. The leaders are more "socially-smart":
+
+- The leaders tell **exaggerated** stories and missions, with **high confidence**.
+- The **leaders don't fear of being wrong** like the intellectual experts. What leaders say are often seen as bullshit by intellectual experts.
+- The leaders are **experienced in persuation and negotiation**. When intellectual experts are studying and working about objective reality, the leaders interact with peoples and gain experiences.
+- The leaders often don't believe much in experts' results. They trust their inutition, not results of a math model. **Intellectual experts often cannot persuade the intuition-driven leaders**.
+
+However, the leaders often can persuade the intellectual experts:
+
+- They are often generous on praising the intellectual experts that they want to persuade. The intellectual experts often feel respected and valued.
+- They often offer big missions for intellectual experts to fulfill their value.
+- They often **over-promise** about future reward of money and fame (with no proper legal obligation).
+
+The intellectual experts fear of being wrong because of habits developed when working with objective reality. **Objective reality punishes being wrong**. However, **when working with people (not engineering or researching), telling fantasy is often effective**.
 
 ## Two trading strategies
 

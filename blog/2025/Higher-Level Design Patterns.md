@@ -195,6 +195,17 @@ Examples:
 
 [^quick_sort_equal_pivot]: About the elements that equals the pivot, how exactly to treat them is implementation-specific. Some put them into the first partition. Some put then into another third partition.
 
+### Manually maintaining invariant is hard
+
+If there is a source-of-truth mutable state, and another data that's derived from source-of-truth.
+
+There are many ways of modelling it:
+
+- Make the derived data always compute-on-demand.
+- Store the derived data as mutable state and manually keep consistency with source-of-truth (manulally maintainining invariant).
+- Use other tools to maintain invariant. E.g. use database index and constraints. Use reactive frameworks.
+
+The second one is error-prone and is a common source of bugs.
 
 ## Corresponding GoF design patterns
 
