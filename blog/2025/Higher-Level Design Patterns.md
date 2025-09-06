@@ -108,12 +108,7 @@ Partial computation: only compute some parts of the data, and keep the structure
 - Using a future (promise) object to represent a pending computation.
 - In Idris, having a hole and inspecting the type of hole can help proving.
 
-A computation, an optimization, or a safety check can be done in:
 
-- Pre-compile stage. (Code generation, IDE linting, etc.)
-- Compile stage. (Compile-time computation, macros, dependent type theorem proving, etc.)
-- Runtime stage. (runtime check, JIT compilation, etc.)
-- After first run. (Offline profile-guided optimization, etc.)
 
 Deferred compuation vs immediate compuation:
 
@@ -121,6 +116,17 @@ Deferred compuation vs immediate compuation:
 - Stream processing vs batch processing.
 - Pytorch's most matrix operations are async. GPU computes in background. The tensor object's content may be yet unknown (and CPU will wait for GPU when you try to read its content).
 - Some databases (PostgreSQL, SQLite, etc.) require deferred "vacuum" that rearranges storage space.
+
+### Program lifecycle
+
+A computation, an optimization, or a safety check can be done in:
+
+- Pre-compile stage. (Code generation, IDE linting, etc.)
+- Compile stage. (Compile-time computation, macros, dependent type theorem proving, etc.)
+- Runtime stage. (runtime check, JIT compilation, etc.)
+- After first run. (Offline profile-guided optimization, etc.)
+
+Most computations that are done at compile time can be done at runtime (with extra performance cost). But if you want to avoid the performance cost by doing it in compile time, you often need to do complex type gymnastics (In Rust and C++, most runtime computation methods cannot be directly used in compile-time. Compile-time computation often require encoding data structure in types and a lot of type gymnastics. But the harmony between compile-time and runtime can be accomplished in Zig and dependently-typed languages. Related: [Statics-dynamics Biformity](https://hirrolot.github.io/posts/why-static-languages-suffer-from-complexity#)
 
 ## Generalized View
 
@@ -194,6 +200,14 @@ Examples:
 
 
 [^quick_sort_equal_pivot]: About the elements that equals the pivot, how exactly to treat them is implementation-specific. Some put them into the first partition. Some put then into another third partition.
+
+Two ways of maintaining invariant: immediate perfect invariant maintenance, delayed imperfect invariant maintenance.
+
+Most bugs occur because an invariant is broken. Maintaining some complex invariants require all the code over different places to "collaborate" together. If one piece code was changed by a developer not knowing the invariant, it breaks.
+
+One purpose of encapsulation is to reduce the chance the invariant be broken.
+
+Type systems also help maintaining invariant. But a simple type system can only maintain simple invariants. Complex invariants require complex types to maintain. If it becomes too complex, type may be longer than execution code.
 
 ### Manually maintaining invariant is hard
 
