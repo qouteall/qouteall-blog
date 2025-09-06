@@ -1236,30 +1236,31 @@ Reference: [G.I. Joe Phenomena: Understanding  the Limits of Metacognitive  Awar
 
 Note that the **cognitive biases are not necessarily negative things**. They are tradeoffs. 
 
-## The intuition-driven and rationality-driven
+## Between leaders and scholars/engineers
 
-In real world, it's often that intellectual experts (e.g. scientists, engineers) are managed and persuaded by intuition-driven people (e.g. political leaders, CEOs).
+The attributes of charismatic leaders:
 
-The intellectual experts often have desires:
+- They often tell **exaggerated** stories and missions, with **high confidence**.
+- They often **don't fear of being wrong**. They don't talk in conservative tone.
+- They often offer hope and mission.
+- They often provide "emotional value". For example:
+  - People want to be respected and valued. The leader give respect using words (but not in material).
+  - Leader often give promises. (The promises often will never be fulfilled.)
+- They don't care about logic in debating, and show a strong stance.
+- They often utilize cognitive biases well:
+  - They simplify ideas to make them easy to understand and spread.
+  - Tribalism and in-group bias. Provide superior satisfaction within group. Elicit hatred to "enemies".
+  - They create rituals that foster herd mentality.
+  - They use seeming-plausible execuses for failure. Utilizing confirmation bias, causual simplification, etc.
+  - ...
 
-- Intellectual experts want to feel respected. They want their intelligence be valued. They want their intelligence be properly utilized for meaningful things and big missions.
-- They fear of their work being misunderstood, downplayed and ignored.
-- They fear of being wrong.
+On the other hand, scholars and engineers:
 
-The intellectual experts are more smart in their expert domain than the leaders. However, "smart" is multi-dimensional. The leaders are more "socially-smart":
+- They often fear of being wrong. They often talk in **conservative tone**. It's much less effective than the leader's confident and assertive tone.
+- They often care about logic and evidence in debating. They often fail debating with the ones that don't care about logic and evidence, but are good at eliciting emotions. (The debate opponents often **reverse the burden of proof** to them.)
+- They often fear of their work being misunderstood, downplayed and ignored. They can often easily fall for a leader that gives only verbal respect and recognition to them (often the leader doesn't really understand their work).
+- Although being more smart in their expert domain, they are often less smart in social and politics and more susceptible to manipulation.
 
-- The leaders tell **exaggerated** stories and missions, with **high confidence**.
-- The **leaders don't fear of being wrong** like the intellectual experts. What leaders say are often seen as bullshit by intellectual experts.
-- The leaders are **experienced in persuation and negotiation**. When intellectual experts are studying and working about objective reality, the leaders interact with peoples and gain experiences.
-- The leaders often don't believe much in experts' results. They trust their inutition, not results of a math model. **Intellectual experts often cannot persuade the intuition-driven leaders**.
-
-However, the leaders often can persuade the intellectual experts:
-
-- They are often generous on praising the intellectual experts that they want to persuade. The intellectual experts often feel respected and valued.
-- They often offer big missions for intellectual experts to fulfill their value.
-- They often **over-promise** about future reward of money and fame (with no proper legal obligation).
-
-The intellectual experts fear of being wrong because of habits developed when working with objective reality. **Objective reality punishes being wrong**. However, **when working with people (not engineering or researching), telling fantasy is often effective**.
 
 ## Two trading strategies
 
