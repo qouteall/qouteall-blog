@@ -5,7 +5,7 @@
 
 - Computation-data duality.
 - Mutation-data duality.
-- Partial computation.
+- Partial computation and multi-stage computation.
 - Generalized View.
 - Invariant production, grow, and maintenance.
 
@@ -44,7 +44,7 @@ The applications of algebraic effect idea:
 - Async/await
 - Generator
 - React `Suspense`
-- Serializing saved execution state so that it can be saved to disk or sent via network. Example: Restate.
+- Serializing saved execution state so that it can be saved to disk or sent via network. Related: Restate.
 
 ### Don't always go too far on DSL
 
@@ -61,34 +61,28 @@ However then a tradeoff befome salient:
   - No existing libraries ecosystem. Need to reinvent wheel.
   - The new DSL is often less battle-tested and more buggy.
 
-DSL are useful when it's high in abstraction level, and new requirements can usually follow the abstration.
+DSL are useful when it's high in abstraction level, and new requirements mostly follow the abstration.
 
 ## Mutation-data duality
 
 Mutation can be represented as data. Data can be interpreted as mutation.
 
-- Instead of just doing in-place mutation, we can enqueue a command to do mutation later. The command is then processed to do actual mutation.
-- In a transactional database, modifying things in a transaction adds mutation records instead of just modify in-place. The mutation is persisted when transaction commits. With snapshot isolation, mutation in one transaction is invisible to another except for locking, but mutation in current transaction is visible to own.
-- In a client-side GUI application, modifying a thing requires sending a request to the server. That request is data. The server's response is also data, which may confirm or deny the modification. The client can display modified data before server responds to reduce latency, but need to rollback temporary changes when the server denies the modification (in multiplayer cases, one player's modification can invalidate another player's modification).
-- **Event sourcing**. Derive latest state from a log. Examples: Database WAL, Raft, Lambda architecture.
-
-Instead of doing in-place modification, we can:
-
-- Defer mutation. Put updates in some queue and mutate in a deferred way. (It's also moving computatin between stages)
-- Keep both the new state and the old states (copy-on-write, read-copy-update).
-- Express the latest state as a view of old state + mutations.
-- Two alternate buffers. Example: when simulating Conway's game of life, you need two buffers. Just having one buffer and doing in-place modification will give wrong result, as each simulation step requires the previous state, and in-place modification replaces some previous states with new states. Sometimes a computation requires old state, and sometimes it requires new state, depending on exact requirements.
+- Instead of just doing in-place mutation, we can enqueue a command (or event) to do mutation later. The command is then processed to do actual mutation. (It's also moving computatin between stages)
+- **Event sourcing**. Derive latest state from a log. Express the latest state as a view of old state + mutations. The idea is adopted by database WAL, data replication, Lambda architecture, etc.
 - Layered filesystem (in Docker). Mutating or adding file is creating a new layer. The unchanged previous layers can be cached and reused.
 
 The benefits:
 
-- Easier to inspect and debug mutations, because mutations are explicit data, not implicit execution history. Easier to audit and replay.
-- Avoid data race issues under parallelism (copy-on-write, reading old snapshot, make mutation command processing sequential). Transactional databases provide snapshot isolation.
-- Rollback.
-  - Transactional databases allow rolling back a uncommited transation. Mutation by append data (WAL) so that mutations can be easily rolled back even if database crashes.
-  - Editing software often need to support undo. It's often implemted by storing previous step's data, while sharing unchanged substructure to optimize.
-  - Multiplayer client that does server-state-prediction (to reduce visible latency) need to rollback when prediction is invalidted by server's message.
-  - CPU does branch prediction and speculative execution. If branch prediction fails, it internally rollback ([Spectre vulnerability](https://en.wikipedia.org/wiki/Spectre_(security_vulnerability)) is caused by rollback not cancelling side effects in cache that can be measured in access speed).
+- Easier to inspect, audit and debug mutations, because mutations are explicit data, not implicit execution history. Easier to audit and replay.
+- Can replay mutations and rollback easily.
+- Can replicate (sync) data change without sending full data.
+
+Abot rollback:
+
+- Transactional databases allow rollback a uncommited transaction. (Implementation details vary between databases. PostgreSQL is append-only. MySQL InnoDB does in-place mutation on disk but writes undo log and redo log.)
+- Editing software often need to support undo. It's often implemted by storing previous step's data, while sharing unchanged substructure to optimize.
+- Multiplayer game client that does server-state-prediction (to reduce visible latency) need to rollback when prediction is invalidted by server's message.
+- CPU does branch prediction and speculative execution. If branch prediction fails, it internally rollback ([Spectre vulnerability](https://en.wikipedia.org/wiki/Spectre_(security_vulnerability)) is caused by rollback not cancelling side effects in cache that can be measured in access speed).
 
 In some places, we specify a new state and need to compute the mutation (diff). Examples:
 
@@ -97,6 +91,9 @@ In some places, we specify a new state and need to compute the mutation (diff). 
 - Kubernetes. You specify what nodes/services it has. Kubernetes found the diff between reality and configuration, then do actions (e.g. launch new service, close service) to cover the diff. 
 
 Bitemporal modelling: Store two pieces of records. One records the data and time updated to database. Another records the data and time that reflect the reality. (Sometimes the reality changes but database doesn't edit immediately. Sometimes database contains wrong informaiton that's corrected later.) 
+
+Related: Mutate-by-recreate. Keep data immutable and only change one root reference. It can avoid data race issues under parallelism (copy-on-write, read-copy-update, reading old snapshot during mutation).
+
 
 ## Partial computation and multi-stage computation
 
@@ -109,7 +106,6 @@ Partial computation: only compute some parts of the data, and keep the structure
 - Replacing a value with a function that produces value or AST helps handling the currently-unknown data.
 - Using a future (promise) object to represent a pending computation.
 - In Idris, having a hole and inspecting the type of hole can help proving.
-- Compiletime-runtime duality: a computation (or a check) can be in compile-time or runtime. It can be even before compile-time (code generation). It can be during running (e.g. JIT compilation). It can also be after first application run (e.g. profile-guided optimization).
 
 A computation, an optimization, or a safety check can be done in:
 
@@ -120,10 +116,10 @@ A computation, an optimization, or a safety check can be done in:
 
 Deferred compuation vs immediate compuation:
 
-- Immediately free memory vs GC
-- Pytorch's most matrix operations are async. GPU computes in background. CPU only wait GPU when trying to read values inside matrices.
+- Immediately free memory vs GC.
+- Stream processing vs batch processing.
+- Pytorch's most matrix operations are async. GPU computes in background. The tensor object's content may be yet unknown (and CPU will wait for GPU when you try to read its content).
 - Some databases (PostgreSQL, SQLite, etc.) require deferred "vacuum" that rearranges storage space.
-- 
 
 ## Generalized View
 
@@ -145,14 +141,16 @@ Examples of the generalized view concept:
 - A functions is a view of a mapping.
 - Index (and lookup acceleration structure) are also views to underlying data.
 - Cache is view to underlying data/computation.
+- Lazy evaluation provides a view to the computation result.
 - Virtual memory is a view to physical memory.
 - File system is a view to data on disk. The not-on-disk data can also be viewed as files (Unix everything-is-file philosophy).
-- Symbolic link in file systems is a view to other point in file system.
+- Symbolic link in file systems is a view to another point in file system.
 - Database provides generalized views of in-disk/in-memory data.
 - Linux namespaces, hypervisors, sandboxes, etc. provides view of aspects of the system.
-- Proxy, NAT, firewall, virtualized networking etc. provides view of network.
+- Proxy, NAT, firewall, virtualized networking etc. provides manipulated view of network.
 - Transaction isolation in databases provide views of data (e.g. snapshot isolation).
 - Replicated data and redundant data are views to the original data.
+- Multi-tier storage system. From small-fast ones to large-slow ones: register, cache, memory, disk, cloud storage.
 
 [^bits_view]: Also: In hard disk, magnetic field is viewed as bits. In CD, the pits and lands are viewed as bits. In SSD, the electron's position in floating gate is viewed as bits. In fiber optics, light pulses are viewed as bits. In quantum computer, the quantum state (like spin of electron) can be viewed as bits. ......
 
@@ -172,6 +170,12 @@ Mainstream languages often have relatively simpler and less expressive type syst
 
 Dynamic languages are better in avoiding the shackle of unexpressive type system, and getting rid of syntax inconvenience related to type erasure (type erasure in typed languages require inconvenient things like type conversion).
 
+### Computation-storage tradeoff
+
+A view can be backed by either storage or computation (or a combination of storage and computation). 
+
+Modern highly-parallel computation are often bottlenecked by IO and synchronization. Adding new computation hardware units is easy. Making the information to flow efficiently between these hardware units is hard.
+
 ## Invariant production, grow, and maintenance
 
 Most algorithms use the idea of producing invariant, growing invariant and maintaining invariant:
@@ -185,13 +189,13 @@ Examples:
 - Merge sort. Create sorted sub-sequence in smallest scale (e.g. two elements). Then merge two sorted sub-sequences into a bigger one, and continue. The invariant of sorted-ness grows up to the whole sequence.
 - Quick sort. Select a pivot. Then partition the sequence into a part that's smaller than pivot and a part that's larger than pivot (and a part that equals pivot) [^quick_sort_equal_pivot]. By partitioning, it creates invariant $\text{LeftPartElements} < \text{Pivot} < \text{RightPartElements}$. By recursively creating such invariants until to the smallest scale (individual elements), the whole sequence is sorted.
 - Binary search tree. It creates invariant $\text{LeftSubtreeElements} < \text{ParentNode} < \text{RightSubtreeElements}$. When there is only one node, the invariant is produced at the smallest scale. Every insertion then follows that invariant and then grows and maintains that invariant.
-- Dijkstra algorithm. The visited nodes are the nodes whose shortest path from source are known. By using the nodes that we know shortest path, it "expand" on graph, knowing new node's shortest path from source. The algorithm iteratively add new nodes into the invariant, until it spans the whole graph.
+- Dijkstra algorithm. The visited nodes are the nodes whose shortest path from source are known. By using the nodes that we know shortest path, it "expands" on graph, knowing new node's shortest path from source. The algorithm iteratively add new nodes into the invariant, until it spans the whole graph.
 
 
 [^quick_sort_equal_pivot]: About the elements that equals the pivot, how exactly to treat them is implementation-specific. Some put them into the first partition. Some put then into another third partition.
 
 
-### Corresponding GoF design patterns
+## Corresponding GoF design patterns
 
 [GoF design patterns](https://en.wikipedia.org/wiki/Design_Patterns)
 
@@ -221,7 +225,7 @@ Examples:
   - Template method pattern. View different implementations as the same interface methods.
   - Flyweight pattern. Save memory by sharing common data. View shared data as owned data.
 - Invariant production, grow and maintenance:
-  - There is no GoF pattern corresponding to it.
+  - There is no GoF pattern that tightly corresponds to it.
 
 
 Other GoF design patterns briefly explained:
@@ -230,3 +234,5 @@ Other GoF design patterns briefly explained:
 - State pattern. Make state a polymorphic object.
 - Memento pattern. Backup the state to allow rollback. Although it's realted to mutable state, it doesn't involve turning mutation into data, so it's not mutation-data duality.
 - Singleton pattern. It's similar to global variable, but can be late-initialzied, can be ploymorphic, etc.
+- Mediator pattern. One abstraction to centrally manage other abstractions.
+
