@@ -1,5 +1,5 @@
 
-# Higher-Level Design Pattern
+# Higher-Level Design Patterns
 
 <!-- truncate -->
 

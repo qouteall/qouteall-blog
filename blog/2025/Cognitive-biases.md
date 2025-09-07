@@ -224,11 +224,11 @@ People tend to avoid thinking about inevitable death because it's unpleasant. Pe
 - People tend to not value the present because "life is permanent"
 - People worry about risks that affect their "permanent" life
 
-Stoicism proposes thinking about death all the time. Thinking about death can make one not procrastinate important things, reduce worrying and value the present. But Stocism does NOT propose indulgence and overdrafting the future (one need to also consider possibilies of both dying tomorrow and not dying tomorrow).
+Stoicism proposes thinking about death all the time. Thinking about death can make one not procrastinate important things, reduce worrying and value the present. But Stocism does NOT propose indulgence and overdrafting the future (need to consider possibilies of both dying tomorrow and not dying tomorrow).
 
 > Respice post te. Hominem te esse memento. Memento mori!
 > 
-> Look behind. Remember you are mortal. Remember you must die!
+> Look behind. Remember you are mortal. Remember you will die!
 
 ## Belief stability
 
