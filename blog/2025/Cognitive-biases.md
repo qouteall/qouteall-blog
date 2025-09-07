@@ -796,12 +796,12 @@ The price chart is often drawn by making lowest price at the bottom and highest 
 
 Two different talking style: the charismatic leader one and the intellectual expert type:
 
-| Charismatic leader talking style                                        | Intellectual expert talking style                                             |
-| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| Confident and assertive. (doesn't fear of being wrong)                  | Conservative and rigorous. (fear of being wrong)                              |
-| Persuades using narratives and emotions (more effective to most people) | Persuades using expert knowledge and evidence (less effective to most people) |
-| Create hope and mission                                                 | Warn about tradeoffs and possible risks                                       |
-| Often take risk and bear responsibility                                 | Conservative in taking risk and bearing responsibility                        |
+| Charismatic leader talking style                                                                       | Intellectual expert talking style                                                                   |
+| ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Confident and assertive. (doesn't fear of being wrong)                                                 | Conservative and rigorous. (fear of being wrong)                                                    |
+| Persuades using narratives and emotions (more effective to most people)                                | Persuades using expert knowledge and evidence (less effective to most people)                       |
+| Create hope and mission                                                                                | Warn about tradeoffs and possible risks                                                             |
+| Often take risk and bear responsibility. Often make decisions quickly using intuition and simple logic | Conservative in taking risk and bearing responsibility. Often hesitate after analyzing many factors |
 
 Note that the above are two simplified stereotypes. The real cases may be different.
 
