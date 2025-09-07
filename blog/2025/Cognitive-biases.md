@@ -127,10 +127,11 @@ People tend to maintain their ego by **self-serving bias**:
 People tend to be **overconfident** about themselves:
 - People overestimate the correctness and rationality of their belief.
 - **Dunning-Kruger effect**: overestimate capability when low in capability, and understimate when high in capability.
--  **Restraint bias**: Overestimate the ability of controlling emotion, controlling impulse behaviors and resisting addiction.
--  **False uniqueness**: We tend to think that we have special talents and special virtues.
--  **Hindsight bias**: Overconfident in understanding history and the ability to predict.
--  **Bias blind spot**: People are hard to recognize their own biases.
+- **Restraint bias**: Overestimate the ability of controlling emotion, controlling impulse behaviors and resisting addiction.
+- **False uniqueness**: We tend to think that we have special talents and special virtues.
+- **Hindsight bias**: Overconfident in understanding history and the ability to predict.
+- **Bias blind spot**: People are hard to recognize their own biases.
+- An expert in one domain tend to think they are generally intelligent in all domains. (Some intellectual experts don't know they are susceptible to psychological manipulation.)
 
 The overconfidence is useful:
 - Being confident helps persuading others, increasing social impact.
@@ -791,6 +792,19 @@ Just looking confident can often make other people believe. This even applies wh
 
 The price chart is often drawn by making lowest price at the bottom and highest price at the top. The offset and scale of the chart is also framing. If one stock already have fallen by 30%, the latest price is in the bottom of the chart, so the stock seems cheap when looking at the chart, but it may actually be not cheap at all, and vice versa.
 
+#### Two talking styles
+
+Two different talking style: the charismatic leader one and the intellectual expert type:
+
+| Charismatic leader talking style                                        | Intellectual expert talking style                                             |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Confident and assertive. (doesn't fear of being wrong)                  | Conservative and rigorous. (fear of being wrong)                              |
+| Persuades using narratives and emotions (more effective to most people) | Persuades using expert knowledge and evidence (less effective to most people) |
+| Create hope and mission                                                 | Warn about tradeoffs and possible risks                                       |
+| Often take risk and bear responsibility                                 | Conservative in taking risk and bearing responsibility                        |
+
+Note that the above are two simplified stereotypes. The real cases may be different.
+
 ### Blame the superficial
 
 "Shooting the messenger" means blaming the one who bring the bad news, even though the messenger has no responsibility of causing the bad news.
@@ -1239,32 +1253,6 @@ Unfortunately, just knowing the cognitive biases is not enough to avoid and over
 Reference: [G.I. Joe Phenomena: Understanding  the Limits of Metacognitive  Awareness on Debiasing](https://www.hbs.edu/ris/Publication%20Files/21-084_436ebba8-c832-4922-bb6e-49d000a77df3.pdf)
 
 Note that the **cognitive biases are not necessarily negative things**. They are tradeoffs: sometimes worse, sometimes better.
-
-## Between leaders and scholars/engineers
-
-The attributes of charismatic leaders:
-
-- They often tell **exaggerated** stories and missions, with **high confidence**.
-- They often **don't fear of being wrong**. They don't talk in conservative tone.
-- They often offer hope and mission.
-- They often provide "emotional value". For example:
-  - People want to be respected and valued. The leader give respect using words (but not in material).
-  - Leader often give promises. (The promises often will never be fulfilled.)
-- They don't care about logic in debating, and show a strong stance.
-- They often utilize cognitive biases well:
-  - They simplify ideas to make them easy to understand and spread.
-  - Tribalism and in-group bias. Provide superior satisfaction within group. Elicit hatred to "enemies".
-  - They create rituals that foster herd mentality.
-  - They use seeming-plausible execuses for failure. Utilizing confirmation bias, causual simplification, etc.
-  - ...
-
-On the other hand, scholars and engineers:
-
-- They often fear of being wrong. They often talk in **conservative tone**. It's much less persuasive than the leader's confident and assertive tone.
-- They often care about logic and evidence in debating. They often fail debating with the ones that don't care about logic and evidence, but are good at eliciting emotions. The debate opponents often **reverse the burden of proof** to them.
-- They often fear of their work being misunderstood, downplayed and ignored. They can often easily fall for a leader that gives only verbal respect and recognition to them (often the leader doesn't really understand their work).
-- Although being more smart in their expert domain, they are often less smart in social and politics and more susceptible to manipulation.
-
 
 ## Two trading strategies
 
