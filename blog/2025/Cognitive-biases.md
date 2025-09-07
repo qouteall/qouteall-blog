@@ -141,7 +141,17 @@ The overconfidence is useful:
 
 When looking at past, people find past events (including Black Swan events) reasonable and predictable, although they didn't predicted these events in prior.
 
-In a complex world, **one event can have two contradicting interpretations**.
+In a complex world, **one event can have two contradicting interpretations**. For example:
+
+- Federal reserve increases interst rate. 
+  - Bearish: it tightens money supply.
+  - Bullish: it's a sign of strong economy.
+- A company reports great profit.
+  - Bearish: that great profit was anticipted and priced in. The potential is being exhausted.
+  - Bullish: that company is growing fast.
+- A large company buys a startup at high price.
+  - Bearish: the large company is trapped in bureaucracy. It cannot compete with the startup despite having more resources.
+  - Bullish: the startup's business will synergize with the large company's. It's a strategic move.
 
 People make execuses about their prediction failure, such as:
 
@@ -205,6 +215,20 @@ People tend to fight the things that oppose their desire. Examples:
 - Restricting buying something make people buy it more eagerly. Same for restricting selling.
 
 Providing external reward may reduce internal motivation (overjustification effect).
+
+### Avoid thinking about death
+
+People tend to avoid thinking about inevitable death because it's unpleasant. People may subcounciously feel like they live forever, then:
+
+- People feel like having plenty time to procrastinate
+- People tend to not value the present because "life is permanent"
+- People worry about risks that affect their "permanent" life
+
+Stoicism proposes thinking about death all the time. Thinking about death can make one not procrastinate important things, reduce worrying and value the present. But Stocism does NOT propose indulgence and overdrafting the future (one need to also consider possibilies of both dying tomorrow and not dying tomorrow).
+
+> Respice post te. Hominem te esse memento. Memento mori!
+> 
+> Look behind. Remember you are mortal. Remember you must die!
 
 ## Belief stability
 
@@ -794,14 +818,14 @@ The price chart is often drawn by making lowest price at the bottom and highest 
 
 #### Two talking styles
 
-Two different talking style: the charismatic leader one and the intellectual expert type:
+Two different talking styles: the charismatic leader one and the intellectual expert type:
 
-| Charismatic leader talking style                                                                       | Intellectual expert talking style                                                                   |
-| ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| Confident and assertive. (doesn't fear of being wrong)                                                 | Conservative and rigorous. (fear of being wrong)                                                    |
-| Persuades using narratives and emotions (more effective to most people)                                | Persuades using expert knowledge and evidence (less effective to most people)                       |
-| Create hope and mission                                                                                | Warn about tradeoffs and possible risks                                                             |
-| Often take risk and bear responsibility. Often make decisions quickly using intuition and simple logic | Conservative in taking risk and bearing responsibility. Often hesitate after analyzing many factors |
+| Charismatic leader talking style                                                                       | Intellectual expert talking style                                             |
+| ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| Confident and assertive. (doesn't fear of being wrong)                                                 | Conservative and rigorous. (fear of being wrong)                              |
+| Persuades using narratives and emotions (more effective to most people)                                | Persuades using expert knowledge and evidence (less effective to most people) |
+| Create hope and mission                                                                                | Warn about tradeoffs and possible risks                                       |
+| Often take risk and bear responsibility. Often make decisions quickly using intuition and simple logic | Often conservative and hesitate in taking risk and bearing responsibility     |
 
 Note that the above are two simplified stereotypes. The real cases may be different.
 

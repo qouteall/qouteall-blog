@@ -3,6 +3,8 @@
 
 <!-- truncate -->
 
+Higher-level software design patterns:
+
 - Computation-data duality.
 - Mutation-data duality.
 - Partial computation and multi-stage computation.
@@ -108,8 +110,6 @@ Partial computation: only compute some parts of the data, and keep the structure
 - Using a future (promise) object to represent a pending computation.
 - In Idris, having a hole and inspecting the type of hole can help proving.
 
-
-
 Deferred compuation vs immediate compuation:
 
 - Immediately free memory vs GC.
@@ -163,8 +163,8 @@ Examples of the generalized view concept:
 
 More generally:
 
-- The mapping between binary data and information is view. Information is bits+context. The context is how the bits are mapped between information. **Type contains viewing from binary data to information**.
-- Abstraction involves viewing different things as the same things.
+- The mapping between binary data and information is view. **Information is bits+context**. The context is how the bits are mapped between information. **Type contains viewing from binary data to information**.
+- **Abstraction involves viewing different things as the same things**.
 
 
 ### Dynamically-typed languages also have "types"
@@ -187,39 +187,68 @@ Modern highly-parallel computation are often bottlenecked by IO and synchronizat
 
 Most algorithms use the idea of producing invariant, growing invariant and maintaining invariant:
 
-- Initially, create invariant at the smallest scale (in the simplest case).
-- Then incrementally make small invariant be larger, until the invariant become big enough to finish the task.
-- For a data structure that has an invariant, every mutaiton to it need to maintain invariant.
+- Produce invariant. Create invariant at the smallest scale, in the simplest case.
+- Grow invariant. Combine or expand small invariants to make them larger. This often utilizes **transitive rule** (if X and Y both follow invariant, then result of merging X and Y also follows invariant). Do it until the invariant become big enough to finish the task.
+- Maintain invariant. Every mutaiton to a data structure need to maintain its invariant.
 
-Examples:
+### Invariant in algorithms
 
 - Merge sort. Create sorted sub-sequence in smallest scale (e.g. two elements). Then merge two sorted sub-sequences into a bigger one, and continue. The invariant of sorted-ness grows up to the whole sequence.
 - Quick sort. Select a pivot. Then partition the sequence into a part that's smaller than pivot and a part that's larger than pivot (and a part that equals pivot) [^quick_sort_equal_pivot]. By partitioning, it creates invariant $\text{LeftPartElements} < \text{Pivot} < \text{RightPartElements}$. By recursively creating such invariants until to the smallest scale (individual elements), the whole sequence is sorted.
-- Binary search tree. It creates invariant $\text{LeftSubtreeElements} < \text{ParentNode} < \text{RightSubtreeElements}$. When there is only one node, the invariant is produced at the smallest scale. Every insertion then follows that invariant and then grows and maintains that invariant.
+- Binary search tree. It creates invariant $\text{LeftSubtreeElements} \leq \text{ParentNode} \leq \text{RightSubtreeElements}$. When there is only one node, the invariant is produced at the smallest scale. Every insertion then follows that invariant and then grows and maintains that invariant.
 - Dijkstra algorithm. The visited nodes are the nodes whose shortest path from source are known. By using the nodes that we know shortest path, it "expands" on graph, knowing new node's shortest path from source. The algorithm iteratively add new nodes into the invariant, until it spans the whole graph.
+- Dynamic programming. The problem is separated into sub-problems. There is no cycle dependency between sub-problems. One problem's result can be quickly calculated from sub-problem's results (e.g. max, min). 
 
 
 [^quick_sort_equal_pivot]: About the elements that equals the pivot, how exactly to treat them is implementation-specific. Some put them into the first partition. Some put then into another third partition.
 
-Two ways of maintaining invariant: immediate perfect invariant maintenance, delayed imperfect invariant maintenance.
+### Invariant in application
 
-Most bugs occur because an invariant is broken. Maintaining some complex invariants require all the code over different places to "collaborate" together. If one piece code was changed by a developer not knowing the invariant, it breaks.
+For example, invariants in business logic:
 
-One purpose of encapsulation is to reduce the chance the invariant be broken.
+- User name cannot duplicate.
+- Bank account balance should never be negative. No over-spend.
+- Product inventory count should never be negative. No over-sell.
+- One room in hotel cannot be booked two times with time overlap.
+- The product should be shipped before the order is paid.
+- Any new comment message should correspond to a notification. No lost notification or duplicated notification.
+- The user can't view or change information that's out of their permission.
+- User cannot use a functionality if subscription ends.
+- ...
 
-Type systems also help maintaining invariant. But a simple type system can only maintain simple invariants. Complex invariants require complex types to maintain. If it becomes too complex, type may be longer than execution code.
+Invariants in data:
 
-### Manually maintaining invariant is hard
+- The reduntant data, derived data and acceleration data structure (index, cache) should stay consistent with base data (source-of-truth).
+- The client side data should be consistent with server side data.
+- Memory safety invariants. Pointer should point to valid data. Should not use-after-free. Only free once. etc.
+- Thread safety invariants. This non-thread-safe data structure should not be shared between threads. That data structure must be accessed under lock. etc.
+- The modification of some action should be cancelled after a subsequent action fails. (Ad-hoc transaction, application-managed rollback)
 
-If there is a source-of-truth mutable state, and another data that's derived from source-of-truth.
+### Maintaining invariant
 
-There are many ways of modelling it:
+The timing of maintaining invariant: 
 
-- Make the derived data always compute-on-demand.
-- Store the derived data as mutable state and manually keep consistency with source-of-truth (manulally maintainining invariant).
-- Use other tools to maintain invariant. E.g. use database index and constraints. Use reactive frameworks.
+- Immediate invariant maintenance
+- Delayed invariant maintenance (tolerant stale data. cache, batched processing)
 
-The second one is error-prone and is a common source of bugs.
+The responsibility of maintaining invariant:
+
+- The database/framework/OS/language etc. is responsible of maintaining invariant. For example, database maintains the validity of index and materialized view. If they don't have bugs, the invariant won't be violated.
+- The application code is responsible for maintaining the invariant. This is more **error-prone**. In that case, **good abstraction helps managing invariant by encapsulating**. Maintaining an invariant often require all the code over different places to "collaborate" together
+
+In the second case (application code maintains invariant), to make it less error prone, we can **encapsulate the data and the invariant-maintaining code**, and ensuring that **any usage of encapsulated API won't violate the invariant**. If some usages of API can break the invariant and developer can only know it by considering implementation, then it's a leaky abstraction.
+
+For example, one common invariant is to ensure consistency between derived data and base data (source-of-truth). There are many solutions:
+
+- Make the derived data always **compute-on-demand**. No longer need to manually maintain invariant. But it may cost performance.
+- Store the derived data as mutable state and manually keep consistency with source-of-truth. This is the most error-prone solution. All **modifications to base data should "notify" the derived data** to update accordingly. Sometimes notify is to call a function. Sometimes notify involves networking.
+  - A more complex case: the derived data need to modified in a way that reflect to base data. This **violates single source-of-truth**. It's even more error-prone.
+  - Even more complex: the client side need to reduce visible latency by predicting server side data, and wrong prediction need to be corrected by server side data. It not only violates single source-of-truth but also often require rollback mechanism.
+- Relying on other tools (database/framework/OS/language etc.) to maintain the invariant, as previously mentioned.
+
+In real-world legacy code, **invariants are often not documented**. They are implicit in code. A developer not knowing an invariant can easily break it.
+
+Type systems also help maintaining invariant. But a simple type system can only maintain simple invariants. Complex invariants require complex types to maintain. If it becomes too complex, type may be longer than execution code, and type errors become harder to resolve. It's a tradeoff.
 
 ## Corresponding GoF design patterns
 
@@ -232,7 +261,7 @@ The second one is error-prone and is a common source of bugs.
   - Command pattern. Turn command (action) into object.
   - Interpreter pattern. Interpret data as computation.
   - Iterator pattern / generator. Turn iteration code into state machine.
-  - Strategy pattern. Turn strategy into object (function value).
+  - Strategy pattern. Turn strategy into object.
   - Observer pattern. Turn event handling code into an observer.
 - Mutation-data duality:
   - Command pattern. It also involves computation-data duality. The command can both represent mutation, action and computation.
