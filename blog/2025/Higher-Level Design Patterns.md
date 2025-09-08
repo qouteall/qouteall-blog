@@ -11,43 +11,40 @@ Higher-level software design patterns:
 - Generalized View.
 - Invariant production, grow, and maintenance.
 
+These patterns and ideas are often deeply connected and used together.
+
 ## Computation-data duality
-
-It's often beneficial to turn an action into data, then replace the raw action code into an interpreter.
-
-By turning action into data, the raw action code is split into two parts: the one generating action and the one executing action. (It's also related to moving computation stages)
 
 It involves two different aspects: 
 
 - Turn computation (logic and action) into data.
 - Turn execution state into explicit data.
 
-The benefit of turning logic and action into data:
+The benefit of turning computation (logic and action) into data:
 
-- Closure (lambda expression). A function along with captured data. It allows [reusing a piece of code along with captured data](./About%20Code%20Reuse,%20Polymorphism%20and%20Abstraction#code-reuse-mechanisms). 
-- Composition. The logic that's turned to data can be more easily composed. Functional programming encourages having simple building blocks and compose them into complex logic.
+- Closure (lambda expression, function value). A function along with captured data. It allows [reusing a piece of code along with captured data](./About%20Code%20Reuse,%20Polymorphism%20and%20Abstraction#code-reuse-mechanisms). It can help abstraction: separate the generation of computation (create function values) and execution of computation (executing function). (It's related to partial computation and multi-stage computation)
+- Composition. The computation that's turned to data can be more easily composed. Functional programming encourages having simple building blocks and compose them into complex logic.
+- Flexibility. The computation that's turned to data can be changed and rebuilt dynamically.
 
 The benefit of turning execution state into explicit data:
 
-- Inspection: Explicit execution state is easier to inspect and display (than stackframe and code execution position).
-- Serialization: Explicit execution state can be serialized and deserialized, thus be stored to database and sent across network.
+- Inspection: Explicit execution state is easier to inspect and display  (the machine code can be optimized, and it's platform-depenent, so machine code execution position and runtime stack are harder to inspect and manipulate than explicit data)
+- Serialization: Explicit execution state can be serialized and deserialized, thus be stored to database and sent across network. (Example: Restate)
 - Suspension: Explicit execution state allows temporarily suspending execution and resume it later. Suspending thread is harder (to avoid suspending the whole process, you need to run it in a separate thread) and less efficient (current OS is not optimized for one million threads). (Turning execution state as data. It's related to mutation-data duality)
 - Modification: Explicit execution state can be modified. It makes cancellation and rollback easier. (Modifying execution stack and execution state is harder, and it's not supported by many mainstream languages.)
 - Forking: Allows forking control flow, which can be useful in some kinds of simulations.
 
 The distinction between computation and execution state is blurry. A closure can capture data. An execution state can be seen as a **continuation**, which is also a computation.
 
-### Algebraic effect and execution state
+### Algebraic effect and continuation
 
 **Algebraic effect**: An effect handler executes some code in a scope. Some code is executed under an effect handler. When it performs an effect, the control flow jumps to the effect handler, and the execution state (**delimited continuation**) up to the effect handler's scope is also saved. The effect handler can then resume using the execution state. [A simple introduction to Algebraic effects](https://overreacted.io/algebraic-effects-for-the-rest-of-us/)
 
-The applications of algebraic effect idea:
+**Delimited continuation** is the execution state turned into data. It's delimited because the execution state only include the stackframes within effect handling scope.
 
-- Async/await
-- Generator
-- React `Suspense`
-- Serializing saved execution state so that it can be saved to disk or sent via network. Related: Restate.
-- Control flow forking. 
+The continuation (without "delimited") contains the whole execution state of the whole program (assume program is single-threaded). Delimited continuation is "local". Continuation is "global". The "local" one is more fine-grained and useful.
+
+**Continuation passing style** (CPS) is a way of representing programs. In CPS, each function accepts a continuation. Returning becomes calling the continuation. Calling continuation is to continue execution. The output of continuation is the "final output of whole program" (if IO or mutable state involved, the "final output of whole program" can be empty).
 
 ### Don't always go too far on DSL
 
@@ -71,7 +68,7 @@ DSL are useful when it's high in abstraction level, and new requirements mostly 
 Mutation can be represented as data. Data can be interpreted as mutation.
 
 - Instead of just doing in-place mutation, we can enqueue a command (or event) to do mutation later. The command is then processed to do actual mutation. (It's also moving computatin between stages)
-- **Event sourcing**. Derive latest state from a log. Express the latest state as a view of old state + mutations. The idea is adopted by database WAL, data replication, Lambda architecture, etc.
+- **Event sourcing**. Derive latest state from a events (log, mutations). Express the latest state as a view of old state + mutations. The idea is adopted by database WAL, data replication, Lambda architecture, etc.
 - Layered filesystem (in Docker). Mutating or adding file is creating a new layer. The unchanged previous layers can be cached and reused.
 
 The benefits:
@@ -82,7 +79,7 @@ The benefits:
 
 Abot rollback:
 
-- Transactional databases allow rollback a uncommited transaction. (Implementation details vary between databases. PostgreSQL is append-only. MySQL InnoDB does in-place mutation on disk but writes undo log and redo log.)
+- Transactional databases allow rollback a uncommited transaction. (Implementation details vary between databases. PostgreSQL write is append-only on disk except vacuum. MySQL InnoDB does in-place mutation on disk but writes undo log and redo log.)
 - Editing software often need to support undo. It's often implemted by storing previous step's data, while sharing unchanged substructure to optimize.
 - Multiplayer game client that does server-state-prediction (to reduce visible latency) need to rollback when prediction is invalidted by server's message.
 - CPU does branch prediction and speculative execution. If branch prediction fails, it internally rollback ([Spectre vulnerability](https://en.wikipedia.org/wiki/Spectre_(security_vulnerability)) is caused by rollback not cancelling side effects in cache that can be measured in access speed).
@@ -110,12 +107,12 @@ Partial computation: only compute some parts of the data, and keep the structure
 - Using a future (promise) object to represent a pending computation.
 - In Idris, having a hole and inspecting the type of hole can help proving.
 
-Deferred compuation vs immediate compuation:
+Deferred (async) compuation vs immediate compuation:
 
 - Immediately free memory vs GC.
 - Stream processing vs batch processing.
 - Pytorch's most matrix operations are async. GPU computes in background. The tensor object's content may be yet unknown (and CPU will wait for GPU when you try to read its content).
-- Some databases (PostgreSQL, SQLite, etc.) require deferred "vacuum" that rearranges storage space.
+- PostgreSQL and SQLite require deferred "vacuum" that rearranges storage space.
 
 ### Program lifecycle
 
@@ -123,10 +120,18 @@ A computation, an optimization, or a safety check can be done in:
 
 - Pre-compile stage. (Code generation, IDE linting, etc.)
 - Compile stage. (Compile-time computation, macros, dependent type theorem proving, etc.)
-- Runtime stage. (runtime check, JIT compilation, etc.)
+- Runtime stage. (Runtime check, JIT compilation, etc.)
 - After first run. (Offline profile-guided optimization, etc.)
 
-Most computations that are done at compile time can be done at runtime (with extra performance cost). But if you want to avoid the performance cost by doing it in compile time, you often need to do complex type gymnastics (In Rust and C++, most runtime computation methods cannot be directly used in compile-time. Compile-time computation often require encoding data structure in types and a lot of type gymnastics. But the harmony between compile-time and runtime can be accomplished in Zig and dependently-typed languages. Related: [Statics-dynamics Biformity](https://hirrolot.github.io/posts/why-static-languages-suffer-from-complexity#)
+Most computations that are done at compile time can be done at runtime (with extra performance cost). But if you want to avoid the performance cost by doing it in compile time, it becomes harder. 
+
+Rust and C++ has **Statics-Dynamics Biformity** ([see also](https://hirrolot.github.io/posts/why-static-languages-suffer-from-complexity#)): most runtime computation methods cannot be easily used in compile-time. Using compile-time mechanisms often require data to be encoded in types, which then require type gymnastics.
+
+The ways that solve (or partially solve) the biformity between compile-time and runtime computation:
+
+- Scala multi-stage programming. [See also](https://docs.scala-lang.org/scala3/reference/metaprogramming/staging.html)
+- Zig compile-time computation and reflection. [See also](https://ziglang.org/documentation/master/#comptime)
+- Dependently-typed languages. (e.g. Idris, Lean)
 
 ## Generalized View
 
@@ -137,7 +142,7 @@ The **generalized** concept of view: View takes one information model and presen
 The generalized view can be understood as:
 
 - Encapsulating information. Hiding you the true underlying information and only expose derived information.
-- Faking and lying information.
+- "Faking" information.
 
 Examples of the generalized view concept:
 
@@ -158,6 +163,7 @@ Examples of the generalized view concept:
 - Transaction isolation in databases provide views of data (e.g. snapshot isolation).
 - Replicated data and redundant data are views to the original data.
 - Multi-tier storage system. From small-fast ones to large-slow ones: register, cache, memory, disk, cloud storage.
+- Previously mentioned computation-data duality and mutation-data duality can be also seen as viewing.
 
 [^bits_view]: Also: In hard disk, magnetic field is viewed as bits. In CD, the pits and lands are viewed as bits. In SSD, the electron's position in floating gate is viewed as bits. In fiber optics, light pulses are viewed as bits. In quantum computer, the quantum state (like spin of electron) can be viewed as bits. ......
 
@@ -171,11 +177,18 @@ More generally:
 
 Dynamically-typed languages also have "types". The "type" here is **the mapping between in-memory data and information**.
 
-Even in dynamic languages, the **data still has "shape" at runtime**. **The program only works with specific "shapes" of data**. It cannot work with arbitrary data. The code that computes number cannot work when you give it a file object. The code that requires a field cannot work when that field is missing.
+Even in dynamic languages, the **data still has "shape" at runtime**. **The program only works with specific "shapes" of data**. It cannot work with wrongly-shaped data. The code that computes number cannot work when you give it a file object. The code that requires a field cannot work when that field is missing.
 
 Mainstream languages often have relatively simpler and less expressive type systems. Some "shape" of data are complex and cannot be easily expressed in mainstram languages' type system (without type erasure).
 
-Dynamic languages are better in avoiding the shackle of unexpressive type system, and getting rid of syntax inconvenience related to type erasure (type erasure in typed languages require inconvenient things like type conversion).
+Dynamic languages' benefits:
+
+- Avoid the shackle of an unexpressive type sysytem.
+- Avoid syntax inconvenience related to type erasure (type erasure in typed languages require inconvenient things like type conversion).
+- Can quickly iterate by changing one part of program, before the changes work with other parts of program (in static typed languages, you need to resolve all compile errors in the code that you don't use now). This is double-edged sword. The broken code that was not tested tend to get missed.
+- Save some time typing types and type definitions.
+
+But the statically-typed languages and IDEs are improving. The more expressive type systems reduce friction of typing. Types can help catching mistakes, help understanding code and help IDE functionalities. Type inference and IDE completion saves time of typing types.
 
 ### Computation-storage tradeoff
 
@@ -183,13 +196,17 @@ A view can be backed by either storage or computation (or a combination of stora
 
 Modern highly-parallel computation are often bottlenecked by IO and synchronization. Adding new computation hardware units is easy. Making the information to flow efficiently between these hardware units is hard.
 
+When memory IO becomes bottleneck, re-computing rather than storing can be beneficial.
+
 ## Invariant production, grow, and maintenance
 
 Most algorithms use the idea of producing invariant, growing invariant and maintaining invariant:
 
 - Produce invariant. Create invariant at the smallest scale, in the simplest case.
-- Grow invariant. Combine or expand small invariants to make them larger. This often utilizes **transitive rule** (if X and Y both follow invariant, then result of merging X and Y also follows invariant). Do it until the invariant become big enough to finish the task.
+- Grow invariant. Combine or expand small invariants to make them larger. This often utilizes **transitive rule**. Do it until the invariant become big enough to finish the task.
 - Maintain invariant. Every mutaiton to a data structure need to maintain its invariant.
+
+About transitive rule: if X and Y both follow invariant, then result of "merging" X and Y also follows invariant. "Transitive" is why the invariant can grow without re-checking the whole data. When the invariant is forced in language level, it can be "contagious".
 
 ### Invariant in algorithms
 
@@ -198,6 +215,7 @@ Most algorithms use the idea of producing invariant, growing invariant and maint
 - Binary search tree. It creates invariant $\text{LeftSubtreeElements} \leq \text{ParentNode} \leq \text{RightSubtreeElements}$. When there is only one node, the invariant is produced at the smallest scale. Every insertion then follows that invariant and then grows and maintains that invariant.
 - Dijkstra algorithm. The visited nodes are the nodes whose shortest path from source are known. By using the nodes that we know shortest path, it "expands" on graph, knowing new node's shortest path from source. The algorithm iteratively add new nodes into the invariant, until it spans the whole graph.
 - Dynamic programming. The problem is separated into sub-problems. There is no cycle dependency between sub-problems. One problem's result can be quickly calculated from sub-problem's results (e.g. max, min). 
+- ......
 
 
 [^quick_sort_equal_pivot]: About the elements that equals the pivot, how exactly to treat them is implementation-specific. Some put them into the first partition. Some put then into another third partition.
@@ -214,7 +232,7 @@ For example, invariants in business logic:
 - Any new comment message should correspond to a notification. No lost notification or duplicated notification.
 - The user can't view or change information that's out of their permission.
 - User cannot use a functionality if subscription ends.
-- ...
+- ......
 
 Invariants in data:
 
@@ -241,6 +259,7 @@ In the second case (application code maintains invariant), to make it less error
 For example, one common invariant is to ensure consistency between derived data and base data (source-of-truth). There are many solutions:
 
 - Make the derived data always **compute-on-demand**. No longer need to manually maintain invariant. But it may cost performance.
+  - Some internal caching can make compute-on-demand be faster.
 - Store the derived data as mutable state and manually keep consistency with source-of-truth. This is the most error-prone solution. All **modifications to base data should "notify" the derived data** to update accordingly. Sometimes notify is to call a function. Sometimes notify involves networking.
   - A more complex case: the derived data need to modified in a way that reflect to base data. This **violates single source-of-truth**. It's even more error-prone.
   - Even more complex: the client side need to reduce visible latency by predicting server side data, and wrong prediction need to be corrected by server side data. It not only violates single source-of-truth but also often require rollback mechanism.
@@ -287,7 +306,7 @@ Other GoF design patterns briefly explained:
 
 - Visitor pattern. Can be replaced by pattern matching.
 - State pattern. Make state a polymorphic object.
-- Memento pattern. Backup the state to allow rollback. Although it's realted to mutable state, it doesn't involve turning mutation into data, so it's not mutation-data duality.
+- Memento pattern. Backup the state to allow rollback. Although it's related to mutable state, it doesn't involve turning mutation into data, so it's not mutation-data duality.
 - Singleton pattern. It's similar to global variable, but can be late-initialzied, can be ploymorphic, etc.
 - Mediator pattern. One abstraction to centrally manage other abstractions.
 

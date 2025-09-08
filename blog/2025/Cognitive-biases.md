@@ -224,7 +224,7 @@ People tend to avoid thinking about inevitable death because it's unpleasant. Pe
 - People tend to not value the present because "life is permanent"
 - People worry about risks that affect their "permanent" life
 
-Stoicism proposes thinking about death all the time. Thinking about death can make one not procrastinate important things, reduce worrying and value the present. But Stocism does NOT propose indulgence and overdrafting the future (need to consider possibilies of both dying tomorrow and not dying tomorrow).
+Stoicism proposes thinking about death all the time. Thinking about death can make one not procrastinate important things, reduce worrying and value the present. But Stocism does NOT propose indulgence and overdrafting the future.
 
 > Respice post te. Hominem te esse memento. Memento mori!
 > 
@@ -664,6 +664,8 @@ People often think the quality of new movies/games/novels declines, worse than t
 Interestingly, LLMs also seem to have availability bias: the information mentioned before in context can guide or mislead subsequent output. The knowledge that's "implicit" in LLM may be suppressed by context.
 
 When reviewing a document, most reviews tend to nitpick on the most easy-to-understand places, like diagram, or summarization, while not reading subsequent text that explain the nuances.
+
+When judging on other people's decisions, people often just see visible downsides and don't see it's a tradeoff that avoids larger downsides.
 
 ### Familiarity bias
 
