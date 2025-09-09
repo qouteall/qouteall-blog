@@ -54,7 +54,7 @@ When you try to handle many different business requests, one solution is to crea
 
 However then a tradeoff befome salient:
 
-- If the rules engine is high in abstraction level, doing a lot of predefined things under-the-hood, then: it will be unadaptive when a new requirement clashes with predefined behavior.
+- If the rules engine is high in abstraction level, doing a lot of predefined things under-the-hood, then: it will be unadaptive when a new requirement clashes with predefined behavior. [Simple interface = hardcoded defaults = less customizability](./About%20Code%20Reuse,%20Polymorphism%20and%20Abstraction#simple-interface--hardcoded-defaults--less-customizability).
 - If the rules engine is low in abstraction level, then doing things will require more configuration. It's not more convenient than just coding. It becomes a new DSL. The new DSL is often worse than mainstream languages because:
   - The new DSL often has poor debug support.
   - The new DSL often has no IDE support.
@@ -77,7 +77,7 @@ The benefits:
 - Can replay mutations and rollback easily.
 - Can replicate (sync) data change without sending full data.
 
-Abot rollback:
+About rollback:
 
 - Transactional databases allow rollback a uncommited transaction. (Implementation details vary between databases. PostgreSQL write is append-only on disk except vacuum. MySQL InnoDB does in-place mutation on disk but writes undo log and redo log.)
 - Editing software often need to support undo. It's often implemted by storing previous step's data, while sharing unchanged substructure to optimize.
@@ -129,9 +129,9 @@ Rust and C++ has **Statics-Dynamics Biformity** ([see also](https://hirrolot.git
 
 The ways that solve (or partially solve) the biformity between compile-time and runtime computation:
 
-- Scala multi-stage programming. [See also](https://docs.scala-lang.org/scala3/reference/metaprogramming/staging.html)
 - Zig compile-time computation and reflection. [See also](https://ziglang.org/documentation/master/#comptime)
 - Dependently-typed languages. (e.g. Idris, Lean)
+- Scala multi-stage programming. [See also](https://docs.scala-lang.org/scala3/reference/metaprogramming/staging.html). It's at runtime, not compile-time. But its purpose is similar to macro and code generation. Dynamically compose code at runtime and then get JITed.
 
 ## Generalized View
 
@@ -149,7 +149,7 @@ Examples of the generalized view concept:
 - Bits are views of voltage in circuits. [^bits_view]
 - Integers are views of bits
 - Characters are views of integers. Strings are views of characters.
-- Other complex data structures are views to binary data.
+- Other complex data structures are views to binary data. (pointer can be seen as a view to pointed data)
 - A functions is a view of a mapping.
 - Index (and lookup acceleration structure) are also views to underlying data.
 - Cache is view to underlying data/computation.
@@ -206,14 +206,14 @@ Most algorithms use the idea of producing invariant, growing invariant and maint
 - Grow invariant. Combine or expand small invariants to make them larger. This often utilizes **transitive rule**. Do it until the invariant become big enough to finish the task.
 - Maintain invariant. Every mutaiton to a data structure need to maintain its invariant.
 
-About transitive rule: if X and Y both follow invariant, then result of "merging" X and Y also follows invariant. "Transitive" is why the invariant can grow without re-checking the whole data. When the invariant is forced in language level, it can be "contagious".
+About transitive rule: if X and Y both follow invariant, then result of "merging" X and Y also follows invariant. "Transitive" is why the invariant can grow without re-checking the whole data. When the invariant is forced in language level, it can be "[contagious](./How%20to%20Avoid%20Fighting%20Rust%20Borrow%20Checker#summarize-the-contagious-things)".
 
 ### Invariant in algorithms
 
 - Merge sort. Create sorted sub-sequence in smallest scale (e.g. two elements). Then merge two sorted sub-sequences into a bigger one, and continue. The invariant of sorted-ness grows up to the whole sequence.
 - Quick sort. Select a pivot. Then partition the sequence into a part that's smaller than pivot and a part that's larger than pivot (and a part that equals pivot) [^quick_sort_equal_pivot]. By partitioning, it creates invariant $\text{LeftPartElements} < \text{Pivot} < \text{RightPartElements}$. By recursively creating such invariants until to the smallest scale (individual elements), the whole sequence is sorted.
 - Binary search tree. It creates invariant $\text{LeftSubtreeElements} \leq \text{ParentNode} \leq \text{RightSubtreeElements}$. When there is only one node, the invariant is produced at the smallest scale. Every insertion then follows that invariant and then grows and maintains that invariant.
-- Dijkstra algorithm. The visited nodes are the nodes whose shortest path from source are known. By using the nodes that we know shortest path, it "expands" on graph, knowing new node's shortest path from source. The algorithm iteratively add new nodes into the invariant, until it spans the whole graph.
+- Dijkstra algorithm. The visited nodes are the nodes whose shortest path from source node are known. By using the nodes that we know shortest path, it "expands" on graph, knowing new node's shortest path from source. The algorithm iteratively add new nodes into the invariant, until it expands to destination node.
 - Dynamic programming. The problem is separated into sub-problems. There is no cycle dependency between sub-problems. One problem's result can be quickly calculated from sub-problem's results (e.g. max, min). 
 - ......
 
@@ -252,14 +252,14 @@ The timing of maintaining invariant:
 The responsibility of maintaining invariant:
 
 - The database/framework/OS/language etc. is responsible of maintaining invariant. For example, database maintains the validity of index and materialized view. If they don't have bugs, the invariant won't be violated.
-- The application code is responsible for maintaining the invariant. This is more **error-prone**. In that case, **good abstraction helps managing invariant by encapsulating**. Maintaining an invariant often require all the code over different places to "collaborate" together
+- The application code is responsible for maintaining the invariant. This is more **error-prone**.
 
 In the second case (application code maintains invariant), to make it less error prone, we can **encapsulate the data and the invariant-maintaining code**, and ensuring that **any usage of encapsulated API won't violate the invariant**. If some usages of API can break the invariant and developer can only know it by considering implementation, then it's a leaky abstraction.
 
-For example, one common invariant is to ensure consistency between derived data and base data (source-of-truth). There are many solutions:
+For example, one common invariant to maintain is **consistency between derived data and base data (source-of-truth)**. There are many solutions:
 
 - Make the derived data always **compute-on-demand**. No longer need to manually maintain invariant. But it may cost performance.
-  - Some internal caching can make compute-on-demand be faster.
+  - Caching can make compute-on-demand be faster.
 - Store the derived data as mutable state and manually keep consistency with source-of-truth. This is the most error-prone solution. All **modifications to base data should "notify" the derived data** to update accordingly. Sometimes notify is to call a function. Sometimes notify involves networking.
   - A more complex case: the derived data need to modified in a way that reflect to base data. This **violates single source-of-truth**. It's even more error-prone.
   - Even more complex: the client side need to reduce visible latency by predicting server side data, and wrong prediction need to be corrected by server side data. It not only violates single source-of-truth but also often require rollback mechanism.
@@ -307,6 +307,6 @@ Other GoF design patterns briefly explained:
 - Visitor pattern. Can be replaced by pattern matching.
 - State pattern. Make state a polymorphic object.
 - Memento pattern. Backup the state to allow rollback. Although it's related to mutable state, it doesn't involve turning mutation into data, so it's not mutation-data duality.
-- Singleton pattern. It's similar to global variable, but can be late-initialzied, can be ploymorphic, etc.
+- Singleton pattern. It's similar to global variable, but can be late-initialized, can be ploymorphic, etc.
 - Mediator pattern. One abstraction to centrally manage other abstractions.
 

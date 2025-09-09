@@ -87,7 +87,7 @@ fn main() {
 }
 ```
 
-[^about_code_example]: This simplified code example is just for illustrating contagious borrow issue. The total score doesn't need to be a mutable field. It's analogous a complex state that will exist in real applications. 
+[^about_code_example]: This simplified code example is just for illustrating contagious borrow issue. The total score doesn't need to be a mutable field. It's analogous to a complex state that will exist in real applications. 
 
 Compile error:
 
@@ -385,6 +385,7 @@ The major differences:
   - In Rust, the coupling comes from borrow checker. The borrow is limited by lifetime and other constraints.
   - In GC langauges, the coupling comes from GC. The existence of a strong reference keeps the object alive. Note that in GC languages there are **live-but-unusable objects** (e.g. Java `FileInputStream` is unusable after closing).
   - In reference counting, the coupling of course comes from runtime reference counting.
+  - The foreign key constraint of ID is enforced by database.
 - For weak generalized reference, the **lifetime of object is decoupled from referces to it**.
 
 If you want to design an abstraction that **decouples** object lifetime and how these objects are referenced, it's recommended to either:
@@ -528,6 +529,8 @@ public class Main {
 That will get `java.util.ConcurrentModificationException`. Java's `ArrayList` has an internal version counter that's incremented every time it changes. The iterator code checks concurrent modification using version counter. 
 
 Even without the version check, it will still be memory-safe because array access is range-checked.
+
+Note that the container for loop in java internally use iterator (except for raw array). Inserting or removing to the container while for looping can also cause iterator invalidation.
 
 Note that **iteration invalidation is logic error**, no matter whether it's memory-safe or not.
 
@@ -771,7 +774,7 @@ It can also work in multithreading, by having `RwLock<QCellOwner>`. This can all
 
 [^lock_granularity]: Sometimes, having fine-grained lock is slower because of more lock/unlock operations. But sometimes having fine-grained lock is faster because it allows higher parallelism. Sometimes fine-grained lock can cause deadlock but coarse-grained lock won't deadlock. It depends on exact case.
 
-[Ghost cell](https://docs.rs/ghost-cell/latest/ghost_cell/) and [LCell](https://docs.rs/qcell/latest/qcell/struct.LCell.html) are similar to QCell, but use closure lifetime as owner id. They are zero-cost, and more restrictive (use closure lifetime as owner id).
+[Ghost cell](https://docs.rs/ghost-cell/latest/ghost_cell/) and [LCell](https://docs.rs/qcell/latest/qcell/struct.LCell.html) are similar to QCell, but use closure lifetime as owner id. They are zero-cost, but more restrictive (owner is tied to closure scope, cannot dynamically create, owner cannot outlive closure).
 
 ### Rust lock is not re-entrant
 

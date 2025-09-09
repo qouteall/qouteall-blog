@@ -681,7 +681,7 @@ This is related to risk compensation: People tend to take more risk in familiar 
 > 2. Anything that's invented between when you’re 15 and 35 is new and exciting and revolutionary and you can probably get a career in it.
 > 3. Anything invented after you're 35 is against the natural order of things.
 >
-> - Douglas Adams
+> \- Douglas Adams
 
 ### Frequency illusion
 
@@ -783,7 +783,7 @@ There are many ways to frame one fact. For example, one from positive aspect, on
 
 - "90% of people survive this surgery" / "10% of people die from this surgery". 
 - "This ground beef is 80% lean" / "This ground beef is 20% fat".
-- "Save $20 by buying now!" / "You'll lose the $20 discount if you wait".
+- "Save \$20 by buying now!" / "You'll lose the \$20 discount if you wait".
 - "99.9% effective against germs" / "Fails to kill 0.1% of germs".
 
 The content creator could emphasize one aspect and downplay another aspect, and use different wording or art style to convey different opinions. The people reading the information could be easily influenced by the framing subconsciously.
