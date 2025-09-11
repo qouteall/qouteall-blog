@@ -85,6 +85,10 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - Normalization. For example é can be U+00E9 (one code point) or U+0065 U+0301 (two code points).
 - [Zero-width characters](https://ptiglobal.com/the-beauty-of-unicode-zero-width-characters/), [Invisible characters](https://invisible-characters.com/)
 - Line break. Windows often use CRLF `\r\n` for line break. Linux and MacOS often use LF `\n` for line break.
+- About escaping in string literal:
+  - `\u` followed by 4 hex digits: supported by JSON, JS, Java, C#, Python and other languages. One such escape must have 4 hex digits. For code points greater than U+FFFF, surrogate pair is needed. "\uD83D\uDE00" gives 😀 which is one code point.
+  - `\U` followed by 8 hex digits: supported by Python, and C++ (start from C++11). Not supported by JSON.
+  - `\x` followed by 2 hex digits, representing a byte: supported by Python and C/C++.
 - Locale ([elaborated below](#locale)).
 
 
