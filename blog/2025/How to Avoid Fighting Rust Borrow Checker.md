@@ -870,7 +870,7 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
 - Using uninitialized memory is undefined behavior.
 - `a = b` will drop the original object in place of `a`. If `a` is uninitialized, then it will drop an unitialized object, which is undefined behavior. Use `addr_of_mut!(...).write(...)` [Related](https://lucumr.pocoo.org/2022/1/30/unsafe-rust/)
 - Handle panic unwinding.
-- Reading/writing to mutable data that's shared between threads need to use atomic or volatile access ([`read_volatile`](https://doc.rust-lang.org/std/ptr/fn.read_volatile.html), [`write_volatile`](https://doc.rust-lang.org/beta/std/ptr/fn.write_volatile.html)). If not, optimizer may assume that data won't be changed by other thread, treating spin-lock-like loop as deadloop.
+- Reading/writing to mutable data that's shared between threads need to use atomic or volatile access ([`read_volatile`](https://doc.rust-lang.org/std/ptr/fn.read_volatile.html), [`write_volatile`](https://doc.rust-lang.org/beta/std/ptr/fn.write_volatile.html)). If not, optimizer may wrongly merge and reorder reads/writes. Note that volatile access themself doesn't establish memory order (unlike Java `volatile`).
 - ......
 
 Modern compilers tries to optimize as much as possible. **To optimize as much as possible, the compiler makes assumptions as much as possible. Breaking any of these assumption can lead to wrong optimization.** That's why it's so complex. [See also](https://queue.acm.org/detail.cfm?id=3212479)
