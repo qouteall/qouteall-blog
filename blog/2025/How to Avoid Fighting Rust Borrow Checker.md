@@ -870,7 +870,8 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
 - Using uninitialized memory is undefined behavior.
 - `a = b` will drop the original object in place of `a`. If `a` is uninitialized, then it will drop an unitialized object, which is undefined behavior. Use `addr_of_mut!(...).write(...)` [Related](https://lucumr.pocoo.org/2022/1/30/unsafe-rust/)
 - Handle panic unwinding.
-- ...
+- Reading/writing to mutable data that's shared between threads need to use atomic or volatile access ([`read_volatile`](https://doc.rust-lang.org/std/ptr/fn.read_volatile.html), [`write_volatile`](https://doc.rust-lang.org/beta/std/ptr/fn.write_volatile.html)). If not, optimizer may assume that data won't be changed by other thread, treating spin-lock-like loop as deadloop.
+- ......
 
 Modern compilers tries to optimize as much as possible. **To optimize as much as possible, the compiler makes assumptions as much as possible. Breaking any of these assumption can lead to wrong optimization.** That's why it's so complex. [See also](https://queue.acm.org/detail.cfm?id=3212479)
 
@@ -1101,6 +1102,6 @@ async fn main() {
 - In current borrow checker, one branch's borrowing is contagious to the whole branching scope.
 - `async` is contagious. `async` function can call normal function. Normal function cannot easily call `async` function (but it's possible to call by blocking).
 - Being not `Sync`/`Send` is contagious. A struct that indirectly owns a non-`Sync` data is not `Sync`. A struct that indirectly owns a non-`Send` data is not `Send`.
-- Error passing is contagious. If panic is not acceptable, then all functions that indirectly call a fallible function must return `Result`.
+- Error passing is contagious. If panic is not acceptable, then all functions that indirectly call a fallible function must return `Result`. Related: NaN is contagious in floating point computaiton.
 
 

@@ -34,7 +34,7 @@ The "gain/loss" is **relative to the expectation** (frame of reference). Differe
 
 Expectation management is important. If the outcome is good but doesn't meet the high expectation, it still causes disappointment. Vice versa.
 
-**The expectation can gradually change.** People gradually get used to the new norm. This make people be able to endure bad environments, and not get satisfied after achievement. 
+**The expectation can gradually change.** People gradually get used to the new norm. This make people be able to endure bad environments, and not get satisfied after achievement.
 
 **Shifting baseline syndrome (boiling frog syndrome)**: If the reality keeps changing slowly, the expectation also tend to keep nudging, eventually move a lot without being noticed. This is also common in long-term psychological manipulation.
 
@@ -215,6 +215,8 @@ People tend to fight the things that oppose their desire. Examples:
 - Restricting buying something make people buy it more eagerly. Same for restricting selling.
 
 Providing external reward may reduce internal motivation (overjustification effect).
+
+Being helped doesn't always elicit gratitude. The one being helped may feel being inferior in social status, thus helping may cause hatred, especially when reciprocal helping cannot be done.
 
 ### Avoid thinking about death
 
@@ -667,6 +669,8 @@ When reviewing a document, most reviews tend to nitpick on the most easy-to-unde
 
 When judging on other people's decisions, people often just see visible downsides and don't see it's a tradeoff that avoids larger downsides.
 
+**Agenda-setting theory**: what media pay attention to can influence people's attention, then influence people's opinions.
+
 ### Familiarity bias
 
 People prefer familiar things. One reason is the availability bias. Another reason is that people self-justifys their previous attention and dedication. This is highly related to availability bias.
@@ -817,6 +821,8 @@ Just looking confident can often make other people believe. This even applies wh
 **Lie by omission**: A person can tell a lot of truth while omitting the important facts, stressing unimportant facts (wrong framing), intentially causing misunderstanding, but at the same time be not lying in literal sense.
 
 The price chart is often drawn by making lowest price at the bottom and highest price at the top. The offset and scale of the chart is also framing. If one stock already have fallen by 30%, the latest price is in the bottom of the chart, so the stock seems cheap when looking at the chart, but it may actually be not cheap at all, and vice versa.
+
+**Reversal of burden of proof**: One common debating technique is to reverse the burden of proof to opponent: "My claim is true because you cannot prove it is false." "You are guilty because you cannot prove you are innocent."
 
 #### Two talking styles
 

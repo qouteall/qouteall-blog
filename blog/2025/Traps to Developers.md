@@ -72,23 +72,20 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
   - An emoji is a grapheme cluster, but it may consist of many code points.
   - In UTF-8, a code point can be 1, 2, 3 or 4 bytes. The byte number does not necessarily represent code point number.
   - In UTF-16, each UTF-16 code unit is 2 bytes. A code point can be 1 code unit (2 bytes) or 2 code units (4 bytes, surrogate pair).
+  - JSON string `\u` escape uses surrogate pair. `"\uD83D\uDE00"` in JSON has only one code point.
 - Different in-memory string behaviors in different languages:
   - Rust use UTF-8 for in-memory string. `s.len()` gives byte count. Rust does not allow directly indexing on a `str` (but allows subslicing). `s.chars().count()` gives code point count. Rust is strict in UTF-8 code point validity (for example Rust doesn't allow subslice to cut on invalid code point boundary).
-  - Java, C# and JS's string encoding is similar to UTF-16 [^string_encoding]. String length is code unit count, not code point count. Indexing works on code units. Each code unit is 2 bytes. One code point can be 1 code unit or 2 code units.
+  - Java, C# and JS's string encoding is similar to UTF-16 [^string_encoding]. String length is code unit count. Indexing works on code units. Each code unit is 2 bytes. One code point can be 1 code unit or 2 code units.
   - In Python, `len(s)` gives code point count. Indexing gives a string that contains one code point.
   - Golang string has no constraint of encoding and is similar to byte array. String length and indexing works same as byte array. But the most commonly used encoding is UTF-8. [See also](https://go.dev/blog/strings)
   - In C++, `std::string` has no constraint of encoding and is similar to byte array. String length and indexing is based on bytes.
   - No language mentioned above do string length and indexing based on grapheme cluster.
-- Some text files have byte order mark (BOM) at the beginning. For example, FE FF means file is in big-endian UTF-16 encoding. EF BB BF means file is in UTF-8 encoding. It's mainly used in Windows. Some non-Windows software does not handle BOM.
+- Some text files have byte order mark (BOM) at the beginning. For example, FE FF means file is in big-endian UTF-16. EF BB BF means UTF-8. It's mainly used in Windows. Some non-Windows software does not handle BOM.
 - When converting binary data to string, often the invalid places are replaced by � (U+FFFD)
 - [Confusable characters](https://github.com/unicode-org/icu/blob/main/icu4c/source/data/unidata/confusables.txt).
-- Normalization. For example é can be U+00E9 (one code point) or U+0065 U+0301 (two code points).
+- Normalization. For example é can be U+00E9 (one code point) or U+0065 U+0301 (two code points). String comparision works on binary data and don't consider normalization.
 - [Zero-width characters](https://ptiglobal.com/the-beauty-of-unicode-zero-width-characters/), [Invisible characters](https://invisible-characters.com/)
 - Line break. Windows often use CRLF `\r\n` for line break. Linux and MacOS often use LF `\n` for line break.
-- About escaping in string literal:
-  - `\u` followed by 4 hex digits: supported by JSON, JS, Java, C#, Python and other languages. One such escape must have 4 hex digits. For code points greater than U+FFFF, surrogate pair is needed. "\uD83D\uDE00" gives 😀 which is one code point.
-  - `\U` followed by 8 hex digits: supported by Python, and C++ (start from C++11). Not supported by JSON.
-  - `\x` followed by 2 hex digits, representing a byte: supported by Python and C/C++.
 - Locale ([elaborated below](#locale)).
 
 

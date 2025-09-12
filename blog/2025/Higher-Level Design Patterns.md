@@ -88,7 +88,12 @@ In some places, we specify a new state and need to compute the mutation (diff). 
 
 - Git. Compute diff based on file snapshots. The diff can then be manipulated (e.g. merging, rebasing, cherry-pick).
 - React. Compute diff from virtual data structure and apply to actual DOM. Sync change from virtual data structure to actual DOM.
-- Kubernetes. You specify what nodes/services it has. Kubernetes found the diff between reality and configuration, then do actions (e.g. launch new service, close service) to cover the diff. 
+- Kubernetes. You configure what pods/volumes/... should exist. Kubernetes observes the diff between reality and configuration, then do actions (e.g. launch new pod, destroy pod) to cover the diff. 
+
+Related: avoiding system calls and replacing calls with data can improve performance:
+
+- io_uring: after initial setup, IO operations no longer involve system call. Just writing to memory can dispatch IO tasks.
+- Graphics API: Old OpenGL use system calls to change state and dispatch draw call. New Graphics APIs like Vulkan, Metal and WebGPU all use command buffer. Operations are turned to data in command buffer.
 
 Bitemporal modelling: Store two pieces of records. One records the data and time updated to database. Another records the data and time that reflect the reality. (Sometimes the reality changes but database doesn't edit immediately. Sometimes database contains wrong informaiton that's corrected later.) 
 
@@ -109,8 +114,8 @@ Partial computation: only compute some parts of the data, and keep the structure
 
 Deferred (async) compuation vs immediate compuation:
 
-- Immediately free memory vs GC.
-- Stream processing vs batch processing.
+- Immediately free memory is immediate computation. GC is deferred computation.
+- Stream processing is immediate computation. Batch processing is deferred computation.
 - Pytorch's most matrix operations are async. GPU computes in background. The tensor object's content may be yet unknown (and CPU will wait for GPU when you try to read its content).
 - PostgreSQL and SQLite require deferred "vacuum" that rearranges storage space.
 
@@ -177,7 +182,9 @@ More generally:
 
 Dynamically-typed languages also have "types". The "type" here is **the mapping between in-memory data and information**.
 
-Even in dynamic languages, the **data still has "shape" at runtime**. **The program only works with specific "shapes" of data**. It cannot work with wrongly-shaped data. The code that computes number cannot work when you give it a file object. The code that requires a field cannot work when that field is missing.
+Even in dynamic languages, the **data still has "shape" at runtime**. **The program only works with specific "shapes" of data**. 
+
+In dynamic languages, code still cannot work properly with wrongly-shaped data. For example, in Python, if a function accepts an array of string, but you pass it one string, then it may treat each character as a string, which is wrong.
 
 Mainstream languages often have relatively simpler and less expressive type systems. Some "shape" of data are complex and cannot be easily expressed in mainstram languages' type system (without type erasure).
 
