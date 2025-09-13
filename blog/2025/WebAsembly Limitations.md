@@ -99,15 +99,47 @@ The first solution, manually implementing GC encounters difficulties:
 
 [^safepoint_mechanism]: Safepoint mechanism allows a thread to pause at specific points. It can force the paused thread to expose all local variables on stack. When a thread is running, a local variable may be in register that cannot be scanned by another thread. And scanning a running thread's stack is not reliable due to memory order issues and race conditions. One way to implement safepoint is to have a global safepoint flag. The code frequently reads the safepoint flag and pause if flag is true. There exists optimizations such as using OS page fault handler.
 
-What about using Wasm's built-in GC functionality? It requires:
+What about using Wasm's built-in GC functionality? It requires mapping the data structure to Wasm GC data structure. Wasm's GC data structure allows Java-like class (with object header), Java-like prefix subtyping, and Java-like arrays. But it doesn't support:
 
-- Mapping the data structure to Wasm's GC data structure. Wasm's GC data structure allows Java-like class (with object header), Java-like prefix subtyping, and Java-like arrays. However it doesn't allow:
-    - Use fat pointer to avoid object header
-    - Add custom fields at the head of an array object
-    - Compact sum type memory layout
-- No support for weak reference and finalizer.
+- Use fat pointer to avoid object header. (Golang does it)
+- Add custom fields at the head of an array object. (C# supports it)
+- Compact sum type memory layout.
+- Interior pointer. (Golang supports interior pointer)
+- Weak reference.
+- Finalizer (the code that run when an object is collected by GC).
 
 ## Multi-threading
+
+The execution model of web code:
+
+- The main thread runs in an event loop, with an event queue.
+- Each calling to JS adds one event to queue.
+- The event loop executes all events in queue, until queue is empty, then browser controls the main thread, until new event arrives.
+- The web page rendering and interaction is blocked by main thread JS code running. It's not recommended to make main thread JS code block for long time.
+- There are web workers. Each web worker also has its own event loop and event queue. Each web worker is single-threaded.
+- Web workers don't share memory (exception: `SharedArrayBuffer`). JS values can be sent to another web worker, but it's deep-copied after being sent.
+
+WebAssembly multithreading relies on web workers and `SharedArrayBuffer`.
+
+### Security issue of `SharedArrayBuffer`
+
+Two vulnearbilities: [Spectre vulnerability](https://en.wikipedia.org/wiki/Spectre_(security_vulnerability)) and [Meltdown vulnerability](https://en.wikipedia.org/wiki/Meltdown_(security_vulnerability).
+
+Background:
+
+- CPU does speculative execution and branch prediction. CPU can execute many instructions in parallel. When CPU sees a branch, it tries to predict the branch and speculatively execute it. If CPU later find branch prediction to be false, the effects of speculative execution will be rolled back, but the side effects on cache won't rollback. 
+- CPU also has memory access permission sytem. The memory access security check is deferred. When CPU sees memory access permission issue, it also rolls back side effects, but the side effects on cache won't rollback.
+- CPU has a cache for accelerating memory access. Some parts of memory are put into cache. Accessing these memory can be done by accessing cache which is faster. 
+- The cache size is limited. Accessing new memory can evict existing data in cache.
+- Whether a content of memory is in cache can be tested by memory access time.
+- Measuring memory access time requires a high precision timer. The web API of getting time (e.g. `performance.now()`) is not accurate enough. One more accurate way is to have another web worker keep incrementing an integer in `SharedArrayBuffer`.
+- Spectre vulnearbility:    The memory access address contains content of `array1[x]`. The attacker measure 
+
+Specture vulneability (Variant 1):
+
+- It requires there exists code like `if (x < array1_size) { y = array2[array1[x] * 4096]; ... }` , and the attacker can call that code with specified `x`. These code are common in browsers.
+- The attacker firstly call it with many in-bound `x` to make branch predictor to assume `x < array1_size` is likely true.
+- Attacker then calls it using an out-of-bound `x`, then speculative execution will do memory access to `array2[array1[x] * 4096]`. It affects cache before CPU found branch prediction failure and rollback.
 
 ### Cannot block on main thread
 
