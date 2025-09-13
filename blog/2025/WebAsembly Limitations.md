@@ -55,14 +55,17 @@ It has benefits:
 
 But it also have downsides:
 
-- GC needs to scan the references (pointers) on stack. If the Wasm app use application-managed GC (not Wasm built-in GC) (for reasons explained below), then the on-stack references (pointer) need to be "spilled" to linear memory, which has costs (larger binary, slower execution). 
+- Some local variables need to be taken address to. They need to be in linar memory.
+- GC needs to scan the references (pointers) on stack. If the Wasm app use application-managed GC (not Wasm built-in GC) (for reasons explained below), then the on-stack references (pointer) need to be "spilled" to linear memory.
 - Stack switching cannot be done. Golang use stack switching for goroutine scheduling. There is a [proposal](https://github.com/WebAssembly/stack-switching) for adding this functionality.
 - Dynamic stack resizing cannot be done. Golang does dynamic stack resizing so that new goroutines can be initialized with small stacks, reducing memory usage.
 
-Note that there are 3 different "stacks" that need to be clarified:
+The common solution is to have a **shadow stack** that's in linear memory. That stack is managed by Wasm code.
 
-- The main execution stack, that holds local variable, call arguments, function pointers, and possibly operands (in wasm stack machine). It's managed by Wasm runtime and not in linear memory. (Some local variables and operands will be put in register or optimized out.)
-- The shadow stack. It's in linear memory. Holds the local variables that need to be in linear memory. Managed by Wasm application, not Wasm runtime.
+Summarize 2 different stacks:
+
+- The main execution stack, that holds local variable, call arguments, function pointers, and possibly operands (in wasm stack machine). It's managed by Wasm runtime and not in linear memory. It cannot be directly read and written by Wasm code.
+- The shadow stack. It's in linear memory. Holds the local variables that need to be in linear memory. Managed by Wasm code, not Wasm runtime.
 
 ## Memory deallocation
 
@@ -80,7 +83,19 @@ There is a [memory control propsal](https://github.com/WebAssembly/memory-contro
 
 ## Wasm GC
 
+When compiling non-GC languages (e.g. C/C++/Rust/Zig) to Wasm, they use the linear memory and implement the allocator in Wasm code.
 
+For GC langauges (e.g. Java/C#/Python/Golang), they need to make GC work in Wasm. There are two solutions:
+
+- Still use linear memory to hold data. Implement GC in Wasm code.
+- Use Wasm's built-in GC functionality.
+
+For the first solution, manually implementing GC encounters these difficulties:
+
+- GC requires scanning GC roots (pointers). Some GC roots are on stack. But the Wasm main stack is not in linear memory and cannot be read by address. One solution is to "spill" the pointers to the shadow stack in linear memory.
+- Multithreaded GC often need to pause the execution to scan the stack correctly. In native applications, it's often done using safepoint mechanism [^safepoint_mechanism].
+
+[^safepoint_mechanism]: Safepoint mechanism allows a thread to pause at specific points. It can force the paused thread to expose all local variables on stack. When a thread is running, a local variable may be in register that cannot be scanned by another thread. And scanning a running thread's stack is not reliable due to memory order issues and race conditions. One way to implement safepoint is to have a global safepoint flag. The code frequently reads the safepoint flag and pause if flag is true. There exists optimizations such as using OS page fault handler.
 
 ## Multi-threading
 
