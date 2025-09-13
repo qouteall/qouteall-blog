@@ -598,6 +598,8 @@ According to [predictive processing theory](https://en.wikipedia.org/wiki/Predic
 
 [Body transfer illusion (fake hand experiment)](https://x.com/visualfeastwang/status/1788507432961839469)
 
+Prior belief can often greatly affect perception.  
+
 Related: **free energy principle**. The brain tries to minimize free energy.
 
 Free energy = Surprise + Change of Belief
@@ -1016,11 +1018,16 @@ Path dependence means sticking to what worked in the past and avoid changing, ev
 
 One easy way to make decisions is to simply follow the people around us. This is beneficial in ancient world: for example, if a tiger comes and some people start fleeing, following them is better than spending time recognizing the tiger.
 
-This is related to **social proof heuristic**: assuming that surrounding people know the situation better.
+This is related to **social proof heuristic**: assuming that surrounding people know the situation better, so following them is correct.
 
 Following the crowd is also a great way of **reducing responsibility**: when everyone is guilty, the law cannot punish everyone. The one that acts independently bears more responsibility.
 
 When many people follow each other, they will confirm each other, creating self-reinforcing momentum. This is also a reason of the momentum in markets. People tend to be overconfident when people around them are confident, and vice versa.
+
+Two kinds of knowing:
+
+- I know something. But I am not sure other people also know it.
+- I know something. I also know other people also know it. I also know other people know me know it. It's **common knowledge**. This is the kind of knowledge that drives herd mentality.
 
 The price can grow not because people believe in the asset, but because the amount of people and money believing in the asset increases. Once that amount stop increasing, price tend to drop despite people believing. Profit can come from the expansion of believers. In this case, the asset is a [Veblen good](https://en.wikipedia.org/wiki/Veblen_good), where higher price induce more demand, until the limit is reached.
 
