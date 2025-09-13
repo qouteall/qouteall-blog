@@ -299,10 +299,8 @@ Type systems also help maintaining invariant. But a simple type system can only 
   - Bridge pattern. View the underlying different implentations as one interface.
   - Composite pattern. View multiple objects as one object.
   - Decorator pattern. Wrap an object, changing its behavior and view it as the same object.
-  - Facade pattern. View complex interfaces as simple interfaces.
-  - Flyweight pattern. View owning into sharing.
+  - Facade pattern. View multiple complex interfaces as one simple interface.
   - Proxy pattern. Proxy object provides a view into other things.
-  - Facade pattern. Provide a simpler abstraction.
   - Template method pattern. View different implementations as the same interface methods.
   - Flyweight pattern. Save memory by sharing common data. View shared data as owned data.
 - Invariant production, grow and maintenance:
