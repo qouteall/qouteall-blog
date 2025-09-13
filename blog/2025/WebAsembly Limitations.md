@@ -90,12 +90,22 @@ For GC langauges (e.g. Java/C#/Python/Golang), they need to make GC work in Wasm
 - Still use linear memory to hold data. Implement GC in Wasm code.
 - Use Wasm's built-in GC functionality.
 
-For the first solution, manually implementing GC encounters these difficulties:
+The first solution, manually implementing GC encounters difficulties:
 
-- GC requires scanning GC roots (pointers). Some GC roots are on stack. But the Wasm main stack is not in linear memory and cannot be read by address. One solution is to "spill" the pointers to the shadow stack in linear memory.
-- Multithreaded GC often need to pause the execution to scan the stack correctly. In native applications, it's often done using safepoint mechanism [^safepoint_mechanism].
+- GC requires scanning GC roots (pointers). Some GC roots are on stack. But the Wasm main stack is not in linear memory and cannot be read by address. One solution is to "spill" the pointers to the shadow stack in linear memory. Having the shadow stack increases binary size and costs runtime performance.
+- Multi-threaded GC often need to pause the execution to scan the stack correctly. In native applications, it's often done using safepoint mechanism [^safepoint_mechanism]. It also increases binary size and costs runtime performance.
+- Multi-threded GC often use store barrier or load barrier to ensure scanning correctness. It also increases binary size and costs runtime performance.
+- Cannot collect a cycle where a JS object and an in-Wasm object references each other.
 
 [^safepoint_mechanism]: Safepoint mechanism allows a thread to pause at specific points. It can force the paused thread to expose all local variables on stack. When a thread is running, a local variable may be in register that cannot be scanned by another thread. And scanning a running thread's stack is not reliable due to memory order issues and race conditions. One way to implement safepoint is to have a global safepoint flag. The code frequently reads the safepoint flag and pause if flag is true. There exists optimizations such as using OS page fault handler.
+
+What about using Wasm's built-in GC functionality? It requires:
+
+- Mapping the data structure to Wasm's GC data structure. Wasm's GC data structure allows Java-like class (with object header), Java-like prefix subtyping, and Java-like arrays. However it doesn't allow:
+    - Use fat pointer to avoid object header
+    - Add custom fields at the head of an array object
+    - Compact sum type memory layout
+- No support for weak reference and finalizer.
 
 ## Multi-threading
 
