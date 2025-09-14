@@ -123,23 +123,13 @@ WebAssembly multithreading relies on web workers and `SharedArrayBuffer`.
 
 ### Security issue of `SharedArrayBuffer`
 
-Two vulnearbilities: [Spectre vulnerability](https://en.wikipedia.org/wiki/Spectre_(security_vulnerability)) and [Meltdown vulnerability](https://en.wikipedia.org/wiki/Meltdown_(security_vulnerability).
+[Spectre vulnerability](https://meltdownattack.com/) is a vulnearbility that allows JS code running in browser to read browser memory. Exploiting it requires accurately measuring memory access latency to test whether a piece of data is in cache. 
 
-Background:
+Modern browsers reduced `performance.now()`'s precision to make it not usable for exploit. But there is another way of accurately measuring (relative) latency: by using `SharedArrayBuffer`. One thread keeps incrementing a counter in `SharedArrayBuffer`. Another thread can read that counter, treating it as "time". Subtracting two "time" gets accurate relative latency.
 
-- CPU does speculative execution and branch prediction. CPU can execute many instructions in parallel. When CPU sees a branch, it tries to predict the branch and speculatively execute it. If CPU later find branch prediction to be false, the effects of speculative execution will be rolled back, but the side effects on cache won't rollback. 
-- CPU also has memory access permission sytem. The memory access security check is deferred. When CPU sees memory access permission issue, it also rolls back side effects, but the side effects on cache won't rollback.
-- CPU has a cache for accelerating memory access. Some parts of memory are put into cache. Accessing these memory can be done by accessing cache which is faster. 
-- The cache size is limited. Accessing new memory can evict existing data in cache.
-- Whether a content of memory is in cache can be tested by memory access time.
-- Measuring memory access time requires a high precision timer. The web API of getting time (e.g. `performance.now()`) is not accurate enough. One more accurate way is to have another web worker keep incrementing an integer in `SharedArrayBuffer`.
-- Spectre vulnearbility:    The memory access address contains content of `array1[x]`. The attacker measure 
+Explanation of Spectre vulnaribility:
 
-Specture vulneability (Variant 1):
 
-- It requires there exists code like `if (x < array1_size) { y = array2[array1[x] * 4096]; ... }` , and the attacker can call that code with specified `x`. These code are common in browsers.
-- The attacker firstly call it with many in-bound `x` to make branch predictor to assume `x < array1_size` is likely true.
-- Attacker then calls it using an out-of-bound `x`, then speculative execution will do memory access to `array2[array1[x] * 4096]`. It affects cache before CPU found branch prediction failure and rollback.
 
 ### Cannot block on main thread
 
@@ -151,3 +141,40 @@ Specture vulneability (Variant 1):
 
 
 ## Dunamically loading new code
+
+
+## Appendix
+
+### Spectre vulnerability explanation
+
+Background:
+
+- CPU has a cache for accelerating memory access. Some parts of memory are put into cache. Accessing these memory can be done by accessing cache, which is faster. 
+- The cache size is limited. Accessing new memory can evict existing data in cache.
+- Whether a content of memory is in cache can be tested by memory access latency.
+- CPU does speculative execution and branch prediction. CPU tries to execute as many as possible instructions in parallel. When CPU sees a branch (e.g. `if`), it tries to predict the branch and speculatively execute code in branch. 
+- If CPU later find branch prediction to be wrong, the effects of speculative execution (e.g. written registers, written memory) will be rolled back. However, memory access leads side effect on cache, and that side effect won't be cancelled by rollback. 
+- The branch predictor relies on statistical data, so it can be "trained". If one branch keeps go to first path for many times, the branch predictor will predict it will always go to the first path.
+
+Specture vulneability (Variant 1) core exploit JS code ([see also](https://spectreattack.com/spectre.pdf)):
+
+```js
+...
+if (index < simpleByteArray.length) {
+    index = simpleByteArray[index | 0];
+    index = (((index * 4096)|0) & (32*1024*1024-1))|0;
+    localJunk ˆ= probeTable[index|0]|0;
+}
+...
+```
+
+The `|0` is for converting value to 32-bit integer, helping JS runtime to optimize it into integer operation (JS is dynamic, without that the JITed code may do other things). The `localJunk` is to prevent these read opearations from being optimized out.
+
+- The attacker firstly execute that code many times with in-bound `index` to "train" branch predictor. 
+- Then the attacker access many other different memory locations to invalidate the cache.
+- Then attacker executes that code using a specific out-of-bound `index`:
+  - CPU speculatively reads `simpleByteArray[index]`. It's out-of-bound. That result is the secret in browser process's memory.
+  - Then CPU speculatively reads `probeTable`, using an index that's computed from that secret.
+  - One specific memory region in `probleTable` will be loaded into cache. Accessing that region is faster.
+  - CPU found that branch prediction is wrong and rolls back, but doesn't rollback side effect on cache.
+- The attacker measures memory read latency in `probeTable`. Which place access faster correspond to the value of secret.
