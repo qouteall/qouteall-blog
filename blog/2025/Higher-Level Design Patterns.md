@@ -184,7 +184,7 @@ Dynamically-typed languages also have "types". The "type" here is **the mapping 
 
 Even in dynamic languages, the **data still has "shape" at runtime**. **The program only works with specific "shapes" of data**. 
 
-In dynamic languages, code still cannot work properly with wrongly-shaped data. For example, in Python, if a function accepts an array of string, but you pass it one string, then it may treat each character as a string, which is wrong.
+For example, in Python, if a function accepts an array of string, but you pass it one string, then it treats each character as a string, which is wrong.
 
 Mainstream languages often have relatively simpler and less expressive type systems. Some "shape" of data are complex and cannot be easily expressed in mainstram languages' type system (without type erasure).
 

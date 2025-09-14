@@ -1,13 +1,18 @@
 
+# WebAssembly Limitations
+
+<!-- truncate -->
+
 Background:
 
 - [WebAssembly](https://webassembly.org/) is an execution model and a code format.
 - It's designed with performance concern. It can achieve higher performance than JS [^wasm_js_perf].
-- It's designed with safety concern. Its execution is sandboxed. It can be run in browser. 
+- It's designed with safety concern. Its execution is sandboxed.
+- It can be run in browser. 
 - It's close to native assembly (e.g. X86, ARM) but abstracts in a cross-platform way, so that many C/C++/Rust/etc. applications can be compiled to Wasm (but with limitations).
 - Although its name has "Web", it's is not just for Web. It can be used outside of browser.
 - Although its name has "Assembly", it has features (e.g. [GC](https://github.com/WebAssembly/gc)) that are in a higher abstraction layer than native assembly. WebAssembly can be seen as a programming language.
-- In browsers, the Wasm runtime is JS runtime. For example, Chromium V8 executes both JS and Wasm.
+- In browsers, it's the same engine that runs JS and Wasm. For example, Chromium V8 executes both JS and Wasm.
 
 [^wasm_js_perf]: WebAssembly is not always faster than JS, depending on how optimization efforts are put in, and browser's limitations. But WebAssembly has higher potential for computation performance than JS. JS has a lot of flexibility. Flexibility costs performance. JS runtime often use runtime statistics to find unused flexibility and optimize accordingly. But statistics cannot be really sure so JS runtime still have to "prepare" for flexibility. The runtime statistics and "prepare for flexibility" all costs performance, in a way that cannot be optimized without changing code format.
 
@@ -125,11 +130,23 @@ WebAssembly multithreading relies on web workers and `SharedArrayBuffer`.
 
 [Spectre vulnerability](https://meltdownattack.com/) is a vulnearbility that allows JS code running in browser to read browser memory. Exploiting it requires accurately measuring memory access latency to test whether a piece of data is in cache. 
 
-Modern browsers reduced `performance.now()`'s precision to make it not usable for exploit. But there is another way of accurately measuring (relative) latency: by using `SharedArrayBuffer`. One thread keeps incrementing a counter in `SharedArrayBuffer`. Another thread can read that counter, treating it as "time". Subtracting two "time" gets accurate relative latency.
+Modern browsers reduced `performance.now()`'s precision to make it not usable for exploit. But there is another way of accurately measuring (relative) latency: multi-threaded counter timer. One thread (web worker) keeps incrementing a counter in `SharedArrayBuffer`. Another thread can read that counter, treating it as "time". Subtracting two "time" gets accurate relative latency.
 
-Explanation of Spectre vulnaribility:
+[Spectre vulneability explanation below](#spectre-vulnerability-explanation)
 
+The solution to that security issue is [**cross-origin isolation**](https://web.dev/articles/cross-origin-isolation-guide). Cross-origin isolation make the browser to use different processes for different websites. One website exploiting Spectre vulnearbility can only read the memory in the process of their website, not other websites.
 
+Cross-origin isolation can be enabled by the HTML loading response having these headers:
+
+- `Cross-Origin-Opener-Policy` be `same-origin`
+- `Cross-Origin-Embedder-Policy` be `require-corp` or `credentialless`. 
+  - If it's `require-corp`, all resources loaded from other websites (origins) must have response header contain `Cross-Origin-Resource-Policy: cross-origin` (or CORS headers, like `Access-Control-Allow-Origin: *`). Otherwise resource loading will fail.
+  - If it's `credentialless`
+
+After cross-origin isolation is enabled:
+
+- For the resources loaded from other websites (origins), the resource loading response header must have 
+- The `iframe` that the website embeds also need to be cross-origin isolated.
 
 ### Cannot block on main thread
 
@@ -178,3 +195,7 @@ The `|0` is for converting value to 32-bit integer, helping JS runtime to optimi
   - One specific memory region in `probleTable` will be loaded into cache. Accessing that region is faster.
   - CPU found that branch prediction is wrong and rolls back, but doesn't rollback side effect on cache.
 - The attacker measures memory read latency in `probeTable`. Which place access faster correspond to the value of secret.
+- To accurately measure memory access latency, `performance.now()` is not accurate enough. It need to use a multi-threaded counter timer: One thread (web worker) keeps increasing a shared counter in a loop. The attacking thread reads that counter to get "time". The cross-thread counter sharing requires `SharedArrayBuffer`. Although it cannot measure time in standard units (e.g. nanosecond), it's accurate enough to distinguish latency difference between fast cache access and slow RAM access.
+
+Related: Another vulnerability related to cache side channel: [GoFetch](https://gofetch.fail/). It exploits Apple processors' cache prefetching functionality.
+
