@@ -60,7 +60,18 @@ It has benefits:
 
 But it also have downsides:
 
-- Some local variables need to be taken address to. They need to be in linar memory.
+- Some local variables need to be taken address to. They need to be in linar memory. For example:
+
+```
+void f() {
+    int localVariable = 0;
+    int* ptr = &localVariable;
+    ...
+}
+```
+
+  The `localVariable` is taken address to, so it must be in linear memory, not Wasm execution stack.
+
 - GC needs to scan the references (pointers) on stack. If the Wasm app use application-managed GC (not Wasm built-in GC) (for reasons explained below), then the on-stack references (pointer) need to be "spilled" to linear memory.
 - Stack switching cannot be done. Golang use stack switching for goroutine scheduling. There is a [proposal](https://github.com/WebAssembly/stack-switching) for adding this functionality.
 - Dynamic stack resizing cannot be done. Golang does dynamic stack resizing so that new goroutines can be initialized with small stacks, reducing memory usage.
@@ -155,11 +166,22 @@ However, the main thread cannot be suspended by these instructions. This was due
 
 [Related 1](https://github.com/WebAssembly/threads/issues/106) [Related 2](https://github.com/WebAssembly/threads/issues/177) [Related 3](https://github.com/WebAssembly/threads/issues/174)
 
-This restriction makes porting native multi-threaded code to Wasm harder. For example, locking in web worker can use normal locking, but locking in main thread must use spin-lock. Spin-locking for long time costs performance.
+This restriction makes porting native multi-threaded code to Wasm harder. For example, locking in web worker can use normal locking, but locking in main thread must use spin-lock. Spin-locking for long time costs performance. Locking is often necessary in multi-threaded allocators.
 
 The main thread can be blocked using [JS Promise integration](https://github.com/WebAssembly/js-promise-integration). That blocking will allow other code (JS code and Wasm code) to execute when blocking. This is called **reentrancy**. 
 
+Wasm applications often use **shadow stack**. It's a stack that's in linear memory, managed by Wasm app rather than Wasm runtime. Shadow stack must be properly switched when Wasm code suspends and resumes using JS Promise integration. Otherwise, the shadow stack parts of different execution can be mixed and messed up. Other things may also break under reentrancy and need to be taken care of.
+
+What's more, if the canvas drawing code suspends using JS Promise integration, the half-drawn canvas will present in web page. This can be workarounded by using [offscreen canvas](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas), drawn in web worker. 
+
+
 ## Cannot directly call Web APIs
+
+Wasm code cannot directly call Web APIs. Web APIs must be called via JS glue code.
+
+Although all Web's JS APIs have [Web IDL](https://webidl.spec.whatwg.org/) specifications, it involves GCed-objects, iterators and async iterators (e.g. `fetch()` returns `Response`. Its `body` field is `ReadableStream`). These GC-related things and async-related things cannot easily adapt to Wasm code using linear memory.
+
+To pass a JS string to Wasm, JS code need transcode (e.g. passing to Rust need to convert WTF-16 to UTF-8), and copy to Wasm linear memory. Passing a string from Wasm to JS also needs copying and transcoding. Passing string between Wasm and JS can be a performance bottleneck
 
 ## JS Interop
 
