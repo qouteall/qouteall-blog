@@ -128,14 +128,15 @@ What about using Wasm's built-in GC functionality? It requires mapping the data 
 
 ## Multi-threading
 
-The execution model of web code:
+Web code runs in event loop:
 
 - The main thread runs in an event loop, with an event queue.
 - Each calling to JS adds one event to queue.
 - The event loop executes all events in queue, until queue is empty, then browser controls the main thread, until new event arrives.
+- If JS code awaits on an unresolved promise, the event handling finishes. When that promise resolves, a new event is added into queue.
 - The web page rendering and interaction is blocked by main thread JS code running. It's not recommended to make main thread JS code block for long time.
-- There are web workers. Each web worker also has its own event loop and event queue. Each web worker is single-threaded.
-- Web workers don't share memory (exception: `SharedArrayBuffer`). JS values can be sent to another web worker, but it's deep-copied after being sent.
+- There are web workers that can run in parallel. Each web worker also has its own event loop and event queue. Each web worker is single-threaded.
+- Web workers don't share memory (except `SharedArrayBuffer`). JS values can be sent to another web worker, but it's deep-copied after being sent. Sending an `ArrayBuffer` to across thread will make `ArrayBuffer` to detach with its binary data.
 
 WebAssembly multithreading relies on web workers and `SharedArrayBuffer`.
 
@@ -175,20 +176,28 @@ Wasm applications often use **shadow stack**. It's a stack that's in linear memo
 What's more, if the canvas drawing code suspends using JS Promise integration, the half-drawn canvas will present in web page. This can be workarounded by using [offscreen canvas](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas), drawn in web worker. 
 
 
+## Wasm-JS passing
+
+Numbers (`i32`, `i64`, `f32`, `f64`) can be directly passed between JS and Wasm.
+
+However, to pass a JS string to Wasm, JS code need transcode (e.g. passing to Rust need to convert WTF-16 to UTF-8), and copy to Wasm linear memory. Passing a string from Wasm to JS also needs copying and transcoding. Passing strings between Wasm and JS can be a performance bottleneck.
+
 ## Cannot directly call Web APIs
 
 Wasm code cannot directly call Web APIs. Web APIs must be called via JS glue code.
 
 Although all Web's JS APIs have [Web IDL](https://webidl.spec.whatwg.org/) specifications, it involves GCed-objects, iterators and async iterators (e.g. `fetch()` returns `Response`. Its `body` field is `ReadableStream`). These GC-related things and async-related things cannot easily adapt to Wasm code using linear memory.
 
-To pass a JS string to Wasm, JS code need transcode (e.g. passing to Rust need to convert WTF-16 to UTF-8), and copy to Wasm linear memory. Passing a string from Wasm to JS also needs copying and transcoding. Passing string between Wasm and JS can be a performance bottleneck
-
-## JS Interop
-
-### Passing string
+## Dynamically loading new code
 
 
-## Dunamically loading new code
+
+## Debugging
+
+
+
+## Hot reload with execution state preservation
+
 
 
 ## Appendix
