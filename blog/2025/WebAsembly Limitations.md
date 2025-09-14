@@ -72,6 +72,8 @@ Summarize 2 different stacks:
 - The main execution stack, that holds local variable, call arguments, function pointers, and possibly operands (in wasm stack machine). It's managed by Wasm runtime and not in linear memory. It cannot be directly read and written by Wasm code.
 - The shadow stack. It's in linear memory. Holds the local variables that need to be in linear memory. Managed by Wasm code, not Wasm runtime.
 
+Using shadow stack involves issue of **reentrancy** explained below.
+
 ## Memory deallocation
 
 The Wasm linear memory can be seen as a large array of bytes. Address in linear memory is the index into the array.
@@ -134,21 +136,28 @@ Modern browsers reduced `performance.now()`'s precision to make it not usable fo
 
 [Spectre vulneability explanation below](#spectre-vulnerability-explanation)
 
+### Cross-origin isolation
+
 The solution to that security issue is [**cross-origin isolation**](https://web.dev/articles/cross-origin-isolation-guide). Cross-origin isolation make the browser to use different processes for different websites. One website exploiting Spectre vulnearbility can only read the memory in the process of their website, not other websites.
 
 Cross-origin isolation can be enabled by the HTML loading response having these headers:
 
-- `Cross-Origin-Opener-Policy` be `same-origin`
-- `Cross-Origin-Embedder-Policy` be `require-corp` or `credentialless`. 
-  - If it's `require-corp`, all resources loaded from other websites (origins) must have response header contain `Cross-Origin-Resource-Policy: cross-origin` (or CORS headers, like `Access-Control-Allow-Origin: *`). Otherwise resource loading will fail.
-  - If it's `credentialless`
-
-After cross-origin isolation is enabled:
-
-- For the resources loaded from other websites (origins), the resource loading response header must have 
-- The `iframe` that the website embeds also need to be cross-origin isolated.
+- `Cross-Origin-Opener-Policy` be `same-origin`. [See also](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cross-Origin-Opener-Policy)
+- `Cross-Origin-Embedder-Policy` be `require-corp` or `credentialless`. [See also](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cross-Origin-Embedder-Policy)
+  - If it's `require-corp`, all resources loaded from other websites (origins) must have response header contain `Cross-Origin-Resource-Policy: cross-origin` (or differently if in CORS mode).
+  - If it's `credentialless`, requests sent to other websites won't contain credentials like cookies.
 
 ### Cannot block on main thread
+
+The threads proposal adds `memory.atomic.wait32`, `memory.atomic.wait64` instructions for suspending a thread, which can be used for implement locks (and conditional variables, etc.). [See also](https://github.com/WebAssembly/threads/blob/main/proposals/threads/Overview.md)
+
+However, the main thread cannot be suspended by these instructions. This was due to some concerns about web page responsiveness.
+
+[Related 1](https://github.com/WebAssembly/threads/issues/106) [Related 2](https://github.com/WebAssembly/threads/issues/177) [Related 3](https://github.com/WebAssembly/threads/issues/174)
+
+This restriction makes porting native multi-threaded code to Wasm harder. For example, locking in web worker can use normal locking, but locking in main thread must use spin-lock. Spin-locking for long time costs performance.
+
+The main thread can be blocked using [JS Promise integration](https://github.com/WebAssembly/js-promise-integration). That blocking will allow other code (JS code and Wasm code) to execute when blocking. This is called **reentrancy**. 
 
 ## Cannot directly call Web APIs
 
