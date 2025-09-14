@@ -16,6 +16,7 @@ Background:
 
 [^wasm_js_perf]: WebAssembly is not always faster than JS, depending on how optimization efforts are put in, and browser's limitations. But WebAssembly has higher potential for computation performance than JS. JS has a lot of flexibility. Flexibility costs performance. JS runtime often use runtime statistics to find unused flexibility and optimize accordingly. But statistics cannot be really sure so JS runtime still have to "prepare" for flexibility. The runtime statistics and "prepare for flexibility" all costs performance, in a way that cannot be optimized without changing code format.
 
+This article focuses on in-browser Wasm.
 
 ## Wasm runtime data
 
@@ -126,6 +127,8 @@ What about using Wasm's built-in GC functionality? It requires mapping the data 
 - Weak reference.
 - Finalizer (the code that run when an object is collected by GC).
 
+Currently, **GC values cannot be shared across threads**.
+
 ## Multi-threading
 
 Web code runs in event loop:
@@ -175,6 +178,21 @@ Wasm applications often use **shadow stack**. It's a stack that's in linear memo
 
 What's more, if the canvas drawing code suspends using JS Promise integration, the half-drawn canvas will present in web page. This can be workarounded by using [offscreen canvas](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas), drawn in web worker. 
 
+### Tables cannot shared
+
+Multi-threading in Web relies on web workers. Currently there is no way to directly launch a Wasm thread in browser.
+
+Launching a multi-threaded Wasm application is done by passing `WebAssembly.Memory` (that contains a `SharedArrayBuffer`) to another web worker. That web worker need to **separately create a new Wasm instance**, using the same `WebAssembly.Memory` object (and `WebAssembly.Module` object.
+
+The `WebAssembly.Memory` that contains `SharedArrayBuffer`. The `WebAssembly.Module` can also be shared.
+
+However, the Wasm globals are not shared. Mutate a mutable Wasm global in one thread don't affect other threads. To workaround this, mutable globals are not compiled to Wasm global. Mutable globals variables are placed in linear memory. That feature makes Wasm globals useful for thread-local storage.
+
+The Wasm tables are by not shared. Dynamically loading new code requires 
+
+### Summarize how to launch multi-threaded Wasm application
+
+
 
 ## Wasm-JS passing
 
@@ -188,7 +206,12 @@ Wasm code cannot directly call Web APIs. Web APIs must be called via JS glue cod
 
 Although all Web's JS APIs have [Web IDL](https://webidl.spec.whatwg.org/) specifications, it involves GCed-objects, iterators and async iterators (e.g. `fetch()` returns `Response`. Its `body` field is `ReadableStream`). These GC-related things and async-related things cannot easily adapt to Wasm code using linear memory.
 
+Currently Wasm cannot be run in browser without JS code that bootstraps Wasm.
+
 ## Dynamically loading new code
+
+
+### Wasm sections
 
 
 
