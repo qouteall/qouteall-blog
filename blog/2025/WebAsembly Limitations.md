@@ -39,7 +39,7 @@ The data that Wasm program works on:
 The linear memory doesn't hold these things:
 
 - Linear memory doesn't hold the stack. The stack managed by runtime and cannot be read/written by address.
-- The linear memory doesn't hold function references. Unlike function pointers in C, Wasm function references cannot be converted to and from integers. This design can improve safety. A function reference can be on stack or on table or in global, and can be called by special instructions [^function_call_instructions].
+- The linear memory doesn't hold function references. Unlike function pointers in C, Wasm function references cannot be converted to and from integers. This design can improve safety. A function reference can be on stack or on table or in global, and can be called by special instructions [^function_call_instructions]. The function pointers become index into table.
 
 [^function_call_instructions]: `call_ref` calls a function reference on stack. `call_indirect` calls a function reference in a table in an index. `return_call_ref`, `return_call_indirect` are for tail call.
 
@@ -178,7 +178,7 @@ Wasm applications often use **shadow stack**. It's a stack that's in linear memo
 
 What's more, if the canvas drawing code suspends using JS Promise integration, the half-drawn canvas will present in web page. This can be workarounded by using [offscreen canvas](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas), drawn in web worker. 
 
-### Tables cannot shared
+### Recreating Wasm instance
 
 Multi-threading in Web relies on web workers. Currently there is no way to directly launch a Wasm thread in browser.
 
@@ -186,9 +186,13 @@ Launching a multi-threaded Wasm application is done by passing `WebAssembly.Memo
 
 The `WebAssembly.Memory` that contains `SharedArrayBuffer`. The `WebAssembly.Module` can also be shared.
 
-However, the Wasm globals are not shared. Mutate a mutable Wasm global in one thread don't affect other threads. To workaround this, mutable globals are not compiled to Wasm global. Mutable globals variables are placed in linear memory. That feature makes Wasm globals useful for thread-local storage.
+The **Wasm globals are thread-local** (not actually global). Mutate a mutable Wasm global in one thread don't affect other threads. Mutable globals variables are placed in linear memory.
 
-The Wasm tables are by not shared. Dynamically loading new code requires 
+Another important limitation: **The Wasm tables cannot be shared**. Wasm tables can hold function references, JS values and other things. Function pointers in C/C++ are replaced by indexes into a function reference in table.
+
+That creates trouble when **loading new Wasm code during running** (dynamic linking). To make existing code call new function, you need indirect call via function reference in table. However, tables cannot be shared across Wasm instances in different web workers.
+
+The current workaround is to notify the web workers to make them proactively load the new code and put new function references to table. One simple way is to send a message to web worker. But that doesn't work when web worker's Wasm code is still running. For that case, some other mechanisms (that costs performance) need to be used.
 
 ### Summarize how to launch multi-threaded Wasm application
 
