@@ -673,6 +673,8 @@ When judging on other people's decisions, people often just see visible downside
 
 **Agenda-setting theory**: what media pay attention to can influence people's attention, then influence people's opinions.
 
+**Saliency bias**: We pay attention to the salient things that grab attention. The things that we don't pay attention to are ignored. **Attention** is a core mechanism of how brain works. (Related: modern deep learning also relies on attention mechanism (transformer).)
+
 ### Familiarity bias
 
 People prefer familiar things. One reason is the availability bias. Another reason is that people self-justifys their previous attention and dedication. This is highly related to availability bias.
@@ -1038,6 +1040,18 @@ Herd mentality is in some sense a kind of trend following strategy. If the trend
 One similar effect, **in-group bias**: Favoring investments or opinions from people within one's own group or those who share similar characteristics.
 
 From the cultrual standpoint, herd mentality also facilitates collaboration and society stability.
+
+### "Because" justification
+
+In [an experiment](https://www.researchgate.net/publication/232505985_The_mindlessness_of_ostensibly_thoughtful_action_The_role_of_placebic_information_in_interpersonal_interaction), requesting jump the queue of using a copy machine:
+
+| Request                                                                   | Accept rate |
+| ------------------------------------------------------------------------- | ----------- |
+| "... May I use the Xerox machine?"                                        | 60%         |
+| "... May I use the Xerox machine **because I have to make some copies**?" | 93%         |
+| "... May I use the Xerox machine because I’m in a rush?"                  | 94%         |
+
+Providing reason "because I'm in a rush" increases accept rate. However, providing a nonsense reason "because I have to make some copies" also increases accept rate similar to a normal reason.
 
 ### Mental accounting
 
