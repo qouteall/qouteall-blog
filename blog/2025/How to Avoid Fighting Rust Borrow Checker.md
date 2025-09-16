@@ -45,10 +45,11 @@ The solutions in borrow-checker-unfriendly cases (will elaborate below):
 - Data-oriented design. Avoid unnecessary getter and setter. Split borrow.
 - Avoid just-for-convenience circular reference.
 - Use ID/handle to replace borrow.
-- Avoid mutation. Mutate-by-recreate.
 - Defer mutation. Mutation-as-data.
-- `Arc<QCell<T>>`, `Arc<RwLock<T>>`
-- Use unsafe and raw pointer.
+- Avoid mutation. Mutate-by-recreate.
+- `Arc<QCell<T>>`
+- `Arc<RwLock<T>>` (only use when really necessary)
+- `unsafe` and raw pointer (only use when really necessary) 
 
 ## Contagious borrow issue
 
@@ -909,13 +910,13 @@ This will be fixed by [Polonius](https://rust-lang.github.io/polonius/current_st
 
 ## `Send` and `Sync`
 
-Rust favors tree-shaped ownership. Each object is owned by exactly one place. If you send something to another thread, only one thread can access it, so it's thread-safe. No risk of data race.
+Rust favors tree-shaped ownership. Each object is owned by exactly one place. If you send tree-shaped data to another thread, only one thread can access it, so it's thread-safe. No data race.
 
 Sending an immutable borrow to another thread is also fine as long as the shared data is actually immutable.
 
-But there are exceptions. One exception is interior mutability, like `Cell` and `RefCell`. Because interior mutability, the data pointed by immutable borrow `&T` may no longer actually be immutable. So Rust prevents sharing `&Cell<T>` and `&RefCell<T>` by making `Cell<T>` and `RefCell<T>` not `Sync`. If `X` is `Sync` then `&X` is `Send`. If `X` is not `Sync` then `&X` is not `Send`. This prevents `Cell` and `RefCell` from being shared across threads.
+But there are exceptions. One exception is interior mutability. Because of interior mutability, the data pointed by immutable borrow `&T` may no longer actually be immutable. So Rust prevents sharing `&Cell<T>` and `&RefCell<T>` by making `Cell<T>` and `RefCell<T>` not `Sync`. If `X` is `Sync` then `&X` is `Send`. If `X` is not `Sync` then `&X` is not `Send`. This prevents `Cell` and `RefCell` from being shared across threads.
 
-`Rc`'s reference counter is not atomic, so `Rc` is neither `Send` or `Sync`.
+`Rc` also has internal shared mutable reference counter. It's not atomic, so `Rc` cannot be passed between threads. It's neither `Send` or `Sync`.
 
 But `&Mutex<T>` can be shared because lock protects them. Also immutable reference to atomic cells like `&AtomicU32` can be shared because of atomicity. `Mutex<T>` and `AtomicU32` are `Sync` so `&Mutex<T>` and `&AtomicU32` are `Send`.
 
@@ -943,7 +944,7 @@ It requires the future need to be `Send` and `'static`:
   
   The future being `'static` often require the future be standalone and doesn't borrow other things. If the future need to share data with outside, pass `Arc<T>` into (not `&Arc<T>`). 
 
-  Note that the "static" in C/C++/Java/C# often mean global value. But in Rust, `'static` can also mean mean standalone (owned) value that's not global.
+  Note that the "static" in C/C++/Java/C# often mean global variable. But in Rust, `'static` can also mean mean standalone (self-owned) value that's not global.
   
 - `Send` means that the future can be sent across threads. Tokio use work-stealing, which means that one thread's task can be stolen by other threads that currently have no work.
 
@@ -994,7 +995,7 @@ fn mutate_twice(i: &mut u32) -> &mut u32 {
 }
 ```
 
-That works. Rust will implicitly treat `mutate(i)` as `mutate(&mut *i)` so that `i` is not moved into and become usable again.
+That works. Rust will implicitly treat the first `mutate(i)` as `mutate(&mut *i)` so that `i` is not moved into and become usable again.
 
 But extracting the second `i` into a local variable early make it not compile:
 
@@ -1104,4 +1105,19 @@ async fn main() {
 - Being not `Sync`/`Send` is contagious. A struct that indirectly owns a non-`Sync` data is not `Sync`. A struct that indirectly owns a non-`Send` data is not `Send`.
 - Error passing is contagious. If panic is not acceptable, then all functions that indirectly call a fallible function must return `Result`. Related: NaN is contagious in floating point computaiton.
 
+## Rust is a tradeoff
 
+Rust's constraints also helps catch bugs other than memory safety and thread safety:
+
+- Algebraic data type (e.g. `Option`, `Result`) helps avoid creating illegal data from the source. Using ADT data require pattern match all cases, avoiding forgetting handling one case. (except when using escape hatch like `unwrap()`).
+- Mutable borrow exclusiveness prevents iterator invalidation.
+- Explicit `.clone()` avoids accidentally copying string like in C++.
+- The receiver of [single-receiver channel](https://doc.rust-lang.org/std/sync/mpsc/fn.channel.html) cannot be copied, ensuring uniqueness of receiver.
+- ......
+
+As previously mentioned, Rust creates obstacles for things like sharing mutable data and circular reference. Also Rust is harder to learn and compiles slower. Apart from that, there are other things that can sometimes be obstacles:
+
+- Unit testing can be obstacle. When the business logic changed, unit test need to also be adjusted, which can feel annoying, because this work won't be needed if there is no unit test.
+- Type system can be obstacle, especially in unexpressive type systems.
+
+They are tradeoffs.
