@@ -56,7 +56,7 @@ In Wasm, the main stack is managed by Wasm runtime. The main stack is not in lin
 
 It has benefits:
 
-- It avoids security issues related to control flow hijacking. A native application's stack is in memory. An out-of-bound write can change the return function address on stack, causing it to execute wrong code. Mitigations such as [data execution prevention](https://en.wikipedia.org/wiki/Executable_space_protection) (DEP) and [stack smashing protection](https://en.wikipedia.org/wiki/Buffer_overflow_protection#Random_canaries) (SSP) are not needed in Wasm. [See also](https://webassembly.org/docs/security/)
+- It avoids security issues related to control flow hijacking. A native application's stack is in memory, so out-of-bound write can change the return code address on stack, causing it to execute wrong code. There are protections such as [data execution prevention](https://en.wikipedia.org/wiki/Executable_space_protection) (DEP) and [stack canary](https://en.wikipedia.org/wiki/Buffer_overflow_protection#Random_canaries) and [address space layout randomization](https://en.wikipedia.org/wiki/Address_space_layout_randomization) (ASLR). These are not needed in Wasm. [See also](https://webassembly.org/docs/security/)
 - It allows the runtime to optimize stack layout without changing program behavior.
 
 But it also have downsides:
@@ -71,7 +71,7 @@ void f() {
 }
 ```
 
-  The `localVariable` is taken address to, so it must be in linear memory, not Wasm execution stack.
+  The `localVariable` is taken address to, so it must be in linear memory, not Wasm execution stack (unless the compiler can optimize out the pointer).
 
 - GC needs to scan the references (pointers) on stack. If the Wasm app use application-managed GC (not Wasm built-in GC) (for reasons explained below), then the on-stack references (pointer) need to be "spilled" to linear memory.
 - Stack switching cannot be done. Golang use stack switching for goroutine scheduling. There is a [proposal](https://github.com/WebAssembly/stack-switching) for adding this functionality.
@@ -125,9 +125,9 @@ What about using Wasm's built-in GC functionality? It requires mapping the data 
 - Compact sum type memory layout.
 - Interior pointer. (Golang supports interior pointer)
 - Weak reference.
-- Finalizer (the code that run when an object is collected by GC).
+- Finalizer (the code that runs when an object is collected by GC).
 
-Currently, **GC values cannot be shared across threads**.
+But the biggest limitation is: **GC values cannot be shared across threads**.
 
 ## Multi-threading
 
@@ -135,11 +135,12 @@ Web code runs in event loop:
 
 - The main thread runs in an event loop, with an event queue.
 - Each calling to JS adds one event to queue.
-- The event loop executes all events in queue, until queue is empty, then browser controls the main thread, until new event arrives.
+- The event loop executes all events in queue, until queue is empty. It waits until new event arrives.
 - If JS code awaits on an unresolved promise, the event handling finishes. When that promise resolves, a new event is added into queue.
-- The web page rendering and interaction is blocked by main thread JS code running. It's not recommended to make main thread JS code block for long time.
+- The web page rendering and interaction is blocked by main thread JS code and Wasm code running. It's not recommended to make main thread keep executing JS/Wasm for long time.
 - There are web workers that can run in parallel. Each web worker also has its own event loop and event queue. Each web worker is single-threaded.
-- Web workers don't share memory (except `SharedArrayBuffer`). JS values can be sent to another web worker, but it's deep-copied after being sent. Sending an `ArrayBuffer` to across thread will make `ArrayBuffer` to detach with its binary data.
+- Web workers don't share memory (except `SharedArrayBuffer`). JS values sent to another web worker are deep-copied. Sending an `ArrayBuffer` across thread will make `ArrayBuffer` to detach with its binary data.
+- Only the main thread can do DOM operations.
 
 WebAssembly multithreading relies on web workers and `SharedArrayBuffer`.
 
@@ -176,31 +177,32 @@ The main thread can be blocked using [JS Promise integration](https://github.com
 
 Wasm applications often use **shadow stack**. It's a stack that's in linear memory, managed by Wasm app rather than Wasm runtime. Shadow stack must be properly switched when Wasm code suspends and resumes using JS Promise integration. Otherwise, the shadow stack parts of different execution can be mixed and messed up. Other things may also break under reentrancy and need to be taken care of.
 
-What's more, if the canvas drawing code suspends using JS Promise integration, the half-drawn canvas will present in web page. This can be workarounded by using [offscreen canvas](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas), drawn in web worker. 
+What's more, if the canvas drawing code suspends using JS Promise integration, the half-drawn canvas will be presented in web page. This can be workarounded by using [offscreen canvas](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas), drawn in web worker. 
 
 ### Recreating Wasm instance
 
 Multi-threading in Web relies on web workers. Currently there is no way to directly launch a Wasm thread in browser.
 
-Launching a multi-threaded Wasm application is done by passing `WebAssembly.Memory` (that contains a `SharedArrayBuffer`) to another web worker. That web worker need to **separately create a new Wasm instance**, using the same `WebAssembly.Memory` object (and `WebAssembly.Module` object.
+Launching a multi-threaded Wasm application is done by passing shared `WebAssembly.Memory` (that contains a `SharedArrayBuffer`) to another web worker. That web worker need to **separately create a new Wasm instance**, using the same `WebAssembly.Memory` object (and `WebAssembly.Module` object.
 
-The `WebAssembly.Memory` that contains `SharedArrayBuffer`. The `WebAssembly.Module` can also be shared.
+The **Wasm globals are thread-local** (not actually global). Mutate a mutable Wasm global in one thread don't affect other threads. Mutable globals variables need to be placed in linear memory.
 
-The **Wasm globals are thread-local** (not actually global). Mutate a mutable Wasm global in one thread don't affect other threads. Mutable globals variables are placed in linear memory.
-
-Another important limitation: **The Wasm tables cannot be shared**. Wasm tables can hold function references, JS values and other things. Function pointers in C/C++ are replaced by indexes into a function reference in table.
+Another important limitation: **The Wasm tables cannot be shared**.
 
 That creates trouble when **loading new Wasm code during running** (dynamic linking). To make existing code call new function, you need indirect call via function reference in table. However, tables cannot be shared across Wasm instances in different web workers.
 
 The current workaround is to notify the web workers to make them proactively load the new code and put new function references to table. One simple way is to send a message to web worker. But that doesn't work when web worker's Wasm code is still running. For that case, some other mechanisms (that costs performance) need to be used.
 
-### Summarize how to launch multi-threaded Wasm application
-
+> While load-time dynamic linking works without any complications, runtime dynamic linking via `dlopen`/`dlsym` can require some extra consideration. The reason for this is that keeping the indirection function pointer table in sync between threads has to be done by emscripten library code. Each time a new library is loaded or a new symbol is requested via `dlsym`, table slots can be added and these changes need to be mirrored on every thread in the process.
+> 
+> Changes to the table are protected by a mutex, and before any thread returns from `dlopen` or `dlsym` it will wait until all other threads are sync. In order to make this synchronization as seamless as possible, we hook into the low level primitives of *emscripten_futex_wait* and *emscripten_yield*.
+> 
+> [Dynamic Linking — Emscripten](https://emscripten.org/docs/compiling/Dynamic-Linking.html)
 
 
 ## Wasm-JS passing
 
-Numbers (`i32`, `i64`, `f32`, `f64`) can be directly passed between JS and Wasm.
+Numbers (`i32`, `i64`, `f32`, `f64`) can be directly passed between JS and Wasm (`i64` maps to `BigInt` in JS, other 3 maps to `number`).
 
 However, to pass a JS string to Wasm, JS code need transcode (e.g. passing to Rust need to convert WTF-16 to UTF-8), and copy to Wasm linear memory. Passing a string from Wasm to JS also needs copying and transcoding. Passing strings between Wasm and JS can be a performance bottleneck.
 
