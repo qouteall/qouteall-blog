@@ -222,6 +222,7 @@ About transitive rule: if X and Y both follow invariant, then result of "merging
 - Binary search tree. It creates invariant $\text{LeftSubtreeElements} \leq \text{ParentNode} \leq \text{RightSubtreeElements}$. When there is only one node, the invariant is produced at the smallest scale. Every insertion then follows that invariant and then grows and maintains that invariant.
 - Dijkstra algorithm. The visited nodes are the nodes whose shortest path from source node are known. By using the nodes that we know shortest path, it "expands" on graph, knowing new node's shortest path from source. The algorithm iteratively add new nodes into the invariant, until it expands to destination node.
 - Dynamic programming. The problem is separated into sub-problems. There is no cycle dependency between sub-problems. One problem's result can be quickly calculated from sub-problem's results (e.g. max, min). 
+- Querying hash map can skip data because $\text{hash}(a) \neq \text{hash}(b)$ implies $a \neq b$. Querying ordered search tree can skip data because $(a < b) \land (b < c)$ implies $a < c$.
 - ......
 
 
