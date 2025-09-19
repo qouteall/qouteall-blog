@@ -270,7 +270,7 @@ People tend to justify the groups they belong (group justification), and justify
 
 Examples:
 
-- An environmental activist might justify other environmental activists' illegal trespassing because they are deemed to be in the same group.
+- An environmental activist may justify other environmental activists' illegal behaviors, because they are deemed in the same group.
 - A middle-class tend to believe "the poor are lazy" and "the wealthy work harder".
 
 
@@ -432,7 +432,7 @@ People tend to judge things **by first impression**. This makes people generate 
 
 Nominal fallacy: Understand one thing just by its names. Examples:
 
-- Knowing that LLM has "temperature" so think LLM is based on thermodynamics. [Link](https://x.com/KeyTryer/status/1962589192124309974)
+- Knowing that LLM has "temperature" so think LLM is heat-based algorithm.
 - Knowing that LLM has "token" so think LLM is a Web3 crypto thing.
 - "How can you be against Patriot Act/Safety Bill/Responsible Disclosure? Do you hate your country/want to kill people/be not responsible?" [Link](https://x.com/onehappyfellow/status/1952258485024084118)
 
@@ -763,7 +763,7 @@ When learning a new domain of knowledge, it's beneficial to ask "stupid question
 
 Normalcy bias: Thinking that past trend will always continue. This is partially due to confirmation bias.
 
-Although the market has trends, and a trend may be much longer than expected, no trend continues forever. Anything that is physically constrained cannot grow forever. Even with Matthew effect, the richest one's wealth cannot grow exponentially forever, as the wealth is physically constrainted.
+Although the market has trends, and a trend may be much longer than expected, no trend continues forever. Anything that is physically constrained cannot grow forever.
 
 Most people are late-trend-following in investment: **not believing in a trend in the beginning, then firmly believing in the trend in its late stage**. This is dangerous, because the market has cycles, and some macro-scale cycles can span years or even decades. **The experiences gained in the surge part of the cycle are harmful in the decline part of the cycle and vice versa**.
 
@@ -778,7 +778,7 @@ People tend to
 
 This is related to **Amara's law**: we tend to overestimate the effect of a technology in the short run and underestimate the effect in the long run.
 
-This is also related to availability bias, where the just-seen events are more obvious and easier to recall than old events and non-obvious underlying trends. This is also related to narrative fallacy: people tend to make up reasons to explain recent events and them believe in their own understanding.
+This is also related to availability bias, where the just-seen events are more obvious and easier to recall than old events and non-obvious underlying trends.
 
 **Normalcy bias means underreact** to new events, but **recency bias means overreact** to new events, which is the opposite of normalcy bias. These two are actually not conflicting. Which one takes effect initially is related to actual situation and existing beliefs (**confirmation bias**). When one person does not believe in a trend but the trend continued for a long time, **binary thinking** may make that person turn their belief 180 degrees and deeply believe in the trend.
 
@@ -801,6 +801,7 @@ The name of a thing affects how people perceive it. Examples:
 - "Collateral damage" / "Death"
 - "Gun control" / "Gun safety"
 - "Government subsidy" / "Using taxpayer money"
+- "Frugal" / "Cheap"
 
 A **loaded question** is a question that contains an assumption (framing). Following that assumption can lead to a biased answer. Example: "Do you support the attempt by the US to bring freedom and democracy to other places in the world?"
 
@@ -938,11 +939,14 @@ Flattering subcounciously increase favorability, even when knowing it's flatteri
 
 When making decisions, human tend to **follow intuitions, which is quick and energy-efficient**, but also less accurate.
 
-- Sometimes quickly making decision is more important than correctness of decision.
 - Often quickly making decision before having complete information is better than waiting for complete investination.
-- Sometime multiple decisions both can fulfill the goal. The important is to do rather than which decision.
+- Sometime multiple decisions both can fulfill the goal. The important is to quickly do action, rather than which decision is optimal.
 
 _Thinking, Fast and Slow_ proposes that human mind has two systems: System 1 thinks by intuition and heuristics, which is fast and efficient, but inaccurate and biased; System 2: thinks by rational logical reasoning, which is slower and requires more efforts, but is more accurate. Most thinking mainly uses System 1 while being unnoticed.
+
+### Emotion overrides System 2
+
+
 
 ### Default effect
 
@@ -970,7 +974,8 @@ When being judged by other people, people tend to do action to show their value,
 - A personal doctor may do useless medications to show they are working. (_Antifragile_ argues that useless medications are potentially harmful. It's naïve interventionism.)
 - A politician tend to do political action to show that they are working on an affair. These policies usually superficially helps the problem but doesn't address the root cause, and may exacerbate the problem. One example is to subsidize house buyers, which makes housing price higher, instead of building more houses.
 - Financial analysts tend to give a definitive result, even knowing that there isn't enough sound evidences.
-- For high-liquidity assets (e.g. stocks), people tend to do impulsive trading when market exhibit volatility. But for low-liquidity harder-to-trade assets (e.g. real estate) people tend to hold when the market exhibit volatility.
+
+For high-liquidity assets (e.g. stocks), people tend to do impulsive trading when market exhibit volatility. But for low-liquidity harder-to-trade assets (e.g. real estate) people tend to hold when the market exhibit volatility.
 
 Action bias does not contradict with default effect. When one is asked to work and show value, doing action is the default behavior, and not doing action is more risky, as people tend to question the one that does not look like working.
 
@@ -1001,9 +1006,9 @@ Examples:
 
 This is related to **means-end inversion**. To achieve the root goal (end) we work on a sub-goal (means) that helps root goal. But focusing on an easy but unimportant sub-goal may hurt the root goal, by taking resources from hard but important sub-goals.
 
-A similar phenomenon occurs commonly in medicine: treatments usually mainly suppress visible symptoms instead of curing the root cause of illness. This is usually due to technological and budget limitations.
+A similar phenomenon occurs commonly in medicine: treatments usually mainly suppress visible symptoms (e.g. painkiller) instead of curing the root cause of illness. This is usually due to technological and budget limitations.
 
-Pepole tend to spend much time making decision on small things but spend very few time making decisions on big things (e.g. buy house with mortgage, change career, big investment):
+Pepole tend to spend much time making decision on small things but spend very few time making decisions on big things (e.g. buy house with mortgage, big investment):
 
 - As the big decision is important, people tend to be nervous when thinking about it.
 - Thinking about big decisions is tiresome, as the future is uncertain, and there are many factors to analyze.
@@ -1051,7 +1056,7 @@ In [an experiment](https://www.researchgate.net/publication/232505985_The_mindle
 | "... May I use the Xerox machine **because I have to make some copies**?" | 93%         |
 | "... May I use the Xerox machine because I’m in a rush?"                  | 94%         |
 
-Providing reason "because I'm in a rush" increases accept rate. However, providing a nonsense reason "because I have to make some copies" also increases accept rate similar to a normal reason.
+Providing a non-reasonable reason "because I have to make some copies" also increases accept rate similar to a normal reason.
 
 ### Mental accounting
 

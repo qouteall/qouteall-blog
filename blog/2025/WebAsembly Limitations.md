@@ -11,7 +11,7 @@ Background:
 - It can be run in browser. 
 - It's close to native assembly (e.g. X86, ARM) but abstracts in a cross-platform way, so that many C/C++/Rust/etc. applications can be compiled to Wasm (but with limitations).
 - Although its name has "Web", it's is not just for Web. It can be used outside of browser.
-- Although its name has "Assembly", it has features (e.g. [GC](https://github.com/WebAssembly/gc)) that are in a higher abstraction layer than native assembly. WebAssembly can be seen as a programming language.
+- Although its name has "Assembly", it has features (e.g. [GC](https://github.com/WebAssembly/gc)) that are in a higher abstraction layer than native assembly, similar to JVM bytecode.
 - In browsers, it's the same engine that runs JS and Wasm. For example, Chromium V8 executes both JS and Wasm.
 
 [^wasm_js_perf]: WebAssembly is not always faster than JS, depending on how optimization efforts are put in, and browser's limitations. But WebAssembly has higher potential for computation performance than JS. JS has a lot of flexibility. Flexibility costs performance. JS runtime often use runtime statistics to find unused flexibility and optimize accordingly. But statistics cannot be really sure so JS runtime still have to "prepare" for flexibility. The runtime statistics and "prepare for flexibility" all costs performance, in a way that cannot be optimized without changing code format.
@@ -118,16 +118,20 @@ The first solution, manually implementing GC encounters difficulties:
 
 [^safepoint_mechanism]: Safepoint mechanism allows a thread to pause at specific points. It can force the paused thread to expose all local variables on stack. When a thread is running, a local variable may be in register that cannot be scanned by another thread. And scanning a running thread's stack is not reliable due to memory order issues and race conditions. One way to implement safepoint is to have a global safepoint flag. The code frequently reads the safepoint flag and pause if flag is true. There exists optimizations such as using OS page fault handler.
 
-What about using Wasm's built-in GC functionality? It requires mapping the data structure to Wasm GC data structure. Wasm's GC data structure allows Java-like class (with object header), Java-like prefix subtyping, and Java-like arrays. But it doesn't support:
+What about using Wasm's built-in GC functionality? It requires mapping the data structure to Wasm GC data structure. Wasm's GC data structure allows Java-like class (with object header), Java-like prefix subtyping, and Java-like arrays. 
 
-- Use fat pointer to avoid object header. (Golang does it)
-- Add custom fields at the head of an array object. (C# supports it)
-- Compact sum type memory layout.
-- Interior pointer. (Golang supports interior pointer)
-- Weak reference.
-- Finalizer (the code that runs when an object is collected by GC).
+The important memory management features that it doesn't support:
 
-But the biggest limitation is: **GC values cannot be shared across threads**.
+- No weak reference.
+- No finalizer (the code that runs when an object is collected by GC).
+- No interior pointer. (Golang supports interior pointer)
+- **GC values cannot be shared across threads**
+
+It doesn't support some memory layout optimizations:
+
+- Cannot use fat pointer to avoid object header. (Golang does it)
+- Cannot add custom fields at the head of an array object. (C# supports it)
+- Don't have compact sum type memory layout.
 
 ## Multi-threading
 
@@ -214,6 +218,10 @@ Although all Web's JS APIs have [Web IDL](https://webidl.spec.whatwg.org/) speci
 
 Currently Wasm cannot be run in browser without JS code that bootstraps Wasm.
 
+## Component model
+
+
+
 ## Dynamically loading new code
 
 
@@ -226,6 +234,9 @@ Currently Wasm cannot be run in browser without JS code that bootstraps Wasm.
 
 
 ## Hot reload with execution state preservation
+
+
+## Memory64 performance
 
 
 
@@ -261,7 +272,7 @@ The `|0` is for converting value to 32-bit integer, helping JS runtime to optimi
 - Then attacker executes that code using a specific out-of-bound `index`:
   - CPU speculatively reads `simpleByteArray[index]`. It's out-of-bound. That result is the secret in browser process's memory.
   - Then CPU speculatively reads `probeTable`, using an index that's computed from that secret.
-  - One specific memory region in `probleTable` will be loaded into cache. Accessing that region is faster.
+  - One specific memory region in `probeTable` will be loaded into cache. Accessing that region is faster.
   - CPU found that branch prediction is wrong and rolls back, but doesn't rollback side effect on cache.
 - The attacker measures memory read latency in `probeTable`. Which place access faster correspond to the value of secret.
 - To accurately measure memory access latency, `performance.now()` is not accurate enough. It need to use a multi-threaded counter timer: One thread (web worker) keeps increasing a shared counter in a loop. The attacking thread reads that counter to get "time". The cross-thread counter sharing requires `SharedArrayBuffer`. Although it cannot measure time in standard units (e.g. nanosecond), it's accurate enough to distinguish latency difference between fast cache access and slow RAM access.

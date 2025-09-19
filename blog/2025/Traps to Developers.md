@@ -153,8 +153,10 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - About `nil`:
   - There are nil slice and empty slice (the two are different). But there is no nil string, only empty string. The nil map can be read like an empty map, but nil map cannot be written.
   - Interface `nil` weird behavior. Interface pointer is a fat pointer containing type info and data pointer. If the data pointer is null but type info is not null, then it will not equal `nil`.
+- Before Go 1.22, [loop variable capture issue](https://go.dev/blog/loopvar-preview).
 - Dead wait. [Understanding Real-World Concurrency Bugs in Go](https://songlh.github.io/paper/go-study.pdf)
 - Different kinds of timeout. [The complete guide to Go net/http timeouts](https://blog.cloudflare.com/the-complete-guide-to-golang-net-http-timeouts/)
+- Having interior pointer to an object keeps the whole object alive. This may cause memory leak.
 
 
 ### C/C++
