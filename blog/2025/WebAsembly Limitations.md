@@ -12,7 +12,7 @@ Background:
 - It's close to native assembly (e.g. X86, ARM) but abstracts in a cross-platform way, so that many C/C++/Rust/etc. applications can be compiled to Wasm (but with limitations).
 - Although its name has "Web", it's is not just for Web. It can be used outside of browser.
 - Although its name has "Assembly", it has features (e.g. [GC](https://github.com/WebAssembly/gc)) that are in a higher abstraction layer than native assembly, similar to JVM bytecode.
-- In browsers, it's the same engine that runs JS and Wasm. For example, Chromium V8 executes both JS and Wasm.
+- In browsers, it's the same engine that runs JS and Wasm. Chromium V8 executes both JS and Wasm. Wasm GC use the same GC as JS.
 
 [^wasm_js_perf]: WebAssembly is not always faster than JS, depending on how optimization efforts are put in, and browser's limitations. But WebAssembly has higher potential for computation performance than JS. JS has a lot of flexibility. Flexibility costs performance. JS runtime often use runtime statistics to find unused flexibility and optimize accordingly. But statistics cannot be really sure so JS runtime still have to "prepare" for flexibility. The runtime statistics and "prepare for flexibility" all costs performance, in a way that cannot be optimized without changing code format.
 
@@ -219,6 +219,8 @@ Although all Web's JS APIs have [Web IDL](https://webidl.spec.whatwg.org/) speci
 Currently Wasm cannot be run in browser without JS code that bootstraps Wasm.
 
 ## Component model
+
+The [Wasm Component Model](https://component-model.bytecodealliance.org/introduction.html) is ambitious:
 
 
 
