@@ -126,7 +126,7 @@ People tend to maintain their ego by **self-serving bias**:
 
 People tend to be **overconfident** about themselves:
 - People overestimate the correctness and rationality of their belief.
-- **Dunning-Kruger effect**: overestimate capability when low in capability, and understimate when high in capability.
+- **Dunning-Kruger effect**: overestimate capability when low in capability, and understimate when high in capability. (Low-capability ones tend to criticize other people's work even though they cannot do the work themselves.)
 - **Restraint bias**: Overestimate the ability of controlling emotion, controlling impulse behaviors and resisting addiction.
 - **False uniqueness**: We tend to think that we have special talents and special virtues.
 - **Hindsight bias**: Overconfident in understanding history and the ability to predict.
@@ -176,7 +176,7 @@ This is related to Stockholm Syndrome. After experiencing pain in the past, peop
 
 **Ben Franklin effect**: People like someone more after doing a favor for them.
 
-**Endowment effect**: We value more on the things that we own (including ideas). Investors tend to be biased to positive information of the stock they own.
+**Endowment effect**: We value more on the things that we own (including ideas). Investors tend to be biased to positive information of the stock they own. Disaggreing an idea tend to be treated as insult.
 
 **Foot-in-the-door effect**: One agreed on a small request tend to subsequently agree on a larger request.
 
@@ -446,6 +446,8 @@ There is no perfect strategy that will guarantee success. Overemphasizing short-
 
 The quicker the feedback gives, the quicker people can learn (this also applies to reinforcement learning AI). But if the feedback delays 6 months, it's hard to learn from it, and people may do **wrong hasty generalization using random coincidents**, before the real feedback comes, thus get fooled by randomness.
 
+When feedback comes early, its correlation with previous behavior is high, having high **signal-to-noise ratio**. If feedback comes late, many previous behaviors may correlate with it, so feedback has low signal-to-noise ratio.
+
 Reducing cost by removing safety measures usually does not cause any visible accidents in the short run, but the benefit of reduced costs are immediately visible. When the accident actually happened because of the removed safety measures, it may be years later.
 
 The solution is to take notes and analyze past notes.
@@ -539,7 +541,9 @@ Examples:
 - A person that likes one Apple product thinks that all designs of all Apple products are correct and superior.
 - When one likes one opinion of a political candidate, one tend to ignore the candidate's shortcomings.
 
-**Horn effect** is the inverse of halo effect: if people dislike one aspect of a thing, they tend to dislike all aspects of that thing and its related things. People tend to judge words by the political stance of the person who said it. **Disaggrement on ideas tend to become insults to people, especially in a competitive environment.**
+**Horn effect** is the inverse of halo effect: if people dislike one aspect of a thing, they tend to dislike all aspects of that thing and its related things. People tend to judge words by the political stance of the person who said it. 
+
+**Disaggrement on ideas tend to become insults to people.**
 
 Halo effect and horn effect are related to **binary thinking**.
 
@@ -598,7 +602,7 @@ According to [predictive processing theory](https://en.wikipedia.org/wiki/Predic
 
 [Body transfer illusion (fake hand experiment)](https://x.com/visualfeastwang/status/1788507432961839469)
 
-Prior belief can often greatly affect perception.  
+Prior belief (confirmation bias) can often greatly affect perception. This not only affects recognition of objects, but also affects reading of text. **Under confirmation bias, when reading text, one may skip important words subcounciously**.
 
 Related: **free energy principle**. The brain tries to minimize free energy.
 
@@ -801,7 +805,6 @@ The name of a thing affects how people perceive it. Examples:
 - "Collateral damage" / "Death"
 - "Gun control" / "Gun safety"
 - "Government subsidy" / "Using taxpayer money"
-- "Frugal" / "Cheap"
 
 A **loaded question** is a question that contains an assumption (framing). Following that assumption can lead to a biased answer. Example: "Do you support the attempt by the US to bring freedom and democracy to other places in the world?"
 
@@ -935,6 +938,16 @@ The placebo effect is also possibly related with priming.
 
 Flattering subcounciously increase favorability, even when knowing it's flattering (this even applies to sycophant AI). Saying harsh criticism subcounciously reduce favorability, even when knowing the criticism is beneficial. Placebo still works even when knowing it's placebo.
 
+### AI is good at creating superficial signal
+
+People often evaluate things by superficial signal. However, AI is good at creating superficial signal (and much quicker than human).
+
+- Articles generated by AI can look professional. But it may contain bullshit that only experts can notice.
+- Images generated by AI can look real or aesthetic. But professional artists can often find wrong details in image.
+- AI can produce code and working applications. The working application shows a sign of AI coding ability. But if the app becomes complex, or requirement is special, AI coding tend to fail.
+
+The above can change as AI improves.
+
 ## Efficient decision making
 
 When making decisions, human tend to **follow intuitions, which is quick and energy-efficient**, but also less accurate.
@@ -942,11 +955,24 @@ When making decisions, human tend to **follow intuitions, which is quick and ene
 - Often quickly making decision before having complete information is better than waiting for complete investination.
 - Sometime multiple decisions both can fulfill the goal. The important is to quickly do action, rather than which decision is optimal.
 
-_Thinking, Fast and Slow_ proposes that human mind has two systems: System 1 thinks by intuition and heuristics, which is fast and efficient, but inaccurate and biased; System 2: thinks by rational logical reasoning, which is slower and requires more efforts, but is more accurate. Most thinking mainly uses System 1 while being unnoticed.
+_Thinking, Fast and Slow_ proposes that human mind has two systems: 
 
-### Emotion overrides System 2
+- **System 1** thinks by intuition and heuristics, which is fast and efficient, but inaccurate and biased.
+- **System 2** thinks by rational logical reasoning, which is slower and requires more efforts, but is more accurate.
+
+Most thinking mainly uses System 1 while being unnoticed.
 
 
+### Emotion overrides rationality
+
+With in intense emotion, the rationality (System 2) is being overridden, making one more likely to make mistakes.
+
+Some examples:
+
+- When being criticized, the more eager you are trying to prove you correct, the more mistake you may make.
+- The trader experiencing loss tend to do more irrational trading and lose more money.
+
+Being calm can "increase intelligence".
 
 ### Default effect
 
@@ -982,6 +1008,8 @@ Action bias does not contradict with default effect. When one is asked to work a
 > It's not the things you buy and sell that make you money; it's the things you hold.
 > 
 > \- Howard Marks
+
+Also, when under pressure, people tend do make actions in hurry before thinking, which increase the chance of making mistakes.
 
 ### Prioritizing the easy and superficial
 
