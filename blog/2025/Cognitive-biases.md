@@ -404,7 +404,9 @@ Examples:
 - "Someone smoked their entire life and lived until 97, so smoking is actually not that bad."
 - "Someone never went to college and turned out to be successful, so college is a waste of time and money."
 - "Someone made a fortune trading cryptocurrency, and so can I."
-- "It was the coldest winter on record in my town this year. Global warming can't be real." (Side note: The weather is a non-linear chaotic system. Global warming can indeed make some region's winter colder.)
+- "It was the coldest winter on record in my town this year. Global warming can't be real." [^weather]
+
+[^weather]: The weather is a non-linear chaotic system. Global warming can indeed make some region's winter colder.
 
 ### Narrative fallacy
 
@@ -898,7 +900,7 @@ In these cases, **confounding variable** correspond to which subgroup the sample
 
 ### False consensus (echo chamber, information cocoon)
 
-When one person is in a small group with similar opinions, they tend to think that the general population have the similar opinions. When they encounter a person that disagrees with them, they tend to think the disagreer are minority or are defective in some way.
+When one person is in a small group with similar opinions, they tend to think that the general population have the similar opinions. When they encounter a person that disagrees with them, they tend to think the disagreer is minority or is defective in some way.
 
 This effect is exacerbated by algorithmic recommendation of social medias.
 
@@ -962,7 +964,9 @@ Some examples:
 - When being criticized, the more eager you are trying to prove you correct, the more mistake you may make.
 - The trader experiencing loss tend to do more irrational trading and lose more money.
 
-Being calm can "increase intelligence".
+**Being calm can "increase intelligence".**
+
+When one is in intense emotion, logical argument often has little effect, and emotional connection is often more effective.
 
 ### Default effect
 
@@ -1003,7 +1007,7 @@ Also, when under pressure, people tend do make actions in hurry before thinking,
 
 ### Prioritizing the easy and superficial
 
-Law of least effort: people tend to choose the easiest way to do things, choosing path of least resistance.
+**Law of least effort**: people tend to choose the easiest way to do things, choosing path of least resistance.
 
 Some seemingly easy solutions does not address the root cause, having negligible effect or negative effect in the long run. Applying the easy solution gives the fake impression that the problem is being addressed, achieving mental comfort.
 
@@ -1012,7 +1016,7 @@ Examples:
 - Focusing on buying exercise equipments instead of exercising. Paying to gym to give an illusion of determination in exercising.
 - Buying supplements instead of adopting healthier lifestyle.
 - Focusing on buying courses, books, study equipments instead of actually studying. Keep bookmarking online learning materials instead of reading them.
-- Musicians focusing on buying instruments (gear acquisition syndrome). This also applies to other fields such as photography.
+- Musicians focusing on buying instruments (gear acquisition syndrome).
 - When writing, focusing on the formatting instead of the content.
 - A manager pushing employees to seemingly work hard instead of improving efficiency.
 - A parent train child by punishing hard, instead of using scientific training methods.
@@ -1045,14 +1049,16 @@ One easy way to make decisions is to simply follow the people around us. This is
 
 This is related to **social proof heuristic**: assuming that surrounding people know the situation better, so following them is correct.
 
-Following the crowd is also a great way of **reducing responsibility**: when everyone is guilty, the law cannot punish everyone. The one that acts independently bears more responsibility.
+Following the crowd is also a great way of **reducing responsibility**: when everyone is guilty, the law cannot punish everyone. The one that acts independently bears more responsibility (omission bias). People often fear of acting independently.
 
 When many people follow each other, they will confirm each other, creating self-reinforcing momentum. This is also a reason of the momentum in markets. People tend to be overconfident when people around them are confident, and vice versa.
 
 Two kinds of knowing:
 
-- I know something. But I am not sure other people also know it.
+- I know something. But I am not sure other people also know it. Other people may also be not sure I know it.
 - I know something. I also know other people also know it. I also know other people know me know it. It's **common knowledge**. This is the kind of knowledge that drives herd mentality.
+
+In "The emperor's new cloth" story, "king is clothless" is originally not common knowledge, even though everyone knows. But once the child states the truth, that knowlege becomes common knowledge.
 
 The price can grow not because people believe in the asset, but because the amount of people and money believing in the asset increases. Once that amount stop increasing, price tend to drop despite people believing. Profit can come from the expansion of believers. In this case, the asset is a [Veblen good](https://en.wikipedia.org/wiki/Veblen_good), where higher price induce more demand, until the limit is reached.
 
@@ -1197,9 +1203,9 @@ Memorizing is lossy compression. Recall is lossy decompression, where details ca
 > 
 > \- Amanda Askell, [Link](https://x.com/AmandaAskell/status/1931786539002105905)
 
-**Information is costly to store, and even more costly to index and query**. Sometimes forgetting is just not being able to query the specific memory that is stored in brain (and may be recalled if some cue were found that enables querying it). The "querying capacity" of brain is limited and can be occupied by distracting things.
+**Information is costly to store, and even more costly to index and query**. Sometimes forgetting is just not being able to query the specific memory that is stored in brain (and may be recalled if some cue were found that enables querying it). The "querying capacity" of brain is limited and can be occupied by distracting things. [^about_database]
 
-(Side note: the similar principle also applies to computer databases. Just writing information into a log is easy and fast. But indexing the information to make them queryable is harder.)
+[^about_database]: The similar principle also applies to computer databases. Just writing information into a log is easy and fast. But indexing the information to make them queryable is harder.
 
 Taking notes is one way to mitigate the unreliable memory issue.
 
