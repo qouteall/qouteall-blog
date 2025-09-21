@@ -272,6 +272,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - Modifying state in rendering code.
 - Hook used inside if or loop.
 - Value not included in `useEffect` dependency array.
+- `useEffect` dependency array contains object recreated in rendering. See also [Cloudflare indicent](https://blog.cloudflare.com/deep-dive-into-cloudflares-sept-12-dashboard-and-api-outage/)
 - Forget clean up in `useEffect`.
 - Closure trap (capturing outdated state).
 - Accidentally change data in wrong places (impure component).

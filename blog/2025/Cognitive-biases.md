@@ -241,7 +241,13 @@ Stoicism proposes thinking about death all the time. Thinking about death can ma
 
 **Confirmation bias**: People tend to seek and accept the evidences that confirm their beliefs, and reluctant to accept contradictory evidences.
 
-**Motivated reasoning**: when they does not want to accept contradictory evidences, they may make up and believe low-probability assumptions to explain the evidence in a way that follows the original belief.
+**Motivated reasoning**: when they does not want to accept contradictory evidences, they may make up and believe in **non-falsifiable explanations** to explain the evidence in a way that follows the original belief.
+
+Examples of non-falsifiable explanations:
+
+- "There is \[a secret evil group\] that controls everything. You don't see evidence of their existence because it's so powerful that it hides all evidences."
+- "The AI doesn't work on your task just because you prompted it wrongly." (without telling how to "prompt correctly".)
+- "You believe in \[an idea\] because you get a sense of moral superiority from that."
 
 **With confirimation bias, more information increases confidence, but doesn't lead to better understanding**.
 
@@ -514,7 +520,7 @@ Examples of binary thinking:
 - The idol maintains a perfect image. / Image collapse, true nature exposes.
 - "We will win quickly." / "We will lose quickly."
 - "I can do it perfectly." / "I cannot do it perfectly so I will fail."
-- "X is the best thing and everyone should use it." / "X has this drawback so it's not only useless but also harmful."
+- "\[X\] is the best thing and everyone should use it." / "\[X\] has this drawback so it's not only useless but also harmful."
 - Doesn't admit tradeoffs exist.
 
 People's evaluations are anchored on the expectation, and **not meeting an expectation could make people's belief turn to another extreme**.

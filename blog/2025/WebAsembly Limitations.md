@@ -77,7 +77,7 @@ void f() {
 - Stack switching cannot be done. Golang use stack switching for goroutine scheduling. There is a [proposal](https://github.com/WebAssembly/stack-switching) for adding this functionality.
 - Dynamic stack resizing cannot be done. Golang does dynamic stack resizing so that new goroutines can be initialized with small stacks, reducing memory usage.
 
-The common solution is to have a **shadow stack** that's in linear memory. That stack is managed by Wasm code.
+The common solution is to have a **shadow stack** that's in linear memory. That stack is managed by Wasm code. (Sometimes shadow stack is called aux stack.)
 
 Summarize 2 different stacks:
 
