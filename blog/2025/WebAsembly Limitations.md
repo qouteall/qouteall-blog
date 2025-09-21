@@ -208,19 +208,33 @@ The current workaround is to notify the web workers to make them proactively loa
 
 Numbers (`i32`, `i64`, `f32`, `f64`) can be directly passed between JS and Wasm (`i64` maps to `BigInt` in JS, other 3 maps to `number`).
 
-However, to pass a JS string to Wasm, JS code need transcode (e.g. passing to Rust need to convert WTF-16 to UTF-8), and copy to Wasm linear memory. Passing a string from Wasm to JS also needs copying and transcoding. Passing strings between Wasm and JS can be a performance bottleneck.
+Passing a JS string to Wasm requires:
+
+- transcode (e.g. passing to Rust need to convert WTF-16 to UTF-8),
+- allocate memory in Wasm linear memory,
+- copy transcoded string into Wasm linear memory,
+- pass address and length into Wasm code,
+- Wasm code need to care about deallocating the string.
+
+Similarily passing a string in Wasm linear memory to JS is also not easy. 
+
+Passing strings between Wasm and JS can be a performance bottleneck. If your application involve frequent Wasm-JS data passing, then replacing JS by Wasm may actually reduce performance.
+
+Modern Wasm/JS runtime (including V8) can JIT and inline the cross calling between Wasm and JS. But the copying cost still cannot be optimized out.
+
+The [Wasm Component Model](https://component-model.bytecodealliance.org/introduction.html) aim to solve this. It allows passing higher-level types such as string, record (struct), list, enum in interface. But different components cannot share memory, and the passed data need to be copied.
 
 ## Cannot directly call Web APIs
 
 Wasm code cannot directly call Web APIs. Web APIs must be called via JS glue code.
 
-Although all Web's JS APIs have [Web IDL](https://webidl.spec.whatwg.org/) specifications, it involves GCed-objects, iterators and async iterators (e.g. `fetch()` returns `Response`. Its `body` field is `ReadableStream`). These GC-related things and async-related things cannot easily adapt to Wasm code using linear memory.
+Although all Web's JS APIs have [Web IDL](https://webidl.spec.whatwg.org/) specifications, it involves GCed-objects, iterators and async iterators (e.g. `fetch()` returns `Response`. Its `body` field is `ReadableStream`). These GC-related things and async-related things cannot easily adapt to Wasm code using linear memory. Letting Wasm to directly call Web API is still hard.
+
+There was [Web IDL Bindings Proposal](https://github.com/WebAssembly/interface-types/blob/1c46f9fe30143867545c9747fa8a94b72e5d9737/proposals/webidl-bindings/Explainer.md) but superseded by Component Model proposal.
 
 Currently Wasm cannot be run in browser without JS code that bootstraps Wasm.
 
-## Component model
-
-The [Wasm Component Model](https://component-model.bytecodealliance.org/introduction.html) is ambitious:
+## Debugging
 
 
 
@@ -229,9 +243,6 @@ The [Wasm Component Model](https://component-model.bytecodealliance.org/introduc
 
 ### Wasm sections
 
-
-
-## Debugging
 
 
 
@@ -278,6 +289,8 @@ The `|0` is for converting value to 32-bit integer, helping JS runtime to optimi
   - CPU found that branch prediction is wrong and rolls back, but doesn't rollback side effect on cache.
 - The attacker measures memory read latency in `probeTable`. Which place access faster correspond to the value of secret.
 - To accurately measure memory access latency, `performance.now()` is not accurate enough. It need to use a multi-threaded counter timer: One thread (web worker) keeps increasing a shared counter in a loop. The attacking thread reads that counter to get "time". The cross-thread counter sharing requires `SharedArrayBuffer`. Although it cannot measure time in standard units (e.g. nanosecond), it's accurate enough to distinguish latency difference between fast cache access and slow RAM access.
+
+The same thing can also be done via equivalent Wasm code using `SharedArrayBuffer`.
 
 Related: Another vulnerability related to cache side channel: [GoFetch](https://gofetch.fail/). It exploits Apple processors' cache prefetching functionality.
 
