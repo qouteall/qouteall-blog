@@ -1,3 +1,8 @@
+---
+date: 2025-09-23
+tags:
+  - Programming
+---
 
 # WebAssembly Limitations
 
@@ -269,6 +274,8 @@ Web code runs in event loop. After one cycle of event loop, there is no Wasm or 
 - If the data structure in linear memory changes, it won't work, unless there is no such data in linear memory. This also includes Rust futures. Async functions cannot be easily be hot reloaded.
 - All references to Wasm-exported functions in JS need to be replaced with new ones, otherwise it will still execute old Wasm instance.
 - It doesn't work with [JS Promise integration](https://github.com/WebAssembly/js-promise-integration), as the Wasm runtime manages the stack for that.
+
+That hot realod is not yet implemented.
 
 ## Appendix
 
