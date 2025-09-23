@@ -77,6 +77,9 @@ The benefits:
 - Can replay mutations and rollback easily.
 - Can replicate (sync) data change without sending full data.
 
+
+### Rollback
+
 About rollback:
 
 - Transactional databases allow rollback a uncommited transaction. (Implementation details vary between databases. PostgreSQL write is append-only on disk except vacuum. MySQL InnoDB does in-place mutation on disk but writes undo log and redo log.)
@@ -84,21 +87,46 @@ About rollback:
 - Multiplayer game client that does server-state-prediction (to reduce visible latency) need to rollback when prediction is invalidted by server's message.
 - CPU does branch prediction and speculative execution. If branch prediction fails or there is other failure, it internally rollback. ([Spectre vulnerability](https://en.wikipedia.org/wiki/Spectre_(security_vulnerability)) and [Meltdown vulnerability](https://en.wikipedia.org/wiki/Meltdown_(security_vulnerability)) are caused by rollback not cancelling side effects in cache that can be measured in access speed).
 
+### Diffing
+
 In some places, we specify a new state and need to compute the mutation (diff). Examples:
 
 - Git. Compute diff based on file snapshots. The diff can then be manipulated (e.g. merging, rebasing, cherry-pick).
 - React. Compute diff from virtual data structure and apply to actual DOM. Sync change from virtual data structure to actual DOM.
 - Kubernetes. You configure what pods/volumes/... should exist. Kubernetes observes the diff between reality and configuration, then do actions (e.g. launch new pod, destroy pod) to cover the diff. 
 
-Related: avoiding system calls and replacing calls with data can improve performance:
+### Replace calls with data
 
-- io_uring: after initial setup, IO operations no longer involve system call. Just writing to memory can dispatch IO tasks.
-- Graphics API: Old OpenGL use system calls to change state and dispatch draw call. New Graphics APIs like Vulkan, Metal and WebGPU all use command buffer. Operations are turned to data in command buffer.
+[System calls are expensive](https://blog.codingconfessions.com/p/what-makes-system-calls-expensive). Replacing system calls with data can improve performance:
 
-Bitemporal modelling: Store two pieces of records. One records the data and time updated to database. Another records the data and time that reflect the reality. (Sometimes the reality changes but database doesn't edit immediately. Sometimes database contains wrong informaiton that's corrected later.) 
+- io_uring: allows submitting many IO tasks by writing into memory, then use one system call to submit them. [^io_uring_polling]
+- Graphics API: Old OpenGL use system calls to change state and dispatch draw call. New Graphics APIs like Vulkan, Metal and WebGPU all use command buffer. Operations are turned to data in command buffer, then one system call to submit many commands.
 
-Related: Mutate-by-recreate. Keep data immutable and only change one root reference. It can avoid data race issues under parallelism (copy-on-write, read-copy-update, reading old snapshot during mutation).
+[^io_uring_polling]: It's possible to use polling to fully avoid system call after initial setup, but with costs.
 
+### Mutate-by-recreate
+
+Mutate-by-recreate: Keep data immutable. Change it by recreating the whole data.
+
+In multi-threading, for read-heavy data, it's often beneficial to make only one reference to data structure atomically mutable, then make the referenced structure immutable. Updating recreates the whole data structure and atomically change the reference. This called read-copy-update (RCU) or copy-on-write (COW).
+
+In pure functional languages (e.g. Haskell), there is no direct way of mutating things. Mutation can only be simutated by recreating.
+
+### Conflict-free replicated data type
+
+[Conflict-free replicated data type (CRDT)](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type): The mutations can be combined, and the result doesn't depend on order of combining. It allows distributed system get eventual consistency without immediate communication. 
+
+In CRDT, the operator of combining mutation $*$:
+
+- It must be commutative. $a * b = b * a$. The order of combinding doesn't matter.
+- It must be associative. $a * (b * c) = (a * b) * c$. The order of combining doesn't matter.
+- It must be idempotent: $a * a = a$. Duplicating a mutation won't affect result. (Idempotence is not needed if you ensure exactly-once delivery.)
+
+One simple kind of CRDT is last-write-wins. Each mutation is attached with a timestamp. The higher-timestamp ones override lower-timestamp ones. However it can cause data loss.
+
+### Bitemporal modelling
+
+[Bitemporal modelling](https://en.wikipedia.org/wiki/Bitemporal_modeling): Store two pieces of records. One records the data and time updated to database. Another records the data and time that reflect the reality. (Sometimes the reality changes but database doesn't edit immediately. Sometimes database contains wrong informaiton that's corrected later.) 
 
 ## Partial computation and multi-stage computation
 
@@ -204,6 +232,15 @@ A view can be backed by either storage or computation (or a combination of stora
 Modern highly-parallel computation are often bottlenecked by IO and synchronization. Adding new computation hardware units is easy. Making the information to flow efficiently between these hardware units is hard.
 
 When memory IO becomes bottleneck, re-computing rather than storing can be beneficial.
+
+### Different kinds of "pointers"
+
+- Reference in GC languages. It may be implemented with a pointer, a colored pointer, or a handle (object ID). The pointer may be changed by moving GC. But in-language semantic doesn't change after moving.
+- ID. All kinds of ID, like string id, integer id, UUID, etc. can be seen as a reference to an object. The ID may still exist after referenced object is removed, then ID become "dangling ID".
+  - A special kind of ID is path. For example, file path points to a file, URL points to a web resource, permission path points to a permission, etc. They are the "pointers" into a node in a hierarchical (tree-like) structure.
+- Iterator. An Iterator can be seen as a pointer pointing to an element in container.
+- Zipper. A zipper contains two things: 1. a container with a hole 2. element at the position of the hole. Unlike iterator, a zipper contains the information of whole container. It's often used in pure functional languages.
+- [Lens](https://hackage.haskell.org/package/lens).
 
 ## Invariant production, grow, and maintenance
 

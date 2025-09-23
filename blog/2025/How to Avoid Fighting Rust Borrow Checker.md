@@ -167,7 +167,7 @@ Mutate-by-recreate can be optimized by sharing unchanged sub-structures. See als
 Another solution is to **treat mutation as data**. To mutate something, **append a mutation command into command queue**. Then execute the mutation commands at once. (Note that command should not indirectly borrow base data.)
 
 - In the process of creating new commands, it only do immutable borrow to base data, and only one mutable borrow to the command queue at a time. 
-- When executing the commands, it only do one mutable borrow to base data, and one mutable borrow to command queue at a time.
+- When executing the commands, it only do one mutable borrow to base data, and one borrow to command queue at a time.
 
 What if I need the latest state before executing the commands in queue? Then inspect both the command queue and base data to get latest state ([LSM tree](https://en.wikipedia.org/wiki/Log-structured_merge-tree) does similar things). You can often avoid needing to getting latest state during processing, by separating it into multiple stages.
 
@@ -275,7 +275,8 @@ Circular reference being bad in mathematics does NOT mean they are also bad in p
 
 But circular reference do add risks to memory management:
 
-- In C/C++, circular reference need to be carefully handled to avoid use-after-free.
+- In C/C++, if two objects point to each other, when one object destructs, the another object's reference should be cleared, or there will be risk of use-after-free.
+- When using reference counting, loop should be cut by weak reference, or it will memory leak.
 - In GC languages, circular reference has memory leak risk. If all children references parents, and parents references children, then referencing any child will keep the whole structure alive.
 
 Here are some common use cases of circular reference:
@@ -414,9 +415,11 @@ But in single-threaded case, this restriction is not natural at all. No mainstre
 > 
 > \- [The borrow checker within](https://smallcultfollowing.com/babysteps/blog/2024/06/02/the-borrow-checker-within/)
 
+Mutable borrow exclusiveness is still important for safety of interior pointer, even in single thread:
+
 ### Interior pointer
 
-Rust has **interior pointer**. Interior pointer are the pointers that point into some data inside another object. A **mutation can invalidate the memory layout that interior pointer points to**. So that mutable borrow exclusiveness is still important for memory safety in single thread:
+Rust has **interior pointer**. Interior pointer are the pointers that point into some data inside another object. A **mutation can invalidate the memory layout that interior pointer points to**. 
 
 For example, you can take pointer of an element in `Vec`. If the `Vec` grows, it may allocate new memory and copy existing data to new memory, thus the interior pointer to it can become invalid (break the memory layout that interior pointer points to). Mutable borrow exclusiveness can prevent this issue from happening:
 
@@ -555,9 +558,13 @@ Interior mutability allows you to mutate something from an immutable reference t
 Ways of interior mutability:
 
 - `Cell<T>`. It's suitable for simple copy-able types like integer. In the previous contagious borrow example, if the `total_score` is replaced with `Cell<u32>` then mutating it doesn't need mutable borrow of parent thus avoid the issue. `Cell<T>` only supports replacing the whole `T` at once, and doesn't support getting a mutable borrow.
-- `RefCell<T>`, suitable for data structure that does incremental mutation, in single-threaded cases. It has internal counters tracking how many immutable borrow and mutable borrow currently exist. If it detects violation of mutable borrow exclusiveness, `.borrow()` or `.borrow_mut()` will panic.It can cause crash if there is nested borrow that involves mutation. 
+- `RefCell<T>`, suitable for data structure that does incremental mutation, in single-threaded cases. It has internal counters tracking how many immutable borrow and mutable borrow currently exist. If it detects violation of mutable borrow exclusiveness, `.borrow()` or `.borrow_mut()` will panic.It can cause crash if there is nested borrow that involves mutation.
 - `Mutex<T>` `RwLock<T>`, for locking in multi-threaded case. Its functionality is similar to `RefCell`. Note that unnecessary locking can cost performance, and has risk of deadlock. It's not recommended to overuse `Arc<Mutex<T>>` just because it can satisfy the borrow checker.
 - [`QCell<T>`](https://docs.rs/qcell/latest/qcell/). Elaborated below.
+- Atomic types such as `AtomicU32`
+- `UnsafeCell<T>`
+- Lazily-initialized `OnceCell<T>`
+- ......
 
 
 They are usually used inside reference counting (`Arc<...>`, `Rc<...>`).
@@ -588,7 +595,7 @@ fn main() {
 
 It will panic with `RefCell already borrowed` error.
 
-In Rust, just having a mutable borrow `&mut T`, **Rust assumes that you can use it at any time**. **But holding the reference is different to using reference**. It's entirely possible that I have two `&mut T` for same object, but I only use one at a time. This is the use case that `RefCell` solves.
+Rust assumes that, if you have a mutable borrow `&mut T`, you can use it at any time. **But holding the reference is different to using reference**. There are use cases that I have two mutable references to the same object, but I only use one at a time. This is the use case that `RefCell` solves.
 
 `RefCell` still follows mutable borrow exclusiveness rule. In previous contagious borrow example, the `Parent` is borrowed one immutablely and one mutable, thus `RefCell` will still panic at runtime.
 
@@ -677,41 +684,16 @@ help: consider borrowing here
 
 Because the reference borrowed from `RefCell` is not normal reference, it's actually `Ref`. `Ref` implements `Deref` so it can be used similar to a normal borrow. But it's different to a normal borrow.
 
-The "help: consider borrowing here" suggestion won't solve the compiler error. If you follow its instruction you will get new compile error "returns a reference to data owned by the current function". It's important that **compiler's suggestion may be misleading**. Don't focus too much on compiler's suggestion.
+The "help: consider borrowing here" suggestion won't solve the compiler error. Don't blindly follow compiler's suggestions.
 
-Returning `Ref` works:
+Possible solutions:
 
-```rust
-impl Parent {  
-    fn get_entries(&self) -> Ref<HashMap<String, Entry>> {  
-        self.entries.borrow()  
-    }
-}  
-```
+- Return a `Ref<HashMap<String, Entry>>`. `Ref` is a `RefCell`-specific thing and makes abstraction leaky (you cannot replace `RefCell` with another thing without breaking API).
+- Return `&RefCell<HashMap<String, Entry>>`. Also leaky abstraction.
+- Return `impl DeRef<Target=HashMap<String, Entry>> + '_`. It's more complex, as the function signature now have existential type, not concrete type. It still doesn't allow storing returned value for long term.
+- Put `RefCell` inside `Rc` and return cloned `Rc`. It allows storing returned value for long term. It's the most "adaptive" solution.
 
-But returning `Ref` defeats the purpose of getter abstraction. `Ref` is tightly coupled with `RefCell`. For example, if one day the value returned by `get_entries` become data that's computed on demand:
-
-```rust
-impl Parent {  
-    fn get_entries(&self) -> Ref<HashMap<String, Entry>> {  
-        let mut map: HashMap<String, Entry> = HashMap::new();  
-        map.insert("a".to_string(), Entry { score: 100 });  
-        RefCell::new(map).borrow()  
-    }  
-}
-```
-
-Then
-
-```
-12 |         RefCell::new(map).borrow()
-   |         -----------------^^^^^^^^^
-   |         |
-   |         returns a value referencing data owned by the current function
-   |         temporary value created here
-```
-
-A more "adaptive" approach is to save referenced data as `Rc<RefCell<...>>`. But it's NOT recommended to overuse `Rc<RefCell<>>`, because:
+So `Rc<RefCell<...>>` seems more "adaptive". But it's NOT recommended to overuse `Rc<RefCell<>>`, because:
 
 - It has (relatively small) performance cost. `Rc` Reference counting and `RefCell` borrow counting costs peformance. (Performance is affected by many factors. It depends on exact case.)
 - `Rc` has memory leak risk (need to use `Weak` to cut loop)
@@ -721,12 +703,10 @@ A more "adaptive" approach is to save referenced data as `Rc<RefCell<...>>`. But
 Similarily, `Arc` is the multi-threaded version of `Rc`. `Mutex` `RwLock` are the multi-threaded version of `RefCell`. It's also not recommended to overuse things like `Arc<Mutex<T>>`:
 
 - `Arc`'s performance cost is larger than `Rc` because it involves atomic operation. Elaborated below.
-- `Mutex` `RwLock`'s performance cost is larger than `RefCell` because locking also involves atomic operation, can reduce parallelism and can cause context switch.
+- `Mutex` `RwLock`'s performance cost is larger than `RefCell` because locking also involves atomic operation, can reduce parallelism and can cause context switch. Using `Arc<Mutex<>>` everywhere can make the performance worse than using a GC language.
 - `Arc` also has memory leak risk (need to use `Weak` to cut loop)
 - `Mutex` and `RwLock` have deadlock risk.
 - Its syntax ergonomic is not good either.
-
-[^cache_contention]: It's actually more complicated and depends on which hardware. 
 
 ### `QCell`
 
@@ -734,7 +714,7 @@ Similarily, `Arc` is the multi-threaded version of `Rc`. `Mutex` `RwLock` are th
 
 The borrowing to `QCellOwner` "centralizes" the borrowing of many `QCell`s associated with it, ensuring mutable borrow exclusiveness. Using it require passing borrow of `QCellOwner` in argument everywhere it's used.
 
-QCell will fail to borrow if the owner ID doesn't match. Different to `RefCell`, if owner ID matches, it won't panic just because nested borrow.
+`QCell` will fail to borrow if the owner ID doesn't match. Different to `RefCell`, if owner ID matches, it won't panic just because nested borrow.
 
 Its runtime cost is low. When borrowing, it just checks whether cell's id matches owner's id. It has memory cost of owner ID per cell.
 
@@ -868,7 +848,7 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
   - Two pointers created from two provenance is considered to never alias. If their address equals, it's undefined behavior.
   - Converting an integer to pointer gets a pointer with no provenance, which is undefined behavior, unless the integer was converted from a pointer.
   - Adding a pointer with an integer doesn't change provenance.
-- Using uninitialized memory is undefined behavior.
+- Using uninitialized memory is undefined behavior. [`MaybeUninit`](https://doc.rust-lang.org/beta/std/mem/union.MaybeUninit.html)
 - `a = b` will drop the original object in place of `a`. If `a` is uninitialized, then it will drop an unitialized object, which is undefined behavior. Use `addr_of_mut!(...).write(...)` [Related](https://lucumr.pocoo.org/2022/1/30/unsafe-rust/)
 - Handle panic unwinding.
 - Reading/writing to mutable data that's shared between threads need to use atomic or volatile access ([`read_volatile`](https://doc.rust-lang.org/std/ptr/fn.read_volatile.html), [`write_volatile`](https://doc.rust-lang.org/beta/std/ptr/fn.write_volatile.html)). If not, optimizer may wrongly merge and reorder reads/writes. Note that volatile access themself doesn't establish memory order (unlike Java `volatile`).
