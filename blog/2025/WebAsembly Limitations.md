@@ -234,24 +234,41 @@ There was [Web IDL Bindings Proposal](https://github.com/WebAssembly/interface-t
 
 Currently Wasm cannot be run in browser without JS code that bootstraps Wasm.
 
-## Debugging
-
-
-
-## Dynamically loading new code
-
-
-### Wasm sections
-
-
-
-
-## Hot reload with execution state preservation
-
-
 ## Memory64 performance
 
+The original version of Wasm only supports 32-bit address and up to 4GiB linear memory. 
 
+In Wasm, a linear memory has a finite size. Accessing an address out of size need to trigger a [trap](https://webassembly.github.io/spec/core/intro/overview.html) that aborts execution. Normally, to implement that range checking, the runtime need to insert branches to each linear memory access. 
+
+But Wasm runtimes have an optimization: map the 4GB linear memory to a virtual memory space. The out-of-range pages are not allocated from OS, so accessing them cause error from OS. Wasm runtime can use signal handling to handle these error.
+
+That optimization doesn't work when supporting 64-bit address. There is no enough virtual address space to hold Wasm linear memory. So the branches of range checking still need to be inserted for every linear memory access. This costs performance.
+
+See also: [Is Memory64 actually worth using?](https://spidermonkey.dev/blog/2025/01/15/is-memory64-actually-worth-using.html)
+
+## Debugging
+
+As Wasm runs inside VM, debugging relies on VM's functionality.
+
+(TODO)
+
+## Hot reload that keeps execution state
+
+It's easy to load new Wasm code in browser, without keeping Wasm execution state. 
+
+During development, hot reloading Wasm code while keeping execution state can improve iteration speed. Without hot reload, the developer changed the code need to re-enter the same application state to test changes.
+
+Java and C# supports hot reloading (Java only supports changing function body or inlined constants), with the help of their runtime. Just being able to reload function body is already useful. [See also](https://loglog.games/blog/leaving-rust-gamedev/#hot-reloading-is-more-important-for-iteration-speed-than-people-give-it-credit-for)
+
+In native applications, hot reload often requires advanced machine code instumentation. Because it need to be done while application is running. Keeping the execution state and adapting it to new code is hard.
+
+Web code runs in event loop. After one cycle of event loop, there is no Wasm or JS code running. Now the only execution state become linear memory, globals and tables, etc. The stack and code execution position doesn't exist and don't need to be kept. It's theoretically possible to do hot swap during that, by creating a new Wasm module using new code, creating a new Wasm instance using new module, with the old linear memory, globals, tables etc. Related details:
+
+- The initialization code that resets some global state need to be skipped after hotswap.
+- The layout of data section changes. Data sections are loaded into linear memory during startup. The original pointers (including strings) pointing into data section need to still work. One solution is to place new data section in new places, which wastes some memory. As that hot swapping is intended to be only used in development, wasting some memory is fine. The address of global constants need to be relocated (can reuse existing dynamic linking functionality).
+- If the data structure in linear memory changes, it won't work, unless there is no such data in linear memory. This also includes Rust futures. Async functions cannot be easily be hot reloaded.
+- All references to Wasm-exported functions in JS need to be replaced with new ones, otherwise it will still execute old Wasm instance.
+- It doesn't work with [JS Promise integration](https://github.com/WebAssembly/js-promise-integration), as the Wasm runtime manages the stack for that.
 
 ## Appendix
 

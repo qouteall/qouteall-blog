@@ -290,6 +290,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - In GitHub, if there is a private repo A and you forked it as B (also private), then when A become public, the private repo B's content is also publicly accessible, even after deleting B. [See also](https://trufflesecurity.com/blog/anyone-can-access-deleted-and-private-repo-data-github).
 - GitHub by default allows deleting a release tag, and adding a new tag with same name, pointing to another commit.
 - `git stash pop` does not drop the stash if there is a conflict.
+- In Windows, Git often auto-convert cloned text files to be CRLF line ending. But in WSL many software (e.g. bash) doesn't work with files with CRLF. Using `git clone --config core.autocrlf=false -c core.eol=lf ...` can make git clone as LF.
 - MacOS auto adds `.DS_Store` files into every folder. It's recommended to add `**/.DS_Store` into `.gitignore`.
 
 ### Networking
