@@ -19,7 +19,7 @@ Background:
 - Although its name has "Assembly", it has features (e.g. [GC](https://github.com/WebAssembly/gc)) that are in a higher abstraction layer than native assembly, similar to JVM bytecode.
 - In browsers, it's the same engine that runs JS and Wasm. Chromium V8 executes both JS and Wasm. Wasm GC use the same GC as JS.
 
-[^wasm_js_perf]: WebAssembly is not always faster than JS, depending on how optimization efforts are put in, and browser's limitations. But WebAssembly has higher potential for computation performance than JS. JS has a lot of flexibility. Flexibility costs performance. JS runtime often use runtime statistics to find unused flexibility and optimize accordingly. But statistics cannot be really sure so JS runtime still have to "prepare" for flexibility. The runtime statistics and "prepare for flexibility" all costs performance, in a way that cannot be optimized without changing code format.
+[^wasm_js_perf]: WebAssembly is not always faster than JS, depending on how much optimization efforts are put in, and browser's limitations. But WebAssembly has higher potential of performance than JS. JS has a lot of flexibility. Flexibility costs performance. JS runtime often use runtime statistics to find unused flexibility and optimize accordingly. But statistics cannot be really sure so JS runtime still have to "prepare" for flexibility. The runtime statistics and "prepare for flexibility" all costs performance, in a way that cannot be optimized without changing code format.
 
 This article focuses on in-browser Wasm.
 
@@ -27,10 +27,10 @@ This article focuses on in-browser Wasm.
 
 The data that Wasm program works on:
 
-- Runtime-managed stack. It has local variables, function arguments, function pointers, etc. It's managed by the runtime. It's not in linear memory.
+- Runtime-managed stack. It has local variables, function arguments, return code addresses, etc. It's managed by the runtime. It's not in linear memory.
 - Linear memory. 
-  - A linear memory is an array of bytes. Can be read/written by address (address is the index in array). 
-  - Wasm supports one module to have multiple linear memories.
+  - A linear memory is an array of bytes. Can be read/written by address (address can be seen as index in array). 
+  - Wasm supports having multiple linear memories.
   - A linear memory's size can grow. But currently a linear memory's size cannot shrink.
   - A linear memory can be shared by multiple Wasm instances, see multi-threading section below.
 - Table. Each table is a (growable) array that can hold:
@@ -44,7 +44,7 @@ The data that Wasm program works on:
 The linear memory doesn't hold these things:
 
 - Linear memory doesn't hold the stack. The stack managed by runtime and cannot be read/written by address.
-- The linear memory doesn't hold function references. Unlike function pointers in C, Wasm function references cannot be converted to and from integers. This design can improve safety. A function reference can be on stack or on table or in global, and can be called by special instructions [^function_call_instructions]. The function pointers become index into table.
+- The linear memory doesn't hold function references. Unlike function pointers in C, Wasm function references cannot be converted to and from integers. This design can improve safety. A function reference can be on stack or on table or in global, and can be called by special instructions [^function_call_instructions]. Function pointer becomes integer index corresponding to a function reference in table.
 
 [^function_call_instructions]: `call_ref` calls a function reference on stack. `call_indirect` calls a function reference in a table in an index. `return_call_ref`, `return_call_indirect` are for tail call.
 
@@ -52,8 +52,7 @@ The linear memory doesn't hold these things:
 
 Normally program runs with a stack. For native programs, the stack holds:
 
-- Local variables. (not all local variables are on stack. some are in registers)
-- Call arguments. (similar to the above, some are in registers)
+- Local variables and call arguments. (not all of them are on stack. some are in registers)
 - Return code address. It's the machine code address to jump to when function returns. (Function can be inlined, machine code can be optimized, so this don't always correspond to code.)
 - Other things. (e.g. C# `stackalloc`, Golang `defer` metadata) 
 
@@ -68,7 +67,7 @@ But it also have downsides:
 
 - Some local variables need to be taken address to. They need to be in linar memory. For example:
 
-```
+```c
 void f() {
     int localVariable = 0;
     int* ptr = &localVariable;
@@ -180,7 +179,7 @@ However, the main thread cannot be suspended by these instructions. This was due
 
 [Related 1](https://github.com/WebAssembly/threads/issues/106) [Related 2](https://github.com/WebAssembly/threads/issues/177) [Related 3](https://github.com/WebAssembly/threads/issues/174)
 
-This restriction makes porting native multi-threaded code to Wasm harder. For example, locking in web worker can use normal locking, but locking in main thread must use spin-lock. Spin-locking for long time costs performance. Locking is often necessary in multi-threaded allocators.
+This restriction makes porting native multi-threaded code to Wasm harder. For example, locking in web worker can use normal locking, but locking in main thread must use spin-lock. Spin-locking for long time costs performance.
 
 The main thread can be blocked using [JS Promise integration](https://github.com/WebAssembly/js-promise-integration). That blocking will allow other code (JS code and Wasm code) to execute when blocking. This is called **reentrancy**. 
 
@@ -243,9 +242,9 @@ Currently Wasm cannot be run in browser without JS code that bootstraps Wasm.
 
 The original version of Wasm only supports 32-bit address and up to 4GiB linear memory. 
 
-In Wasm, a linear memory has a finite size. Accessing an address out of size need to trigger a [trap](https://webassembly.github.io/spec/core/intro/overview.html) that aborts execution. Normally, to implement that range checking, the runtime need to insert branches to each linear memory access. 
+In Wasm, a linear memory has a finite size. Accessing an address out of size need to trigger a [trap](https://webassembly.github.io/spec/core/intro/overview.html) that aborts execution. Normally, to implement that range checking, the runtime need to insert branches to each linear memory access (like `if (address > memorySize) {trap();}`). 
 
-But Wasm runtimes have an optimization: map the 4GB linear memory to a virtual memory space. The out-of-range pages are not allocated from OS, so accessing them cause error from OS. Wasm runtime can use signal handling to handle these error.
+But Wasm runtimes have an optimization: map the 4GB linear memory to a virtual memory space. The out-of-range pages are not allocated from OS, so accessing them cause error from OS. Wasm runtime can use signal handling to handle these error. No range checking branch needed.
 
 That optimization doesn't work when supporting 64-bit address. There is no enough virtual address space to hold Wasm linear memory. So the branches of range checking still need to be inserted for every linear memory access. This costs performance.
 
@@ -271,7 +270,7 @@ Web code runs in event loop. After one cycle of event loop, there is no Wasm or 
 
 - The initialization code that resets some global state need to be skipped after hotswap.
 - The layout of data section changes. Data sections are loaded into linear memory during startup. The original pointers (including strings) pointing into data section need to still work. One solution is to place new data section in new places, which wastes some memory. As that hot swapping is intended to be only used in development, wasting some memory is fine. The address of global constants need to be relocated (can reuse existing dynamic linking functionality).
-- If the data structure in linear memory changes, it won't work, unless there is no such data in linear memory. This also includes Rust futures. Async functions cannot be easily be hot reloaded.
+- If the memory layout in linear memory changes, it won't work, unless there is no such data in linear memory. This also includes Rust futures. Async functions cannot be easily be hot reloaded.
 - All references to Wasm-exported functions in JS need to be replaced with new ones, otherwise it will still execute old Wasm instance.
 - It doesn't work with [JS Promise integration](https://github.com/WebAssembly/js-promise-integration), as the Wasm runtime manages the stack for that.
 
