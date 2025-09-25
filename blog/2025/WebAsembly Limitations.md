@@ -242,7 +242,7 @@ Currently Wasm cannot be run in browser without JS code that bootstraps Wasm.
 
 The original version of Wasm only supports 32-bit address and up to 4GiB linear memory. 
 
-In Wasm, a linear memory has a finite size. Accessing an address out of size need to trigger a [trap](https://webassembly.github.io/spec/core/intro/overview.html) that aborts execution. Normally, to implement that range checking, the runtime need to insert branches to each linear memory access (like `if (address > memorySize) {trap();}`). 
+In Wasm, a linear memory has a finite size. Accessing an address out of size need to trigger a [trap](https://webassembly.github.io/spec/core/intro/overview.html) that aborts execution. Normally, to implement that range checking, the runtime need to insert branches for each linear memory access (like `if (address >= memorySize) {trap();}`). 
 
 But Wasm runtimes have an optimization: map the 4GB linear memory to a virtual memory space. The out-of-range pages are not allocated from OS, so accessing them cause error from OS. Wasm runtime can use signal handling to handle these error. No range checking branch needed.
 
@@ -273,6 +273,8 @@ Web code runs in event loop. After one cycle of event loop, there is no Wasm or 
 - If the memory layout in linear memory changes, it won't work, unless there is no such data in linear memory. This also includes Rust futures. Async functions cannot be easily be hot reloaded.
 - All references to Wasm-exported functions in JS need to be replaced with new ones, otherwise it will still execute old Wasm instance.
 - It doesn't work with [JS Promise integration](https://github.com/WebAssembly/js-promise-integration), as the Wasm runtime manages the stack for that.
+- The Wasm globals and tables need to be exported, otherwise JS cannot access them.
+- The function table need to be new, but the function in each index need to correspond to the function in same index in the old table, otherwise function indexes on linear memory will break.
 
 That hot realod is not yet implemented.
 

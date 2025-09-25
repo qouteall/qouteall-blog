@@ -814,7 +814,7 @@ Note that there are two different kinds of data:
 
 ## `Arc` is not always fast
 
-`Arc` uses atomic operations to change its reference count.
+`Arc` uses atomic operations to change its reference count. (Cloning and dropping `Arc` changes reference count, but borrowing `Arc` doesn't.)
 
 However, when many threads frequently change the same atomic counter, performance can degrade. The more threads touching it, the slower it is.
 
@@ -831,6 +831,24 @@ Solutions:
 
  These deferred memory reclamation techniques (hazard pointer, epoch-based) are also used in lock-free data structures. If one thread can read an element while another thread removes and frees the same element in parallel, it will not be memory-safe (this issue doesn't exist in GC languages).
 
+## Reference counting vs tracing GC
+
+There are some ambiguity of the word "GC". Some say reference counting is GC, some say it isn't.
+
+No matter what the definition of "GC" is, reference counting is different from tracing GC (in Java/JS/C#/Golang/etc.):
+
+| Reference counting                                                                                     | Tracing GC                                                                                          |
+| ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Frees memory immediately                                                                               | Frees in deferred and batched way                                                                   |
+| [Finds greatest fixed point](https://www.cs.cornell.edu/courses/cs6120/2019fa/blog/unified-theory-gc/) | [Finds least fixed point](https://www.cs.cornell.edu/courses/cs6120/2019fa/blog/unified-theory-gc/) |
+| Propagates "death". (freeing one object may cause its children to be freed)                            | Propagates "live". (a living object cause its children to live, except for weak reference)          |
+| Cloning and dropping a reference involves atomic operation (except single-threaded `Rc`)               | Reading/writing an on-heap reference may involve read/write barrier                                 |
+| Cannot automatically handle cycles. Need to use weak reference to cut cycle                            | Can handle cycles automatically                                                                     |
+| Cost is roughly O(how much time reference count change)                                                | Cost is roughly O(count of living objects)                                                          |
+
+## Bump allocator
+
+(TODO)
 
 ## Using unsafe
 

@@ -138,8 +138,10 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - Mutate the content of map key object (or set element object) makes the container malfunciton.
 - A method that returns `List<T>` may sometimes return mutable `ArrayList`, but sometimes return `Collections.emptyList()` which is immutable. Trying to modify on `Collections.emptyList()` throws `UnsupportedOperationException`.
 - A method that returns `Optional<T>` may return `null` (this is not recommended, but this do exist in real codebases).
+- Null is ambiguous. If `get()` on a map returns null, it may be either value is missing or value exists but it's null (can distinguish by `containsKey`). Null field and missing field in JSON are all mapped to null in Java object. [See also](https://committing-crimes.com/articles/2025-09-16-null-and-absence/)
+- Implicitly converting `Integer` `Long` `Double` etc. to `int` `long` `double` etc. can cause `NullPointerException`.
 - Return in `finally` block swallows any exception thrown in the `try` or `catch` block. The method will return the value from `finally`.
-- Interrupt. Some libraries ignore interrupt. Interrupt may break class initialization that contains IO.
+- Interrupt. Some libraries ignore interrupt. If a thread is interrupted and then load a class, and class initialization has IO, then class may fail to load.
 - Thread pool does not log exception of tasks sent by `.submit()` by default. You can only get exception from the future returned by `.submit()`. Don't discard the future. And `scheduleAtFixedRate` task silently stop if exception is thrown.
 - Literal number starting with 0 will be treated as octal number. (`0123` is 83)
 - When debugging, debugger will call `.toString()` to local variables. Some class' `.toString()` has side effect, which cause the code to run differently under debugger. This can be disabled in IDE.
@@ -326,6 +328,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
   - YAML doesn't allow using tab for indentation.
   - [Norway country code `NO` become false if unquoted](https://www.bram.us/2022/01/11/yaml-the-norway-problem/).
   - [Git commit hash may become number if unquoted](https://tmendez.dev/posts/rng-git-hash-bug/).
+  - [The yaml document from hell](https://ruudvanasseldonk.com/2023/01/11/the-yaml-document-from-hell)
 - When using Microsoft Excel to open a CSV file, Excel will do a lot of conversions, such as date conversion (e.g. turn `1/2` and `1-2` into `2-Jan`) and Excel won't show you the original string. [The gene SEPT1 was renamed due to this Excel issue](https://en.wikipedia.org/wiki/SEPTIN1). Excel will also make large numbers inaccurate (e.g. turn `12345678901234567890` into `12345678901234500000`) and won't show you the original accurate number, because Excel internally use floating point for number.
 - It's recommended to configure billing limit when using cloud services, especially serverless. See also: [ServerlessHorrors](https://serverlesshorrors.com/)
 

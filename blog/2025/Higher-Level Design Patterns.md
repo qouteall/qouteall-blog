@@ -1,3 +1,8 @@
+---
+date: 2025-09-02
+tags:
+  - Programming
+---
 
 # Higher-Level Design Patterns
 
@@ -146,6 +151,7 @@ Deferred (async) compuation vs immediate compuation:
 - Stream processing is immediate computation. Batch processing is deferred computation.
 - Pytorch's most matrix operations are async. GPU computes in background. The tensor object's content may be yet unknown (and CPU will wait for GPU when you try to read its content).
 - PostgreSQL and SQLite require deferred "vacuum" that rearranges storage space.
+- Mobile GPUs often do [tiled rendering](https://en.wikipedia.org/wiki/Tiled_rendering). After vertex shader running, the triangles are not immediately rasterized, but dispatched to different tiles (one trangle can go do multiple tiles). Each tile then rasterize and run pixel shader separately. It can reduce memory bandwidth requirement and power consumption.
 
 ### Program lifecycle
 
