@@ -92,6 +92,8 @@ About rollback:
 - Multiplayer game client that does server-state-prediction (to reduce visible latency) need to rollback when prediction is invalidted by server's message.
 - CPU does branch prediction and speculative execution. If branch prediction fails or there is other failure, it internally rollback. ([Spectre vulnerability](https://en.wikipedia.org/wiki/Spectre_(security_vulnerability)) and [Meltdown vulnerability](https://en.wikipedia.org/wiki/Meltdown_(security_vulnerability)) are caused by rollback not cancelling side effects in cache that can be measured in access speed).
 
+Sometimes, to improve user experience, we need to replay conflicted changes, instead of rolling back them. It's more complex.
+
 ### Diffing
 
 In some places, we specify a new state and need to compute the mutation (diff). Examples:
@@ -203,8 +205,11 @@ Examples of the generalized view concept:
 - Replicated data and redundant data are views to the original data.
 - Multi-tier storage system. From small-fast ones to large-slow ones: register, cache, memory, disk, cloud storage.
 - Previously mentioned computation-data duality and mutation-data duality can be also seen as viewing.
+- Transposing in Pytorch (by default) doesn't change the underlying matrix data. It only changes how the data is interpreted.
 
 [^bits_view]: Also: In hard disk, magnetic field is viewed as bits. In CD, the pits and lands are viewed as bits. In SSD, the electron's position in floating gate is viewed as bits. In fiber optics, light pulses are viewed as bits. In quantum computer, the quantum state (like spin of electron) can be viewed as bits. ......
+
+[^character_to_string]: Specifically, bytes are viewed as code units, code units are viewed as code points, code points are viewed as strings. Code points can also be viewed as grapheme clusters.
 
 More generally:
 
@@ -229,7 +234,7 @@ Dynamic languages' benefits:
 - Can quickly iterate by changing one part of program, before the changes work with other parts of program (in static typed languages, you need to resolve all compile errors in the code that you don't use now). This is double-edged sword. The broken code that was not tested tend to get missed.
 - Save some time typing types and type definitions.
 
-But the statically-typed languages and IDEs are improving. The more expressive type systems reduce friction of typing. Types can help catching mistakes, help understanding code and help IDE functionalities. Type inference and IDE completion saves time of typing types.
+But the statically-typed languages and IDEs are improving. The more expressive type systems reduce friction of typing. Types can help catching mistakes, help understanding code and help IDE functionalities. Type inference and IDE completion saves time of typing types. That's why mainstream dynamic languages (JS, Python) are embracing type annotations.
 
 ### Computation-storage tradeoff
 
@@ -310,10 +315,10 @@ In the second case (application code maintains invariant), to make it less error
 For example, one common invariant to maintain is **consistency between derived data and base data (source-of-truth)**. There are many solutions:
 
 - Make the derived data always **compute-on-demand**. No longer need to manually maintain invariant. But it may cost performance.
-  - Caching can make compute-on-demand be faster.
+  - Caching of immutable compute result can make it faster, while still maintaining the semantic of compute-on-demand.
 - Store the derived data as mutable state and manually keep consistency with source-of-truth. This is the most error-prone solution. All **modifications to base data should "notify" the derived data** to update accordingly. Sometimes notify is to call a function. Sometimes notify involves networking.
   - A more complex case: the derived data need to modified in a way that reflect to base data. This **violates single source-of-truth**. It's even more error-prone.
-  - Even more complex: the client side need to reduce visible latency by predicting server side data, and wrong prediction need to be corrected by server side data. It not only violates single source-of-truth but also often require rollback mechanism.
+  - Even more complex: the client side need to reduce visible latency by predicting server side data, and wrong prediction need to be corrected by server side data. It not only violates single source-of-truth but also often require rollback and replay mechanism.
 - Relying on other tools (database/framework/OS/language etc.) to maintain the invariant, as previously mentioned.
 
 In real-world legacy code, **invariants are often not documented**. They are implicit in code. A developer not knowing an invariant can easily break it.

@@ -88,7 +88,9 @@ Summarize 2 different stacks:
 - The main execution stack, that holds local variable, call arguments, function pointers, and possibly operands (in wasm stack machine). It's managed by Wasm runtime and not in linear memory. It cannot be directly read and written by Wasm code.
 - The shadow stack. It's in linear memory. Holds the local variables that need to be in linear memory. Managed by Wasm code, not Wasm runtime.
 
-Using shadow stack involves issue of **reentrancy** explained below.
+There is a [stack switching proposal](https://github.com/WebAssembly/stack-switching) that aim to allow Wasm to do stack switching. This make it easier to implement lightweight thread (virtual thread, goroutine, etc.), without transforming the code and add many branches.
+
+Using shadow stack involves issue of reentrancy explained below.
 
 ## Memory deallocation
 
@@ -117,7 +119,7 @@ The first solution, manually implementing GC encounters difficulties:
 
 - GC requires scanning GC roots (pointers). Some GC roots are on stack. But the Wasm main stack is not in linear memory and cannot be read by address. One solution is to "spill" the pointers to the shadow stack in linear memory. Having the shadow stack increases binary size and costs runtime performance.
 - Multi-threaded GC often need to pause the execution to scan the stack correctly. In native applications, it's often done using safepoint mechanism [^safepoint_mechanism]. It also increases binary size and costs runtime performance.
-- Multi-threded GC often use store barrier or load barrier to ensure scanning correctness. It also increases binary size and costs runtime performance.
+- Multi-threaded GC often use store barrier or load barrier to ensure scanning correctness. It also increases binary size and costs runtime performance.
 - Cannot collect a cycle where a JS object and an in-Wasm object references each other.
 
 [^safepoint_mechanism]: Safepoint mechanism allows a thread to pause at specific points. It can force the paused thread to expose all local variables on stack. When a thread is running, a local variable may be in register that cannot be scanned by another thread. And scanning a running thread's stack is not reliable due to memory order issues and race conditions. One way to implement safepoint is to have a global safepoint flag. The code frequently reads the safepoint flag and pause if flag is true. There exists optimizations such as using OS page fault handler.
@@ -154,7 +156,7 @@ WebAssembly multithreading relies on web workers and `SharedArrayBuffer`.
 
 ### Security issue of `SharedArrayBuffer`
 
-[Spectre vulnerability](https://meltdownattack.com/) is a vulnearbility that allows JS code running in browser to read browser memory. Exploiting it requires accurately measuring memory access latency to test whether a piece of data is in cache. 
+[Spectre vulnerability](https://meltdownattack.com/) is a vulnearbility that allows JS code running in browser to read browser memory. Exploiting it requires accurately measuring memory access latency to test whether a region of memory is in cache. 
 
 Modern browsers reduced `performance.now()`'s precision to make it not usable for exploit. But there is another way of accurately measuring (relative) latency: multi-threaded counter timer. One thread (web worker) keeps incrementing a counter in `SharedArrayBuffer`. Another thread can read that counter, treating it as "time". Subtracting two "time" gets accurate relative latency.
 
@@ -207,6 +209,7 @@ The current workaround is to notify the web workers to make them proactively loa
 > 
 > [Dynamic Linking — Emscripten](https://emscripten.org/docs/compiling/Dynamic-Linking.html)
 
+There is [shared-everything threads proposal](https://github.com/WebAssembly/shared-everything-threads) that aim to fix that.
 
 ## Wasm-JS passing
 
@@ -227,6 +230,8 @@ Passing strings between Wasm and JS can be a performance bottleneck. If your app
 Modern Wasm/JS runtime (including V8) can JIT and inline the cross calling between Wasm and JS. But the copying cost still cannot be optimized out.
 
 The [Wasm Component Model](https://component-model.bytecodealliance.org/introduction.html) aim to solve this. It allows passing higher-level types such as string, record (struct), list, enum in interface. But different components cannot share memory, and the passed data need to be copied.
+
+There are [Wasm-JS string builtins](https://webassembly.github.io/spec/js-api/index.html#builtins-js-string) that aim to reduce the cost of string passing between Wasm and JS.
 
 ## Cannot directly call Web APIs
 

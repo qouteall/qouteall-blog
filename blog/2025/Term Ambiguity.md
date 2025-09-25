@@ -35,6 +35,7 @@ A lot of debate happen because same word has different meanings to different peo
   - The referenced object is immutable, and the reference is also immutable.
   - The referenced object is immutable, but the reference itself is mutable.
   - The referenced object is mutable, but the reference itself is immutable.
+- Character. A character in GUI is a grapheme cluster. Sometimes it mean a code point. In C, a `char` is a byte. In Java a `char` is two bytes.
 
 
 
