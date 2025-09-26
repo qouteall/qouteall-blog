@@ -330,7 +330,7 @@ Data-oriented design:
 
 - Try to pack data into contagious array, (instead of objects laid out sparsely managed by allocator).
 - Use handle (e.g. array index) or ID to replace reference.
-- **Decouple object ID with memory address**. An ID can be save to disk and sent via network, but a pointer cannot (the same address cannot be used in another process or after process restart, because there may be other data in the same address).
+- **Decouple object ID with memory address**. An ID can be saved to disk and sent via network, but a pointer cannot (the same address cannot be used in another process or after process restart, because there may be other data in the same address).
 - The different fields of the same object doesn't necessarily need to be together in memory. The one field of many objects can be put together (parallel array).
 - Manage memory based on **arenas**.
 
@@ -595,9 +595,9 @@ fn main() {
 
 It will panic with `RefCell already borrowed` error.
 
-Rust assumes that, if you have a mutable borrow `&mut T`, you can use it at any time. **But holding the reference is different to using reference**. There are use cases that I have two mutable references to the same object, but I only use one at a time. This is the use case that `RefCell` solves.
-
 `RefCell` still follows mutable borrow exclusiveness rule. In previous contagious borrow example, the `Parent` is borrowed one immutablely and one mutable, thus `RefCell` will still panic at runtime.
+
+Rust assumes that, if you have a mutable borrow `&mut T`, you can use it at any time. **But holding the reference is different to using reference**. There are use cases that I have two mutable references to the same object, but I only use one at a time. This is the use case that `RefCell` solves.
 
 Another problem: It's hard to return a reference borrowed from `RefCell`.
 
@@ -682,7 +682,7 @@ help: consider borrowing here
    |         +
 ```
 
-Because the reference borrowed from `RefCell` is not normal reference, it's actually `Ref`. `Ref` implements `Deref` so it can be used similar to a normal borrow. But it's different to a normal borrow.
+Because the borrow got from `RefCell` is not normal borrow, it's actually `Ref`. `Ref` implements `Deref` so it can be used similar to a normal borrow.
 
 The "help: consider borrowing here" suggestion won't solve the compiler error. Don't blindly follow compiler's suggestions.
 
@@ -848,7 +848,12 @@ No matter what the definition of "GC" is, reference counting is different from t
 | Propagates "death". (freeing one object may cause its children to be freed)                            | Propagates "live". (a living object cause its children to live, except for weak reference)          |
 | Cloning and dropping a reference involves atomic operation (except single-threaded `Rc`)               | Reading/writing an on-heap reference may involve read/write barrier                                 |
 | Cannot automatically handle cycles. Need to use weak reference to cut cycle                            | Can handle cycles automatically                                                                     |
-| Cost is roughly O(how much time reference count change)                                                | Cost is roughly O(count of living objects)                                                          |
+| Cost is roughly O(how many times reference count change) [^reference_counting_cost]                    | Cost is roughly O(count of living objects) [^generational_gc]                                       |
+
+[^reference_counting_cost]: Contended reference counting is slower than non-contended.
+
+[^generational_gc]: In generational GC, a minor GC only scans young generation, whose cost is roughly count of living young generation objects. But it still need to occasionally do full GC.
+
 
 ## Bump allocator
 
@@ -1117,7 +1122,9 @@ Rust's constraints also helps catch bugs other than memory safety and thread saf
 - The receiver of [single-receiver channel](https://doc.rust-lang.org/std/sync/mpsc/fn.channel.html) cannot be copied, ensuring uniqueness of receiver.
 - ......
 
-As previously mentioned, Rust creates obstacles for things like sharing mutable data and circular reference. Also Rust is harder to learn and compiles slower. Apart from that, there are other things that can sometimes be obstacles:
+As previously mentioned, Rust creates obstacles for things like sharing mutable data and circular reference. Also Rust is harder to learn and compiles slower. 
+
+Apart from borrow checker, there are other things that can sometimes be obstacles:
 
 - Unit testing can be obstacle. When the business logic changed, unit test need to also be adjusted, which can feel annoying, because this work won't be needed if there is no unit test.
 - Type system can be obstacle, especially in unexpressive type systems.

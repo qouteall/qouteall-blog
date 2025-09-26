@@ -169,7 +169,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - `std::remove` doesn't remove but just rearrange elements. `erase` actually removes.
 - Literal number starting with 0 will be treated as octal number. (`0123` is 83)
 - Undefined behaviors. The compiler optimization aim to keep defined behavior the same, but can freely change undefined behavior. Relying on undefined behavior can make program break under optimization. [See also](https://russellw.github.io/undefined-behavior)
-  - Accessing uninitialized memory is undefined behavior. Converting a `char*` to struct pointer can be seem as accessing uninitialized memory, because the object lifetime hasn't started. It's recommended to put the struct elsewhere and use `memcpy` to initialize it.
+  - Accessing uninitialized memory is undefined behavior. Converting a `char*` to struct pointer can be seen as accessing uninitialized memory, because the object lifetime hasn't started. It's recommended to put the struct elsewhere and use `memcpy` to initialize it.
   - Accessing invalid memory (e.g. null pointer) is undefined behavior.
   - Integer overflow/underflow is undefined behavior. Note that unsigned integer can underflow below 0.
   - Aliasing.
@@ -243,6 +243,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - Reentrant lock:
   - Reentrant means one thread can lock twice (and unlock twice) without deadlocking. Java's `synchronized` and `ReentrantLock` are reentrant.
   - Non-reentrant means if one thread lock twice, it will deadlock. Rust `Mutex` and Golang `sync.Mutex` are not reentrant.
+- [False sharing](https://en.wikipedia.org/wiki/False_sharing) of the same cache line costs performance.
 
 ### Common in many languages
 

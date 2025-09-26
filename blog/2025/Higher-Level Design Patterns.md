@@ -73,8 +73,9 @@ DSL are useful when it's high in abstraction level, and new requirements mostly 
 Mutation can be represented as data. Data can be interpreted as mutation.
 
 - Instead of just doing in-place mutation, we can enqueue a command (or event) to do mutation later. The command is then processed to do actual mutation. (It's also moving computatin between stages)
-- **Event sourcing**. Derive latest state from a events (log, mutations). Express the latest state as a view of old state + mutations. The idea is adopted by database WAL, data replication, Lambda architecture, etc.
 - Layered filesystem (in Docker). Mutating or adding file is creating a new layer. The unchanged previous layers can be cached and reused.
+- **Event sourcing**. Derive latest state from a events (log, mutations). Express the latest state as a view of old state + mutations. The idea is adopted by database WAL, data replication, Lambda architecture, etc.
+- [Command Query Responsibility Segregation](https://en.wikipedia.org/wiki/Command_Query_Responsibility_Segregation). The system has two facades: the query facade doesn't allow mutation, and the command facade only accepts commands and don't give data.
 
 The benefits:
 
@@ -271,6 +272,7 @@ About transitive rule: if X and Y both follow invariant, then result of "merging
 - Dijkstra algorithm. The visited nodes are the nodes whose shortest path from source node are known. By using the nodes that we know shortest path, it "expands" on graph, knowing new node's shortest path from source. The algorithm iteratively add new nodes into the invariant, until it expands to destination node.
 - Dynamic programming. The problem is separated into sub-problems. There is no cycle dependency between sub-problems. One problem's result can be quickly calculated from sub-problem's results (e.g. max, min). 
 - Querying hash map can skip data because $\text{hash}(a) \neq \text{hash}(b)$ implies $a \neq b$. Querying ordered search tree can skip data because $(a < b) \land (b < c)$ implies $a < c$.
+- Parallelization often utilize associativity: $a * (b * c) = (a * b) * c$. For example, $a*(b*(c*d))=(a * b) * (c * d)$, where $a*b$ and $c*d$ don't depend on each other and can be computed in parallel. Examples: sum, product, max, min, max-by, min-by, list concat, set union, function combination, logical and, logical or. (Associativity with identity is monoid.)
 - ......
 
 
