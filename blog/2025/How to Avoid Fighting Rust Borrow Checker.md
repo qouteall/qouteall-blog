@@ -12,7 +12,7 @@ The 3 important facts in Rust:
 
 - **Tree-shaped ownership**. In Rust's ownership system, one object can own many children or no chlld, but must be owned by **exactly one parent**. Ownership relations form a tree. [^about_sharing]
 - **Mutable borrow exclusiveness**. If there exists one mutable borrow for an object, then no other borrow to that object can exist. Mutable borrow is exclusive.
-- **Borrow is contagious**. If you borrow a child, you indirectly borrow the parent (and parent's parent, and so on) **if crossing function boundary**. Just borrowing one wheel of a car makes you borrow the whole car. Combined with previous point, it can cause troubles for mutable data.
+- **Borrow is contagious** (if crossing function boundary). If you borrow a child, you indirectly borrow the parent (and parent's parent, and so on). Just borrowing one wheel of a car makes you borrow the whole car. Combined with previous point, it can cause troubles for mutable data. It can be avoided by split borrow, but not across functions.
 
 [^about_sharing]: Reference counting (`Rc`, `Arc`) allows sharing. Here I mean "native" Rust ownership relation form a tree.
 
@@ -546,7 +546,7 @@ That's why mainstream languages has no mutable borrow exclusiveness, and still w
 
 Rust's mutable borrow exclusiveness creates a lot of troubles in single-threaded cases. But it also has **benefits** (even in signle-threaded cases):
 
-- Make the borrow more universal. In Rust, map entry value can be borrowed. But in Golang you cannot take interior pointer to map value. This makes abstractions that work with borrows more general.
+- Make the borrow more universal. In Rust, map key and value can be borrowed. But in Golang you cannot take interior pointer to map key or value. This makes abstractions that work with borrows more general.
 - Mutable borrow is exclusive, so Rust can emit `noalias` attribute to LLVM. `noalias` allows aggressively merging and reordering reads/writes, which then enables a lot of optimizations. Without `noalias`, the optimizer will "worry" about optimization affecting other code that also reads/writes current data, so that much fewer optimizations can be done.
 
 ### Interior mutability summary
@@ -829,9 +829,10 @@ Atomic reference counting is still fast if not contended (mostly only one thread
 Solutions:
 
 - Avoid sharing the same reference count. Copying data is sometimes better.
-- [arc_swap](https://docs.rs/arc-swap/latest/arc_swap/). It uses [hazard pointer](https://en.wikipedia.org/wiki/Hazard_pointer) and other mechanics to improve performance.
 - [trc](https://docs.rs/trc/1.2.4/trc/) and [hybrid_rc](https://docs.rs/hybrid-rc/latest/hybrid_rc/). They use per-thread non-atomic counter, and another shared atomic counter for how many threads use it. This can make atomic operations be less frequent, getting higher performance.
-- [aarc](https://docs.rs/aarc/latest/aarc/) and [crossbeam_epoch](https://docs.rs/crossbeam-epoch/latest/crossbeam_epoch/). Use [epoch-based memory reclamation](https://aturon.github.io/blog/2015/08/27/epoch/#epoch-based-reclamation).
+- For scenario of frequent short-term reads:
+  - [arc_swap](https://docs.rs/arc-swap/latest/arc_swap/). It uses [hazard pointer](https://en.wikipedia.org/wiki/Hazard_pointer) and other mechanics to improve performance.
+  - [aarc](https://docs.rs/aarc/latest/aarc/) and [crossbeam_epoch](https://docs.rs/crossbeam-epoch/latest/crossbeam_epoch/). Use [epoch-based memory reclamation](https://aturon.github.io/blog/2015/08/27/epoch/#epoch-based-reclamation).
 
  These deferred memory reclamation techniques (hazard pointer, epoch-based) are also used in lock-free data structures. If one thread can read an element while another thread removes and frees the same element in parallel, it will not be memory-safe (this issue doesn't exist in GC languages).
 
@@ -841,18 +842,19 @@ There are some ambiguity of the word "GC". Some say reference counting is GC, so
 
 No matter what the definition of "GC" is, reference counting is different from tracing GC (in Java/JS/C#/Golang/etc.):
 
-| Reference counting                                                                                     | Tracing GC                                                                                          |
-| ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| Frees memory immediately                                                                               | Frees in deferred and batched way                                                                   |
-| [Finds greatest fixed point](https://www.cs.cornell.edu/courses/cs6120/2019fa/blog/unified-theory-gc/) | [Finds least fixed point](https://www.cs.cornell.edu/courses/cs6120/2019fa/blog/unified-theory-gc/) |
-| Propagates "death". (freeing one object may cause its children to be freed)                            | Propagates "live". (a living object cause its children to live, except for weak reference)          |
-| Cloning and dropping a reference involves atomic operation (except single-threaded `Rc`)               | Reading/writing an on-heap reference may involve read/write barrier                                 |
-| Cannot automatically handle cycles. Need to use weak reference to cut cycle                            | Can handle cycles automatically                                                                     |
-| Cost is roughly O(how many times reference count change) [^reference_counting_cost]                    | Cost is roughly O(count of living objects) [^generational_gc]                                       |
+| Reference counting                                                                                     | Tracing GC                                                                                                 |
+| ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| Frees memory immediately                                                                               | Frees in deferred and batched way                                                                          |
+| \-                                                                                                     | [Require more memory to achieve high performance](https://people.cs.umass.edu/~emery/pubs/gcvsmalloc.pdf). |
+| [Finds greatest fixed point](https://www.cs.cornell.edu/courses/cs6120/2019fa/blog/unified-theory-gc/) | [Finds least fixed point](https://www.cs.cornell.edu/courses/cs6120/2019fa/blog/unified-theory-gc/)        |
+| Propagates "death". (freeing one object may cause its children to be freed)                            | Propagates "live". (a living object cause its children to live, except for weak reference)                 |
+| Cloning and dropping a reference involves atomic operation (except single-threaded `Rc`)               | Reading/writing an on-heap reference may involve read/write barrier                                        |
+| Cannot automatically handle cycles. Need to use weak reference to cut cycle                            | Can handle cycles automatically                                                                            |
+| Cost is roughly O(how many times reference count change) [^reference_counting_cost]                    | Cost is roughly O(count of living objects \* GC frequency) [^gc_cost]                                      |
 
-[^reference_counting_cost]: Contended reference counting is slower than non-contended.
+[^reference_counting_cost]: Contended atomic operations (many threads touch one atomic value at the same time) are much slower than when not contended.
 
-[^generational_gc]: In generational GC, a minor GC only scans young generation, whose cost is roughly count of living young generation objects. But it still need to occasionally do full GC.
+[^gc_cost]: GC frequency is roughly porpotional to allocation speed divide by free memory. In generational GC, a minor GC only scans young generation, whose cost is roughly count of living young generation objects. But it still need to occasionally do full GC.
 
 
 ## Bump allocator
@@ -888,6 +890,12 @@ Unfortunately Rust's syntax ergonomics on raw pointer is currently not good:
 - If `p` is a raw pointer, you cannot write `p->field` (like in C/C++), and can only write `(*p).field`
 - Raw pointer cannot be method receiver (self).
 - There is no "raw pointer to slice". You need to manually `.add()` pointer and dereference. Bound checking is also manual.
+
+## Contagious borrowing in container
+
+Mutably borrow one element in `Vec` disallow borrowing of other elements. Workaround is [`split_at_mut`](https://doc.rust-lang.org/std/vec/struct.Vec.html#method.split_at_mut).
+
+For `HashMap`, use [`get_disjoint_mut`](https://doc.rust-lang.org/std/collections/struct.HashMap.html#method.get_disjoint_mut).
 
 ## Contagious borrowing between branches
 

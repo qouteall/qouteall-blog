@@ -211,6 +211,8 @@ The current workaround is to notify the web workers to make them proactively loa
 
 There is [shared-everything threads proposal](https://github.com/WebAssembly/shared-everything-threads) that aim to fix that.
 
+If all web workers utitlize browser's event loop and don't block for long time in each execution, then they can coorporatively load new Wasm code by processing web worker message, without much delay.
+
 ## Wasm-JS passing
 
 Numbers (`i32`, `i64`, `f32`, `f64`) can be directly passed between JS and Wasm (`i64` maps to `BigInt` in JS, other 3 maps to `number`).
@@ -255,11 +257,17 @@ That optimization doesn't work when supporting 64-bit address. There is no enoug
 
 See also: [Is Memory64 actually worth using?](https://spidermonkey.dev/blog/2025/01/15/is-memory64-actually-worth-using.html)
 
-## Debugging
+## Debugging Wasm running in Chrome
 
-As Wasm runs inside VM, debugging relies on VM's functionality.
+Firstly, the `.wasm` file need to have [DWARF](https://dwarfstd.org/) debug information in custom section.
 
-(TODO)
+There is a [C/C++ DevTools Support (DWARF) plugin](https://chromewebstore.google.com/detail/cc++-devtools-support-dwa/pdcpmagijalfljmkmjngeonclgbbannb)  ([Source code](https://github.com/ChromeDevTools/devtools-frontend/tree/main/extensions/cxx_debugging)). That plugin is designed to work with C/C++. When using it on Rust, breakpoints and inspecting integer local variables work, but other functionalities (inspecting string, inspecting global, evaluate expression, etc.) are not supported.
+
+VSCode can debug Wasm running in Chrome, using [vscode-js-debug plugin](https://github.com/microsoft/vscode-js-debug). [Documentation](https://code.visualstudio.com/docs/nodejs/browser-debugging), [Documentation](https://code.visualstudio.com/docs/nodejs/nodejs-debugging#_debugging-webassembly). It allows inspecting integer local variable. But the local variable view doesn't show string content. Can only see string content by inspecting linear memory. The debug console expression evaluation doesn't allow call functions.
+
+(It also requires VSCode [WebAssembly DWARF Debugging](https://marketplace.visualstudio.com/items?itemName=ms-vscode.wasm-dwarf-debugging) extension. Currently (2025 Sept) that extension doesn't exist in Cursor.)
+
+Chromium [debugging API](https://chromedevtools.github.io/devtools-protocol/tot/Debugger/).
 
 ## Hot reload that keeps execution state
 
