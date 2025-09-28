@@ -874,18 +874,19 @@ The function signature of allocation (changed for clarity):
 
 ```rust
 impl Bump {
-    ....
+    ...
     pub fn alloc<T, 'bump>(&'bump self, val: T) -> &'bump mut T { ... }
 }
 ```
 
-It takes immutable borrow of `Bump` (it has interior mutability). It outputs a mutable borrow, but having the same lifetime as bump allocator. That lifetime ensures memory safety (cannot make result borrow outlive bump allocator).
+It takes immutable borrow of `Bump` (it has interior mutability). It moves `val` into the bump-allocated memory region. It outputs a mutable borrow, having the same lifetime as bump allocator. That lifetime ensures memory safety (cannot make the borrow of allocated value outlive bump allocator).
 
-If you want to keep the borrow of allocated result for long time, then **lifetime annotation is often required**. In Rust, **lifetime annotation is also "contagious"**. Every struct that holds bump-allocated borrow need to also have lifetime annotation of the bump allocator. Every function that use it must also have lifetime annotation.
+If you want to keep the borrow of allocated result for long time, then **lifetime annotation is often required**. In Rust, **lifetime annotation is also contagious**:
 
-Rust has lifetime elision, which allows you to omit lifetime annotation in some functions. However it cannot be avoided in struct definition. 
+- Every struct that holds bump-allocated borrow need to also have lifetime annotation of the bump allocator. 
+- Every function that use it also needs lifetime annotation. Rust has [lifetime elision](https://doc.rust-lang.org/nomicon/lifetime-elision.html), which allows you to omit lifetime in function signature in some cases. However it doesn't work in all cases.
 
-Adding or removing lifetime for one thing may involve refactoring many code that use it, which can be huge work. Be careful in planning what lifetime parameters it needs. 
+Adding or removing lifetime for one thing may involve refactoring many code that use it, which can be huge work. Be careful in planning what lifetime parameters it needs.
 
 `Bump` doesn't implement `Sync`, so `&Bump` is not `Send`. It cannot be shared across threads (even if it can share, there will be lifetime constraint that force you to use structured concurrency). It's recommended to have separated bump allocator in each thread, locally.
 
@@ -927,7 +928,7 @@ For `HashMap`, use [`get_disjoint_mut`](https://doc.rust-lang.org/std/collection
 
 ## Contagious borrowing between branches
 
-Current borrow checker does coarse-grained analysis on branch. One branch's borrowing is **contagious** to another branch.
+Current borrow checker does coarse-grained analysis on branch. One branch's output's borrowing is contagious to another branch.
 
 Currently, this won't compile ([see also](https://blog.rust-lang.org/inside-rust/2023/10/06/polonius-update/)):
 
@@ -980,14 +981,11 @@ where
 
 It requires the future need to be `Send` and `'static`:
 
-- `'static` means:
-  - it's a standalone value that doesn't borrow other things, or
-  - it references a global value that will always live when program is running, or
-  - it only borrows global values
+- `'static` means it's standalone (self-owned). It doesn't borrow temporary things. It can borrow global values (global values will always live when program is running). It cannot borrow a value that only temporarily exists.
   
-  The future being `'static` often require the future be standalone and doesn't borrow other things. If the future need to share data with outside, pass `Arc<T>` into (not `&Arc<T>`). 
+  If the future need to share data with outside, pass `Arc<T>` into (not `&Arc<T>`). 
 
-  Note that the "static" in C/C++/Java/C# often mean global variable. But in Rust, `'static` can also mean mean standalone (self-owned) value that's not global.
+  Note that the "static" in C/C++/Java/C# often mean global variable. But in Rust its meaning is different.
   
 - `Send` means that the future can be sent across threads. Tokio use work-stealing, which means that one thread's task can be stolen by other threads that currently have no work.
 
