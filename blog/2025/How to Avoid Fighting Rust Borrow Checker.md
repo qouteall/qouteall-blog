@@ -842,24 +842,52 @@ There are some ambiguity of the word "GC". Some say reference counting is GC, so
 
 No matter what the definition of "GC" is, reference counting is different from tracing GC (in Java/JS/C#/Golang/etc.):
 
-| Reference counting                                                                                     | Tracing GC                                                                                                 |
-| ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| Frees memory immediately                                                                               | Frees in deferred and batched way                                                                          |
-| \-                                                                                                     | [Require more memory to achieve high performance](https://people.cs.umass.edu/~emery/pubs/gcvsmalloc.pdf). |
-| [Finds greatest fixed point](https://www.cs.cornell.edu/courses/cs6120/2019fa/blog/unified-theory-gc/) | [Finds least fixed point](https://www.cs.cornell.edu/courses/cs6120/2019fa/blog/unified-theory-gc/)        |
-| Propagates "death". (freeing one object may cause its children to be freed)                            | Propagates "live". (a living object cause its children to live, except for weak reference)                 |
-| Cloning and dropping a reference involves atomic operation (except single-threaded `Rc`)               | Reading/writing an on-heap reference may involve read/write barrier                                        |
-| Cannot automatically handle cycles. Need to use weak reference to cut cycle                            | Can handle cycles automatically                                                                            |
-| Cost is roughly O(how many times reference count change) [^reference_counting_cost]                    | Cost is roughly O(count of living objects \* GC frequency) [^gc_cost]                                      |
+| Reference counting                                                                                     | Tracing GC                                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Frees memory immediately                                                                               | Frees in deferred and batched way [^gc_benefit]                                                                                            |
+| Freeing a whole large structure may cause large lag [^ref_counting_lag]                                | [Require more memory to achieve high performance](https://people.cs.umass.edu/~emery/pubs/gcvsmalloc.pdf), otherwise GC lag will be large. |
+| [Finds greatest fixed point](https://www.cs.cornell.edu/courses/cs6120/2019fa/blog/unified-theory-gc/) | [Finds least fixed point](https://www.cs.cornell.edu/courses/cs6120/2019fa/blog/unified-theory-gc/)                                        |
+| Propagates "death". (freeing one object may cause its children to be freed)                            | Propagates "live". (a living object cause its children to live, except for weak reference)                                                 |
+| Cloning and dropping a reference involves atomic operation (except single-threaded `Rc`)               | Reading/writing an on-heap reference may involve read/write barrier (often a branch, no atomic memory access)                              |
+| Cannot automatically handle cycles. Need to use weak reference to cut cycle                            | Can handle cycles automatically                                                                                                            |
+| Cost is roughly O(reference count changing frequency) [^reference_counting_cost]                       | Cost is roughly O(count of living objects \* GC frequency) [^gc_cost]                                                                      |
 
-[^reference_counting_cost]: Contended atomic operations (many threads touch one atomic value at the same time) are much slower than when not contended.
+[^reference_counting_cost]: Contended atomic operations (many threads touch one atomic value at the same time) are much slower than when not contended. Its cost also include memory block allocation and freeing.
+
+[^ref_counting_lag]: It lags because it need to do many counter decrement and deallocation for each individual object. Can be workarounded by sending the `Arc` to another thread and drop in that thread. Also, for deep structures, dropping may stack overflow.
 
 [^gc_cost]: GC frequency is roughly porpotional to allocation speed divide by free memory. In generational GC, a minor GC only scans young generation, whose cost is roughly count of living young generation objects. But it still need to occasionally do full GC.
 
+[^gc_benefit]: Tracing GC is faster for short-lived programs (such as some CLI programs and serverless functions), because there's no need to free memory for individual objects on exit. Example: [My JavaScript is Faster than Your Rust](https://medium.com/@jbyj/my-javascript-is-faster-than-your-rust-5f98fe5db1bf). The same optimization is also achievable in Rust, but require extra work (e.g. `mem::forget`, bump allocator).
 
 ## Bump allocator
 
-(TODO)
+[bumpalo](https://docs.rs/bumpalo/latest/bumpalo/) provides bump allocator. In bump allocator, allocation is fast because it usually just increase an integer. It supports quickly freeing the whole arena, but doesn't support freeing individual objects.
+
+It's usually faster than normal memory allocators. Normal memory allocator will do a lot of bookkeeping work for each allocation and free. Each individual memory region can free separately, these regions can be reused for later allocation, these information need to be recorded and updated.
+
+Bump allocator frees memory in batched and deferred way, which is similar to tracing GC. As it cannot free individual objects, it may temporarily consume more memory, similar to tracing GC.
+
+Bump allocator is suitable for temporary objects, where you are sure that none of these temporary objects will be needed after the work complets.
+
+The function signature of allocation (changed for clarity):
+
+```rust
+impl Bump {
+    ....
+    pub fn alloc<T, 'bump>(&'bump self, val: T) -> &'bump mut T { ... }
+}
+```
+
+It takes immutable borrow of `Bump` (it has interior mutability). It outputs a mutable borrow, but having the same lifetime as bump allocator. That lifetime ensures memory safety (cannot make result borrow outlive bump allocator).
+
+If you want to keep the borrow of allocated result for long time, then **lifetime annotation is often required**. In Rust, **lifetime annotation is also "contagious"**. Every struct that holds bump-allocated borrow need to also have lifetime annotation of the bump allocator. Every function that use it must also have lifetime annotation.
+
+Rust has lifetime elision, which allows you to omit lifetime annotation in some functions. However it cannot be avoided in struct definition. 
+
+Adding or removing lifetime for one thing may involve refactoring many code that use it, which can be huge work. Be careful in planning what lifetime parameters it needs. 
+
+`Bump` doesn't implement `Sync`, so `&Bump` is not `Send`. It cannot be shared across threads (even if it can share, there will be lifetime constraint that force you to use structured concurrency). It's recommended to have separated bump allocator in each thread, locally.
 
 ## Using unsafe
 
@@ -895,7 +923,7 @@ Unfortunately Rust's syntax ergonomics on raw pointer is currently not good:
 
 Mutably borrow one element in `Vec` disallow borrowing of other elements. Workaround is [`split_at_mut`](https://doc.rust-lang.org/std/vec/struct.Vec.html#method.split_at_mut).
 
-For `HashMap`, use [`get_disjoint_mut`](https://doc.rust-lang.org/std/collections/struct.HashMap.html#method.get_disjoint_mut).
+For `HashMap`, use [`get_disjoint_mut`](https://doc.rust-lang.org/std/collections/struct.HashMap.html#method.get_disjoint_mut). (There seem to be no such thing in `BTreeMap`.)
 
 ## Contagious borrowing between branches
 
@@ -1114,7 +1142,7 @@ async fn main() {
 
 - Borrowing that cross function boundary is contagious. Just borrowing a wheel of car can indirectly borrow the whole car.
 - Mutate-by-recreate is contagious. Recreating child require also recreating parent that holds the new child, and parent's parent, and so on.
-- Lifetime annotation is contagious. If some type has a lifetime parameter `'a`, then every type that holds it and every function signature that use it must also have the lifetime parameter `'a` (some may be auto-inferred, but not all). Refactoring that adds/remove lifetime parameter can be a huge work.
+- Lifetime annotation is contagious. If some type has a lifetime parameter `'a`, then every type that holds it must also have the lifetime parameter `'a`. (Every function that use them may also need lifetime annotation, but lifetime elision can help). Refactoring that adds/remove lifetime parameter can be a huge work.
 - In current borrow checker, one branch's borrowing is contagious to the whole branching scope.
 - `async` is contagious. `async` function can call normal function. Normal function cannot easily call `async` function (but it's possible to call by blocking).
 - Being not `Sync`/`Send` is contagious. A struct that indirectly owns a non-`Sync` data is not `Sync`. A struct that indirectly owns a non-`Send` data is not `Send`.

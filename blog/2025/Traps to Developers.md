@@ -168,6 +168,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - Iterator invalidation. Modifying a container when looping on it.
 - `std::remove` doesn't remove but just rearrange elements. `erase` actually removes.
 - Literal number starting with 0 will be treated as octal number. (`0123` is 83)
+- Destructing a deep tree structure can stack overflow. Solution is to replace recursion with loop in destructor.
 - Undefined behaviors. The compiler optimization aim to keep defined behavior the same, but can freely change undefined behavior. Relying on undefined behavior can make program break under optimization. [See also](https://russellw.github.io/undefined-behavior)
   - Accessing uninitialized memory is undefined behavior. Converting a `char*` to struct pointer can be seen as accessing uninitialized memory, because the object lifetime hasn't started. It's recommended to put the struct elsewhere and use `memcpy` to initialize it.
   - Accessing invalid memory (e.g. null pointer) is undefined behavior.
