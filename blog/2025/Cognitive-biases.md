@@ -503,6 +503,12 @@ Examples of causal oversimplification:
 > 
 > \- H. L. Mencken
 
+People often dream of a "silver bullet" that simply magically works:
+
+- People hope that a "secret weapon" alone can reverse the disadvantage in war.
+- Hoping that a secret recipe can build a success business. Coca Cola succeedes not just by the "secret recipe". The global production system, logistic network, and brading is also important.
+- Just knowing one super advanced algorithm doesn't mean you can simply use it. Deploying an algorithm needs systematic efforts: data ingestion and storage, compute power, testing, debugging, observability, performance optimization, networking facility, error handling, energy supply, etc. Also, there are many implementation details for the same algorithm. Devil is in details.
+
 ### Binary thinking (false dichotomy)
 
 We tend to simplify things. One way of simplification is to ignore the grey-zone and complex nuance, reducing things into two simple extremes.
