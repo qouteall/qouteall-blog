@@ -35,13 +35,15 @@ The benefit of turning execution state into explicit data:
 
 - Inspection: Explicit execution state is easier to inspect and display  (the machine code can be optimized, and it's platform-depenent, so machine code execution position and runtime stack are harder to inspect and manipulate than explicit data)
 - Serialization: Explicit execution state can be serialized and deserialized, thus be stored to database and sent across network. (Example: Restate)
-- Suspension: Explicit execution state allows temporarily suspending execution and resume it later. Suspending thread is harder (to avoid suspending the whole process, you need to run it in a separate thread) and less efficient (current OS is not optimized for one million threads). (Turning execution state as data. It's related to mutation-data duality)
+- Suspension: Explicit execution state allows temporarily suspending execution and resume it later. Suspending thread is harder and less efficient [^suspending_thread].
 - Modification: Explicit execution state can be modified. It makes cancellation and rollback easier. (Modifying execution stack and execution state is harder, and it's not supported by many mainstream languages.)
 - Forking: Allows forking control flow, which can be useful in some kinds of simulations.
 
+[^suspending_thread]: It's possible to use separate threads for suspendable compuatation. However, OS threads are expensive and context switch is expensive. Manually-implemented state machine is faster. 
+
 The distinction between computation and execution state is blurry. A closure can capture data. An execution state can be seen as a **continuation**, which is also a computation.
 
-### Algebraic effect and continuation
+### Algebraic effect and delimited continuation
 
 **Algebraic effect**: An effect handler executes some code in a scope. Some code is executed under an effect handler. When it performs an effect, the control flow jumps to the effect handler, and the execution state (**delimited continuation**) up to the effect handler's scope is also saved. The effect handler can then resume using the execution state. [A simple introduction to Algebraic effects](https://overreacted.io/algebraic-effects-for-the-rest-of-us/)
 
@@ -88,7 +90,7 @@ The benefits:
 
 About rollback:
 
-- Transactional databases allow rollback a uncommited transaction. (Implementation details vary between databases. PostgreSQL write is append-only on disk except vacuum. MySQL InnoDB does in-place mutation on disk but writes undo log and redo log.)
+- Transactional databases allow rolling back a uncommited transaction. (MySQL InnoDB does in-place mutation on disk but writes undo log and redo log. PostgreSQL MVCC write is append-only on disk.)
 - Editing software often need to support undo. It's often implemted by storing previous step's data, while sharing unchanged substructure to optimize.
 - Multiplayer game client that does server-state-prediction (to reduce visible latency) need to rollback when prediction is invalidted by server's message.
 - CPU does branch prediction and speculative execution. If branch prediction fails or there is other failure, it internally rollback. ([Spectre vulnerability](https://en.wikipedia.org/wiki/Spectre_(security_vulnerability)) and [Meltdown vulnerability](https://en.wikipedia.org/wiki/Meltdown_(security_vulnerability)) are caused by rollback not cancelling side effects in cache that can be measured in access speed).
@@ -120,6 +122,10 @@ In multi-threading, for read-heavy data, it's often beneficial to make only one 
 
 In pure functional languages (e.g. Haskell), there is no direct way of mutating things. Mutation can only be simutated by recreating.
 
+### Bitemporal modelling
+
+[Bitemporal modelling](https://en.wikipedia.org/wiki/Bitemporal_modeling): Store two pieces of records. One records the data and time updated to database. Another records the data and time that reflect the reality. (Sometimes the reality changes but database doesn't edit immediately. Sometimes database contains wrong informaiton that's corrected later.) 
+
 ### Conflict-free replicated data type
 
 [Conflict-free replicated data type (CRDT)](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type): The mutations can be combined, and the result doesn't depend on order of combining. It allows distributed system get eventual consistency without immediate communication. 
@@ -130,11 +136,44 @@ In CRDT, the operator of combining mutation $*$:
 - It must be associative. $a * (b * c) = (a * b) * c$. The order of combining doesn't matter.
 - It must be idempotent: $a * a = a$. Duplicating a mutation won't affect result. (Idempotence is not needed if you ensure exactly-once delivery.)
 
-One simple kind of CRDT is last-write-wins. Each mutation is attached with a timestamp. The higher-timestamp ones override lower-timestamp ones. However it can cause data loss.
+Examples of CRDT:
 
-### Bitemporal modelling
+#### CRDT: Last write wins
 
-[Bitemporal modelling](https://en.wikipedia.org/wiki/Bitemporal_modeling): Store two pieces of records. One records the data and time updated to database. Another records the data and time that reflect the reality. (Sometimes the reality changes but database doesn't edit immediately. Sometimes database contains wrong informaiton that's corrected later.) 
+For example, in multiplayer game, there is a door. The door's state can be open or close (a boolean). 
+
+Each operation is a tuple `(timestamp, doorState)`. Combination is max-by-timestamp (for two operations, pick the higher-timestamp ones).
+
+Consdering that multiple players can do operation in exactly the same timestamp, so we add player ID as **tie-breaker**. The operation now become `(timestamp, playerId, doorState)`. Combination max-by the tuple of `(timestamp, playerId)`. If `timestamp` equals, larger `playerId` wins.
+
+Note that typical multiplayer game implementation doesn't use CRDT. The server holds source-of-truth game state. Clients send actions to servers. The server validates actions, change game state and broadcast to all clients.
+
+#### CRDT: Lower depth wins
+
+Drawing solid triangles to framebuffer can also be seen as CRDT. 
+
+The whole framebuffer can be seen as an operation. Each pixel in framebuffer has a depth value. Combining two framebuffer takes lowest-depth one for two pixels in the same position.
+
+(Two framebuffers may have same depth on same pixel with different color. We can use unique triangle ID as tie-breaker.)
+
+Note that actual rasterization in GPU works by having one centralized framebuffer, not using CRDT.
+
+#### CRDT: Collaborative text editing
+
+In a collaborative text editing system, each character has an ID. It supports two kinds of operations: 
+
+- Insertion. `insertAfter(charId, timestamp, userId, charToInsert, newCharId)` inserts a new character after the character with id `charId`. The `newCharId` is unique globally.
+- Deletion `delete(charId)` only marks invisible flag of character (keep the tombstone)
+
+There is a "root character" in the beginning of document. It's invisible and cannot delete.
+
+For two insertions after the same character, the tie-breaker is `(timestamp, userId)`. Higher timestamp applies first. For the same timestamp, higher user id applies first.
+
+It forms a tree. Each character is a node, containing visibility boolean flag. Each `insertAfter` operation is an edge pointing to new character. Traversing the tree in depth-first order (edges ordered by tie-breaker) and ignoring invisible ones gives document. [^text_edit_optimization] [^operational_transformation]
+
+[^text_edit_optimization]: There are optimizations. To avoid storing unique ID for each character, it can store many immutable text blocks, and use `(textBlockId, offsetInTextBlock)` as character ID. Consecutive insertions and deletions can be merged. The tree keeps growing, and need to be merged. The exact implementation is complex.
+
+[^operational_transformation]: Another way of collaborative text editing is [Operational Transformation](https://en.wikipedia.org/wiki/Operational_transformation). It use `(documentVersion, offset)` as cursor. The server can transform a cursor to the latest version of document: if there are insertion before `offset`, the `offset` increments accordingly. If there are deletion, `offset` reduces accordingly. This is also called index rebasing.
 
 ## Partial computation and multi-stage computation
 
@@ -154,7 +193,7 @@ Deferred (async) compuation vs immediate compuation:
 - Stream processing is immediate computation. Batch processing is deferred computation.
 - Pytorch's most matrix operations are async. GPU computes in background. The tensor object's content may be yet unknown (and CPU will wait for GPU when you try to read its content).
 - PostgreSQL and SQLite require deferred "vacuum" that rearranges storage space.
-- Mobile GPUs often do [tiled rendering](https://en.wikipedia.org/wiki/Tiled_rendering). After vertex shader running, the triangles are not immediately rasterized, but dispatched to different tiles (one trangle can go do multiple tiles). Each tile then rasterize and run pixel shader separately. It can reduce memory bandwidth requirement and power consumption.
+- Mobile GPUs often do [tiled rendering](https://en.wikipedia.org/wiki/Tiled_rendering). After vertex shader running, the triangles are not immediately rasterized, but dispatched to tiles (one triangle can go to multiple tiles). Each tile then rasterize and run pixel shader separately. It can reduce memory bandwidth requirement and power consumption.
 
 ### Program lifecycle
 
@@ -190,10 +229,10 @@ Examples of the generalized view concept:
 
 - Bits are views of voltage in circuits. [^bits_view]
 - Integers are views of bits
-- Characters are views of integers. Strings are views of characters.
+- Characters are views of integers. Strings are views of characters. [^character_to_string]
 - Other complex data structures are views to binary data. (pointer can be seen as a view to pointed data)
-- A functions is a view of a mapping.
-- Index (and lookup acceleration structure) are also views to underlying data.
+- A map (dictionary) can be viewed as a function.
+- Lookup acceleration structure (e.g. database index) are also views to underlying data.
 - Cache is view to underlying data/computation.
 - Lazy evaluation provides a view to the computation result.
 - Virtual memory is a view to physical memory.
@@ -206,7 +245,7 @@ Examples of the generalized view concept:
 - Replicated data and redundant data are views to the original data.
 - Multi-tier storage system. From small-fast ones to large-slow ones: register, cache, memory, disk, cloud storage.
 - Previously mentioned computation-data duality and mutation-data duality can be also seen as viewing.
-- Transposing in Pytorch (by default) doesn't change the underlying matrix data. It only changes how the data is interpreted.
+- Transposing in Pytorch (by default) doesn't change the underlying matrix data. It only changes how the data is viewed.
 
 [^bits_view]: Also: In hard disk, magnetic field is viewed as bits. In CD, the pits and lands are viewed as bits. In SSD, the electron's position in floating gate is viewed as bits. In fiber optics, light pulses are viewed as bits. In quantum computer, the quantum state (like spin of electron) can be viewed as bits. ......
 
@@ -230,7 +269,7 @@ Mainstream languages often have relatively simpler and less expressive type syst
 
 Dynamic languages' benefits:
 
-- Avoid the shackle of an unexpressive type sysytem.
+- Avoid the shackle of an unexpressive type system.
 - Avoid syntax inconvenience related to type erasure (type erasure in typed languages require inconvenient things like type conversion).
 - Can quickly iterate by changing one part of program, before the changes work with other parts of program (in static typed languages, you need to resolve all compile errors in the code that you don't use now). This is double-edged sword. The broken code that was not tested tend to get missed.
 - Save some time typing types and type definitions.
@@ -286,8 +325,8 @@ For example, invariants in business logic:
 - Bank account balance should never be negative. No over-spend.
 - Product inventory count should never be negative. No over-sell.
 - One room in hotel cannot be booked two times with time overlap.
-- The product should be shipped before the order is paid.
-- Any new comment message should correspond to a notification. No lost notification or duplicated notification.
+- The product should be shipped after the order is paid.
+- No lost notification or duplicated notification.
 - The user can't view or change information that's out of their permission.
 - User cannot use a functionality if subscription ends.
 - ......
@@ -297,7 +336,13 @@ Invariants in data:
 - The reduntant data, derived data and acceleration data structure (index, cache) should stay consistent with base data (source-of-truth).
 - The client side data should be consistent with server side data.
 - Memory safety invariants. Pointer should point to valid data. Should not use-after-free. Only free once. etc.
-- Thread safety invariants. This non-thread-safe data structure should not be shared between threads. That data structure must be accessed under lock. etc.
+- Should free unused memory.
+- Thread safety invariants.
+  - Many operations involve 3 stages: read-compute-write. 
+  - It will malfunction when other thread mutates between reading data and writing data. The previous read result is no longer valid.
+  - Some operations involve more stages (many reads and writes). If the partially-modified state is exposed, invariant is also violatated.
+  - Some non-thread-safe data structure should not be shared between threads.
+  - Some non-thread-safe data structure must be accessed under lock.
 - The modification of some action should be cancelled after a subsequent action fails. (Ad-hoc transaction, application-managed rollback)
 
 ### Maintaining invariant

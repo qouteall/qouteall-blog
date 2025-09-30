@@ -505,9 +505,10 @@ Examples of causal oversimplification:
 
 People often dream of a "silver bullet" that simply magically works:
 
-- People hope that a "secret weapon" alone can reverse the disadvantage in war.
-- Hoping that a secret recipe can build a success business. Coca Cola succeedes not just by the "secret recipe". The global production system, logistic network, and brading is also important.
-- Just knowing one super advanced algorithm doesn't mean you can simply use it. Deploying an algorithm needs systematic efforts: data ingestion and storage, compute power, testing, debugging, observability, performance optimization, networking facility, error handling, energy supply, etc. Also, there are many implementation details for the same algorithm. Devil is in details.
+- People hope that a "secret advanced weapon" can reverse the systematic disadvantage in war. This almost never happens in real world. 
+- Hoping that a secret recipe or a secret techonology alone can succeed.
+  - Coca Cola succeedes not just by the "secret recipe". The brading, global production system and logistic network are also important.
+  - Modern technology are complex and have many dependencies. You cannot just simply copy "one key techonology" and get the same result. Even just imitating existing technology often requires a whole infrastructure, many talents and years of work.
 
 ### Binary thinking (false dichotomy)
 

@@ -122,7 +122,7 @@ The first solution, manually implementing GC encounters difficulties:
 - Multi-threaded GC often use store barrier or load barrier to ensure scanning correctness. It also increases binary size and costs runtime performance.
 - Cannot collect a cycle where a JS object and an in-Wasm object references each other.
 
-[^safepoint_mechanism]: Safepoint mechanism allows a thread to cooporatively pause at specific points. Scanning a running thread's stack is not reliable, due to memory order issues and race conditions, and some pointers may be in register, not stack. If a thread is coorporatively paused, its stack can be reliably scanned. One way to implement safepoint is to have a global safepoint flag. The code frequently reads the safepoint flag and pause if flag is true. There exists optimizations such as using OS page fault signal handler.
+[^safepoint_mechanism]: Safepoint mechanism allows a thread to cooporatively pause at specific points. Scanning a running thread's stack is not reliable, due to memory order issues and race conditions, and some pointers may be in register, not stack. If the thread is suspended using OS functionality, some local variable may be in register, and it's hard to tell whether data in register is pointer or other data (treating integer as pointer may cause memory safety issue or memory leak). If a thread is coorporatively paused in specific places, the references can be reliably scanned. One way to implement safepoint is to have a global safepoint flag. The code frequently reads the safepoint flag and pause if flag is true. There exists optimizations such as using OS page fault signal handler.
 
 What about using Wasm's built-in GC functionality? It requires mapping the data structure to Wasm GC data structure. Wasm's GC data structure allows Java-like class (with object header), Java-like prefix subtyping, and Java-like arrays. 
 
@@ -144,9 +144,9 @@ It doesn't support some memory layout optimizations:
 Web code runs in event loop:
 
 - The main thread runs in an event loop, with an event queue.
-- Each calling to JS adds one event to queue.
-- The event loop executes all events in queue, until queue is empty. It waits until new event arrives.
+- Each time browser calls JS code (e.g. event handling), it adds an event to queue.
 - If JS code awaits on an unresolved promise, the event handling finishes. When that promise resolves, a new event is added into queue.
+- The event loop executes all events in queue, until queue is empty. It waits until new event arrives.
 - The web page rendering and interaction is blocked by main thread JS code and Wasm code running. It's not recommended to make main thread keep executing JS/Wasm for long time.
 - There are web workers that can run in parallel. Each web worker also has its own event loop and event queue. Each web worker is single-threaded.
 - Web workers don't share memory (except `SharedArrayBuffer`). JS values sent to another web worker are deep-copied. Sending an `ArrayBuffer` across thread will make `ArrayBuffer` to detach with its binary data.
@@ -239,7 +239,7 @@ There are [Wasm-JS string builtins](https://webassembly.github.io/spec/js-api/in
 
 Wasm code cannot directly call Web APIs. Web APIs must be called via JS glue code.
 
-Although all Web's JS APIs have [Web IDL](https://webidl.spec.whatwg.org/) specifications, it involves GCed-objects, iterators and async iterators (e.g. `fetch()` returns `Response`. Its `body` field is `ReadableStream`). These GC-related things and async-related things cannot easily adapt to Wasm code using linear memory. Letting Wasm to directly call Web API is still hard.
+Although all Web's JS APIs have [Web IDL](https://webidl.spec.whatwg.org/) specifications, it involves GCed-objects, iterators and async iterators (e.g. `fetch()` returns `Response`. Its `body` field is `ReadableStream`). These GC-related things and async-related things cannot easily adapt to Wasm code using linear memory. It's hard to design a specification of turning Web IDL interfaces to Wasm interfaces.
 
 There was [Web IDL Bindings Proposal](https://github.com/WebAssembly/interface-types/blob/1c46f9fe30143867545c9747fa8a94b72e5d9737/proposals/webidl-bindings/Explainer.md) but superseded by Component Model proposal.
 
@@ -298,7 +298,7 @@ That hot realod is not yet implemented.
 Background:
 
 - CPU has a cache for accelerating memory access. Some parts of memory are put into cache. Accessing these memory can be done by accessing cache, which is faster. 
-- The cache size is limited. Accessing new memory can evict existing data in cache.
+- The cache size is limited. Accessing new memory can evict existing data in cache, and put newly accessed data into cache.
 - Whether a content of memory is in cache can be tested by memory access latency.
 - CPU does speculative execution and branch prediction. CPU tries to execute as many as possible instructions in parallel. When CPU sees a branch (e.g. `if`), it tries to predict the branch and speculatively execute code in branch. 
 - If CPU later find branch prediction to be wrong, the effects of speculative execution (e.g. written registers, written memory) will be rolled back. However, memory access leads side effect on cache, and that side effect won't be cancelled by rollback. 

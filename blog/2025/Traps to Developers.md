@@ -80,6 +80,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
   - Golang string has no constraint of encoding and is similar to byte array. String length and indexing works same as byte array. But the most commonly used encoding is UTF-8. [See also](https://go.dev/blog/strings)
   - In C++, `std::string` has no constraint of encoding and is similar to byte array. String length and indexing is based on bytes.
   - No language mentioned above do string length and indexing based on grapheme cluster.
+  - In SQL, `varchar(100)` limits 100 code points (not byte).
 - Some text files have byte order mark (BOM) at the beginning. For example, FE FF means file is in big-endian UTF-16. EF BB BF means UTF-8. It's mainly used in Windows. Some non-Windows software does not handle BOM.
 - When converting binary data to string, often the invalid places are replaced by � (U+FFFD)
 - [Confusable characters](https://github.com/unicode-org/icu/blob/main/icu4c/source/data/unidata/confusables.txt).
@@ -210,6 +211,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - Distributed SQL database may doesn't support locking or have weird locking behaviors. It's database-specific.
 - If the backend has N+1 query issue, the slowness may won't be shown in slow query log, because the backend does many small queries serially and each individual query is fast.
 - Long-running transaction can cause problems (e.g. locking). It's recommended to make all transactions finish quickly.
+- If a string column is used in index or primary key, it will have length limit. MySQL applies the limitation when changing table schema. PostgreSQL applies the limitation by erroring when inserting or updating data.
 - Whole-table locks that can make the service temporarily unusable:
   - In MySQL (InnoDB) 8.0+, adding unique index or foreign key is mostly concurrent (only briefly lock) and won't block operations. But in older versions it may do whole-table lock.
   - `mysqldump` used without `--single-transaction` cause whole-table read lock.
@@ -229,7 +231,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
   - In C/C++, `volatile` only avoids some wrong optimizations, and won't automatically add memory barrier instruction for `volatile` access.
   - In Java, `volatile` accesses have sequentially-consistent ordering (JVM will use memory barrier instruction if needed)
   - In C#, accesses to the same `volatile` value have release-aquire ordering (CLR will use memory barrier instruction if needed)
-  - `volatile` can avoid wrong optimization related to reordering and merging memory reads/writes. (Compiler can merge reads by caching a value in register. Compiler can merge writes by only writing to register and delaying writing to memory).
+  - `volatile` can avoid wrong optimization related to reordering and merging memory reads/writes. (Compiler can merge reads by caching a value in register. Compiler can merge writes by only writing to register and delaying writing to memory. A read after a write can be optimized out.).
 - Time-of-check to time-of-use ([TOCTOU](https://en.wikipedia.org/wiki/Time-of-check_to_time-of-use)).
 - In SQL database, for special uniqueness constraints that doesn't fit simple unique index (e.g. unique across two tables, conditional unique, unique within time range), if the constraint is enforced by application, then:
   - In MySQL (InnoDB), if in repeatable read level, application checks using `select ... for update` then insert, and the unique-checked column has index, then it works due to gap lock. (Note that gap lock may cause deadlock under high concurrency, ensure deadlock detection is on and use retrying).
