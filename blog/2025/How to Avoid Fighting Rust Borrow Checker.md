@@ -42,12 +42,13 @@ The most fighting with borrow checker happens in the **borrow-check-unfriendly c
 
 The solutions in borrow-checker-unfriendly cases (will elaborate below):
 
-- Data-oriented design. Avoid unnecessary getter and setter. Split borrow.
-- Avoid just-for-convenience circular reference.
-- Use ID/handle to replace borrow.
-- Defer mutation. Mutation-as-data.
-- Avoid mutation. Mutate-by-recreate.
-- `Arc<QCell<T>>`
+- Data-oriented design. **Avoid unnecessary getter and setter**. Avoid contagious borrow. Do split borrow if necessary.
+- **Use ID/handle to replace borrow**.
+- **Defer mutation**. Turn mutation as commands and execute later.
+- **Avoid mutation**. Mutate-by-recreate. Use `Arc` to share immutable data.
+- For circular reference:
+  - For graph data structure, use ID/handle to replace borrow.
+  - For callback, use event bus or `Arc<QCell<T>>` (use `Weak` to cut cycle)
 - `Arc<RwLock<T>>` (only use when really necessary)
 - `unsafe` and raw pointer (only use when really necessary) 
 
@@ -88,7 +89,7 @@ fn main() {
 }
 ```
 
-[^about_code_example]: This simplified code example is just for illustrating contagious borrow issue. The total score doesn't need to be a mutable field. It's analogous to a complex state that will exist in real applications. 
+[^about_code_example]: This simplified code example is just for illustrating contagious borrow issue. The total score doesn't need to be a mutable field. It's analogous to a complex state that will exist in real applications. Same for other examples.
 
 Compile error:
 
@@ -443,9 +444,7 @@ Compile error:
   |                  ----------------- immutable borrow later used here
 ```
 
-Another example is about `enum`: interior pointer pointing inside `enum` can also be invalidated, because different enum variants has different memory layout [^memory_layout]. In one layout the first 8 bytes is integer, in another layout the first 8 bytes may be a pointer. Treating an integer as a pointer is definitely not memory-safe.
-
-[^memory_layout]: The memory layout here means **how we map between information and in-memory binary data**. It's not just the placement of fields of a struct.
+Another example is about `enum`: interior pointer pointing inside `enum` can also be invalidated, because different enum variants has different memory layout. In one layout the first 8 bytes is integer, in another layout the first 8 bytes may be a pointer. Treating an arbitrary integer as a pointer is definitely not memory-safe.
 
 ```rust
 enum DifferentMemoryLayout {  
@@ -595,7 +594,9 @@ fn main() {
 
 It will panic with `RefCell already borrowed` error.
 
-`RefCell` still follows mutable borrow exclusiveness rule. In previous contagious borrow example, the `Parent` is borrowed one immutablely and one mutable, thus `RefCell` will still panic at runtime.
+**`RefCell` cannot fix contagious borrow issue**. `RefCell` still follows mutable borrow exclusiveness rule, just checked at runtime, not compile time. Borrowing one fields inside `RefCell` still borrows the whole `RefCell`.
+
+See also: [Dynamic borrow checking causes unexpected crashes after refactorings](https://loglog.games/blog/leaving-rust-gamedev/#dynamic-borrow-checking-causes-unexpected-crashes-after-refactorings)
 
 Rust assumes that, if you have a mutable borrow `&mut T`, you can use it at any time. **But holding the reference is different to using reference**. There are use cases that I have two mutable references to the same object, but I only use one at a time. This is the use case that `RefCell` solves.
 
@@ -663,7 +664,7 @@ impl Parent {
 }
 ```
 
-But returning a reference in `RefCell` is not that simple:
+But returning a borrow from `RefCell` is not that simple:
 
 ```
 error[E0308]: mismatched types
@@ -686,27 +687,25 @@ Because the borrow got from `RefCell` is not normal borrow, it's actually `Ref`.
 
 The "help: consider borrowing here" suggestion won't solve the compiler error. Don't blindly follow compiler's suggestions.
 
-Possible solutions:
+Possible solutions (all not recommended):
 
-- Return a `Ref<HashMap<String, Entry>>`. `Ref` is a `RefCell`-specific thing and makes abstraction leaky (you cannot replace `RefCell` with another thing without breaking API).
-- Return `&RefCell<HashMap<String, Entry>>`. Also leaky abstraction.
-- Return `impl DeRef<Target=HashMap<String, Entry>> + '_`. It's more complex, as the function signature now have existential type, not concrete type. It still doesn't allow storing returned value for long term.
-- Put `RefCell` inside `Rc` and return cloned `Rc`. It allows storing returned value for long term. It's the most "adaptive" solution.
+1. Return a `Ref<HashMap<String, Entry>>`.
+2. Return `&RefCell<HashMap<String, Entry>>`. 
+3. Return `impl Deref<Target=HashMap<String, Entry>>`. It's existential type, not concrete type.
+4. Make the field `Rc<RefCell<...>>` and return cloned `Rc`.
 
-So `Rc<RefCell<...>>` seems more "adaptive". But it's NOT recommended to overuse `Rc<RefCell<>>`, because:
+In 1,2,4, the types related to `RefCell` is exposed in function signature. Cannot change `RefCell` to another things (e.g. `RwLock`) without changing function signature. In 3, the function signature has no `RefCell`-related type, but it's existential type and can lead to other issues (e.g. [its type cannot be written out in local variable](https://github.com/rust-lang/rust/issues/63065)). Only in 4 the returned reference can be stored for long time.
 
-- It has (relatively small) performance cost. `Rc` Reference counting and `RefCell` borrow counting costs peformance. (Performance is affected by many factors. It depends on exact case.)
-- `Rc` has memory leak risk (need to use `Weak` to cut loop)
-- `RefCell` has runtime panic risk. A previous example already shows. [See also](https://loglog.games/blog/leaving-rust-gamedev/#dynamic-borrow-checking-causes-unexpected-crashes-after-refactorings)
-- Its syntax ergonomic is not good. The code will have a lot of "noise" like `.borrow().borrow_mut()` etc.
+The previous 4 solutions are all not recommended (only use when really necessary).
 
-Similarily, `Arc` is the multi-threaded version of `Rc`. `Mutex` `RwLock` are the multi-threaded version of `RefCell`. It's also not recommended to overuse things like `Arc<Mutex<T>>`:
+### `Rc<RefCell<...>>` and `Arc<Mutex<...>>` are not panacea
 
-- `Arc`'s performance cost is larger than `Rc` because it involves atomic operation. Elaborated below.
-- `Mutex` `RwLock`'s performance cost is larger than `RefCell` because locking also involves atomic operation, can reduce parallelism and can cause context switch. Using `Arc<Mutex<>>` everywhere can make the performance worse than using a GC language.
-- `Arc` also has memory leak risk (need to use `Weak` to cut loop)
-- `Mutex` and `RwLock` have deadlock risk.
-- Its syntax ergonomic is not good either.
+`Rc<RefCell<...>>` and `Arc<Mutex<...>>` allows freely copying reference and freely mutating things, just like in other languages. Finally "get rid of shackle of borrow checker". However, there are **traps**:
+
+- **Contagious borrowing**. As previously mentioned, `RefCell` doesn't solve contagious borrowing. `Mutex` also won't. Violating mutable borrow exclusiveness in the same thread is panic (or error) in `RefCell` and **deadlock** in `Mutex`. Rust lock is not re-entrant, [explained below](#rust-lock-is-not-re-entrant).
+- Need to cut cycle using `Weak`, unless it will memory leak.
+- **Performance**. `Rc` and `RefCell` has relatively small performance cost. But unnecessary locking can hurt performance. `Arc` also can have performance issue, [explained below](#arc-is-not-always-fast). It's still ok to use them when not in performance bottleneck.
+- Their syntax ergonomic is not good. The code will have a lot of "noise" like `.borrow().borrow_mut()`.
 
 ### `QCell`
 
@@ -748,6 +747,8 @@ Compile error:
    |                   ^^^^^^^^^^ mutable borrow occurs here
 
 ```
+
+It turns runtime panic into compile error, which make discovering problems eariler.
 
 [GPUI](https://zed.dev/blog/gpui-ownership)'s `Model<T>` is similar to `Rc<QCell<T>>`, where GPUI's `AppContext` correspond to `QCellOwner`.
 
@@ -805,12 +806,6 @@ Another important thing is that Rust only unlocks at the end of scope by default
 ## Just clone the data
 
 For example, if borrow checker has trouble with a string borrowing, you can just clone the string. It's usually fine as long as it's not performance bottleneck.
-
-Note that there are two different kinds of data:
-
-- The identity of object is important. Cloning it is treated as adding a new entity into the system.
-- The identity of object is not important. Only object content matters. Cloning doesn't affect semantics. Cloning is fine.
-
 
 ## `Arc` is not always fast
 
@@ -1140,27 +1135,29 @@ async fn main() {
 
 - Borrowing that cross function boundary is contagious. Just borrowing a wheel of car can indirectly borrow the whole car.
 - Mutate-by-recreate is contagious. Recreating child require also recreating parent that holds the new child, and parent's parent, and so on.
-- Lifetime annotation is contagious. If some type has a lifetime parameter `'a`, then every type that holds it must also have the lifetime parameter `'a`. (Every function that use them may also need lifetime annotation, but lifetime elision can help). Refactoring that adds/remove lifetime parameter can be a huge work.
-- In current borrow checker, one branch's borrowing is contagious to the whole branching scope.
+- Lifetime annotation is contagious. If some type has a lifetime parameter `'a`, then every type that holds it must also have `'a`. Every function that use them also need lifetime annotation, except when lifetime elision works. Refactoring that adds/remove lifetime parameter can be a huge work.
+- In current borrow checker, one branch's output's borrowing is contagious to the whole branching scope.
 - `async` is contagious. `async` function can call normal function. Normal function cannot easily call `async` function (but it's possible to call by blocking).
 - Being not `Sync`/`Send` is contagious. A struct that indirectly owns a non-`Sync` data is not `Sync`. A struct that indirectly owns a non-`Send` data is not `Send`.
 - Error passing is contagious. If panic is not acceptable, then all functions that indirectly call a fallible function must return `Result`. Related: NaN is contagious in floating point computaiton.
 
 ## Rust is a tradeoff
 
-Rust's constraints also helps catch bugs other than memory safety and thread safety:
+As commonly mentioned, Rust gives memory safety, thread safety and opportunity of high performance.
+
+**Rust also helps preventing bugs other than memory safety and thread safety**:
 
 - Algebraic data type (e.g. `Option`, `Result`) helps avoid creating illegal data from the source. Using ADT data require pattern match all cases, avoiding forgetting handling one case. (except when using escape hatch like `unwrap()`).
 - Mutable borrow exclusiveness prevents iterator invalidation.
 - Explicit `.clone()` avoids accidentally copying string like in C++.
-- The receiver of [single-receiver channel](https://doc.rust-lang.org/std/sync/mpsc/fn.channel.html) cannot be copied, ensuring uniqueness of receiver.
 - ......
 
-As previously mentioned, Rust creates obstacles for things like sharing mutable data and circular reference. Also Rust is harder to learn and compiles slower. 
+**Not all security issues are memory-safety issue**. According to [Common Weakness Enumeration 2024 Top 25 Most Dangerous Software Weaknesses](https://cwe.mitre.org/top25/archive/2024/2024_cwe_top25.html), many real-world vulnerabilities are XSS, SQL injection, directory traversal, command injection, missing authentication, etc. that are not memory safety. The GC languages are also memory-safe [^golang_memory_safety], but there are still vulnerabilities in Java (e.g. Log4j vulnerability).
 
-Apart from borrow checker, there are other things that can sometimes be obstacles:
+[^golang_memory_safety]: Note that Golang is not fully memory-safe under data race. For example, string in Golang is 16 bytes, 8-byte pointer and 8-byte length. Tearing can cause pointer to mismatch length, prone out-of-bound read.
 
-- Unit testing can be obstacle. When the business logic changed, unit test need to also be adjusted, which can feel annoying, because this work won't be needed if there is no unit test.
-- Type system can be obstacle, especially in unexpressive type systems.
+**Rust prefers data-oriented design. Rust is doesn't fit OOP. Rust dislikes sharing mutable data. Rust dislikes circular reference**. Getter and setter can easily cause contagious borrow issue. Sharing and mutation has many limitations.
 
-They are tradeoffs.
+**Rust is less flexible and does not suit quick iteration**. A new requirement often require changing reference structure, which often involve large refactoring in Rust.
+
+**Rust saves time of debugging memory safety issue and thread safety issue**. Many memory safety issues and thread safety issues are random. Random bugs are not easy to reproduce and debug. In a complex and unfamiliar codebase, debugging a random bug may take weeks or months. Rust greatly saves debugging time in this aspect.

@@ -167,9 +167,9 @@ In a collaborative text editing system, each character has an ID. It supports tw
 
 There is a "root character" in the beginning of document. It's invisible and cannot delete.
 
-For two insertions after the same character, the tie-breaker is `(timestamp, userId)`. Higher timestamp applies first. For the same timestamp, higher user id applies first.
+For two insertions after the same character, the tie-breaker is `(timestamp, userId)`. Higher timestamp ones appear first. For the same timestamp, higher user id ones appear first.
 
-It forms a tree. Each character is a node, containing visibility boolean flag. Each `insertAfter` operation is an edge pointing to new character. Traversing the tree in depth-first order (edges ordered by tie-breaker) and ignoring invisible ones gives document. [^text_edit_optimization] [^operational_transformation]
+It forms a tree. Each character is a node, containing visibility boolean flag. Each `insertAfter` operation is an edge pointing to new character. The document is formed by traversing the tree in depth-first order (edges ordered by tie-breaker) while hiding invisible characters. [^text_edit_optimization] [^operational_transformation]
 
 [^text_edit_optimization]: There are optimizations. To avoid storing unique ID for each character, it can store many immutable text blocks, and use `(textBlockId, offsetInTextBlock)` as character ID. Consecutive insertions and deletions can be merged. The tree keeps growing, and need to be merged. The exact implementation is complex.
 
@@ -306,7 +306,7 @@ About transitive rule: if X and Y both follow invariant, then result of "merging
 ### Invariant in algorithms
 
 - Merge sort. Create sorted sub-sequence in smallest scale (e.g. two elements). Then merge two sorted sub-sequences into a bigger one, and continue. The invariant of sorted-ness grows up to the whole sequence.
-- Quick sort. Select a pivot. Then partition the sequence into a part that's smaller than pivot and a part that's larger than pivot (and a part that equals pivot) [^quick_sort_equal_pivot]. By partitioning, it creates invariant $\text{LeftPartElements} < \text{Pivot} < \text{RightPartElements}$. By recursively creating such invariants until to the smallest scale (individual elements), the whole sequence is sorted.
+- Quick sort. Select a pivot. Then partition the sequence into a part that's smaller than pivot and a part that's larger than pivot (and a part that equals pivot). By partitioning, it creates invariant $\text{LeftPartElements} < \text{Pivot} < \text{RightPartElements}$. By recursively creating such invariants until to the smallest scale (individual elements), the whole sequence is sorted.
 - Binary search tree. It creates invariant $\text{LeftSubtreeElements} \leq \text{ParentNode} \leq \text{RightSubtreeElements}$. When there is only one node, the invariant is produced at the smallest scale. Every insertion then follows that invariant and then grows and maintains that invariant.
 - Dijkstra algorithm. The visited nodes are the nodes whose shortest path from source node are known. By using the nodes that we know shortest path, it "expands" on graph, knowing new node's shortest path from source. The algorithm iteratively add new nodes into the invariant, until it expands to destination node.
 - Dynamic programming. The problem is separated into sub-problems. There is no cycle dependency between sub-problems. One problem's result can be quickly calculated from sub-problem's results (e.g. max, min). 
@@ -314,8 +314,6 @@ About transitive rule: if X and Y both follow invariant, then result of "merging
 - Parallelization often utilize associativity: $a * (b * c) = (a * b) * c$. For example, $a*(b*(c*d))=(a * b) * (c * d)$, where $a*b$ and $c*d$ don't depend on each other and can be computed in parallel. Examples: sum, product, max, min, max-by, min-by, list concat, set union, function combination, logical and, logical or. (Associativity with identity is monoid.)
 - ......
 
-
-[^quick_sort_equal_pivot]: About the elements that equals the pivot, how exactly to treat them is implementation-specific. Some put them into the first partition. Some put then into another third partition.
 
 ### Invariant in application
 
@@ -407,7 +405,7 @@ Other GoF design patterns briefly explained:
 
 - Visitor pattern. Can be replaced by pattern matching.
 - State pattern. Make state a polymorphic object.
-- Memento pattern. Backup the state to allow rollback. Although it's related to mutable state, it doesn't involve turning mutation into data, so it's not mutation-data duality.
+- Memento pattern. Backup the state to allow rollback. It exists mainly because in OOP data is tied to behavior. The separate memento is just data, decoupled with behavior. Memento pattern doesn't involve turning mutation into data, so it's not mutation-data duality.
 - Singleton pattern. It's similar to global variable, but can be late-initialized, can be ploymorphic, etc.
 - Mediator pattern. One abstraction to centrally manage other abstractions.
 
