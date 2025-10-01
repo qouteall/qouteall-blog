@@ -14,7 +14,7 @@ The 3 important facts in Rust:
 - **Mutable borrow exclusiveness**. If there exists one mutable borrow for an object, then no other borrow to that object can exist. Mutable borrow is exclusive.
 - **Borrow is contagious** (if crossing function boundary). If you borrow a child, you indirectly borrow the parent (and parent's parent, and so on). Just borrowing one wheel of a car makes you borrow the whole car. Combined with previous point, it can cause troubles for mutable data. It can be avoided by split borrow, but not across functions.
 
-[^about_sharing]: Reference counting (`Rc`, `Arc`) allows sharing. Here I mean "native" Rust ownership relation form a tree.
+[^about_sharing]: The native Rust ownership relation form a tree. Reference counting (`Rc`, `Arc`) allows shared ownership.
 
 Note that Rust borrow checker can reject some incorrect programs but also reject some correct programs.
 
@@ -49,6 +49,7 @@ The solutions in borrow-checker-unfriendly cases (will elaborate below):
 - For circular reference:
   - For graph data structure, use ID/handle to replace borrow.
   - For callback, use event bus or `Arc<QCell<T>>` (use `Weak` to cut cycle)
+- Make borrows as shortest as possible, as temporary as possible.
 - `Arc<RwLock<T>>` (only use when really necessary)
 - `unsafe` and raw pointer (only use when really necessary) 
 
@@ -145,6 +146,7 @@ The solutions:
   - If you design a library and want encapsulation, it's recommended to use ID/handle to replace borrow (elaborated below).
   - The getter that returns cloned/copied value is fine. If data is immutable, getter is also usually fine.
 - Use ID/handle to replace borrow.
+- Make borrow as shortest as possible.
 - Other workarounds like `Arc<QCell<T>>` `Arc<RwLock<T>>`, etc.
 - **Avoid mutation** or **defer mutation**:
 
@@ -546,7 +548,13 @@ That's why mainstream languages has no mutable borrow exclusiveness, and still w
 Rust's mutable borrow exclusiveness creates a lot of troubles in single-threaded cases. But it also has **benefits** (even in signle-threaded cases):
 
 - Make the borrow more universal. In Rust, map key and value can be borrowed. But in Golang you cannot take interior pointer to map key or value. This makes abstractions that work with borrows more general.
-- Mutable borrow is exclusive, so Rust can emit `noalias` attribute to LLVM. `noalias` allows aggressively merging and reordering reads/writes, which then enables a lot of optimizations. Without `noalias`, the optimizer will "worry" about optimization affecting other code that also reads/writes current data, so that much fewer optimizations can be done.
+- Mutable borrow is exclusive, so Rust can emit `noalias` attribute to LLVM. `noalias` means the pointed data cannot be accessed by other code, which means:
+  - It allows aggressively merging reads. Before next write to it, it can be temporarily treated as constant.
+  - It allows aggressively merging writes. If there are two memory writes to it, compiler can remove the first write, only keep the last write.
+  - It allows removing reads after write, using the previous write as read result.
+  - It allows aggressively reordering reads/writes to it between other computation and other memory accesses.
+  - The above give compiler a lot of freedom of transforming code, which enables many other optimizations.
+  - Without `noalias`, the optimizer must consider all possible reads/writes to the same value to do above transformation. In many cases, compiler don't have enough information, so much fewer optimizations can be done.
 
 ### Interior mutability summary
 
@@ -570,7 +578,7 @@ They are usually used inside reference counting (`Arc<...>`, `Rc<...>`).
 
 ### `RefCell` is not panacea
 
-In the previous contagious borrow case, wrapping parent in `RefCell<>` can make the code compile. However it doesn't fix the issue. It just turns compile error into runtime panic:
+In the previous contagious borrow case, wrapping parent in `RefCell<>` can make the code compile. However it doesn't fix the issue. **It just turns compile error into runtime panic**:
 
 ```rust
 use std::cell::RefCell;  
@@ -594,7 +602,9 @@ fn main() {
 
 It will panic with `RefCell already borrowed` error.
 
-**`RefCell` cannot fix contagious borrow issue**. `RefCell` still follows mutable borrow exclusiveness rule, just checked at runtime, not compile time. Borrowing one fields inside `RefCell` still borrows the whole `RefCell`.
+`RefCell` still follows mutable borrow exclusiveness rule, just checked at runtime, not compile time. Borrowing one fields inside `RefCell` still borrows the whole `RefCell`.
+
+**Wrapping parent in `RefCell` cannot fix contagious borrow, but putting individual children into `RefCell` can work, as it makes borrow more fine-grained**.
 
 See also: [Dynamic borrow checking causes unexpected crashes after refactorings](https://loglog.games/blog/leaving-rust-gamedev/#dynamic-borrow-checking-causes-unexpected-crashes-after-refactorings)
 
@@ -694,9 +704,13 @@ Possible solutions (all not recommended):
 3. Return `impl Deref<Target=HashMap<String, Entry>>`. It's existential type, not concrete type.
 4. Make the field `Rc<RefCell<...>>` and return cloned `Rc`.
 
-In 1,2,4, the types related to `RefCell` is exposed in function signature. Cannot change `RefCell` to another things (e.g. `RwLock`) without changing function signature. In 3, the function signature has no `RefCell`-related type, but it's existential type and can lead to other issues (e.g. [its type cannot be written out in local variable](https://github.com/rust-lang/rust/issues/63065)). Only in 4 the returned reference can be stored for long time.
+In 1,2,4, the types related to `RefCell` is exposed in function signature. Cannot change `RefCell` to another things (e.g. `RwLock`) without changing function signature. 
 
-The previous 4 solutions are all not recommended (only use when really necessary).
+In 3, the function signature has no `RefCell`-related type, but it's existential type and can lead to other issues (e.g. [its type cannot be written out in local variable](https://github.com/rust-lang/rust/issues/63065)). 
+
+Only in 4, can the returned reference be stored for long time.
+
+All the 4 solutions are all not recommended (only use when really necessary).
 
 ### `Rc<RefCell<...>>` and `Arc<Mutex<...>>` are not panacea
 
@@ -797,9 +811,7 @@ fn main() {
 
 It prints `going to do second-layer lock` then deadlocks.
 
-In Rust, it's important to **be clear about which scope holds lock**. You cannot just casually do locking like in Java/C# (this method touch that shared data so add `synchronized` [^casual_locking]). Golang lock is also not re-entrant.
-
-[^casual_locking]: Although re-entrant lock is more tolerant to this kind of casual locking, not being clear about locking means risk of deadlock. Casual locking is not recommended even in Java.
+In Rust, it's important to **be clear about which scope holds lock**. Golang lock is also not re-entrant.
 
 Another important thing is that Rust only unlocks at the end of scope by default. `mutex.lock().unwrap()` gives a `MutexGuard<T>`. `MutexGuard` implements `Drop`, so it will drop at the end of scope. It's different to the local variables whose type doesn't implement `Drop`, they are dropped after their last use (unless borrowed). This is called NLL (non-lexical lifetime).
 
@@ -894,11 +906,11 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
 - Don't violate mutable borrow exclusiveness. 
   - A `&mut` cannot overlap with any other borrow that overlaps.
   - The overlap here also includes interior pointer. A `&mut` to an object cannot co-exist with any other borrow into any part of that object.
-  - Violating that rule cause undefined behavior and can cause wrong optimization. Rust adds `noalias` attribute for mutable borrows into LLVM IR. LLVM will heavily optimize based on `noalias` (including merging and reorder reads/writes. Being able to merge and reorder reads/writes enables a lot of optimization.). [See also](https://doc.rust-lang.org/nomicon/aliasing.html)
+  - Violating that rule cause undefined behavior and can cause wrong optimization. Rust adds `noalias` attribute for mutable borrows into LLVM IR. LLVM will heavily optimize based on `noalias`. [See also](https://doc.rust-lang.org/nomicon/aliasing.html)
   - The above rule doesn't apply to raw pointer `*mut T`.
   - It's very easy to accidentally violate that rule when using borrows in unsafe. It's recommended to always use raw pointer and avoid using borrow (including slice borrow) in unsafe code. [Related1](https://chadaustin.me/2024/10/intrusive-linked-list-in-rust/), [Related2](https://web.archive.org/web/20230307172822/https://zackoverflow.dev/writing/unsafe-rust-vs-zig/)
 - Pointer provenance.
-  - Two pointers created from two provenance is considered to never alias. If their address equals, it's undefined behavior.
+  - Two pointers created from two provenances is considered to never alias. If their address equals, it's undefined behavior.
   - Converting an integer to pointer gets a pointer with no provenance, which is undefined behavior, unless the integer was converted from a pointer.
   - Adding a pointer with an integer doesn't change provenance.
 - Using uninitialized memory is undefined behavior. [`MaybeUninit`](https://doc.rust-lang.org/beta/std/mem/union.MaybeUninit.html)
@@ -1135,7 +1147,7 @@ async fn main() {
 
 - Borrowing that cross function boundary is contagious. Just borrowing a wheel of car can indirectly borrow the whole car.
 - Mutate-by-recreate is contagious. Recreating child require also recreating parent that holds the new child, and parent's parent, and so on.
-- Lifetime annotation is contagious. If some type has a lifetime parameter `'a`, then every type that holds it must also have `'a`. Every function that use them also need lifetime annotation, except when lifetime elision works. Refactoring that adds/remove lifetime parameter can be a huge work.
+- Lifetime annotation is contagious. If some type has a lifetime parameter, then every type that holds it must also have lifetime parameter. Every function that use them also need lifetime parameter, except when lifetime elision works. Refactoring that adds/remove lifetime parameter can be huge work.
 - In current borrow checker, one branch's output's borrowing is contagious to the whole branching scope.
 - `async` is contagious. `async` function can call normal function. Normal function cannot easily call `async` function (but it's possible to call by blocking).
 - Being not `Sync`/`Send` is contagious. A struct that indirectly owns a non-`Sync` data is not `Sync`. A struct that indirectly owns a non-`Send` data is not `Send`.
@@ -1156,7 +1168,7 @@ As commonly mentioned, Rust gives memory safety, thread safety and opportunity o
 
 [^golang_memory_safety]: Note that Golang is not fully memory-safe under data race. For example, string in Golang is 16 bytes, 8-byte pointer and 8-byte length. Tearing can cause pointer to mismatch length, prone out-of-bound read.
 
-**Rust prefers data-oriented design. Rust is doesn't fit OOP. Rust dislikes sharing mutable data. Rust dislikes circular reference**. Getter and setter can easily cause contagious borrow issue. Sharing and mutation has many limitations.
+**Rust prefers data-oriented design. Rust doesn't fit OOP. Rust dislikes sharing mutable data. Rust dislikes circular reference**. Getter and setter can easily cause contagious borrow issue. Sharing and mutation has many limitations.
 
 **Rust is less flexible and does not suit quick iteration**. A new requirement often require changing reference structure, which often involve large refactoring in Rust.
 
