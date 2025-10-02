@@ -114,7 +114,7 @@ Material consumption can give short-term satisfaction, but cannot give long-term
 
 > We al­ready walked too far, down to we had for­got­ten why em­barked.
 
-> A man on a thousand mile walk has to forget his goal and say to himself every morning, 'Today I'm going to cover twenty-five miles and then rest up and sleep.
+> A man on a thousand mile walk has to forget his goal and say to himself every morning, "Today I'm going to cover twenty-five miles and then rest up and sleep."
 > 
 > \- Leo Tolstoy, War and Peace
 
@@ -168,7 +168,7 @@ People make execuses about their prediction failure, such as:
 
 ### Self justification
 
-People tend to **justify previous behavior**, even if these behaviors was made randomly, or made by external factors that does not exist now.
+People tend to **justify previous behavior**, even if these behaviors was made randomly, or made under external factors that does not exist now.
 
 Self justitication shows self-control and consistency, facilitating social collaboration.
 
@@ -198,9 +198,10 @@ Examples of self-handicapping:
 - Refusing help. Refusing medical treatment.
 - Drinking alcohol and using drugs.
 - Choosing difficult conditions and methods.
-- Setting unrealistic high goals.
 
 Self-handicapping can avoid questioning the capability from self. However, other people usually just judge from result, and see self-handicapping as low capability.
+
+Setting unrealistic high goals is sometimes a form of self-handicapping. But not always.
 
 Self-handicapping is also a way of **reducing responsibility**. This is common in large corporations and governments: intentionally create reasons of failure to reduce responsibility.
 
@@ -224,9 +225,9 @@ People tend to avoid thinking about inevitable death because it's unpleasant. Pe
 
 - People feel like having plenty time to procrastinate
 - People tend to not value the present because "life is permanent"
-- People worry about risks that affect their "permanent" life
+- People exaggerage risk as it affect their "permanent" life
 
-Stoicism proposes thinking about death all the time. Thinking about death can make one not procrastinate important things, reduce worrying and value the present. But Stocism does NOT propose indulgence and overdrafting the future.
+Stoicism proposes thinking about death all the time. Thinking about death can make one not procrastinate important things, make one value the present and reduce unnecessary worrying. But Stocism does NOT propose indulgence and overdrafting the future.
 
 > Respice post te. Hominem te esse memento. Memento mori!
 > 
@@ -401,19 +402,6 @@ Examples of correlation of A and B are actually driven by another factor C:
 > 
 > \- Paul Kedrosky, [Link](https://x.com/pkedrosky/status/1876018990663041285)
 
-### Anecdotal fallacy
-
-People tend to believe more from stories, anecdotes or individual examples, even if these examples are made up or are just statistical outlier. On the contrary, people are less likely to believe in abstract statistical evidences.
-
-Examples: 
-
-- "Someone smoked their entire life and lived until 97, so smoking is actually not that bad."
-- "Someone never went to college and turned out to be successful, so college is a waste of time and money."
-- "Someone made a fortune trading cryptocurrency, and so can I."
-- "It was the coldest winter on record in my town this year. Global warming can't be real." [^weather]
-
-[^weather]: The weather is a non-linear chaotic system. Global warming can indeed make some region's winter colder.
-
 ### Narrative fallacy
 
 Narrative fallacy is introduced in _The Black Swan_:
@@ -457,8 +445,6 @@ The quicker the feedback gives, the quicker people can learn (this also applies 
 When feedback comes early, its correlation with previous behavior is high, having high **signal-to-noise ratio**. If feedback comes late, many previous behaviors may correlate with it, so feedback has low signal-to-noise ratio.
 
 Reducing cost by removing safety measures usually does not cause any visible accidents in the short run, but the benefit of reduced costs are immediately visible. When the accident actually happened because of the removed safety measures, it may be years later.
-
-The solution is to take notes and analyze past notes.
 
 **People crave quick feedback**. Successful video games and gambling mechanisms utilize this by providing immediate responses to actions. 
 
@@ -649,7 +635,7 @@ Other examples of survivorship bias:
 - The succeded research results are published and the failed attempts are hidden (P-hacking).
 - Only special and interesting cases appear on news. The more representative common but not newsworthy cases are hidden.
 
-A more generalized version of survivor bias is **selection bias**: When the sampling is not uniform enough and contains selection mechanism (not necessary sample vanishing), there will be bias in the result.
+A more generalized version of survivor bias is **selection bias**: When the sampling is not uniform enough and contains selection mechanism (not necessary 100% accurate selection), there will be bias in the result.
 
 The opinions on social media does not necessarily represent most peoples' view. There are several selection mechanisms in it: 1. not all people use the same social media platform 2. the people using social media may not post opinions 3. not all posted opinions will be seen by you due to algorithmic recommendation.
 
@@ -693,6 +679,19 @@ When judging on other people's decisions, people often just see visible downside
 **Agenda-setting theory**: what media pay attention to can influence people's attention, then influence people's opinions.
 
 **Saliency bias**: We pay attention to the salient things that grab attention. The things that we don't pay attention to are ignored. **Attention** is a core mechanism of how brain works. (Related: modern deep learning also relies on attention mechanism (transformer).)
+
+### Anecdotal fallacy
+
+People tend to believe more from stories, anecdotes or individual examples, even if these examples are made up or are just statistical outlier. On the contrary, people are less likely to believe in abstract statistical evidences.
+
+Examples: 
+
+- "Someone smoked their entire life and lived until 97, so smoking is actually not that bad."
+- "Someone never went to college and turned out to be successful, so college is a waste of time and money."
+- "Someone made a fortune trading cryptocurrency, and so can I."
+- "It was the coldest winter on record in my town this year. Global warming can't be real." [^weather]
+
+[^weather]: The weather is a non-linear chaotic system. Global warming can indeed make some region's winter colder.
 
 ### Familiarity bias
 
@@ -820,6 +819,7 @@ The name of a thing affects how people perceive it. Examples:
 - "Collateral damage" / "Death"
 - "Gun control" / "Gun safety"
 - "Government subsidy" / "Using taxpayer money"
+- "Risk measurement" / "Risk forecast"
 
 A **loaded question** is a question that contains an assumption (framing). Following that assumption can lead to a biased answer. Example: "Do you support the attempt by the US to bring freedom and democracy to other places in the world?"
 
@@ -1189,7 +1189,9 @@ The rational activities (System 2 activities) require mental energy (willpower):
 - Paying attention and thinking hard problems consume willpower.
 - For introverts, social interaction consumes willpower. But for extroverts, staying alone consumes willpower.
 
-If there is no enough mental energy, one is less likely to resist impulse behaviors or think about hard problems, and possibly have difficulty in social interactions.
+If there is no enough mental energy, one is less likely to resist impulse behaviors or think about hard problems, and possibly have difficulty in social interactions. [^long_term_planning_computation]
+
+[^long_term_planning_computation]: Long-term planning require larger computation capacity. In reinforcement learning AI, if the model is small, it cannot learn to do long-term planning, and its behevior will be short-sighted. Only when the model is big and has enough computation capacity, does it start do long-term planning, sacrificing short-term reward for larger long-term reward. So, in some sense, not being able to control oneself can be caused by "lacking compute resource".
 
 These factors affect mental energy:
 

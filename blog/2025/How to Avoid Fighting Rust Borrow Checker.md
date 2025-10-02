@@ -1000,7 +1000,7 @@ It requires the future need to be `Send` and `'static`:
   
 - `Send` means that the future can be sent across threads. Tokio use work-stealing, which means that one thread's task can be stolen by other threads that currently have no work.
 
-Another important trap is that, the normal sleep `std::thread::sleep` and normal locking `std::sync::Mutex` should not be used when using async runtime, because they block using OS functionality without telling async runtime, so they will block the async runtime's scheduling thread. In Tokio, use `tokio::sync::Mutex` and `tokio::time::sleep`.
+Another important trap is that, the normal sleep `std::thread::sleep` and normal locking `std::sync::Mutex` should not be used when using async runtime, because they block using OS functionality without telling async runtime, so they will block the async runtime's scheduling thread. In Tokio, use `tokio::sync::Mutex` and `tokio::time::sleep`. (That issue doesn't exist in Golang. Rust async runtime is leaky abstraction compared to Golang.)
 
 ## Side effect of extracting and inlining variable
 
@@ -1174,7 +1174,7 @@ As commonly mentioned, Rust gives memory safety, thread safety and opportunity o
 
 **Rust prefers data-oriented design. Rust doesn't fit OOP. Rust dislikes sharing mutable data. Rust dislikes circular reference**. Getter and setter can easily cause contagious borrow issue. Sharing and mutation has many limitations.
 
-**Rust is less flexible and does not suit quick iteration**. A new requirement often require changing reference structure, which often involve large refactoring in Rust. Putting everything into arena can mitigate this problem.
+**Rust is less flexible and does not suit quick iteration**.
 
 **Rust saves time of debugging memory safety issue and thread safety issue**. Many memory safety issues and thread safety issues are random. Random bugs are not easy to reproduce and debug. In a complex and unfamiliar codebase, debugging a random bug may take weeks or months. Rust greatly saves debugging time in this aspect.
 
