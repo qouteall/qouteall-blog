@@ -337,6 +337,10 @@ Data-oriented design:
 - The different fields of the same object doesn't necessarily need to be together in memory. The one field of many objects can be put together (parallel array).
 - Manage memory based on **arenas**.
 
+Some may think that using handle/ID is "just a nasty workaround caused by borow checker". However, in GC languages, using ID to refer to object is also common, as reference cannot be saved to database or sent via network. [^id_ref_translation]
+
+[^id_ref_translation]: Having both ID and object reference introduces friction: translating between ID and object reference. Some ORM will malfunction if there exists two objects with the same primary key.
+
 One kind of arena is [slotmap](https://docs.rs/slotmap/latest/slotmap/):
 
 - Slotmap is basically an array of elements, but each element has a version integer. 
@@ -1170,6 +1174,9 @@ As commonly mentioned, Rust gives memory safety, thread safety and opportunity o
 
 **Rust prefers data-oriented design. Rust doesn't fit OOP. Rust dislikes sharing mutable data. Rust dislikes circular reference**. Getter and setter can easily cause contagious borrow issue. Sharing and mutation has many limitations.
 
-**Rust is less flexible and does not suit quick iteration**. A new requirement often require changing reference structure, which often involve large refactoring in Rust.
+**Rust is less flexible and does not suit quick iteration**. A new requirement often require changing reference structure, which often involve large refactoring in Rust. Putting everything into arena can mitigate this problem.
 
 **Rust saves time of debugging memory safety issue and thread safety issue**. Many memory safety issues and thread safety issues are random. Random bugs are not easy to reproduce and debug. In a complex and unfamiliar codebase, debugging a random bug may take weeks or months. Rust greatly saves debugging time in this aspect.
+
+Rust's constraints apply to **both human and AI**. In a large C/C++ codebase, both human and AI can accidentally break memory safety and thread safety in **non-obvious way**. Rust can protect against that. Rust also makes reviewing PR easier: as long as CI passes and it doesn't use `unsafe`, it won't break memory and thread safety. Note that Rust doesn't protect against logical error.
+
