@@ -605,17 +605,19 @@ According to [predictive processing theory](https://en.wikipedia.org/wiki/Predic
 
 Prior belief (confirmation bias) can often greatly affect perception. This not only affects recognition of objects, but also affects reading of text. **Under confirmation bias, when reading text, one may skip important words subcounciously**.
 
-Related: **free energy principle**. The brain tries to minimize free energy.
+**Free energy principle**: The brain tries to minimize free energy.
 
 Free energy = Surprise + Change of Belief
 
 - Surprise is the difference between perception and prediction.
 - Change of Belief is how much belief changes to improve prediction.
 
-The two ways of reducing free energy:
+The 3 ways of reducing free energy:
 
 - Passive: Change the belief (understanding of the world).
 - Active: Use action (change environment, move to another environment, etc.) to make the perception better match prediction.
+- Hallucination: Ignore real perception and generate preception, to make it mach prediction.
+
 
 ### Survivorship bias
 
@@ -1234,7 +1236,7 @@ People usually remember the "special" things well. This is an information compre
 
 **Cryptomnesia**: Treating other peoples' idea as own original idea, after forgetting the source of the idea.
 
-**Sleeper effect**: After exposed to persuation, some people initially don't agree because of some reasons. But after time passes, people may forget the reasons why they initially disagree, and may gradually aggree to it. Persuations that don't work immediately may still have long-term effects.
+**Sleeper effect**: After exposed to persuation, some people initially don't agree because of some reasons. But after time passes, people may forget the reasons why they initially disagree, and may gradually agree to it. Persuations that don't work immediately may still have long-term effects.
 
 ## Information addiction and curiosity
 
@@ -1269,7 +1271,7 @@ People seeks information that they are interested in. The seeking of interesting
 
 Information bias: Seeking out more information even when more information is no longer useful. 
 
-With confirmation bias, more information lead to higher confidence, but not better accuracy. This is contraty to statistics, where more samples lead to more accurate result (but still suffer from systematic sampling bias).
+With confirmation bias, more information lead to higher confidence, but not better accuracy. This is contrary to statistics, where more samples lead to more accurate result (but still suffer from systematic sampling bias).
 
 **Having no information is better than having wrong information**. Wrong information reinforced by confirmation bias can make you stuck in a wrong path.
 
@@ -1290,8 +1292,8 @@ The 80/20 rule also applies to social media: 80% of the voice come from 20% of u
 What's more, social media may make people:
 
 - Get used to interesting easy-to-digest information and become less tolerant to not-so-interesting hard-to-digest information.
-- Get used to moving attention (distraction) and not get used to keeping attention. In social media, different posts are usually irrelevant and understanding them require moving attention (forget previous context).
-- Have less intention of trying things real world practice. Watching video about a new experience is much easier than experiencing in real life.
+- Get used to moving attention (distraction) and not get used to keeping attention. In social media, different posts are usually irrelevant and understanding them requires moving attention (forget previous context).
+- Have less intention of trying things via real world practice. Watching videos about a new experience is much easier than experiencing in real life.
 
 ### Natural selection of memes
 
@@ -1311,9 +1313,8 @@ In the ancient world, when there was no algorithmic recommendataion, there was s
 
 Memes facilitate being spreaded. On the contrary, **antimemes** resist being spreaded. 
 
-- Antimemes are usually long, complex and nuanced, reflecting the intricacies of real-world complexity, being hard-to-grasp.
+- Antimemes are usually long, complex and nuanced, reflecting real-world complexity, being hard-to-grasp.
 - Antimemes usually don't spur much emotions.
-- Antimemes are usually not controversial.
 - Antimemes are usually boring and "obvious" (hindsight bias).
 - The information that conflicts with existing beliefs are also antimemes. (confirmation bias)
 
