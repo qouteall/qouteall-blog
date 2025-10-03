@@ -612,12 +612,10 @@ Free energy = Surprise + Change of Belief
 - Surprise is the difference between perception and prediction.
 - Change of Belief is how much belief changes to improve prediction.
 
-The 3 ways of reducing free energy:
+The ways of reducing free energy:
 
 - Passive: Change the belief (understanding of the world).
 - Active: Use action (change environment, move to another environment, etc.) to make the perception better match prediction.
-- Hallucination: Ignore real perception and generate preception, to make it mach prediction.
-
 
 ### Survivorship bias
 
