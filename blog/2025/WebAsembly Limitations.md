@@ -23,30 +23,17 @@ Background:
 
 This article focuses on in-browser Wasm.
 
-## Wasm runtime data
+## About linear memory
 
-The data that Wasm program works on:
+In Wasm, a linear memory can be seen as a byte array. Address correspond to index into byte array. 
 
-- Runtime-managed stack. It has local variables, function arguments, return code addresses, etc. It's managed by the runtime. It's not in linear memory.
-- Linear memory. 
-  - A linear memory is an array of bytes. Can be read/written by address (address can be seen as index in array). 
-  - Wasm supports having multiple linear memories.
-  - A linear memory's size can grow. But currently a linear memory's size cannot shrink.
-  - A linear memory can be shared by multiple Wasm instances, see multi-threading section below.
-- Table. Each table is a (growable) array that can hold:
-  - Function references.
-  - Extern value references. Extern value can be JS value or other things, depending on environment.
-  - Exception references.
-  - GC value references.
-- Heap. Holds GC values. Explained later.
-- Globals. A global can hold a number (`i32`, `i64`, `f32`, `f64`), an `i128` or a reference (including function reference, GC value reference, extern value reference, etc.). The globals are not in linear memory.
+Wasm linear memory size must be multiple of page size, which is 64 KiB.
 
-The linear memory doesn't hold these things:
+Linear memory doesn't hold the stack. The stack managed by runtime and cannot be read/written by address.
 
-- Linear memory doesn't hold the stack. The stack managed by runtime and cannot be read/written by address.
-- The linear memory doesn't hold function references. Unlike function pointers in C, Wasm function references cannot be converted to and from integers. This design can improve safety. A function reference can be on stack or on table or in global, and can be called by special instructions [^function_call_instructions]. Function pointer becomes integer index corresponding to a function reference in table.
+There is no function pointer in Wasm. Only function references. Function references are semi-opaque: they cannot be converted to and from integer, unlike function pointer. This design can improve safety. The function references cannot be put into linear memory.
 
-[^function_call_instructions]: `call_ref` calls a function reference on stack. `call_indirect` calls a function reference in a table in an index. `return_call_ref`, `return_call_indirect` are for tail call.
+Wasm has tables. A table is an array that can hold not only integer, but also function references, and JS value, and many other things. The function pointer become an integer index corresponding to a function reference in table.
 
 ## Stack is not in linear memory
 
@@ -142,6 +129,12 @@ It doesn't support some memory layout optimizations:
 - Don't have compact sum type memory layout.
 
 See also: [C# Wasm GC issue](https://github.com/dotnet/runtime/issues/94420), [Golang Wasm GC issue](https://github.com/golang/go/issues/63904)
+
+The benefit of using Wasm built-in GC:
+
+- It reuses highly-optimized JS GC. No need to re-implement GC in Wasm application code.
+- Wasm GC references can be passed to JS. (But currently JS code cannot directly access fields of Wasm GC object. The primary usage is to pass them back to Wasm code.)
+- Can collect a cycle between Wasm GC object and JS object.
 
 ## Multi-threading
 
@@ -255,7 +248,7 @@ The original version of Wasm only supports 32-bit address and up to 4GiB linear 
 
 In Wasm, a linear memory has a finite size. Accessing an address out of size need to trigger a [trap](https://webassembly.github.io/spec/core/intro/overview.html) that aborts execution. Normally, to implement that range checking, the runtime need to insert branches for each linear memory access (like `if (address >= memorySize) {trap();}`). 
 
-But Wasm runtimes have an optimization: map the 4GB linear memory to a virtual memory space. The out-of-range pages are not allocated from OS, so accessing them cause error from OS. Wasm runtime can use signal handling to handle these error. No range checking branch needed.
+But Wasm runtimes have an optimization: map the 4GB linear memory to a virtual memory space. The out-of-range memory regions are not allocated from OS, so accessing them cause error from OS. Wasm runtime can use signal handling to handle these error. No range checking branch needed.
 
 That optimization doesn't work when supporting 64-bit address. There is no enough virtual address space to hold Wasm linear memory. So the branches of range checking still need to be inserted for every linear memory access. This costs performance.
 
