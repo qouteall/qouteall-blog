@@ -1173,6 +1173,8 @@ As commonly mentioned, Rust gives memory safety, thread safety and opportunity o
 - Explicit `.clone()` avoids accidentally copying string like in C++.
 - ......
 
+**Rust enables high performance, but doesn't guarantee high performance.** If one evades borrow checker by using `Arc<Mutex<>>` everywhere, the program will be likely slower than using a normal GC language (and has more risk of deadlocking). But it's easier to achieve high performance in Rust. In other languages, achieving high perfomance often require bypassing a lot of language functionalities.
+
 **Not all security issues are memory safety issues**. According to [Common Weakness Enumeration 2024 Top 25 Most Dangerous Software Weaknesses](https://cwe.mitre.org/top25/archive/2024/2024_cwe_top25.html), many real-world vulnerabilities are XSS, SQL injection, directory traversal, command injection, missing authentication, etc. that are not memory safety. The GC languages are also memory-safe [^golang_memory_safety], but there are still vulnerabilities in Java (e.g. Log4j vulnerability).
 
 [^golang_memory_safety]: Note that Golang is not fully memory-safe under data race. For example, string in Golang is 16 bytes, 8-byte pointer and 8-byte length. Tearing can cause pointer to mismatch length, prone out-of-bound read.
