@@ -177,7 +177,7 @@ It forms a tree. Each character is a node, containing visibility boolean flag. E
 
 ## Partial computation and multi-stage computation
 
-Partial computation: only compute some parts of the data, and keep the structure of the whole computation.
+Only compute some parts of the data, and keep the information of remaining computation for future use.
 
 - In lazy evaluation, the unobserved data is not computed.
 - Deferred mutation. Relates to mutation-data duality.
@@ -204,7 +204,7 @@ A computation, an optimization, or a safety check can be done in:
 - Runtime stage. (Runtime check, JIT compilation, etc.)
 - After first run. (Offline profile-guided optimization, etc.)
 
-Most computations that are done at compile time can be done at runtime (with extra performance cost). But if you want to avoid the performance cost by doing it in compile time, it becomes harder. 
+Most computations that are done at compile time can be done at runtime (with extra performance cost). But if you want to avoid the performance cost by doing it in compile time, it becomes harder.
 
 Rust and C++ has **Statics-Dynamics Biformity** ([see also](https://hirrolot.github.io/posts/why-static-languages-suffer-from-complexity#)): most runtime computation methods cannot be easily used in compile-time. Using compile-time mechanisms often require data to be encoded in types, which then require type gymnastics.
 
@@ -369,6 +369,25 @@ For example, one common invariant to maintain is **consistency between derived d
 In real-world legacy code, **invariants are often not documented**. They are implicit in code. A developer not knowing an invariant can easily break it.
 
 Type systems also help maintaining invariant. But a simple type system can only maintain simple invariants. Complex invariants require complex types to maintain. If it becomes too complex, type may be longer than execution code, and type errors become harder to resolve. It's a tradeoff.
+
+### Statistical invariant
+
+Concentration and fat-tail distribution (80/20) are common in software world:
+
+- Most users use few common features of a software.
+- Most complexity (and bugs) come from very few features requirements.
+- Most time of CPU is spent executing few hot code.
+- Most data access targets few core data (cache require this to be effective).
+- Most branches are biased to one in execution (branch prediction require this to be effective).
+- Most developers use few languages and frameworks.
+- Most development efforts are for fixing edge cases. Few development efforts are spent on main case handling.
+- Most bugs that user see are caused by few easy-to-trigger bugs.
+
+Many optimizations are based on **assuming the high-probability case happens**:
+
+- Branch prediction assumes that it will execute the high-probability branch. If it predicts wrongly, speculative execution rolls back.
+- Cache assumes that it will access hot data. If it accesses outside of hot data, cache is not hit.
+- Optimistic concurrency control assumes there will be no concurrency conflict. If there do is a conflict, it rolls back and retries.
 
 ## Corresponding GoF design patterns
 

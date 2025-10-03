@@ -722,7 +722,7 @@ All the 4 solutions are all not recommended (only use when really necessary).
 
 - **Contagious borrowing**. As previously mentioned, `RefCell` doesn't solve contagious borrowing. `Mutex` also won't. Violating mutable borrow exclusiveness in the same thread is panic (or error) in `RefCell` and **deadlock** in `Mutex`. Rust lock is not re-entrant, [explained below](#rust-lock-is-not-re-entrant).
 - Need to cut cycle using `Weak`, unless it will memory leak.
-- **Performance**. `Rc` and `RefCell` has relatively small performance cost. But unnecessary locking can hurt performance. `Arc` also can have performance issue, [explained below](#arc-is-not-always-fast). It's still ok to use them when not in performance bottleneck.
+- **Performance**. `Rc` and `RefCell` has relatively small performance cost. But for `Arc<Mutex<...>>`, unnecessary locking can hurt performance. `Arc` also can have performance issue, [explained below](#arc-is-not-always-fast). It's still ok to use them when not in performance bottleneck.
 - Their syntax ergonomic is not good. The code will have a lot of "noise" like `.borrow().borrow_mut()`.
 
 ### `QCell`
@@ -990,8 +990,6 @@ where
     F::Output: Send + 'static,
 ```
 
-It requires the future need to be `Send` and `'static`:
-
 - `'static` means it's standalone (self-owned). It doesn't borrow temporary things. It can borrow global values (global values will always live when program is running). It cannot borrow a value that only temporarily exists.
   
   If the future need to share data with outside, pass `Arc<T>` into (not `&Arc<T>`). 
@@ -1168,15 +1166,15 @@ As commonly mentioned, Rust gives memory safety, thread safety and opportunity o
 - Explicit `.clone()` avoids accidentally copying string like in C++.
 - ......
 
-**Not all security issues are memory-safety issue**. According to [Common Weakness Enumeration 2024 Top 25 Most Dangerous Software Weaknesses](https://cwe.mitre.org/top25/archive/2024/2024_cwe_top25.html), many real-world vulnerabilities are XSS, SQL injection, directory traversal, command injection, missing authentication, etc. that are not memory safety. The GC languages are also memory-safe [^golang_memory_safety], but there are still vulnerabilities in Java (e.g. Log4j vulnerability).
+**Not all security issues are memory safety issues**. According to [Common Weakness Enumeration 2024 Top 25 Most Dangerous Software Weaknesses](https://cwe.mitre.org/top25/archive/2024/2024_cwe_top25.html), many real-world vulnerabilities are XSS, SQL injection, directory traversal, command injection, missing authentication, etc. that are not memory safety. The GC languages are also memory-safe [^golang_memory_safety], but there are still vulnerabilities in Java (e.g. Log4j vulnerability).
 
 [^golang_memory_safety]: Note that Golang is not fully memory-safe under data race. For example, string in Golang is 16 bytes, 8-byte pointer and 8-byte length. Tearing can cause pointer to mismatch length, prone out-of-bound read.
 
-**Rust prefers data-oriented design. Rust doesn't fit OOP. Rust dislikes sharing mutable data. Rust dislikes circular reference**. Getter and setter can easily cause contagious borrow issue. Sharing and mutation has many limitations.
+**Rust prefers data-oriented design. Rust doesn't fit OOP. Rust dislikes sharing mutable data. Rust dislikes circular reference. Rust is unfriendly to observer pattern**. Getter and setter can easily cause contagious borrow issue. Sharing and mutation has many limitations.
 
-**Rust is less flexible and does not suit quick iteration**.
+**Rust is less flexible and does not suit quick iteration** (unless you are a Rust expert).
 
 **Rust saves time of debugging memory safety issue and thread safety issue**. Many memory safety issues and thread safety issues are random. Random bugs are not easy to reproduce and debug. In a complex and unfamiliar codebase, debugging a random bug may take weeks or months. Rust greatly saves debugging time in this aspect.
 
-Rust's constraints apply to **both human and AI**. In a large C/C++ codebase, both human and AI can accidentally break memory safety and thread safety in **non-obvious way**. Rust can protect against that. Rust also makes reviewing PR easier: as long as CI passes and it doesn't use `unsafe`, it won't break memory and thread safety. Note that Rust doesn't protect against logical error.
+Rust's constraints apply to **both human and AI**. In a large C/C++ codebase, both human and AI can accidentally break memory safety and thread safety in **non-obvious way**. Rust can protect against that. Popular open source projects are often flooded with AI-generated PR. Rust makes reviewing PR easier: as long as CI passes and it doesn't use `unsafe`, it won't break memory and thread safety.  Note that Rust doesn't protect against logical error.
 

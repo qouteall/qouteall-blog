@@ -983,7 +983,9 @@ When one is in intense emotion, logical argument often has little effect, and em
 
 ### Default effect
 
-People tend to choose the default and easiest choice. Partially due to laziness, partially due to fear of unknown risk.
+People tend to choose the default and easiest choice. Partially due to laziness, partially due to fear of unknown risk. [^principle_of_least_action]
+
+[^principle_of_least_action]: In physics, there is principle of least action, but the "action" here means a physical quantity, not the common meaning of "action".
 
 In software product design, the default options in software plays a big role in how user will use and feel about the software. Increasing the cost of some behavior greatly reduces the people doing that behavior:
 
