@@ -139,6 +139,12 @@ It doesn't support some memory layout optimizations:
 - Cannot add custom fields at the head of an array object. (C# supports it)
 - Don't have compact sum type memory layout.
 
+The benefit of using Wasm built-in GC:
+
+- It reuses highly-optimized JS GC. No need to re-implement GC in Wasm application code.
+- Wasm GC references can be passed to JS. (But currently JS code cannot directly access fields of Wasm GC object. The primary usage is to pass them back to Wasm code.)
+- Can collect a cycle between Wasm GC object and JS object.
+
 ## Multi-threading
 
 Web code runs in event loop:
@@ -251,7 +257,9 @@ The original version of Wasm only supports 32-bit address and up to 4GiB linear 
 
 In Wasm, a linear memory has a finite size. Accessing an address out of size need to trigger a [trap](https://webassembly.github.io/spec/core/intro/overview.html) that aborts execution. Normally, to implement that range checking, the runtime need to insert branches for each linear memory access (like `if (address >= memorySize) {trap();}`). 
 
-But Wasm runtimes have an optimization: map the 4GB linear memory to a virtual memory space. The out-of-range pages are not allocated from OS, so accessing them cause error from OS. Wasm runtime can use signal handling to handle these error. No range checking branch needed.
+But Wasm runtimes have an optimization: map the 4GB linear memory to a virtual memory space. The out-of-range memory regions [^wasm_page] are not allocated from OS, so accessing them cause error from OS. Wasm runtime can use signal handling to handle these error. No range checking branch needed.
+
+[^wasm_page]: Wasm linear memory size must be multiple of 64 KiB.
 
 That optimization doesn't work when supporting 64-bit address. There is no enough virtual address space to hold Wasm linear memory. So the branches of range checking still need to be inserted for every linear memory access. This costs performance.
 
@@ -331,4 +339,20 @@ The `|0` is for converting value to 32-bit integer, helping JS runtime to optimi
 The same thing can also be done via equivalent Wasm code using `SharedArrayBuffer`.
 
 Related: Another vulnerability related to cache side channel: [GoFetch](https://gofetch.fail/). It exploits Apple processors' cache prefetching functionality.
+
+### Structure of Wasm binary
+
+Two different concepts: Wasm module and Wasm instance:
+
+- Wasm module is defined by a `.wasm` file. It can compiled to a `WebAssembly.Module` in JS. The `WebAssembly.Module` itself is immutable and can be sent to other web workers. A module can define functions and import functions.
+- A Wasm instance is a Wasm module combined with some runtime data. These runtime data includes: linear memories, tables, globals, etc.
+
+[Wasm Modules specification](https://webassembly.github.io/spec/core/syntax/modules.html)
+
+
+
+In Wasm binary, functions by default has no name. They are referenced using integer index in binary. Both imported functions and the functions defined in binary share the same indexing space.
+
+Currently a Wasm binary cannot directly import another function of another Wasm binary, without using JS glue code. This will be solved by component model. A current workaround is to put function reference in table and use indirect call.
+
 
