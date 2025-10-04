@@ -358,8 +358,10 @@ If no element can be removed from arena, then a `Vec` can also be an areana.
 
 The important things about arena:
 
-- The borrow checker **no longer ensure the ID/handle points to a living object**. Each data access to arena may fail.
+- The borrow checker **no longer ensure the ID/handle points to a living object**. Each data access to arena may fail. There is equivalent of "use after free".
 - **Arenas still suffer from contagious borrow issue**. We need to borrow things as temporary as possible. But when arena contains a container and we want to for-loop on it, to avoid cost of copying the container, borrowing for long time is still necessary. If we want to change the arena when for looping in that container, contagious borrow issue appears. The previously mentioned **deferred mutation can help**.
+
+Some may think "using arena cannot protect you from equivalent of 'use after free' so it doesn't solve problem". But arena can greatly improve determinism of bugs, making debugging much easier. A randomly-occuring memory safety [Heisenbug](https://en.wikipedia.org/wiki/Heisenbug) may no longer trigger when you enable sanitizer, as sanitizer can change memory layout.
 
 ### Entity component system
 
@@ -1176,7 +1178,9 @@ As commonly mentioned, Rust gives memory safety, thread safety and opportunity o
 
 **Rust is less flexible and does not suit quick iteration** (unless you are a Rust expert).
 
-**Rust saves time of debugging memory safety issue and thread safety issue**. Many memory safety issues and thread safety issues are random. Random bugs are not easy to reproduce and debug. In a complex and unfamiliar codebase, debugging a random bug may take weeks or months. Rust greatly saves debugging time in this aspect.
+**Rust saves time of debugging memory safety issue and thread safety issue**. Many memory safety issues and thread safety issues are random. Random bugs are not easy to reproduce and debug. In a complex and unfamiliar codebase, debugging a random bug may take weeks or months. There are [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug): they may only trigger in relase build, not in debug build, not when sanitizers are on, not when logging is on, not when debugger is on [^heisenbug_reason]. Safe Rust can mostly prevent Heisenbug. (Rust still doesn't protect on wrong `unsafe` code. But when such bugs happens we can focus on checking a small amount of `unsafe` code.).
 
-Rust's constraints apply to **both human and AI**. In a large C/C++ codebase, both human and AI can accidentally break memory safety and thread safety in **non-obvious way**. Rust can protect against that. Popular open source projects are often flooded with AI-generated PR. Rust makes reviewing PR easier: as long as CI passes and it doesn't use `unsafe`, it won't break memory and thread safety.  Note that Rust doesn't protect against logical error.
+[^heisenbug_reason]: Because optimization, sanitizer, debugger and logging can change timing and memory layout, which can make memory safety or thread safety bug no longer trigger.
+
+Rust's constraints apply to **both human and AI**. In a large C/C++ codebase, both human and AI can accidentally break memory safety and thread safety in **non-obvious way**. Rust can protect against that. Popular open source projects are often flooded with AI-generated PR. Rust makes reviewing PR easier: as long as CI passes and it doesn't use `unsafe`, it won't break memory and thread safety. Note that Rust doesn't protect against many kinds logical error.
 
