@@ -340,14 +340,26 @@ The same thing can also be done via equivalent Wasm code using `SharedArrayBuffe
 
 Related: Another vulnerability related to cache side channel: [GoFetch](https://gofetch.fail/). It exploits Apple processors' cache prefetching functionality.
 
-### Structure of Wasm binary
+### Wasm execution
 
 Two different concepts: Wasm module and Wasm instance:
 
-- Wasm module is defined by a `.wasm` file. It can compiled to a `WebAssembly.Module` in JS. The `WebAssembly.Module` itself is immutable and can be sent to other web workers. A module can define functions and import functions.
-- A Wasm instance is a Wasm module combined with some runtime data. These runtime data includes: linear memories, tables, globals, etc.
+- A wasm binary (content of `.wasm` file) can compiled to a `WebAssembly.Module` in JS (often using `WebAssembly.compileStreaming`). That compile includes validation (and possibly turning Wasm bytecode to machine code, depending on runtime implementation). The `WebAssembly.Module` itself is immutable and can be sent to other web workers.
+- A `WebAssembly.Instance` is used for Wasm execution. `new WebAssembly.Instance(module, importObject)` can create a new instance by providing a module and imports. These runtime data includes: linear memories, tables, globals, etc.
 
 [Wasm Modules specification](https://webassembly.github.io/spec/core/syntax/modules.html)
+
+Wasm can import and export these things:
+
+- Functions.
+- Memories. 
+  - Wasm application can use multiple memories, but most applications just use one memory. 
+  - You can create a `WebAssembly.Memory` in JS code and import it to Wasm. 
+  - You can also make Wasm binary to declare a memory and export it.
+- Globals.
+- Tables.
+- Tags. (used for exceptions)
+
 
 
 
@@ -355,4 +367,17 @@ In Wasm binary, functions by default has no name. They are referenced using inte
 
 Currently a Wasm binary cannot directly import another function of another Wasm binary, without using JS glue code. This will be solved by component model. A current workaround is to put function reference in table and use indirect call.
 
+### Type system of GC objects
+
+The types of GC objects are **structural type** (duck typing), instead of nominal typing. A struct type is defined by its field types.
+
+Java (and C#, C, Rust, etc.) use nominal typing. Even if two classes have exactly same fields, the two classes are still different. Typescript and Golang interfaces use structural typing: as long as the data have these fields/methods, it satisfy the type.
+
+In Wasm struct there is no field name. The fields are referred to using indexes.
+
+Wasm doesn't need to import or export the types, thanks to structural typing.
+
+But what if a type references it self? For example, a tree node's field's type will also be the tree node's type. If that struct type is defined by its field types, then that type expression will be infinitely long. So Wasm adds [recursive type annotation](https://webassembly.github.io/spec/core/syntax/types.html#recursive-types). To compare whether two recursive types are the same, Wasm defines [rolling and unrolling](https://webassembly.github.io/spec/core/valid/conventions.html#aux-unroll-deftype).
+
+Wasm also allows prefix subtyping, which can express OOP inheritance.
 
