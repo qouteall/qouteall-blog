@@ -43,13 +43,13 @@ The most fighting with borrow checker happens in the **borrow-check-unfriendly c
 The solutions in borrow-checker-unfriendly cases (will elaborate below):
 
 - Data-oriented design. **Avoid unnecessary getter and setter**. Avoid contagious borrow. Do split borrow if necessary.
-- **Use ID/handle to replace borrow**.
+- **Use ID/handle to replace borrow**. Use arena to hold data.
 - **Defer mutation**. Turn mutation as commands and execute later.
 - **Avoid mutation**. Mutate-by-recreate. Use `Arc` to share immutable data.
 - For circular reference:
-  - For graph data structure, use ID/handle to replace borrow.
+  - For graph data structure, use ID/handle and arena.
   - For callback, use event bus or `Arc<QCell<T>>` (use `Weak` to cut cycle)
-- Make borrows as shortest as possible, as temporary as possible.
+- Borrows as temporary as possible.
 - `Arc<RwLock<T>>` (only use when really necessary)
 - `unsafe` and raw pointer (only use when really necessary) 
 
@@ -344,10 +344,9 @@ Some may think that using handle/ID is "just a nasty workaround caused by borow 
 One kind of arena is [slotmap](https://docs.rs/slotmap/latest/slotmap/):
 
 - Slotmap is basically an array of elements, but each element has a version integer. 
-- Each handle (key) has an index and a version. 
+- Each handle (key) has an index and a version. It's `Copy`-able data that's not restricted by borrow checker.
 - When accessing the slotmap, it firstly does a bound check, then checks version. 
 - After removing element, the version increments. The previous handle cannot get the new element at the same index, because of version mismatch.
-- The handles (keys) are just `Copy`-able data that's not restricted by borrow checker.
 - Although memory safe, it still has the equivalent of "use-after-free": using a handle of an already-removed object cannot get element from the slotmap [^slotmap_uniqueness]. Each get element operation may fail.
 - Note that slotmap is not efficient when there are many unused empty space between elements. Slotmap offers two other variants for sparce case.
 
@@ -357,7 +356,10 @@ Other map structure, like `HashMap` or `TreeMap` can also be arenas.
 
 If no element can be removed from arena, then a `Vec` can also be an areana.
 
-One important fact: when we use ID/handle to replace borrow, the borrow checker no longer ensure that the ID/handle will point to a living object.
+The important things about arena:
+
+- The borrow checker **no longer ensure the ID/handle points to a living object**. Each data access to arena may fail.
+- **Arenas still suffer from contagious borrow issue**. We need to borrow things as temporary as possible. But when arena contains a container and we want to for-loop on it, to avoid cost of copying the container, borrowing for long time is still necessary. If we want to change the arena when for looping in that container, contagious borrow issue appears. The previously mentioned **deferred mutation can help**.
 
 ### Entity component system
 

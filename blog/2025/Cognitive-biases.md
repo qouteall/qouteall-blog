@@ -63,7 +63,7 @@ In real life, some risks are hard to reverse or are irreversible, so avoiding ri
 
 So, losses have a larger mental impact than gains of the same size. The pain of losing \$100 is bigger than the happiness of gaining \$100.
 
-People don't intuitively treat avoiding losing one dollar as the same as earning one dollar.
+Unfortunately, loss aversion make being unhappy easier and make being happy harder.
 
 **Relative deprivation** is also a kind of loss that people tend to avoid. For example, when the people near one get rich by investing a bubble asset, one may also choose to invest the bubble asset to avoid the "relative loss" between one and others.
 
@@ -290,6 +290,8 @@ However, due to belief stability, it's hard to persuade/teach others. People dis
 > The trouble with having an open mind, of course, is that people will insist on coming along and trying to put things in it.
 >
 > \- Terry Pratchett
+
+Cunningham's Law: The best way to get the right answer on the internet is not to ask a question; it's to post the wrong answer.
 
 ### Sunk cost fallacy
 
@@ -615,7 +617,9 @@ Free energy = Surprise + Change of Belief
 The ways of reducing free energy:
 
 - Passive: Change the belief (understanding of the world).
-- Active: Use action (change environment, move to another environment, etc.) to make the perception better match prediction.
+- Active: Use action (change environment, move to another environment, etc.) to make the perception better match prediction. [^third_way_of_reducing_free_energy]
+
+[^third_way_of_reducing_free_energy]: I think there is a third way of reducing free energy: hallucination. Confirmation bias can be seen as a mild version of hallucination. Hallucination make the brain "filter" some sensory signal and "fill the gap" with prediction.
 
 ### Survivorship bias
 
@@ -1193,7 +1197,7 @@ The rational activities (System 2 activities) require mental energy (willpower):
 
 If there is no enough mental energy, one is less likely to resist impulse behaviors or think about hard problems, and possibly have difficulty in social interactions. [^long_term_planning_computation]
 
-[^long_term_planning_computation]: Long-term planning require larger computation capacity. In reinforcement learning AI, if the model is small, it cannot learn to do long-term planning, and its behevior will be short-sighted. Only when the model is big and has enough computation capacity, does it start do long-term planning, sacrificing short-term reward for larger long-term reward. So, in some sense, not being able to control oneself can be caused by "lacking compute resource".
+[^long_term_planning_computation]: Long-term planning require larger computation capacity. In reinforcement learning AI, if the model is small, it cannot learn to do long-term planning. Only when the model is big and has enough computation capacity, does it start to sacrifice short-term reward for larger long-term reward. So, in some sense, not being able to control oneself is related to "lacking compute resource". Note that self-control is also affected by many other factors.
 
 These factors affect mental energy:
 
