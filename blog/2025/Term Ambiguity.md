@@ -36,6 +36,7 @@ A lot of debate happen because same word has different meanings to different peo
   - The referenced object is immutable, but the reference itself is mutable.
   - The referenced object is mutable, but the reference itself is immutable.
 - Character. A character in GUI is a grapheme cluster. Sometimes it mean a code point. In C, a `char` is a byte. In Java a `char` is two bytes.
+- Artificial nerual network are "Black Box". All the matrix computations and weights involved in inference and training are white-box. The "Black Box" here means the mechanism of why it produce specific output is not clear. Although human can view the weight numbers, it's hard to understand how these weights correspond to what "thinking" and "decision making".
 
 
 

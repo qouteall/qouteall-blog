@@ -256,7 +256,6 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - For non-negative integer `(low + high) / 2` may overflow. A safer way is `low + (high - low) / 2`.
 - Short circuit. `a() || b()` will not run `b()` if `a()` returns true. `a() && b()` will not run `b()` when `a()` returns false.
 - When using profiler: the profiler may by default only include CPU time which excludes waiting time. If your app spends 90% time waiting on database, the flamegraph may not include that 90% which is misleading.
-- There are many different "dialects" of regular expression. Don't assume a regular expression that works in JS can work in Java.
 
 ### Linux and bash
 
@@ -278,7 +277,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - Modifying state in rendering code.
 - Hook used inside if or loop.
 - Value not included in `useEffect` dependency array.
-- `useEffect` dependency array contains object recreated in rendering. See also [Cloudflare indicent](https://blog.cloudflare.com/deep-dive-into-cloudflares-sept-12-dashboard-and-api-outage/)
+- `useEffect` dependency array contains object recreated in rendering. See also [Cloudflare indicent 2025 Sept-12](https://blog.cloudflare.com/deep-dive-into-cloudflares-sept-12-dashboard-and-api-outage/)
 - Forget clean up in `useEffect`.
 - Closure trap (capturing outdated state).
 - Accidentally change data in wrong places (impure component).
@@ -318,12 +317,19 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 
 ### Locale
 
-- Regular expression behavior can be locale-dependent (depending on which regular expression engine).
 - The upper case and lower case can be different in other natural languages. In Turkish (tr-TR) lowercase of `I` is `ı` and upper case of `i` is `İ`. The `\w` (word char) in regular expression can be locale-dependent.
 - Letter ordering can be different in other natural languages. Regular expression `[a-z]` may malfunction in other locale.
 - Text notation of floating-point number is locale-dependent. `1,234.56` in US correspond to `1.234,56` in Germany.
 - CSV use normally use `,` as spearator, but use `;` as separator in German locale.
 - [Han unification](https://en.wikipedia.org/wiki/Han_unification). Some characters in different language with slightly different appearance use the same code point. Usually a font will contain variants for different languages that render these characters differently. [HTML code](https://github.com/qouteall/qouteall-blog/blob/main/blog/2025/unicode-unification-example.html) ![](unicode_unification_example.png)
+
+### Regular expression
+
+- Regular expression cannot parse the syntax that allows infinite nesting (because regular expression engine use finite state machine. Infinite nesting require infinite states to parse). HTML allows infinite nesting. But it's ok to use regex to parse HTML of a specific website.
+- Regular expression behavior can be locale-dependent (depending on which regular expression engine).
+- There are many different "dialects" of regular expression. Don't assume a regular expression that works in JS can work in Java.
+- A separate regular expression validation can be out-of-sync with actual data format. [Crowdstrike incident](https://www.crowdstrike.com/wp-content/uploads/2024/08/Channel-File-291-Incident-Root-Cause-Analysis-08.06.2024.pdf) was caused by a wrong separate regular expression validation. It's recommended to **avoid separate regular expression validation. Reuse parsing code for validation**. See also: [Parse, don't validate](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/)
+- Backtracking performance issue. See also: [Cloudflare indicent 2019 July-2](https://blog.cloudflare.com/details-of-the-cloudflare-outage-on-july-2-2019/), [Stack Exchange incident 2016 July-20](https://stackstatus.tumblr.com/post/147710624694/outage-postmortem-july-20-2016)
 
 ### Other
 
