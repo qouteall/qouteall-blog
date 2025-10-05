@@ -16,7 +16,22 @@ The 3 important facts in Rust:
 
 [^about_sharing]: The native Rust ownership relation form a tree. Reference counting (`Rc`, `Arc`) allows shared ownership.
 
-Note that Rust borrow checker can reject some incorrect programs but also reject some correct programs.
+
+## Some common arguments
+
+- "Rust doesn't ensure safety of `unsafe` code, so using `unsafe` defeats the purpose of using Rust". No. If you keep the amount of `unsafe` small, then when memory/thread safety issue happens, you can inspect these small amount of `unsafe` code. In C/C++ you need to inspect all related code.
+- "Using arena still face the equivalent of 'use after free', so arena doesn't solve the problem". No. Arenas can make "use-after-free" much more deterministic, prevent memory-safety [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug)  [^about_heisenbug], making debugging much easier.
+- "Rust borrow checker rejects your code because your code is wrong." No. Rust can reject valid safe code.
+- "Doubly-linked list is useless." No. It can be useful in many cases. Linux kernel use them. But often trees and hash maps can replace manually-implemented doubly-linked list.
+- "Circular reference is bad and should be avoided." No. Circular reference can be useful in many cases. Circular reference do come with risks.
+- "Rust guarantees high performance." No. If one evades borrow checker by using `Arc<Mutex<>>` everywhere, the program will be likely slower than using a normal GC language (and has more risk of deadlocking). But it's easier to achieve high performance in Rust. In many other languages, achieving high perfomance often require bypassing (hacking) a lot of language functionalities.
+- "Rust guarantees security." No. Not all security issues are memory/thread safety issues. According to [Common Weakness Enumeration 2024](https://cwe.mitre.org/top25/archive/2024/2024_cwe_top25.html), many real-world vulnerabilities are XSS, SQL injection, directory traversal, command injection, missing authentication, etc. that are not memory/thread safety.
+- "Rust doesn't help other than memory/thread safety." No.
+  - Algebraic data type (e.g. `Option`, `Result`) helps avoid creating illegal data from the source. Using ADT data require pattern match all cases, avoiding forgetting handling one case. (except when using escape hatch like `unwrap()`).
+  - Mutable borrow exclusiveness prevents iterator invalidation.
+  - Explicit `.clone()` avoids accidentally copying container like in C++.
+
+[^about_heisenbug]: The Heisenbugs may only trigger in relase build, not in debug build, not when sanitizers are on, not when logging is on, not when debugger is on. Because optimization, sanitizer, debugger and logging can change timing and memory layout, which can make memory safety or thread safety bug no longer trigger. Debugging a Heisenbug in large codebase may take weeks even months.
 
 ## Considering reference shape
 
@@ -1162,38 +1177,10 @@ async fn main() {
 - Being not `Sync`/`Send` is contagious. A struct that indirectly owns a non-`Sync` data is not `Sync`. A struct that indirectly owns a non-`Send` data is not `Send`.
 - Error passing is contagious. If panic is not acceptable, then all functions that indirectly call a fallible function must return `Result`. Related: NaN is contagious in floating point computaiton.
 
-## Rust is a tradeoff
-
-As commonly mentioned, Rust gives memory safety, thread safety and opportunity of high performance.
-
-**Rust also helps preventing bugs other than memory safety and thread safety**:
-
-- Algebraic data type (e.g. `Option`, `Result`) helps avoid creating illegal data from the source. Using ADT data require pattern match all cases, avoiding forgetting handling one case. (except when using escape hatch like `unwrap()`).
-- Mutable borrow exclusiveness prevents iterator invalidation.
-- Explicit `.clone()` avoids accidentally copying string like in C++.
-- ......
-
-**Not all security issues are memory safety issues**. According to [Common Weakness Enumeration 2024 Top 25 Most Dangerous Software Weaknesses](https://cwe.mitre.org/top25/archive/2024/2024_cwe_top25.html), many real-world vulnerabilities are XSS, SQL injection, directory traversal, command injection, missing authentication, etc. that are not memory safety. The GC languages are also memory-safe [^golang_memory_safety], but there are still vulnerabilities in Java (e.g. Log4j vulnerability).
-
-[^golang_memory_safety]: Note that Golang is not fully memory-safe under data race. For example, string in Golang is 16 bytes, 8-byte pointer and 8-byte length. Tearing can cause pointer to mismatch length, prone out-of-bound read.
+## Other
 
 **Rust prefers data-oriented design. Rust doesn't fit OOP. Rust dislikes sharing mutable data. Rust dislikes circular reference. Rust is unfriendly to observer pattern**. Getter and setter can easily cause contagious borrow issue. Sharing and mutation has many limitations.
 
 **Rust is less flexible and does not suit quick iteration** (unless you are a Rust expert).
 
-**Rust saves time of debugging memory safety issue and thread safety issue**. Many memory safety issues and thread safety issues are random. Random bugs are not easy to reproduce and debug. In a complex and unfamiliar codebase, debugging a random bug may take weeks or months. There are [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug): they may only trigger in relase build, not in debug build, not when sanitizers are on, not when logging is on, not when debugger is on [^heisenbug_reason]. Safe Rust can prevent many kinds of Heisenbug. 
-
-Rust still doesn't protect on wrong `unsafe` code. But when such bugs happens we can focus on checking a small amount of `unsafe` code.
-
-[^heisenbug_reason]: Because optimization, sanitizer, debugger and logging can change timing and memory layout, which can make memory safety or thread safety bug no longer trigger.
-
 Rust's constraints apply to **both human and AI**. In a large C/C++ codebase, both human and AI can accidentally break memory safety and thread safety in **non-obvious way**. Rust can protect against that. Popular open source projects are often flooded with AI-generated PR. Rust makes reviewing PR easier: as long as CI passes and it doesn't use `unsafe`, it won't break memory and thread safety. Note that Rust doesn't protect against many kinds logical error.
-
-Some arguments:
-
-- "Using arena still face the equivalent of 'use after free', so arena doesn't solve the problem". No. Arenas can make "use-after-free" much more deterministic, prevent memory-safety [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug), making debugging much easier.
-- "Rust doesn't protect `unsafe` code, so using `unsafe` defeats the purpose of using Rust". No. If you keep the amount of `unsafe` small, then when memory/thread safety issue happens, you can inspect these small amount of `unsafe` code. In C/C++ you need to inspect all related code.
-- "Rust borrow checker rejects your code because your code is wrong." No. Rust can reject valid safe code.
-- "Doubly-linked list is useless." No. It can be useful in some cases where extreme performance is required. But often arenas work.
-- "Circular reference is bad and should be avoided." No. Circular reference can be useful in many cases. Circular reference do come with risks.
-- "Rust guarantees high performance." No. 
