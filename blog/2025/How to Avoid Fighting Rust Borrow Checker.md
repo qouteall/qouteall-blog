@@ -1181,9 +1181,19 @@ As commonly mentioned, Rust gives memory safety, thread safety and opportunity o
 
 **Rust is less flexible and does not suit quick iteration** (unless you are a Rust expert).
 
-**Rust saves time of debugging memory safety issue and thread safety issue**. Many memory safety issues and thread safety issues are random. Random bugs are not easy to reproduce and debug. In a complex and unfamiliar codebase, debugging a random bug may take weeks or months. There are [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug): they may only trigger in relase build, not in debug build, not when sanitizers are on, not when logging is on, not when debugger is on [^heisenbug_reason]. Safe Rust can mostly prevent Heisenbug. (Rust still doesn't protect on wrong `unsafe` code. But when such bugs happens we can focus on checking a small amount of `unsafe` code.).
+**Rust saves time of debugging memory safety issue and thread safety issue**. Many memory safety issues and thread safety issues are random. Random bugs are not easy to reproduce and debug. In a complex and unfamiliar codebase, debugging a random bug may take weeks or months. There are [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug): they may only trigger in relase build, not in debug build, not when sanitizers are on, not when logging is on, not when debugger is on [^heisenbug_reason]. Safe Rust can prevent many kinds of Heisenbug. 
+
+Rust still doesn't protect on wrong `unsafe` code. But when such bugs happens we can focus on checking a small amount of `unsafe` code.
 
 [^heisenbug_reason]: Because optimization, sanitizer, debugger and logging can change timing and memory layout, which can make memory safety or thread safety bug no longer trigger.
 
 Rust's constraints apply to **both human and AI**. In a large C/C++ codebase, both human and AI can accidentally break memory safety and thread safety in **non-obvious way**. Rust can protect against that. Popular open source projects are often flooded with AI-generated PR. Rust makes reviewing PR easier: as long as CI passes and it doesn't use `unsafe`, it won't break memory and thread safety. Note that Rust doesn't protect against many kinds logical error.
 
+Some arguments:
+
+- "Using arena still face the equivalent of 'use after free', so arena doesn't solve the problem". No. Arenas can make "use-after-free" much more deterministic, prevent memory-safety [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug), making debugging much easier.
+- "Rust doesn't protect `unsafe` code, so using `unsafe` defeats the purpose of using Rust". No. If you keep the amount of `unsafe` small, then when memory/thread safety issue happens, you can inspect these small amount of `unsafe` code. In C/C++ you need to inspect all related code.
+- "Rust borrow checker rejects your code because your code is wrong." No. Rust can reject valid safe code.
+- "Doubly-linked list is useless." No. It can be useful in some cases where extreme performance is required. But often arenas work.
+- "Circular reference is bad and should be avoided." No. Circular reference can be useful in many cases. Circular reference do come with risks.
+- "Rust guarantees high performance." No. 
