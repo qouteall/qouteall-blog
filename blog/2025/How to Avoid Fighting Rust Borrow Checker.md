@@ -633,71 +633,23 @@ See also: [Dynamic borrow checking causes unexpected crashes after refactorings]
 
 Rust assumes that, if you have a mutable borrow `&mut T`, you can use it at any time. **But holding the reference is different to using reference**. There are use cases that I have two mutable references to the same object, but I only use one at a time. This is the use case that `RefCell` solves.
 
-Another problem: It's hard to return a reference borrowed from `RefCell`.
-
-As the previous example can be fixed by `Cell`, without `RefCell`, here is another contagious borrow example:
-
-```rust
-use std::collections::HashMap;  
-pub struct Parent {  
-    entries: HashMap<String, Entry>,  
-    passed_names: Vec<String>  
-}  
-pub struct Entry {  score: u32  }  
-impl Parent {  
-    fn get_entries(&self) -> &HashMap<String, Entry> {  
-        &self.entries  
-    }  
-    fn add_name(&mut self, name: &str) {  
-        self.passed_names.push(name.to_string());  
-    }  
-}  
-fn main() {  
-    let mut map: HashMap<String, Entry> = HashMap::new();  
-    map.insert("a".to_string(), Entry { score: 100 });  
-    let mut parent = Parent {  
-        entries: map, passed_names: vec![]  
-    };  
-    for (name, entry) in parent.get_entries() {  
-        if (entry.score > 20) {  
-            parent.add_name(name);  
-        }  
-    }  
-}
-```
-
-Compile error
-
-```
-22 |     for (name, entry) in parent.get_entries() {
-   |                          --------------------
-   |                          |
-   |                          immutable borrow occurs here
-   |                          immutable borrow later used here
-23 |         if (entry.score > 20) {
-24 |             parent.add_name(name);
-   |             ^^^^^^^^^^^^^^^^^^^^^ mutable borrow occurs here
-```
-
-Then let's try to fix it using `RefCell`. As previously mentioned, wrapping `Parent` in `RefCell` doesn't work. We need to wrap two fields of parent into `RefCell`:
+Another problem: The borrow taken from `RefCell` cannot be directly returned.
 
 ```rust
 pub struct Parent {  
     entries: RefCell<HashMap<String, Entry>>,  
-    passed_names: RefCell<Vec<String>>  
+    ...
 }  
 pub struct Entry {  score: u32  }  
 impl Parent {  
     fn get_entries(&self) -> &HashMap<String, Entry> {  
         self.entries.borrow()  
     }  
-    fn add_name(&self, name: &str) {  
-        self.passed_names.borrow_mut().push(name.to_string());  
-    }  
+    ...
 }
 ```
 
-But returning a borrow from `RefCell` is not that simple:
+Compile error:
 
 ```
 error[E0308]: mismatched types
@@ -720,20 +672,9 @@ Because the borrow got from `RefCell` is not normal borrow, it's actually `Ref`.
 
 The "help: consider borrowing here" suggestion won't solve the compiler error. Don't blindly follow compiler's suggestions.
 
-Possible solutions (all not recommended):
+One solution is to return `&RefCell<HashMap<String, Entry>>`, instead of returning `&HashMap<String, Entry>`.
 
-1. Return a `Ref<HashMap<String, Entry>>`.
-2. Return `&RefCell<HashMap<String, Entry>>`. 
-3. Return `impl Deref<Target=HashMap<String, Entry>>`. It's existential type, not concrete type.
-4. Make the field `Rc<RefCell<...>>` and return cloned `Rc`.
-
-In 1,2,4, the types related to `RefCell` is exposed in function signature. Cannot change `RefCell` to another things (e.g. `RwLock`) without changing function signature. 
-
-In 3, the function signature has no `RefCell`-related type, but it's existential type and can lead to other issues (e.g. [its type cannot be written out in local variable](https://github.com/rust-lang/rust/issues/63065)). 
-
-Only in 4, can the returned reference be stored for long time.
-
-All the 4 solutions are all not recommended (only use when really necessary).
+Returning `Ref<HashMap<String, Entry>>` or returning `impl Deref<Target=HashMap<String, Entry>>`) can also work, but they are not recommended.
 
 ### `Rc<RefCell<...>>` and `Arc<Mutex<...>>` are not panacea
 
@@ -896,7 +837,7 @@ No matter what the definition of "GC" is, reference counting is different from t
 
 It's usually faster than normal memory allocators. Normal memory allocator will do a lot of bookkeeping work for each allocation and free. Each individual memory region can free separately, these regions can be reused for later allocation, these information need to be recorded and updated.
 
-Bump allocator frees memory in batched and deferred way, which is similar to tracing GC. As it cannot free individual objects, it may temporarily consume more memory, similar to tracing GC.
+Bump allocator frees memory in batched and deferred way. As it cannot free individual objects, it may temporarily consume more memory.
 
 Bump allocator is suitable for temporary objects, where you are sure that none of these temporary objects will be needed after the work complets.
 
