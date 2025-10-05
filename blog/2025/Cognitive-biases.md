@@ -246,7 +246,7 @@ Stoicism proposes thinking about death all the time. Thinking about death can ma
 
 Examples of non-falsifiable explanations:
 
-- "There is \[a secret evil group\] that controls everything. You don't see evidence of their existence because it's so powerful that it hides all evidences."
+- "There is \[a secret evil group\] that controls everything. You don't see evidence of its existence because it's so powerful that it hides all evidences."
 - "The AI doesn't work on your task just because you prompted it wrongly." (without telling how to "prompt correctly".)
 - "You believe in \[an idea\] because you get a sense of moral superiority from that."
 
@@ -322,11 +322,11 @@ An environment that doesn't tolerant failure makes people not correct mistakes a
 
 > When you’re in the midst of building a product, you will often randomly stumble across an insight that completely invalidates your original thesis. In many cases, there will be no solution. And now you’re forced to pivot or start over completely.
 >
-> If you’ve only worked at a big company, you will be instinctually compelled to keep going because of how pivoting would reflect on stakeholders. This behavior is essentially ingrained in your subconscious\-from years of constantly worrying about how things could jeopardize your performance review, and effectively your compensation.
+> If you’ve only worked at a big company, you will be instinctually compelled to keep going because of how pivoting would reflect on stakeholders. This behavior is essentially ingrained in your subconscious \- from years of constantly worrying about how things could jeopardize your performance review, and effectively your compensation.
 >
 > This is why so many dud products at BigCos will survive with anemic adoption.
 >
-> Instead, it’s important to build an almost academic culture of intellectual honesty\-so that being wrong is met with a quick (and stoic) acceptance by everyone.
+> Instead, it’s important to build an almost academic culture of intellectual honesty \- so that being wrong is met with a quick (and stoic) acceptance by everyone.
 >
 > There is nothing worse than a team that continues to chase a mirage.
 >
@@ -682,7 +682,9 @@ When judging on other people's decisions, people often just see visible downside
 
 **Agenda-setting theory**: what media pay attention to can influence people's attention, then influence people's opinions.
 
-**Saliency bias**: We pay attention to the salient things that grab attention. The things that we don't pay attention to are ignored. **Attention** is a core mechanism of how brain works. (Related: modern deep learning also relies on attention mechanism (transformer).)
+**Saliency bias**: We pay attention to the salient things that grab attention. The things that we don't pay attention to are ignored. **Attention** is a core mechanism of how brain works [^about_attention].
+
+[^about_attention]: Related: modern deep learning also relies on attention mechanism (transformer).
 
 ### Anecdotal fallacy
 
@@ -894,6 +896,10 @@ Examples:
 
 People tend to value something only after losing it.
 
+> Health is forgotten until it’s the only thing that matters.
+> 
+> \- Bryan Johnson, [Link](https://x.com/bryan_johnson/status/1972674688087445603)
+
 ### Simpson's paradox and base rate fallacy
 
 The correlation of overall samples may be contradictory to the correlation inside each sub-groups. 
@@ -987,9 +993,7 @@ When one is in intense emotion, logical argument often has little effect, and em
 
 ### Default effect
 
-People tend to choose the default and easiest choice. Partially due to laziness, partially due to fear of unknown risk. [^principle_of_least_action]
-
-[^principle_of_least_action]: In physics, there is principle of least action, but the "action" here means a physical quantity, not the common meaning of "action".
+People tend to choose the default and easiest choice. Partially due to laziness, partially due to fear of unknown risk.
 
 In software product design, the default options in software plays a big role in how user will use and feel about the software. Increasing the cost of some behavior greatly reduces the people doing that behavior:
 
@@ -1026,7 +1030,9 @@ Also, when under pressure, people tend do make actions in hurry before thinking,
 
 ### Prioritizing the easy and superficial
 
-**Law of least effort**: people tend to choose the easiest way to do things, choosing path of least resistance.
+**Law of least effort**: people tend to choose the easiest way to do things, choosing path of least resistance. [^principle_of_least_action]
+
+[^principle_of_least_action]: Related: In physics, there is principle of least action, but the "action" here means a physical quantity, not the common meaning of "action".
 
 Some seemingly easy solutions does not address the root cause, having negligible effect or negative effect in the long run. Applying the easy solution gives the fake impression that the problem is being addressed, achieving mental comfort.
 
@@ -1066,20 +1072,24 @@ Path dependence means sticking to what worked in the past and avoid changing, ev
 
 One easy way to make decisions is to simply follow the people around us. This is beneficial in ancient world: for example, if a tiger comes and some people start fleeing, following them is better than spending time recognizing the tiger.
 
-This is related to **social proof heuristic**: assuming that surrounding people know the situation better, so following them is correct.
+**Social proof heuristic**: Assuming that surrounding people know the situation better, so following them is correct.
 
 Following the crowd is also a great way of **reducing responsibility**: when everyone is guilty, the law cannot punish everyone. The one that acts independently bears more responsibility (omission bias). People often fear of acting independently.
 
-When many people follow each other, they will confirm each other, creating self-reinforcing momentum. This is also a reason of the momentum in markets. People tend to be overconfident when people around them are confident, and vice versa.
+When many people follow each other, they will confirm each other, creating self-reinforcing feedback loop. This is also a reason of the momentum in markets. People tend to be overconfident when people around them are confident, and vice versa.
 
 Two kinds of knowing:
 
-- I know something. But I am not sure other people also know it. Other people may also be not sure I know it.
-- I know something. I also know other people also know it. I also know other people know me know it. It's **common knowledge**. This is the kind of knowledge that drives herd mentality.
+- I know something. But I am not sure other people also know it. Other people may also be not sure I know it. There is no consensus even if everyone thinks the same. This is [**pluralistic ignorance**](https://en.wikipedia.org/wiki/Pluralistic_ignorance).
+- I know something. I also know other people also know it. I also know other people know me know it. It's [**common knowledge**](https://en.wikipedia.org/wiki/Common_knowledge). This is the kind of knowledge that drives herd mentality.
 
-In "The emperor's new cloth" story, "king is clothless" is originally not common knowledge, even though everyone knows. But once the child states the truth, that knowlege becomes common knowledge.
+The former may suddenly convert to the later and unleash big power.
 
-The price can grow not because people believe in the asset, but because the amount of people and money believing in the asset increases. Once that amount stop increasing, price tend to drop despite people believing. Profit can come from the expansion of believers. In this case, the asset is a [Veblen good](https://en.wikipedia.org/wiki/Veblen_good), where higher price induce more demand, until the limit is reached.
+In "The emperor's new cloth" story, "king is clothless" is originally not common knowledge, even though everyone knows. But once the child states the truth publicly, that knowlege becomes common knowledge.
+
+Price grow often depends on "delta" of believers, instead of the existing believers. 
+
+[Veblen good](https://en.wikipedia.org/wiki/Veblen_good): higher price induce more demand, unlike normal commodity.
 
 Measuring people's belief by observing the people around you is inaccurate, because the people near you don't necessarily represent all people (representative bias).
 
@@ -1087,7 +1097,7 @@ Herd mentality is in some sense a kind of trend following strategy. If the trend
 
 One similar effect, **in-group bias**: Favoring investments or opinions from people within one's own group or those who share similar characteristics.
 
-From the cultrual standpoint, herd mentality also facilitates collaboration and society stability.
+[Bystander effect](https://en.wikipedia.org/wiki/Bystander_effect): People are less likely to help a victim in the presence of other people.
 
 ### "Because" justification
 
