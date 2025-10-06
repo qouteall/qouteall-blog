@@ -289,6 +289,7 @@ When memory IO becomes bottleneck, re-computing rather than storing can be benef
 - Reference in GC languages. It may be implemented with a pointer, a colored pointer, or a handle (object ID). The pointer may be changed by moving GC. But in-language semantic doesn't change after moving.
 - ID. All kinds of ID, like string id, integer id, UUID, etc. can be seen as a reference to an object. The ID may still exist after referenced object is removed, then ID become "dangling ID".
   - A special kind of ID is path. For example, file path points to a file, URL points to a web resource, permission path points to a permission, etc. They are the "pointers" into a node in a hierarchical (tree-like) structure.
+  - Content-addressable ID. Using the hash of object as the ID of object. This is used in Git, Blockchain, [IPFS](https://en.wikipedia.org/wiki/InterPlanetary_File_System) and languages like [Unison](https://www.unison-lang.org/docs/the-big-idea/).
 - Iterator. An Iterator can be seen as a pointer pointing to an element in container.
 - Zipper. A zipper contains two things: 1. a container with a hole 2. element at the position of the hole. Unlike iterator, a zipper contains the information of whole container. It's often used in pure functional languages.
 - [Lens](https://hackage.haskell.org/package/lens).

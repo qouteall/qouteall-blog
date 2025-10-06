@@ -385,7 +385,7 @@ $$
 \text{Skew}[X] = E\left[\frac{(X - \mu)^3}{\sigma ^3}\right]
 $$
 
-A large positive skew means there is a fat tail on positive side (may have positive Black Swans). A large negative skew means fat tail on negative side (may have negative Black Swans). 
+A large positive skew means there is a fat tail on positive side (may have positive extreme values). A large negative skew means fat tail on negative side (may have negative extreme values). 
 
 If two sides are symmetric, its skew is 0, regardless of how fat the tails are. Gaussian distributions are symmetric so they has zero skew. note that an asymmetric distribution can also has 0 skewness.
 
@@ -416,7 +416,7 @@ But it's still biased, as $E[\frac{X}{Y}]$ doesn't necessarily equal $\frac{E[X]
 
 ## Kurtosis
 
-Larger kurtosis means it has a fatter tail. The more extreme values (Black Swans) it has, the higher its kurtosis.
+Larger kurtosis means it has a fatter tail. The more extreme values it has, the higher its kurtosis.
 
 $$
 \text{Kurt}[X] = E\left[\frac{(X - \mu)^4}{\sigma ^4}\right] = \frac{E[(X-\mu)^4]}{\sigma^4}
@@ -790,35 +790,6 @@ Recall control variate: if we want to estimate $E[X]$ from samples more accurate
 The mean of that control variate is zero, because $E_{x \sim A}\left[\frac{P_B(x)}{P_A(x)}-1\right]=\sum_x P_A(x) (\frac{P_B(x)}{P_A(x)}-1)=\sum_x (P_B(x) - P_A(x)) =\sum_x P_B(x) - \sum_x P_A(x)=0$
 
 The $\lambda=1$ is not chosen by mimimizing variance, but chosen by making the estimator non-negative. If I define $k=\frac{P_B(x)}{P_A(x)}$, then $\log \frac{P_A(x)}{P_B(x)} + \lambda(\frac{P_B(x)}{P_A(x)} - 1) = -\log k + \lambda(k-1)$. We want it to be non-negative: $-\log k + \lambda(k-1) \geq 0$ for all $k>0$, it can be seen that a line $y=\lambda (k-1)$ must be above $y=\log k$, the only solution is $\lambda=1$, where the line is a tangent line on $\log k$.
-
-### KL divergence in reinforcement learning
-
-In reinforcement learning, the KL divergence is usually used in loss function for regularization and make training more stable.
-
-In policy model, the model accepts a state input and output a distribution (a vector of probabilities), telling the probability of doing each possible action in that state, called policy value:
-
-$$
-\pi_{\text{parameter}} (\text{action} \ | \ \text{state}) = \text{probability of taking that action given state}
-$$
-
-The training keeps updating the model parameter. KL divergence can be added into loss function to make the new model's policy be not too far from old policy, avoiding model from changing too fast, making training more stable:
-
-$$
-\text{Loss} = \ ... + \hat E_{\text{state}}[\hat D_{KL}(\pi_\text{new parameter}(\cdot | \text{state}) \parallel \pi_\text{old parameter}(\cdot | \text{state}))]
-$$
-
-That KL divergence is estimated from samples, using multiple states and multiple actions:
-
-$$
-\hat D_{KL}(\pi_\text{new}(\cdot|\text{state}) \parallel \pi_\text{old}(\cdot | \text{state}))= \hat E_{\text{action} \sim \pi_\text{new}}\left[
-\log \frac{\pi_\text{new}(\text{action}|\text{state})}
-{\pi_\text{old}(\text{action}|\text{state})}
-+\frac{\pi_\text{old}(\text{action}|\text{state})}
-{\pi_\text{new}(\text{action}|\text{state})}-1
-\right]
-$$
-
-Update: According to [On a few pitfalls in KL divergence gradient estimation for RL](https://arxiv.org/abs/2506.09477), the gradient of KL divergence behave differently. This section may need to be revised.
 
 ## Mutual information
 

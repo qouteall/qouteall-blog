@@ -20,7 +20,7 @@ The 3 important facts in Rust:
 ## Some common arguments
 
 - "Rust doesn't ensure safety of `unsafe` code, so using `unsafe` defeats the purpose of using Rust". No. If you keep the amount of `unsafe` small, then when memory/thread safety issue happens, you can inspect these small amount of `unsafe` code. In C/C++ you need to inspect all related code.
-- "Using arena still face the equivalent of 'use after free', so arena doesn't solve the problem". No. Arenas can make "use-after-free" much more deterministic, prevent memory-safety [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug)  [^about_heisenbug], making debugging much easier.
+- "Using arena still face the equivalent of 'use after free', so arena doesn't solve the problem". No. Arenas can make these bugs much more deterministic than the use-after-free in C/C++, prevent memory-safety [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug)  [^about_heisenbug], making debugging much easier.
 - "Rust borrow checker rejects your code because your code is wrong." No. Rust can reject valid safe code.
 - "Doubly-linked list is useless." No. It can be useful in many cases. Linux kernel use them. But often trees and hash maps can replace manually-implemented doubly-linked list.
 - "Circular reference is bad and should be avoided." No. Circular reference can be useful in many cases. Circular reference do come with risks.
@@ -31,7 +31,7 @@ The 3 important facts in Rust:
   - Mutable borrow exclusiveness prevents iterator invalidation.
   - Explicit `.clone()` avoids accidentally copying container like in C++.
 
-[^about_heisenbug]: The Heisenbugs may only trigger in relase build, not in debug build, not when sanitizers are on, not when logging is on, not when debugger is on. Because optimization, sanitizer, debugger and logging can change timing and memory layout, which can make memory safety or thread safety bug no longer trigger. Debugging a Heisenbug in large codebase may take weeks even months.
+[^about_heisenbug]: The Heisenbugs may only trigger in relase build, not in debug build, not when sanitizers are on, not when logging is on, not when debugger is on. Because optimization, sanitizer, debugger and logging can change timing and memory layout, which can make memory safety or thread safety bug no longer trigger. Debugging a Heisenbug in large codebase may take weeks even months. Note that not all memory/thread safety bugs are Heisenbugs. Many are still easy to trigger.
 
 ## Considering reference shape
 
@@ -879,12 +879,14 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
     - The integer was converted from a pointer using `.expose_provenance()` and then integer converts to pointer using `with_exposed_provenance()`
     - The integer `i` is converted to pointer using `p.with_addr(i)` (`p` is another pointer). The result has same provenance of `p`.
   - Adding a pointer with an integer doesn't change provenance.
-  - The provenance is tracked by compiler in compile time. In actual execution, pointer is still integer address that doesn't attach provenance information.
+  - The provenance is tracked by compiler in compile time. In actual execution, pointer is still integer address that doesn't attach provenance information [^miri_pointer_provenance].
 - Using uninitialized memory is undefined behavior. [`MaybeUninit`](https://doc.rust-lang.org/beta/std/mem/union.MaybeUninit.html)
 - `a = b` will drop the original object in place of `a`. If `a` is uninitialized, then it will drop an unitialized object, which is undefined behavior. Use `addr_of_mut!(...).write(...)` [Related](https://lucumr.pocoo.org/2022/1/30/unsafe-rust/)
 - Handle panic unwinding.
 - Reading/writing to mutable data that's shared between threads need to use atomic, or volatile access ([`read_volatile`](https://doc.rust-lang.org/std/ptr/fn.read_volatile.html), [`write_volatile`](https://doc.rust-lang.org/beta/std/ptr/fn.write_volatile.html)), or use other synchronization (like locking). If not, optimizer may wrongly merge and reorder reads/writes. Note that volatile access themself doesn't establish memory order (unlike Java `volatile`).
 - ......
+
+[^miri_pointer_provenance]: When running in tools like [Miri](https://github.com/rust-lang/miri), the pointer provenance will be tracked at runtime.
 
 Modern compilers tries to optimize as much as possible. **To optimize as much as possible, the compiler makes assumptions as much as possible. Breaking any of these assumption can lead to wrong optimization.** That's why it's so complex. [See also](https://queue.acm.org/detail.cfm?id=3212479)
 

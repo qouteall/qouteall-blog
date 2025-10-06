@@ -135,9 +135,13 @@ The important memory management features that it doesn't support:
 
 It doesn't support some memory layout optimizations:
 
+- No array of struct type.
+- No per-object locking (in Java and C# every object can be a lock)
 - Cannot use fat pointer to avoid object header. (Golang does it)
 - Cannot add custom fields at the head of an array object. (C# supports it)
 - Don't have compact sum type memory layout.
+
+See also: [C# Wasm GC issue](https://github.com/dotnet/runtime/issues/94420), [Golang Wasm GC issue](https://github.com/golang/go/issues/63904)
 
 ## Multi-threading
 

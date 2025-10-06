@@ -125,6 +125,7 @@ People tend to maintain their ego by **self-serving bias**:
 ### Overconfidence
 
 People tend to be **overconfident** about themselves:
+
 - People overestimate the correctness and rationality of their belief.
 - **Dunning-Kruger effect**: overestimate capability when low in capability, and understimate when high in capability. (Low-capability ones tend to criticize other people's work even though they cannot do the work themselves.)
 - **Restraint bias**: Overestimate the ability of controlling emotion, controlling impulse behaviors and resisting addiction.
@@ -133,7 +134,8 @@ People tend to be **overconfident** about themselves:
 - **Bias blind spot**: People are hard to recognize their own biases.
 - An expert in one domain tend to think they are generally intelligent in all domains. (Some intellectual experts don't know they are susceptible to psychological manipulation.)
 
-The overconfidence is useful:
+The overconfidence is sometimes useful:
+
 - Being confident helps persuading others, increasing social impact.
 - **Self-fulfilling prophecy**: sometimes having confidence make people perform better, make others collaborate more, and then get good result (Note that the power of mere confidence is limited by physical conditions).
 
@@ -184,7 +186,7 @@ This is related to Stockholm Syndrome. After experiencing pain in the past, peop
 
 ### Self-handicapping
 
-People want to have a self-image of high capability. But a failure can debunk their self-image. Self-handicapping is one way of protecting the self-image. It's an extension of **protective pessimism**.
+People want to show an image of high capability (to both others and self). But a failure can debunk the high-capability-image. Self-handicapping is one way of protecting the image. It's an extension of **protective pessimism**.
 
 |                 | Try hard                           | Self-handicap                           |
 | --------------- | ---------------------------------- | --------------------------------------- |
@@ -199,7 +201,7 @@ Examples of self-handicapping:
 - Drinking alcohol and using drugs.
 - Choosing difficult conditions and methods.
 
-Self-handicapping can avoid questioning the capability from self. However, other people usually just judge from result, and see self-handicapping as low capability.
+When one succeedes despite self-handicapping, it shows great capability. But if one fails, self-handicapping can only protect image to self, not from others. People usually just judge from result and see failed self-handicapping as low capability.
 
 Setting unrealistic high goals is sometimes a form of self-handicapping. But not always.
 
@@ -240,7 +242,7 @@ Stoicism proposes thinking about death all the time. Thinking about death can ma
 - People tend to justify their previous behavior. Behavior can shape attitudes.
 - People have a tendency to pursuade others by their belief (meme spread).
 
-**Confirmation bias**: People tend to seek and accept the evidences that confirm their beliefs, and reluctant to accept contradictory evidences.
+**Confirmation bias**: People tend to seek and accept the evidences that confirm their beliefs, and reluctant to accept contradictory evidences. Confirmation bias can even make one subcounciously ignore some information.
 
 **Motivated reasoning**: when they does not want to accept contradictory evidences, they may make up and believe in **non-falsifiable explanations** to explain the evidence in a way that follows the original belief.
 
@@ -342,6 +344,13 @@ Examples:
 
 - Not wanting to diagnose health problem.
 - Reluctant to check the account after an investment failed.
+
+### Self-deception
+
+Robert Trivers proposes that we deceive ourselves to help deceiving others:
+
+- If one tries to deceive others without internally believing in the lie, the brain need to process two pieces of conflicting information, which takes more efforts and is slower.
+- When one knows one is telling lie, one may unable to control the nervousness, which can show in ways like heart beat rate, face blush, body movement, etc. Deceiving self before deceiving others can avoid these nervousness signals.
 
 ## Quick simplified understanding
 
@@ -496,7 +505,9 @@ People often dream of a "silver bullet" that simply magically works:
 - People hope that a "secret advanced weapon" can reverse the systematic disadvantage in war. This almost never happens in real world. 
 - Hoping that a secret recipe or a secret techonology alone can succeed.
   - Coca Cola succeedes not just by the "secret recipe". The brading, global production system and logistic network are also important.
-  - Modern technology are complex and have many dependencies. You cannot just simply copy "one key techonology" and get the same result. Even just imitating existing technology often requires a whole infrastructure, many talents and years of work.
+  - Modern technology are complex and have many dependencies. You cannot just simply copy "one key techonology" and get the same result. Even just imitating existing technology often requires a whole infrastructure, many talents and years of work. [^about_ai_race]
+
+[^about_ai_race]: It's a common view that AI capability can improve exponetially. And when AI is smart enough to keep improving itself, its intelligence will skyrocket into superintelligence, far above human. But it's highly possible that future AI will still be bottlenecked by energy production, compute power and interconnect bandwidth, which limits how fast AI can self-improve. There will probably be no dramatic "suddenly winning AI race forever".
 
 ### Binary thinking (false dichotomy)
 
@@ -967,7 +978,7 @@ Flattering subcounciously increase favorability, even when knowing it's flatteri
 
 When making decisions, human tend to **follow intuitions, which is quick and energy-efficient**, but also less accurate.
 
-- Often quickly making decision before having complete information is better than waiting for complete investination.
+- Often quickly making decision before having complete information is better than waiting for complete investigation.
 - Sometime multiple decisions both can fulfill the goal. The important is to quickly do action, rather than which decision is optimal.
 
 _Thinking, Fast and Slow_ proposes that human mind has two systems: 
@@ -989,7 +1000,7 @@ Some examples:
 
 **Being calm can "increase intelligence".**
 
-When one is in intense emotion, logical argument often has little effect, and emotional connection is often more effective.
+When one is in intense emotion, logical argument often has little effect in persuading, and emotional connection is often more effective.
 
 ### Default effect
 
@@ -1053,7 +1064,7 @@ Examples:
 
 This is related to **means-end inversion**. To achieve the root goal (end) we work on a sub-goal (means) that helps root goal. But focusing on an easy but unimportant sub-goal may hurt the root goal, by taking resources from hard but important sub-goals.
 
-A similar phenomenon occurs commonly in medicine: treatments usually mainly suppress visible symptoms (e.g. painkiller) instead of curing the root cause of illness. This is usually due to technological and budget limitations.
+A similar phenomenon occurs commonly in medicine: treatments usually mainly suppress visible symptoms (e.g. painkiller) instead of curing the root cause of illness. This is usually due many other factors.
 
 Pepole tend to spend much time making decision on small things but spend very few time making decisions on big things (e.g. buy house with mortgage, big investment):
 
@@ -1065,6 +1076,16 @@ Pepole tend to spend much time making decision on small things but spend very fe
 ### Path dependence
 
 Path dependence means sticking to what worked in the past and avoid changing, even when the paradigm has shifted and the past successful decisions are no longer appropriate.
+
+> I think people's thinking process is too bound by convention or analogy to prior experiences. It's rare that people try to think of something on a first principles basis. 
+> 
+> They'll say, "We'll do that because it's always been done that way." Or they'll not do it because "Well, nobody's ever done that, so it must not be good." 
+> 
+> But that's just a ridiculous way to think. 
+> 
+> You have to build up the reasoning from the ground up \- "From the first principles" is the phrase that's used in physics. You look at the fundamentals and construct your reasoning from that, and then you see if you have a conclusion that works or doesn't work, and it may or may not be different from what people have done in the past.
+> 
+> \- Elon Musk
 
 **Law of the instrument**: "If the only tool you have is a hammer, it is tempting to treat everything as if it were a nail."
 
@@ -1139,7 +1160,7 @@ Narrow framing bias: focusing too much on one aspect while neglecting other aspe
 
 Zero-risk bias: preferring to eliminate one type of risk entirely rather than reducing overall risk (usually at the expense of increasing exposure to other risks).
 
-It's related to risk aversion and availability bias: risk aversion usually focuses the risk that comes to mind, and ignores other kinds of risks. It's also related to binary thinking: thinking that an risk is either completely eliminated or not being taken any action on. The rational decision is to do a tradeoff to reduce overall risk.
+It's related to risk aversion and availability bias: risk aversion usually focuses the risk that comes to mind, and ignores other kinds of risks. It's also related to binary thinking: thinking that a risk is either completely eliminated or not being taken any action on. The rational decision is to do a tradeoff to reduce overall risk.
 
 Examples:
 
@@ -1160,7 +1181,7 @@ The world is full of randomness. There is no decision that guarantees to be opti
 
 We tend to regret doing something in short term, but regret not doing something in the long term. [Reference](https://www.anderson.ucla.edu/faculty/keith.chen/negot.%20papers/GilovichMedvec_Regret95.pdf).
 
-> 'I have led a toothless life', he thought. 'A toothless life. I have never bitten into anything. I was waiting. I was reserving myself for later on-and I have just noticed that my teeth have gone. ...'
+> 'I have led a toothless life', he thought. 'A toothless life. I have never bitten into anything. I was waiting. I was reserving myself for later on \- and I have just noticed that my teeth have gone. ...'
 > 
 > \- Jean-Paul Sartre
 
@@ -1345,6 +1366,8 @@ People wants attention from others. Some people try to gain attention by posting
 > Producers who go viral produce 183% more posts per day for the subsequent month.
 >
 > \- [Paying attention](https://karthikecon.github.io/karthiksrinivasan.org/paying_attention.pdf) by Karthik Srinivasan
+
+Having attention from others is indeed useful: it increases exposure to possible allies, mates and opportunities.
 
 ### Randomized reward
 
