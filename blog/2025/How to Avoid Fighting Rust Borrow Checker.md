@@ -12,7 +12,7 @@ The 3 important facts in Rust:
 
 - **Tree-shaped ownership**. In Rust's ownership system, one object can own many children or no chlld, but must be owned by **exactly one parent**. Ownership relations form a tree. [^about_sharing]
 - **Mutable borrow exclusiveness**. If there exists one mutable borrow for an object, then no other borrow to that object can exist. Mutable borrow is exclusive.
-- **Borrow is contagious** (if crossing function boundary). If you borrow a child, you indirectly borrow the parent (and parent's parent, and so on). Just borrowing one wheel of a car makes you borrow the whole car. Combined with previous point, it can cause troubles for mutable data. It can be avoided by split borrow, but not across functions.
+- **Borrow is contagious**. If you borrow a child, you indirectly borrow the parent (and parent's parent, and so on). Just borrowing one wheel of a car makes you borrow the whole car, then another wheel cannot be mutably borrowed. It can be avoided by split borrow within one scope, but not across functions.
 
 [^about_sharing]: The native Rust ownership relation form a tree. Reference counting (`Rc`, `Arc`) allows shared ownership.
 
@@ -572,6 +572,8 @@ In Java, you can remove element via the iterator, then the iterator will update 
 Mutable borrow exclusiveness is still important in single-threaded case, because of interior pointer. **But if we don't use any interior pointer, then mutable borrow exclusiveness is not necessary for memory safety in single-thread case**.
 
 That's why mainstream languages has no mutable borrow exclusiveness, and still works fine in single-threaded case. Java, JS and Python has no interior pointer. Golang and C# have interior pointer, they have GC and restrict interior pointer, so memory safe is still kept without mutable borrow exclusiveness.
+
+### Benefits of mutable borrow exclusiveness
 
 Rust's mutable borrow exclusiveness creates a lot of troubles in single-threaded cases. But it also has **benefits** (even in signle-threaded cases):
 
