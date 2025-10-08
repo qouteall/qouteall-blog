@@ -107,17 +107,17 @@ Some important decisions that need to made:
   - What work must be done immediately? What work can be deferred?
   - What data can be stale? What data cannot be stale?
 
-## Orthogonality: separate things that can combine easily
+## Make things as unrelated as possible
 
-The software usually need to do multi-case handling: do different computation to different kinds of information.
+Reducing complexity requires making things as unrelated as possible. One thing is less complex when less thing relates with it. Reduce responsibility of any individual module. Separation of concern.
 
-In non trivial cases, the software need to do different computation to **different combinations of information**. Making the handling of them more **orthogonal** will make that simpler. 
+In the context of programming, **orthogonality** means **unrelatedness**:
 
-In the context of programming, **orthogonality** can be think as **two different things can be combined without interfering each other**. **Orthogonality also mean unrelatedness** Non-orthogonal means when two things combine, they interfere with each other. **Orthogonality also means logical isolaton and freedom to combine, allowing combinatory explosion to be easily handled.**
+- Two different pieces of data can be combined in valid way.
+- Two different pieces of logic can work together without interferring with each other. No need to do special-case-handling of combinations.
+- No combinatory explosion.
 
-If different parts of decision-making cannot be orthogonally destructured, then the software will become complex.
-
-Splitting a complex operation into multiple steps makes it more orthogonal. Doing the work of multiple different steps in one step adds complexity and reduces orthogonality. 
+Sometimes splitting a complex operation into multiple stages makes it more orthogonal. Merging multiple steps into one step increases complexity.
 
 The reality is usually less perfect than theories. Often two things are mostly orthogonal but has some non-orthogonal edge cases. If the edge cases are not complex, and are few, then the program can be designed around the fact that the two things are mostly orthogonal, and add the special case handling to two modules. However, if there are many special cases, or some special cases are very complex to handle, then the two modules are very non-orthogonal and should be re-designed.
 

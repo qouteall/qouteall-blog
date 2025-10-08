@@ -163,22 +163,8 @@ The solutions:
 - Use ID/handle to replace borrow.
 - Make borrow as shortest as possible.
 - Other workarounds like `Arc<QCell<T>>` `Arc<RwLock<T>>`, etc.
-- **Avoid mutation** or **defer mutation**:
-
-## Avoid mutation
-
-The previous problem occurs partially due to mutable borrow exclusiveness. If all borrows are immutable, then contagious borrow is usually not a problem.
-
-The common way of avoiding mutation is **mutate-by-recreate**: All data is immutable. When you want to mutate something, you create a new version of it. Just like in pure functional language (e.g. Haskell).
-
-Unfortunately, **mutate-by-recreate is also contagious**: if you recreated a new version of a child, you need to also recreate a new version of parent that holds the new child, and parent's parent, and so on. There are abstractions like [lens](https://hackage.haskell.org/package/lens) to make this kind of cascade-recreate more convenient.
-
-Mutate-by-recreate can be useful for cases like:
-
-- Safely sharing data in multithreading (read-copy-update (RCU), copy-on-write (COW))
-- Take snapshot and rollback efficiently
-
-Mutate-by-recreate can be optimized by sharing unchanged sub-structures. See also: [Persistent data structure](https://en.wikipedia.org/wiki/Persistent_data_structure), [Rope](https://en.wikipedia.org/wiki/Rope_(data_structure)).
+- **Defer mutation**
+- **Avoid mutation**
 
 ## Defer mutation. Mutation-as-data
 
@@ -194,7 +180,11 @@ Treating mutation as data also has other benefits:
 - The mutation can be serialized, and sent via network or saved to disk.
 - The mutation can be inspected for debugging and logging.
 - You can post-process the command list, such as sorting, filtering. If the data is sharded, the mutation command can dispatch to specific shard.
-- Transactional databases often use write-ahead log (WAL) to help atomicity of transactions. Database writs all mutations into WAL. Then after some time the mutations in WAL will be merged to base data in disk. Database often keep the latest mutated data in memory for querying.
+- Better parallelism. The process of generating mutation command does not mutate the base data, so it can be parallelized. If data is sharded, the execution of mutation commands can be dispatched to shards executing in parallel.
+
+Other applications of the idea of mutation-as-data:
+
+- Transactional databases often use write-ahead log (WAL) to help atomicity of transactions. Database writs all mutations into WAL. Then after some time the mutations in WAL will be merged to base data in disk.
 - Event sourcing. Derive the latest state from events and previous checkpoint. Distributes systems often use consensus protocol (like Raft) to replicate log (events, mutations). The mutable data is derived from logs and previous checkpoint.
 - The idea of turning operations into data is also adopted by [io_uring](https://en.wikipedia.org/wiki/Io_uring) and modern graphics APIs (Vulkan, Metal, WebGPU).
 - The idea of turning mutation into insertion is also adopted by ClickHouse. In ClickHouse, direct mutaiton is not performant. Mutate-by-insert is faster, but querying require aggregate both the old data and new mutations.
@@ -241,6 +231,21 @@ fn main() {
     }  
 }
 ```
+
+## Avoid mutation
+
+The previous problem occurs partially due to mutable borrow exclusiveness. If all borrows are immutable, then contagious borrow is usually not a problem.
+
+The common way of avoiding mutation is **mutate-by-recreate**: All data is immutable. When you want to mutate something, you create a new version of it. Just like in pure functional language (e.g. Haskell).
+
+Unfortunately, **mutate-by-recreate is also contagious**: if you recreated a new version of a child, you need to also recreate a new version of parent that holds the new child, and parent's parent, and so on. There are abstractions like [lens](https://hackage.haskell.org/package/lens) to make this kind of cascade-recreate more convenient.
+
+Mutate-by-recreate can be useful for cases like:
+
+- Safely sharing data in multithreading (read-copy-update (RCU), copy-on-write (COW))
+- Take snapshot and rollback efficiently
+
+Mutate-by-recreate can be optimized by sharing unchanged sub-structures. See also: [Persistent data structure](https://en.wikipedia.org/wiki/Persistent_data_structure), [Rope](https://en.wikipedia.org/wiki/Rope_(data_structure)).
 
 ## About circular reference
 
@@ -872,6 +877,7 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
   - The overlap here also includes interior pointer. A `&mut` to an object cannot co-exist with any other borrow into any part of that object.
   - Violating that rule cause undefined behavior and can cause wrong optimization. Rust adds `noalias` attribute for mutable borrows into LLVM IR. LLVM will heavily optimize based on `noalias`. [See also](https://doc.rust-lang.org/nomicon/aliasing.html)
   - The above rule doesn't apply to raw pointer `*mut T`.
+  - Converting a `&T` to `*mut T` then mutate pointed data is undefined behavior. For that use case, wrap `T` in `UnsafeCell<T>`.
   - It's very easy to accidentally violate that rule when using borrows in unsafe. It's recommended to always use raw pointer and avoid using borrow (including slice borrow) in unsafe code. [Related1](https://chadaustin.me/2024/10/intrusive-linked-list-in-rust/), [Related2](https://web.archive.org/web/20230307172822/https://zackoverflow.dev/writing/unsafe-rust-vs-zig/)
 - [Pointer provenance](https://doc.rust-lang.org/std/ptr/index.html#provenance).
   - Two pointers created from two provenances is considered to never alias. If their address equals, it's undefined behavior.

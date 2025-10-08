@@ -227,9 +227,9 @@ People tend to avoid thinking about inevitable death because it's unpleasant. Pe
 
 - People feel like having plenty time to procrastinate
 - People tend to not value the present because "life is permanent"
-- People exaggerage risk as it affect their "permanent" life
+- People focus too much on small problems
 
-Stoicism proposes thinking about death all the time. Thinking about death can make one not procrastinate important things, make one value the present and reduce unnecessary worrying. But Stocism does NOT propose indulgence and overdrafting the future.
+Stoicism proposes thinking about death all the time. Thinking about death can make one not procrastinate important things, make one value the present and reduce worrying about small problems. But Stocism does NOT propose indulgence and overdrafting the future.
 
 > Respice post te. Hominem te esse memento. Memento mori!
 > 
@@ -505,7 +505,7 @@ People often dream of a "silver bullet" that simply magically works:
 - People hope that a "secret advanced weapon" can reverse the systematic disadvantage in war. This almost never happens in real world. 
 - Hoping that a secret recipe or a secret techonology alone can succeed.
   - Coca Cola succeedes not just by the "secret recipe". The brading, global production system and logistic network are also important.
-  - Modern technology are complex and have many dependencies. You cannot just simply copy "one key techonology" and get the same result. Even just imitating existing technology often requires a whole infrastructure, many talents and years of work. [^about_ai_race]
+  - Modern technologies are complex and have many dependencies. You cannot just simply copy "one key techonology" and get the same result. Even just imitating existing technology often requires a whole infrastructure, many talents and years of work. [^about_ai_race]
 
 [^about_ai_race]: It's a common view that AI capability can improve exponetially. And when AI is smart enough to keep improving itself, its intelligence will skyrocket into superintelligence, far above human. But it's highly possible that future AI will still be bottlenecked by energy production, compute power and interconnect bandwidth, which limits how fast AI can self-improve. There will probably be no dramatic "suddenly winning AI race forever".
 
@@ -543,6 +543,7 @@ Internet has indeed changed the world. But the dot com bubble burst. It's just t
 
 - A: "We should increase investment for renewable energy." B: "You want to ban oil, gas, and coal, removing millions of jobs and crash the economy?"
 - A: "The history curriculum should include more perspectives to present a more objective and nuanced view of our nation." B: "So you want to rewrite history to make our children hate their own country?"
+- A: "We should implement stricter gun control." B: "It's useless, because no matter how strict it is, criminals will always find a way to get guns illegally." (perfect solution fallacy)
 
 ### Halo effect and horn effect
 
@@ -864,6 +865,8 @@ The price chart is often drawn by making lowest price at the bottom and highest 
 
 **Reversal of burden of proof**: One common debating technique is to reverse the burden of proof to opponent: "My claim is true because you cannot prove it is false." "You are guilty because you cannot prove you are innocent."
 
+PowerPoint (a.k.a. keynote, slide), as a medium, is good for persuading, but bad for communicating information. PowerPoint medium encourages author to omit imformation instead of writing details. [Amazon bans PowerPoint for internal usage](https://www.inc.com/justin-bariso/amazon-jeff-bezos-powerpoint-meetings-how-to-think.html). See also: [Columbia Space Shuttle Disaster](https://nicholastoole.wordpress.ncsu.edu/disaster-archive-case-study/columbia-space-shuttle-disaster-and-powerpoint/), [Military spaghetti powerpoint](http://warincontext.org/2010/04/29/the-perils-of-powerpoint/).
+
 #### Two talking styles
 
 Two different talking styles: the charismatic leader one and the intellectual expert type:
@@ -991,7 +994,7 @@ Most thinking mainly uses System 1 while being unnoticed.
 
 ### Emotion overrides rationality
 
-With in intense emotion, the rationality (System 2) is being overridden, making one more likely to make mistakes.
+With intense emotion, the rationality (System 2) is being overridden, making one more likely to make mistakes.
 
 Some examples:
 
@@ -1011,7 +1014,8 @@ In software product design, the default options in software plays a big role in 
 - If a software functionality require manually enabling it, much fewer users will know and use that functionality.
 - Just 1 second longer page load time may reduce user conversion by 30%. [Source](https://www.cloudflare.com/learning/performance/more/website-performance-conversion-rates/)
 - Each setup procedure will frustrate a portion of users, making them give up installing the software. [Why I’m Done Making Desktop Applications](https://www.kalzumeus.com/2009/09/05/desktop-aps-versus-web-apps/). A good product requires minimal configuration to start working.
-- [Ask for no, don’t ask for yes](https://www.mooreds.com/wordpress/archives/3518)
+
+[Ask for no, don’t ask for yes](https://www.mooreds.com/wordpress/archives/3518).
 
 **Status quo bias**: tend to maintain status quo. This is related to risk aversion, as change may cause risk.
 
@@ -1027,7 +1031,7 @@ When being judged by other people, people tend to do action to show their value,
 
 - A personal doctor may do useless medications to show they are working. (_Antifragile_ argues that useless medications are potentially harmful. It's naïve interventionism.)
 - A politician tend to do political action to show that they are working on an affair. These policies usually superficially helps the problem but doesn't address the root cause, and may exacerbate the problem. One example is to subsidize house buyers, which makes housing price higher, instead of building more houses.
-- Financial analysts tend to give a definitive result, even knowing that there isn't enough sound evidences.
+- Financial analysts tend to give a definitive result when knowing there isn't enough sound evidence.
 
 For high-liquidity assets (e.g. stocks), people tend to do impulsive trading when market exhibit volatility. But for low-liquidity harder-to-trade assets (e.g. real estate) people tend to hold when the market exhibit volatility.
 
@@ -1045,11 +1049,11 @@ Also, when under pressure, people tend do make actions in hurry before thinking,
 
 [^principle_of_least_action]: Related: In physics, there is principle of least action, but the "action" here means a physical quantity, not the common meaning of "action".
 
-Some seemingly easy solutions does not address the root cause, having negligible effect or negative effect in the long run. Applying the easy solution gives the fake impression that the problem is being addressed, achieving mental comfort.
+Some seemingly easy solutions do not address the root cause, having negligible effect or negative effect in the long run. Applying the easy solution gives the fake impression that the problem is being addressed, achieving mental comfort.
 
 Examples:
 
-- Focusing on buying exercise equipments instead of exercising. Paying to gym to give an illusion of determination in exercising.
+- Focusing on buying exercise equipments instead of exercising. Paying to gym without going to gym.
 - Buying supplements instead of adopting healthier lifestyle.
 - Focusing on buying courses, books, study equipments instead of actually studying. Keep bookmarking online learning materials instead of reading them.
 - Musicians focusing on buying instruments (gear acquisition syndrome).
@@ -1064,7 +1068,7 @@ Examples:
 
 This is related to **means-end inversion**. To achieve the root goal (end) we work on a sub-goal (means) that helps root goal. But focusing on an easy but unimportant sub-goal may hurt the root goal, by taking resources from hard but important sub-goals.
 
-A similar phenomenon occurs commonly in medicine: treatments usually mainly suppress visible symptoms (e.g. painkiller) instead of curing the root cause of illness. This is usually due many other factors.
+A similar phenomenon occurs commonly in medicine: treatments usually mainly suppress superficial symptoms (e.g. painkiller) instead of curing the root cause of illness. This is usually due many other factors.
 
 Pepole tend to spend much time making decision on small things but spend very few time making decisions on big things (e.g. buy house with mortgage, big investment):
 
@@ -1122,7 +1126,7 @@ One similar effect, **in-group bias**: Favoring investments or opinions from peo
 
 ### "Because" justification
 
-In [an experiment](https://www.researchgate.net/publication/232505985_The_mindlessness_of_ostensibly_thoughtful_action_The_role_of_placebic_information_in_interpersonal_interaction), requesting jump the queue of using a copy machine:
+In [an experiment](https://www.researchgate.net/publication/232505985_The_mindlessness_of_ostensibly_thoughtful_action_The_role_of_placebic_information_in_interpersonal_interaction), requesting jumping the queue of using a copy machine:
 
 | Request                                                                   | Accept rate |
 | ------------------------------------------------------------------------- | ----------- |
@@ -1144,7 +1148,7 @@ In investment, mental accounting can happen on different forms:
 
 - Seperate by different time intervals. Setting profit target in each time interval (by month, season or year) can be detrimental in a market with momentum. If the profit in the time interval is meet, stop investing misses large profit from trend. If the profit in the time interval is not meet near the end, then the trader tend to be more nervous and more aggressive, which is dangerous.
 
-  However, setting stop-loss in each time interval may be good. When the current trading strategy does not fit the market, temporarily stopping could get through the current part of cycle that temporarily doesn't suit the strategy. The stopping period also help calming and becoming rational.
+  However, setting stop-loss in each time interval may be good. When the current trading strategy does not fit the market, temporarily stopping could get through the current part of cycle that temporarily doesn't suit the strategy. The stopping period also helps calm down and become rational.
 
 - Separate by different specific assets (e.g. stocks). If the mental accounts are separated based on different stocks, after losing from one stock, one may insist to gain the loss back from the same stock, even if investing in other stocks is better overall.
 
@@ -1235,7 +1239,7 @@ These factors affect mental energy:
 - Sleeping and mental resting can replenish mental energy.
 - Body conditions (like blood sugar level) affects mental energy.
 - Exercising self-control can strengthen mental energy, similar to muscular strength.
-- Lingering emotion (e.g. keep ruminating past things) costs mental energy.
+- Lingering emotion (e.g. keep ruminating past mistakes) costs mental energy.
 
 Mental resting is different to body resting. Intense thinking when lying on the bed even consumes mental energy. Mental resting involves focusing on simple things with low cognitive demand.
 
@@ -1261,7 +1265,9 @@ Memorizing is lossy compression. Recall is lossy decompression, where details ca
 
 Taking notes is one way to mitigate the unreliable memory issue.
 
-**Every time a messsage is relayed through a person, some of its information gets lost, and some noise gets added**. The person relaying the message will add their own understanding (which can be misleading), and omit the information that they think is not important (but can be actually important). This issue is very common in big corporation and governments. **Good communication requires reducing middlemen**.
+**Every time a messsage is relayed through a person, some of its information gets lost, and some noise gets added**. The person relaying the message will add their own understanding (which can be misleading), and omit the information that they think is not important (but can be actually important). This issue is very common in big corporation and governments. **Good communication requires reducing middlemen**. [^about_pdf]
+
+[^about_pdf]: PDF is harder to edit than other document formats. This can be a good trait when you don't want information relayers to modify your document. (Note that it's not a perfect solution. Others can still ask AI to transcribe screenshots, take text snippets and form new documents. It only increases difficulty of modifying.)
 
 People usually remember the "special" things well. This is an information compression mechanism that filters out the unimportant details.
 
@@ -1397,7 +1403,7 @@ Consider two financial trading strategies:
 - Strategy 1 has small gains frequently but has huge loss rarely (suffering from negative Black Swan events).
 - Strategy 2 has small losses frequently but has rare huge gains (utilizing positive Black Swan events). 
 
-In the long term, strategy 2 can greatly outperforms strategy 1, but people prefer strategy 1, because of many reasons:
+In the long term, strategy 2 greatly outperforms strategy 1, but people prefer strategy 1, because of many reasons:
 
 - The first strategy has better Sharpe ratio as long as the rare Black Swan don't come. The second strategy has lower Sharpe ratio because of the high volatility (although volatility has positive skewness).
 - **Moral hazard**: in some places the money manager can take a share of profit but are only slighly punished when the huge asset loss happens (no skin in the game). This incentive structure allow them to use Strategy 1 while transferring tail risk to asset owner.
