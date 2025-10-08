@@ -44,8 +44,6 @@ Extracting function is regularization, while inlining function is de-regularizat
 | Easier to implement requirements that follow regularity.                                     | Harder to implement requirements that follow regularity. (duplicated changes) |
 | Harder to implement requirements that breaks regularity. (add complex special-case handling) | Easier to implement requirements that breaks regularity.                      |
 
-
-
 Why we sometimes specialize instead of generalizing:
 
 - Generalization introduces new concepts and **adds cognitive load**. Sometimes, not adding these is better, depending on how useful the abstraction is.
@@ -74,15 +72,16 @@ If some tool has a simple interface, it must have hardcoded a lot of detail deci
 
 This also applies to AI coding. When you write a vague prompt and LLM generates a whole application/feature for you, the generated code contains many opinionated detail decisions that's made by LLM, not you (of course you can then prompt the LLM to change a detail).
 
-Some important decisions that need to made:
-
 ## Important architectural decisions
 
+These decisions are important and should be made early (when using AI-assisted coding, these decisions sholuld be clearly specified).
+
 - Data modelling:
-  - Which data to store? Which data to compute?
+  - Which data to store? Which data to compute-on-demand?
   - How and when is ID allocated?
   - What lookup acceleration structure or redundant data do we have?
   - How to migrate schema?
+  - Is there any ambiguity in data model? (two different things correspond to same data)
 - Constraints:
   - What can change and what cannot change?
   - What can duplicate (overlap) and what cannot?
@@ -119,7 +118,7 @@ In the context of programming, **orthogonality** means **unrelatedness**:
 
 Sometimes splitting a complex operation into multiple stages makes it more orthogonal. Merging multiple steps into one step increases complexity.
 
-The reality is usually less perfect than theories. Often two things are mostly orthogonal but has some non-orthogonal edge cases. If the edge cases are not complex, and are few, then the program can be designed around the fact that the two things are mostly orthogonal, and add the special case handling to two modules. However, if there are many special cases, or some special cases are very complex to handle, then the two modules are very non-orthogonal and should be re-designed.
+The reality is usually less perfect than theories. Often two things are mostly orthogonal but has some non-orthogonal edge cases. If the edge cases are few and are not complex, and add the special case handling is ok. However, if there are many special cases, or some special cases are complex, then the two modules are very non-orthogonal and should be re-designed.
 
 ### Reducing fake orthogonality
 
@@ -134,61 +133,55 @@ Another case is that the software provides orthogonality in interface, and actua
 > \- [My story on “worse is better”](https://www.sigbus.info/worse-is-better)
 
 
-## "Simple" requirements that are hard to implement
+## Examples of breaking abstraction
 
-Sometimes a seemingly simple requirement is actually hard to implement. Examples:
 
 ### Major change of data modelling
 
-- You use user name as id of user. But a new requirement comes: the user must be able to change the user name. 
+- The user name is used as id of user. But a new requirement comes: the user must be able to change the user name. 
   
-  (Using name as id is usually a bad design because it's incompatible with name changing.)
-- In a game, if an entity dies, you delete that entity. But a new requirement comes: a dead entity can be resurrected by a new magic.
-  
-  To implement that, you cannot delete the dead entity and you need to add dead entity into data modelling. For example, add a boolean flag of whether it's living, and check that flag in every logic of living entity.
-- Your app supports one language. And the event log is recorded using simple strings. But a new requirement comes: make the app support multiple languages. The user can switch language at any time and see the event log in their language.
-  
-  To implement that, you cannot store the text as string and should store the text as translatable template. (A "dumber" way is to store the strings for every supported language.)
+  (Using name as id is usually a bad design, unless the tool is for programmers.)
 
+- In a game, if an entity dies, that entity is deleted. But a new requirement comes: a dead entity can be resurrected by a new magic.
+  
+  To implement that, you need to change real delete to soft delete. For example, add a boolean flag of whether it's living, and check that flag in every logic of entity behavior.
+
+- An app supports one language. And the event log is recorded using simple strings. But a new requirement comes: make the app support multiple languages. The user can switch language at any time and see the event log in their language.
+  
+  To implement that, you cannot store the text as string. The log should be stored as data structure of relevant information of log, and turned to text when showing in UI. (A "dumber" way is to store the strings for every supported language.)
+
+- A todo list app need to support undo and redo.
 
 ### Major change of dataflow and source-of-truth
 
-- You built a singleplayer game. All game logic runs locally. All game data are in memoery and you manually load/save from file. But a new requirement comes: make it multiplayer.
+- In a singleplayer game, all game logic runs locally. All game data are in memoery and are loaded/saved from file. But a new requirement comes: make it multiplayer.
   
   In singleplayer game, the in-memory data can be source-of-truth, but in multiplayer the server is source-of-truth. Every non-client operation now requires packet sending and receiving.
   
-  What's more, to reduce visible latency, the client side game must guess future game state and correct the guess from server packets (add rollback mechanism).
-- You built a todo list app. All data are loaded from server. All edits also go through server. But a new requirement comes: make the app work offline and sync when it connects with internet.
+  What's more, to reduce visible latency, the client side game must guess future game state and correct the guess from server packets (add rollback mechanism). It can become complex.
+
+- In a todo list app, all data are loaded from server. All edits also go through server. But a new requirement comes: make the app work offline and sync when it connects with internet.
 
 - In a GUI, previously there is a long running task that changes GUI state, and user cannot operate the GUI while task is running. Now, to improve user experience, you need to allow operating the GUI while task is running. Both the background task and user can now change the mutable state. [User interfaces are hard - why?](https://happyfellow.bearblog.dev/user-interfaces-are-hard-why/)
-
-
-### Making previously unrelated things related (break separation of concern)
 
 - Two previously separated UI components now need to share mutable state. [The complexity that lives in the GUI | RoyalSloth](https://blog.royalsloth.eu/posts/the-complexity-that-lives-in-the-gui/)
 
 ### Corner case explosion
 
-- You have a fixed workflow. A new requirement comes: allow the user to configure and customize the workflow. The new flexible system allow much more ways of configuring and introduce many corner cases.
+- There are some fixed workflows (hardcoded in code). A new requirement comes: allow the user to configure and customize the workflow. The new flexible system allow much more ways of configuring and introduce many corner cases.
   
   (Developing specially for each enterprise customer may be actually easier than creating a configurable flexible "rules engine". The custom "rules engine" will be more complex and harder to debug than just code. You can still share common code when developing separately. [The Configuration Complexity Clock](https://mikehadlow.blogspot.com/2012/05/configuration-complexity-clock.html))
 
-- You have a permission system where different functionalities form a tree: if one user have the permission of parent node then the user has the permissions of the child nodes. But a new requirement comes: one functionality moves category, so that node's parent changes. You must also keep the existing users' permissions the same as before.
-- Some functionality require some permission. You use user token to authenticate. But a new requirement comes: allow non-logged-in users access a part of the functionality.
-- A new requirement comes: add bot as a new type of user, and the bot user has different authentication logic than normal user.
-- Two systems A and B need to work together, but A and B's API both change across versions. However every version of A must work with every version of B. 
+- Special case in permission system. Allow non-logged-in users to access some functionalities. Add bot as a new kind of user with special permissions. Make permission of modifying specific field fing-grained.
+- Two systems A and B need to work together, but A and B's API both change across versions. However every version of A must work with every version of B.
+- Keep adding AB test feature flags. There will be many combinations of feature flags. It's possible that some combinations will trigger bugs.
 
 
 ### Working on full data to working on partially known data
 
-- You built a data visualization UI. Originally, it firstly loads all data from server then render. But when the data size become huge, loading becomes slow and you need break the data into parts, dynamically load parts and visualize loaded parts.
+- There is a data visualization UI. Originally, it firstly loads all data from server then render. But when the data size become huge, loading becomes slow and you need break the data into parts, dynamically load parts and visualize loaded parts.
 - A game has loading screen when switching scene. A new requirement comes: make the loading seamless and remove the loading screen.
-- You load all data from database and then compute things using programming language. One day the data become so big that cannot be held in memory. You need to either 
+- It loads all data from database and then compute things using programming language. One day the data become so big that cannot be held in memory. You need to either 
   - load partial data into memory, compute separately and then merge the result, or
   - rewrite logic into SQL and let database compute it 
-
-### Migrating to incompatible APIs
-
-Migrating the libraries/framework/OS/database/game engine/other components whose API is not compatible with the old. **From non-developer perspective, the migration does not add any new feature, but it takes a long time, (possibly) remove existing features and (possibly) introduces new bugs.**
-
 

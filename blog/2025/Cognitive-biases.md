@@ -865,7 +865,7 @@ The price chart is often drawn by making lowest price at the bottom and highest 
 
 **Reversal of burden of proof**: One common debating technique is to reverse the burden of proof to opponent: "My claim is true because you cannot prove it is false." "You are guilty because you cannot prove you are innocent."
 
-PowerPoint (a.k.a. keynote, slide), as a medium, is good for persuading, but bad for communicating information. PowerPoint medium encourages author to omit imformation instead of writing details. [Amazon bans PowerPoint for internal usage](https://www.inc.com/justin-bariso/amazon-jeff-bezos-powerpoint-meetings-how-to-think.html). See also: [Columbia Space Shuttle Disaster](https://nicholastoole.wordpress.ncsu.edu/disaster-archive-case-study/columbia-space-shuttle-disaster-and-powerpoint/), [Military spaghetti powerpoint](http://warincontext.org/2010/04/29/the-perils-of-powerpoint/).
+PowerPoint (keynote, slide) medium is good for persuading, but bad for communicating information. PowerPoint medium encourages author to omit imformation instead of writing details. [Amazon bans PowerPoint for internal usage](https://www.inc.com/justin-bariso/amazon-jeff-bezos-powerpoint-meetings-how-to-think.html). See also: [Columbia Space Shuttle Disaster](https://nicholastoole.wordpress.ncsu.edu/disaster-archive-case-study/columbia-space-shuttle-disaster-and-powerpoint/), [Military spaghetti powerpoint](http://warincontext.org/2010/04/29/the-perils-of-powerpoint/).
 
 #### Two talking styles
 
