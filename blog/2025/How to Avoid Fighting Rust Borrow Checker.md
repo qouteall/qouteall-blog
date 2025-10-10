@@ -293,7 +293,6 @@ let mut map: BTreeMap<i32, i32> = BTreeMap::new();
 
 let mut curr_key_opt: Option<i32> = map.first_key_value().map(|(k, _v)| *k);  
 while let Some(current_key) = curr_key_opt {  
-    println!("Processing key: {}", current_key);  
     let v: &i32 = map.get(&current_key).unwrap();  
     if *v > 2 {  
         map.insert(current_key * 2, *v / 2);  
