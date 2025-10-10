@@ -259,7 +259,7 @@ For example, if you want to mutate the container while looping on it:
 let mut vec: Vec<i32> = vec![1, 2, 3];  
 for i in &vec {  
     if *i > 2 {  
-        vec.push(i / 2);  
+        vec.push(*i / 2);  
     }  
 }
 ```
