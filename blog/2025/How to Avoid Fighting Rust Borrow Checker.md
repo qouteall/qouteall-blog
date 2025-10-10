@@ -303,6 +303,8 @@ while let Some(current_key) = curr_key_opt {
 }
 ```
 
+Note that it requires cloning the key.
+
 How to take two mutable borrows of two elements in one `Vec`? For `Vec` or slice, use [`split_at_mut`](https://doc.rust-lang.org/std/vec/struct.Vec.html#method.split_at_mut). For `HashMap`, use [`get_disjoint_mut`](https://doc.rust-lang.org/std/collections/struct.HashMap.html#method.get_disjoint_mut).
 
 Another solution is to use persistent data structure. They are optimized by reusing unchanged sub-structures. Cloning them is usually fast. And they are immutable. You can shallow-clone a persistent data structure, then for loop on it.
