@@ -1121,10 +1121,10 @@ When many people follow each other, they will confirm each other, creating self-
 
 Two kinds of knowing:
 
-- I know something. But I am not sure other people also know it. Other people may also be not sure I know it. There is no consensus even if everyone thinks the same. This is [**pluralistic ignorance**](https://en.wikipedia.org/wiki/Pluralistic_ignorance).
+- I know something. But I am not sure other people also know it. Other people may also be not sure I know it. There is no consensus even if everyone thinks the same. This is [**pluralistic ignorance**](https://en.wikipedia.org/wiki/Pluralistic_ignorance). It happens when there is something that prevents communicating information.
 - I know something. I also know other people also know it. I also know other people know me know it. It's [**common knowledge**](https://en.wikipedia.org/wiki/Common_knowledge). This is the kind of knowledge that drives herd mentality.
 
-The former may suddenly convert to the later and unleash big power.
+The former may suddenly convert to the later and unleash big power, especially when people can freely communicate information.
 
 In "The emperor's new cloth" story, "king is clothless" is originally not common knowledge, even though everyone knows. But once the child states the truth publicly, that knowlege becomes common knowledge.
 
