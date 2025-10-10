@@ -182,7 +182,7 @@ This is related to Stockholm Syndrome. After experiencing pain in the past, peop
 
 **Foot-in-the-door effect**: One agreed on a small request tend to subsequently agree on a larger request.
 
-**Saying becomes believing**: Telling a lie too many times may make one truly believe in it.
+Saying becomes believing.
 
 ### Self-handicapping
 
@@ -347,10 +347,12 @@ Examples:
 
 ### Self-deception
 
-Robert Trivers proposes that we deceive ourselves to help deceiving others:
+Robert Trivers proposes that we deceive ourselves to better deceive others:
 
 - If one tries to deceive others without internally believing in the lie, the brain need to process two pieces of conflicting information, which takes more efforts and is slower.
 - When one knows one is telling lie, one may unable to control the nervousness, which can show in ways like heart beat rate, face blush, body movement, etc. Deceiving self before deceiving others can avoid these nervousness signals.
+
+Saying becomes believing. Telling a lie too many times may make one truly believe in it.
 
 ## Quick simplified understanding
 
@@ -578,7 +580,7 @@ People dislike uncertain future and keep predicting the future, while ignoring t
 
 People like to wrongly apply a theory to real world, because applying the theory can give results. Example: assuming that an unknown distribution is gaussian even when it's not.
 
-**Zeigarnik effect**: People focus on uncompleted things more than completed things. When some desire is not fulfilled (gambling not winning, PvP game not winning, browsing social media not seeing wanted content, etc.), the desire becomes more significant.
+**Zeigarnik effect**: People focus on uncompleted things more than completed things. When some desire is not fulfilled (gambling not winning, PvP game not winning, browsing social media not seeing wanted content, etc.), the desire becomes more significant. This effect can cause one not wanting to sleep.
 
 Need for closure is also related to **curiosity**.
 
@@ -726,6 +728,20 @@ This is related to risk compensation: People tend to take more risk in familiar 
 > 3. Anything invented after you're 35 is against the natural order of things.
 >
 > \- Douglas Adams
+
+#### About LLM
+
+Most people tend to treat LLM chatbot as similar to human, because most familiar form of intelligence is human. 
+
+However, LLM is different to human in many fundamental ways:
+
+- Deep learning is very different to how human brain works.
+- **Jagged intelligence**. [See also](https://x.com/karpathy/status/1816531576228053133)
+  - LLM is good at many things that are hard for human. LLM's knowledge is larger than any individual human.
+  - LLM is bad at many things that are easy for human.
+- LLM doesn't have intrinsic opinion as human do. Asking LLM a loaded question, LLM tend to follow the assumption in question to please the user. Directly asking a question tend to get different answer than asking a question under context (other chat history).
+
+One similarity: Both human and LLM can "hallucinate" in consistent way. When human forgets something, human tend to make up consistent information to fill the hole in memory. LLM's hallucinations are also seemingly plausible, not just random.
 
 ### Frequency illusion
 
@@ -1425,6 +1441,10 @@ Disposition effect:
 
 Disposition effect works well in oscillating markets. However, markets can also exhibit momentum, where disposition effect is detrimental.
 
+## Related books
 
-
+- _The Black Swan_
+- _Social Psychology_ (by David G.Myers)
+- _Thinking, fast and slow_
+- _Elephant in the brain_
 

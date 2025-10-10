@@ -247,6 +247,66 @@ Mutate-by-recreate can be useful for cases like:
 
 Mutate-by-recreate can be optimized by sharing unchanged sub-structures. See also: [Persistent data structure](https://en.wikipedia.org/wiki/Persistent_data_structure), [Rope](https://en.wikipedia.org/wiki/Rope_(data_structure)).
 
+## Contagious borrowing in containers
+
+Contagious borrowing also applies to containers. Borrowing one element in `Vec` also borrows the whole `Vec`.
+
+For looping on `Vec` is very common. In `for x in &vec {...}`, . This disallows you to mutate the vec in the loop.
+
+For example, if you want to mutate the container while looping on it:
+
+```rust
+let mut vec: Vec<i32> = vec![1, 2, 3];  
+for i in &vec {  
+    if *i > 2 {  
+        vec.push(i / 2);  
+    }  
+}
+```
+
+It doesn't work because **the whole loop keeps borrowing the `vec`**, but `vec.push` requires mutable borrowing the `vec`, which violates mutable borrow exclusiveness.
+
+However, manually using index can work:
+
+```rust
+let mut vec: Vec<i32> = vec![1, 2, 3];  
+let mut i = 0;  
+while i < vec.len() {  
+    if vec[i] > 2 {  
+        vec.push(vec[i] / 2);  
+    }  
+    i += 1;
+}
+```
+
+Because it avoids having an iterator that keeps borrowing the whole container.
+
+(That example copies element in vec. If the element in vec is not copied but borrowed, contagious borrow issue persists.)
+
+Unfortunately Rust doesn't have C-style for loop `for (int i = 0; i < len; i++)`.
+
+The similar thing can be done in `BTreeMap`. We can get the minimum key, then iteratively get next key. This allows looping on `BTreeMap` without keep borrowing it:
+
+```rust
+let mut map: BTreeMap<i32, i32> = BTreeMap::new();
+...
+
+let mut curr_key_opt: Option<i32> = map.first_key_value().map(|(k, _v)| *k);  
+while let Some(current_key) = curr_key_opt {  
+    println!("Processing key: {}", current_key);  
+    let v: &i32 = map.get(&current_key).unwrap();  
+    if *v > 2 {  
+        map.insert(current_key * 2, *v / 2);  
+    }  
+    curr_key_opt = map.range((Bound::Excluded(&current_key), Bound::Unbounded))  
+        .next().map(|(k, _v)| *k);
+}
+```
+
+How to take two mutable borrows of two elements in one `Vec`? For `Vec` or slice, use [`split_at_mut`](https://doc.rust-lang.org/std/vec/struct.Vec.html#method.split_at_mut). For `HashMap`, use [`get_disjoint_mut`](https://doc.rust-lang.org/std/collections/struct.HashMap.html#method.get_disjoint_mut).
+
+Another solution is to use persistent data structure. They are optimized by reusing unchanged sub-structures. Cloning them is usually fast. And they are immutable. You can shallow-clone a persistent data structure, then for loop on it.
+
 ## About circular reference
 
 ### Circular reference in mathematics
@@ -788,7 +848,9 @@ Another important thing is that Rust only unlocks at the end of scope by default
 
 ## Just clone the data
 
-For example, if borrow checker has trouble with a string borrowing, you can just clone the string. It's usually fine as long as it's not performance bottleneck.
+Just cloning the data can avoid borrowing the data. Without borrowing, there will be no borrow checker issue. It's usually fine if the data is small, or it's not in performance bottleneck.
+
+Another solution is persistent data structure, mentioned previously.
 
 ## `Arc` is not always fast
 
@@ -903,12 +965,6 @@ Unfortunately Rust's syntax ergonomics on raw pointer is currently not good:
 - If `p` is a raw pointer, you cannot write `p->field` (like in C/C++), and can only write `(*p).field`
 - Raw pointer cannot be method receiver (self).
 - There is no "raw pointer to slice". You need to manually `.add()` pointer and dereference. Bound checking is also manual.
-
-## Contagious borrowing in container
-
-Mutably borrow one element in `Vec` disallow borrowing of other elements. Workaround is [`split_at_mut`](https://doc.rust-lang.org/std/vec/struct.Vec.html#method.split_at_mut).
-
-For `HashMap`, use [`get_disjoint_mut`](https://doc.rust-lang.org/std/collections/struct.HashMap.html#method.get_disjoint_mut). (There seem to be no such thing in `BTreeMap`.)
 
 ## Contagious borrowing between branches
 
