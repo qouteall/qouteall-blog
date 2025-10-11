@@ -57,14 +57,16 @@ The most fighting with borrow checker happens in the **borrow-check-unfriendly c
 
 The solutions in borrow-checker-unfriendly cases (will elaborate below):
 
-- Data-oriented design. **Avoid unnecessary getter and setter**. Avoid contagious borrow. Do split borrow if necessary.
+- Data-oriented design. **Avoid unnecessary getter and setter**.
+- Do split borrow in outer scope and pass borrowing of each component separately.
 - **Use ID/handle to replace borrow**. Use arena to hold data.
 - **Defer mutation**. Turn mutation as commands and execute later.
-- **Avoid mutation**. Mutate-by-recreate. Use `Arc` to share immutable data.
+- **Avoid in-place mutation**. Mutate-by-recreate. Use `Arc` to share immutable data. Use **persistent data structure**.
 - For circular reference:
   - For graph data structure, use ID/handle and arena.
   - For callback, use event bus or `Arc<QCell<T>>` (use `Weak` to cut cycle)
-- Borrows as temporary as possible.
+- Borrow as temporary as possible. For example, replace container for-loop `for x in &vec {}` with raw index loop.
+- `Arc<QCell<T>>`
 - `Arc<RwLock<T>>` (only use when really necessary)
 - `unsafe` and raw pointer (only use when really necessary) 
 
@@ -154,17 +156,17 @@ The deeper cause is that:
 - **Borrow checker works locally**: when seeing a function call, it **only checks function signature**, instead of checking code inside the function. (Its benefit is to make borrow checking faster and simpler. Doing whole-program analysis is hard and slow, and doesn't work with things like dynamic linking.)
 - **Information is lost in function signature**: the borrowing information becomes coarse-grained and is simplified in function signature. The type system does not allow expressing borrowing only one field, and can only express borrowing the whole object. [There are propsed solutions](https://smallcultfollowing.com/babysteps/blog/2025/02/25/view-types-redux/).
 
-The solutions:
+Summarize solutions:
 
 - **Avoid OOP-style getter and setter** (just make fields public), unless necessary.
   - **Data-oriented** design (DOD). Just directly work on data and make fields public.
   - If you design a library and want encapsulation, it's recommended to use ID/handle to replace borrow (elaborated below).
   - The getter that returns cloned/copied value is fine. If data is immutable, getter is also usually fine.
 - Use ID/handle to replace borrow.
-- Make borrow as shortest as possible.
+- Borrow as temporary as possible.
 - Other workarounds like `Arc<QCell<T>>` `Arc<RwLock<T>>`, etc.
 - **Defer mutation**
-- **Avoid mutation**
+- **Avoid in-place mutation**
 
 ## Defer mutation. Mutation-as-data
 
@@ -180,7 +182,7 @@ Treating mutation as data also has other benefits:
 - The mutation can be serialized, and sent via network or saved to disk.
 - The mutation can be inspected for debugging and logging.
 - You can post-process the command list, such as sorting, filtering. If the data is sharded, the mutation command can dispatch to specific shard.
-- Better parallelism. The process of generating mutation command does not mutate the base data, so it can be parallelized. If data is sharded, the execution of mutation commands can be dispatched to shards executing in parallel.
+- Easier **parallelism**. The process of generating mutation command does not mutate the base data, so it can be parallelized. If data is sharded, the execution of mutation commands can be dispatched to shards executing in parallel.
 
 Other applications of the idea of mutation-as-data:
 
@@ -232,7 +234,7 @@ fn main() {
 }
 ```
 
-## Avoid mutation
+## Avoid in-place mutation
 
 The previous problem occurs partially due to mutable borrow exclusiveness. If all borrows are immutable, then contagious borrow is usually not a problem.
 
@@ -245,19 +247,19 @@ Mutate-by-recreate can be useful for cases like:
 - Safely sharing data in multithreading (read-copy-update (RCU), copy-on-write (COW))
 - Take snapshot and rollback efficiently
 
-Mutate-by-recreate can be optimized by sharing unchanged sub-structures. See also: [Persistent data structure](https://en.wikipedia.org/wiki/Persistent_data_structure), [Rope](https://en.wikipedia.org/wiki/Rope_(data_structure)).
+**Persistent data structure**: they share unchanged sub-structure (structural sharing) to make mutate-by-recreate faster. Some crates of persistent data structures: [rpds](https://docs.rs/rpds/latest/rpds/index.html), [im](https://docs.rs/im/latest/im/), [pvec](https://docs.rs/pvec/latest/pvec/index.html).
 
 ## Contagious borrowing in containers
 
 Contagious borrowing also applies to containers. Borrowing one element in `Vec` also borrows the whole `Vec`.
 
-For looping on `Vec` is very common. In `for x in &vec {...}`, . This disallows you to mutate the vec in the loop.
+For looping on `Vec` is very common. Rust provides concise container for-loop syntax `for x in &vec {...}`. However, it has an implicit iterator that keeps borrowing the whole container, thus involve contagious borrow issue.
 
 For example, if you want to mutate the container while looping on it:
 
 ```rust
 let mut vec: Vec<i32> = vec![1, 2, 3];  
-for i in &vec {  
+for i in &mut vec {  
     if *i > 2 {  
         vec.push(*i / 2);  
     }  
@@ -281,9 +283,7 @@ while i < vec.len() {
 
 Because it avoids having an iterator that keeps borrowing the whole container.
 
-(That example copies element in vec. If the element in vec is not copied but borrowed, contagious borrow issue persists.)
-
-Unfortunately Rust doesn't have C-style for loop `for (int i = 0; i < len; i++)`.
+(Rust doesn't have C-style for loop `for (int i = 0; i < len; i++)`.)
 
 The similar thing can be done in `BTreeMap`. We can get the minimum key, then iteratively get next key. This allows looping on `BTreeMap` without keep borrowing it:
 
@@ -304,9 +304,11 @@ while let Some(current_key) = curr_key_opt {
 
 Note that it requires cloning the key.
 
-How to take two mutable borrows of two elements in one `Vec`? For `Vec` or slice, use [`split_at_mut`](https://doc.rust-lang.org/std/vec/struct.Vec.html#method.split_at_mut). For `HashMap`, use [`get_disjoint_mut`](https://doc.rust-lang.org/std/collections/struct.HashMap.html#method.get_disjoint_mut).
+The previously mentioned **avoid in-place mutation** can help. Normally, recreating the whole container costs performance (unless container is small or it's not in performance bottleneck). The previously mentioned **persistent data structures** can be useful. One solution is to shallow-clone the container, then for-loop on the cloned one, then change the container in original place.
 
-Another solution is to use persistent data structure. They are optimized by reusing unchanged sub-structures. Cloning them is usually fast. And they are immutable. You can shallow-clone a persistent data structure, then for loop on it.
+The previously mentioned **deferred mutation** can also work. To mutate a container, firstly put mutation commands into another container, then execute these commands later.
+
+How to take two mutable borrows of two elements in one `Vec`? For `Vec` or slice, use [`split_at_mut`](https://doc.rust-lang.org/std/vec/struct.Vec.html#method.split_at_mut). For `HashMap`, use [`get_disjoint_mut`](https://doc.rust-lang.org/std/collections/struct.HashMap.html#method.get_disjoint_mut).
 
 ## About circular reference
 

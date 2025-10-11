@@ -509,7 +509,7 @@ People often dream of a "silver bullet" that simply magically works:
   - Coca Cola succeedes not just by the "secret recipe". The brading, global production system and logistic network are also important.
   - Modern technologies are complex and have many dependencies. You cannot just simply copy "one key techonology" and get the same result. Even just imitating existing technology often requires a whole infrastructure, many talents and years of work. [^about_ai_race]
 
-[^about_ai_race]: It's a common view that AI capability can improve exponetially. And when AI is smart enough to keep improving itself, its intelligence will skyrocket into superintelligence, far above human. But it's highly possible that future AI will still be bottlenecked by energy production, compute power and interconnect bandwidth, which limits how fast AI can self-improve. There will probably be no dramatic "suddenly winning AI race forever".
+[^about_ai_race]: It's a common view that AI capability can improve exponetially. And when AI is smart enough to keep improving itself, its intelligence will skyrocket into superintelligence, far above human. But it's highly possible that future AI will still be bottlenecked by 1. energy production 2. compute power 3. getting verification from real world. These 3 factors limits how fast AI can take effect and self-improve. Especially the third limitation (Go game and Lean math proving can be verified purely in computer, but other kinds of science, like chemistry and biology, are too complex to be fully simulated in computer, thus getting verification from real world is a very important bottleneck. Also, some AI researchers say they are bottlecked by training speed rather than ideas. Deep learning has chaotic characteristics, so how fast AI experiments can be done is an important bottleneck in AI self-improve.). There will probably be no dramatic "suddenly winning AI race forever".
 
 ### Binary thinking (false dichotomy)
 
@@ -1253,9 +1253,11 @@ If there is no enough mental energy, one is less likely to resist impulse behavi
 These factors affect mental energy:
 
 - Sleeping and mental resting can replenish mental energy.
-- Body conditions (like blood sugar level) affects mental energy.
+- Body conditions (like blood sugar level [^blood_sugar_level]) affects mental energy.
 - Exercising self-control can strengthen mental energy, similar to muscular strength.
 - Lingering emotion (e.g. keep ruminating past mistakes) costs mental energy.
+
+[^blood_sugar_level]: Related: Using GLP-1 may cause one harder to focus and pay attention due to reduced blood sugar level and other factors. However, GLP-1 can improve brain fog related to inflammation. The overall effect is complex and not yet well understood.
 
 Mental resting is different to body resting. Intense thinking when lying on the bed even consumes mental energy. Mental resting involves focusing on simple things with low cognitive demand.
 

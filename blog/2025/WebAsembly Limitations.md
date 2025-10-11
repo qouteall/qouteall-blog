@@ -78,7 +78,7 @@ void f() {
   The `localVariable` is taken address to, so it must be in linear memory, not Wasm execution stack (unless the compiler can optimize out the pointer).
 
 - GC needs to scan the references (pointers) on stack. If the Wasm app use application-managed GC (not Wasm built-in GC) (for reasons explained below), then the on-stack references (pointer) need to be "spilled" to linear memory.
-- Stack switching cannot be done. Golang use stack switching for goroutine scheduling (not in Wasm). [Currently Golang's performance in Wasm is poor](https://github.com/golang/go/issues/65440), because it tries to simulate goroutine scheduling in single-threaded Wasm, thus it need to add many dynamic jumps in code.
+- Stack switching cannot be done. Golang use stack switching for goroutine scheduling (not in Wasm). [Currently Golang's performance in Wasm is poor](https://github.com/golang/go/issues/65440), because it tries to emulate goroutine scheduling in single-threaded Wasm, thus it need to add many dynamic jumps in code.
 - Dynamic stack resizing cannot be done. Golang does dynamic stack resizing so that new goroutines can be initialized with small stacks, reducing memory usage.
 
 The common solution is to have a **shadow stack** that's in linear memory. That stack is managed by Wasm code. (Sometimes shadow stack is called aux stack.)
@@ -336,3 +336,7 @@ The same thing can also be done via equivalent Wasm code using `SharedArrayBuffe
 
 Related: Another vulnerability related to cache side channel: [GoFetch](https://gofetch.fail/). It exploits Apple processors' cache prefetching functionality.
 
+### Forcing structural control flow
+
+See also: [WebAssembly Troubles part 2: Why Do We Need the Relooper Algorithm, Again?](http://troubles.md/why-do-we-need-the-relooper-algorithm-again/)
+This may reduce the performance of compiling to Wasm and JIT optimization. This issue doesn't apply to application developers.

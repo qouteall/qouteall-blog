@@ -378,17 +378,19 @@ Concentration and fat-tail distribution (80/20) are common in software world:
 - Most users use few common features of a software.
 - Most complexity (and bugs) come from very few features requirements.
 - Most time of CPU is spent executing few hot code.
-- Most data access targets few core data (cache require this to be effective).
+- Most data access targets few hot data (cache require this to be effective).
 - Most branches are biased to one in execution (branch prediction require this to be effective).
-- Most developers use few languages and frameworks.
-- Most development efforts are for fixing edge cases. Few development efforts are spent on main case handling.
-- Most bugs that user see are caused by few easy-to-trigger bugs.
+- Most developers use few languages, libraries and frameworks. (Matthew effect of ecosystem)
+- Most code and development efforts are for fixing edge cases. Few code and development efforts are spent on main case handling. [^progress_misconception]
+- Most bugs that users see are caused by few easy-to-trigger bugs.
+
+[^progress_misconception]: For beginners, a common misconception is that "if the software shows things on screen, then it's 90% done". In reality, a proof-of-concept is often just 20% done. There are so many corner cases in real usage. Not handing one corner case is bug. Most code are used for handling corner cases, not common cases. Although each specific corner case triggering probability is small, triggering any of the many corner cases is high-probability.
 
 Many optimizations are based on **assuming the high-probability case happens**:
 
 - Branch prediction assumes that it will execute the high-probability branch. If it predicts wrongly, speculative execution rolls back.
 - Cache assumes that it will access hot data. If it accesses outside of hot data, cache is not hit.
-- Optimistic concurrency control assumes there will be no concurrency conflict. If there do is a conflict, it rolls back and retries.
+- Optimistic concurrency control assumes there will be no concurrency conflict. If there do is a conflict, it rolls back and retries. It requires fewer waiting and communication than pessimistic concurrency control (locking), unless there are many contentions.
 
 ## Corresponding GoF design patterns
 
