@@ -17,22 +17,6 @@ The 3 important facts in Rust:
 [^about_sharing]: The native Rust ownership relation form a tree. Reference counting (`Rc`, `Arc`) allows shared ownership.
 
 
-## Some common arguments
-
-- "Rust doesn't ensure safety of `unsafe` code, so using `unsafe` defeats the purpose of using Rust". No. If you keep the amount of `unsafe` small, then when memory/thread safety issue happens, you can inspect these small amount of `unsafe` code. In C/C++ you need to inspect all related code.
-- "Using arena still face the equivalent of 'use after free', so arena doesn't solve the problem". No. Arenas can make these bugs much more deterministic than the use-after-free in C/C++, prevent memory-safety [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug)  [^about_heisenbug], making debugging much easier.
-- "Rust borrow checker rejects your code because your code is wrong." No. Rust can reject valid safe code.
-- "Doubly-linked list is useless." No. It can be useful in many cases. Linux kernel use them. But often trees and hash maps can replace manually-implemented doubly-linked list.
-- "Circular reference is bad and should be avoided." No. Circular reference can be useful in many cases. Circular reference do come with risks.
-- "Rust guarantees high performance." No. If one evades borrow checker by using `Arc<Mutex<>>` everywhere, the program will be likely slower than using a normal GC language (and has more risk of deadlocking). But it's easier to achieve high performance in Rust. In many other languages, achieving high perfomance often require bypassing (hacking) a lot of language functionalities.
-- "Rust guarantees security." No. Not all security issues are memory/thread safety issues. According to [Common Weakness Enumeration 2024](https://cwe.mitre.org/top25/archive/2024/2024_cwe_top25.html), many real-world vulnerabilities are XSS, SQL injection, directory traversal, command injection, missing authentication, etc. that are not memory/thread safety.
-- "Rust doesn't help other than memory/thread safety." No.
-  - Algebraic data type (e.g. `Option`, `Result`) helps avoid creating illegal data from the source. Using ADT data require pattern match all cases, avoiding forgetting handling one case. (except when using escape hatch like `unwrap()`).
-  - Mutable borrow exclusiveness prevents iterator invalidation.
-  - Explicit `.clone()` avoids accidentally copying container like in C++.
-
-[^about_heisenbug]: The Heisenbugs may only trigger in relase build, not in debug build, not when sanitizers are on, not when logging is on, not when debugger is on. Because optimization, sanitizer, debugger and logging can change timing and memory layout, which can make memory safety or thread safety bug no longer trigger. Debugging a Heisenbug in large codebase may take weeks even months. Note that not all memory/thread safety bugs are Heisenbugs. Many are still easy to trigger.
-
 ## Considering reference shape
 
 Firstly consider the reference [^about_reference] shape of your in-memory data.
@@ -253,7 +237,7 @@ Mutate-by-recreate can be useful for cases like:
 
 Contagious borrowing also applies to containers. Borrowing one element in `Vec` also borrows the whole `Vec`.
 
-For looping on `Vec` is very common. Rust provides concise container for-loop syntax `for x in &vec {...}`. However, it has an implicit iterator that keeps borrowing the whole container, thus involve contagious borrow issue.
+For looping on `Vec` is very common. Rust provides concise container for-loop syntax `for x in &vec {...}`. However, it has **an implicit iterator that keeps borrowing the whole container**, thus involve contagious borrow issue.
 
 For example, if you want to mutate the container while looping on it:
 
@@ -266,7 +250,7 @@ for i in &mut vec {
 }
 ```
 
-It doesn't work because **the whole loop keeps borrowing the `vec`**, but `vec.push` requires mutable borrowing the `vec`, which violates mutable borrow exclusiveness.
+It doesn't work because the implicit iterator keeps borrowing the `vec`, but `vec.push` requires mutable borrowing the `vec`, which violates mutable borrow exclusiveness.
 
 However, manually using index can work:
 
@@ -281,15 +265,17 @@ while i < vec.len() {
 }
 ```
 
-Because it avoids having an iterator that keeps borrowing the whole container.
+Because it avoids having an iterator that keeps borrowing the whole container. Getting an element only temporarily borrows.
 
 (Rust doesn't have C-style for loop `for (int i = 0; i < len; i++)`.)
+
+(That example is just for showing how to mutate the container while looping on it. It's not recommended to do that.)
 
 The similar thing can be done in `BTreeMap`. We can get the minimum key, then iteratively get next key. This allows looping on `BTreeMap` without keep borrowing it:
 
 ```rust
 let mut map: BTreeMap<i32, i32> = BTreeMap::new();
-...
+map.insert(2, 3);
 
 let mut curr_key_opt: Option<i32> = map.first_key_value().map(|(k, _v)| *k);  
 while let Some(current_key) = curr_key_opt {  
@@ -304,9 +290,41 @@ while let Some(current_key) = curr_key_opt {
 
 Note that it requires cloning the key.
 
+That way doesn't work for `HashMap`. `HashMap` doesn't preserver order and doesn't allow getting the next key.
+
 The previously mentioned **avoid in-place mutation** can help. Normally, recreating the whole container costs performance (unless container is small or it's not in performance bottleneck). The previously mentioned **persistent data structures** can be useful. One solution is to shallow-clone the container, then for-loop on the cloned one, then change the container in original place.
 
+Example of mutating container while looping on it, using [rpds](https://docs.rs/rpds/latest/rpds/index.html):
+
+```rust
+let mut map: HashTrieMap<i32, i32> = HashTrieMap::new();  
+map = map.insert(2, 3);  
+for (k, v) in &map.clone() {  
+    if *v > 2 {  
+        map = map.insert(*k * 2, *v / 2);  
+    }  
+}
+```
+
+It for-loops on a shallow-cloned version of the map. The new entries added during looping won't be visited in the loop, unlike previous two examples.
+
 The previously mentioned **deferred mutation** can also work. To mutate a container, firstly put mutation commands into another container, then execute these commands later.
+
+```rust
+let mut map: HashMap<i32, i32> = HashMap::new();  
+map.insert(2, 3);  
+let mut to_insert: Vec<(i32, i32)> = Vec::new();  
+for (k, v) in &map {  
+    if *v > 2 {  
+        to_insert.push((*k * 2, *v / 2));  
+    }  
+}  
+for (k, v) in &to_insert {  
+    map.insert(*k, *v);  
+}
+```
+
+If you just want to remove some elements by some condition, use `retain`. No need to write your own for-loop for that.
 
 How to take two mutable borrows of two elements in one `Vec`? For `Vec` or slice, use [`split_at_mut`](https://doc.rust-lang.org/std/vec/struct.Vec.html#method.split_at_mut). For `HashMap`, use [`get_disjoint_mut`](https://doc.rust-lang.org/std/collections/struct.HashMap.html#method.get_disjoint_mut).
 
@@ -1186,6 +1204,23 @@ async fn main() {
 - `async` is contagious. `async` function can call normal function. Normal function cannot easily call `async` function (but it's possible to call by blocking).
 - Being not `Sync`/`Send` is contagious. A struct that indirectly owns a non-`Sync` data is not `Sync`. A struct that indirectly owns a non-`Send` data is not `Send`.
 - Error passing is contagious. If panic is not acceptable, then all functions that indirectly call a fallible function must return `Result`. Related: NaN is contagious in floating point computaiton.
+
+## Some common arguments
+
+- "Rust doesn't ensure safety of `unsafe` code, so using `unsafe` defeats the purpose of using Rust". No. If you keep the amount of `unsafe` small, then when memory/thread safety issue happens, you can inspect these small amount of `unsafe` code. In C/C++ you need to inspect all related code. It's still not recommended to use many `unsafe` in Rust.
+- "Using arena still face the equivalent of 'use after free', so arena doesn't solve the problem". No. Arenas can make these bugs much more deterministic than the use-after-free in C/C++, prevent memory-safety [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug)  [^about_heisenbug], making debugging much easier.
+- "Rust borrow checker rejects your code because your code is wrong." No. Rust can reject valid safe code.
+- "Doubly-linked list is useless." No. It can be useful in many cases. Linux kernel use them. But often trees and hash maps can replace manually-implemented doubly-linked list.
+- "Circular reference is bad and should be avoided." No. Circular reference can be useful in many cases. Circular reference do come with risks.
+- "Rust guarantees high performance." No. If one evades borrow checker by using `Arc<Mutex<>>` everywhere, the program will be likely slower than using a normal GC language (and has more risk of deadlocking). But it's easier to achieve high performance in Rust. In many other languages, achieving high perfomance often require bypassing (hacking) a lot of language functionalities.
+- "Rust guarantees security." No. Not all security issues are memory/thread safety issues. According to [Common Weakness Enumeration 2024](https://cwe.mitre.org/top25/archive/2024/2024_cwe_top25.html), many real-world vulnerabilities are XSS, SQL injection, directory traversal, command injection, missing authentication, etc. that are not memory/thread safety.
+- "Rust doesn't help other than memory/thread safety." No.
+  - Algebraic data type (e.g. `Option`, `Result`) helps avoid creating illegal data from the source. Using ADT data require pattern match all cases, avoiding forgetting handling one case. (except when using escape hatch like `unwrap()`).
+  - Mutable borrow exclusiveness prevents iterator invalidation.
+  - Explicit `.clone()` avoids accidentally copying container like in C++.
+- "Using immutable data structure is just a workaround forced by Rust." No. Immutable data structure can prevent many bugs caused by accidental mutation. If used correctly, they can reduce complexity. They are also useful for things like rollback.
+
+[^about_heisenbug]: The Heisenbugs may only trigger in relase build, not in debug build, not when sanitizers are on, not when logging is on, not when debugger is on. Because optimization, sanitizer, debugger and logging can change timing and memory layout, which can make memory safety or thread safety bug no longer trigger. Debugging a Heisenbug in large codebase may take weeks even months. Note that not all memory/thread safety bugs are Heisenbugs. Many are still easy to trigger.
 
 ## Other
 

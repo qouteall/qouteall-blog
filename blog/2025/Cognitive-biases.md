@@ -229,11 +229,7 @@ People tend to avoid thinking about inevitable death because it's unpleasant. Pe
 - People tend to not value the present because "life is permanent"
 - People focus too much on small problems
 
-Stoicism proposes thinking about death all the time. Thinking about death can make one not procrastinate important things, make one value the present and reduce worrying about small problems. But Stocism does NOT propose indulgence and overdrafting the future.
-
-> Respice post te. Hominem te esse memento. Memento mori!
-> 
-> Look behind. Remember you are mortal. Remember you will die!
+Stoicism proposes thinking about death all the time (_memento mori_). Thinking about death can make one not procrastinate important things, make one value the present and reduce worrying about small problems. But Stocism does NOT propose indulgence and overdrafting the future.
 
 ## Belief stability
 
@@ -356,7 +352,9 @@ Saying becomes believing. Telling a lie too many times may make one truly believ
 
 ## Quick simplified understanding
 
-We can learn from the world in an **information-efficient** way: learning from very few information quickly. (On the other side, current deep learning technology is information-inefficient, as it requires tons of training data to get good results.)
+We can learn from the world in an **information-efficient** way: learning from very few information quickly. [^deep_learning_data_efficiency]
+
+[^deep_learning_data_efficiency]: On the contrary, current deep learning technology is information-inefficient, as it requires tons of training data to get good results. Current (2025 Oct) LLMs have limited in-context learning ability, but still suffer from context rot and cannot do continuous learning.
 
 The flip side of information-efficient learning is **hasty generalization**. We tend to generalize from very few examples quickly, rather than using logical reasoning and statistical evidence, thus easily get fooled by randomness.
 

@@ -166,6 +166,8 @@ Another case is that the software provides orthogonality in interface, and actua
 
 - Two previously separated UI components now need to share mutable state. [The complexity that lives in the GUI | RoyalSloth](https://blog.royalsloth.eu/posts/the-complexity-that-lives-in-the-gui/)
 
+- The previous data processing removes some information. New requirement needs to keep that information. (Example TODO)
+
 ### Corner case explosion
 
 - There are some fixed workflows (hardcoded in code). A new requirement comes: allow the user to configure and customize the workflow. The new flexible system allow much more ways of configuring and introduce many corner cases.
