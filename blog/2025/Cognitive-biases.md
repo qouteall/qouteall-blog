@@ -360,7 +360,9 @@ The flip side of information-efficient learning is **hasty generalization**. We 
 
 The reality is complex, so **we need to simplify things to make them easier to understand and easier to remember. However, the simplification can get wrong.** There are too many informations in the world. We have some heuristics for filtering information.
 
-To simplify, we tend to **make up reasons of why things happen**. A reasonable thing is simpler and easier to memorize than raw complex facts. This process is also compression. It has implications in AI: Attempting (lossy) compression will naturally lead to learning, [which is the core mehanism of why unsupervised learning works](https://www.youtube.com/live/AKMuA_TVz3A?si=IswmwkZj8kBRx9Fv).
+To simplify, we tend to **make up reasons of why things happen**. A reasonable thing is simpler and easier to memorize than raw complex facts. This process is also compression. [^lossy_compression_ai]
+
+[^lossy_compression_ai]: It has implications in AI: Attempting (lossy) compression will naturally lead to learning, which is the core mehanism of why unsupervised learning works. [See also](https://www.youtube.com/live/AKMuA_TVz3A?si=IswmwkZj8kBRx9Fv)
 
 ### Hasty generalization
 
@@ -517,7 +519,6 @@ Examples of binary thinking:
 
 - "That person is a good person." / "That person is a bad person."
 - "You're either with us or against us.", "Anything less than absolute loyalty is absolute disloyalty."
-- "You either support free speech absolutely, or you're in favor of censorship."
 - "Bitcoin is the future." / "Bitcoin is a scam".
 - "This asset is completely safe." / "This bubble is going to collapse tomorrow."
 - FOMO (fear of missing out) / risk averse.
@@ -527,7 +528,8 @@ Examples of binary thinking:
 - "We will win quickly." / "We will lose quickly."
 - "I can do it perfectly." / "I cannot do it perfectly so I will fail."
 - "\[X\] is the best thing and everyone should use it." / "\[X\] has this drawback so it's not only useless but also harmful."
-- Doesn't admit tradeoffs exist.
+- "Market is always fully effective." / "Market is never effective."
+- Doesn't admit **tradeoffs** exist.
 
 People's evaluations are anchored on the expectation, and **not meeting an expectation could make people's belief turn to another extreme**.
 
@@ -645,11 +647,11 @@ The planes that get hit in critical places never come back, thus don't get inclu
 Other examples of survivorship bias:
 
 - Most gamblers are initially lucky, because the unlucky ones tend to quit gambling early.
-- One person can do many different predictions. After the event happened, they pick the right one and delete the wrong ones, giving the illusion of prediction accuracy.
+- Assume that many fund managers randomly pick stocks. After one year, some of the lucky ones have good performance, while others are overlooked. In the short term, you cannot know whether success come from just luck.
 - "Taleb's rat health club": Feeding poison to rats increases average health, because the unhealthy ones are more likely to die from poison.
 - Social media has more negative news than positive news. Bad news travels fast.
 - The succeded research results are published and the failed attempts are hidden (P-hacking).
-- Only special and interesting cases appear on news. The more representative common but not newsworthy cases are hidden.
+- Only special and interesting events appear on news. The more representative common but not newsworthy events are overlooked.
 
 A more generalized version of survivor bias is **selection bias**: When the sampling is not uniform enough and contains selection mechanism (not necessary 100% accurate selection), there will be bias in the result.
 

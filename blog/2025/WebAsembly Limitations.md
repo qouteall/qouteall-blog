@@ -197,7 +197,7 @@ What's more, if the canvas drawing code suspends using JS Promise integration, t
 
 Multi-threading in Web relies on web workers. Currently there is no way to directly launch a Wasm thread in browser.
 
-Launching a multi-threaded Wasm application is done by passing shared `WebAssembly.Memory` (that contains a `SharedArrayBuffer`) to another web worker. That web worker need to **separately create a new Wasm instance**, using the same `WebAssembly.Memory` object (and `WebAssembly.Module` object.
+Launching a multi-threaded Wasm application is done by passing shared `WebAssembly.Memory` (that contains a `SharedArrayBuffer`) to another web worker. That web worker need to **separately create a new Wasm instance**, using the same `WebAssembly.Memory` (and `WebAssembly.Module`).
 
 The **Wasm globals are thread-local** (not actually global). Mutate a mutable Wasm global in one thread don't affect other threads. Mutable globals variables need to be placed in linear memory.
 
@@ -272,28 +272,6 @@ VSCode can debug Wasm running in Chrome, using [vscode-js-debug plugin](https://
 (It also requires VSCode [WebAssembly DWARF Debugging](https://marketplace.visualstudio.com/items?itemName=ms-vscode.wasm-dwarf-debugging) extension. Currently (2025 Sept) that extension doesn't exist in Cursor.)
 
 Chromium [debugging API](https://chromedevtools.github.io/devtools-protocol/tot/Debugger/).
-
-## Hot reload that keeps execution state
-
-It's easy to load new Wasm code in browser, without keeping Wasm execution state. 
-
-During development, hot reloading Wasm code while keeping execution state can improve iteration speed. Without hot reload, the developer changed the code need to re-enter the same application state to test changes.
-
-Java and C# supports hot reloading (Java only supports changing function body or inlined constants), with the help of their runtime. Just being able to reload function body is already useful. [See also](https://loglog.games/blog/leaving-rust-gamedev/#hot-reloading-is-more-important-for-iteration-speed-than-people-give-it-credit-for)
-
-In native applications, hot reload often requires advanced machine code instumentation. Because it need to be done while application is running. Keeping the execution state and adapting it to new code is hard.
-
-Web code runs in event loop. After one cycle of event loop, there is no Wasm or JS code running. Now the only execution state become linear memory, globals and tables, etc. The stack and code execution position doesn't exist and don't need to be kept. It's theoretically possible to do hot swap during that, by creating a new Wasm module using new code, creating a new Wasm instance using new module, with the old linear memory, globals, tables etc. Related details:
-
-- The initialization code that resets some global state need to be skipped after hotswap.
-- The layout of data section changes. Data sections are loaded into linear memory during startup. The original pointers (including strings) pointing into data section need to still work. One solution is to place new data section in new places, which wastes some memory. As that hot swapping is intended to be only used in development, wasting some memory is fine. The address of global constants need to be relocated (can reuse existing dynamic linking functionality).
-- If the memory layout in linear memory changes, it won't work, unless there is no such data in linear memory. This also includes Rust futures. Async functions cannot be easily be hot reloaded.
-- All references to Wasm-exported functions in JS need to be replaced with new ones, otherwise it will still execute old Wasm instance.
-- It doesn't work with [JS Promise integration](https://github.com/WebAssembly/js-promise-integration), as the Wasm runtime manages the stack for that.
-- The Wasm globals and tables need to be exported, otherwise JS cannot access them.
-- The function table need to be new, but the function in each index need to correspond to the function in same index in the old table, otherwise function indexes on linear memory will break.
-
-That hot realod is not yet implemented.
 
 ## Appendix
 

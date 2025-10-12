@@ -118,7 +118,7 @@ In some places, we specify a new state and need to compute the mutation (diff). 
 
 Mutate-by-recreate: Keep data immutable. Change it by recreating the whole data.
 
-In multi-threading, for read-heavy data, it's often beneficial to make only one reference to data structure atomically mutable, then make the referenced structure immutable. Updating recreates the whole data structure and atomically change the reference. This called read-copy-update (RCU) or copy-on-write (COW).
+In multi-threading, for read-heavy data, it's often beneficial to make the data structure immutable, but keep one mutable atomic reference to it. Updating recreates the whole data structure and atomically change the reference. This called read-copy-update (RCU) or copy-on-write (COW).
 
 In pure functional languages (e.g. Haskell), there is no direct way of mutating things. Mutation can only be simutated by recreating.
 
