@@ -100,9 +100,19 @@ About constants: there are integer constants, string constants and other kinds o
 - An integer constant can also be put into a Wasm global.
 - A contant can be put into data section. String constants are put into data section.
 
-
-
 Wasm binary use [LEB128](https://en.wikipedia.org/wiki/LEB128) format for encoding integers.
+
+When linking, these constants in instructions need to be changed (relocation):
+
+- Function index of function call
+- Linear memory address of constant data in data section
+- Global index of global-related operations
+- Table index of table-related operations
+- ...
+
+These constants are immediate values in instructions. There are other constants that are also immediate values in instructions. Without extra data, linker cannot know whether an immediate value in instruction is relocatable (linear memory address, function index, etc.) or just constant (some constants are put to immeidate value instead of data section or global). 
+
+So, there is a special kind of custom section that holds relocation info. That relocation info contains offset into Wasm binary, pointing to function index/linear memory address/etc. in instruction. When linker tries to relocate, it reads relocation information and change corresponding value in instruction.
 
 Although the functions within Wasm binary has no name, only index, the exports and imports have name, and they correspond to field name in JS object.
 
