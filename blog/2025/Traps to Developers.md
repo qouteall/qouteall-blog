@@ -275,15 +275,21 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 
 ### React
 
-- Modifying state in rendering code.
-- Hook used inside if or loop.
-- Value not included in `useEffect` dependency array.
-- `useEffect` dependency array contains object recreated in rendering. See also [Cloudflare indicent 2025 Sept-12](https://blog.cloudflare.com/deep-dive-into-cloudflares-sept-12-dashboard-and-api-outage/)
+- Modify state in rendering code.
+- React compares equality using reference equality, not content equality.
+  - The objects and arrays that are newly created in rendering are treated as always-new. Use `useMemo` to fix.
+  - The closure functions that are created in rendering are also always-new. Use `useCallback` to fix.
+  - If an always-new thing is put into `useEffect` dependency array, the effect will run on every render. See also [Cloudflare indicent 2025 Sept-12](https://blog.cloudflare.com/deep-dive-into-cloudflares-sept-12-dashboard-and-api-outage/). 
+  - Don't forget to include dependencies in the dependency array. And the dependencies also need to be memoed.
+- When using effect to manage `setInterval` `removeInterval`, if the effect has dependency value, it will remove timer and re-add timer when dependency changes, which can mess up the timing.
+- State objects themselves should be immutable. Don't directly set fields of state objects. Always recreate whole object.
+- Forget to include value in `useEffect` dependency array.
 - Forget clean up in `useEffect`.
-- Closure trap (capturing outdated state).
-- Accidentally change data in wrong places (impure component).
-- Forgetting `useCallback` cause unnecessary re-render.
-- Passing non-memoed things into a memoed component makes memo useless.
+- Closure trap. Closure can capture a state. If the state changes, the closure still captures the old state. 
+  - One solution is to make closure not capture state and access state within `useReducer`. 
+  - Another solution is to put state in `useRef` (note that changing value inside ref don't trigger re-rendering, you need to change state or prop to trigger re-rendering)
+- `useEffect` firstly runs after component DOM presents in web page. Doing initialization in `useEffect` may cause visual flicker. Use `useLayoutEffect` for early initialization.
+- When using ref to get DOM object, it won't be accessible during first rendering (component function call). It can be accessed in `useLayoutEffect`.
 
 
 
@@ -307,7 +313,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - TCP slow start can increase latency. Can be fixed by disabling `tcp_slow_start_after_idle`. [See also](https://ably.com/blog/optimizing-global-message-transit-latency-a-journey-through-tcp-configuration)
 - TCP sticky packet. Nagle's algorithm delays packet sending. It will increase latency. Can be fixed by enabling `TCP_NODELAY`. [See also](https://brooker.co.za/blog/2024/05/09/nagle.html) 
 - If you put your backend behind Nginx, you need to configure connection reuse, otherwise under high concurrency, connection between nginx and backend may fail, due to not having enough internal ports.
-- Nginx by default buffers packet. It will delay SSE.
+- Nginx `proxy_buffering` delays SSE.
 - The HTTP protocol does not explicitly forbit GET and DELETE requests to have body. Some places do use body in GET and DELETE requests. But many libraries and HTTP servers does not support them.
 - One IP can host multiple websites, distinguished by domain name. The HTTP header `Host` and SNI in TLS handshake carries domain name, which are important. Some websites cannot be accessed via IP address.
 - CORS (cross-origin resource sharing). For requests to another website (origin), the browser will prevent JS from getting response, unless the server's response contains header `Access-Control-Allow-Origin` and it matches client website. This requires configuring the backend. If you want to pass cookie to another website it involves more configuration.
