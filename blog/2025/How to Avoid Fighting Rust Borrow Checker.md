@@ -12,7 +12,7 @@ The 3 important facts in Rust:
 
 - **Tree-shaped ownership**. In Rust's ownership system, one object can own many children or no chlld, but must be owned by **exactly one parent**. Ownership relations form a tree. [^about_sharing]
 - **Mutable borrow exclusiveness**. If there exists one mutable borrow for an object, then no other borrow to that object can exist. Mutable borrow is exclusive.
-- **Borrow is contagious**. If you borrow a child, you indirectly borrow the parent (and parent's parent, and so on). Just borrowing one wheel of a car makes you borrow the whole car, then another wheel cannot be mutably borrowed. It can be avoided by split borrow within one scope, but not across functions.
+- **Borrow is contagious**. If you borrow a child, you indirectly borrow the parent (and parent's parent, and so on). Just borrowing one wheel of a car makes you borrow the whole car, then another wheel cannot be mutably borrowed. It can be avoided by **split borrow** which only works within one scope.
 
 [^about_sharing]: The native Rust ownership relation form a tree. Reference counting (`Rc`, `Arc`) allows shared ownership.
 
@@ -91,7 +91,7 @@ fn main() {
 }
 ```
 
-[^about_code_example]: This simplified code example is just for illustrating contagious borrow issue. The total score doesn't need to be a mutable field. It's analogous to a complex state that will exist in real applications. Same for other examples.
+(That example is just for illustrating contagious borrow issue. The total score doesn't need to be a mutable field. It's analogous to a complex state that will exist in real applications. Same for other examples.)
 
 Compile error:
 
@@ -140,17 +140,17 @@ The deeper cause is that:
 - **Borrow checker works locally**: when seeing a function call, it **only checks function signature**, instead of checking code inside the function. (Its benefit is to make borrow checking faster and simpler. Doing whole-program analysis is hard and slow, and doesn't work with things like dynamic linking.)
 - **Information is lost in function signature**: the borrowing information becomes coarse-grained and is simplified in function signature. The type system does not allow expressing borrowing only one field, and can only express borrowing the whole object. [There are propsed solutions](https://smallcultfollowing.com/babysteps/blog/2025/02/25/view-types-redux/).
 
-Summarize solutions:
+Summarize solutions (workarounds) of contagious borrow issue (elaborated below):
 
 - **Avoid OOP-style getter and setter** (just make fields public), unless necessary.
   - **Data-oriented** design (DOD). Just directly work on data and make fields public.
   - If you design a library and want encapsulation, it's recommended to use ID/handle to replace borrow (elaborated below).
   - The getter that returns cloned/copied value is fine. If data is immutable, getter is also usually fine.
-- Use ID/handle to replace borrow.
-- Borrow as temporary as possible.
-- Other workarounds like `Arc<QCell<T>>` `Arc<RwLock<T>>`, etc.
 - **Defer mutation**
 - **Avoid in-place mutation**
+- Do a split borrow on the outer scope
+- Borrow as temporary as possible.
+- Using interior mutability
 
 ## Defer mutation. Mutation-as-data
 
@@ -233,13 +233,43 @@ Mutate-by-recreate can be useful for cases like:
 
 **Persistent data structure**: they share unchanged sub-structure (structural sharing) to make mutate-by-recreate faster. Some crates of persistent data structures: [rpds](https://docs.rs/rpds/latest/rpds/index.html), [im](https://docs.rs/im/latest/im/), [pvec](https://docs.rs/pvec/latest/pvec/index.html).
 
-## Contagious borrowing in containers
+Example of mutating container while looping on a clone of it, using [rpds](https://docs.rs/rpds/latest/rpds/index.html):
 
-Contagious borrowing also applies to containers. Borrowing one element in `Vec` also borrows the whole `Vec`.
+```rust
+let mut map: HashTrieMap<i32, i32> = HashTrieMap::new();  
+map = map.insert(2, 3);  
+for (k, v) in &map.clone() {  
+    if *v > 2 {  
+        map = map.insert(*k * 2, *v / 2);  
+    }  
+}
+```
 
-For looping on `Vec` is very common. Rust provides concise container for-loop syntax `for x in &vec {...}`. However, it has **an implicit iterator that keeps borrowing the whole container**, thus involve contagious borrow issue.
+## Split borrow
 
-For example, if you want to mutate the container while looping on it:
+**Split borrow of fields in struct**: As previously mentioned, if you separately borrow two fields of a struct within one scope (e.g. a function), Rust will do a split borrow. This can solve contagious borrow issue. Getter and setter functions break split borrow, because borrowing information become coarse-grained in function signature.
+
+Contagious borrow can also happen in containers. If you borrow one element of a container, then another element cannot be mutably borrowed. Solutions:
+
+- For `Vec` and slice, use [`split_at_mut`](https://doc.rust-lang.org/std/vec/struct.Vec.html#method.split_at_mut)
+- For `HashMap`, use [`get_disjoint_mut`](https://doc.rust-lang.org/std/collections/struct.HashMap.html#method.get_disjoint_mut)
+
+## Iterator contagious borrow
+
+For looping on container is very common. Rust provides concise container for-loop syntax `for x in &container {...}`. However, it has **an implicit iterator that keeps borrowing the whole container**.
+
+In the container for loop, you can mutate the current element (`for x in &mut container { mutate(x); }`). However, you cannot mutate other elements, or add/remove elements.
+
+What if you really need to mutate the container while for-looping?
+
+- If you just want to remove some elements by some condition, use `retain`. No need to write your own for-loop for that.
+- The previously mentioned **deferred mutation**.
+- The previously mentioned **avoid mutation**. Re-create the whole container. **Persistent data structure** can optimize for that.
+- Manually manage index and key in loop.
+
+### Manually manage index and key in loop
+
+For example, if you want to add element to `Vec` while looping on it, it doesn't work due to implicit iterator keep borrowing whole container:
 
 ```rust
 let mut vec: Vec<i32> = vec![1, 2, 3];  
@@ -250,9 +280,7 @@ for i in &mut vec {
 }
 ```
 
-It doesn't work because the implicit iterator keeps borrowing the `vec`, but `vec.push` requires mutable borrowing the `vec`, which violates mutable borrow exclusiveness.
-
-However, manually using index can work:
+Manually managing the index in loop can work:
 
 ```rust
 let mut vec: Vec<i32> = vec![1, 2, 3];  
@@ -267,9 +295,9 @@ while i < vec.len() {
 
 Because it avoids having an iterator that keeps borrowing the whole container. Getting an element only temporarily borrows.
 
-(Rust doesn't have C-style for loop `for (int i = 0; i < len; i++)`.)
+Note that **it requires stop borrowing the element before mutating the container**. (In that example the `i32` is copied, so element doesn't indirectly borrow container.)
 
-(That example is just for showing how to mutate the container while looping on it. It's not recommended to do that.)
+(Rust doesn't have C-style for loop `for (int i = 0; i < len; i++)`.)
 
 The similar thing can be done in `BTreeMap`. We can get the minimum key, then iteratively get next key. This allows looping on `BTreeMap` without keep borrowing it:
 
@@ -290,43 +318,7 @@ while let Some(current_key) = curr_key_opt {
 
 Note that it requires cloning the key.
 
-That way doesn't work for `HashMap`. `HashMap` doesn't preserver order and doesn't allow getting the next key.
-
-The previously mentioned **avoid in-place mutation** can help. Normally, recreating the whole container costs performance (unless container is small or it's not in performance bottleneck). The previously mentioned **persistent data structures** can be useful. One solution is to shallow-clone the container, then for-loop on the cloned one, then change the container in original place.
-
-Example of mutating container while looping on it, using [rpds](https://docs.rs/rpds/latest/rpds/index.html):
-
-```rust
-let mut map: HashTrieMap<i32, i32> = HashTrieMap::new();  
-map = map.insert(2, 3);  
-for (k, v) in &map.clone() {  
-    if *v > 2 {  
-        map = map.insert(*k * 2, *v / 2);  
-    }  
-}
-```
-
-It for-loops on a shallow-cloned version of the map. The new entries added during looping won't be visited in the loop, unlike previous two examples.
-
-The previously mentioned **deferred mutation** can also work. To mutate a container, firstly put mutation commands into another container, then execute these commands later.
-
-```rust
-let mut map: HashMap<i32, i32> = HashMap::new();  
-map.insert(2, 3);  
-let mut to_insert: Vec<(i32, i32)> = Vec::new();  
-for (k, v) in &map {  
-    if *v > 2 {  
-        to_insert.push((*k * 2, *v / 2));  
-    }  
-}  
-for (k, v) in &to_insert {  
-    map.insert(*k, *v);  
-}
-```
-
-If you just want to remove some elements by some condition, use `retain`. No need to write your own for-loop for that.
-
-How to take two mutable borrows of two elements in one `Vec`? For `Vec` or slice, use [`split_at_mut`](https://doc.rust-lang.org/std/vec/struct.Vec.html#method.split_at_mut). For `HashMap`, use [`get_disjoint_mut`](https://doc.rust-lang.org/std/collections/struct.HashMap.html#method.get_disjoint_mut).
+That way doesn't work for `HashMap`. `HashMap` doesn't preserver order and doesn't allow getting the next key. But that way can work on [indexmap](https://docs.rs/indexmap/latest/indexmap/index.html)'s `IndexMap`, which allows getting key by integer index (it internally uses array, so removing or adding in the middle is not fast).
 
 ## About circular reference
 
