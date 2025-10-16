@@ -760,7 +760,7 @@ Returning `Ref<HashMap<String, Entry>>` or returning `impl Deref<Target=HashMap<
 
 `Rc<RefCell<...>>` and `Arc<Mutex<...>>` allows freely copying reference and freely mutating things, just like in other languages. Finally "get rid of shackle of borrow checker". However, there are **traps**:
 
-- **Contagious borrowing**. As previously mentioned, `RefCell` doesn't solve contagious borrowing. `Mutex` also won't. Violating mutable borrow exclusiveness in the same thread is panic (or error) in `RefCell` and **deadlock** in `Mutex`. Rust lock is not re-entrant, [explained below](#rust-lock-is-not-re-entrant).
+- **Contagious borrowing**. As previously mentioned, `RefCell` wrapping parent doesn't solve contagious borrowing. `Mutex` also won't. Violating mutable borrow exclusiveness in the same thread is panic (or error) in `RefCell` and **deadlock** in `Mutex`. Rust lock is not re-entrant, [explained below](#rust-lock-is-not-re-entrant).
 - Need to cut cycle using `Weak`, unless it will memory leak.
 - **Performance**. `Rc` and `RefCell` has relatively small performance cost. But for `Arc<Mutex<...>>`, unnecessary locking can hurt performance. `Arc` also can have performance issue, [explained below](#arc-is-not-always-fast). It's still ok to use them when not in performance bottleneck.
 - Their syntax ergonomic is not good. The code will have a lot of "noise" like `.borrow().borrow_mut()`.
@@ -1198,7 +1198,7 @@ async fn main() {
 - In current borrow checker, one branch's output's borrowing is contagious to the whole branching scope.
 - `async` is contagious. `async` function can call normal function. Normal function cannot easily call `async` function (but it's possible to call by blocking).
 - Being not `Sync`/`Send` is contagious. A struct that indirectly owns a non-`Sync` data is not `Sync`. A struct that indirectly owns a non-`Send` data is not `Send`.
-- Error passing is contagious. If panic is not acceptable, then all functions that indirectly call a fallible function must return `Result`. Related: NaN is contagious in floating point computaiton.
+- Error passing is contagious. If panic is not acceptable, then all functions that indirectly call a fallible function must return `Result`. Related: NaN is contagious in floating point computation.
 
 ## Some arguments
 
