@@ -148,9 +148,9 @@ Summarize solutions (workarounds) of contagious borrow issue (elaborated below):
   - The getter that returns cloned/copied value is fine. If data is immutable, getter is also usually fine.
 - **Defer mutation**
 - **Avoid in-place mutation**
-- Do a split borrow on the outer scope
+- Do a split borrow on the outer scope. Or just get rid of struct, pass fields as separate arguments. (This is inconvenient.)
 - Borrow as temporary as possible.
-- Using interior mutability
+- Using interior mutability.
 
 ## Defer mutation. Mutation-as-data
 
@@ -160,20 +160,6 @@ Another solution is to **treat mutation as data**. To mutate something, **append
 - When executing the commands, it only do one mutable borrow to base data, and one borrow to command queue at a time.
 
 What if I need the latest state before executing the commands in queue? Then inspect both the command queue and base data to get latest state ([LSM tree](https://en.wikipedia.org/wiki/Log-structured_merge-tree) does similar things). You can often avoid needing to getting latest state during processing, by separating it into multiple stages.
-
-Treating mutation as data also has other benefits:
-
-- The mutation can be serialized, and sent via network or saved to disk.
-- The mutation can be inspected for debugging and logging.
-- You can post-process the command list, such as sorting, filtering. If the data is sharded, the mutation command can dispatch to specific shard.
-- Easier **parallelism**. The process of generating mutation command does not mutate the base data, so it can be parallelized. If data is sharded, the execution of mutation commands can be dispatched to shards executing in parallel.
-
-Other applications of the idea of mutation-as-data:
-
-- Transactional databases often use write-ahead log (WAL) to help atomicity of transactions. Database writs all mutations into WAL. Then after some time the mutations in WAL will be merged to base data in disk.
-- Event sourcing. Derive the latest state from events and previous checkpoint. Distributes systems often use consensus protocol (like Raft) to replicate log (events, mutations). The mutable data is derived from logs and previous checkpoint.
-- The idea of turning operations into data is also adopted by [io_uring](https://en.wikipedia.org/wiki/Io_uring) and modern graphics APIs (Vulkan, Metal, WebGPU).
-- The idea of turning mutation into insertion is also adopted by ClickHouse. In ClickHouse, direct mutaiton is not performant. Mutate-by-insert is faster, but querying require aggregate both the old data and new mutations.
 
 The previous code rewritten using deferred mutation:
 
@@ -218,6 +204,20 @@ fn main() {
 }
 ```
 
+Deferred mutation is not "just a workaround for borrow checker". Treating mutation as data also has other benefits:
+
+- The mutation can be serialized, and sent via network or saved to disk.
+- The mutation can be inspected for debugging and logging.
+- You can post-process the command list, such as sorting, filtering.
+- Easier **parallelism**. The process of generating mutation command does not mutate the base data, so it can be parallelized. If data is sharded, the execution of mutation commands can be dispatched to shards executing in parallel.
+
+Other applications of the idea of mutation-as-data:
+
+- Transactional databases often use write-ahead log (WAL) to help atomicity of transactions. Database writs all mutations into WAL. Then after some time the mutations in WAL will be merged to base data in disk.
+- Event sourcing. Derive the latest state from events and previous checkpoint. Distributes systems often use consensus protocol (like Raft) to replicate log (events, mutations). The mutable data is derived from logs and previous checkpoint.
+- The idea of turning operations into data is also adopted by [io_uring](https://en.wikipedia.org/wiki/Io_uring) and modern graphics APIs (Vulkan, Metal, WebGPU).
+- The idea of turning mutation into insertion is also adopted by ClickHouse. In ClickHouse, direct mutaiton is not performant. Mutate-by-insert is faster, but querying require aggregate both the old data and new mutations.
+
 ## Avoid in-place mutation
 
 The previous problem occurs partially due to mutable borrow exclusiveness. If all borrows are immutable, then contagious borrow is usually not a problem.
@@ -249,7 +249,7 @@ for (k, v) in &map.clone() {
 
 **Split borrow of fields in struct**: As previously mentioned, if you separately borrow two fields of a struct within one scope (e.g. a function), Rust will do a split borrow. This can solve contagious borrow issue. Getter and setter functions break split borrow, because borrowing information become coarse-grained in function signature.
 
-Contagious borrow can also happen in containers. If you borrow one element of a container, then another element cannot be mutably borrowed. Solutions:
+Contagious borrow can also happen in containers. If you borrow one element of a container, then another element cannot be mutably borrowed. How to split borrow a container:
 
 - For `Vec` and slice, use [`split_at_mut`](https://doc.rust-lang.org/std/vec/struct.Vec.html#method.split_at_mut)
 - For `HashMap`, use [`get_disjoint_mut`](https://doc.rust-lang.org/std/collections/struct.HashMap.html#method.get_disjoint_mut)
@@ -316,7 +316,7 @@ while let Some(current_key) = curr_key_opt {
 }
 ```
 
-Note that it requires cloning the key.
+Note that it requires copying/cloning the key.
 
 That way doesn't work for `HashMap`. `HashMap` doesn't preserver order and doesn't allow getting the next key. But that way can work on [indexmap](https://docs.rs/indexmap/latest/indexmap/index.html)'s `IndexMap`, which allows getting key by integer index (it internally uses array, so removing or adding in the middle is not fast).
 
@@ -1040,7 +1040,10 @@ where
   
 - `Send` means that the future can be sent across threads. Tokio use work-stealing, which means that one thread's task can be stolen by other threads that currently have no work.
 
-Another important trap is that, the normal sleep `std::thread::sleep` and normal locking `std::sync::Mutex` should not be used when using async runtime, because they block using OS functionality without telling async runtime, so they will block the async runtime's scheduling thread. In Tokio, use `tokio::sync::Mutex` and `tokio::time::sleep`. (That issue doesn't exist in Golang. Rust async runtime is leaky abstraction compared to Golang.)
+## Async traps
+
+- The normal sleep `std::thread::sleep` and normal locking `std::sync::Mutex` should not be used when using async runtime, because they block using OS functionality without telling async runtime, so they will block the async runtime's scheduling thread. In Tokio, use `tokio::sync::Mutex` and `tokio::time::sleep`.
+- Cancellation safety. [See also](https://sunshowers.io/posts/cancelling-async-rust/)
 
 ## Side effect of extracting and inlining variable
 
@@ -1197,22 +1200,26 @@ async fn main() {
 - Being not `Sync`/`Send` is contagious. A struct that indirectly owns a non-`Sync` data is not `Sync`. A struct that indirectly owns a non-`Send` data is not `Send`.
 - Error passing is contagious. If panic is not acceptable, then all functions that indirectly call a fallible function must return `Result`. Related: NaN is contagious in floating point computaiton.
 
-## Some common arguments
+## Some arguments
 
 - "Rust doesn't ensure safety of `unsafe` code, so using `unsafe` defeats the purpose of using Rust". No. If you keep the amount of `unsafe` small, then when memory/thread safety issue happens, you can inspect these small amount of `unsafe` code. In C/C++ you need to inspect all related code. It's still not recommended to use many `unsafe` in Rust.
-- "Using arena still face the equivalent of 'use after free', so arena doesn't solve the problem". No. Arenas can make these bugs much more deterministic than the use-after-free in C/C++, prevent memory-safety [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug)  [^about_heisenbug], making debugging much easier.
+- "Using arena still face the equivalent of 'use after free', so arena doesn't solve the problem". No. Arenas can make these bugs much more deterministic than the use-after-free in C/C++, prevent memory-safety [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug) [^about_heisenbug], making debugging much easier.
 - "Rust borrow checker rejects your code because your code is wrong." No. Rust can reject valid safe code.
-- "Doubly-linked list is useless." No. It can be useful in many cases. Linux kernel use them. But often trees and hash maps can replace manually-implemented doubly-linked list.
+- "Doubly-linked list is useless." No. It can be useful in many cases. Linux kernel uses them. But often trees and hash maps can replace manually-implemented doubly-linked list.
 - "Circular reference is bad and should be avoided." No. Circular reference can be useful in many cases. Circular reference do come with risks.
 - "Rust guarantees high performance." No. If one evades borrow checker by using `Arc<Mutex<>>` everywhere, the program will be likely slower than using a normal GC language (and has more risk of deadlocking). But it's easier to achieve high performance in Rust. In many other languages, achieving high perfomance often require bypassing (hacking) a lot of language functionalities.
 - "Rust guarantees security." No. Not all security issues are memory/thread safety issues. According to [Common Weakness Enumeration 2024](https://cwe.mitre.org/top25/archive/2024/2024_cwe_top25.html), many real-world vulnerabilities are XSS, SQL injection, directory traversal, command injection, missing authentication, etc. that are not memory/thread safety.
 - "Rust doesn't help other than memory/thread safety." No.
   - Algebraic data type (e.g. `Option`, `Result`) helps avoid creating illegal data from the source. Using ADT data require pattern match all cases, avoiding forgetting handling one case. (except when using escape hatch like `unwrap()`).
-  - Mutable borrow exclusiveness prevents iterator invalidation.
+  - Mutable borrow exclusiveness prevents iterator invalidation. And it reduces bugs caused by accidental mutation.
   - Explicit `.clone()` avoids accidentally copying container like in C++.
-- "Using immutable data structure is just a workaround forced by Rust." No. Immutable data structure can prevent many bugs caused by accidental mutation. If used correctly, they can reduce complexity. They are also useful for things like rollback.
+  - Managing dependencies is much easier in Rust than in C/C++.
+- "Using immutable data structure is just a workaround forced by Rust." No. Immutable data structure can prevent many bugs caused by accidental mutation. If used correctly, they can reduce complexity. The persistent data structures are also efficient for things like rollback.
+- "Memory safety can only be achieved by Rust." No. Most GC languages are memory-safe. [^gc_memory_safety] Memory safety of existing C/C++ applications can be achieved via [Fil-C](https://github.com/pizlonator/fil-c).
 
 [^about_heisenbug]: The Heisenbugs may only trigger in relase build, not in debug build, not when sanitizers are on, not when logging is on, not when debugger is on. Because optimization, sanitizer, debugger and logging can change timing and memory layout, which can make memory safety or thread safety bug no longer trigger. Debugging a Heisenbug in large codebase may take weeks even months. Note that not all memory/thread safety bugs are Heisenbugs. Many are still easy to trigger.
+
+[^gc_memory_safety]: Golang is not memory-safe under data race.
 
 ## Other
 
