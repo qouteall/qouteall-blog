@@ -3,8 +3,6 @@
 
 Previous: [WebAssembly Limitations](./WebAsembly%20Limitations)
 
-This article focuses WebAssembly in browser.
-
 ## Wasm runtime data
 
 The data that Wasm program works on:
@@ -23,6 +21,16 @@ The data that Wasm program works on:
   - GC value references.
 - Heap. Holds GC values.
 - Globals. A global can hold a number (`i32`, `i64`, `f32`, `f64`), an `i128` or a reference (including function reference, GC value reference, extern value reference, etc.). The globals are not in linear memory.
+
+## Wasm stack machine
+
+WebAssembly use [stack machine](https://en.wikipedia.org/wiki/Stack_machine) execution model. It uses an implicit stack for passing values. It can push or pop the implicit stack. Wasm specification doesn't have registers. The implicit stack serves similar purpose as registers (but the machine code compiled from Wasm will use registers).
+
+The stack layout (stack size, the type of element on i-th place on stack) must be deterministic before/after a branch or loop. You cannot have an `if` that one branch leaves an element on stack but another branch doesn't.
+
+Wasm also have local variables, called locals. They are not in the implicit stack. They can be freely accessed within one function.
+
+JVM bytecode also uses stack machine execution model.
 
 ## Wasm binary content
 
