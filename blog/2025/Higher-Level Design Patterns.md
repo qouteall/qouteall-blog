@@ -70,6 +70,15 @@ However then a tradeoff become salient:
 
 DSL are useful when it's high in abstraction level, and new requirements mostly follow the abstration.
 
+### Replace calls with data
+
+[System calls are expensive](https://blog.codingconfessions.com/p/what-makes-system-calls-expensive). Replacing system calls with data can improve performance:
+
+- io_uring: allows submitting many IO tasks by writing into memory, then use one system call to submit them. [^io_uring_polling]
+- Graphics API: Old OpenGL use system calls to change state and dispatch draw call. New Graphics APIs like Vulkan, Metal and WebGPU all use command buffer. Operations are turned to data in command buffer, then one system call to submit many commands.
+
+[^io_uring_polling]: It's possible to use polling to fully avoid system call after initial setup, but with costs.
+
 ## Mutation-data duality
 
 Mutation can be represented as data. Data can be interpreted as mutation.
@@ -104,15 +113,6 @@ In some places, we specify a new state and need to compute the mutation (diff). 
 - Git. Compute diff based on file snapshots. The diff can then be manipulated (e.g. merging, rebasing, cherry-pick).
 - React. Compute diff from virtual data structure and apply to actual DOM. Sync change from virtual data structure to actual DOM.
 - Kubernetes. You configure what pods/volumes/... should exist. Kubernetes observes the diff between reality and configuration, then do actions (e.g. launch new pod, destroy pod) to cover the diff. 
-
-### Replace calls with data
-
-[System calls are expensive](https://blog.codingconfessions.com/p/what-makes-system-calls-expensive). Replacing system calls with data can improve performance:
-
-- io_uring: allows submitting many IO tasks by writing into memory, then use one system call to submit them. [^io_uring_polling]
-- Graphics API: Old OpenGL use system calls to change state and dispatch draw call. New Graphics APIs like Vulkan, Metal and WebGPU all use command buffer. Operations are turned to data in command buffer, then one system call to submit many commands.
-
-[^io_uring_polling]: It's possible to use polling to fully avoid system call after initial setup, but with costs.
 
 ### Mutate-by-recreate
 
@@ -213,6 +213,10 @@ The ways that solve (or partially solve) the biformity between compile-time and 
 - Zig compile-time computation and reflection. [See also](https://ziglang.org/documentation/master/#comptime)
 - Dependently-typed languages. (e.g. Idris, Lean)
 - Scala multi-stage programming. [See also](https://docs.scala-lang.org/scala3/reference/metaprogramming/staging.html). It's at runtime, not compile-time. But its purpose is similar to macro and code generation. Dynamically compose code at runtime and then get JITed.
+
+### Execute on unknown values or superposition
+
+Related: [Symbolic execution](https://en.wikipedia.org/wiki/Symbolic_execution), [Program search using superposition](https://gist.github.com/VictorTaelin/d5c318348aaee7033eb3d18b0b0ace34)
 
 ## Generalized View
 
@@ -383,6 +387,7 @@ Concentration and fat-tail distribution (80/20) are common in software world:
 - Most developers use few languages, libraries and frameworks. (Matthew effect of ecosystem)
 - Most code and development efforts are for fixing edge cases. Few code and development efforts are spent on main case handling. [^progress_misconception]
 - Most bugs that users see are caused by few easy-to-trigger bugs.
+- Only small set of transisters in hardware are used in most times. Many transistors are rarely used. (Many transistors are for rarely-used instructions. Hardware defects related to them have higher probability to evade the test. See also: [Silent Data Corruptions at Scale](https://arxiv.org/pdf/2102.11245), [Cores that don’t count](https://sigops.org/s/conferences/hotos/2021/papers/hotos21-s01-hochschild.pdf))
 
 [^progress_misconception]: For beginners, a common misconception is that "if the software shows things on screen, then it's 90% done". In reality, a proof-of-concept is often just 20% done. There are so many corner cases in real usage. Not handing one corner case is bug. Most code are used for handling corner cases, not common cases. Although each specific corner case triggering probability is small, triggering any of the many corner cases is high-probability.
 

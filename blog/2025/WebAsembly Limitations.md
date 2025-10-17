@@ -77,7 +77,7 @@ void f() {
 
   The `localVariable` is taken address to, so it must be in linear memory, not Wasm execution stack (unless the compiler can optimize out the pointer).
 
-- GC needs to scan the references (pointers) on stack. If the Wasm app use application-managed GC (not Wasm built-in GC) (for reasons explained below), then the on-stack references (pointer) need to be "spilled" to linear memory.
+- GC needs to scan the references (pointers) on stack. If the Wasm app use application-managed GC (not Wasm built-in GC, for reasons explained below), then the on-stack references (pointer) need to be "spilled" to linear memory.
 - Stack switching cannot be done. Golang use stack switching for goroutine scheduling (not in Wasm). [Currently Golang's performance in Wasm is poor](https://github.com/golang/go/issues/65440), because it tries to emulate goroutine scheduling in single-threaded Wasm, thus it need to add many dynamic jumps in code.
 - Dynamic stack resizing cannot be done. Golang does dynamic stack resizing so that new goroutines can be initialized with small stacks, reducing memory usage.
 
@@ -85,7 +85,7 @@ The common solution is to have a **shadow stack** that's in linear memory. That 
 
 Summarize 2 different stacks:
 
-- The main execution stack, that holds local variable, call arguments, return code addresses, and possibly operands (in wasm stack machine). It's managed by Wasm runtime and not in linear memory. It cannot be directly read and written by Wasm code.
+- The main execution stack, that holds local variable, call arguments, return code addresses, and possibly operands (in wasm stack machine). It's managed by Wasm runtime and not in linear memory. It cannot be freely manipulated by Wasm code.
 - The shadow stack. It's in linear memory. Holds the local variables that need to be in linear memory. Managed by Wasm code, not Wasm runtime.
 
 There is a [stack switching proposal](https://github.com/WebAssembly/stack-switching) that aim to allow Wasm to do stack switching. This make it easier to implement lightweight thread (virtual thread, goroutine, etc.), without transforming the code and add many branches.
@@ -96,15 +96,21 @@ Using shadow stack involves issue of reentrancy explained below.
 
 The Wasm linear memory can be seen as a large array of bytes. Address in linear memory is the index into the array.
 
-Instruction `memory.grow` can grow a linear memory. 
+Instruction `memory.grow` can grow a linear memory. However, there is no way to shrink the linear memory.
 
-However, there is no way to shrink the linear memory. There is no way to return allocated memory back to Wasm runtime then back to OS. 
-
-The allocator (in Wasm application) can free regions of linear memory for future use. In native applications, the memory block freed by allocator are often returned to OS. But in Wasm, the freed memory regions cannot be returned to OS.
+Wasm applications (that doesn't use Wasm GC) implements their own allocator in Wasm code. The memory regions freed in that allocator can be used in future allocation. However, the **freed memory resources cannot be returned back to OS**. 
 
 Mobile platforms (iOS, Android, etc.) often kill background process that has large memory usage, so not returning memory to OS is an important issue. See also: [Wasm needs a better memory management story](https://github.com/WebAssembly/design/issues/1397). 
 
-There is a [memory control propsal](https://github.com/WebAssembly/memory-control) that addresses this issue.
+Due to this limitation, Wasm applications **consume as much physical memory as its peak memory usage**. 
+
+Possible workarounds for reducing peak memory usage: 
+
+- Store large data in JS `ArrayBuffer`. If an `ArrayBuffer` is GC-ed, its physical memory can be returned to OS.
+- Only fetch a small chunk of data from server at a time. Avoid fetching all data then process in batch. Do stream processing.
+- Use [Origin-private file system](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API/Origin_private_file_system) to hold large data, and only load a small chunk into linear memory at once.
+
+There is a [memory control proposal](https://github.com/WebAssembly/memory-control) that addresses this issue.
 
 ## Wasm GC
 
@@ -128,10 +134,10 @@ What about using Wasm's built-in GC functionality? It requires mapping the data 
 
 The important memory management features that it doesn't support:
 
+- **GC values cannot be shared across threads**
 - No weak reference.
 - No finalizer (the code that runs when an object is collected by GC).
 - No interior pointer. (Golang supports interior pointer)
-- **GC values cannot be shared across threads**
 
 It doesn't support some memory layout optimizations:
 
@@ -143,18 +149,56 @@ It doesn't support some memory layout optimizations:
 
 See also: [C# Wasm GC issue](https://github.com/dotnet/runtime/issues/94420), [Golang Wasm GC issue](https://github.com/golang/go/issues/63904)
 
+
 ## Multi-threading
 
-Web code runs in event loop:
 
-- The main thread runs in an event loop, with an event queue.
-- Each time browser calls JS code (e.g. event handling), it adds an event to queue.
+## The browser event loop
+
+For each web tab, there ia an event loop where JS code runs. There is also an event queue [^web_event_loop].
+
+The pseudocode of simplified event loop (of main thread of each tab):
+
+```pseudocode
+for (;;) {
+    while (!eventQueue.isEmpty()) {
+        eventQueue.dequeue().execute() // this is where JS code executes
+    }
+    doRendering()
+}
+```
+
+[^web_event_loop]: That's a simplification. Actually there are two event queues in each main thread per tab. One is callback queue for low-priority events. Another is microtask queue for high-priority events. The high-priority ones execute first.
+
+New events can be added to event queue in many ways:
+
+- Each time browser calls JS/Wasm code (e.g. event handling), it adds an event to queue.
 - If JS code awaits on an unresolved promise, the event handling finishes. When that promise resolves, a new event is added into queue.
-- The event loop executes all events in queue, until queue is empty. It waits until new event arrives.
-- The web page rendering and interaction is blocked by main thread JS code and Wasm code running. It's not recommended to make main thread keep executing JS/Wasm for long time.
-- There are web workers that can run in parallel. Each web worker also has its own event loop and event queue. Each web worker is single-threaded.
-- Web workers don't share memory (except `SharedArrayBuffer`). JS values sent to another web worker are deep-copied. Sending an `ArrayBuffer` across thread will make `ArrayBuffer` to detach with its binary data.
-- Only the main thread can do DOM operations.
+
+Important things related to event loop:
+
+- Web page rendering is blocked by JS/Wasm code executing. Having JS/Wasm code keep running for long time will "freeze" the web page.
+- When JS code draws canvas, the things drawn in canvas will only be presented once current iteration of event loop finishes (`doRending()` in pseudocode). If the canvas drawing code is async and awaits on unresolved promise during drawing, half-drawn canvas will be presented.
+- In React, when a component firstly mounts, the effect callback in `useEffect` will run in the next iteration of event loop (React schedules task using `MessageChannel`). But the effect in `useLayoutEffect` will run in the current iteration of event loop.
+
+There are web workers that can run in parallel. Each web worker also runs in an event loop (each web worker is single-threaded), but no rendering involved. Pseudocode:
+
+```pseudocode
+for (;;) {
+    while (!eventQueue.isEmpty()) {
+        eventQueue.dequeue().execute() // this is where JS code executes
+    }
+    waitUntilEventQueueIsNotEmpty()
+}
+```
+
+The web threads (main thread and web workers) don't share mutable data (except `SharedArrayBuffer`):
+
+- Usually, JS values sent to another web worker are deep-copied. (except that, immutable values like  won't be copied). 
+- Sending an `ArrayBuffer` across thread will make `ArrayBuffer` to detach with its binary data. Only one thread can access its binary data.
+- The immutable things, like `WebAssembly.Module`, can be sent to another web worker without copying or detaching.
+
+This design avoids data race of JS things and DOM things.
 
 WebAssembly multithreading relies on web workers and `SharedArrayBuffer`.
 
@@ -168,7 +212,7 @@ Modern browsers reduced `performance.now()`'s precision to make it not usable fo
 
 ### Cross-origin isolation
 
-The solution to that security issue is [**cross-origin isolation**](https://web.dev/articles/cross-origin-isolation-guide). Cross-origin isolation make the browser to use different processes for different websites. One website exploiting Spectre vulnearbility can only read the memory in the process of their website, not other websites.
+The solution to that security issue is [**cross-origin isolation**](https://web.dev/articles/cross-origin-isolation-guide). Cross-origin isolation make the browser to use different processes for different websites. One website exploiting Spectre vulnearbility can only read the memory in the browser process of their website, not other websites.
 
 Cross-origin isolation can be enabled by the HTML loading response having these headers:
 
@@ -191,7 +235,7 @@ The main thread can be blocked using [JS Promise integration](https://github.com
 
 Wasm applications often use **shadow stack**. It's a stack that's in linear memory, managed by Wasm app rather than Wasm runtime. Shadow stack must be properly switched when Wasm code suspends and resumes using JS Promise integration. Otherwise, the shadow stack parts of different execution can be mixed and messed up. Other things may also break under reentrancy and need to be taken care of.
 
-What's more, if the canvas drawing code suspends using JS Promise integration, the half-drawn canvas will be presented in web page. This can be workarounded by using [offscreen canvas](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas), drawn in web worker. 
+Also, as previously mentioned, if the canvas drawing code suspends (using JS Promise integration), the half-drawn canvas will be presented to web page. This can be workarounded by using [offscreen canvas](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas), drawn in web worker. 
 
 ### Recreating Wasm instance
 
@@ -260,6 +304,17 @@ But Wasm runtimes have an optimization: map the 4GB linear memory to a virtual m
 That optimization doesn't work when supporting 64-bit address. There is no enough virtual address space to hold Wasm linear memory. So the branches of range checking still need to be inserted for every linear memory access. This costs performance.
 
 See also: [Is Memory64 actually worth using?](https://spidermonkey.dev/blog/2025/01/15/is-memory64-actually-worth-using.html)
+
+## Other performance constraints
+
+Generally, WebAssembly runs slower than native applications compiled from the same source code. Because of many factors:
+
+- The previously mentioned linear memory bounds check.
+- JIT (just-in-time compilation) cost. Native C/C++/Rust applications can be AOTed (ahead-of-time compiled). V8 firstly use a quick simple compiler to compile Wasm into machine code quickly to improve startup speed (but the generated machine code runs slower), then use a slower high-optimization compiler to generated optimized machine code for few hot Wasm code. [See also](https://v8.dev/docs/wasm-compilation-pipeline). That optimization is profile-guided (target on few hot code, use statistical result to guide optimization). Both profiling, optimization and code-switching costs performance.
+- Multi-threading cannot use release-acquire memory ordering, which can improve performance of some atomic oprations. [See also](https://webassembly.github.io/threads/core/exec/relaxed.html)
+- Multi-threading require launching web worker, which is a slow operation.
+- Limited access to hardware functionality, such as some special SIMD instructions. But Wasm already support many common SIMD instructions.
+- Cannot access some OS functionalities, such as `mmap`.
 
 ## Debugging Wasm running in Chrome
 
