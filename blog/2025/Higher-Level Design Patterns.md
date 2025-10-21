@@ -387,7 +387,7 @@ Concentration and fat-tail distribution (80/20) are common in software world:
 - Most developers use few languages, libraries and frameworks. (Matthew effect of ecosystem)
 - Most code and development efforts are for fixing edge cases. Few code and development efforts are spent on main case handling. [^progress_misconception]
 - Most bugs that users see are caused by few easy-to-trigger bugs.
-- Only small set of transisters in hardware are used in most times. Many transistors are rarely used. (Many transistors are for rarely-used instructions. Hardware defects related to them have higher probability to evade the test. See also: [Silent Data Corruptions at Scale](https://arxiv.org/pdf/2102.11245), [Cores that don’t count](https://sigops.org/s/conferences/hotos/2021/papers/hotos21-s01-hochschild.pdf))
+- Only a small portion of transisters in hardware are used in most times. Many transistors are rarely used. (Many transistors are for rarely-used instructions. Hardware defects related to them have higher probability to evade the test. See also: [Silent Data Corruptions at Scale](https://arxiv.org/pdf/2102.11245), [Cores that don’t count](https://sigops.org/s/conferences/hotos/2021/papers/hotos21-s01-hochschild.pdf))
 
 [^progress_misconception]: For beginners, a common misconception is that "if the software shows things on screen, then it's 90% done". In reality, a proof-of-concept is often just 20% done. There are so many corner cases in real usage. Not handing one corner case is bug. Most code are used for handling corner cases, not common cases. Although each specific corner case triggering probability is small, triggering any of the many corner cases is high-probability.
 

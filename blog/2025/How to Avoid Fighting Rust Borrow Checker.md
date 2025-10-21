@@ -1019,11 +1019,9 @@ But `&Mutex<T>` can be shared because lock protects them. Also immutable referen
 
 There are things that are `Sync` but not `Send`, like `MutexGuard`. If something is already locked, sharing its reference to other threads temporarily is fine. But moving a `MutexGuard` to another thread is not fine because locking is tied to thread.
 
-## When using async runtime
+## `Send + 'static`
 
-Tokio is a popular async runtime. 
-
-In Tokio, submitting a task require the future to be `Send` and `'static`.
+Tokio is a popular async runtime. In Tokio, submitting a task require the future to be `Send` and `'static`.
 
 ```rust
 pub fn spawn<F>(future: F) -> JoinHandle<F::Output>  
@@ -1034,11 +1032,19 @@ where
 
 - `'static` means it's standalone (self-owned). It doesn't borrow temporary things. It can borrow global values (global values will always live when program is running). It cannot borrow a value that only temporarily exists.
   
+  The spawned future may be kept for a long time. It's not determined whether future will only temporarily live within a scope. So the future need to be `'static`. [tokio_scoped](https://docs.rs/tokio-scoped/latest/tokio_scoped/struct.Scope.html#method.spawn) allows submitting a future that's not `'static`, but it must be finished within a scope.
+  
   If the future need to share data with outside, pass `Arc<T>` into (not `&Arc<T>`). 
 
   Note that the "static" in C/C++/Java/C# often mean global variable. But in Rust its meaning is different.
-  
+
 - `Send` means that the future can be sent across threads. Tokio use work-stealing, which means that one thread's task can be stolen by other threads that currently have no work.
+  
+  `Send` is not needed if the async runtime doesn't move future between threads.
+
+Rust converts an async functions into a state machine, which is the future. In async function, the local variables that are used across `await` points will become fields in future. If the future is required to be `Send` then these local variables also need to be `Send`.
+
+
 
 ## Async traps
 

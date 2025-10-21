@@ -179,12 +179,14 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
     - Aliasing means multiple pointers point to the same place in memory.
     - Strict aliasing rule: If there are two pointers with type `A*` and `B*`, then compiler assumes two pointer can never equal. If they equal, it's undefined behavior. Except in two cases: 1. `A` and `B` has subtyping relation 2. converting pointer to byte pointer (`char*`, `unsigned char*` or `std::byte*`) (the reverse does not apply).
     - Pointer provenance. Two pointers from two different provenances are treated as never alias. If their address equals, it's undefined behavior. [See also](https://www.ralfj.de/blog/2020/12/14/provenance.html)
-  - Unaligned memory access is undefined behavior.
 - Alignment.
   - For example, 64-bit integer's address need to be disivible by 8. In ARM, accessing memory in unaligned way can cause crash.
-  - Directly treating a part of byte buffer as a struct may cause alignment issue.
+  - Unaligned memory access is undefined behavior.
+  - Directly treating a part of byte buffer as a struct is undefined behavior. Not only due to alignment, but also due to object lifetime not yet started [^start_object_lifetime].
   - Alignment can cause padding in struct that waste space.
   - Some SIMD instructions only work with aligned data. For example, AVX instructions usually require 32-byte alignment.
+
+[^start_object_lifetime]: Directly treating existing binary data as struct is undefined behavior because the object lifetime hasn't started. But using `memcpy` to initialize a struct is fine.
 
 ### Python
 
@@ -348,5 +350,6 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
   - [The yaml document from hell](https://ruudvanasseldonk.com/2023/01/11/the-yaml-document-from-hell)
 - When using Microsoft Excel to open a CSV file, Excel will do a lot of conversions, such as date conversion (e.g. turn `1/2` and `1-2` into `2-Jan`) and Excel won't show you the original string. [The gene SEPT1 was renamed due to this Excel issue](https://en.wikipedia.org/wiki/SEPTIN1). Excel will also make large numbers inaccurate (e.g. turn `12345678901234567890` into `12345678901234500000`) and won't show you the original accurate number, because Excel internally use floating point for number.
 - It's recommended to configure billing limit when using cloud services, especially serverless. See also: [ServerlessHorrors](https://serverlesshorrors.com/)
+- Big endian and little endian in binary file and net packet.
 
 
