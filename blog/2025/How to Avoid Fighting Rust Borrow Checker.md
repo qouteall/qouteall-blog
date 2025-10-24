@@ -12,7 +12,7 @@ The 3 important facts in Rust:
 
 - **Tree-shaped ownership**. In Rust's ownership system, one object can own many children or no chlld, but must be owned by **exactly one parent**. Ownership relations form a tree. [^about_sharing]
 - **Mutable borrow exclusiveness**. If there exists one mutable borrow for an object, then no other borrow to that object can exist. Mutable borrow is exclusive.
-- **Borrow is contagious**. If you borrow a child, you indirectly borrow the parent (and parent's parent, and so on). Just borrowing one wheel of a car makes you borrow the whole car, then another wheel cannot be mutably borrowed. It can be avoided by **split borrow** which only works within one scope.
+- **Borrow is contagious**. If you borrow a child, you indirectly borrow the parent (and parent's parent, and so on). Mutably borrowing one wheel of a car makes you borrow the whole car, preventing another wheel from being borrowed. It can be avoided by **split borrow** which only works within one scope.
 
 [^about_sharing]: The native Rust ownership relation form a tree. Reference counting (`Rc`, `Arc`) allows shared ownership.
 
@@ -56,12 +56,14 @@ The solutions in borrow-checker-unfriendly cases (will elaborate below):
 
 ## Contagious borrow issue
 
+Contagious borrow issue is a very common and important source of frustrations in Rust, especially for beginners.
+
 The previously mentioned two important facts:
 
-- **Mutable borrow exclusiveness**. If you mutable borrow it, others cannot borrow it.
-- **Borrow is contagious**. Just borrowing one wheel of a car makes you borrow the whole car, if the borrow crosses function boundary. (unless using split borrow that works within one scope)
+- **Mutable borrow exclusiveness**. If you mutably borrow one object, others cannot borrow it.
+- **Borrow is contagious**. If you borrow a child, you indirectly borrow the parent (and parent's parent, and so on). Mutably borrowing one wheel of a car makes you borrow the whole car, preventing another wheel from being borrowed.
 
-A simple example: [^about_code_example]
+A simple example:
 
 ```rust
 pub struct Parent {  
@@ -91,8 +93,6 @@ fn main() {
 }
 ```
 
-(That example is just for illustrating contagious borrow issue. The total score doesn't need to be a mutable field. It's analogous to a complex state that will exist in real applications. Same for other examples.)
-
 Compile error:
 
 ```
@@ -105,13 +105,15 @@ Compile error:
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ mutable borrow occurs here
 ```
 
-This code is totally memory-safe: the `.add_score()` only touch the `total_score` field, and `.get_children()` only touch the `children` field. They work on separate data, they still clashes, because of **contagious borrow**:
+(That example is just for illustrating contagious borrow issue. The `total_score` is analogous to a complex state that exists in real applications. Same for subsequent examples. Just summing integer don't necessarily need to use mutable field. Simple integer mutable state can be workarounded using `Cell`.)
 
-- In `fn get_children(&self) -> &Vec<Child> { &self.children }`, although the method body just borrows `children` field, the return value indirectly borrows the whole `self`, not just one field.
-- In `fn add_score(&mut self, score: u32) { self.total_score += score; }`, the function body only mutably borrowed `total_score` field, but the argument `&mut self` borrows the whole `Parent`, not just one field.
+This code is totally memory-safe: the `.add_score()` only touch the `total_score` field, and `.get_children()` only touch the `children` field. They work on separate data, but borrow checker thinks they overlap, because of **contagious borrow**:
+
+- In `fn get_children(&self) -> &Vec<Child> { &self.children }`, although the method body just borrows `children` field, the return value **indirectly borrows the whole `self`**, not just one field.
+- In `fn add_score(&mut self, score: u32) { self.total_score += score; }`, the function body only mutably borrowed `total_score` field, but the **argument `&mut self` borrows the whole `Parent`**, not just one field.
 - Inside the loop, one immutable borrow to the whole `Parent` and one mutable borrow to the whole `Parent` overlaps in lifetime.
 
-The core problem is that you just want to borrow one field, but forced to borrow the whole object.
+You just want to borrow one field, but forced to borrow the whole object.
 
 What if I just inline `get_children` and `add_score`? Then it compiles fine:
 
@@ -138,19 +140,20 @@ Why that compiles? Because it does a **split borrow**: the compiler sees borrowi
 The deeper cause is that:
 
 - **Borrow checker works locally**: when seeing a function call, it **only checks function signature**, instead of checking code inside the function. (Its benefit is to make borrow checking faster and simpler. Doing whole-program analysis is hard and slow, and doesn't work with things like dynamic linking.)
-- **Information is lost in function signature**: the borrowing information becomes coarse-grained and is simplified in function signature. The type system does not allow expressing borrowing only one field, and can only express borrowing the whole object. [There are propsed solutions](https://smallcultfollowing.com/babysteps/blog/2025/02/25/view-types-redux/).
+- **Information is lost in function signature**: the borrowing information becomes coarse-grained and is simplified in function signature. The type system does not allow expressing borrowing only one field, and can only express borrowing the whole object. [There are propsed solutions: view type](https://smallcultfollowing.com/babysteps/blog/2025/02/25/view-types-redux/).
 
 Summarize solutions (workarounds) of contagious borrow issue (elaborated below):
 
-- **Avoid OOP-style getter and setter** (just make fields public), unless necessary.
-  - **Data-oriented** design (DOD). Just directly work on data and make fields public.
-  - If you design a library and want encapsulation, it's recommended to use ID/handle to replace borrow (elaborated below).
-  - The getter that returns cloned/copied value is fine. If data is immutable, getter is also usually fine.
+- **Remove unnecessary getters and setters**.
+  - Just simply make fields public. This makes split borrow possible. If you want encapsulation, it's recommended to use ID/handle to replace borrow of mutable data (elaborated below).
+  - The getter that returns cloned/copied value is fine.
+  - If data is immutable, getter is also fine.
 - **Defer mutation**
 - **Avoid in-place mutation**
 - Do a split borrow on the outer scope. Or just get rid of struct, pass fields as separate arguments. (This is inconvenient.)
-- Borrow as temporary as possible.
-- Using interior mutability.
+- Manually manage index (or key) in container for-loop. Borrow as temporary as possible. 
+- Just clone the data (can be shallow-clone).
+- Use **interior mutability** (cells and locks).
 
 ## Defer mutation. Mutation-as-data
 
@@ -233,7 +236,7 @@ Mutate-by-recreate can be useful for cases like:
 
 **Persistent data structure**: they share unchanged sub-structure (structural sharing) to make mutate-by-recreate faster. Some crates of persistent data structures: [rpds](https://docs.rs/rpds/latest/rpds/index.html), [im](https://docs.rs/im/latest/im/), [pvec](https://docs.rs/pvec/latest/pvec/index.html).
 
-Example of mutating container while looping on a clone of it, using [rpds](https://docs.rs/rpds/latest/rpds/index.html):
+Example of mutating hash map while looping on a clone of it, using [rpds](https://docs.rs/rpds/latest/rpds/index.html):
 
 ```rust
 let mut map: HashTrieMap<i32, i32> = HashTrieMap::new();  
@@ -254,52 +257,46 @@ Contagious borrow can also happen in containers. If you borrow one element of a 
 - For `Vec` and slice, use [`split_at_mut`](https://doc.rust-lang.org/std/vec/struct.Vec.html#method.split_at_mut)
 - For `HashMap`, use [`get_disjoint_mut`](https://doc.rust-lang.org/std/collections/struct.HashMap.html#method.get_disjoint_mut)
 
-## Iterator contagious borrow
+## Avoid iterator. Manually manage index (key) in loop
 
 For looping on container is very common. Rust provides concise container for-loop syntax `for x in &container {...}`. However, it has **an implicit iterator that keeps borrowing the whole container**.
 
-In the container for loop, you can mutate the current element (`for x in &mut container { mutate(x); }`). However, you cannot mutate other elements, or add/remove elements.
+One solution is to manually manage index (key) in loop, without using iterator. For `Vec` or slice, you can make index a mutable local variable, then use while loop to traverse the array.
 
-What if you really need to mutate the container while for-looping?
-
-- If you just want to remove some elements by some condition, use `retain`. No need to write your own for-loop for that.
-- The previously mentioned **deferred mutation**.
-- The previously mentioned **avoid mutation**. Re-create the whole container. **Persistent data structure** can optimize for that.
-- Manually manage index and key in loop.
-
-### Manually manage index and key in loop
-
-For example, if you want to add element to `Vec` while looping on it, it doesn't work due to implicit iterator keep borrowing whole container:
+The previous example rewritten using manual loop:
 
 ```rust
-let mut vec: Vec<i32> = vec![1, 2, 3];  
-for i in &mut vec {  
-    if *i > 2 {  
-        vec.push(*i / 2);  
+pub struct Parent {  
+    total_score: u32,  
+    children: Vec<Child>  
+}  
+pub struct Child { score: u32 }  
+impl Parent {  
+    fn get_children(&self) -> &Vec<Child> { &self.children }  
+    fn add_score(&mut self, score: u32) { self.total_score += score; }  
+}  
+  
+fn main() {  
+    let mut parent = Parent{total_score: 0, children: vec![Child{score: 2}]};  
+  
+    let mut i: usize = 0;  
+    while i < parent.get_children().len() {  
+        let score = parent.get_children()[i].score;  
+        parent.add_score(score);  
+        i += 1;  
     }  
 }
 ```
 
-Manually managing the index in loop can work:
+It calls `.get_children()` many times. Each time, the result borrow is kept for only a short time. After copying the `score` field of element, it stops borrowing the element, which then indirectly stops borrowing the parent.
 
-```rust
-let mut vec: Vec<i32> = vec![1, 2, 3];  
-let mut i = 0;  
-while i < vec.len() {  
-    if vec[i] > 2 {  
-        vec.push(vec[i] / 2);  
-    }  
-    i += 1;
-}
-```
-
-Because it avoids having an iterator that keeps borrowing the whole container. Getting an element only temporarily borrows.
-
-Note that **it requires stop borrowing the element before mutating the container**. (In that example the `i32` is copied, so element doesn't indirectly borrow container.)
+Note that **it requires stop borrowing the element before doing mutation**. That example copies `score` integer so it can stop borrowing the child. For other large data structures, you also need copying/cloning to stop borrowing element (reference counting and persistent data structure can reduce cost of cloning).
 
 (Rust doesn't have C-style for loop `for (int i = 0; i < len; i++)`.)
 
-The similar thing can be done in `BTreeMap`. We can get the minimum key, then iteratively get next key. This allows looping on `BTreeMap` without keep borrowing it:
+The similar thing can be done in `BTreeMap`. We can get the minimum key, then iteratively get next key. This allows looping on `BTreeMap` without keep borrowing it.
+
+Example of mutating a `BTreeMap` when looping on it.
 
 ```rust
 let mut map: BTreeMap<i32, i32> = BTreeMap::new();
@@ -316,9 +313,45 @@ while let Some(current_key) = curr_key_opt {
 }
 ```
 
-Note that it requires copying/cloning the key.
+Note that it requires copying/cloning the key, and stop borrowing element before mutating.
 
 That way doesn't work for `HashMap`. `HashMap` doesn't preserver order and doesn't allow getting the next key. But that way can work on [indexmap](https://docs.rs/indexmap/latest/indexmap/index.html)'s `IndexMap`, which allows getting key by integer index (it internally uses array, so removing or adding in the middle is not fast).
+
+## Just (shallow) clone the data
+
+Cloning data can avoid keeping borrowing the data. For immutable data, wrapping in `Rc` (`Arc`) then clone can work:
+
+The previous example rewritten by wrapping container in `Rc` then for-loop:
+
+```rust
+pub struct Parent {  
+    total_score: u32,  
+    children: Rc<Vec<Child>>  
+}  
+pub struct Child {  
+    score: u32  
+}  
+impl Parent {  
+    fn get_children(&self) -> Rc<Vec<Child>> {  
+        self.children.clone()  
+    }  
+    fn add_score(&mut self, score: u32) {  
+        self.total_score += score;  
+    }  
+}  
+  
+fn main() {  
+    let mut parent = Parent{total_score: 0, children: Rc::new(vec![Child{score: 2}])};  
+  
+    for child in parent.get_children().iter() {  
+        parent.add_score(child.score);  
+    }  
+}
+```
+
+For mutable data, to make cloning and mutation more efficient, the previously mentioned persistent data structure can be used. 
+
+If the data is small, deep cloning is usually fine. If it's not in hot code, deep cloning is also usually fine.
 
 ## About circular reference
 
@@ -858,12 +891,6 @@ It prints `going to do second-layer lock` then deadlocks.
 In Rust, it's important to **be clear about which scope holds lock**. Golang lock is also not re-entrant.
 
 Another important thing is that Rust only unlocks at the end of scope by default. `mutex.lock().unwrap()` gives a `MutexGuard<T>`. `MutexGuard` implements `Drop`, so it will drop at the end of scope. It's different to the local variables whose type doesn't implement `Drop`, they are dropped after their last use (unless borrowed). This is called NLL (non-lexical lifetime).
-
-## Just clone the data
-
-Just cloning the data can avoid borrowing the data. Without borrowing, there will be no borrow checker issue. It's usually fine if the data is small, or it's not in performance bottleneck.
-
-Another solution is persistent data structure, mentioned previously.
 
 ## `Arc` is not always fast
 
