@@ -61,7 +61,7 @@ Contagious borrow issue is a very common and important source of frustrations in
 The previously mentioned two important facts:
 
 - **Mutable borrow exclusiveness**. If you mutably borrow one object, others cannot borrow it.
-- **Borrow is contagious**. If you borrow a child, you indirectly borrow the parent (and parent's parent, and so on). Mutably borrowing one wheel of a car makes you borrow the whole car, preventing another wheel from being borrowed.
+- **Borrow is contagious**. If you borrow a child, you indirectly borrow the parent (and parent's parent, and so on), which contagiously borrow other childs of the same parent. Mutably borrowing one wheel of a car makes you borrow the whole car, including all 4 wheels, then the wheel that you don't use cannot be borrowed. This don't happen under split borrow.
 
 A simple example:
 
