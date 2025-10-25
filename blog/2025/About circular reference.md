@@ -12,10 +12,27 @@ unlisted: "true"
 
 ## Deadlock
 
+Deadlock can be understood via **resource allocation graph**.
 
+It has two kinds of nodes:
+
+- Threads. (Sometimes called processes). Often drawn as circle.
+- Locks. Often drawn as square.
+
+It has two kinds of edges:
+
+- A lock points to a thread. Assignment edge. It denotes that the thread already holds the lock. The lock's release depends on the thread's progress.
+- A thread points to a lock. Request edge. It denotes that the thread try to hold the lock. The thread's progress depends on acquiring the lock.
+
+All two kinds of edges represent "depending on" relation.
+
+When that graph forms a cycle, deadlock occurs.
+
+For non-reentrant locks, deadlock can happen with only one lock and one thread.
 
 ## Lock-free deadlock
 
+Deadlock can also happen when there is no lock. I call it **lock-free deadlock**. (That naming is inspired by "[serverless servers](https://vercel.com/blog/serverless-servers-node-js-with-in-function-concurrency)", "constant variables" and "[unnamed namespaces](https://www.learncpp.com/cpp-tutorial/unnamed-and-inline-namespaces/)".)
 
 
 
@@ -58,6 +75,9 @@ fn paradox(program: Program) {
 Although Y combinator's own expression doesn't require self-reference, the type of Y combinator requires self-reference to express.
 
 ## Circular reference in math
+
+
+
 ### Circular proof
 
 [Circular proof](https://en.wikipedia.org/wiki/Circular_reasoning): if A then B, if B then A. Circular proof is wrong. It can prove neither A nor B.
@@ -85,4 +105,12 @@ Let `H(x) = unprovable(x(x))`. Then let `G = H(H) = unprovable(H(H)) = unprovabl
 The `x(x)` is symbol substitution. replacing the free variable `x` with `x`, while avoid making two different variables same name by renaming when necessary. 
 
 It's also similar to Y combinator: `Y = f -> (x -> f(x(x))) (x -> f(x(x)))`. In that case `f = unprovable`, `H = x -> f(x(x))`, `Y(f) = H(H)`, `Y(f)` is a fixed point of `f`: `f(Y(f)) = Y(f)`. `G = Y(f)`, `f(G) = G`
+
+---
+
+Related:
+
+[Weakening Cycles So That Turing Can Halt](https://pling.jondgoodwin.com/post/weakening-cycles/)
+
+[A Universal Approach to Self-Referential Paradoxes, Incompleteness and Fixed Points](https://arxiv.org/pdf/math/0305282)
 

@@ -48,7 +48,7 @@ The solutions in borrow-checker-unfriendly cases (will elaborate below):
 - **Avoid in-place mutation**. Mutate-by-recreate. Use `Arc` to share immutable data. Use **persistent data structure**.
 - For circular reference:
   - For graph data structure, use ID/handle and arena.
-  - For callback, use event bus or `Arc<QCell<T>>` (use `Weak` to cut cycle)
+  - For callbacks, replace capturing with arguments, or use event-as-data.
 - Borrow as temporary as possible. For example, replace container for-loop `for x in &vec {}` with raw index loop.
 - `Arc<QCell<T>>`
 - `Arc<RwLock<T>>` (only use when really necessary)
@@ -105,7 +105,7 @@ Compile error:
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ mutable borrow occurs here
 ```
 
-(That simplified example is just for illustrating contagious borrow issue. The **`total_score` is analogous to a complex state that exists in real applications**. Same for subsequent examples. Just summing integer can use `.sum()` or local variable. Simple integer mutable state can be workarounded using `Cell`.)
+(That simplified example is just for illustrating contagious borrow issue. The **`total_score` is analogous to a complex state that exists in real applications**. Same for subsequent examples. Just summing integers can be done by `.sum()` or local variable. Simple integer mutable state can be workarounded using `Cell`.)
 
 This code is totally memory-safe: the `.add_score()` only touch the `total_score` field, and `.get_children()` only touch the `children` field. They work on separate data, but borrow checker thinks they overlap, because of **contagious borrow**:
 
@@ -145,7 +145,7 @@ The deeper cause is that:
 Summarize solutions (workarounds) of contagious borrow issue (elaborated below):
 
 - **Remove unnecessary getters and setters**.
-  - Just simply make fields public. This makes split borrow possible. If you want encapsulation, it's recommended to use ID/handle to replace borrow of mutable data (elaborated below).
+  - Just simply make fields public (or in-crate public). This makes split borrow possible. If you want encapsulation, it's recommended to use ID/handle to replace borrow of mutable data (elaborated below).
   - The getter that returns cloned/copied value is fine.
   - If data is immutable, getter is also fine.
 - **Defer mutation**
@@ -513,6 +513,8 @@ impl ParentComponent {
     }  
 }
 ```
+
+(That example is similified. An event passing system requires much more code. Also need to separate different event channels to improve performance.)
 
 ## Avoid just-for-convenience circular reference
 
@@ -1055,9 +1057,9 @@ It takes immutable borrow of `Bump` (it has interior mutability). It moves `val`
 If you want to keep the borrow of allocated result for long time, then **lifetime annotation is often required**. In Rust, **lifetime annotation is also contagious**:
 
 - Every struct that holds bump-allocated borrow need to also have lifetime annotation of the bump allocator. 
-- Every function that use it also needs lifetime annotation. Rust has [lifetime elision](https://doc.rust-lang.org/nomicon/lifetime-elision.html), which allows you to omit lifetime in function signature in some cases. However it doesn't work in all cases.
+- Every function that use it also needs lifetime annotation. Rust has [lifetime elision](https://doc.rust-lang.org/nomicon/lifetime-elision.html), which allows you to omit lifetime in function signature in some cases. However you still need to write a lot of things like `<'_>`. And it doesn't work in all cases.
 
-Adding or removing lifetime for one thing may involve refactoring many code that use it, which can be huge work. Be careful in planning what lifetime parameters it needs.
+Adding or removing lifetime for one thing may involve refactoring many code that use it, which can be huge work. (AI can help in these kinds of refactoring.)
 
 `Bump` doesn't implement `Sync`, so `&Bump` is not `Send`. It cannot be shared across threads (even if it can share, there will be lifetime constraint that force you to use structured concurrency). It's recommended to have separated bump allocator in each thread, locally.
 
@@ -1320,7 +1322,7 @@ async fn main() {
 
 - Borrowing that cross function boundary is contagious. Just borrowing a wheel of car can indirectly borrow the whole car.
 - Mutate-by-recreate is contagious. Recreating child require also recreating parent that holds the new child, and parent's parent, and so on.
-- Lifetime annotation is contagious. If some type has a lifetime parameter, then every type that holds it must also have lifetime parameter. Every function that use them also need lifetime parameter, except when lifetime elision works. Refactoring that adds/remove lifetime parameter can be huge work.
+- Lifetime annotation is contagious. If some type has a lifetime parameter, then every type that holds it must also have lifetime parameter. Every function that use them also need lifetime parameter (except when lifetime elision works). Adding/removing lifetime parameter to a type may require changing many code.
 - In current borrow checker, one branch's output's borrowing is contagious to the whole branching scope.
 - `async` is contagious. `async` function can call normal function. Normal function cannot easily call `async` function (but it's possible to call by blocking).
 - Being not `Sync`/`Send` is contagious. A struct that indirectly owns a non-`Sync` data is not `Sync`. A struct that indirectly owns a non-`Send` data is not `Send`.
@@ -1329,7 +1331,8 @@ async fn main() {
 ## Some arguments
 
 - "Rust doesn't ensure safety of `unsafe` code, so using `unsafe` defeats the purpose of using Rust". No. If you keep the amount of `unsafe` small, then when memory/thread safety issue happens, you can inspect these small amount of `unsafe` code. In C/C++ you need to inspect all related code. It's still not recommended to use many `unsafe` in Rust.
-- "Using arena still face the equivalent of 'use after free', so arena doesn't solve the problem". No. Arenas can make these bugs much more deterministic than the use-after-free in C/C++, prevent memory-safety [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug) [^about_heisenbug], making debugging much easier.
+- "There are sanitizers in C/C++ that help me catch memory safety bugs and thread safety bugs, so Rust has no value." No. Some memory safety and thread safety bugs only trigger in production environments and in client's computers, but don't reproduce in test environment. There are [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug) [^about_heisenbug].
+- "Using arena still face the equivalent of 'use after free', so arena doesn't solve the problem". No. Arenas can make these bugs much more deterministic than raw use-after-free bugs, preventing them from becoming Heisenbugs, making debugging much easier.
 - "Rust borrow checker rejects your code because your code is wrong." No. Rust can reject valid safe code.
 - "Doubly-linked list is useless." No. It can be useful in many cases. Linux kernel uses them. But often trees and hash maps can replace manually-implemented doubly-linked list.
 - "Circular reference is bad and should be avoided." No. Circular reference can be useful in many cases. Circular reference do come with risks.
