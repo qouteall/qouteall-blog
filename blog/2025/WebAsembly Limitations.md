@@ -132,17 +132,22 @@ The first solution, manually implementing GC encounters difficulties:
 
 What about using Wasm's built-in GC functionality? It requires mapping the data structure to Wasm GC data structure. Wasm's GC data structure allows Java-like class (with object header), Java-like prefix subtyping, and Java-like arrays. 
 
-The important memory management features that it doesn't support:
+The benefit of using Wasm built-in GC:
 
-- **GC values cannot be shared across threads**
+- It reuses highly-optimized JS GC. No need to re-implement GC in Wasm application code.
+- Wasm GC references can be passed to JS. (But currently JS code cannot directly access fields of Wasm GC object. The primary usage is to pass them back to Wasm code.)
+- Can collect a cycle between Wasm GC object and JS object.
+
+The important memory management features that Wasm GC doesn't support:
+
+- **GC values cannot be shared across threads**. This is the most important limitation.
 - No weak reference.
-- No finalizer (the code that runs when an object is collected by GC).
-- No interior pointer. (Golang supports interior pointer)
+- No finalizer (run callback when an object is collected by GC).
+- No interior pointer. (Golang has interior pointer)
 
 It doesn't support some memory layout optimizations:
 
 - No array of struct type.
-- No per-object locking (in Java and C# every object can be a lock)
 - Cannot use fat pointer to avoid object header. (Golang does it)
 - Cannot add custom fields at the head of an array object. (C# supports it)
 - Don't have compact sum type memory layout.
