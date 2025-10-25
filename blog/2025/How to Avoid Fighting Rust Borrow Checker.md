@@ -432,11 +432,96 @@ However, the callback function object often have to reference the parent (becaus
 
 Solutions:
 
-- Use reference counting and interior mutability. The classical ones: `Rc<RefCell<T>>` (singlethreaded), `Arc<RwLock<T>>` (multithreaded). I also recommend using [`QCell`](https://docs.rs/qcell/latest/qcell/) (elaborated below): `Rc<QCell<T>>`, `Arc<QCell<T>>`.
+- Use reference counting and interior mutability. I recommend using [`QCell`](https://docs.rs/qcell/latest/qcell/) (elaborated below): `Rc<QCell<T>>`, `Arc<QCell<T>>`. `QCell` can mostly avoid runtime crash compared to `RefCell` and avoid deadlock compared to `RwLock` `Mutex`.
   
   The back-reference (callback to parent, child to parent) should use `Weak` to avoid memory leak.
 - Use event bus to replace callbacks. Similar to the previous deferred mutation, we turn event into data. Each component listen to specific "event channel" or "event topic". When something happens, put the event into event bus, then event bus notifies components.
 - Use ID/handle to replace borrow (elaborated later).
+
+For example, in a GUI application, I have a counter and a button, clicking button increments counter:
+
+```rust
+struct ParentComponent {  
+    button: ChildButton,  
+    counter: u32,  
+}  
+struct ChildButton {  
+    on_click: Option<Box<dyn FnMut() -> ()>>,  
+}  
+  
+fn main() {  
+    let mut parent = ParentComponent {  
+        button: ChildButton { on_click: None },  
+        counter: 0  
+    };  
+  
+    parent.button.on_click = Some(Box::new(|| {  
+        parent.counter += 1;  
+    }));  
+}
+```
+
+Compile error
+
+```
+error[E0597]: `parent.counter` does not live long enough
+  --> src\main.rs:19:9
+   |
+13 |       let mut parent = ParentComponent {
+   |           ---------- binding `parent` declared here
+...
+18 |       parent.button.on_click = Some(Box::new(|| {
+   |                                     -        -- value captured here
+   |  ___________________________________|
+   | |
+19 | |         parent.counter += 1;
+   | |         ^^^^^^^^^^^^^^ borrowed value does not live long enough
+20 | |     }));
+   | |______- coercion requires that `parent.counter` is borrowed for `'static`
+21 |   }
+   |   - `parent.counter` dropped here while still borrowed
+   |
+   = note: due to object lifetime defaults, `Box<dyn FnMut()>` actually means `Box<(dyn FnMut() + 'static)>`
+```
+
+Solve using `Rc<QCell<>>`:
+
+```rust
+struct ParentComponent {  
+    button: Rc<QCell<ChildButton>>,  
+    counter: u32,  
+}  
+struct ChildButton {  
+    on_click: Option<Rc<dyn Fn(&mut QCellOwner) -> ()>>,  
+}  
+  
+fn main() {  
+    let mut qco: QCellOwner = QCellOwner::new();  
+  
+    let button: Rc<QCell<ChildButton>> = Rc::new(QCell::new(  
+        &qco, ChildButton { on_click: None }  
+    ));  
+    let parent: Rc<QCell<ParentComponent>> = Rc::new(QCell::new(  
+        &qco, ParentComponent { button: button.clone(), counter: 0 }  
+    ));  
+  
+    let weak_parent: Weak<QCell<ParentComponent>> = Rc::downgrade(&parent);  
+    button.clone().rw(&mut qco).on_click = Some(Rc::new(move |qco| {  
+        weak_parent.upgrade().unwrap().rw(qco).counter += 1;  
+    }));  
+  
+    (*button.ro(&qco).on_click.clone().unwrap())(&mut qco);  
+  
+    assert!(parent.ro(&qco).counter == 1);  
+}
+```
+
+Using reference counting and interior mutability for callback circular reference is very inconvenient:
+
+- Many syntax noise related to `Rc` and `QCell`.
+- The callback need to be put inside `Rc`, not `Box`. Reading the callback require holding `&QCellOwner`, but calling callback require holding `&mut QCellOwner`. There is still contagious borrow on `QCellOwner`.
+
+[GPUI](https://zed.dev/blog/gpui-ownership)'s `Model<T>` is similar to `Rc<QCell<T>>` and `AppContext` is similar to `QCellOwner`. GPU does many wrapping to reduce syntax noise. And GPUI use event queue instead of executing callback immeidately.
 
 ### The circular reference that's inherent in data structure
 
@@ -969,6 +1054,8 @@ If you want to keep the borrow of allocated result for long time, then **lifetim
 Adding or removing lifetime for one thing may involve refactoring many code that use it, which can be huge work. Be careful in planning what lifetime parameters it needs.
 
 `Bump` doesn't implement `Sync`, so `&Bump` is not `Send`. It cannot be shared across threads (even if it can share, there will be lifetime constraint that force you to use structured concurrency). It's recommended to have separated bump allocator in each thread, locally.
+
+Putting a `Bump` with its allocated references together creates self-reference, which is hard and requires unsafe. It's recommended to just put `Bump` on stack and use it temporarily.
 
 ## Using unsafe
 
