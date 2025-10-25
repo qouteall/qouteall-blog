@@ -432,11 +432,9 @@ However, the callback function object often have to reference the parent (becaus
 
 Solutions:
 
-- Use reference counting and interior mutability. I recommend using [`QCell`](https://docs.rs/qcell/latest/qcell/) (elaborated below): `Rc<QCell<T>>`, `Arc<QCell<T>>`. `QCell` can mostly avoid runtime crash compared to `RefCell` and avoid deadlock compared to `RwLock` `Mutex`.
-  
-  The back-reference (callback to parent, child to parent) should use `Weak` to avoid memory leak.
+- Avoid having circular reference. Don't make the callback capture parent data. Just pass parent data as argument to callback.
 - Use event bus to replace callbacks. Similar to the previous deferred mutation, we turn event into data. Each component listen to specific "event channel" or "event topic". When something happens, put the event into event bus, then event bus notifies components.
-- Use ID/handle to replace borrow (elaborated later).
+- (Not recommended.) Use reference counting and interior mutability. Such as `Rc<RefCell<>>` `Rc<QCell<>>`. The back-reference (callback to parent, child to parent) should use `Weak` to avoid memory leak.
 
 For example, in a GUI application, I have a counter and a button, clicking button increments counter:
 
@@ -484,44 +482,98 @@ error[E0597]: `parent.counter` does not live long enough
    = note: due to object lifetime defaults, `Box<dyn FnMut()>` actually means `Box<(dyn FnMut() + 'static)>`
 ```
 
-Solve using `Rc<QCell<>>`:
+Solve it using `Rc<RefCell<>>` is inconvenient and "noisy":
 
 ```rust
 struct ParentComponent {  
-    button: Rc<QCell<ChildButton>>,  
+    button: Rc<RefCell<ChildButton>>,  
     counter: u32,  
 }  
 struct ChildButton {  
-    on_click: Option<Rc<dyn Fn(&mut QCellOwner) -> ()>>,  
+    on_click: Option<Box<dyn Fn() -> ()>>,  
 }  
   
 fn main() {  
-    let mut qco: QCellOwner = QCellOwner::new();  
-  
-    let button: Rc<QCell<ChildButton>> = Rc::new(QCell::new(  
-        &qco, ChildButton { on_click: None }  
+    let button: Rc<RefCell<ChildButton>> = Rc::new(RefCell::new(  
+        ChildButton { on_click: None }  
     ));  
-    let parent: Rc<QCell<ParentComponent>> = Rc::new(QCell::new(  
-        &qco, ParentComponent { button: button.clone(), counter: 0 }  
+    let parent: Rc<RefCell<ParentComponent>> = Rc::new(RefCell::new(  
+        ParentComponent { button: button.clone(), counter: 0 }  
     ));  
   
-    let weak_parent: Weak<QCell<ParentComponent>> = Rc::downgrade(&parent);  
-    button.clone().rw(&mut qco).on_click = Some(Rc::new(move |qco| {  
-        weak_parent.upgrade().unwrap().rw(qco).counter += 1;  
+    let weak_parent: Weak<RefCell<ParentComponent>> = Rc::downgrade(&parent);  
+    button.clone().borrow_mut().on_click = Some(Box::new(move || {  
+        weak_parent.upgrade().unwrap().borrow_mut().counter += 1;  
     }));  
   
-    (*button.ro(&qco).on_click.clone().unwrap())(&mut qco);  
+    if let Some(f) = &button.borrow().on_click {  
+        f()  
+    }  
   
-    assert!(parent.ro(&qco).counter == 1);  
+    assert!(parent.borrow().counter == 1);  
 }
 ```
 
-Using reference counting and interior mutability for callback circular reference is very inconvenient:
+It has many inconvenient things like `upgrade` `downgrade` `unwrap` `borrow`  `borrow_mut`. It's not recommended to do that.
 
-- Many syntax noise related to `Rc` and `QCell`.
-- The callback need to be put inside `Rc`, not `Box`. Reading the callback require holding `&QCellOwner`, but calling callback require holding `&mut QCellOwner`. There is still contagious borrow on `QCellOwner`.
+If the parent component's state is passed as argument of callback, instead of captured by callback, then there will be no circular reference. Things become much simpler:
 
-[GPUI](https://zed.dev/blog/gpui-ownership)'s `Model<T>` is similar to `Rc<QCell<T>>` and `AppContext` is similar to `QCellOwner`. GPU does many wrapping to reduce syntax noise. And GPUI use event queue instead of executing callback immeidately.
+```rust
+struct ParentState {  
+    counter: u32,  
+}  
+struct ParentComponent {  
+    button: ChildButton,  
+    state: ParentState,  
+}  
+struct ChildButton {  
+    on_click: Option<Box<dyn Fn(&mut ParentState) -> ()>>,  
+}  
+  
+fn main() {  
+    let mut parent = ParentComponent {  
+        button: ChildButton { on_click: None },  
+        state: ParentState { counter: 0 },  
+    };  
+  
+    parent.button.on_click = Some(Box::new(|state| {  
+        state.counter += 1;  
+    }));  
+  
+    parent.button.on_click.unwrap()(&mut parent.state);  
+    assert!(parent.state.counter == 1);  
+}
+```
+
+Another solution is to get rid of callback, and instead use event processing (replace reference with id):
+
+```rust
+enum Event {  
+    ButtonClicked { button_id: Uuid },  
+    // ...  
+}  
+  
+struct ParentComponent {
+    id: UUid,
+    button: ChildButton,  
+    counter: u32,  
+}  
+struct ChildButton {  
+    id: Uuid,  
+}  
+  
+impl ParentComponent {  
+    fn handle_event(&mut self, event: Event) -> bool {  
+        match event {  
+            Event::ButtonClicked { button_id } if button_id == self.button.id => {
+                self.counter += 1;  
+                true  
+            }  
+            _ => false,  
+        }  
+    }  
+}
+```
 
 ### The circular reference that's inherent in data structure
 
@@ -794,8 +846,12 @@ Ways of interior mutability:
 - Lazily-initialized `OnceCell<T>`
 - ......
 
-
 They are usually used inside reference counting (`Arc<...>`, `Rc<...>`).
+
+How Rust GUI frameworks handle interior mutability:
+
+- [Dioxus](https://dioxuslabs.com/learn/0.6/) offers React-like GUI solution. In Dioxus, signal is similar to `Cell`. You can read or write the whole data of a signal, but cannot keep a borrow of data in signal.
+- [GPUI](https://www.gpui.rs/). Its [`Model<T>`](https://zed.dev/blog/gpui-ownership) is similar to `Rc<QCell<T>>` and `AppContext` is similar to `QCellOwner`.
 
 ### `RefCell` is not panacea
 
