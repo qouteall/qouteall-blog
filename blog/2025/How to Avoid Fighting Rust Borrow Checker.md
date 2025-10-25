@@ -514,25 +514,6 @@ impl ParentComponent {
 }
 ```
 
-## About circular reference
-
-
-Circular reference being bad in mathematics does NOT mean they are also bad in programming. The circular reference in math theories are different to circular reference in data. There are many valid cases of circular references in programming (e.g. there are doublely-linked list running in Linux kernel that works fine).
-
-But circular reference do add risks to memory management:
-
-- In C/C++, if two objects point to each other, when one object destructs, the another object's reference should be cleared, or there will be risk of use-after-free.
-- When using reference counting, loop should be cut by weak reference, or it will memory leak.
-- In GC languages, circular reference has memory leak risk. If all children references parents, and parents references children, then referencing any child will keep the whole structure alive.
-
-Here are some common use cases of circular reference:
-
-- Case 1: The parent references a child. The child references its parent, just for convenience. (Referencing to parent is not necessary, parent can be passed by argument)
-- Case 2: The parent registers a callback to child. When something happened on child, the callback is called, and parent do something. It that case, parent references child, child references callback, callback references parent.
-- Case 3: In a tree structure, the child references parent allows getting the path from one node to root node. Without it, you cannot get the path from just one node reference, and need to store variable-length path information.
-- Case 4: The data is inherently a graph structure that can contain cycles.
-- Case 5: The data requires self-reference.
-
 ## Avoid just-for-convenience circular reference
 
 In OOP languages, it's common that parent references child, and child references parent just for convenience. It's convenient because you can access parent data in child's method, without passing parent as argument.
