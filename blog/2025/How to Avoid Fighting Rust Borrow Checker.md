@@ -493,7 +493,7 @@ enum Event {
 }  
   
 struct ParentComponent {
-    id: UUid,
+    id: Uuid,
     button: ChildButton,  
     counter: u32,  
 }  
@@ -831,7 +831,7 @@ fn main() {
 
 It will panic with `RefCell already borrowed` error.
 
-`RefCell` still follows mutable borrow exclusiveness rule, just checked at runtime, not compile time. Borrowing one fields inside `RefCell` still borrows the whole `RefCell`.
+`RefCell` still follows mutable borrow exclusiveness rule, just checked at runtime, not compile time. Borrowing one field inside `RefCell` still borrows the whole `RefCell`.
 
 **Wrapping parent in `RefCell` cannot fix contagious borrow, but putting individual children into `RefCell` can work, as it makes borrow more fine-grained**.
 
@@ -897,7 +897,7 @@ Returning `Ref<HashMap<String, Entry>>` or returning `impl Deref<Target=HashMap<
 
 The borrowing to `QCellOwner` "centralizes" the borrowing of many `QCell`s associated with it, ensuring mutable borrow exclusiveness. Using it require passing borrow of `QCellOwner` in argument everywhere it's used.
 
-`QCell` will fail to borrow if the owner ID doesn't match. Different to `RefCell`, if owner ID matches, it won't panic just because nested borrow.
+`QCell` will fail to borrow if the owner ID doesn't match. Different to `RefCell`, if owner ID matches, it won't panic just because of nested borrow.
 
 Its runtime cost is low. When borrowing, it just checks whether cell's id matches owner's id. It has memory cost of owner ID per cell.
 
@@ -941,6 +941,8 @@ It can also work in multithreading, by having `RwLock<QCellOwner>`. This can all
 [^lock_granularity]: Sometimes, having fine-grained lock is slower because of more lock/unlock operations. But sometimes having fine-grained lock is faster because it allows higher parallelism. Sometimes fine-grained lock can cause deadlock but coarse-grained lock won't deadlock. It depends on exact case.
 
 [Ghost cell](https://docs.rs/ghost-cell/latest/ghost_cell/) and [LCell](https://docs.rs/qcell/latest/qcell/struct.LCell.html) are similar to QCell, but use closure lifetime as owner id. They are zero-cost, but more restrictive (owner is tied to closure scope, cannot dynamically create, owner cannot outlive closure).
+
+Note that `QCell` still suffers from contagious borrow: mutably borrowing one `QCell` under a `QCellOwner`, cannot borrow another `QCell` under the same `QCellOwner`, except when using special multi-borrow like [`rw2`](https://docs.rs/qcell/latest/qcell/struct.QCellOwner.html#method.rw2) 
 
 ### Rust lock is not re-entrant
 
