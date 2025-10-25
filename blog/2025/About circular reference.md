@@ -3,6 +3,7 @@ date: 2025-10-25
 tags:
   - Programming
   - Math
+unlisted: "true"
 ---
 
 # About circular reference
