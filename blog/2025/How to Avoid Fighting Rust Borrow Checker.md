@@ -529,7 +529,7 @@ In a tree structure, letting child node to reference parent node can be convenie
 If the data structure inherently requires circular reference, solutions:
 
 - Use ID/handle to replace borrow (elaborated later). This is **recommended when you want more compact memory layout, and you rarely need to add new types into data** (suitable for data-intensive cases, can obtain better performance due to cache-friendliness).
-- Use reference counting and interior mutability (not recommende).
+- Use reference counting and interior mutability (not recommended).
 - Use `unsafe` (only use if really necessary).
 
 ## Self-reference
