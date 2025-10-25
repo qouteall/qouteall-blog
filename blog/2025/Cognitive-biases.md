@@ -246,7 +246,8 @@ Examples of non-falsifiable explanations:
 
 - "There is \[a secret evil group\] that controls everything. You don't see evidence of its existence because it's so powerful that it hides all evidences."
 - "The AI doesn't work on your task just because you prompted it wrongly." (without telling how to "prompt correctly".)
-- "You believe in \[an idea\] because you get a sense of moral superiority from that."
+- "You propose \[an idea\] because you get a sense of moral superiority from that."
+- "Absolute free-market capitalism is the only correct path. All problems of market is caused by the market being not free enough." (without telling how free is "free enough")
 
 **With confirimation bias, more information increases confidence, but doesn't lead to better understanding**.
 

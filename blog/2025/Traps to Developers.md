@@ -284,16 +284,15 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
   - If an always-new thing is put into `useEffect` dependency array, the effect will run on every render. See also [Cloudflare indicent 2025 Sept-12](https://blog.cloudflare.com/deep-dive-into-cloudflares-sept-12-dashboard-and-api-outage/). 
   - Don't forget to include dependencies in the dependency array. And the dependencies also need to be memoed.
 - When using effect to manage `setInterval` `removeInterval`, if the effect has dependency value, it will remove timer and re-add timer when dependency changes, which can mess up the timing.
-- State objects themselves should be immutable. Don't directly set fields of state objects. Always recreate whole object.
+- State values themselves should be immutable. Don't directly set fields of state objects. Always recreate whole object.
 - Forget to include value in `useEffect` dependency array.
 - Forget clean up in `useEffect`.
 - Closure trap. Closure can capture a state. If the state changes, the closure still captures the old state. 
   - One solution is to make closure not capture state and access state within `useReducer`. 
-  - Another solution is to put state in `useRef` (note that changing value inside ref don't trigger re-rendering, you need to change state or prop to trigger re-rendering)
-- `useEffect` firstly runs after component DOM presents in web page. Doing initialization in `useEffect` may cause visual flicker. Use `useLayoutEffect` for early initialization.
-- When using ref to get DOM object, it won't be accessible during first rendering (component function call). It can be accessed in `useLayoutEffect`.
+  - Another solution is to put mutable thing in `useRef` (note that changing value inside ref don't trigger re-rendering, you need to change state or prop to trigger re-rendering)
+- `useEffect` firstly runs in next iteration of event loop, after browser renders [^render_ambiguity] the web page. Doing initialization in `useEffect` is not early enough and may cause visual flicker. Use `useLayoutEffect` for early initialization (it will run in the same iteration of event loop). When using ref to get DOM object, it won't be accessible during first rendering (component function call). It can be accessed in `useLayoutEffect`.
 
-
+[^render_ambiguity]: In web dev the word "render" is ambiguous. When browser "renders" it draws content to present in screen. When the React component "renders" the component function is called, not drawing things to screen.
 
 ### Git
 

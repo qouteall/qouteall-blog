@@ -353,50 +353,19 @@ For mutable data, to make cloning and mutation more efficient, the previously me
 
 If the data is small, deep cloning is usually fine. If it's not in hot code, deep cloning is also usually fine.
 
-## About circular reference
-
-### Circular reference in mathematics
-
-Some may argue that "Circular reference is a bad thing. Look how much trouble do circular references create in mathematics":
-
-
-### Circular reference in programming
-
-Circular reference being bad in mathematics does NOT mean they are also bad in programming. The circular reference in math theories are different to circular reference in data. There are many valid cases of circular references in programming (e.g. there are doublely-linked list running in Linux kernel that works fine).
-
-But circular reference do add risks to memory management:
-
-- In C/C++, if two objects point to each other, when one object destructs, the another object's reference should be cleared, or there will be risk of use-after-free.
-- When using reference counting, loop should be cut by weak reference, or it will memory leak.
-- In GC languages, circular reference has memory leak risk. If all children references parents, and parents references children, then referencing any child will keep the whole structure alive.
-
-Here are some common use cases of circular reference:
-
-- Case 1: The parent references a child. The child references its parent, just for convenience. (Referencing to parent is not necessary, parent can be passed by argument)
-- Case 2: The parent registers a callback to child. When something happened on child, the callback is called, and parent do something. It that case, parent references child, child references callback, callback references parent.
-- Case 3: In a tree structure, the child references parent allows getting the path from one node to root node. Without it, you cannot get the path from just one node reference, and need to store variable-length path information.
-- Case 4: The data is inherently a graph structure that can contain cycles.
-- Case 5: The data requires self-reference.
-
-### Avoid "just-for-convenience" circular reference in Rust
-
-In the case 1 above: The child references parent, just for convenience. In OOP code. If you just have a reference to a child object, and you want to use some data in parent, child referencing parent would be convenient. Without it, the parent also need to be passed as argument. 
-
-That convenience in OOP languages will lead to troubles in Rust. It's recommended to pass extra arguments instead of having circular reference.
-
-Note that due to previously mentioned contagious borrow issue, you cannot mutably borrow child and parent at the same time (except using interior mutability). The workaround is to 1. do a split borrow on parent and pass the individual components of parent (pass more arguments and be more verbose than in other languages) 2. use interior mutability (e.g. `RefCell`, `Mutex`, `QCell`).
-
-### The callback circular reference
+## Callbacks
 
 **Observer pattern** is commonly used in GUI and other dynamic reactive systems. If parent want to be notified when some event happens on child, the parent register callback to child, and child calls callback when event happens.
 
-However, the callback function object often have to reference the parent (because it need to use parent's data). Then it creates circular reference: **parent references child, child references callback, callback references parent**, as mentioned previously in case 2.
+However, the callback function object often have to reference the parent (because it need to use parent's data). Then it creates **circular reference**: parent references child, child references callback, callback references parent.
 
-Solutions:
+**Rust is unfriendly to circular reference**.
 
-- Avoid having circular reference. Don't make the callback capture parent data. Just pass parent data as argument to callback.
-- Use event bus to replace callbacks. Similar to the previous deferred mutation, we turn event into data. Each component listen to specific "event channel" or "event topic". When something happens, put the event into event bus, then event bus notifies components.
-- (Not recommended.) Use reference counting and interior mutability. Such as `Rc<RefCell<>>` `Rc<QCell<>>`. The back-reference (callback to parent, child to parent) should use `Weak` to avoid memory leak.
+Summarize solutions to circular reference callbacks:
+
+- Pass mutable data in argument. Don't make the callback capture mutable data. This can break the circular reference.
+- Turn events into data. Use ID/handle to refer to objects. Don't use callback. Just create events and process events.
+- (Not recommended) Use reference counting and interior mutability.
 
 For example, in a GUI application, I have a counter and a button, clicking button increments counter:
 
@@ -444,7 +413,9 @@ error[E0597]: `parent.counter` does not live long enough
    = note: due to object lifetime defaults, `Box<dyn FnMut()>` actually means `Box<(dyn FnMut() + 'static)>`
 ```
 
-Solve it using `Rc<RefCell<>>` is inconvenient and "noisy":
+### (Not recommended) `Rc<RefCell<>>` callback circular reference
+
+Solving it using `Rc<RefCell<>>` is inconvenient and "noisy":
 
 ```rust
 struct ParentComponent {  
@@ -454,31 +425,33 @@ struct ParentComponent {
 struct ChildButton {  
     on_click: Option<Box<dyn Fn() -> ()>>,  
 }  
-  
 fn main() {  
     let button: Rc<RefCell<ChildButton>> = Rc::new(RefCell::new(  
         ChildButton { on_click: None }  
     ));  
     let parent: Rc<RefCell<ParentComponent>> = Rc::new(RefCell::new(  
         ParentComponent { button: button.clone(), counter: 0 }  
-    ));  
-  
+    )); 
     let weak_parent: Weak<RefCell<ParentComponent>> = Rc::downgrade(&parent);  
     button.clone().borrow_mut().on_click = Some(Box::new(move || {  
         weak_parent.upgrade().unwrap().borrow_mut().counter += 1;  
     }));  
-  
     if let Some(f) = &button.borrow().on_click {  
         f()  
-    }  
-  
+    }
     assert!(parent.borrow().counter == 1);  
 }
 ```
 
 It has many inconvenient things like `upgrade` `downgrade` `unwrap` `borrow`  `borrow_mut`. It's not recommended to do that.
 
-If the parent component's state is passed as argument of callback, instead of captured by callback, then there will be no circular reference. Things become much simpler:
+### Replace capturing with argument
+
+The callback need to access the mutable state. 
+
+The callback can access data in 3 ways: 1. arguments 2. capturing 3. global variable. Using capturing cause circular reference. Using global variable is not recommended. But accessing data via argument is easy to borrow checker.
+
+We can pass the mutable state as argument to callback, instead of letting callback capture it:
 
 ```rust
 struct ParentState {  
@@ -509,7 +482,9 @@ fn main() {
 }
 ```
 
-Another solution is to get rid of callback, and instead use event processing (replace reference with id):
+### Avoid callback. Event-as-data
+
+Similar to previous mutation-as-data, we turn calling of callback to events. The event should not indirectly borrow the mutable data. The event should use ID/handle to refer to data.
 
 ```rust
 enum Event {  
@@ -539,20 +514,50 @@ impl ParentComponent {
 }
 ```
 
-### The circular reference that's inherent in data structure
+## About circular reference
 
-In the previously mentioned case 3 and case 4, circular reference is needed in data structure.
 
-Solutions:
+Circular reference being bad in mathematics does NOT mean they are also bad in programming. The circular reference in math theories are different to circular reference in data. There are many valid cases of circular references in programming (e.g. there are doublely-linked list running in Linux kernel that works fine).
 
-- Use reference counting and interior mutability (previously mentioned). This is **recommended when there are many different types of components and you want to add new types easily** (like in GUI).
+But circular reference do add risks to memory management:
+
+- In C/C++, if two objects point to each other, when one object destructs, the another object's reference should be cleared, or there will be risk of use-after-free.
+- When using reference counting, loop should be cut by weak reference, or it will memory leak.
+- In GC languages, circular reference has memory leak risk. If all children references parents, and parents references children, then referencing any child will keep the whole structure alive.
+
+Here are some common use cases of circular reference:
+
+- Case 1: The parent references a child. The child references its parent, just for convenience. (Referencing to parent is not necessary, parent can be passed by argument)
+- Case 2: The parent registers a callback to child. When something happened on child, the callback is called, and parent do something. It that case, parent references child, child references callback, callback references parent.
+- Case 3: In a tree structure, the child references parent allows getting the path from one node to root node. Without it, you cannot get the path from just one node reference, and need to store variable-length path information.
+- Case 4: The data is inherently a graph structure that can contain cycles.
+- Case 5: The data requires self-reference.
+
+## Avoid just-for-convenience circular reference
+
+In OOP languages, it's common that parent references child, and child references parent just for convenience. It's convenient because you can access parent data in child's method, without passing parent as argument.
+
+However, Rust is unfriendly to circular reference, so these just-for-convenience circular reference should be avoided. It's recommended to **pass extra arguments instead of having circular reference**.
+
+Note that due to previously mentioned contagious borrow issue, you cannot mutably borrow child and parent at the same time (except using interior mutability). The workaround is to 1. do a split borrow on parent and pass the individual components of parent (pass more arguments and be more verbose than in other languages) 2. use interior mutability (e.g. `RefCell`, `Mutex`, `QCell`).
+
+In a tree structure, letting child node to reference parent node can be convenient. If you get a reference to a node, it's easy to do things that use parent data. One workaround is to keep tracking the path from root node to current node (but that solution is unfriendly to mutation). A better solution is to use ID/handle to replace borrow.
+
+## The circular reference that's inherent in data structure
+
+If the data structure inherently requires circular reference, solutions:
+
 - Use ID/handle to replace borrow (elaborated later). This is **recommended when you want more compact memory layout, and you rarely need to add new types into data** (suitable for data-intensive cases, can obtain better performance due to cache-friendliness).
+- Use reference counting and interior mutability (not recommende).
+- Use `unsafe` (only use if really necessary).
 
-### Self-reference
+## Self-reference
 
 Self-reference means a struct contains an interior pointer to another part of data that it owns.
 
-Zero-cost self reference requires `Pin` and `unsafe`. Normal Rust mutable borrow allow moving the value out (by `mem::replace`, or `mem::swap`, etc.). `Pin` disallows that, as self-reference pointer can be invalidated by moving. They are complex and hard to use. Workarounds includes separating child and use reference counting so it's no longer self-reference. 
+Zero-cost self reference requires `Pin` and `unsafe`. Normal Rust mutable borrow allow moving the value out (by `mem::replace`, or `mem::swap`, etc.). `Pin` disallows that, as self-reference pointer can be invalidated by moving. They are complex and hard to use. 
+
+Using things like reference counting can avoid self-reference in many cases.
 
 ## Use handle/ID to replace borrow
 
