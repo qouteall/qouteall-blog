@@ -105,7 +105,7 @@ Compile error:
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ mutable borrow occurs here
 ```
 
-(That example is just for illustrating contagious borrow issue. The `total_score` is analogous to a complex state that exists in real applications. Same for subsequent examples. Just summing integer don't necessarily need to use mutable field. Simple integer mutable state can be workarounded using `Cell`.)
+(That simplified example is just for illustrating contagious borrow issue. The **`total_score` is analogous to a complex state that exists in real applications**. Same for subsequent examples. Just summing integer can use `.sum()` or local variable. Simple integer mutable state can be workarounded using `Cell`.)
 
 This code is totally memory-safe: the `.add_score()` only touch the `total_score` field, and `.get_children()` only touch the `children` field. They work on separate data, but borrow checker thinks they overlap, because of **contagious borrow**:
 
@@ -139,7 +139,7 @@ Why that compiles? Because it does a **split borrow**: the compiler sees borrowi
 
 The deeper cause is that:
 
-- **Borrow checker works locally**: when seeing a function call, it **only checks function signature**, instead of checking code inside the function. (Its benefit is to make borrow checking faster and simpler. Doing whole-program analysis is hard and slow, and doesn't work with things like dynamic linking.)
+- **Borrow checker works locally**: when seeing a function call, it **only checks function signature**, instead of checking code inside the function. (Its benefit is to make borrow checking faster and simpler. Doing whole-program analysis is hard and slow, and doesn't work with things like dynamic linking. It also improves decoupling. A library changing function body won't make your code stop compiling.)
 - **Information is lost in function signature**: the borrowing information becomes coarse-grained and is simplified in function signature. The type system does not allow expressing borrowing only one field, and can only express borrowing the whole object. [There are propsed solutions: view type](https://smallcultfollowing.com/babysteps/blog/2025/02/25/view-types-redux/).
 
 Summarize solutions (workarounds) of contagious borrow issue (elaborated below):
