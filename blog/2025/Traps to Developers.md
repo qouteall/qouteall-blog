@@ -167,7 +167,8 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 
 - Storing a pointer of an element inside `std::vector` and then grow the vector, `vector` may re-allocate content, making element pointer no longer valid.
 - `std::string` created from literal string may be temporary. Taking `c_str()` from a temporary string is wrong.
-- Iterator invalidation. Modifying a container when looping on it.
+- [Iterator invalidation](https://learnmoderncpp.com/2024/09/04/understanding-iterator-invalidation/). Modifying a container when looping on it.
+- `std::views::filter` malfunctions when element is mutated that predicate result changes in multi-pass iteration. [See also](https://github.com/CppCon/CppCon2024/blob/main/Presentations/Taming_the_Cpp_Filter_View.pdf). `std::views::as_rvalue` with `std::ranges::to` mutates the element which can trigger that issue. [See also](https://github.com/philsquared/cpponsea2025-slides/blob/main/Presentations/Faster_Safer_Better_Ranges.pdf)
 - `std::remove` doesn't remove but just rearrange elements. `erase` actually removes.
 - Literal number starting with 0 will be treated as octal number. (`0123` is 83)
 - Destructing a deep tree structure can stack overflow. Solution is to replace recursion with loop in destructor.

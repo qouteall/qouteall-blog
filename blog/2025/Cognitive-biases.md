@@ -67,6 +67,8 @@ Unfortunately, loss aversion make being unhappy easier and make being happy hard
 
 **Relative deprivation** is also a kind of loss that people tend to avoid. For example, when the people near one get rich by investing a bubble asset, one may also choose to invest the bubble asset to avoid the "relative loss" between one and others.
 
+It's much easier to increase expectation than to reduce expectation. The knowledge of "better things exist" can be "info hazard", as it makes one harder to accept the things that one gets used to.
+
 ### Perception of risk
 
 **We prefer deterministic gain instead of risky gain**. A bird in the hand is worth two in the bush. 

@@ -1076,13 +1076,14 @@ By using unsafe you can freely manipulate pointers and are not restricted by bor
 Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
 
 - Don't violate mutable borrow exclusiveness. 
-  - A `&mut` cannot overlap with any other borrow that overlaps.
+  - A `&mut` should not overlap with any other borrows and raw pointers.
   - The overlap here also includes interior pointer. A `&mut` to an object cannot co-exist with any other borrow into any part of that object.
   - Violating that rule cause undefined behavior and can cause wrong optimization. Rust adds `noalias` attribute for mutable borrows into LLVM IR. LLVM will heavily optimize based on `noalias`. [See also](https://doc.rust-lang.org/nomicon/aliasing.html)
   - The above rule doesn't apply to raw pointer `*mut T`.
   - Converting a `&T` to `*mut T` then mutate pointed data is undefined behavior. For that use case, wrap `T` in `UnsafeCell<T>`.
   - It's very easy to accidentally violate that rule when using borrows in unsafe. It's recommended to always use raw pointer and avoid using borrow (including slice borrow) in unsafe code. [Related1](https://chadaustin.me/2024/10/intrusive-linked-list-in-rust/), [Related2](https://web.archive.org/web/20230307172822/https://zackoverflow.dev/writing/unsafe-rust-vs-zig/)
 - [Pointer provenance](https://doc.rust-lang.org/std/ptr/index.html#provenance).
+  - For to-heap pointers, different allocations are different provenances. For to-stack pointers, different local variables are different provenances.
   - Two pointers created from two provenances is considered to never alias. If their address equals, it's undefined behavior.
   - Converting an integer to pointer gets a pointer with no provenance, using that pointer is undefined behavior, unless in these two cases:
     - The integer was converted from a pointer using `.expose_provenance()` and then integer converts to pointer using `with_exposed_provenance()`
@@ -1091,7 +1092,7 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
   - The provenance is tracked by compiler in compile time. In actual execution, pointer is still integer address that doesn't attach provenance information [^miri_pointer_provenance].
 - Using uninitialized memory is undefined behavior. [`MaybeUninit`](https://doc.rust-lang.org/beta/std/mem/union.MaybeUninit.html)
 - `a = b` will drop the original object in place of `a`. If `a` is uninitialized, then it will drop an unitialized object, which is undefined behavior. Use `addr_of_mut!(...).write(...)` [Related](https://lucumr.pocoo.org/2022/1/30/unsafe-rust/)
-- Handle panic unwinding.
+- Handle panic unwinding. If unsafe code turn data into temporarily-invalid state, you need to make it valid again during unwinding. [See also](https://doc.rust-lang.org/nomicon/unwinding.html).
 - Reading/writing to mutable data that's shared between threads need to use atomic, or volatile access ([`read_volatile`](https://doc.rust-lang.org/std/ptr/fn.read_volatile.html), [`write_volatile`](https://doc.rust-lang.org/beta/std/ptr/fn.write_volatile.html)), or use other synchronization (like locking). If not, optimizer may wrongly merge and reorder reads/writes. Note that volatile access themself doesn't establish memory order (unlike Java `volatile`).
 - ......
 
@@ -1156,7 +1157,7 @@ where
     F::Output: Send + 'static,
 ```
 
-- `'static` means it's standalone (self-owned). It doesn't borrow temporary things. It can borrow global values (global values will always live when program is running). It cannot borrow a value that only temporarily exists.
+- `'static` means it's standalone (self-owned). It doesn't borrow temporary things. It can borrow global values (global values will always live when program is running).
   
   The spawned future may be kept for a long time. It's not determined whether future will only temporarily live within a scope. So the future need to be `'static`. [tokio_scoped](https://docs.rs/tokio-scoped/latest/tokio_scoped/struct.Scope.html#method.spawn) allows submitting a future that's not `'static`, but it must be finished within a scope.
   
@@ -1168,9 +1169,7 @@ where
   
   `Send` is not needed if the async runtime doesn't move future between threads.
 
-Rust converts an async functions into a state machine, which is the future. In async function, the local variables that are used across `await` points will become fields in future. If the future is required to be `Send` then these local variables also need to be `Send`.
-
-
+Rust converts an async functions into a state machine, which is the future object. In async function, the local variables that are used across `await` points will become fields in future. If the future is required to be `Send` then these local variables also need to be `Send`.
 
 ## Async traps
 
@@ -1190,18 +1189,20 @@ But in Rust it's different.
 
 ### Lifetime of temporary value
 
+Simply put:
+
+- Putting a temporary value to local variable usually make it live longer.
+- Inlining a local variable usually make it live shorter.
+
+Specifically:
+
 - A temporary value drops immediately after evaluating, except when there is a borrow to it, its lifetime extends by the borrow. It's called temporary lifetime extension. 
   - There are implicit ways of creating borrow. `DeRef` can implicitly borrow, `a.b()` can implicitly borrow `a`
   - `match`, `if let` or `while let` can also borrow which extend the lifetime
   - Sometimes temporary lifetime extension doesn't work, such as `let guard = Mutex::new(0).lock().unwrap();`
 - A value that's put into a local variable:
   - If its type implements `Drop`, then it will drop at the end of scope (one example is `MutexGuard`).
-  - If its type doesn't implement `Drop`, then it will drop after its last use. This is called NLL (non-lexical lifetime).
-
-Simplify: 
-
-- Putting a temporary value to local variable usually make it live longer.
-- Inlining a local variable usually make it live shorter.
+  - If its type doesn't implement `Drop`, then it will drop after its last use. This is called NLL (non-lexical lifetime). Borrow types `&T` don't implement `Drop` so their lifetime ends after last use (unless extended).
 
 ### Reborrow
 
