@@ -187,6 +187,8 @@ Only compute some parts of the data, and keep the information of remaining compu
 - Using a future (promise) object to represent a pending computation.
 - In Idris, having a hole and inspecting the type of hole can help proving.
 
+Related: [I'm not mutable, I'm partially instantiated](https://blog.dnmfarrell.com/post/incomplete-data-structures/)
+
 Deferred (async) compuation vs immediate compuation:
 
 - Immediately free memory is immediate computation. GC is deferred computation.
@@ -216,7 +218,11 @@ The ways that solve (or partially solve) the biformity between compile-time and 
 
 ### Execute on unknown values or superposition
 
-Related: [Symbolic execution](https://en.wikipedia.org/wiki/Symbolic_execution), [Program search using superposition](https://gist.github.com/VictorTaelin/d5c318348aaee7033eb3d18b0b0ace34)
+Related: 
+
+- [Symbolic execution](https://en.wikipedia.org/wiki/Symbolic_execution)
+- [Program search using superposition](https://gist.github.com/VictorTaelin/d5c318348aaee7033eb3d18b0b0ace34)
+
 
 ## Generalized View
 

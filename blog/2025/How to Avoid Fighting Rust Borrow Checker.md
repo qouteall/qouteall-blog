@@ -48,10 +48,9 @@ The solutions in borrow-checker-unfriendly cases (will elaborate below):
 - **Avoid in-place mutation**. Mutate-by-recreate. Use `Arc` to share immutable data. Use **persistent data structure**.
 - For circular reference:
   - For graph data structure, use ID/handle and arena.
-  - For callbacks, replace capturing with arguments, or use event-as-data.
+  - For callbacks, replace capturing with arguments, or use event handling to replace callback.
 - Borrow as temporary as possible. For example, replace container for-loop `for x in &vec {}` with raw index loop.
-- `Arc<QCell<T>>`
-- `Arc<RwLock<T>>` (only use when really necessary)
+- Reference counting and interior mutability. `Arc<QCell<T>>`, `Arc<RwLock<T>>`, etc. (only use when really necessary)
 - `unsafe` and raw pointer (only use when really necessary) 
 
 ## Contagious borrow issue
@@ -139,18 +138,28 @@ Why that compiles? Because it does a **split borrow**: the compiler sees borrowi
 
 The deeper cause is that:
 
-- **Borrow checker works locally**: when seeing a function call, it **only checks function signature**, instead of checking code inside the function. (Its benefit is to make borrow checking faster and simpler. Doing whole-program analysis is hard and slow, and doesn't work with things like dynamic linking. It also improves decoupling. A library changing function body won't make your code stop compiling.)
-- **Information is lost in function signature**: the borrowing information becomes coarse-grained and is simplified in function signature. The type system does not allow expressing borrowing only one field, and can only express borrowing the whole object. [There are propsed solutions: view type](https://smallcultfollowing.com/babysteps/blog/2025/02/25/view-types-redux/).
+- **Borrow checker works locally**: when seeing a function call, it **only checks function signature**, instead of checking code inside the function.
+  
+  The borrow checker works locally because:
+  
+  - If it checks method body, it need to do whole-program analysis. It's complex and slow.
+  - It improves decoupling. You don't need to worry a library's changing of function body makes your code stop compling. That decoupling is also required by dynamic linking.
+
+- **Information is lost in function signature**: the borrowing information becomes coarse-grained and is simplified in function signature. The type system does not allow expressing borrowing only one field, and can only express borrowing the whole object.
+  
+  There are propsed solutions: [view type](https://smallcultfollowing.com/babysteps/blog/2025/02/25/view-types-redux/). It encodes field-level borrow information into type. But it adds a lot of complexity, and still don't solve container contagious borrow [^solving_container_contagious_borrow].
+
+[^solving_container_contagious_borrow]: To encode the information of borrowing `i`-th element of a `Vec` into type, it requires dependent type, depending on runtime value of `i`. Adding dependent type into language is much more complex.
 
 Summarize solutions (workarounds) of contagious borrow issue (elaborated below):
 
 - **Remove unnecessary getters and setters**.
-  - Just simply make fields public (or in-crate public). This makes split borrow possible. If you want encapsulation, it's recommended to use ID/handle to replace borrow of mutable data (elaborated below).
+  - Just simply make fields public (or in-crate public). This enables split borrow in outer code. If you want encapsulation, use ID/handle to replace borrow of mutable data (elaborated below).
   - The getter that returns cloned/copied value is fine.
   - If data is immutable, getter is also fine.
 - **Defer mutation**
 - **Avoid in-place mutation**
-- Do a split borrow on the outer scope. Or just get rid of struct, pass fields as separate arguments. (This is inconvenient.)
+- Do a split borrow on the outer scope. Or just get rid of struct, pass fields as separate arguments. (This is inconvenient. Unfortunately, borrowing is unfriendly to composition.)
 - Manually manage index (or key) in container for-loop. Borrow as temporary as possible. 
 - Just clone the data (can be shallow-clone).
 - Use **interior mutability** (cells and locks).
@@ -355,11 +364,9 @@ If the data is small, deep cloning is usually fine. If it's not in hot code, dee
 
 ## Callbacks
 
-**Observer pattern** is commonly used in GUI and other dynamic reactive systems. If parent want to be notified when some event happens on child, the parent register callback to child, and child calls callback when event happens.
+Callbacks are commonly used in GUIs, games and other dynamic reactive systems. If parent want to be notified when some event happens on child, the parent register callback to child, and child calls callback when event happens.
 
-However, the callback function object often have to reference the parent (because it need to use parent's data). Then it creates **circular reference**: parent references child, child references callback, callback references parent.
-
-**Rust is unfriendly to circular reference**.
+However, the callback function object often have to reference the parent (because it need to use parent's data). Then it creates **circular reference**: parent references child, child references callback, callback references parent. This creates trouble as **Rust is unfriendly to circular reference**.
 
 Summarize solutions to circular reference callbacks:
 
@@ -443,13 +450,17 @@ fn main() {
 }
 ```
 
-It has many inconvenient things like `upgrade` `downgrade` `unwrap` `borrow`  `borrow_mut`. It's not recommended to do that.
+It has many inconvenient things like `upgrade` `downgrade` `unwrap` `borrow`  `borrow_mut`. Also needs to use `Weak` to cut cycle to avoid memory leak. It's not recommended to do that.
 
 ### Replace capturing with argument
 
-The callback need to access the mutable state. 
+The callback need to access the mutable state. The callback can access data in 3 ways: 
 
-The callback can access data in 3 ways: 1. arguments 2. capturing 3. global variable. Using capturing cause circular reference. Using global variable is not recommended. But accessing data via argument is easy to borrow checker.
+- Arguments.
+- Capturing. It stores data inside function object.
+- Global variable. It's not recommended (only use when really necessary).
+
+Use capturing to make callback access mutable data creates circular reference. Letting callback to access mutable data via argument suits borrow checker better.
 
 We can pass the mutable state as argument to callback, instead of letting callback capture it:
 
@@ -482,9 +493,13 @@ fn main() {
 }
 ```
 
-### Avoid callback. Event-as-data
+### Avoid callback. Defer event handling. Event-as-data.
 
-Similar to previous mutation-as-data, we turn calling of callback to events. The event should not indirectly borrow the mutable data. The event should use ID/handle to refer to data.
+Apply the previous deferred mutation and mutation-as-data idea. Don't immediately call callback when event happens. Store events as data and put to a queue. 
+
+The event should use ID/handle to refer to data, without indirectly borrowing the mutable data.
+
+The event then can be notified to the components that subscribe to specific event channels. Event can be handled in a top-down manner, following ownership tree.
 
 ```rust
 enum Event {  
@@ -512,21 +527,27 @@ impl ParentComponent {
         }  
     }  
 }
+
+... // many code omitted
 ```
 
-(That example is similified. An event passing system requires much more code. Also need to separate different event channels to improve performance.)
+In backend applications, it's common to use external message broker (e.g. Kafka) to pass message. Using them also requires turning event into data.
 
-## Avoid just-for-convenience circular reference
+## Avoid child-to-parent circular reference
 
-In OOP languages, it's common that parent references child, and child references parent just for convenience. It's convenient because you can access parent data in child's method, without passing parent as argument.
+In OOP languages, it's common that parent references child, and child references parent. It's convenient because you can access parent data in child's method, without passing parent as argument. That creates circular reference.
 
-However, Rust is unfriendly to circular reference, so these just-for-convenience circular reference should be avoided. It's recommended to **pass extra arguments instead of having circular reference**.
+However, Rust is unfriendly to circular reference, so the just-for-convenience circular reference should be avoided. It's recommended to **pass extra arguments instead of having circular reference**.
 
-Note that due to previously mentioned contagious borrow issue, you cannot mutably borrow child and parent at the same time. The workaround is to 1. do a split borrow on parent and pass the individual components of parent (pass more arguments, it's less convenient) 2. use interior mutability (e.g. `RefCell`, `Mutex`, `QCell`).
+Note that due to previously mentioned contagious borrow issue, you cannot mutably borrow child and parent at the same time. One workaround is to do a split borrow on parent and pass the individual components of parent (pass more arguments, it's less convenient).
 
 In a tree structure, letting child node to reference parent node can be convenient. If you get a reference to a node, it's easy to do things that use parent data. One workaround is to keep tracking the path from root node to current node (but that solution is unfriendly to mutation). A better solution is to use ID/handle to replace borrow.
 
 In C++ there is the **unregister-from-parent-on-destruct pattern**: the parent keep a container of child object pointers; in child object's destructor, it removes itself from parent's container. This pattern also involves circular reference. This should be avoided in Rust. The child should be owned by parent, and destructing child should be done via parent.
+
+Although circular reference is convenient in GC languages, it still has memory leak risk: when every child references parent, keeping a reference to one node of whole structure will prevent the whole structure from being GCed. In GC languages, the capturing of closure (lambda expression) are one common source of memory leaks, as the capturing is not obvious [^visualize_capturing].
+
+[^visualize_capturing]: IDE syntax coloring can be configured so that captured values are in another color. This can make capturing more obvious.
 
 ## The circular reference that's inherent in data structure
 
@@ -944,7 +965,7 @@ It can also work in multithreading, by having `RwLock<QCellOwner>`. This can all
 
 [Ghost cell](https://docs.rs/ghost-cell/latest/ghost_cell/) and [LCell](https://docs.rs/qcell/latest/qcell/struct.LCell.html) are similar to QCell, but use closure lifetime as owner id. They are zero-cost, but more restrictive (owner is tied to closure scope, cannot dynamically create, owner cannot outlive closure).
 
-Note that `QCell` still suffers from contagious borrow: mutably borrowing one `QCell` under a `QCellOwner`, cannot borrow another `QCell` under the same `QCellOwner`, except when using special multi-borrow like [`rw2`](https://docs.rs/qcell/latest/qcell/struct.QCellOwner.html#method.rw2) 
+Note that `QCell` still suffers from contagious borrow: mutably borrowing one `QCell` under a `QCellOwner`, cannot borrow another `QCell` under the same `QCellOwner`, except when using special multi-borrow like [`rw2`](https://docs.rs/qcell/latest/qcell/struct.QCellOwner.html#method.rw2) .
 
 ### Rust lock is not re-entrant
 
