@@ -522,9 +522,11 @@ In OOP languages, it's common that parent references child, and child references
 
 However, Rust is unfriendly to circular reference, so these just-for-convenience circular reference should be avoided. It's recommended to **pass extra arguments instead of having circular reference**.
 
-Note that due to previously mentioned contagious borrow issue, you cannot mutably borrow child and parent at the same time (except using interior mutability). The workaround is to 1. do a split borrow on parent and pass the individual components of parent (pass more arguments and be more verbose than in other languages) 2. use interior mutability (e.g. `RefCell`, `Mutex`, `QCell`).
+Note that due to previously mentioned contagious borrow issue, you cannot mutably borrow child and parent at the same time. The workaround is to 1. do a split borrow on parent and pass the individual components of parent (pass more arguments, it's less convenient) 2. use interior mutability (e.g. `RefCell`, `Mutex`, `QCell`).
 
 In a tree structure, letting child node to reference parent node can be convenient. If you get a reference to a node, it's easy to do things that use parent data. One workaround is to keep tracking the path from root node to current node (but that solution is unfriendly to mutation). A better solution is to use ID/handle to replace borrow.
+
+In C++ there is the **unregister-from-parent-on-destruct pattern**: the parent keep a container of child object pointers; in child object's destructor, it removes itself from parent's container. This pattern also involves circular reference. This should be avoided in Rust. The child should be owned by parent, and destructing child should be done via parent.
 
 ## The circular reference that's inherent in data structure
 
@@ -1333,22 +1335,25 @@ async fn main() {
 ## Some arguments
 
 - "Rust doesn't ensure safety of `unsafe` code, so using `unsafe` defeats the purpose of using Rust". No. If you keep the amount of `unsafe` small, then when memory/thread safety issue happens, you can inspect these small amount of `unsafe` code. In C/C++ you need to inspect all related code. It's still not recommended to use many `unsafe` in Rust.
-- "There are sanitizers in C/C++ that help me catch memory safety bugs and thread safety bugs, so Rust has no value." No. Some memory safety and thread safety bugs only trigger in production environments and in client's computers, but don't reproduce in test environment. There are [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug) [^about_heisenbug].
+- "There are sanitizers in C/C++ that help me catch memory safety bugs and thread safety bugs, so Rust has no value." No. Some memory safety and thread safety bugs only trigger in production environments and in client's computers, but don't reproduce in test environment. There are [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug) [^about_heisenbug]. Using sanitizers in production comes with large performance cost. [^about_arm_memory_tagging] In a complex codebase, even if memory/thread safety issue is catched, it's not always easy to fully fix it (sometimes a fix just reduce probability of triggering it).
 - "Using arena still face the equivalent of 'use after free', so arena doesn't solve the problem". No. Arenas can make these bugs much more deterministic than raw use-after-free bugs, preventing them from becoming Heisenbugs, making debugging much easier.
 - "Rust borrow checker rejects your code because your code is wrong." No. Rust can reject valid safe code.
 - "Doubly-linked list is useless." No. It can be useful in many cases. Linux kernel uses them. But often trees and hash maps can replace manually-implemented doubly-linked list.
-- "Circular reference is bad and should be avoided." No. Circular reference can be useful in many cases. Circular reference do come with risks.
+- "Circular reference is bad and should be avoided." No. Circular reference can be useful in many cases. Linux kernel has doubly linked lists. But circular reference do come with risks.
 - "Rust guarantees high performance." No. If one evades borrow checker by using `Arc<Mutex<>>` everywhere, the program will be likely slower than using a normal GC language (and has more risk of deadlocking). But it's easier to achieve high performance in Rust. In many other languages, achieving high perfomance often require bypassing (hacking) a lot of language functionalities.
 - "Rust guarantees security." No. Not all security issues are memory/thread safety issues. According to [Common Weakness Enumeration 2024](https://cwe.mitre.org/top25/archive/2024/2024_cwe_top25.html), many real-world vulnerabilities are XSS, SQL injection, directory traversal, command injection, missing authentication, etc. that are not memory/thread safety.
 - "Rust doesn't help other than memory/thread safety." No.
-  - Algebraic data type (e.g. `Option`, `Result`) helps avoid creating illegal data from the source. Using ADT data require pattern match all cases, avoiding forgetting handling one case. (except when using escape hatch like `unwrap()`).
-  - Mutable borrow exclusiveness prevents iterator invalidation. And it reduces bugs caused by accidental mutation.
+  - Algebraic data type (e.g. `Option`, `Result`) helps avoid creating illegal data from the source. Using ADT data require pattern match all cases, avoiding forgetting handling one case (except when using escape hatch like `unwrap()`).
+  - Mutable borrow exclusiveness reduces bugs caused by unwanted accidental mutation (except when using interior mutability).
   - Explicit `.clone()` avoids accidentally copying container like in C++.
   - Managing dependencies is much easier in Rust than in C/C++.
+  - ...
 - "Using immutable data structure is just a workaround forced by Rust." No. Immutable data structure can prevent many bugs caused by accidental mutation. If used correctly, they can reduce complexity. The persistent data structures are also efficient for things like rollback.
 - "Memory safety can only be achieved by Rust." No. Most GC languages are memory-safe. [^gc_memory_safety] Memory safety of existing C/C++ applications can be achieved via [Fil-C](https://github.com/pizlonator/fil-c).
 
 [^about_heisenbug]: The Heisenbugs may only trigger in relase build, not in debug build, not when sanitizers are on, not when logging is on, not when debugger is on. Because optimization, sanitizer, debugger and logging can change timing and memory layout, which can make memory safety or thread safety bug no longer trigger. Debugging a Heisenbug in large codebase may take weeks even months. Note that not all memory/thread safety bugs are Heisenbugs. Many are still easy to trigger.
+
+[^about_arm_memory_tagging]: [ARM memory tagging](https://developer.arm.com/documentation/108035/0100/Introduction-to-the-Memory-Tagging-Extension) is a low-cost way of checking memory safety issue at runtime. [Fil-C](https://github.com/pizlonator/fil-c) is a medium-cost way. Fil-C is more reliable in catching memory safety issue than ARM memory tagging or address sanitizer.
 
 [^gc_memory_safety]: Golang is not memory-safe under data race.
 

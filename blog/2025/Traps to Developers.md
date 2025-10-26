@@ -185,6 +185,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
   - Directly treating a part of byte buffer as a struct is undefined behavior. Not only due to alignment, but also due to object lifetime not yet started [^start_object_lifetime].
   - Alignment can cause padding in struct that waste space.
   - Some SIMD instructions only work with aligned data. For example, AVX instructions usually require 32-byte alignment.
+- Global variable initialization runs before `main`. [Static Initialization Order Fiasco](https://en.cppreference.com/w/cpp/language/siof.html).
 
 [^start_object_lifetime]: Directly treating existing binary data as struct is undefined behavior because the object lifetime hasn't started. But using `memcpy` to initialize a struct is fine.
 

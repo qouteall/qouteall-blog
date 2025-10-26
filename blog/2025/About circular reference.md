@@ -32,7 +32,7 @@ For non-reentrant locks, deadlock can happen with only one lock and one thread.
 
 ## Lock-free deadlock
 
-Deadlock can also happen when there is no explicit lock. I call it **lock-free deadlock**. (That naming is inspired by "[serverless servers](https://vercel.com/blog/serverless-servers-node-js-with-in-function-concurrency)", "constant variables" and "[unnamed namespaces](https://www.learncpp.com/cpp-tutorial/unnamed-and-inline-namespaces/)".)
+Deadlock can also happen when there is no explicit lock. I call it **lock-free deadlock**. (That naming is inspired by "[serverless servers](https://vercel.com/blog/serverless-servers-node-js-with-in-function-concurrency)", "constant variables" and "[unnamed namespaces](https://en.cppreference.com/w/cpp/language/namespace.html#Unnamed_namespaces)".)
 
 A simple Golang program showing lock-free deadlock:
 
