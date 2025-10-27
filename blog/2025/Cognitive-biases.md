@@ -662,6 +662,8 @@ The opinions on social media does not necessarily represent most peoples' view. 
 
 Some physicists propose **Anthropic Principle**: the physical laws allow life because the existence of life "selects" the physical law. The speciality of the physical laws come from survivorship bias.
 
+What people don't do is as important as what people do.
+
 ### Availability bias
 
 **Availability bias**: When thinking, the immediate examples that come into mind plays a big role.
@@ -837,6 +839,10 @@ This is also related to availability bias, where the just-seen events are more o
 
 **Normalcy bias means underreact** to new events, but **recency bias means overreact** to new events, which is the opposite of normalcy bias. These two are actually not conflicting. Which one takes effect initially is related to actual situation and existing beliefs (**confirmation bias**). When one person does not believe in a trend but the trend continued for a long time, **binary thinking** may make that person turn their belief 180 degrees and deeply believe in the trend.
 
+Relation between recency effect and primacy effect (first impression effect):
+
+- One firstly sees A, then after a long time, then sees B, recency effect tells that B has higher influence than A.
+- One firstly sees A, then sees B, then after a long time, primarcy effect tells A has higher influence than B.
 
 ### Framing effect
 
@@ -1119,6 +1125,10 @@ One easy way to make decisions is to simply follow the people around us. This is
 **Social proof heuristic**: Assuming that surrounding people know the situation better, so following them is correct.
 
 Following the crowd is also a great way of **reducing responsibility**: when everyone is guilty, the law cannot punish everyone. The one that acts independently bears more responsibility (omission bias). People often fear of acting independently.
+
+> Worldly wisdom teaches that it is better for reputation to fail conventionally than to succeed unconventionally.
+> 
+> \- John Maynard Keynes
 
 When many people follow each other, they will confirm each other, creating self-reinforcing feedback loop. This is also a reason of the momentum in markets. People tend to be overconfident when people around them are confident, and vice versa.
 

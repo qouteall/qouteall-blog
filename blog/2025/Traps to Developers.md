@@ -261,6 +261,8 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - For non-negative integer `(low + high) / 2` may overflow. A safer way is `low + (high - low) / 2`.
 - Short circuit. `a() || b()` will not run `b()` if `a()` returns true. `a() && b()` will not run `b()` when `a()` returns false.
 - When using profiler: the profiler may by default only include CPU time which excludes waiting time. If your app spends 90% time waiting on database, the flamegraph may not include that 90% which is misleading.
+- Try to cancel some async operation, but the callback still runs.
+- Assertion should not be used for validating data. Should do proper error handling to invalid external data. Assertion should check internal invariants.
 
 ### Linux and bash
 
@@ -273,9 +275,12 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - Bash has caching between command name and file path of command. If you move one file in `$PATH` then using that command gives ENOENT. Refresh cache using `hash -r`
 - Using a variable unquoted will make its line breaks treated as space.
 - `set -e` can make the script exit immediately when a sub-command fails, but it doesn't work inside function whose result is condition-checked (e.g. the left side of `||`, `&&`, condition of `if`). [See also](https://stratus3d.com/blog/2019/11/29/bash-errexit-inconsistency/)
+
+### Backend-related
+
 - K8s `livenessProbe` used with debugger. Breakpoint debugger usually block the whole application, making it unable to respond health check request, so it can be killed by K8s `livenessProbe`.
-
-
+- Don't use `:latest` image. They can change at any time.
+- In Redis, getting keys by a prefix `KEYS prefix-*` is a slow operation that will traverse all keys. Use Redis hash map for that use case.
 
 ### React
 

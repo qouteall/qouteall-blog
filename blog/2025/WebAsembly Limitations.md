@@ -175,6 +175,8 @@ for (;;) {
 
 [^web_event_loop]: That's a simplification. Actually there are two event queues in each main thread per tab. One is callback queue for low-priority events. Another is microtask queue for high-priority events. The high-priority ones execute first.
 
+(The `doRendering()` means rendering image and present in browser, not React component "rendering".)
+
 New events can be added to event queue in many ways:
 
 - Each time browser calls JS/Wasm code (e.g. event handling), it adds an event to queue.
@@ -199,7 +201,7 @@ for (;;) {
 
 The web threads (main thread and web workers) don't share mutable data (except `SharedArrayBuffer`):
 
-- Usually, JS values sent to another web worker are deep-copied. (except that, immutable values like  won't be copied). 
+- Usually, JS values sent to another web worker are deep-copied.
 - Sending an `ArrayBuffer` across thread will make `ArrayBuffer` to detach with its binary data. Only one thread can access its binary data.
 - The immutable things, like `WebAssembly.Module`, can be sent to another web worker without copying or detaching.
 
