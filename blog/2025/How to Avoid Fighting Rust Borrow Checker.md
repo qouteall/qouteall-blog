@@ -547,7 +547,7 @@ In C++ there is the **unregister-from-parent-on-destruct pattern**: the parent k
 
 Although circular reference is convenient in GC languages, it still has memory leak risk: when every child references parent, keeping a reference to one node of whole structure will prevent the whole structure from being GCed. In GC languages, the capturing of closure (lambda expression) are one common source of memory leaks, as the capturing is not obvious [^visualize_capturing].
 
-[^visualize_capturing]: IDE syntax coloring can be configured so that captured values are in another color. This can make capturing more obvious.
+[^visualize_capturing]: JetBrains IDEs semantic coloring can be configured so that captured values are in another color. This can make capturing more obvious.
 
 ## The circular reference that's inherent in data structure
 
@@ -812,7 +812,7 @@ Interior mutability allows you to mutate something from an immutable reference t
 
 Ways of interior mutability:
 
-- `Cell<T>`. It's suitable for simple copy-able types like integer. In the previous contagious borrow example, if the `total_score` is replaced with `Cell<u32>` then mutating it doesn't need mutable borrow of parent thus avoid the issue. `Cell<T>` only supports replacing the whole `T` at once, and doesn't support getting a mutable borrow.
+- `Cell<T>`. It's suitable for simple copy-able types like integer.
 - `RefCell<T>`, suitable for data structure that does incremental mutation, in single-threaded cases. It has internal counters tracking how many immutable borrow and mutable borrow currently exist. If it detects violation of mutable borrow exclusiveness, `.borrow()` or `.borrow_mut()` will panic.It can cause crash if there is nested borrow that involves mutation.
 - `Mutex<T>` `RwLock<T>`, for locking in multi-threaded case. Its functionality is similar to `RefCell`. Note that unnecessary locking can cost performance, and has risk of deadlock. It's not recommended to overuse `Arc<Mutex<T>>` just because it can satisfy the borrow checker.
 - [`QCell<T>`](https://docs.rs/qcell/latest/qcell/). Elaborated below.
@@ -825,7 +825,7 @@ They are usually used inside reference counting (`Arc<...>`, `Rc<...>`).
 
 How Rust GUI frameworks handle interior mutability:
 
-- [Dioxus](https://dioxuslabs.com/learn/0.6/) offers React-like GUI solution. In Dioxus, signal is similar to `Cell`. You can read or write the whole data of a signal, but cannot keep a borrow of data in signal.
+- [Dioxus](https://dioxuslabs.com/learn/0.6/) offers React-like GUI solution. In Dioxus, signal is similar to `Cell`. You can read or write the whole data of a signal, but cannot keep a borrow of data in signal. `Cell` requires `Copy` but signal doesn't.
 - [GPUI](https://www.gpui.rs/). Its [`Model<T>`](https://zed.dev/blog/gpui-ownership) is similar to `Rc<QCell<T>>` and `AppContext` is similar to `QCellOwner`.
 
 ### `RefCell` is not panacea
@@ -965,7 +965,7 @@ It can also work in multithreading, by having `RwLock<QCellOwner>`. This can all
 
 [Ghost cell](https://docs.rs/ghost-cell/latest/ghost_cell/) and [LCell](https://docs.rs/qcell/latest/qcell/struct.LCell.html) are similar to QCell, but use closure lifetime as owner id. They are zero-cost, but more restrictive (owner is tied to closure scope, cannot dynamically create, owner cannot outlive closure).
 
-Note that `QCell` still suffers from contagious borrow: mutably borrowing one `QCell` under a `QCellOwner`, cannot borrow another `QCell` under the same `QCellOwner`, except when using special multi-borrow like [`rw2`](https://docs.rs/qcell/latest/qcell/struct.QCellOwner.html#method.rw2) .
+Note that `QCell` still suffers from contagious borrow: after mutably borrowing one `QCell` under a `QCellOwner`, you cannot borrow another `QCell` under the same `QCellOwner`, except when using special multi-borrow like [`rw2`](https://docs.rs/qcell/latest/qcell/struct.QCellOwner.html#method.rw2).
 
 ### Rust lock is not re-entrant
 
@@ -1360,17 +1360,16 @@ async fn main() {
 - "There are sanitizers in C/C++ that help me catch memory safety bugs and thread safety bugs, so Rust has no value." No. Some memory safety and thread safety bugs only trigger in production environments and in client's computers, but don't reproduce in test environment. There are [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug) [^about_heisenbug]. Using sanitizers in production comes with large performance cost. [^about_arm_memory_tagging] In a complex codebase, even if memory/thread safety issue is catched, it's not always easy to fully fix it (sometimes a fix just reduce probability of triggering it).
 - "Using arena still face the equivalent of 'use after free', so arena doesn't solve the problem". No. Arenas can make these bugs much more deterministic than raw use-after-free bugs, preventing them from becoming Heisenbugs, making debugging much easier.
 - "Rust borrow checker rejects your code because your code is wrong." No. Rust can reject valid safe code.
-- "Doubly-linked list is useless." No. It can be useful in many cases. Linux kernel uses them. But often trees and hash maps can replace manually-implemented doubly-linked list.
 - "Circular reference is bad and should be avoided." No. Circular reference can be useful in many cases. Linux kernel has doubly linked lists. But circular reference do come with risks.
 - "Rust guarantees high performance." No. If one evades borrow checker by using `Arc<Mutex<>>` everywhere, the program will be likely slower than using a normal GC language (and has more risk of deadlocking). But it's easier to achieve high performance in Rust. In many other languages, achieving high perfomance often require bypassing (hacking) a lot of language functionalities.
 - "Rust guarantees security." No. Not all security issues are memory/thread safety issues. According to [Common Weakness Enumeration 2024](https://cwe.mitre.org/top25/archive/2024/2024_cwe_top25.html), many real-world vulnerabilities are XSS, SQL injection, directory traversal, command injection, missing authentication, etc. that are not memory/thread safety.
 - "Rust doesn't help other than memory/thread safety." No.
   - Algebraic data type (e.g. `Option`, `Result`) helps avoid creating illegal data from the source. Using ADT data require pattern match all cases, avoiding forgetting handling one case (except when using escape hatch like `unwrap()`).
-  - Mutable borrow exclusiveness reduces bugs caused by unwanted accidental mutation (except when using interior mutability).
+  - Rust defaults to immutable. Combined with, mutable borrow exclusiveness, it reduces bugs caused by unwanted accidental mutation.
   - Explicit `.clone()` avoids accidentally copying container like in C++.
   - Managing dependencies is much easier in Rust than in C/C++.
+  - Rust standard library design learns from mistaked in C++ std.
   - ...
-- "Using immutable data structure is just a workaround forced by Rust." No. Immutable data structure can prevent many bugs caused by accidental mutation. If used correctly, they can reduce complexity. The persistent data structures are also efficient for things like rollback.
 - "Memory safety can only be achieved by Rust." No. Most GC languages are memory-safe. [^gc_memory_safety] Memory safety of existing C/C++ applications can be achieved via [Fil-C](https://github.com/pizlonator/fil-c).
 
 [^about_heisenbug]: The Heisenbugs may only trigger in relase build, not in debug build, not when sanitizers are on, not when logging is on, not when debugger is on. Because optimization, sanitizer, debugger and logging can change timing and memory layout, which can make memory safety or thread safety bug no longer trigger. Debugging a Heisenbug in large codebase may take weeks even months. Note that not all memory/thread safety bugs are Heisenbugs. Many are still easy to trigger.
