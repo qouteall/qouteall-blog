@@ -1365,10 +1365,10 @@ async fn main() {
 - "Rust guarantees security." No. Not all security issues are memory/thread safety issues. According to [Common Weakness Enumeration 2024](https://cwe.mitre.org/top25/archive/2024/2024_cwe_top25.html), many real-world vulnerabilities are XSS, SQL injection, directory traversal, command injection, missing authentication, etc. that are not memory/thread safety.
 - "Rust doesn't help other than memory/thread safety." No.
   - Algebraic data type (e.g. `Option`, `Result`) helps avoid creating illegal data from the source. Using ADT data require pattern match all cases, avoiding forgetting handling one case (except when using escape hatch like `unwrap()`).
-  - Rust defaults to immutable. Combined with, mutable borrow exclusiveness, it reduces bugs caused by unwanted accidental mutation.
+  - Rust reduces bugs caused by unwanted accidental mutation.
   - Explicit `.clone()` avoids accidentally copying container like in C++.
   - Managing dependencies is much easier in Rust than in C/C++.
-  - Rust standard library design learns from mistaked in C++ std.
+  - Rust's generics, traits and standard library design learned from mistakes in C++.
   - ...
 - "Memory safety can only be achieved by Rust." No. Most GC languages are memory-safe. [^gc_memory_safety] Memory safety of existing C/C++ applications can be achieved via [Fil-C](https://github.com/pizlonator/fil-c).
 

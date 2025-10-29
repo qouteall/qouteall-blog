@@ -73,7 +73,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
   - In UTF-8, a code point can be 1, 2, 3 or 4 bytes. The byte number does not necessarily represent code point number.
   - In UTF-16, each UTF-16 code unit is 2 bytes. A code point can be 1 code unit (2 bytes) or 2 code units (4 bytes, surrogate pair).
   - JSON string `\u` escape uses surrogate pair. `"\uD83D\uDE00"` in JSON has only one code point.
-- Different in-memory string behaviors in different languages:
+- Strings in different languages:
   - Rust use UTF-8 for in-memory string. `s.len()` gives byte count. Rust does not allow directly indexing on a `str` (but allows subslicing). `s.chars().count()` gives code point count. Rust is strict in UTF-8 code point validity (for example Rust doesn't allow subslice to cut on invalid code point boundary).
   - Java, C# and JS's string encoding is similar to UTF-16 [^string_encoding]. String length is code unit count. Indexing works on code units. Each code unit is 2 bytes. One code point can be 1 code unit or 2 code units.
   - In Python, `len(s)` gives code point count. Indexing gives a string that contains one code point.
@@ -172,6 +172,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - `std::remove` doesn't remove but just rearrange elements. `erase` actually removes.
 - Literal number starting with 0 will be treated as octal number. (`0123` is 83)
 - Destructing a deep tree structure can stack overflow. Solution is to replace recursion with loop in destructor.
+- `std::shared_ptr` itself is not atomic (although its reference count is atomic). Mutating a `shared_ptr` itself is not thread-safe. `std::atomic<std::shared_ptr<...>>` is atomic.
 - Undefined behaviors. The compiler optimization aim to keep defined behavior the same, but can freely change undefined behavior. Relying on undefined behavior can make program break under optimization. [See also](https://russellw.github.io/undefined-behavior)
   - Accessing uninitialized memory is undefined behavior. Converting a `char*` to struct pointer can be seen as accessing uninitialized memory, because the object lifetime hasn't started. It's recommended to put the struct elsewhere and use `memcpy` to initialize it.
   - Accessing invalid memory (e.g. null pointer) is undefined behavior.
@@ -271,7 +272,6 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - File name is case sensitive (unlike Windows).
 - There is a capability system for executables, apart from file permission sytem. Use `getcap` to see capability.
 - Unset variables. If `DIR` is unset, `rm -rf $DIR/` becomes `rm -rf /`. Using `set -u` can make bash error when encountering unset variable.
-- If you want a script to add variables and aliases to current shell, it should be executed by using `source script.sh`, instead of directly executing. But the effect of `source` is not permanent and doesn't apply after re-login. It can be made permanent by putting into `~/.bashrc`.
 - Bash has caching between command name and file path of command. If you move one file in `$PATH` then using that command gives ENOENT. Refresh cache using `hash -r`
 - Using a variable unquoted will make its line breaks treated as space.
 - `set -e` can make the script exit immediately when a sub-command fails, but it doesn't work inside function whose result is condition-checked (e.g. the left side of `||`, `&&`, condition of `if`). [See also](https://stratus3d.com/blog/2019/11/29/bash-errexit-inconsistency/)
@@ -303,7 +303,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 
 ### Git
 
-- Rebase can rewrite history. After rebasing local branch, normal push will give weird result (because history is rewritten). Rebase should be used with force push. If remote branch's history is rewritten, pulling should use `--rebase`.
+- Rebase can rewrite history. If history is rewritten, normal push will give conflicts. After rewriting history, force push is needed. If remote branch's history is rewritten, pulling should use `--rebase`.
   - Force pushing with `--force-with-lease` can sometimes avoid overwriting other developers' commits. But if you fetch then don't pull, `--force-with-lease` cannot protect.
 - Reverting a merge doesn't fully cancel the side effect of the merge. If you merge B to A and then revert, merging B to A again has no effect. One solution is to revert the revert of merge. (A cleaner way to cancel a merge, instead of reverting merge, is to backup the branch, then hard reset to commit before merge, then cherry pick commits after merge, then force push.)
 - In GitHub, if you accidentally commited secret (e.g. API key) and pushed to public, even if you override it using force push, GitHub will still record that secret. [See also](https://trufflesecurity.com/blog/guest-post-how-i-scanned-all-of-github-s-oops-commits-for-leaked-secrets) [Example activity tab](https://github.com/SharonBrizinov/test-oops-commit/compare/e6533c7bd729957b2eb31e88065c5158d1317c5e...9eedfa00983b7269a75d76ec5e008565c2eff2ef)
