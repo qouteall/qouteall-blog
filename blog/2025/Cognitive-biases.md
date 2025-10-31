@@ -616,6 +616,8 @@ Even so, writing the idea down may be still not enough, because **natural langua
 
 Having ideas is easy and cheap. If you search the internet carefully you are likely to find ideas similar to yours. The important is to validate and execute the idea.
 
+Analogies are useful for explaining things to others, but not good at accurately thinking. The analog is similar to the real thing but is different in nuanced ways.
+
 ### Predictive processing
 
 According to [predictive processing theory](https://en.wikipedia.org/wiki/Predictive_coding), the brain predicts (hallucinates) the most parts of perception (what you see, hear, touch, etc.). The sensory signals just correct that prediction (hallucination).
@@ -744,9 +746,10 @@ However, LLM is different to human in many fundamental ways:
 - **Jagged intelligence**. [See also](https://x.com/karpathy/status/1816531576228053133)
   - LLM is good at many things that are hard for human. LLM's knowledge is larger than any individual human.
   - LLM is bad at many things that are easy for human.
-- LLM doesn't have intrinsic opinion as human do. Asking LLM a loaded question, LLM tend to follow the assumption in question to please the user. Directly asking a question tend to get different answer than asking a question under context (other chat history).
+- Most chatbots are trained to sycophants. Asking LLM a loaded question, LLM tend to follow the assumption in question to please the user. Directly asking a question tend to get different answer than asking a question under context (other chat history).
+  - LLM sometimes "defend" the things they said in previous context, similar to belief stability of human. However, the "LLM's opinion" is highly dependent to context, not "intrinsic opinion".
 
-One similarity: Both human and LLM can "hallucinate" in consistent way. When human forgets something, human tend to make up consistent information to fill the hole in memory. LLM's hallucinations are also seemingly plausible, not just random.
+One similarity: Both human and LLM can "hallucinate" in consistent way. When human forgets something, human tend to make up consistent information to fill the hole in memory. LLM's hallucinations are seemingly plausible (maximize likelihood), not just random.
 
 ### Frequency illusion
 

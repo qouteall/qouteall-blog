@@ -40,16 +40,3 @@ A lot of debate happen because same word has different meanings to different peo
 - RAG (retrieval augmented generation). Sometimes it must involve vector database. Sometimes it involves all kinds of information retrieval methods.
 
 
-Oxymoron naming:
-
-- [Serverless servers](https://vercel.com/blog/serverless-servers-node-js-with-in-function-concurrency).
-- Constant variable. (a constant. but treated as a special kind of variable in compiler)
-- Unnamed namespaces. (C++ namespace without a name)
-- Safe unsafe Rust code. (unsafe Rust code wrapped in a safe way)
-- Asynchronous synchronization. (non-blocking replication)
-- Lock-free deadlock. (deadlock can happen in message-passing systems, without any explicit lock)
-- Transparent opacity. (an opacity value that's less than 1.0, making it semi-transparent)
-- Static animation. (the animation data is hard-coded)
-- Unlogged log in. (the log-in event is not written to record)
-
-

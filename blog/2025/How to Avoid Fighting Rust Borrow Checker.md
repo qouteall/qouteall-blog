@@ -106,7 +106,7 @@ Compile error:
 
 (That simplified example is just for illustrating contagious borrow issue. The **`total_score` is analogous to a complex state that exists in real applications**. Same for subsequent examples. Just summing integers can be done by `.sum()` or local variable. Simple integer mutable state can be workarounded using `Cell`.)
 
-This code is totally memory-safe: the `.add_score()` only touch the `total_score` field, and `.get_children()` only touch the `children` field. They work on separate data, but borrow checker thinks they overlap, because of **contagious borrow**:
+That code is totally memory-safe: the `.add_score()` only touch the `total_score` field, and `.get_children()` only touch the `children` field. They work on separate data, but borrow checker thinks they overlap, because of **contagious borrow**:
 
 - In `fn get_children(&self) -> &Vec<Child> { &self.children }`, although the method body just borrows `children` field, the return value **indirectly borrows the whole `self`**, not just one field.
 - In `fn add_score(&mut self, score: u32) { self.total_score += score; }`, the function body only mutably borrowed `total_score` field, but the **argument `&mut self` borrows the whole `Parent`**, not just one field.
@@ -147,9 +147,9 @@ The deeper cause is that:
 
 - **Information is lost in function signature**: the borrowing information becomes coarse-grained and is simplified in function signature. The type system does not allow expressing borrowing only one field, and can only express borrowing the whole object.
   
-  There are propsed solutions: [view type](https://smallcultfollowing.com/babysteps/blog/2025/02/25/view-types-redux/). It encodes field-level borrow information into type. But it adds a lot of complexity, and still don't solve container contagious borrow [^solving_container_contagious_borrow].
+  There are propsed solutions: [view type](https://smallcultfollowing.com/babysteps/blog/2025/02/25/view-types-redux/). It encodes field-level borrow information into type [^solving_container_contagious_borrow].
 
-[^solving_container_contagious_borrow]: To encode the information of borrowing `i`-th element of a `Vec` into type, it requires dependent type, depending on runtime value of `i`. Adding dependent type into language is much more complex.
+[^solving_container_contagious_borrow]: The view type solves struct field contagious borrow but doesn't solve container contagious borrow. To encode the information of borrowing `i`-th element of a `Vec` into type, it requires dependent type, depending on runtime value of `i`. Adding dependent type into language is much more complex.
 
 Summarize solutions (workarounds) of contagious borrow issue (elaborated below):
 
@@ -362,6 +362,8 @@ For mutable data, to make cloning and mutation more efficient, the previously me
 
 If the data is small, deep cloning is usually fine. If it's not in hot code, deep cloning is also usually fine.
 
+For container contagious borrow, a solution is to firstly copy the keys to a new container then use keys to access the container.
+
 ## Callbacks
 
 Callbacks are commonly used in GUIs, games and other dynamic reactive systems. If parent want to be notified when some event happens on child, the parent register callback to child, and child calls callback when event happens.
@@ -564,6 +566,8 @@ Self-reference means a struct contains an interior pointer to another part of da
 Zero-cost self reference requires `Pin` and `unsafe`. Normal Rust mutable borrow allow moving the value out (by `mem::replace`, or `mem::swap`, etc.). `Pin` disallows that, as self-reference pointer can be invalidated by moving. They are complex and hard to use. 
 
 Using things like reference counting can avoid self-reference in many cases.
+
+The problems of `Pin` aim to be solved in [`Move` trait](https://github.com/rust-lang/lang-team/issues/354) and [in-place initialization](https://github.com/rust-lang/rust-project-goals/blob/main/src/2025h2/in-place-initialization.md).
 
 ## Use handle/ID to replace borrow
 
@@ -1194,8 +1198,35 @@ Rust converts an async functions into a state machine, which is the future objec
 
 ## Async traps
 
-- The normal sleep `std::thread::sleep` and normal locking `std::sync::Mutex` should not be used when using async runtime, because they block using OS functionality without telling async runtime, so they will block the async runtime's scheduling thread. In Tokio, use `tokio::sync::Mutex` and `tokio::time::sleep`.
-- Cancellation safety. [See also](https://sunshowers.io/posts/cancelling-async-rust/)
+### Blocking scheduler thread
+
+Async runtimes (like Tokio) has its own scheduler. It's similar to OS thread scheduling but different in many ways:
+
+- It happens within Rust application. It uses Rust async to switch control flow. It doesn't use OS functionalties. It's in userspace.
+- It's coorporative. If the scheduled Rust code don't coorporatively pause, it won't forcefully suspend it, and the scheduler will be always occupied.
+- It's more lightweight than OS thread scheduling. Creating a future is faster and require less memory than creating a OS thread. Switching between different Rust futures is faster than OS context switch.
+
+The normal sleep `std::thread::sleep` and normal locking `std::sync::Mutex` will **block thread using OS functionality**. Async runtime won't be notified when they block the current thread. It will occupy the async runtime's scheduling thread. This causes reduced concurrency and possible deadlocks.
+
+In Tokio, use `tokio::sync::Mutex` for mutex and `tokio::time::sleep` and sleep. They will coorporatively pause and avoid that issue.
+
+That issue is not limited to only locking and sleep. It also involves networking and all kinds of IOs.
+
+**Fixing it require all libraries you use to support async**. If a library you use do some **implicit** networking that don't use `async`, then that issue still applies. 
+
+That issue is **contagious**. you need to check not only your dependencies but also your dependencies' dependencies, and so on. IOs in Rust are implicit and don't appear in function signature [^explicit_io].
+
+[^explicit_io]: Related: New Zig IO interface require function signature to explicitly tell whether it has IO. It makes IO more obvious. [See also](https://andrewkelley.me/post/zig-new-async-io-text-version.html)
+
+### Cancellation safety
+
+Rust's future is very different to Java `CompletableFuture` and JS `Promise` and C# `Task`. In Java/JS/C#, you launch a task then get a future/promise/task object that represents the async task. The task will run regardless whether you discard the future. But in Rust, when you create a future, the task is not yet launched. It will be launched when the future is firstly polled.
+
+In Rust, if a future is dropped or leaked (never being polled again), its task is "cancelled". Note that "cancel" here doesn't mean the system IO operation is actually cancelled. It just means that the Rust async function will stop running.
+
+It's a complex topic. See also: [Cancelling async Rust](https://sunshowers.io/posts/cancelling-async-rust/)
+
+Note that task cancellation is inherently hard. It's also hard in other languages. Java interrupt and Golang context are also full of traps.
 
 ## Side effect of extracting and inlining variable
 
@@ -1350,7 +1381,9 @@ async fn main() {
 - Mutate-by-recreate is contagious. Recreating child require also recreating parent that holds the new child, and parent's parent, and so on.
 - Lifetime annotation is contagious. If some type has a lifetime parameter, then every type that holds it must also have lifetime parameter. Every function that use them also need lifetime parameter (except when lifetime elision works). Adding/removing lifetime parameter to a type may require changing many code.
 - In current borrow checker, one branch's output's borrowing is contagious to the whole branching scope.
-- `async` is contagious. `async` function can call normal function. Normal function cannot easily call `async` function (but it's possible to call by blocking).
+- `async` is contagious in two ways:
+  - `async` function can call normal function. Normal function cannot easily call `async` function (but it's possible to call by blocking). Many non-blocking functions tend to become async because they may call async function.
+  - When `async` function calls something that block using OS functionality instead of async, the async runtime scheduler thread will be blocked, resulting in reduced concurrency and possible deadlocks. This issue can only be solved if all libraries you use support async, including the dependencies' dependencies.
 - Being not `Sync`/`Send` is contagious. A struct that indirectly owns a non-`Sync` data is not `Sync`. A struct that indirectly owns a non-`Send` data is not `Send`.
 - Error passing is contagious. If panic is not acceptable, then all functions that indirectly call a fallible function must return `Result`. Related: NaN is contagious in floating point computation.
 

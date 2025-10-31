@@ -263,7 +263,6 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - Unintended sharing of mutable data. For example in Python `[[0] * 10] * 10` does not create a proper 2D array.
 - For non-negative integer `(low + high) / 2` may overflow. A safer way is `low + (high - low) / 2`.
 - Short circuit. `a() || b()` will not run `b()` if `a()` returns true. `a() && b()` will not run `b()` when `a()` returns false.
-- When using profiler: the profiler may by default only include CPU time which excludes waiting time. If your app spends 90% time waiting on database, the flamegraph may not include that 90% which is misleading.
 - Try to cancel some async operation, but the callback still runs.
 - Assertion should not be used for validating data. Should do proper error handling to invalid external data. Assertion should check internal invariants.
 
@@ -283,6 +282,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - K8s `livenessProbe` used with debugger. Breakpoint debugger usually block the whole application, making it unable to respond health check request, so it can be killed by K8s `livenessProbe`.
 - Don't use `:latest` image. They can change at any time.
 - In Redis, getting keys by a prefix `KEYS prefix-*` is a slow operation that will traverse all keys. Use Redis hash map for that use case.
+- When using profiler: the profiler may by default only include CPU time which excludes waiting time. If your app spends 90% time waiting on database, the flamegraph may not include that 90% which is misleading.
 
 ### React
 
@@ -307,10 +307,13 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 
 - Rebase can rewrite history. If history is rewritten, normal push will give conflicts. After rewriting history, force push is needed. If remote branch's history is rewritten, pulling should use `--rebase`.
   - Force pushing with `--force-with-lease` can sometimes avoid overwriting other developers' commits. But if you fetch then don't pull, `--force-with-lease` cannot protect.
-- Reverting a merge doesn't fully cancel the side effect of the merge. If you merge B to A and then revert, merging B to A again has no effect. One solution is to revert the revert of merge. (A cleaner way to cancel a merge, instead of reverting merge, is to backup the branch, then hard reset to commit before merge, then cherry pick commits after merge, then force push.)
+  - The main purpose of rebase is to make commit graph a straight line. If you don't care about commit graph aesthetics, only using merge can avoid troubles.
+- After commiting files, adding these files into `.gitignore` won't automatically exclude them from git. To exclude them, delete them or use `git rm --cached`. Note that after excluding and pushing, when another coworker pulls, these files will be deleted (not just excluded from git).
+- Reverting a merge doesn't fully cancel the side effect of the merge. If you merge B to A and then revert, merging B to A again has no effect. One solution is to revert the revert of merge. 
+  - A cleaner way to cancel a merge, instead of reverting merge, is to 1. backup the branch, 2. hard reset to commit before merge, 3. cherry pick commits after merge, 4. force push.
 - In GitHub, if you accidentally commited secret (e.g. API key) and pushed to public, even if you override it using force push, GitHub will still record that secret. [See also](https://trufflesecurity.com/blog/guest-post-how-i-scanned-all-of-github-s-oops-commits-for-leaked-secrets) [Example activity tab](https://github.com/SharonBrizinov/test-oops-commit/compare/e6533c7bd729957b2eb31e88065c5158d1317c5e...9eedfa00983b7269a75d76ec5e008565c2eff2ef)
-- In GitHub, if there is a private repo A and you forked it as B (also private), then when A become public, the private repo B's content is also publicly accessible, even after deleting B. [See also](https://trufflesecurity.com/blog/anyone-can-access-deleted-and-private-repo-data-github).
-- GitHub by default allows deleting a release tag, and adding a new tag with same name, pointing to another commit. It's not recommended to do that. Many build systems cache based on release tag, which breaks under that. It can be disabled in rulesets configuration.
+- In GitHub, if there is a private repo A and you forked it as B (also private), then when A becomes public, the private repo B's content is also publicly accessible, even after deleting B. [See also](https://trufflesecurity.com/blog/anyone-can-access-deleted-and-private-repo-data-github).
+- GitHub by default allows deleting a release tag, and adding a new tag with same name, pointing to another commit. It's not recommended to do that. It breaks build system caching. It can be disabled in rulesets configuration. For external dependencies, hardcoding release tag may be not enough to prevent supply chain risk.
 - `git stash pop` does not drop the stash if there is a conflict.
 - In Windows, Git often auto-convert cloned text files to be CRLF line ending. But in WSL many software (e.g. bash) doesn't work with files with CRLF. Using `git clone --config core.autocrlf=false -c core.eol=lf ...` can make git clone as LF.
 - MacOS auto adds `.DS_Store` files into every folder. It's recommended to add `**/.DS_Store` into `.gitignore`.
