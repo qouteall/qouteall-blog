@@ -157,6 +157,7 @@ Summarize solutions (workarounds) of contagious borrow issue (elaborated below):
   - Just simply make fields public (or in-crate public). This enables split borrow in outer code. If you want encapsulation, use ID/handle to replace borrow of mutable data (elaborated below).
   - The getter that returns cloned/copied value is fine.
   - If data is immutable, getter is also fine.
+- Reorganize code and data structure to enable split borrow.
 - **Defer mutation**
 - **Avoid in-place mutation**
 - Do a split borrow on the outer scope. Or just get rid of struct, pass fields as separate arguments. (This is inconvenient. Unfortunately, borrowing is unfriendly to composition.)
@@ -918,6 +919,8 @@ Returning `Ref<HashMap<String, Entry>>` or returning `impl Deref<Target=HashMap<
 - **Performance**. `Rc` and `RefCell` has relatively small performance cost. But for `Arc<Mutex<...>>`, unnecessary locking can hurt performance. `Arc` also can have performance issue, [explained below](#arc-is-not-always-fast). It's still ok to use them when not in performance bottleneck.
 - Their syntax ergonomic is not good. The code will have a lot of "noise" like `.borrow().borrow_mut()`.
 
+This doesn't mean `Arc<Mutex<>>` shouldn't be used. It should be used when you want both sharing and locking. It should not be used for just evading borrow checker restriction.
+
 ### `QCell`
 
 [`QCell<T>`](https://docs.rs/qcell/latest/qcell/) has an internal ID. `QCellOwner` is also an ID. You can only use `QCell` via an `QCellOwner` that has matched ID. 
@@ -1226,7 +1229,9 @@ In Rust, if a future is dropped or leaked (never being polled again), its task i
 
 It's a complex topic. See also: [Cancelling async Rust](https://sunshowers.io/posts/cancelling-async-rust/)
 
-Note that task cancellation is inherently hard. It's also hard in other languages. Java interrupt and Golang context are also full of traps.
+`tokio::select` has traps. See also: [Futurelock](https://rfd.shared.oxide.computer/rfd/0609)
+
+Note that task cancellation is inherently hard. It's also hard in other languages. Java interrupt and Golang context also have traps.
 
 ## Side effect of extracting and inlining variable
 
@@ -1396,6 +1401,7 @@ async fn main() {
 - "Circular reference is bad and should be avoided." No. Circular reference can be useful in many cases. Linux kernel has doubly linked lists. But circular reference do come with risks.
 - "Rust guarantees high performance." No. If one evades borrow checker by using `Arc<Mutex<>>` everywhere, the program will be likely slower than using a normal GC language (and has more risk of deadlocking). But it's easier to achieve high performance in Rust. In many other languages, achieving high perfomance often require bypassing (hacking) a lot of language functionalities.
 - "Rust guarantees security." No. Not all security issues are memory/thread safety issues. According to [Common Weakness Enumeration 2024](https://cwe.mitre.org/top25/archive/2024/2024_cwe_top25.html), many real-world vulnerabilities are XSS, SQL injection, directory traversal, command injection, missing authentication, etc. that are not memory/thread safety.
+- "Rust makes multi-threading easy, as it prevents data race." No. Although Rust can prevent data race, it cannot prevent deadlocks. Async Rust also has traps including blocking scheduler thread and cancellation safety.
 - "Rust doesn't help other than memory/thread safety." No.
   - Algebraic data type (e.g. `Option`, `Result`) helps avoid creating illegal data from the source. Using ADT data require pattern match all cases, avoiding forgetting handling one case (except when using escape hatch like `unwrap()`).
   - Rust reduces bugs caused by unwanted accidental mutation.

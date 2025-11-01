@@ -6,7 +6,7 @@ tags:
 unlisted: "true"
 ---
 
-# About circular reference
+# Circular reference, deadlock and halting
 
 <!-- truncate -->
 
@@ -27,6 +27,10 @@ Its edges represent **dependency**. A point to B means A depends on B. Specifica
 When that graph forms a cycle, deadlock occurs.
 
 For non-reentrant locks, deadlock can happen with only one lock and one thread.
+
+## Priority inversion deadlock
+
+
 
 ## Lock-free deadlock
 
@@ -90,6 +94,14 @@ In Golang, the channels are by-default not buffered. Sending data into channel w
 
 That lock-free deadlock can also be drawn as resource allocation graph. Channel is also a kind of node. `threadA` depends on `aToB` consuming value, `aToB` consuming value depends on `threadB` progress, `threadB` depends on `bToA` consuming value, `bToA` consuming value depends on `threadA` progress.
 
+## Deadlock caused by select
+
+
+
+## Livelock
+
+
+
 ## Reference counting circular leak
 
 Reference counting is based on the assumption that: if there is no reference to one object, that object can be freed. It's based on local reference to object, not global reachability.
@@ -98,7 +110,7 @@ However, when there is a cycle, each object in cycle will be kept referced. But 
 
 Tracing GC can collect them because tracing GC scans the whole object graph globally.
 
-But reference counting works locally. If the cycle has length limit, such as limiting to 2-object cycles, checking cycle locally can still work. But in real applications the reference cycle can be arbitrarily large, so checking cycle locally won't reliably work. Only by global traversing can these cycles be reliably handled.
+**But reference counting works locally**. If the cycle has length limit, such as limiting to 2-object cycles, checking cycle locally can still work. But in real applications the reference cycle can be arbitrarily large, so checking cycle locally won't reliably work. **Tracing GC works globally** so it can handle arbitrarily-large cycles.
 
 ## Lazy evaluation infinite container
 
@@ -151,6 +163,10 @@ Then `halts(paradox, paradox)` will cause a paradox. If it returns true, then `p
 [Rice's theorem](https://en.wikipedia.org/wiki/Rice%27s_theorem) is an extension to Halting problem: All non-trivial semantic properties of programs are undecidable (includes whether it eventually halts).
 
 (Note that halting problem cares about whether program halts in finite time, but don't care about how long it takes. A program that need to run 1000 years to complete still halts.)
+
+### Halting problem means nothing can be done?
+
+Halting problem and Rice's theorem says that we cannot reliably analyze arbitrary Turing-complete programs. But it doesn't mean nothing can be analyzed.
 
 ## Non-Turing-Complete programming languages
 
