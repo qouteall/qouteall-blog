@@ -389,7 +389,7 @@ Concentration and fat-tail distribution (80/20) are common in software world:
 - Most complexity (and bugs) come from very few features requirements.
 - Most time of CPU is spent executing few hot code.
 - Most data access targets few hot data (cache require this to be effective).
-- Most branches are biased to one in execution (branch prediction require this to be effective).
+- Most branches are biased to one in execution (most error handling branches rarely run) (branch prediction utilizes this).
 - Most developers use few languages, libraries and frameworks. (Matthew effect of ecosystem)
 - Most code and development efforts are for fixing edge cases. Few code and development efforts are spent on main case handling. [^progress_misconception]
 - Most bugs that users see are caused by few easy-to-trigger bugs.
