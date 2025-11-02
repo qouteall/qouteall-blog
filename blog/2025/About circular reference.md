@@ -221,6 +221,12 @@ main = do
   putStrLn $ show result
 ```
 
+It will output
+
+```
+("Before: 4666, After: 2333",4666)
+```
+
 Note that reverse state monad is still in a normal Haskell program. It cannot magically "make time flow backwards". It also cannot magically solve equations to compute old state based on new state. If new state relies on old state it will just deadloop.
 
 ### Memory leak caused by lazy evaluation
@@ -287,7 +293,7 @@ The set that indirectly includes itself cause [Russel's paradox](https://en.wiki
 
 Let R be the set of all sets that are not members of themselves. R contains R deduces R should not contain R, and vice versa. Set theory carefully avoids cirular reference.
 
-## Y combinator
+### Y combinator
 
 Although Y combinator's own expression doesn't require self-reference, the type of Y combinator requires self-reference to express.
 
