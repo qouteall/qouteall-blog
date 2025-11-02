@@ -6,7 +6,7 @@ tags:
 unlisted: "true"
 ---
 
-# Circular reference, deadlock and halting
+# Deadlock, circular reference and halting
 
 <!-- truncate -->
 
@@ -28,9 +28,17 @@ When that graph forms a cycle, deadlock occurs.
 
 For non-reentrant locks, deadlock can happen with only one lock and one thread.
 
-## Priority inversion deadlock
+## Priority inversion
 
+In some real-time (or near-real-time) systems, important threads have higher priority than other thread. The thread scheduler tries to run higher-priority threads first. 
 
+Priority inversion problem can make high-priority threads keep stuck, effectively similar to deadlock (although it's not strictly deadlock).
+
+The common priority inversion problem involves 3 threads, with low/medium/high priorities respectively:
+
+- The low-priority thread holds a lock.
+- A high-priority thread tries to acquire lock. It cannot and wait for low-priority thread to release lock.
+- Another medium-priority thread keeps running. When medium-priority thread runs, it occupies CPU cores so that low-priority thread cannot run. The high-priority thread's running now indirectly depend on medium-priority thread. If medium-priority thread keeps running, high-priority thread will never run.
 
 ## Lock-free deadlock
 
@@ -104,6 +112,8 @@ That lock-free deadlock can also be drawn as resource allocation graph. Channel 
 
 ## Reference counting circular leak
 
+Reference counting cause memory leak if there exists a cycle of strong references.
+
 Reference counting is based on the assumption that: if there is no reference to one object, that object can be freed. It's based on local reference to object, not global reachability.
 
 However, when there is a cycle, each object in cycle will be kept referced. But if that cycle is isolated, inaccessible to the program (not referencable from global variables and local variables), the object should be collected, but locally it's still referenced.
@@ -112,7 +122,11 @@ Tracing GC can collect them because tracing GC scans the whole object graph glob
 
 **But reference counting works locally**. If the cycle has length limit, such as limiting to 2-object cycles, checking cycle locally can still work. But in real applications the reference cycle can be arbitrarily large, so checking cycle locally won't reliably work. **Tracing GC works globally** so it can handle arbitrarily-large cycles.
 
-## Lazy evaluation infinite container
+The common solution is to use weak reference counting to cut cycle.
+
+## Lazy evaluation circular reference
+
+### Infinite container
 
 Haskell is a pure functional language where there is no mutable state. Haskell also has lazy evaluation.
 
@@ -139,6 +153,78 @@ from n = n : from (n + 1)
 creates an infinite list of increasing integers from `n`.
 
 Although the conceptual list is infinitely large, due to lazy evaluation, only the needed places need to be computed and stored into memory. They can be used as long as computation don't use the whole list.
+
+### Reverse state monad
+
+In normal state monad, the new state is computed on old state. But in reverse state monad, the state flows backwards. Old state can be computed on new state. You can change the old state that's used in previous computation. This "magic" relies on lazy evaluation.
+
+Definition of reverse state monad.
+
+```haskell
+newtype RState s a = RState { runRState :: s -> (a, s) }
+
+instance Monad (RState s) where
+  ...
+  RState sf >>= f = RState $ \s ->
+    let (a, past)   = sf future
+        (b, future) = runRState (f a) s
+    in (b, past)
+```
+
+Note that it has circular dependency: `a` depends on `future`, `future` depends on `a`. It can work due to lazy evalution (it doesn't always work).
+
+Example usage:
+
+```haskell
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
+import Control.Monad (ap)
+
+newtype RState s a = RState { runRState :: s -> (a, s) }
+
+instance Functor (RState s) where
+  fmap f st = RState $ \s ->
+    let (a, s') = runRState st s
+    in (f a, s')
+
+instance Applicative (RState s) where
+  pure x = RState $ \s -> (x, s)
+  (<*>) = ap
+
+instance Monad (RState s) where
+  return = pure
+  RState sf >>= f = RState $ \s ->
+    let (a, past)   = sf future
+        (b, future) = runRState (f a) s
+    in (b, past)
+
+get :: RState s s
+get = RState $ \s -> (s, s)
+
+put :: s -> RState s ()
+put s = RState $ \_ -> ((), s)
+
+-- it modifies old state based on new state
+modify :: (s -> s) -> RState s ()
+modify f = RState $ \s -> ((), f s)
+
+example :: RState Int String
+example = do
+  x <- get
+  modify (* 2)
+  y <- get
+  return $ "Before: " ++ show x ++ ", After: " ++ show y
+
+main :: IO ()
+main = do
+  let result = runRState example 2333
+  putStrLn $ show result
+```
+
+Note that reverse state monad is still in a normal Haskell program. It cannot magically "make time flow backwards". It also cannot magically solve equations to compute old state based on new state. If new state relies on old state it will just deadloop.
+
+### Memory leak caused by lazy evaluation
+
 
 ## Halting problem
 
@@ -184,6 +270,10 @@ The proof languages describe both program and proof, according to [Curry–Howar
 - If the program don't halt, then value of type `X` can never be obtained.
 - That program should not use any side effect (mutation, external IO, random, etc.).
 - In reality, you just need to ensure the program halts and don't need to really execute the program.
+
+## Ethernet ring
+
+
 
 ## Circular reference in math
 

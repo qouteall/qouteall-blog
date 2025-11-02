@@ -55,6 +55,8 @@ The continuation (without "delimited") contains the whole execution state of the
 
 **Continuation passing style** (CPS) is a way of representing programs. In CPS, each function accepts a continuation. Returning becomes calling the continuation. Calling continuation is to continue execution. The output of continuation is the "final output of whole program" (if IO or mutable state involved, the "final output of whole program" can be empty).
 
+Algebraic effect can be simulated with free monad. Free monad can turn any functor into monad, but it internally just records computation and don't actually "execute". It can be "executed" by an external interpreter.
+
 ### Don't always go too far on DSL
 
 See also: [Configuration complexity clock](https://mikehadlow.blogspot.com/2012/05/configuration-complexity-clock.html)
@@ -181,7 +183,8 @@ It forms a tree. Each character is a node, containing visibility boolean flag. E
 
 Only compute some parts of the data, and keep the information of remaining computation for future use.
 
-- In lazy evaluation, the unobserved data is not computed.
+- In lazy evaluation, the unobserved data is not computed. It's computed when it's firstly observed.
+  - Lazy evaluation also allows infinitely large containers.
 - Deferred mutation. Relates to mutation-data duality.
 - Replace immediately executed code with data (expression tree, DSL, etc.) that will be executed (interpreted) later. Relates to computation-data duality.
 - In multi-stage programming, some data are fixed while some data are unknown. The fixed data can be used for optimization. It can be seen as runtime constant value folding. JIT can be seen as treating bytecode as runtime constant and fold them in interpreter code.
