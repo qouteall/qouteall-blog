@@ -19,7 +19,7 @@ Background:
 - Although its name has "Assembly", it has features (e.g. [GC](https://github.com/WebAssembly/gc)) that are in a higher abstraction layer than native assembly, similar to JVM bytecode.
 - In browsers, it's the same engine that runs JS and Wasm. Chromium V8 executes both JS and Wasm. Wasm GC use the same GC as JS.
 
-[^wasm_js_perf]: WebAssembly is not always faster than JS, depending on how much optimization efforts are put in, and browser's limitations. But WebAssembly has higher potential of performance than JS. JS has a lot of flexibility. Flexibility costs performance. JS runtime often use runtime statistics to find unused flexibility and optimize accordingly. But statistics cannot be really sure so JS runtime still have to "prepare" for flexibility. The runtime statistics and "prepare for flexibility" all costs performance, in a way that cannot be optimized without changing code format.
+[^wasm_js_perf]: WebAssembly is not always faster than JS. Currently Wasm can only access Web APIs via JS. If the app require frequently copying data between JS and Wasm, it's likely slower than using just JS. WebAssembly by itself has higher potential of performance than JS. JS has a lot of flexibility. Flexibility costs performance. JS runtime often use runtime statistics to find unused flexibility and optimize accordingly. But statistics cannot be really sure so JS runtime still have to "prepare" for flexibility. The runtime statistics and "prepare for flexibility" all costs performance, in a way that cannot be optimized without changing code format and execution model.
 
 This article focuses on in-browser Wasm.
 

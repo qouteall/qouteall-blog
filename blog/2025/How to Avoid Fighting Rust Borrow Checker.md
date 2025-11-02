@@ -1380,6 +1380,28 @@ async fn main() {
 
 [There is a proposal on improving syntax ergonomic of it.](https://rust-lang.github.io/rust-project-goals/2024h2/ergonomic-rc.html)
 
+## Nuance of "immutable"
+
+There are 3 kinds of "immutable":
+
+- Fully-immutable. The referenced object is immutable, and the reference is also immutable.
+- Mutable-ref-to-immutable-obj. The referenced object is immutable, but the reference itself is mutable.
+- Immutable-ref-to-mutable-obj. The referenced object is mutable, but the reference itself is immutable.
+
+Note that **read-only is different to immutable**.
+
+Examples:
+
+- Java `final` reference ensures reference itself is immutable. If pointed object is mutable then its's immutable-ref-to-mutable-obj.
+- Java `Collections.unmodifiableList()` gives read-only view.
+- Copy-on-write (COW) and read-copy-write (RCU) are mutable-ref-to-immutable-obj.
+- Rust `let x: T` makes `x` fully immutable. Immutability applies to whole ownership tree. If a `Vec` is immutable, its elements are also immutable.
+- Rust `let mut x: &T` makes `x` a mutable-ref-to-immutable-obj.
+- Rust `let x: &mut T` makes `x` an immutable-ref-to-mutable-obj.
+- Rust `let x: &mut &T` makes `x` a immutable-ref-to-mutable-ref-to-immutable-obj.
+- The above Rust immutable no longer holds when using interior mutability.
+- Git release tag is mutable-ref-to-immutable-obj. The Git commit with specific hash is immutable. But Git allows removing a release tag and create a new same-named release tag to another commit. This can be disabled.
+
 ## Summarize the contagious things
 
 - Borrowing that cross function boundary is contagious. Just borrowing a wheel of car can indirectly borrow the whole car.
