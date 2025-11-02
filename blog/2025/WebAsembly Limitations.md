@@ -322,6 +322,7 @@ Generally, WebAssembly runs slower than native applications compiled from the sa
 - Multi-threading require launching web worker, which is a slow operation.
 - Limited access to hardware functionality, such as some special SIMD instructions. But Wasm already support many common SIMD instructions.
 - Cannot access some OS functionalities, such as `mmap`.
+- Wasm forces structural control flow. See also: [WebAssembly Troubles part 2: Why Do We Need the Relooper Algorithm, Again?](http://troubles.md/why-do-we-need-the-relooper-algorithm-again/). This may reduce the performance of compiling to Wasm and JIT optimization.
 
 ## Debugging Wasm running in Chrome
 
@@ -376,7 +377,36 @@ The same thing can also be done via equivalent Wasm code using `SharedArrayBuffe
 
 Related: Another vulnerability related to cache side channel: [GoFetch](https://gofetch.fail/). It exploits Apple processors' cache prefetching functionality.
 
-### Forcing structural control flow
+### Other sandboxed execution solutions
 
-See also: [WebAssembly Troubles part 2: Why Do We Need the Relooper Algorithm, Again?](http://troubles.md/why-do-we-need-the-relooper-algorithm-again/)
-This may reduce the performance of compiling to Wasm and JIT optimization. This issue doesn't apply to application developers.
+WebAssembly provides sandboxed execution. This can be useful for things like plugin system.
+
+There are other sandboxed execution solutions:
+
+- [eBPF](https://en.wikipedia.org/wiki/EBPF). It's intended to run code in kernel in a sandboxed way. It has JIT compile.
+- Containers and [gVisor](https://gvisor.dev/).
+- Java loading new class at runtime. If the newly loaded classes run in the same JVM as host application, it's not safe (the newly-loaded class has same permission of accessing files and networking like host process). Similar to CLR.
+- [MicroVM](https://firecracker-microvm.github.io/).
+- [LUA](https://www.lua.org/). It's designed to be easily embedded into other applications. LUA is dynamically-typed. Although it has JIT, its performance may not match statically-typed languages.
+- ...
+
+These things also have VMs:
+
+- Font standard TrueType has its own VM and bytecode format. [See also](https://learn.microsoft.com/en-us/typography/opentype/spec/tt_instructions)
+- PDF allows embedding JavaScript.
+- UEFI has a byte code format and VM. [See also](https://uefi.org/specs/UEFI/2.10/22_EFI_Byte_Code_Virtual_Machine.html)
+- SIM cards runs Java.
+- MySQL supports JS stroed procedure. [See also](https://blogs.oracle.com/mysql/post/introducing-javascript-support-in-mysql)
+- Related: Modern CPUs often have a [microcode](https://en.wikipedia.org/wiki/Microcode) system. The microcode supports conditional jumping and can access things like register and memory bus. It's a "small CPU within CPU".
+
+### Within-website sub-sandboxing
+
+Figma has a plugin system that runs within browser. These plugins executes JS code. To enhance security, Figma cannot allow plugins to call arbitrary web APIs.
+
+However, the web API currently doesn't allow directly running JS code in a way that prevents some web API usage. Running JS code in another iframe has sandboxing but require larger communication cost.
+
+The browser already do sandboxing between website code and browser processes. But that plugin system requries an extra sandboxing layer between website code and the plugin running in website code.
+
+The proposal [ShadowRealm API](https://github.com/tc39/proposal-shadowrealm) will ultimately fix it. Before that standardizes and is commonly supported by browsers, Figma's solution is to use a JS interpreter in Wasm to execute plugin code.
+
+See also: [How to build a plugin system on the web and also sleep well at night](https://www.figma.com/blog/how-we-built-the-figma-plugin-system/), [An update on plugin security](https://www.figma.com/blog/an-update-on-plugin-security/)

@@ -39,6 +39,8 @@ The benefit of turning execution state into explicit data:
 - Modification: Explicit execution state can be modified. It makes cancellation and rollback easier. (Modifying execution stack and execution state is harder, and it's not supported by many mainstream languages.)
 - Forking: Allows forking control flow, which can be useful in some kinds of simulations.
 
+Modern CPUs often have a [microcode](https://en.wikipedia.org/wiki/Microcode) system, allowing complex hardware control logic to be represented in data.
+
 [^suspending_thread]: It's possible to use separate threads for suspendable compuatation. However, OS threads are expensive and context switch is expensive. Manually-implemented state machine is faster. 
 
 The distinction between computation and execution state is blurry. A closure can capture data. An execution state can be seen as a **continuation**, which is also a computation.
@@ -196,6 +198,11 @@ Deferred (async) compuation vs immediate compuation:
 - Pytorch's most matrix operations are async. GPU computes in background. The tensor object's content may be yet unknown (and CPU will wait for GPU when you try to read its content).
 - PostgreSQL and SQLite require deferred "vacuum" that rearranges storage space.
 - Mobile GPUs often do [tiled rendering](https://en.wikipedia.org/wiki/Tiled_rendering). After vertex shader running, the triangles are not immediately rasterized, but dispatched to tiles (one triangle can go to multiple tiles). Each tile then rasterize and run pixel shader separately. It can reduce memory bandwidth requirement and power consumption.
+
+Adding a "middle-stage" can simplify computation and improve generalization:
+
+- Compiler generate cross-platform IR then translate IR to machine code.
+- ...
 
 ### Program lifecycle
 
