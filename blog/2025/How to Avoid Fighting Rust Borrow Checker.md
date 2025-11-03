@@ -375,7 +375,7 @@ Summarize solutions to circular reference callbacks:
 
 - Pass mutable data in argument. Don't make the callback capture mutable data. This can break the circular reference.
 - Turn events into data. Use ID/handle to refer to objects. Don't use callback. Just create events and process events.
-- (Not recommended) Use reference counting and interior mutability.
+- (Not recommended) Use reference counting and interior mutability, like `Rc<RefCell<>>`.
 
 For example, in a GUI application, I have a counter and a button, clicking button increments counter:
 
@@ -423,38 +423,6 @@ error[E0597]: `parent.counter` does not live long enough
    = note: due to object lifetime defaults, `Box<dyn FnMut()>` actually means `Box<(dyn FnMut() + 'static)>`
 ```
 
-### (Not recommended) `Rc<RefCell<>>` callback circular reference
-
-Solving it using `Rc<RefCell<>>` is inconvenient and "noisy":
-
-```rust
-struct ParentComponent {  
-    button: Rc<RefCell<ChildButton>>,  
-    counter: u32,  
-}  
-struct ChildButton {  
-    on_click: Option<Box<dyn Fn() -> ()>>,  
-}  
-fn main() {  
-    let button: Rc<RefCell<ChildButton>> = Rc::new(RefCell::new(  
-        ChildButton { on_click: None }  
-    ));  
-    let parent: Rc<RefCell<ParentComponent>> = Rc::new(RefCell::new(  
-        ParentComponent { button: button.clone(), counter: 0 }  
-    )); 
-    let weak_parent: Weak<RefCell<ParentComponent>> = Rc::downgrade(&parent);  
-    button.clone().borrow_mut().on_click = Some(Box::new(move || {  
-        weak_parent.upgrade().unwrap().borrow_mut().counter += 1;  
-    }));  
-    if let Some(f) = &button.borrow().on_click {  
-        f()  
-    }
-    assert!(parent.borrow().counter == 1);  
-}
-```
-
-It has many inconvenient things like `upgrade` `downgrade` `unwrap` `borrow`  `borrow_mut`. Also needs to use `Weak` to cut cycle to avoid memory leak. It's not recommended to do that.
-
 ### Replace capturing with argument
 
 The callback need to access the mutable state. The callback can access data in 3 ways: 
@@ -496,13 +464,15 @@ fn main() {
 }
 ```
 
+That method is useful when callback needs to share mutable data, not just for circular reference.
+
 ### Avoid callback. Defer event handling. Event-as-data.
 
 Apply the previous deferred mutation and mutation-as-data idea. Don't immediately call callback when event happens. Store events as data and put to a queue. 
 
-The event should use ID/handle to refer to data, without indirectly borrowing the mutable data.
+The event should use ID/handle to refer to data, without indirectly borrowing the mutable data. The event then can be notified to the components that subscribe to specific event channels. Event can be handled in a top-down manner, following ownership tree.
 
-The event then can be notified to the components that subscribe to specific event channels. Event can be handled in a top-down manner, following ownership tree.
+Incomplete code example:
 
 ```rust
 enum Event {  
@@ -584,25 +554,31 @@ Some may think that using handle/ID is "just a nasty workaround caused by borow 
 
 [^id_ref_translation]: Having both ID and object reference introduces friction: translating between ID and object reference. Some ORM will malfunction if there exists two objects with the same primary key.
 
-One kind of arena is [slotmap](https://docs.rs/slotmap/latest/slotmap/):
+### Arena
 
-- Slotmap is basically an array of elements, but each element has a version integer. 
-- Each handle (key) has an index and a version. It's `Copy`-able data that's not restricted by borrow checker.
-- When accessing the slotmap, it firstly does a bound check, then checks version. 
-- After removing element, the version increments. The previous handle cannot get the new element at the same index, because of version mismatch.
-- Although memory safe, it still has the equivalent of "use-after-free": using a handle of an already-removed object cannot get element from the slotmap [^slotmap_uniqueness]. Each get element operation may fail.
-- Note that slotmap is not efficient when there are many unused empty space between elements. Slotmap offers two other variants for sparce case.
+One kind of arena is [slotmap](https://docs.rs/slotmap/latest/slotmap/). It's **generational arena**.
 
-[^slotmap_uniqueness]: Each slotmap ensures key uniqueness, but if you mix keys of different slotmaps, the different keys of different slotmap may duplicate. Using the wrong key may successfully get an element but logically wrong.
+`SlotMap` is similar to an array of elements, but each slot has a generation integer. If a slot's element is dropped and new element is placed in same slot, the generation counter increases. 
 
-Other map structure, like `HashMap` or `TreeMap` can also be arenas. 
+Each handle (key) has an index and a generation integer. It's `Copy`-able data that's not restricted by borrow checker. Accessing slotmap only succeedes if slot generation matches.
 
-If no element can be removed from arena, then a `Vec` can also be an areana.
+Although memory safe, it still has the equivalent of "use-after-free": using a handle of an already-removed object cannot get element from the slotmap [^slotmap_uniqueness]. Each get element operation may fail.
+
+Note that `SlotMap` is not efficient when there are many unused empty space between elements. slotmap crate offers two `HopSlotMap` and `DenseSlotMap` for better performance in sparce case.
+
+[^slotmap_uniqueness]: Each slotmap ensures key uniqueness, but if you mix keys of different slotmaps, the different keys of different slotmap may duplicate. Using the wrong key may successfully get an element but logically wrong. [id-arena](https://docs.rs/id-arena/2.2.1/id_arena/) avoids that by attaching arena id into key, but that makes key larger.
+
+Other kinds of arenas:
+
+- Other map structure, like `HashMap` or `TreeMap` can also be arenas. 
+- If no element can be removed from arena, then a `Vec` can also be an areana. [id-arena](https://docs.rs/id-arena/2.2.1/id_arena/) attaches extra arena id to key, so that keys of different arenas can never be confused.
+- [generational_box](https://docs.rs/generational-box/0.7.0/generational_box/)
+- [bevy_ecs](https://docs.rs/bevy_ecs/latest/bevy_ecs/)
 
 The important things about arena:
 
 - The borrow checker **no longer ensure the ID/handle points to a living object**. Each data access to arena may fail. There is equivalent of "use after free".
-- **Arenas still suffer from contagious borrow issue**. We need to borrow things as temporary as possible. But when arena contains a container and we want to for-loop on it, to avoid cost of copying the container, borrowing for long time is still necessary. If we want to change the arena when for looping in that container, contagious borrow issue appears. The previously mentioned **deferred mutation can help**.
+- **Arenas still suffer from contagious borrow issue**. Borrowing one element in arena indirectly borrows whole arena. The previously mentioned solutions (deferred mutation, shallow clone, manual container loop, persistent data structure, etc.) may be needed.
 
 Some may think "using arena cannot protect you from equivalent of 'use after free' so it doesn't solve problem". But arena can greatly improve determinism of bugs, making debugging much easier. A randomly-occuring memory safety [Heisenbug](https://en.wikipedia.org/wiki/Heisenbug) may no longer trigger when you enable sanitizer, as sanitizer can change memory layout.
 
@@ -827,11 +803,6 @@ Ways of interior mutability:
 - ......
 
 They are usually used inside reference counting (`Arc<...>`, `Rc<...>`).
-
-How Rust GUI frameworks handle interior mutability:
-
-- [Dioxus](https://dioxuslabs.com/learn/0.6/) offers React-like GUI solution. In Dioxus, signal is similar to `Cell`. You can read or write the whole data of a signal, but cannot keep a borrow of data in signal. `Cell` requires `Copy` but signal doesn't.
-- [GPUI](https://www.gpui.rs/). Its [`Model<T>`](https://zed.dev/blog/gpui-ownership) is similar to `Rc<QCell<T>>` and `AppContext` is similar to `QCellOwner`.
 
 ### `RefCell` is not panacea
 

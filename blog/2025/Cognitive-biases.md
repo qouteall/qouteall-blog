@@ -1043,7 +1043,9 @@ In software product design, the default options in software plays a big role in 
 - Just 1 second longer page load time may reduce user conversion by 30%. [Source](https://www.cloudflare.com/learning/performance/more/website-performance-conversion-rates/)
 - Each setup procedure will frustrate a portion of users, making them give up installing the software. [Why I’m Done Making Desktop Applications](https://www.kalzumeus.com/2009/09/05/desktop-aps-versus-web-apps/). A good product requires minimal configuration to start working.
 
-[Ask for no, don’t ask for yes](https://www.mooreds.com/wordpress/archives/3518).
+[Ask for no, don’t ask for yes](https://www.mooreds.com/wordpress/archives/3518). When asking others to approve something they didn't plan, they tend to not approve or delay approving, as the approver bears responsibility. Just proceed by default and ask for no holds more control and bears more responsibility. 
+
+Software UX design should avoid confronting user with a must-made decision. Making decision consumes mental efforts and gives feeling of risk. The software should have a reasonable default and let user to customize on demand.
 
 **Status quo bias**: tend to maintain status quo. This is related to risk aversion, as change may cause risk.
 
