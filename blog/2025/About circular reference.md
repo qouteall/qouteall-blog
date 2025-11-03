@@ -260,6 +260,8 @@ Then `halts(paradox, paradox)` will cause a paradox. If it returns true, then `p
 
 Halting problem and Rice's theorem says that we cannot reliably analyze arbitrary Turing-complete programs. But it doesn't mean nothing can be analyzed.
 
+TODO
+
 ## Non-Turing-Complete programming languages
 
 SQL is not Turing-complete when not using recursive common table extension (`with recursive ...`) and other procedural extensions (e.g. `while`).
@@ -276,6 +278,8 @@ The proof languages describe both program and proof, according to [Curry–Howar
 - If the program don't halt, then value of type `X` can never be obtained.
 - That program should not use any side effect (mutation, external IO, random, etc.).
 - In reality, you just need to ensure the program halts and don't need to really execute the program.
+
+Strictly speaking, Turing complete requires infinitely large memory, so all practical computers and languages don't satisfy strict Turing complete. Apart from memory constraint, blockchain applications often consume fee (gas) in each step of execution, but Turing complete requires unlimited execution steps, so they also not strictly Turing complete.
 
 ## Ethernet ring
 
