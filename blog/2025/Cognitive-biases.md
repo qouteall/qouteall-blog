@@ -1426,7 +1426,9 @@ This is related to information addiction. **Randomized things give more informat
 
 Unfortunately, just knowing the cognitive biases is not enough to avoid and overcome them. A lot of cognitive biases originate from the biological basis of human's cognitive function, which cannot change from just knowledge.
 
-Reference: [G.I. Joe Phenomena: Understanding  the Limits of Metacognitive  Awareness on Debiasing](https://www.hbs.edu/ris/Publication%20Files/21-084_436ebba8-c832-4922-bb6e-49d000a77df3.pdf)
+Related: [Understanding the Limits of Metacognitive Awareness on Debiasing](https://www.hbs.edu/ris/Publication%20Files/21-084_436ebba8-c832-4922-bb6e-49d000a77df3.pdf)
+
+Just knowing the theory is far from applying the theory in action.
 
 Note that the **cognitive biases are not necessarily negative things**. They are tradeoffs: sometimes worse, sometimes better.
 

@@ -233,6 +233,15 @@ Related:
 - [Symbolic execution](https://en.wikipedia.org/wiki/Symbolic_execution)
 - [Program search using superposition](https://gist.github.com/VictorTaelin/d5c318348aaee7033eb3d18b0b0ace34)
 
+### Batched computation, amortize latency
+
+CPU is optimized for low latency of serial computation. GPU is optimized for large thoughput of parallel computation. GPU has higher latency for individual operations but the parallelism amortizes latency.
+
+Amortizing here means reducing latency per computation or latency per data.
+
+For database operations, batching operations can reduce the total amount of network requests. There are almost-fixed costs of each network request, such as latency and context switch. Batching can reduce amount of network requests, so the almost-fixed costs can be amortized.
+
+For the procedural code that does DB accesses, making insertions and updates batched is easy as the app usually don't use results of insertions and updates. However making queries batched is harder, as it need to firstly collect queries (without immediately getting query result), then do batched query, then analyze the result to find related things for each query.
 
 ## Generalized View
 
@@ -405,13 +414,14 @@ Concentration and fat-tail distribution (80/20) are common in software world:
 - Most bugs that users see are caused by few easy-to-trigger bugs.
 - Only a small portion of transisters in hardware are used in most times. Many transistors are rarely used. (Many transistors are for rarely-used instructions. Hardware defects related to them have higher probability to evade the test. See also: [Silent Data Corruptions at Scale](https://arxiv.org/pdf/2102.11245), [Cores that don’t count](https://sigops.org/s/conferences/hotos/2021/papers/hotos21-s01-hochschild.pdf))
 
-[^progress_misconception]: For beginners, a common misconception is that "if the software shows things on screen, then it's 90% done". In reality, a proof-of-concept is often just 20% done. There are so many corner cases in real usage. Not handing one corner case is bug. Most code are used for handling corner cases, not common cases. Although each specific corner case triggering probability is small, triggering any of the many corner cases is high-probability.
+[^progress_misconception]: For beginners, a common misconception is that "if the software shows things on screen, then it's 90% done". In reality, a proof-of-concept is often just 20% done. There are so many corner cases in real usage. Not handing one corner case is bug. Most code are used for handling corner cases, not common cases. Although each specific corner case triggering probability is often small, triggering any of the many corner cases is high-probability.
 
 Many optimizations are based on **assuming the high-probability case happens**:
 
 - Branch prediction assumes that it will execute the high-probability branch. If it predicts wrongly, speculative execution rolls back.
 - Cache assumes that it will access hot data. If it accesses outside of hot data, cache is not hit.
 - Optimistic concurrency control assumes there will be no concurrency conflict. If there do is a conflict, it rolls back and retries. It requires fewer waiting and communication than pessimistic concurrency control (locking), unless there are many contentions.
+- LLM speculative decoding assumes that many tokens are easy to predict and a small model gets same result as large model. (Also the cost of loading weights from memory is much larger than computing on weights, so batching can amortize memory IO latency.)
 
 ## Corresponding GoF design patterns
 
