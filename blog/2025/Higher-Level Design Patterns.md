@@ -57,22 +57,27 @@ The continuation (without "delimited") contains the whole execution state of the
 
 Algebraic effect can be simulated with free monad. Free monad can turn any functor into monad, but it internally just records computation and don't actually "execute". It can be "executed" by an external interpreter.
 
-### Don't always go too far on DSL
+### Don't always go too far on flexible config
 
 See also: [Configuration complexity clock](https://mikehadlow.blogspot.com/2012/05/configuration-complexity-clock.html)
 
-When you try to handle many different business requests, one solution is to create a flexible rules engine. Configuring the rules engine can handle all of the requests.
+When you try to handle many different business requests, one solution is to create a flexible rules engine. Configuring the rules engine can handle all of the new requirements.
 
 However then a tradeoff become salient:
 
 - If the rules engine is high in abstraction level, doing a lot of predefined things under-the-hood, then: it will be unadaptive when a new requirement clashes with predefined behavior. [Simple interface = hardcoded defaults = less customizability](./About%20Code%20Reuse,%20Polymorphism%20and%20Abstraction#simple-interface--hardcoded-defaults--less-customizability).
-- If the rules engine is low in abstraction level, then doing things will require more configuration. It's not more convenient than just coding. It becomes a new DSL. The new DSL is often worse than mainstream languages because:
+- If the rules engine is low in abstraction level, then doing things will require more configuration. It's not more convenient than just coding. It essentially becomes a new DSL. The new DSL is often worse than mainstream languages because:
   - The new DSL often has poor debug support.
   - The new DSL often has no IDE support.
   - No existing libraries ecosystem. Need to reinvent wheel.
   - The new DSL is often less battle-tested and more buggy.
 
-DSL are useful when it's high in abstraction level, and new requirements mostly follow the abstration.
+DSL are useful when:
+
+- It's high in abstraction level. It can work by some simple straightforward configurations.
+- New requirements mostly follow the abstration. No need to break the assumptions and default behaviors of abstraction.
+
+Allowing the user to configure it via UI (no-code platform) is also often appropriate when it's simple to use and is in high abstraction level. The low-abstraction-level config UI is only usable by developers while being less convenient than just coding.
 
 ### Replace calls with data
 
@@ -82,6 +87,20 @@ DSL are useful when it's high in abstraction level, and new requirements mostly 
 - Graphics API: Old OpenGL use system calls to change state and dispatch draw call. New Graphics APIs like Vulkan, Metal and WebGPU all use command buffer. Operations are turned to data in command buffer, then one system call to submit many commands.
 
 [^io_uring_polling]: It's possible to use polling to fully avoid system call after initial setup, but with costs.
+
+### Computation-storage tradeoff
+
+A computation can be turned to accessing storage (pre-compute a lookup table).
+
+Modern highly-parallel computation are often bottlenecked by IO and synchronization. Adding new computation hardware units is easy. Making the information to flow efficiently between these hardware units is hard.
+
+Ways of reducing IO cost:
+
+- Re-compute temporary result instead of storing temporary result.
+- Use compression to reduce required IO.
+- Change data layout or access pattern to make IO targets more dense, improving cache hit rate.
+- Batch the computations related to IO of the same data. Temporarily reuse the result of the same IO.
+- Do other computation while IO is in-progress. Increase concurrency to amortize IO cost.
 
 ## Mutation-data duality
 
@@ -125,6 +144,10 @@ Mutate-by-recreate: Keep data immutable. Change it by recreating the whole data.
 In multi-threading, for read-heavy data, it's often beneficial to make the data structure immutable, but keep one mutable atomic reference to it. Updating recreates the whole data structure and atomically change the reference. This called read-copy-update (RCU) or copy-on-write (COW).
 
 In pure functional languages (e.g. Haskell), there is no direct way of mutating things. Mutation can only be simutated by recreating.
+
+If data is fully immutable, then recreating a child requires recreating the parent to hold new child, and parent's parent, and so on. It's "contagious" up to the top.
+
+[Lens](https://hackage.haskell.org/package/lens) is an abstraction that tackles the "contagious recreate parent" problem. A lens is a "path to sub-data". That path can easily compose. You can get sub-data by path. You can also replace a sub-data by path.
 
 ### Bitemporal modelling
 
@@ -201,6 +224,7 @@ Deferred (async) compuation vs immediate compuation:
 - Pytorch's most matrix operations are async. GPU computes in background. The tensor object's content may be yet unknown (and CPU will wait for GPU when you try to read its content).
 - PostgreSQL and SQLite require deferred "vacuum" that rearranges storage space.
 - Mobile GPUs often do [tiled rendering](https://en.wikipedia.org/wiki/Tiled_rendering). After vertex shader running, the triangles are not immediately rasterized, but dispatched to tiles (one triangle can go to multiple tiles). Each tile then rasterize and run pixel shader separately. It can reduce memory bandwidth requirement and power consumption.
+- For machine learning inference, collect requests then execute them in batch is deferred computation.
 
 Adding a "middle-stage" can simplify computation and improve generalization:
 
@@ -285,6 +309,7 @@ More generally:
 - The mapping between binary data and information is view. **Information is bits+context**. The context is how the bits are mapped between information. **Type contains viewing from binary data to information**.
 - **Abstraction involves viewing different things as the same things**.
 
+A view can be backed by computation, or by storage, or by a combination of computation and storage. This connects with computation-data duality.
 
 ### Dynamically-typed languages also have "types"
 
@@ -305,23 +330,18 @@ Dynamic languages' benefits:
 
 But the statically-typed languages and IDEs are improving. The more expressive type systems reduce friction of typing. Types can help catching mistakes, help understanding code and help IDE functionalities. Type inference and IDE completion saves time of typing types. That's why mainstream dynamic languages (JS, Python) are embracing type annotations.
 
-### Computation-storage tradeoff
+### Identification information
 
-A view can be backed by either storage or computation (or a combination of storage and computation). 
+The "which thing it refers to" modelled as data and abstraction:
 
-Modern highly-parallel computation are often bottlenecked by IO and synchronization. Adding new computation hardware units is easy. Making the information to flow efficiently between these hardware units is hard.
-
-When memory IO becomes bottleneck, re-computing rather than storing can be beneficial.
-
-### Different kinds of "pointers"
-
+- Pointer. Represents a (virtual) memory address. An interior pointer can point to some part inside a data structure.
 - Reference in GC languages. It may be implemented with a pointer, a colored pointer, or a handle (object ID). The pointer may be changed by moving GC. But in-language semantic doesn't change after moving.
 - ID. All kinds of ID, like string id, integer id, UUID, etc. can be seen as a reference to an object. The ID may still exist after referenced object is removed, then ID become "dangling ID".
   - A special kind of ID is path. For example, file path points to a file, URL points to a web resource, permission path points to a permission, etc. They are the "pointers" into a node in a hierarchical (tree-like) structure.
   - Content-addressable ID. Using the hash of object as the ID of object. This is used in Git, Blockchain, [IPFS](https://en.wikipedia.org/wiki/InterPlanetary_File_System) and languages like [Unison](https://www.unison-lang.org/docs/the-big-idea/).
 - Iterator. An Iterator can be seen as a pointer pointing to an element in container.
 - Zipper. A zipper contains two things: 1. a container with a hole 2. element at the position of the hole. Unlike iterator, a zipper contains the information of whole container. It's often used in pure functional languages.
-- [Lens](https://hackage.haskell.org/package/lens).
+- [Lens](https://hackage.haskell.org/package/lens). It represents a path to sub-data.
 
 ## Invariant production, grow, and maintenance
 
@@ -458,7 +478,7 @@ Other GoF design patterns briefly explained:
 
 - Visitor pattern. Can be replaced by pattern matching.
 - State pattern. Make state a polymorphic object.
-- Memento pattern. Backup the state to allow rollback. It exists mainly because in OOP data is tied to behavior. The separate memento is just data, decoupled with behavior. Memento pattern doesn't involve turning mutation into data, so it's not mutation-data duality.
+- Memento pattern. Backup the state to allow rollback. It exists mainly because in OOP data is tied to behavior. The separate memento is just data, decoupled with behavior (except for the behavior of rollback/redo). It's mainly backuping data not mutation-data duality.
 - Singleton pattern. It's similar to global variable, but can be late-initialized, can be ploymorphic, etc.
 - Mediator pattern. One abstraction to centrally manage other abstractions.
 

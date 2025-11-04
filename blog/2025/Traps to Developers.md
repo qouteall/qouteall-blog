@@ -139,8 +139,8 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - Mutate the content of map key object (or set element object) makes the container malfunciton.
 - A method that returns `List<T>` may sometimes return mutable `ArrayList`, but sometimes return `Collections.emptyList()` which is immutable. Trying to modify on `Collections.emptyList()` throws `UnsupportedOperationException`.
 - A method that returns `Optional<T>` may return `null` (this is not recommended, but this do exist in real codebases).
-- Null is ambiguous. If `get()` on a map returns null, it may be either value is missing or value exists but it's null (can distinguish by `containsKey`). Null field and missing field in JSON are all mapped to null in Java object. [See also](https://committing-crimes.com/articles/2025-09-16-null-and-absence/)
-- Implicitly converting `Integer` `Long` `Double` etc. to `int` `long` `double` etc. can cause `NullPointerException`.
+- Null is ambiguous. If `get()` on a map returns null, it may be either value is missing or value exists but it's null (can distinguish by `containsKey`). Null field and missing field in JSON are all mapped to null in Java object. [See also](https://committing-crimes.com/articles/2025-09-16-null-and-absence/). Similarily, privimtive value 0 can also be also ambiguous.
+- Implicitly converting `Integer` to `int` can cause `NullPointerException`, same for `Float`, `Long`, etc.
 - Return in `finally` block swallows any exception thrown in the `try` or `catch` block. The method will return the value from `finally`.
 - Interrupt. Some libraries ignore interrupt. If a thread is interrupted and then load a class, and class initialization has IO, then class may fail to load.
 - Thread pool does not log exception of tasks sent by `.submit()` by default. You can only get exception from the future returned by `.submit()`. Don't discard the future. And `scheduleAtFixedRate` task silently stop if exception is thrown.
@@ -263,8 +263,10 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - Unintended sharing of mutable data. For example in Python `[[0] * 10] * 10` does not create a proper 2D array.
 - For non-negative integer `(low + high) / 2` may overflow. A safer way is `low + (high - low) / 2`.
 - Short circuit. `a() || b()` will not run `b()` if `a()` returns true. `a() && b()` will not run `b()` when `a()` returns false.
+- Operator precedence. `a || b && c` is `a || (b && c)`.
 - Try to cancel some async operation, but the callback still runs.
 - Assertion should not be used for validating data. Should do proper error handling to invalid external data. Assertion should check internal invariants.
+- Confusing default value with missing value. For example, if the balence field is primitive integer, 0 can represent both "balance value not initialized" or "balance is really 0".
 
 ### Linux and bash
 

@@ -1042,7 +1042,7 @@ No matter what the definition of "GC" is, reference counting is different from t
 
 It's usually faster than normal memory allocators. Normal memory allocator will do a lot of bookkeeping work for each allocation and free. Each individual memory region can free separately, these regions can be reused for later allocation, these information need to be recorded and updated.
 
-Bump allocator frees memory in batched and deferred way. As it cannot free individual objects, it may temporarily consume more memory.
+Bump allocator frees memory in batched and deferred way. As it cannot free individual objects, it may temporarily consume more memory. 
 
 Bump allocator is suitable for temporary objects, where you are sure that none of these temporary objects will be needed after the work complets.
 
@@ -1068,6 +1068,8 @@ Adding or removing lifetime for one thing may involve refactoring many code that
 
 Putting a `Bump` with its allocated references together creates self-reference, which is hard and requires unsafe. It's recommended to just put `Bump` on stack and use it temporarily.
 
+Note that bumpalo by default don't run `drop` to improve performance. Use `bumpalo::boxed::Box<T>` for things that require invoking `drop`.
+
 ## Using unsafe
 
 By using unsafe you can freely manipulate pointers and are not restricted by borrow checker. But writing unsafe Rust is harder than just writing C, because you need to **carefully avoid breaking the constraints that safe Rust code relies on**. A bug in unsafe code can cause issue in safe code.
@@ -1086,13 +1088,13 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
   - Two pointers created from two provenances is considered to never alias. If their address equals, it's undefined behavior.
   - Converting an integer to pointer gets a pointer with no provenance, using that pointer is undefined behavior, unless in these two cases:
     - The integer was converted from a pointer using `.expose_provenance()` and then integer converts to pointer using `with_exposed_provenance()`
-    - The integer `i` is converted to pointer using `p.with_addr(i)` (`p` is another pointer). The result has same provenance of `p`.
+    - The integer `i` is converted to pointer using `p.with_addr(i)` (`p` is another pointer that has provenance). The result has same provenance of `p`.
   - Adding a pointer with an integer doesn't change provenance.
   - The provenance is tracked by compiler in compile time. In actual execution, pointer is still integer address that doesn't attach provenance information [^miri_pointer_provenance].
 - Using uninitialized memory is undefined behavior. [`MaybeUninit`](https://doc.rust-lang.org/beta/std/mem/union.MaybeUninit.html)
 - `a = b` will drop the original object in place of `a`. If `a` is uninitialized, then it will drop an unitialized object, which is undefined behavior. Use `addr_of_mut!(...).write(...)` [Related](https://lucumr.pocoo.org/2022/1/30/unsafe-rust/)
 - Handle panic unwinding. If unsafe code turn data into temporarily-invalid state, you need to make it valid again during unwinding. [See also](https://doc.rust-lang.org/nomicon/unwinding.html).
-- Reading/writing to mutable data that's shared between threads need to use atomic, or volatile access ([`read_volatile`](https://doc.rust-lang.org/std/ptr/fn.read_volatile.html), [`write_volatile`](https://doc.rust-lang.org/beta/std/ptr/fn.write_volatile.html)), or use other synchronization (like locking). If not, optimizer may wrongly merge and reorder reads/writes. Note that volatile access themself doesn't establish memory order (unlike Java `volatile`).
+- Reading/writing to mutable data that's shared between threads need to use atomic, or volatile access ([`read_volatile`](https://doc.rust-lang.org/std/ptr/fn.read_volatile.html), [`write_volatile`](https://doc.rust-lang.org/beta/std/ptr/fn.write_volatile.html)), or use other synchronization (like locking). If not, optimizer may wrongly merge and reorder reads/writes. Note that volatile access themself doesn't establish memory order (unlike Java/C# `volatile`).
 - ......
 
 [^miri_pointer_provenance]: When running in tools like [Miri](https://github.com/rust-lang/miri), the pointer provenance will be tracked at runtime.
@@ -1162,13 +1164,17 @@ where
   
   If the future need to share data with outside, pass `Arc<T>` into (not `&Arc<T>`). 
 
-  Note that the "static" in C/C++/Java/C# often mean global variable. But in Rust its meaning is different.
-
 - `Send` means that the future can be sent across threads. Tokio use work-stealing, which means that one thread's task can be stolen by other threads that currently have no work.
   
   `Send` is not needed if the async runtime doesn't move future between threads.
 
 Rust converts an async functions into a state machine, which is the future object. In async function, the local variables that are used across `await` points will become fields in future. If the future is required to be `Send` then these local variables also need to be `Send`.
+
+Note that the "static" in C/C++/Java/C# often mean global variable. In Rust its meaning is similar but different. `static x` still declares global value. Borrows to global values have lifetime `'static`. But the standalone values (self-owned, don't borrow temporary things) also have `'static` lifetime, although they are not global values and don't live forever.
+
+In Rust `'static` just mean its lifetime is not limited to a specific scope. It doesn't necessarily mean it will live forever. `'static` is the bottom type [^about_bottom_type] of lifetimes, similar to `never` in TypeScript. It's called `'static` just because global values' lifetime is coincidentally also bottom type, so the same naming is reused.
+
+[^about_bottom_type]: Some may intuitively think `'static` is top type (like `any` in TypeScript and `Object` in Java) because it's the most "general". However, in Rust, lifetime is constraint, so the most general one is no constraint, and the most specific one is the hardest constraint. The relation is inverted. In Rust narrowing lifetime is safe but expanding lifetime is not safe, similar to java converting any type to `Object` is safe but converting `Object` to another type doesn't necessarily work.
 
 ## Async traps
 
@@ -1375,9 +1381,9 @@ Examples:
 
 ## Summarize the contagious things
 
-- Borrowing that cross function boundary is contagious. Just borrowing a wheel of car can indirectly borrow the whole car.
+- Borrowing that cross function boundary is contagious. Just borrowing a wheel of car indirectly borrows the whole car.
 - Mutate-by-recreate is contagious. Recreating child require also recreating parent that holds the new child, and parent's parent, and so on.
-- Lifetime annotation is contagious. If some type has a lifetime parameter, then every type that holds it must also have lifetime parameter. Every function that use them also need lifetime parameter (except when lifetime elision works). Adding/removing lifetime parameter to a type may require changing many code.
+- Lifetime annotation is contagious. If a type has a lifetime parameter, then every type that holds it must also have lifetime parameter. Every function that use them also need lifetime parameter (except when lifetime elision works). Adding/removing lifetime parameter to a type may require changing many code.
 - In current borrow checker, one branch's output's borrowing is contagious to the whole branching scope.
 - `async` is contagious in two ways:
   - `async` function can call normal function. Normal function cannot easily call `async` function (but it's possible to call by blocking). Many non-blocking functions tend to become async because they may call async function.
