@@ -66,14 +66,13 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - About inheritance:
   - Things like `color` `line-height` inherits deeply by default.
   - Things like `<input>` and `<button>` by default don't inherit CSS attributes like `color` and `font-family`.
-- CSS overrides in this order, from high-priority to low-priority:
+- CSS overrides in this order, from high-priority to low-priority (simplified):
   - `!important` attributes.
-  - Inline CSS: The CSS in HTML and the CSS that's set by JS.
+  - Inline CSS: The CSS in HTML, and the CSS that's set by JS.
   - In CSS files and `<style>`:
     - By-id selector (e.g. `#xyz`)
     - By-class selector (e.g. `.xyz`)
     - By-element-type selector (e.g. `div` `p`)
-  - CSS inherited from parent (Note: not all attributes inherit).
   
   If that ties, the CSS import order matters, the latter-imported ones can override the earlier ones. See [CSS cascade](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_cascade/Cascade) for complete details.
 - About hiding:
