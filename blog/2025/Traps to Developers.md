@@ -20,6 +20,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
   - Normally `width: auto` tries fill available space in parent. But `height: auto` normally tries to just expand to fit content.
   - For inline elements, inline-block elements and float elements, `width: auto` does not try to expand.
   - `margin: 0 auto` centers horizontally. But `margin: auto 0` normally become `margin: 0 0` which does not center vertically. In a flexbox with `flex-direction: column`, `margin: auto 0` can center vertically.
+  - Percentage `margin-top` `margin-bottom` `padding-top` `padding-bottom` use parent width as base value, not height.
   - Margin collapse happens vertically but not horizontally.
   - The above flips when layout direction flips (e.g. `writing-mode: vertical-rl`)
 - Block formatting context (BFC):
@@ -52,8 +53,8 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - `position: absolute` is not based on its parent. It's based on its nearest positioned ancestor (the nearest ancestor that has `position` be `relative`, `absolute` or creates stacking context).
 - [`backdrop-filter: blur` does not consider ambient things](https://www.joshwcomeau.com/css/backdrop-filter/#the-issue).
 - If the parent's `display` is `flex` or `grid`, then the child's `float` has no effect
-- If the parent's width/height is not pre-determined, then percent width/height (e.g. `width: 50%`, `height: 100%`) doesn't work. (It avoids circular dependency where parent height is determined by content height, but content height is determined by parent height.)
-- `padding-top: 10%` use parent height. `padding-left` use parent width. But `padding: 10%` use parent width as base value for four sides. Same for `margin`.
+- If the parent's width/height is not pre-determined, then percent width/height (e.g. `width: 50%`, `height: 100%`) doesn't work. [^percent_width_height]
+- CSS transition doesn't work between `height: 0` and `height: atuo`. One solution is to use JS to set CSS height to `scrollHeight`. Another solution is to put it in grid and transition from `grid-template-rows: 0fr` to `1fr`. Another solution is to use `calc-size()`, [see also](https://developer.chrome.com/docs/css-ui/animate-to-height-auto) [^calc_size].
 - `display: inline` ignores `width` `height` and `margin-top` `margin-bottom`
 - Whitespace collapse. [See also](https://blog.dwac.dev/posts/html-whitespace/)
   - By default, newlines in html are treated as spaces. Multiple spaces together collapse into one. 
@@ -73,8 +74,8 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
     - By-class selector (e.g. `.xyz`)
     - By-element-type selector (e.g. `div` `p`)
   - CSS inherited from parent (Note: not all attributes inherit).
-  - The CSS import order matters. When the previous ties, the latter-imported one can override the earlier one.
-  - See also [CSS cascade](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_cascade/Cascade).
+  
+  If that ties, the CSS import order matters, the latter-imported ones can override the earlier ones. See [CSS cascade](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_cascade/Cascade) for complete details.
 - About hiding:
   - Parent `visibility: hidden` doesn't enforce all childs to be hidden. If child has `visibility: visible` it will still be shown. This don't apply to `opacity: 0` or `display: none`.
   - An element with `opacity: 0` can still be interacted (e.g. click button). This doesn't apply to `display: none` or `visibility: hidden`.
@@ -83,6 +84,10 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - [Cumulative Layout Shift](https://web.dev/articles/cls). It's recommended to specify `width` and `height` attribute in `<img>` to avoid layout shift due to image loading delay.
 - File download request is not shown in Chrome dev tool, because it only shows networking in current tab, but file download is treated as in another tab. To inspect file download request, use `chrome://net-export/`.
 - JS-in-HTML may interfere with HTML parsing. For example `<script>console.log('</script>')</script>` makes browser treat the first `</script>` as ending tag. [See also](https://sirre.al/2025/08/06/safe-json-in-script-tags-how-not-to-break-a-site/)
+
+[^percent_width_height]: It avoids circular dependency where parent height is determined by content height, but content height is determined by parent height.)
+
+[^calc_size]: In Nov 2025 `calc-size` is not yet supported by FireFox and Safari. Also, there is another solution for transition `height: auto`: transitioning `max-height` from 0 to a large value, but I don't recommend it as it will mess up animation timing.
 
 ### Unicode and text
 
@@ -127,6 +132,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
   If a JSON contains an integer larger than that, and JS deserializes it using `JSON.parse`, the number in result will be likely inaccurate. The workaround is to use other ways of deserializing JSON or use string for large integer. 
   
   (Putting millisecond timestamp integer in JSON fine, as millisecond timestamp exceeds limit in year 287396. But nanosecond timestamp suffers from that issue.)
+- Floating-point is 2-based. It cannot accurately represent most decimals. 0.1+0.2 gets 0.30000000000000004 .
 - Associativity law and distribution law doesn't strictly hold because of precision loss. Parallelizing matrix multiplication and sum dynamically using these laws can be non-deterministic. See also: [Defeating Nondeterminism in LLM Inference](https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference/)
 - Division is much slower than multiplication (unless using approximation). Dividing many numbers with one number can be optimized by firstly computing reciprocal then multiply by reciprocal.
 - These things can make different hardware have different floating point computation results:
