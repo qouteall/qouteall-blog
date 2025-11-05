@@ -526,7 +526,7 @@ Although circular reference is convenient in GC languages, it still has memory l
 
 If the data structure inherently requires circular reference, solutions:
 
-- Use ID/handle to replace borrow (elaborated later). This is **recommended when you want more compact memory layout, and you rarely need to add new types into data** (suitable for data-intensive cases, can obtain better performance due to cache-friendliness).
+- Use arena. Use ID/handle to replace borrow (elaborated later).
 - Use reference counting and interior mutability (not recommended).
 - Use `unsafe` (only use if really necessary).
 
@@ -589,43 +589,6 @@ Entity component system (ECS) is a way of organizing data that's different to OO
 ECS also favors composition over inheritance. Inheritance tend to bind code with specific types that cannot easily compose.
 
 (For example, in an OOP game, `Player` extends `Entity`, `Enemy` extends `Entity`. There is a special enemy `Ghost` that ignores collision and also extends `Enemy`. But one day if you want to add a new player skill that temporarily ignores collision like `Ghost`, you cannot make `Player` extend `Ghost` and have to duplicate code. In ECS that can be solved by just combining special collision component.)
-
-### Generalized reference and two reference semantics
-
-The concept of **generalized reference**:
-
-- The reference in GC languages is generalized reference.
-- Pointer is generalized reference.
-- Borrowing in Rust is generalized reference.
-- Ownership in Rust is also considered as generalized reference.
-- Smart pointer (`Rc`, `Arc`, `Weak`, `Box` in Rust, `shared_ptr`, `weak_ptr`, `unique_ptr` in C++, etc.) are generalized reference.
-- **ID**s are generalized reference. (It includes all kinds of IDs, including **handles**, UUID, string id (URL, file path, username, etc.), integer id, primary key, and all kinds of identification information).
-
-The generalized reference is separated into two kinds: strong and weak:
-
-- Strong generalized reference: The system **ensures it always points to a living object**. 
-  
-  It contains: normal references in GC languages (when not null), Rust borrow and ownership, strong reference counting (`Rc`, `Arc`, `shared_ptr` when not null), and ID in database with foreign key constraint.
-- Weak generalized reference: The system **does NOT ensure it points to a living object**.
-  
-  It contains: ID (no foreign key constraint), handles, weak reference in GC languages, weak reference counting (`Weak`, `weak_ptr`).
-
-The major differences:
-
-- For weak generalized references, **every data access may fail, and requires error handling**. (just panic is also a kind of error handling)
-- For strong generalized reference, the **lifetime of referenced object is tightly coupled with the existence of reference**:
-  - In Rust, the coupling comes from borrow checker. The borrow is limited by lifetime and other constraints.
-  - In GC langauges, the coupling comes from GC. The existence of a strong reference keeps the object alive. Note that in GC languages there are **live-but-unusable objects** (e.g. Java `FileInputStream` is unusable after closing).
-  - In reference counting, the coupling of course comes from runtime reference counting.
-  - The foreign key constraint of ID is enforced by database.
-- For weak generalized reference, the **lifetime of object is decoupled from referces to it**.
-
-If you want to design an abstraction that **decouples** object lifetime and how these objects are referenced, it's recommended to either:
-
-- Use weak generalized reference, such as ID and handle. The object can be freed without having to consider how its IDs are held.
-- Use strong generalized reference, but **add a new usability state that's decoupled with object lifetime**. This is common in GC languages. Examples:
-  - In JS, if you send an `ArrayBuffer` to another web worker, the `ArrayBuffer` object can still be referenced and kept alive, but the binary content is no longer accessible from that `ArrayBuffer` object.
-  - In Java, the IO-related objects (e.g. `FileInputStream`) can no longer be used after closing, even these objects are still referenced and still alive.
 
 
 ## Mutable borrow exclusiveness
@@ -936,6 +899,8 @@ Compile error:
 It turns runtime panic into compile error, which make discovering problems eariler.
 
 [GPUI](https://zed.dev/blog/gpui-ownership)'s `Model<T>` is similar to `Rc<QCell<T>>`, where GPUI's `AppContext` correspond to `QCellOwner`.
+
+Directly using `Arc<QCell<>>` is not convenient. GPUI has many wrappers that make it more convenient.
 
 It can also work in multithreading, by having `RwLock<QCellOwner>`. This can allow one lock to protect many pieces of data in different places [^lock_granularity].
 

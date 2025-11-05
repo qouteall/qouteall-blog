@@ -45,6 +45,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
   - `position: sticky` doesn't work across stacking context.
   - `overflow: visible` will still be clipped by stacking context
   - `background-attachment: fixed` will position based on stacking context
+  - `opacity` is "relative" to parent. Child `opacity:1` in transparent parent won't make it more opaque than parent.
 
 - On mobile browsers, the top address bar and bottom navigation bar can go out of screen when you scroll down. `100vh` correspond to the height when top bar and bottom bar gets out of screen, which is larger than the height when the two bars are on screen. The modern solution is `100dvh`.
 - `width: 100vw` makes the width-that-excludes-scrollbar to be `100vw`, which can make the total width (including scrollbar) to horizontally overflow. `width: 100%` can avoid that issue.
@@ -52,6 +53,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - [`backdrop-filter: blur` does not consider ambient things](https://www.joshwcomeau.com/css/backdrop-filter/#the-issue).
 - If the parent's `display` is `flex` or `grid`, then the child's `float` has no effect
 - If the parent's width/height is not pre-determined, then percent width/height (e.g. `width: 50%`, `height: 100%`) doesn't work. (It avoids circular dependency where parent height is determined by content height, but content height is determined by parent height.)
+- `padding-top: 10%` use parent height. `padding-left` use parent width. But `padding: 10%` use parent width as base value for four sides. Same for `margin`.
 - `display: inline` ignores `width` `height` and `margin-top` `margin-bottom`
 - Whitespace collapse. [See also](https://blog.dwac.dev/posts/html-whitespace/)
   - By default, newlines in html are treated as spaces. Multiple spaces together collapse into one. 
@@ -60,6 +62,24 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
   - Any space or line break between two `display: inline-block` elements will be rendered as spacing. This doesn't happen in flexbox or grid.
 - `text-align` aligns text and inline things, but doesn't align block elements (e.g. normal divs).
 - By default `width` and `height` doesn't include padding and border. `width: 100%` with `padding: 10px` can still overflow the parent. `box-sizing: border-box` make the width/height include border and padding.
+- About inheritance:
+  - Things like `color` `line-height` inherits deeply by default.
+  - Things like `<input>` and `<button>` by default don't inherit CSS attributes like `color` and `font-family`.
+- CSS overrides in this order, from high-priority to low-priority:
+  - `!important` attributes.
+  - Inline CSS: The CSS in HTML and the CSS that's set by JS.
+  - In CSS files and `<style>`:
+    - By-id selector (e.g. `#xyz`)
+    - By-class selector (e.g. `.xyz`)
+    - By-element-type selector (e.g. `div` `p`)
+  - CSS inherited from parent (Note: not all attributes inherit).
+  - The CSS import order matters. When the previous ties, the latter-imported one can override the earlier one.
+  - See also [CSS cascade](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_cascade/Cascade).
+- About hiding:
+  - Parent `visibility: hidden` doesn't enforce all childs to be hidden. If child has `visibility: visible` it will still be shown. This don't apply to `opacity: 0` or `display: none`.
+  - An element with `opacity: 0` can still be interacted (e.g. click button). This doesn't apply to `display: none` or `visibility: hidden`.
+  - `display: none` removes element from layout. This doesn't apply to `visibility: hidden` or `opacity: 0`.
+  - `opacity: 0` creates stacking layout but `visibility: hidden` doesn't.
 - [Cumulative Layout Shift](https://web.dev/articles/cls). It's recommended to specify `width` and `height` attribute in `<img>` to avoid layout shift due to image loading delay.
 - File download request is not shown in Chrome dev tool, because it only shows networking in current tab, but file download is treated as in another tab. To inspect file download request, use `chrome://net-export/`.
 - JS-in-HTML may interfere with HTML parsing. For example `<script>console.log('</script>')</script>` makes browser treat the first `</script>` as ending tag. [See also](https://sirre.al/2025/08/06/safe-json-in-script-tags-how-not-to-break-a-site/)
@@ -136,10 +156,10 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 
 - `==` compares object reference. Should use `.equals` to compare object content. 
 - Forget to override `equals` and `hashcode`. It will use object identity equality by default in map key and set.
-- Mutate the content of map key object (or set element object) makes the container malfunciton.
+- Mutate the content of map key object (or set element object) makes the container malfunciton (unless the mutation doesn't affect `equals` and `hashcode`).
 - A method that returns `List<T>` may sometimes return mutable `ArrayList`, but sometimes return `Collections.emptyList()` which is immutable. Trying to modify on `Collections.emptyList()` throws `UnsupportedOperationException`.
 - A method that returns `Optional<T>` may return `null` (this is not recommended, but this do exist in real codebases).
-- Null is ambiguous. If `get()` on a map returns null, it may be either value is missing or value exists but it's null (can distinguish by `containsKey`). Null field and missing field in JSON are all mapped to null in Java object. [See also](https://committing-crimes.com/articles/2025-09-16-null-and-absence/). Similarily, privimtive value 0 can also be also ambiguous.
+- Null is ambiguous. If `get()` on a map returns null, it may be either value is missing or value exists but it's null (can distinguish by `containsKey`). Null field and missing field in JSON are all mapped to null in Java object. [See also](https://committing-crimes.com/articles/2025-09-16-null-and-absence/). Similarily, privimtive value 0 can also be ambiguous.
 - Implicitly converting `Integer` to `int` can cause `NullPointerException`, same for `Float`, `Long`, etc.
 - Return in `finally` block swallows any exception thrown in the `try` or `catch` block. The method will return the value from `finally`.
 - Interrupt. Some libraries ignore interrupt. If a thread is interrupted and then load a class, and class initialization has IO, then class may fail to load.
@@ -220,6 +240,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - If a string column is used in index or primary key, it will have length limit. MySQL applies the limitation when changing table schema. PostgreSQL applies the limitation by erroring when inserting or updating data.
 - PostgreSQL `notify` involves global locking if used within transaction, [see also](https://www.recall.ai/blog/postgres-listen-notify-does-not-scale). Also, `listen` malfunctions when used with connection pooling. It also has message size limit.
 - In PostgreSQL, incrementally updating a large `jsonb` is slow, as it internally recreates whole `jsonb` data. It's recommended to separate it if you want incremental update.
+- Storing UUID as string in database wasts performance. It's recommended to use database's built-in UUID type. Also, in some places UUID text omits `-` (e.g. `550e8400e29b41d4a716446655440000` instead of `550e8400-e29b-41d4-a716-446655440000`).
 - Whole-table locks that can make the service temporarily unusable:
   - In MySQL (InnoDB) 8.0+, adding unique index or foreign key is mostly concurrent (only briefly lock) and won't block operations. But in older versions it may do whole-table lock.
   - `mysqldump` used without `--single-transaction` cause whole-table read lock.
@@ -250,11 +271,12 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
       - For uniqueness across two tables case, insert redundant data into one extra table with unique index.
       - For time range exclusiveness case, use range type and exclude constraint.
 - Atomic reference counting (`Arc`, `shared_ptr`) can be slow when many threads frequently change the same counter. [See also](https://pkolaczk.github.io/server-slower-than-a-laptop/)
-- About read-write lock: trying to write lock when holding read lock can deadlock. The correct way is to firstly release the read lock, then acquire write lock, and the conditions that were checked in read lock need to be re-checked.
+- About read-write lock: trying to write lock when holding read lock will deadlock. The correct way is to firstly release the read lock, then acquire write lock, and the conditions that were checked in read lock need to be re-checked.
 - Reentrant lock:
   - Reentrant means one thread can lock twice (and unlock twice) without deadlocking. Java's `synchronized` and `ReentrantLock` are reentrant.
   - Non-reentrant means if one thread lock twice, it will deadlock. Rust `Mutex` and Golang `sync.Mutex` are not reentrant.
 - [False sharing](https://en.wikipedia.org/wiki/False_sharing) of the same cache line costs performance.
+- Try to cancel some async operation, but the callback still runs.
 
 ### Common in many languages
 
@@ -264,8 +286,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - For non-negative integer `(low + high) / 2` may overflow. A safer way is `low + (high - low) / 2`.
 - Short circuit. `a() || b()` will not run `b()` if `a()` returns true. `a() && b()` will not run `b()` when `a()` returns false.
 - Operator precedence. `a || b && c` is `a || (b && c)`.
-- Try to cancel some async operation, but the callback still runs.
-- Assertion should not be used for validating data. Should do proper error handling to invalid external data. Assertion should check internal invariants.
+- Assertion should not be used for validating external data. Validating external data should use proper error handling. Assertion should check internal invariants.
 - Confusing default value with missing value. For example, if the balence field is primitive integer, 0 can represent both "balance value not initialized" or "balance is really 0".
 
 ### Linux and bash
@@ -289,22 +310,26 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 
 ### React
 
-- Modify state in rendering code.
 - React compares equality using reference equality, not content equality.
-  - The objects and arrays that are newly created in rendering are treated as always-new. Use `useMemo` to fix.
-  - The closure functions that are created in rendering are also always-new. Use `useCallback` to fix.
-  - If an always-new thing is put into `useEffect` dependency array, the effect will run on every render. See also [Cloudflare indicent 2025 Sept-12](https://blog.cloudflare.com/deep-dive-into-cloudflares-sept-12-dashboard-and-api-outage/). 
+  - The objects and arrays that are newly created in component rendering [^react_rendering] are treated as always-new. Use `useMemo` to fix [^js_string_primitive].
+  - The closure functions that are created in component rendering are also always-new. Use `useCallback` to fix.
+  - If an always-new thing is put into `useEffect` dependency array, the effect will run on every component function call. See also [Cloudflare indicent 2025 Sept-12](https://blog.cloudflare.com/deep-dive-into-cloudflares-sept-12-dashboard-and-api-outage/). 
   - Don't forget to include dependencies in the dependency array. And the dependencies also need to be memoed.
 - When using effect to manage `setInterval` `removeInterval`, if the effect has dependency value, it will remove timer and re-add timer when dependency changes, which can mess up the timing.
-- State values themselves should be immutable. Don't directly set fields of state objects. Always recreate whole object.
+- About state:
+  - State objects themselves should be immutable. Don't directly set fields of state objects. Always recreate whole object.
+  - Don't set state directly in component rendering. State can only be set in callbacks.
 - Forget to include value in `useEffect` dependency array.
 - Forget clean up in `useEffect`.
 - Closure trap. Closure can capture a state. If the state changes, the closure still captures the old state. 
   - One solution is to make closure not capture state and access state within `useReducer`. 
-  - Another solution is to put mutable thing in `useRef` (note that changing value inside ref don't trigger re-rendering, you need to change state or prop to trigger re-rendering)
-- `useEffect` firstly runs in next iteration of event loop, after browser renders [^render_ambiguity] the web page. Doing initialization in `useEffect` is not early enough and may cause visual flicker. Use `useLayoutEffect` for early initialization (it will run in the same iteration of event loop). When using ref to get DOM object, it won't be accessible during first rendering (component function call). It can be accessed in `useLayoutEffect`.
+  - Another solution is to put mutable thing in `useRef` (note that changing value inside ref don't trigger component re-rendering, you need to change state or prop to trigger re-rendering)
+- `useEffect` firstly runs in next iteration of event loop, after browser renders the web page. Doing initialization in `useEffect` is not early enough and may cause visual flicker. Use `useLayoutEffect` for early initialization (it will run in the same iteration of event loop). When using ref to get DOM object, it won't be accessible during first component rendering. It can be accessed in `useLayoutEffect`.
 
-[^render_ambiguity]: In web dev the word "render" is ambiguous. When browser "renders" it draws content to present in screen. When the React component "renders" the component function is called, not drawing things to screen.
+[^js_string_primitive]: In JS, `string` is primitive type, not object type. In JS you don't need to worry about two strings with same content but different reference like in Java. However the `String` in JS is object and use refernce equality.
+
+[^react_rendering]: The React component rendering means calling the component function. It doesn't draw contents on web page. It's different to browser rendering, which draws contents on web page.
+
 
 ### Git
 
@@ -314,7 +339,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - After commiting files, adding these files into `.gitignore` won't automatically exclude them from git. To exclude them, delete them or use `git rm --cached`. Note that after excluding and pushing, when another coworker pulls, these files will be deleted (not just excluded from git).
 - Reverting a merge doesn't fully cancel the side effect of the merge. If you merge B to A and then revert, merging B to A again has no effect. One solution is to revert the revert of merge. 
   - A cleaner way to cancel a merge, instead of reverting merge, is to 1. backup the branch, 2. hard reset to commit before merge, 3. cherry pick commits after merge, 4. force push.
-- In GitHub, if you accidentally commited secret (e.g. API key) and pushed to public, even if you override it using force push, GitHub will still record that secret. [See also](https://trufflesecurity.com/blog/guest-post-how-i-scanned-all-of-github-s-oops-commits-for-leaked-secrets) [Example activity tab](https://github.com/SharonBrizinov/test-oops-commit/compare/e6533c7bd729957b2eb31e88065c5158d1317c5e...9eedfa00983b7269a75d76ec5e008565c2eff2ef)
+- In GitHub, if you accidentally commited secret (e.g. API key) and pushed to public, even if you override it using force push, GitHub will still keep that secret public. [See also](https://trufflesecurity.com/blog/guest-post-how-i-scanned-all-of-github-s-oops-commits-for-leaked-secrets), [Example activity tab](https://github.com/SharonBrizinov/test-oops-commit/compare/e6533c7bd729957b2eb31e88065c5158d1317c5e...9eedfa00983b7269a75d76ec5e008565c2eff2ef)
 - In GitHub, if there is a private repo A and you forked it as B (also private), then when A becomes public, the private repo B's content is also publicly accessible, even after deleting B. [See also](https://trufflesecurity.com/blog/anyone-can-access-deleted-and-private-repo-data-github).
 - GitHub by default allows deleting a release tag, and adding a new tag with same name, pointing to another commit. It's not recommended to do that. It breaks build system caching. It can be disabled in rulesets configuration. For external dependencies, hardcoding release tag may be not enough to prevent supply chain risk.
 - `git stash pop` does not drop the stash if there is a conflict.

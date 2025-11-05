@@ -110,7 +110,7 @@ That lock-free deadlock can also be drawn as resource allocation graph. Channel 
 
 
 
-## Reference counting circular leak
+## Circular reference counting leak
 
 Reference counting cause memory leak if there exists a cycle of strong references.
 
@@ -256,11 +256,17 @@ Then `halts(paradox, paradox)` will cause a paradox. If it returns true, then `p
 
 (Note that halting problem cares about whether program halts in finite time, but don't care about how long it takes. A program that need to run 1000 years to complete still halts.)
 
+For a Turing machine, if the states are nodes, then each iteration of running is an edge, jumping from old state to new state. It forms a graph. Not halting is having a cycle in that graph, and that cycle is reachable from beginning state.
+
 ### Halting problem means nothing can be done?
 
-Halting problem and Rice's theorem says that we cannot reliably analyze arbitrary Turing-complete programs. But it doesn't mean nothing can be analyzed.
+Halting problem and Rice's theorem says that we cannot reliably analyze arbitrary Turing-complete programs. 
 
-TODO
+But it doesn't mean nothing can be analyzed. It just means we cannot analyze arbitrary program. There are many analyzable programs. If the program is simple enough, it obviously can be analyzed. If a program use proper encapsulation, analyze can be simplified by only focusing on one part of program. 
+
+If we apply some constraints, to make it not Turing complete but still expressive, then halting can be ensured, while being still useful enough, like in Lean.
+
+Rust has a lot of constraints to limit sets of programs to an analyzable subset, so it can analyze about memory safety and thread safety.
 
 ## Non-Turing-Complete programming languages
 
@@ -281,9 +287,18 @@ The proof languages describe both program and proof, according to [Curry–Howar
 
 Strictly speaking, Turing complete requires infinitely large memory, so all practical computers and languages don't satisfy strict Turing complete. Apart from memory constraint, blockchain applications often consume fee (gas) in each step of execution, but Turing complete requires unlimited execution steps, so they also not strictly Turing complete.
 
-## Ethernet ring
+## Ethernet loop
 
+In the raw form of Ethernet, there is no communication between switches, so one switch cannot know the whole network topology. 
 
+How raw form of Ethernet do routing:
+
+- When it receive a packet from one interface, it knows that the source MAC address correspond to that interface. It's stored into MAC address table. This is self-learning.
+- When it doesn't know which interface a MAC address correspond to, it broadcasts packet to all other interfaces, except for the interface that the packet comes from. 
+
+It works fine when there is no cycle in network topology. But when there is a cycle, the broadcast will come back to the same switch but from another interface. It not only messes up the self-learning of MAC address table, but can also cause the switch to broadcast the same packet again, and again, causing boradcast storm. 
+
+This is solved in spanning tree protocol, where switches share topology information with each other, then break the loop.
 
 ## Circular reference in math
 

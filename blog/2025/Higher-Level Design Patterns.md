@@ -330,18 +330,53 @@ Dynamic languages' benefits:
 
 But the statically-typed languages and IDEs are improving. The more expressive type systems reduce friction of typing. Types can help catching mistakes, help understanding code and help IDE functionalities. Type inference and IDE completion saves time of typing types. That's why mainstream dynamic languages (JS, Python) are embracing type annotations.
 
-### Identification information
+### Generalized reference
 
-The "which thing it refers to" modelled as data and abstraction:
+Generalized reference carries the information of "which thing it refers to". They are pervasive in programming.
 
 - Pointer. Represents a (virtual) memory address. An interior pointer can point to some part inside a data structure.
+  - Smart pointers, e.g. `shared_ptr`, `unique_ptr` in C++, `Arc`, `Box` in Rust
 - Reference in GC languages. It may be implemented with a pointer, a colored pointer, or a handle (object ID). The pointer may be changed by moving GC. But in-language semantic doesn't change after moving.
-- ID. All kinds of ID, like string id, integer id, UUID, etc. can be seen as a reference to an object. The ID may still exist after referenced object is removed, then ID become "dangling ID".
+- ID. All kinds of ID, like string id, integer id, UUID, handles, etc. can be seen as a reference to an object. The ID may still exist after referenced object is removed, then ID become "dangling ID".
+  - For array arenas, an index can be ID.
   - A special kind of ID is path. For example, file path points to a file, URL points to a web resource, permission path points to a permission, etc. They are the "pointers" into a node in a hierarchical (tree-like) structure.
   - Content-addressable ID. Using the hash of object as the ID of object. This is used in Git, Blockchain, [IPFS](https://en.wikipedia.org/wiki/InterPlanetary_File_System) and languages like [Unison](https://www.unison-lang.org/docs/the-big-idea/).
 - Iterator. An Iterator can be seen as a pointer pointing to an element in container.
 - Zipper. A zipper contains two things: 1. a container with a hole 2. element at the position of the hole. Unlike iterator, a zipper contains the information of whole container. It's often used in pure functional languages.
 - [Lens](https://hackage.haskell.org/package/lens). It represents a path to sub-data.
+
+#### Strong/weak generalized reference
+
+Two kinds of generalized references: strong and weak:
+
+- Strong generalized reference: The system **ensures it always points to a living object**. 
+  
+  It contains: normal references in GC languages (when not null), Rust borrow and ownership, strong reference counting (`Rc`, `Arc`, `shared_ptr` when not null), and ID in database with foreign key constraint.
+- Weak generalized reference: The system **does NOT ensure it points to a living object**.
+  
+  It contains: ID (no foreign key constraint), handles, weak reference in GC languages, weak reference counting (`Weak`, `weak_ptr`), raw pointer in (in C, C++, unsafe Rust, etc. it doesn't ensure raw pointer points to living object).
+
+The major differences:
+
+- For weak generalized references:
+  - Accessing data via reference may fail. It requires **error handling** [^weak_generalized_reference_error_handling].
+  - The lifetime of object is **decoupled** from referces to it.
+- For strong generalized reference, the lifetime of referenced object is **tightly coupled** with the existence of reference:
+  - In GC langauges, the coupling comes from GC. The existence of a strong reference keeps the object alive.
+  - In Rust, the coupling comes from borrow checker. The borrow is limited by lifetime and other constraints.
+  - In reference counting, the coupling of course comes from runtime reference counting.
+  - The foreign key constraint of ID is enforced by database.
+
+[^weak_generalized_reference_error_handling]: One kind of error handling is to just crash. Raw pointer is also a kind of weak generalized reference. Another way is to simply not care (e.g. memory safety issue of using dangling raw pointer).
+
+If an abstraction that **decouples** object lifetime and how these objects are referenced, then it either:
+
+- Use weak generalized reference, such as ID and handle. The object can be freed without having to consider how its IDs are held.
+- Use strong generalized reference, but **add a new usability state that's decoupled with object lifetime**. This is common in GC languages. For example, JS `ArrayBuffer` detaches with binary content after sent to another web worker, java IO-related objects (e.g. `FileInputStream`) can no longer be used after closing.
+ 
+#### To-object vs interior
+
+There are two kinds of generalized references: directly reference an object, or reference to a part inside object. It includes: interior pointer, iterator, lens, zipper. They are useful for mutation of one part of a data structure.
 
 ## Invariant production, grow, and maintenance
 
