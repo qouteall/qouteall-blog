@@ -178,6 +178,9 @@ Another case is that the software provides orthogonality in interface, and actua
 - Two systems A and B need to work together, but A and B's API both change across versions. However every version of A must work with every version of B.
 - Keep adding AB test feature flags. There will be many combinations of feature flags. It's possible that some combinations will trigger bugs.
 
+The design of CSS is an example of corner case explosion. CSS has many functionalities, each with corner cases. Most of them can be combined, creating many combinations of corner cases.
+
+Deserialization faces much more corner cases than serialization. Deserialization is a common source of security vulnerabilities.
 
 ### Working on full data to working on partially known data
 

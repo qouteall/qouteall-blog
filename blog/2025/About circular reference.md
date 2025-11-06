@@ -98,11 +98,13 @@ fatal error: all goroutines are asleep - deadlock!
 
 (The WaitGroup is to make the main thread wait for two goroutines. Without it, the main thread can exit normally despite goroutine waiting.)
 
-In Golang, the channels are by-default not buffered. Sending data into channel will block until the data is received. Change the channel to buffered channel `make(chan string, 1)` can solve that deadlock.
+In Golang, channels are not buffered by default, then producer waits for consumer. If you put a thing into a channel that no one will consume, it will wait forever. But changing the channel to buffered channel `make(chan string, 1)` will make the producer to not wait for consumer as long as buffer is not full, so deadlock is solved.
 
 That lock-free deadlock can also be drawn as resource allocation graph. Channel is also a kind of node. `threadA` depends on `aToB` consuming value, `aToB` consuming value depends on `threadB` progress, `threadB` depends on `bToA` consuming value, `bToA` consuming value depends on `threadA` progress.
 
-## Deadlock caused by select
+Note that Golang channel buffer must have a size limit. It cannot dynamically resize without limit. If you want a channel with very large buffer, considering using disk-backed event queue like Kafka.
+
+## Goroutine leak
 
 
 

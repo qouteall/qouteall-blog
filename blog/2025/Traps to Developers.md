@@ -32,8 +32,8 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
   
   In these cases, it will start a new stacking context:
   
-  - The attributes that give special rendering effects (`transform`, `filter`, `perspective`, `mask`, `opacity` etc.) will create a new stacking context
-  - `position: fixed` or `position: sticky` creates a stacking context
+  - The attributes that give special rendering effects (`transform`, `filter`, `perspective`, `mask`, `opacity` etc.), and `will-change` of them
+  - `position: fixed` or `position: sticky`
   - Specifies `z-index` and `position` is `absolute` or `relative`
   - Specifies `z-index` and the element is inside flexbox or grid
   - `isolation: isolate`
@@ -54,7 +54,11 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - [`backdrop-filter: blur` does not consider ambient things](https://www.joshwcomeau.com/css/backdrop-filter/#the-issue).
 - If the parent's `display` is `flex` or `grid`, then the child's `float` has no effect
 - If the parent's width/height is not pre-determined, then percent width/height (e.g. `width: 50%`, `height: 100%`) doesn't work. [^percent_width_height]
-- CSS transition doesn't work between `height: 0` and `height: atuo`. One solution is to use JS to set CSS height to `scrollHeight`. Another solution is to put it in grid and transition from `grid-template-rows: 0fr` to `1fr`. Another solution is to use `calc-size()`, [see also](https://developer.chrome.com/docs/css-ui/animate-to-height-auto) [^calc_size].
+- About transition:
+  - CSS transition doesn't work between `height: 0` and `height: atuo`. One solution is to use JS to set CSS height to `scrollHeight`. Another solution is to put it in grid and transition from `grid-template-rows: 0fr` to `1fr`. Another solution is to use `calc-size()`, [see also](https://developer.chrome.com/docs/css-ui/animate-to-height-auto) [^calc_size].
+  - Margin collapse can make animation not smooth when starting and ending.
+  - When adding a new element, initial transition animation won't work by default. But if you read its layout-related value (e.g. `offsetHeight`) between changing animated attribute, it will trigger a reflow and make initial transition work.
+- In JS, reading size-related value (e.g. `offsetHeight`) cause browser to re-compute layout which may hurt performance.
 - `display: inline` ignores `width` `height` and `margin-top` `margin-bottom`
 - Whitespace collapse. [See also](https://blog.dwac.dev/posts/html-whitespace/)
   - By default, newlines in html are treated as spaces. Multiple spaces together collapse into one. 
@@ -66,15 +70,10 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - About inheritance:
   - Things like `color` `line-height` inherits deeply by default.
   - Things like `<input>` and `<button>` by default don't inherit CSS attributes like `color` and `font-family`.
-- CSS overrides in this order, from high-priority to low-priority (simplified):
-  - `!important` attributes.
-  - Inline CSS: The CSS in HTML, and the CSS that's set by JS.
-  - In CSS files and `<style>`:
-    - By-id selector (e.g. `#xyz`)
-    - By-class selector (e.g. `.xyz`)
-    - By-element-type selector (e.g. `div` `p`)
-  
-  If that ties, the CSS import order matters, the latter-imported ones can override the earlier ones. See [CSS cascade](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_cascade/Cascade) for complete details.
+- About override:
+  - CSS import order matters. The latter-imported ones can override the earlier ones.
+  - JS-set CSS can override attributes in `.css` files (when both are not `!important`). `!important` attribute in `.css` files can override non `!important` JS-set CSS.
+  - See [CSS cascade](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_cascade/Cascade) for complete details.
 - About hiding:
   - Parent `visibility: hidden` doesn't enforce all childs to be hidden. If child has `visibility: visible` it will still be shown. This don't apply to `opacity: 0` or `display: none`.
   - An element with `opacity: 0` can still be interacted (e.g. click button). This doesn't apply to `display: none` or `visibility: hidden`.
@@ -132,7 +131,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
   
   (Putting millisecond timestamp integer in JSON fine, as millisecond timestamp exceeds limit in year 287396. But nanosecond timestamp suffers from that issue.)
 - Floating-point is 2-based. It cannot accurately represent most decimals. 0.1+0.2 gets 0.30000000000000004 .
-- Associativity law and distribution law doesn't strictly hold because of precision loss. Parallelizing matrix multiplication and sum dynamically using these laws can be non-deterministic. See also: [Defeating Nondeterminism in LLM Inference](https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference/)
+- Associativity law and distribution law doesn't strictly hold because of precision loss. See also: [Defeating Nondeterminism in LLM Inference](https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference/), [Taming Floating-Point Sums](https://orlp.net/blog/taming-float-sums/)
 - Division is much slower than multiplication (unless using approximation). Dividing many numbers with one number can be optimized by firstly computing reciprocal then multiply by reciprocal.
 - These things can make different hardware have different floating point computation results:
   - Hardware FMA (fused multiply-add) support. `fma(a, b, c) = a * b + c` (in some places `a + b * c`). Most modern hardware make intermediary result in FMA have higher precision. Some old hardware or embedded processors don't do that and treat it as normal multiply and add.
@@ -143,7 +142,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
   - Math functions (e.g. sin, log) may be less accurate in some embedded hardware or old hardware.
   - X86 has legacy FPU which has 80-bit floating point registers and per-core rounding mode state. It's recommended to not use them.
   - ......
-- Floating point accuracy is low for values with very large absolute value or values very close to zero. It's recommended to avoid temporary result to have very large absolute value or be very close-to-zero.
+- Floating point precision is low for values with very large absolute value or values very close to zero. It's recommended to avoid temporary result to have very large absolute value or be very close-to-zero.
 - Iteration can cause error accumulation. For example, if something need to rotate 1 degree every frame, don't cache the matrix and multiply 1-degree rotation matrix every frame. Compute angle based on time then re-calculate rotation matrix from angle.
 
 
@@ -182,10 +181,12 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - About `nil`:
   - There are nil slice and empty slice (the two are different). But there is no nil string, only empty string. The nil map can be read like an empty map, but nil map cannot be written.
   - Interface `nil` weird behavior. Interface pointer is a fat pointer containing type info and data pointer. If the data pointer is null but type info is not null, then it will not equal `nil`.
+  - Receiving from or sending to `nil` channel blocks forever.
 - Before Go 1.22, [loop variable capture issue](https://go.dev/blog/loopvar-preview).
 - Dead wait. [Understanding Real-World Concurrency Bugs in Go](https://songlh.github.io/paper/go-study.pdf)
 - Different kinds of timeout. [The complete guide to Go net/http timeouts](https://blog.cloudflare.com/the-complete-guide-to-golang-net-http-timeouts/)
 - Having interior pointer to an object keeps the whole object alive. This may cause memory leak.
+- Forgetting to cancel context cause `<-ctx.Done()` to deadlock (except for context created by `context.WithValue`).
 
 
 ### C/C++
@@ -278,7 +279,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - Atomic reference counting (`Arc`, `shared_ptr`) can be slow when many threads frequently change the same counter. [See also](https://pkolaczk.github.io/server-slower-than-a-laptop/)
 - About read-write lock: trying to write lock when holding read lock will deadlock. The correct way is to firstly release the read lock, then acquire write lock, and the conditions that were checked in read lock need to be re-checked.
 - Reentrant lock:
-  - Reentrant means one thread can lock twice (and unlock twice) without deadlocking. Java's `synchronized` and `ReentrantLock` are reentrant.
+  - Reentrant means one thread can lock twice (and unlock twice) without deadlocking. Java `synchronized` and C# `lock` are reentrant.
   - Non-reentrant means if one thread lock twice, it will deadlock. Rust `Mutex` and Golang `sync.Mutex` are not reentrant.
 - [False sharing](https://en.wikipedia.org/wiki/False_sharing) of the same cache line costs performance.
 - Try to cancel some async operation, but the callback still runs.
@@ -293,6 +294,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - Operator precedence. `a || b && c` is `a || (b && c)`.
 - Assertion should not be used for validating external data. Validating external data should use proper error handling. Assertion should check internal invariants.
 - Confusing default value with missing value. For example, if the balence field is primitive integer, 0 can represent both "balance value not initialized" or "balance is really 0".
+- When using profiler: the profiler may by default only include CPU time which excludes waiting time. If your app spends 90% time waiting (e.g. wait on database), the flamegraph may not include that 90% which is misleading.
 
 ### Linux and bash
 
@@ -311,7 +313,6 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - K8s `livenessProbe` used with debugger. Breakpoint debugger usually block the whole application, making it unable to respond health check request, so it can be killed by K8s `livenessProbe`.
 - Don't use `:latest` image. They can change at any time.
 - In Redis, getting keys by a prefix `KEYS prefix-*` is a slow operation that will traverse all keys. Use Redis hash map for that use case.
-- When using profiler: the profiler may by default only include CPU time which excludes waiting time. If your app spends 90% time waiting on database, the flamegraph may not include that 90% which is misleading.
 
 ### React
 
@@ -338,7 +339,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 
 ### Git
 
-- Rebase can rewrite history. If history is rewritten, normal push will give conflicts. After rewriting history, force push is needed. If remote branch's history is rewritten, pulling should use `--rebase`.
+- Rebase and squashing will rewrite history. If local history is rewritten, normal push will give conflicts, need to use force push. If remote branch's history is rewritten, normal pull will give conflicts, need to use `--rebase` pulling. [^rewrite_history]
   - Force pushing with `--force-with-lease` can sometimes avoid overwriting other developers' commits. But if you fetch then don't pull, `--force-with-lease` cannot protect.
   - The main purpose of rebase is to make commit graph a straight line. If you don't care about commit graph aesthetics, only using merge can avoid troubles.
 - After commiting files, adding these files into `.gitignore` won't automatically exclude them from git. To exclude them, delete them or use `git rm --cached`. Note that after excluding and pushing, when another coworker pulls, these files will be deleted (not just excluded from git).
@@ -351,10 +352,11 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - In Windows, Git often auto-convert cloned text files to be CRLF line ending. But in WSL many software (e.g. bash) doesn't work with files with CRLF. Using `git clone --config core.autocrlf=false -c core.eol=lf ...` can make git clone as LF.
 - MacOS auto adds `.DS_Store` files into every folder. It's recommended to add `**/.DS_Store` into `.gitignore`.
 
+[^rewrite_history]: Strictly speaking, rebase doesn't rewrite history if the rebase target branch is based on current branch. If local branch is based on remote branch, then pushing don't require force push. Squashing the local not-yet-pushed commits is fine.
+
 ### Networking
 
-- Some routers and firewall silently kill idle TCP connections without telling application. Some code (like HTTP client libraries, database clients) keep a pool of TCP connections for reuse, which can be silently invalidated (using these TCP connection will get RST). To solve it, configure system TCP keepalive. [See also](https://tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO/)
-  - Note that [HTTP/1.0 Keep-Alive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Keep-Alive) is different to TCP keepalive.
+- Some routers and firewall silently kill idle TCP connections without telling application. Some code (like HTTP client libraries, database clients) keep a pool of TCP connections for reuse, which can be silently invalidated (using these TCP connection will get RST). To solve it, configure system TCP keepalive. [See also](https://tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO/) [^keepalive]
 - The result of `traceroute` is not reliable. [See also](https://gekk.info/articles/traceroute.htm). Sometimes [tcptraceroute](https://linux.die.net/man/1/tcptraceroute) is useful.
 - TCP slow start can increase latency. Can be fixed by disabling `tcp_slow_start_after_idle`. [See also](https://ably.com/blog/optimizing-global-message-transit-latency-a-journey-through-tcp-configuration)
 - TCP sticky packet. Nagle's algorithm delays packet sending. It will increase latency. Can be fixed by enabling `TCP_NODELAY`. [See also](https://brooker.co.za/blog/2024/05/09/nagle.html) 
@@ -367,6 +369,8 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
   Generally, if your frontend and backend are in the same website (same domain name and port) then there is no CORS issue.
 - [Reverse path filtering](https://en.wikipedia.org/wiki/Reverse-path_forwarding). When routing is asymmetric, packet from A to B use different interface than packets from B to A, then reverse path filtering rejects valid packets.
 - In old versions of Linux, if `tcp_tw_recycle` is enabled, it aggressively recycles connection based on TCP timestamp. NAT and load balancer can make TCP timestamp not monotonic, so that feature can drop normal connections.
+
+[^keepalive]: Note that [HTTP/1.0 Keep-Alive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Keep-Alive) is different to TCP keepalive.
 
 ### Locale
 
