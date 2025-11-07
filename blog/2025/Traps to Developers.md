@@ -161,8 +161,8 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - `==` compares object reference. Should use `.equals` to compare object content. 
 - Forget to override `equals` and `hashcode`. It will use object identity equality by default in map key and set.
 - Mutate the content of map key object (or set element object) makes the container malfunciton (unless the mutation doesn't affect `equals` and `hashcode`).
-- A method that returns `List<T>` may sometimes return mutable `ArrayList`, but sometimes return `Collections.emptyList()` which is immutable. Trying to modify on `Collections.emptyList()` throws `UnsupportedOperationException`.
-- A method that returns `Optional<T>` may return `null` (this is not recommended, but this do exist in real codebases).
+- A method that returns `List<T>` may sometimes return mutable `ArrayList`, but sometimes return `Collections.emptyList()` which cannot be mutated.
+- A method that returns `Optional<T>` may return `null`.
 - Null is ambiguous. If `get()` on a map returns null, it may be either value is missing or value exists but it's null (can distinguish by `containsKey`). Null field and missing field in JSON are all mapped to null in Java object. [See also](https://committing-crimes.com/articles/2025-09-16-null-and-absence/). Similarily, privimtive value 0 can also be ambiguous.
 - Implicitly converting `Integer` to `int` can cause `NullPointerException`, same for `Float`, `Long`, etc.
 - Return in `finally` block swallows any exception thrown in the `try` or `catch` block. The method will return the value from `finally`.
@@ -295,6 +295,13 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - Assertion should not be used for validating external data. Validating external data should use proper error handling. Assertion should check internal invariants.
 - Confusing default value with missing value. For example, if the balence field is primitive integer, 0 can represent both "balance value not initialized" or "balance is really 0".
 - When using profiler: the profiler may by default only include CPU time which excludes waiting time. If your app spends 90% time waiting (e.g. wait on database), the flamegraph may not include that 90% which is misleading.
+- When listing files in a folder, the order is not deterministic (may depend on inode order). It may behave differently on different machines even with exactly same files. It's recommended to sort by filename then process, making it deterministic. Use `ls -f` to view raw file order.
+- Transitive dependency conflict. Indirectly use different versions of the same package.
+  - In Java, it's called jar conflict. The conflict is not checked at compile time. May result in `NoSuchMethodError` etc. or weird bugs. 
+    - When using wildcard `*` in classpath, the file order (inode order) may affect jar conflict behavior.
+    - Shading can make two versions of the same package to co-exist.
+  - In node.js, two version of same package can co-exist. Their global variables and classes will co-exist. If two versions of React use together, it may give "invalid hook call" error.
+  - In Python, pip and uv will give error when installing package if conflict occurs. (uv's error message is often more human-readable than pip's).
 
 ### Linux and bash
 
@@ -302,11 +309,12 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - `cmd > file 2>&1` make both stdout and stderr go to file. But `cmd 2>&1 > file` only make stdout go to file but don't redirect stderr.
 - File name is case sensitive (unlike Windows).
 - There is a capability system for executables, apart from file permission sytem. Use `getcap` to see capability.
-- Unset variables. If `DIR` is unset, `rm -rf $DIR/` becomes `rm -rf /`. Using `set -u` can make bash error when encountering unset variable.
+- Unset variables. If `DIR` is unset, `rm -rf "$DIR/"` becomes `rm -rf "/"`. Using `set -u` can make bash error when encountering unset variable. 
 - Bash has caching between command name and file path of command. If you move one file in `$PATH` then using that command gives ENOENT. Refresh cache using `hash -r`
-- Using a variable unquoted will make its line breaks treated as space.
+- Using a variable unquoted will make spaces separate it into different arguments. Also it will make its line breaks treated as space.
 - `set -e` can make the script exit immediately when a sub-command fails, but it doesn't work inside function whose result is condition-checked (e.g. the left side of `||`, `&&`, condition of `if`). [See also](https://stratus3d.com/blog/2019/11/29/bash-errexit-inconsistency/)
 - `fork()` creates a new process that has only one thread. If another thread holds lock during forking, that lock will never release. `fork()` also has potential of security issues.
+- File name can contain `\n` `\r` `'`. File name can be invalid UTF-8.
 
 ### Backend-related
 
@@ -330,7 +338,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - Closure trap. Closure can capture a state. If the state changes, the closure still captures the old state. 
   - One solution is to make closure not capture state and access state within `useReducer`. 
   - Another solution is to put mutable thing in `useRef` (note that changing value inside ref don't trigger component re-rendering, you need to change state or prop to trigger re-rendering)
-- `useEffect` firstly runs in next iteration of event loop, after browser renders the web page. Doing initialization in `useEffect` is not early enough and may cause visual flicker. Use `useLayoutEffect` for early initialization (it will run in the same iteration of event loop). When using ref to get DOM object, it won't be accessible during first component rendering. It can be accessed in `useLayoutEffect`.
+- `useEffect` firstly runs in next iteration of event loop, after browser renders the web page. Doing initialization in `useEffect` is not early enough and may cause visual flicker. Use `useLayoutEffect` for early initialization (it will run in the same iteration of event loop). When using ref to get DOM object, it won't be accessible during first component rendering, but can be accessed in `useLayoutEffect`.
 
 [^js_string_primitive]: In JS, `string` is primitive type, not object type. In JS you don't need to worry about two strings with same content but different reference like in Java. However the `String` in JS is object and use refernce equality.
 

@@ -104,7 +104,82 @@ That lock-free deadlock can also be drawn as resource allocation graph. Channel 
 
 Note that Golang channel buffer must have a size limit. It cannot dynamically resize without limit. If you want a channel with very large buffer, considering using disk-backed event queue like Kafka.
 
-## Goroutine leak
+## Trap of select
+
+### In Golang
+
+For example, do some work with timeout, using channel and select:
+
+```go
+func doWorkWithTimeout(timeout time.Duration) (string, error) {
+	ch := make(chan string)
+	go func() {
+		result := doWork()
+		ch <- result // this blocks
+        fmt.Println("doWork done")
+	}()
+	select {
+	case result := <- ch:
+		return result, nil
+	case <- time.After(timeout):
+		return "", errors.New("timeout")
+	}
+}
+```
+
+`select` will finish if either case gives a result. If it timeouts, `select` will finish by second case and never consume from `ch`. So the `ch <- result` will hang forever, causing **goroutine leak**. This can be fixed by making `ch` buffered.
+
+Strictly speaking, goroutine leak is not deadlock. But if a leaked goroutine holds a lock it will deadlock:
+
+```go
+package main
+
+import (
+	"errors"
+	"sync"
+	"time"
+)
+
+func doWork() string {
+    time.Sleep(2 * time.Second)
+	return "result"
+}
+
+func doWorkWithTimeout(timeout time.Duration, lock *sync.Mutex) (string, error) {
+	ch := make(chan string)
+	go func() {
+		lock.Lock()
+		defer lock.Unlock()
+		result := doWork()
+		ch <- result // this blocks
+	}()
+	select {
+	case result := <- ch:
+		return result, nil
+	case <- time.After(timeout):
+		return "", errors.New("timeout")
+	}
+}
+
+func main() {
+	lock := &sync.Mutex{}
+
+    // timeout 1 second, task takes 2 seconds
+    doWorkWithTimeout(1 * time.Second, lock)
+
+	lock.Lock()
+	defer lock.Unlock()
+}
+```
+
+Output
+
+```
+fatal error: all goroutines are asleep - deadlock!
+...
+```
+
+### In async Rust
 
 
 
