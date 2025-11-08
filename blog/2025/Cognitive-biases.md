@@ -747,9 +747,17 @@ However, LLM is different to human in many fundamental ways:
   - LLM is good at many things that are hard for human. LLM's knowledge is larger than any individual human.
   - LLM is bad at many things that are easy for human.
 - Most chatbots are trained to sycophants. Asking LLM a loaded question, LLM tend to follow the assumption in question to please the user. Directly asking a question tend to get different answer than asking a question under context (other chat history).
+
+> Me to my AI-enabled smart fridge in 2038: Do we have any milk left
+> 
+> My fridge: Wow. Now that's a question worth exploring. By asking me something like that, you've proven that you're not thinking in ordinary ways—you're dialed in to what's really vital about food. Let's dive in.
+> 
+> [Link](https://x.com/franzsherbert/status/1923395242734060005)
+
   - LLM sometimes "defend" the things they said in previous context, similar to belief stability of human. However, the "LLM's opinion" is highly dependent to context, not "intrinsic opinion".
 
 One similarity: Both human and LLM can "hallucinate" in consistent way. When human forgets something, human tend to make up consistent information to fill the hole in memory. LLM's hallucinations are seemingly plausible (maximize likelihood), not just random.
+
 
 ### Frequency illusion
 
@@ -853,10 +861,10 @@ People tend to make decisions based on how information is presented (framed) rat
 
 There are many ways to frame one fact. For example, one from positive aspect, one from negative aspect:
 
-- "90% of people survive this surgery" / "10% of people die from this surgery". 
-- "This ground beef is 80% lean" / "This ground beef is 20% fat".
+- "90% of people survive this surgery" / "10% of people die from this surgery".
 - "Save \$20 by buying now!" / "You'll lose the \$20 discount if you wait".
 - "99.9% effective against germs" / "Fails to kill 0.1% of germs".
+- "No one's agency will replace yours" / "No one is coming to help you".
 
 The content creator could emphasize one aspect and downplay another aspect, and use different wording or art style to convey different opinions. The people reading the information could be easily influenced by the framing subconsciously.
 
@@ -1135,6 +1143,8 @@ Following the crowd is also a great way of **reducing responsibility**: when eve
 > 
 > \- John Maynard Keynes
 
+When the whole group makes a mistake, the sin of the whole group tend to transfer to a [**scapegoat**](https://en.wikipedia.org/wiki/Scapegoating), then punish the scapegoat.
+
 When many people follow each other, they will confirm each other, creating self-reinforcing feedback loop. This is also a reason of the momentum in markets. People tend to be overconfident when people around them are confident, and vice versa.
 
 Two kinds of knowing:
@@ -1157,6 +1167,8 @@ Herd mentality is in some sense a kind of trend following strategy. If the trend
 One similar effect, **in-group bias**: Favoring investments or opinions from people within one's own group or those who share similar characteristics.
 
 [Bystander effect](https://en.wikipedia.org/wiki/Bystander_effect): People are less likely to help a victim in the presence of other people.
+
+[Mimetic desire](https://en.wikipedia.org/wiki/Mimetic_theory): We tend to pursur for thing that other people pursue, not based on personal perferences.
 
 ### "Because" justification
 
@@ -1423,6 +1435,7 @@ Examples:
 - Gacha game (pulling is random)
 
 This is related to information addiction. **Randomized things give more information than deterministic things.**
+
 
 ## Knowing the biases may be not enough
 

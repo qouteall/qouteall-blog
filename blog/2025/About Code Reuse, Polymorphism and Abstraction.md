@@ -72,6 +72,15 @@ If some tool has a simple interface, it must have hardcoded a lot of detail deci
 
 This also applies to AI coding. When you write a vague prompt and LLM generates a whole application/feature for you, the generated code contains many opinionated detail decisions that's made by LLM, not you (of course you can then prompt the LLM to change a detail).
 
+### When an existing tool "almost" match my requirement
+
+Sometimes an existing tool can satisfy your 90% requirements. It lacks only 10% functioanlities. However, sometimes that missing 10% is the most important ones. And implementing that 10% is not a simple addition of feature but require architectural change.
+
+Now there are two solutions:
+
+- Avoid large architectural change. Just add workarounds here and there to make it support the new requirement.
+- Rebuild a new one with the wanted architecture. Partialy "reinvent the wheel".
+
 ## Important architectural decisions
 
 These decisions are important and should be made early (when using AI-assisted coding, these decisions sholuld be clearly specified).
