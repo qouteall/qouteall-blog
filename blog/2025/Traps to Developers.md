@@ -70,6 +70,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - About inheritance:
   - Things like `color` `line-height` inherits deeply by default.
   - Things like `<input>` and `<button>` by default don't inherit CSS attributes like `color` and `font-family`.
+  - CSS variables inherit deeply. Changing a CSS variable may cause browser to re-compute styles of all elements inside it, which may cost performance.
 - About override:
   - CSS import order matters. The latter-imported ones can override the earlier ones.
   - JS-set CSS can override attributes in `.css` files (when both are not `!important`). `!important` attribute in `.css` files can override non `!important` JS-set CSS.

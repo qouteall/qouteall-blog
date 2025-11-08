@@ -1285,7 +1285,7 @@ These factors affect mental energy:
 - Sleeping and mental resting can replenish mental energy.
 - Body conditions (like blood sugar level [^blood_sugar_level]) affects mental energy.
 - Exercising self-control can strengthen mental energy, similar to muscular strength.
-- Lingering emotion (e.g. keep ruminating past mistakes) costs mental energy.
+- Lingering emotion (e.g. **keep ruminating past mistakes**) costs mental energy.
 
 [^blood_sugar_level]: Related: Using GLP-1 may cause one harder to focus and pay attention due to reduced blood sugar level and other factors. However, GLP-1 can improve brain fog related to inflammation. The overall effect is complex and not yet well understood.
 

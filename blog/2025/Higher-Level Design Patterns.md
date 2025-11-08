@@ -396,9 +396,11 @@ About transitive rule: if X and Y both follow invariant, then result of "merging
 - Dijkstra algorithm. The visited nodes are the nodes whose shortest path from source node are known. By using the nodes that we know shortest path, it "expands" on graph, knowing new node's shortest path from source. The algorithm iteratively add new nodes into the invariant, until it expands to destination node.
 - Dynamic programming. The problem is separated into sub-problems. There is no cycle dependency between sub-problems. One problem's result can be quickly calculated from sub-problem's results (e.g. max, min). 
 - Querying hash map can skip data because $\text{hash}(a) \neq \text{hash}(b)$ implies $a \neq b$. Querying ordered search tree can skip data because $(a < b) \land (b < c)$ implies $a < c$.
-- Parallelization often utilize associativity: $a * (b * c) = (a * b) * c$. For example, $a*(b*(c*d))=(a * b) * (c * d)$, where $a*b$ and $c*d$ don't depend on each other and can be computed in parallel. Examples: sum, product, max, min, max-by, min-by, list concat, set union, function combination, logical and, logical or. (Associativity with identity is monoid.)
+- Parallelization often utilize associativity: $a * (b * c) = (a * b) * c$. For example, $a*(b*(c*d))=(a * b) * (c * d)$, where $a*b$ and $c*d$ don't depend on each other and can be computed in parallel. Examples: sum, product, max, min, max-by, min-by, list concat, set union, function combination, logical and, logical or [^monoid]. 
+  - For example, if you want to count something, having thread-local counters (or sharded counter slots) reduces synchronization cost. The final result is summed. It doesn't affect result because addition is associative and commutative.
 - ......
 
+[^monoid]: If it has an identity and has associativity, then it's a **monoid**. 
 
 ### Invariant in application
 
