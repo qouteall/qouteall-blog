@@ -377,6 +377,8 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
   Generally, if your frontend and backend are in the same website (same domain name and port) then there is no CORS issue.
 - [Reverse path filtering](https://en.wikipedia.org/wiki/Reverse-path_forwarding). When routing is asymmetric, packet from A to B use different interface than packets from B to A, then reverse path filtering rejects valid packets.
 - In old versions of Linux, if `tcp_tw_recycle` is enabled, it aggressively recycles connection based on TCP timestamp. NAT and load balancer can make TCP timestamp not monotonic, so that feature can drop normal connections.
+- SSL needs to connect to CA to work. It may cause problems in private network unconnected to internet.
+- Certificate expire. Examples: [Starlink incident](https://www.appviewx.com/blogs/expired-certificate-causes-high-profile-service-outage-proving-certificate-automation-is-critical/), [LinkedIn incident](https://www.appviewx.com/blogs/linkedin-certificate-expiry-fiasco-third-times-a-charm/), [Microsoft Teams incident](https://www.exoprise.com/2020/02/04/teams-outage-expired-certificate/)
 
 [^keepalive]: Note that [HTTP/1.0 Keep-Alive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Keep-Alive) is different to TCP keepalive.
 
@@ -407,5 +409,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - When using Microsoft Excel to open a CSV file, Excel will do a lot of conversions, such as date conversion (e.g. turn `1/2` and `1-2` into `2-Jan`) and Excel won't show you the original string. [The gene SEPT1 was renamed due to this Excel issue](https://en.wikipedia.org/wiki/SEPTIN1). Excel will also make large numbers inaccurate (e.g. turn `12345678901234567890` into `12345678901234500000`) and won't show you the original accurate number, because Excel internally use floating point for number.
 - It's recommended to configure billing limit when using cloud services, especially serverless. See also: [ServerlessHorrors](https://serverlesshorrors.com/)
 - Big endian and little endian in binary file and net packet.
+- Blurring in image may not be enough to remove text information. See [Depix](https://github.com/spipm/Depixelization_poc). Opaque covering can fully remove text information.
+
 
 
