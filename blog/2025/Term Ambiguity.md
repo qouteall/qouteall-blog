@@ -40,9 +40,9 @@ A lot of debate happen because same word has different meanings to different peo
 - Character. A character in GUI is a grapheme cluster. Sometimes it mean a code point. In C, a `char` is a byte. In Java a `char` is two bytes.
 - Artificial nerual network are "Black Box". All the matrix computations and weights involved in inference and training are white-box. The "Black Box" here means the mechanism of why it produce specific output is not clear. Although human can view the weight numbers, it's hard to understand how these weights correspond to what "thinking" and "decision making".
 - RAG (retrieval augmented generation). Sometimes it must involve vector database. Sometimes it involves all kinds of information retrieval methods.
-- Unsafe/safe. "Unsafe" has these nuanced intepretations: 1. it can potentially cause problems 2. it will definitely cause problems. 3. it may be safe in short run but will eventually cause problems if you keep doing it 4. it will only cause problems if you use it wrongly [^rust_unsafe]
+- Unsafe/safe. "Unsafe" has these nuanced intepretations: 1. it can potentially cause problems, 2. it will definitely cause problems, 3. it will only cause problems if you use it wrongly [^rust_unsafe]
 - Routing. Router determine which interface to relay packet to. / Determine which web page based on URL (and other things). / Determine which Restful API by URL (and other things).
 - Token. Text segment for compiler / Text segment to convert to vector for LLM / Secret data for authorization / Representation of digintal asset in blockchain.
 
-[^rust_unsafe]: The meaning of `unsafe` in Rust is close to the 4th interpretation. `unsafe` Rust code can be safe. But some people understand "unsafe" as 2nd interpretation. [See also](https://github.com/rust-lang/rfcs/pull/117)
+[^rust_unsafe]: The meaning of `unsafe` in Rust is close to the 3rd interpretation. `unsafe` Rust code can be safe. But some people understand "unsafe" as 2nd interpretation. [See also](https://github.com/rust-lang/rfcs/pull/117)
 

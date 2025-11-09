@@ -50,6 +50,7 @@ The solutions in borrow-checker-unfriendly cases (will elaborate below):
   - For graph data structure, use ID/handle and arena.
   - For callbacks, replace capturing with arguments, or use event handling to replace callback.
 - Borrow as temporary as possible. For example, replace container for-loop `for x in &vec {}` with raw index loop.
+- Refactor data structure to avoid contagious borrow.
 - Reference counting and interior mutability. `Arc<QCell<T>>`, `Arc<RwLock<T>>`, etc. (only use when really necessary)
 - `unsafe` and raw pointer (only use when really necessary) 
 
@@ -157,13 +158,15 @@ Summarize solutions (workarounds) of contagious borrow issue (elaborated below):
   - Just simply make fields public (or in-crate public). This enables split borrow in outer code. If you want encapsulation, use ID/handle to replace borrow of mutable data (elaborated below).
   - The getter that returns cloned/copied value is fine.
   - If data is immutable, getter is also fine.
-- Reorganize code and data structure to enable split borrow.
+- Reorganize code and data structure. [^refactor]
 - **Defer mutation**
 - **Avoid in-place mutation**
 - Do a split borrow on the outer scope. Or just get rid of struct, pass fields as separate arguments. (This is inconvenient. Unfortunately, borrowing is unfriendly to composition.)
 - Manually manage index (or key) in container for-loop. Borrow as temporary as possible. 
 - Just clone the data (can be shallow-clone).
 - Use **interior mutability** (cells and locks).
+
+[^refactor]: Often the borrow checker issues (including contagious borrow issue) can be workarounded by **refactoring**: reorganize data structure, reorganize code and abstractions. However, **new requirements can easily break existing architecture**, so using refactoring to tackle borrow checker issues will **require frequent large refactoring**. "The most fundamental issue is that the borrow checker _forces_ a refactor at the most inconvenient times." [See also](https://loglog.games/blog/leaving-rust-gamedev/#once-you-get-good-at-rust-all-of-these-problems-will-go-away) . If you don't want frequent refactoring, one solution is to use the combination of: arenas + persistent containers + deferred mutation (deferred event handling).
 
 ## Defer mutation. Mutation-as-data
 
@@ -1060,9 +1063,12 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
 - `a = b` will drop the original object in place of `a`. If `a` is uninitialized, then it will drop an unitialized object, which is undefined behavior. Use `addr_of_mut!(...).write(...)` [Related](https://lucumr.pocoo.org/2022/1/30/unsafe-rust/)
 - Handle panic unwinding. If unsafe code turn data into temporarily-invalid state, you need to make it valid again during unwinding. [See also](https://doc.rust-lang.org/nomicon/unwinding.html).
 - Reading/writing to mutable data that's shared between threads need to use atomic, or volatile access ([`read_volatile`](https://doc.rust-lang.org/std/ptr/fn.read_volatile.html), [`write_volatile`](https://doc.rust-lang.org/beta/std/ptr/fn.write_volatile.html)), or use other synchronization (like locking). If not, optimizer may wrongly merge and reorder reads/writes. Note that volatile access themself doesn't establish memory order (unlike Java/C# `volatile`).
+- If you want to `mem::transmute`, it's recommended to use [zerocopy](https://docs.rs/zerocopy/latest/zerocopy/) which has compile-time checks to ensure memory layout are the same. For simple wrapper types [^wrapper_type], use `#[repr(transparent)]`.
 - ......
 
 [^miri_pointer_provenance]: When running in tools like [Miri](https://github.com/rust-lang/miri), the pointer provenance will be tracked at runtime.
+
+[^wrapper_type]: The main usage of wrapper type is to workaround Rust's trait impl restriction (orphan rule). A single wrapper type value can zero-cost convert to wrapped value. But if wrapper value is in container like `Vec` it requires transmute to avoid copy cost.
 
 Modern compilers tries to optimize as much as possible. **To optimize as much as possible, the compiler makes assumptions as much as possible. Breaking any of these assumption can lead to wrong optimization.** That's why it's so complex. [See also](https://queue.acm.org/detail.cfm?id=3212479)
 

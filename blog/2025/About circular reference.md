@@ -3,10 +3,10 @@ date: 2025-10-25
 tags:
   - Programming
   - Math
-unlisted: "true"
+unlisted: true
 ---
 
-# Deadlock, circular reference and halting
+# Deadlock, Circular Reference and Halting
 
 <!-- truncate -->
 
@@ -181,11 +181,11 @@ fatal error: all goroutines are asleep - deadlock!
 
 ### In async Rust
 
-
+TODO
 
 ## Livelock
 
-
+TODO
 
 ## Circular reference counting leak
 
@@ -200,6 +200,12 @@ Tracing GC can collect them because tracing GC scans the whole object graph glob
 **But reference counting works locally**. If the cycle has length limit, such as limiting to 2-object cycles, checking cycle locally can still work. But in real applications the reference cycle can be arbitrarily large, so checking cycle locally won't reliably work. **Tracing GC works globally** so it can handle arbitrarily-large cycles.
 
 The common solution is to use weak reference counting to cut cycle.
+
+### Why Rust cannot prevent memory leak
+
+TODO
+
+See also [Linear Types One-Pager](https://blog.yoshuawuyts.com/linear-types-one-pager/)
 
 ## Lazy evaluation circular reference
 
@@ -308,6 +314,7 @@ Note that reverse state monad is still in a normal Haskell program. It cannot ma
 
 ### Memory leak caused by lazy evaluation
 
+TODO
 
 ## Halting problem
 
@@ -335,7 +342,7 @@ Then `halts(paradox, paradox)` will cause a paradox. If it returns true, then `p
 
 For a Turing machine, if the states are nodes, then each iteration of running is an edge, jumping from old state to new state. It forms a graph. Not halting is having a cycle in that graph, and that cycle is reachable from beginning state.
 
-### Halting problem means nothing can be done?
+### Nothing can be analyzed?
 
 Halting problem and Rice's theorem says that we cannot reliably analyze arbitrary Turing-complete programs. 
 
@@ -393,6 +400,7 @@ Let R be the set of all sets that are not members of themselves. R contains R 
 
 Although Y combinator's own expression doesn't require self-reference, the type of Y combinator requires self-reference to express.
 
+TODO
 
 ### Gödel's incomplete theorem
 
