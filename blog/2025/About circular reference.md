@@ -102,7 +102,41 @@ In Golang, channels are not buffered by default, then producer waits for consume
 
 That lock-free deadlock can also be drawn as resource allocation graph. Channel is also a kind of node. `threadA` depends on `aToB` consuming value, `aToB` consuming value depends on `threadB` progress, `threadB` depends on `bToA` consuming value, `bToA` consuming value depends on `threadA` progress.
 
-Note that Golang channel buffer must have a size limit. It cannot dynamically resize without limit. If you want a channel with very large buffer, considering using disk-backed event queue like Kafka.
+Note that Golang channel buffer must have a constant size limit. There are packages for unbounded channel ([chanx](https://github.com/smallnest/chanx)). However the memory may be not large enough if big bursts occurs. Use disk-backed event queue (e.g. Kafka) to get larger buffer capacity.
+
+### Buffered channels can still deadlock
+
+The previous deadlock can be solved by making channel buffered. However, buffering doesn't solve all lock-free deadlocks. For example:
+
+```go
+go func() {
+    value := <- ch1
+    ch2 <- "some result"
+} ()
+
+go func() {
+    value := <- ch2
+    ch1 <- "some result"
+} ()
+```
+
+## Channel+Lock deadlock
+
+Example:
+
+```go
+go func(m *sync.Mutex, c chan string) {
+    m.Lock()
+    defer m.Unlock()
+    value := <-c
+} (m, c)
+
+go func(m *sync.Mutex, c chan string) {
+    m.Lock()
+    defer m.Unlock()
+    c <- "some result"
+} (m, c)
+```
 
 ## Trap of select
 
@@ -129,55 +163,7 @@ func doWorkWithTimeout(timeout time.Duration) (string, error) {
 
 `select` will finish if either case gives a result. If it timeouts, `select` will finish by second case and never consume from `ch`. So the `ch <- result` will hang forever, causing **goroutine leak**. This can be fixed by making `ch` buffered.
 
-Strictly speaking, goroutine leak is not deadlock. But if a leaked goroutine holds a lock it will deadlock:
-
-```go
-package main
-
-import (
-	"errors"
-	"sync"
-	"time"
-)
-
-func doWork() string {
-    time.Sleep(2 * time.Second)
-	return "result"
-}
-
-func doWorkWithTimeout(timeout time.Duration, lock *sync.Mutex) (string, error) {
-	ch := make(chan string)
-	go func() {
-		lock.Lock()
-		defer lock.Unlock()
-		result := doWork()
-		ch <- result // this blocks
-	}()
-	select {
-	case result := <- ch:
-		return result, nil
-	case <- time.After(timeout):
-		return "", errors.New("timeout")
-	}
-}
-
-func main() {
-	lock := &sync.Mutex{}
-
-    // timeout 1 second, task takes 2 seconds
-    doWorkWithTimeout(1 * time.Second, lock)
-
-	lock.Lock()
-	defer lock.Unlock()
-}
-```
-
-Output
-
-```
-fatal error: all goroutines are asleep - deadlock!
-...
-```
+Many memory leaks in Golang are caused by goroutine leak. Goroutine leak will also cause its task to never finish which can cause other bugs. If a leaked goroutine holds a lock, it will cause deadlock. If something waits for a leaked goroutine it will also deadlock.
 
 ### In async Rust
 
@@ -398,9 +384,36 @@ Let R be the set of all sets that are not members of themselves. R contains R 
 
 ### Y combinator
 
-Although Y combinator's own expression doesn't require self-reference, the type of Y combinator requires self-reference to express.
+Raw lambda calculus only does "string substitution" [^string_substitution] and doesn't allow a function to directly reference itself. But it can be workarounded by Y combinator:
 
-TODO
+
+$$
+Y = \lambda f . (\lambda x . f (x \ x)) (\lambda x . f (x \ x))
+$$
+
+[^string_substitution]: Lambda calculus substitutes in a way that avoids naming conflict. It's not simple string substitution.
+
+Written in TypeScript:
+
+```typescript
+type Func<Input, Output> = (input: Input) => Output;
+
+type SelfAcceptingFunc<Input, Output> = (s: SelfAcceptingFunc<Input, Output>) => ( (input: Input) => Output );
+
+function Y<Input, Output>(
+    f: (s: Func<Input, Output>) => Func<Input, Output>
+): Func<Input, Output> {
+    let temp = ((x: SelfAcceptingFunc<Input, Output>) => f (x2 => x(x)(x2)));
+    return temp(temp);
+}
+
+const fib = Y((f: (a: number) => number) => (n) => n > 1 ? n + f(n - 1) : 1);
+
+console.log(fib(4));
+```
+
+Note that the type of Y combinator requires self-reference, although Y combinator's expression itself don't require self-reference.
+
 
 ### Gödel's incomplete theorem
 
@@ -422,7 +435,9 @@ It's also similar to Y combinator: `Y = f -> (x -> f(x(x))) (x -> f(x(x)))`. In 
 
 ---
 
-Related:
+## Reference
+
+[Understanding Real-World Concurrency Bugs in Go](https://songlh.github.io/paper/go-study.pdf)
 
 [Weakening Cycles So That Turing Can Halt](https://pling.jondgoodwin.com/post/weakening-cycles/)
 
