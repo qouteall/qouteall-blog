@@ -664,7 +664,7 @@ The opinions on social media does not necessarily represent most peoples' view. 
 
 Some physicists propose **Anthropic Principle**: the physical laws allow life because the existence of life "selects" the physical law. The speciality of the physical laws come from survivorship bias.
 
-What people don't do is as important as what people do.
+What people don't do is as important as what people do. The negative advices (what not to do) are as important as positive advices (what to do). The experiences of failed ones are also important, not just succeeded ones.
 
 ### Availability bias
 
@@ -1437,15 +1437,28 @@ Examples:
 This is related to information addiction. **Randomized things give more information than deterministic things.**
 
 
+## Gap between knowing and doing
+
+Just knowing one should do something is far from actually doing it.
+
+Fantasy realization theory: When thinking about the desired future, one may get satisfied by the imagination, becoming less motivated to pay efforts to achieve it. The subcouncious sometimes don't distinguish imagination and reality. Only when one actively compare reality and imagination, do one get motivated. [See also](https://compass.onlinelibrary.wiley.com/doi/10.1111/spc3.12271)
+
+It also involves the tradeoff between short-term reward and long-term reward. Long-termism is to sacrifice short-term reward for larger long-term reward. Related factors:
+
+- Time discount. How much reward in future is smaller than reward at now.
+- Risk discount. Doing long-termism action deterministically sacrifices short-term reward, but doesn't necessarily get larger long-term reward (tried hard but failed). It's an investment. The more risky it is, the less "worthy" it is.
+- ...
+
 ## Knowing the biases may be not enough
 
 Unfortunately, just knowing the cognitive biases is not enough to avoid and overcome them. A lot of cognitive biases originate from the biological basis of human's cognitive function, which cannot change from just knowledge.
 
 Related: [Understanding the Limits of Metacognitive Awareness on Debiasing](https://www.hbs.edu/ris/Publication%20Files/21-084_436ebba8-c832-4922-bb6e-49d000a77df3.pdf)
 
-Just knowing the theory is far from applying the theory in action.
+
 
 Note that the **cognitive biases are not necessarily negative things**. They are tradeoffs: sometimes worse, sometimes better.
+
 
 ## Two trading strategies
 

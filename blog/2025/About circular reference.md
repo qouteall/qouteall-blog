@@ -398,18 +398,21 @@ Written in TypeScript:
 ```typescript
 type Func<Input, Output> = (input: Input) => Output;
 
-type SelfAcceptingFunc<Input, Output> = (s: SelfAcceptingFunc<Input, Output>) => ( (input: Input) => Output );
+type SelfAcceptingFunc<Input, Output> = (s: SelfAcceptingFunc<Input, Output>) => Func<Input, Output>;
 
 function Y<Input, Output>(
     f: (s: Func<Input, Output>) => Func<Input, Output>
 ): Func<Input, Output> {
-    let temp = ((x: SelfAcceptingFunc<Input, Output>) => f (x2 => x(x)(x2)));
+    // temp = λ x . f (x x)
+    let temp: SelfAcceptingFunc<Input, Output> = 
+        (x: SelfAcceptingFunc<Input, Output>) => f (input => x(x)(input));
+        // Note: cannot write f(x(x)), it will deadloop
     return temp(temp);
 }
 
-const fib = Y((f: (a: number) => number) => (n) => n > 1 ? n + f(n - 1) : 1);
+const factorial = Y((f: (a: number) => number) => (n) => n > 1 ? n * f(n - 1) : 1);
 
-console.log(fib(4));
+console.log(factorial(4));
 ```
 
 Note that the type of Y combinator requires self-reference, although Y combinator's expression itself don't require self-reference.
@@ -427,13 +430,22 @@ Then `provable(theory)` is defined as whether there exists a `proof` that satisf
 
 Unprovable is inverse of provable: `unprovable(theory) = !provable(theory)`
 
-Let `H(x) = unprovable(x(x))`. Then let `G = H(H) = unprovable(H(H)) = unprovable(G)` [^godel_substitution], which creates a self-referencial statement: `G`  means `G` is not provable. If `G` is true, then `G` is not provable, then `G` is false, which is a paradox.
+Let `H(x) = unprovable(x(x))`. Then let `G = H(H) = unprovable(H(H)) = unprovable(G)` (it uses the same form as Y combinator), which creates a self-referencial statement: `G`  means `G` is not provable. If `G` is true, then `G` is not provable, then `G` is false, which is a paradox.
 
 The `x(x)` is symbol substitution. replacing the free variable `x` with `x`, while avoid making two different variables same name by renaming when necessary. 
 
-It's also similar to Y combinator: `Y = f -> (x -> f(x(x))) (x -> f(x(x)))`. In that case `f = unprovable`, `H = x -> f(x(x))`, `Y(f) = H(H)`, `Y(f)` is a fixed point of `f`: `f(Y(f)) = Y(f)`. `G = Y(f)`, `f(G) = G`
 
----
+
+## Error of error of error...
+
+> An error rate can be measured. The measurement, in turn, will have an error rate. The measurement of the error rate will have an error rate. The measurement of the error rate will have an error rate. 
+> 
+> We can use the same argument by replacing "measurement" by "estimation" (say estimating the future value of an economic variable, the rainfall in Brazil, or the risk of a nuclear accident). 
+> 
+> What is called a regress argument by philosophers can be used to put some scrutiny on quantitative methods or risk and probability. The mere existence of such regress argument will lead to two different regimes, both leading to the necessity to raise the values of small probabilities, and one of them to the necessity to use power law distributions.
+> 
+> \- N. N. Taleb, [Link](https://www.fooledbyrandomness.com/notebook.htm)
+
 
 ## Reference
 

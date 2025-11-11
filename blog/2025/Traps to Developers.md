@@ -22,7 +22,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
   - `margin: 0 auto` centers horizontally. But `margin: auto 0` normally become `margin: 0 0` which does not center vertically. In a flexbox with `flex-direction: column`, `margin: auto 0` can center vertically.
   - Percentage `margin-top` `margin-bottom` `padding-top` `padding-bottom` use parent width as base value, not height.
   - Margin collapse happens vertically but not horizontally.
-  - The above flips when layout direction flips (e.g. `writing-mode: vertical-rl`)
+  - The above flips when layout axis flips (e.g. `writing-mode: vertical-rl`)
 - Block formatting context (BFC):
   - `display: flow-root` creates a BFC.
     (There are other ways to create BFC, like `overflow: hidden`, `overflow: auto`, `overflow: scroll`, `display:table`, but with side effects)
@@ -188,6 +188,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - Different kinds of timeout. [The complete guide to Go net/http timeouts](https://blog.cloudflare.com/the-complete-guide-to-golang-net-http-timeouts/)
 - Having interior pointer to an object keeps the whole object alive. This may cause memory leak.
 - Forgetting to cancel context cause `<-ctx.Done()` to deadlock (except for context created by `context.WithValue`).
+- For `WaitGroup`, `Add` must be called before `Wait`. Don't `Add` in a new goroutine (unless with proper synchronization).
 
 
 ### C/C++

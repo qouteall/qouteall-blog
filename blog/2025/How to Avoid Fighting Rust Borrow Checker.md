@@ -1346,7 +1346,6 @@ Examples:
 - Rust `let x: T` makes `x` fully immutable. Immutability applies to whole ownership tree. If a `Vec` is immutable, its elements are also immutable.
 - Rust `let mut x: &T` makes `x` a mutable-ref-to-immutable-obj.
 - Rust `let x: &mut T` makes `x` an immutable-ref-to-mutable-obj.
-- Rust `let x: &mut &T` makes `x` a immutable-ref-to-mutable-ref-to-immutable-obj.
 - The above Rust immutable no longer holds when using interior mutability.
 - Git release tag is mutable-ref-to-immutable-obj. The Git commit with specific hash is immutable. But Git allows removing a release tag and create a new same-named release tag to another commit. This can be disabled.
 
