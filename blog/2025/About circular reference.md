@@ -102,7 +102,9 @@ In Golang, channels are not buffered by default, then producer waits for consume
 
 That lock-free deadlock can also be drawn as resource allocation graph. Channel is also a kind of node. `threadA` depends on `aToB` consuming value, `aToB` consuming value depends on `threadB` progress, `threadB` depends on `bToA` consuming value, `bToA` consuming value depends on `threadA` progress.
 
-Note that Golang channel buffer must have a constant size limit. There are packages for unbounded channel ([chanx](https://github.com/smallnest/chanx)). However the memory may be not large enough if big bursts occurs. Use disk-backed event queue (e.g. Kafka) to get larger buffer capacity.
+Note that Golang channel buffer must have a constant size limit. There are packages for unbounded channel ([chanx](https://github.com/smallnest/chanx)). However the memory may be not large enough if big bursts occurs. Use disk-backed event queue (e.g. Kafka) to get larger buffer capacity. 
+
+Note that sometimes you need back pressure (stop producer when buffer is full) to improve stability (e.g. avoid using up memory) at the cost of blocking requests.
 
 ### Buffered channels can still deadlock
 

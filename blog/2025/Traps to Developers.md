@@ -210,6 +210,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
     - Strict aliasing rule: If there are two pointers with type `A*` and `B*`, then compiler assumes two pointer can never equal. If they equal, it's undefined behavior. Except in two cases: 1. `A` and `B` has subtyping relation 2. converting pointer to byte pointer (`char*`, `unsigned char*` or `std::byte*`) (the reverse does not apply).
     - Pointer provenance. Two pointers from two different provenances are treated as never alias. If their address equals, it's undefined behavior. [See also](https://www.ralfj.de/blog/2020/12/14/provenance.html)
   - In C++ `const` can mean both read-only and truly-immutable. Converting `const T*` to `T*` only works if pointed object is actually mutable. If pointed object is immutable (declared as `const T`) then it's undefined behavior.
+  - If `bool`'s binary value is neither 0 or 1, using it is undefined behavior. If an enum's binary value is not valid, using it is undefined behavior.
 - Alignment.
   - For example, 64-bit integer's address need to be disivible by 8. In ARM, accessing memory in unaligned way can cause crash.
   - Unaligned memory access is undefined behavior.
@@ -217,6 +218,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
   - Alignment can cause padding in struct that waste space.
   - Some SIMD instructions only work with aligned data. For example, AVX instructions usually require 32-byte alignment.
 - Global variable initialization runs before `main`. [Static Initialization Order Fiasco](https://en.cppreference.com/w/cpp/language/siof.html).
+- Start from C++ 11, destructors, copy constructors and move constructors have `noexcept` by default. If exception is thrown out of a `noexcept` function, whole process will crash.
 
 [^start_object_lifetime]: Directly treating existing binary data as struct is undefined behavior because the object lifetime hasn't started. But using `memcpy` to initialize a struct is fine.
 
