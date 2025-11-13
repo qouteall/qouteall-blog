@@ -47,7 +47,7 @@ API usability is important to developer productivity.
 - A convenience feature causes security vulnerability. (e.g. some JSON libraries store class name in JSON to support polymorphic objects, but trusting class name from user is insecure.)
 - Too many downstream errors hiding the root error. 
   An example is log spam in log file, where only the first error is meaningful and all subsequent spam errors are side-effects of the first error. 
-  In C++ if you use some STL container wrongly there may be a spam of compiler error that's in STL code, hiding the root error.
+  For example, in C++ if you use some STL container wrongly there may be a spam of compiler error that's in STL code, hiding the root error.
 - The API becomes complex to accomodate special custom usages, making common simple usage harder and more complex.
 - The API is too simple to accomodate special custom usage. Doing special custom usage requires complex and error-prone hacking (relying on internal implementation instead of public API).
 - Provides two sets of APIs (such as one set of old version API and one set of new version API, or one set of simple but slow API and one set of complex but fast API). But two sets of APIs have complex interactions under the hood, using both of them causes weird behaviors.
@@ -61,8 +61,12 @@ API usability is important to developer productivity.
 - An LLM hallucinates about an important nuanced assumption, causing developer to misunderstand the API's nuanced assumption, then waste a lot of time debugging without questioning the assumption.
 - Order-dependent setup and fragility to mis-ordering. Getting one order wrong cause it to break. This is especially hard to deal with in concurrent or distributed systems, where the order is influenced by random factors, causing unreproducable random errors. 
 - Duplicated configuration. When a configuration is duplicated 3 times, changing it requries changing all of the 3 places.
-- Multi-source configuration. For example, one option can be changed globally, change locally, inherit from parent, change by type, etc. One example is CSS. Although it seems convenient, when one configuration is wrong, it's hard to track where does the wrong config value come from.
+- Multi-source configuration. For example, one option can be changed globally, change locally, inherit from parent, change by type, etc. One example is CSS (css files, inline css, `!important`, browser config, etc.). Although it seems convenient, when one configuration is wrong, it's hard to track where does the wrong config value come from.
 - Overly flexible config file. A config file is a plain text file that does not support rich features provided by a normal programming language, such as variables, conditions and repetition. Trying to make the config file more flexible and expressive eventually turn it into a DSL that's hard to use (existing debugging and logging tools cannot be used on it, existing libraries cannot be used on it, and it usually lacks IDE support).
 - Have to maintain consistency between the data managed by library and the data managed by your code. Each one can update the other one (no single source of truth). If the two pices of data are not kept in sync, weird issues will happen.
 - The library provides the functionality except for an important detail. Then you cannot use the library and have to re-implement. (Example: fine-grained text layout control is hard to do in HTML/CSS so a lot of web apps are forced to do in-canvas rendering for all texts.)
+- Accidentally expose non-deterministic information that downstream code accidentally relies on. Examples:
+  - The order within a hash map
+  - The raw file order in a folder 
+  - The reference equality of `String` objects in java
 

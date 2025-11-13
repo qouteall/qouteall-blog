@@ -169,7 +169,30 @@ Many memory leaks in Golang are caused by goroutine leak. Goroutine leak will al
 
 ### In async Rust
 
-TODO
+Async Rust has uncooporative cancellation.
+
+Cooporative cancellation is that the code manually checks whether it should cancel and then exit by its own. Uncoorporative cancellation is that you forcefully stop some code from running.
+
+Golang doesn't support uncooporative cancellation. Java doesn't allow you to kill a thread (Java has interrupt which is cooperative). OS APIs can kill a thread but it causes other problems (e.g. won't release a lock, won't cleanup a resource) so it shouldn't be used for cancellation.
+
+In Rust, futures are not background tasks. Futures only progress when polled. There are two kinds of async cancellation in Rust:
+
+- The future won't be polled, but it's not yet dropped. (This is prone to deadlock.)
+- The future is dropped. It obviously won't be polled.
+
+In either case, the async function won't continue running. It's called cancellation. Note that the already-done IO operations won't be cancelled (sent packets won't be magically withdrawn). The cancellation here just stops the async function from continuing.
+
+`tokio::select` the value of non-selected cases will be dropped. `tokio::select` very different to Golang select. In Golang select, the non-selected cases won't consume data from channel. 
+
+In `tokio::select`, for each case, you can:
+
+- Pass an owned future. If that case is not selected, the future will be dropped. This cause uncorporative cancellation.
+- Pass a borrow of future. If that case is not selected, `select` will proceed without further polling that future.
+- Pass a `JoinHandle`.
+
+[Tokio document 1](https://tokio.rs/tokio/tutorial/select#cancellation), [Tokio document2](https://docs.rs/tokio/latest/tokio/macro.select.html#cancellation-safety)
+
+See also: [Making Async Rust Reliable - Tyler Mandry](https://tmandry.gitlab.io/blog/posts/making-async-reliable/)  [400 - Dealing with cancel safety in async Rust / RFD / Oxide](https://rfd.shared.oxide.computer/rfd/400)   [609 - Futurelock / RFD / Oxide](https://rfd.shared.oxide.computer/rfd/0609)  [FuturesUnordered and the order of futures](https://without.boats/blog/futures-unordered/) [Barbara gets burned by select - wg-async](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/barbara_gets_burned_by_select.html)
 
 ## Livelock
 
@@ -189,7 +212,7 @@ Tracing GC can collect them because tracing GC scans the whole object graph glob
 
 The common solution is to use weak reference counting to cut cycle.
 
-### Why Rust cannot prevent memory leak
+## Rust dislikes circular reference
 
 TODO
 
@@ -302,7 +325,12 @@ Note that reverse state monad is still in a normal Haskell program. It cannot ma
 
 ### Memory leak caused by lazy evaluation
 
-TODO
+For example, if you have a large list of integers and you compute sum of it. If the sum value is not used, the list will be kept in memory for future evaluation. The list can only be freed after the sum is evaluated. If the sum result will never be evaluated, it memory leaks.
+
+The two cases:
+
+- When the input of computation is smaller than output of computation (e.g. generate a big list), lazy evaluation can temporarily save memory.
+- When the input of computation is larger than output of computation (e.g. sum a big list), lazy evaluation can waste or leak memory.
 
 ## Halting problem
 

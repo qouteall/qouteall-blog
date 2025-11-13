@@ -42,12 +42,6 @@ Expectation management is important. If the outcome is good but doesn't meet the
 
 **Door-in-the-face effect**: Firstly make a large request that will likely be rejected, then make a modest request. The firstly made large request changes expectation to make the subsequent modest request easier to accept.
 
->  ... 譬如你说，这屋子太暗，须在这里开一个窗，大家一定不允许的。但如果你主张拆掉屋顶他们就来调和，愿意开窗了。
->  
->  ... If you say, "This room is too dark; we need to open a window here," everyone would definitely refuse. However, if you propose removing the roof, they would come to a compromise and agree to open a window.
->
-> \- 鲁迅 LuXun
-
 **Protective pessimism**: Being pessimistic can reduce risk of disappointment.
 
 |                | Be optimistic             | Be pessimistic                        |
@@ -544,7 +538,11 @@ Internet has indeed changed the world. But the dot com bubble burst. It's just t
 
 **Neglect of probability**: either neglect a risk entirely or overreact to the risk. 
 
-**Strawman argument** is a technique in debating: refute a changed version of opponent's idea. It often utilizes binary thinking: **refute a more extreme version of opponent's idea**. Examples:
+> The absolute hardest thing to convince people of is that the optimal amount of fraud in a system is not zero. Obviously it would be ideal if there were no fraud, but at some point the cost of catching it outweighs the benefits.
+> 
+> [Link](https://x.com/asymmetricinfo/status/1923112215193714760)
+
+**Strawman argument** is a technique in debating: refute a changed version of opponent's idea. It often utilizes binary thinking: **refute a more extreme version of opponent's idea** (also: slippery slope fallacy). Examples:
 
 - A: "We should increase investment for renewable energy." B: "You want to ban oil, gas, and coal, removing millions of jobs and crash the economy?"
 - A: "The history curriculum should include more perspectives to present a more objective and nuanced view of our nation." B: "So you want to rewrite history to make our children hate their own country?"
@@ -552,7 +550,7 @@ Internet has indeed changed the world. But the dot com bubble burst. It's just t
 
 ### Halo effect and horn effect
 
-**Halo effect**: Liking one aspect of a thing cause liking all aspects of that thing and its related things. (爱屋及乌) 
+**Halo effect**: Liking one aspect of a thing cause liking all aspects of that thing and its related things.
 
 Examples:
 
@@ -612,7 +610,7 @@ Pure thinking is usually vague and incomplete, but people overestimate the ratio
 >
 > \- Paul Graham, [Link](https://www.paulgraham.com/words.html)
 
-Even so, writing the idea down may be still not enough, because **natural language is vague**, and **vagueness can hide practical details**. The issues hidden by the vagueness in language will be revealed in real practice (e.g. turning software requirement into code).
+Even so, writing the idea down may be still not enough, because **natural language is vague**, and **vagueness can hide practical details**. The issues hidden by the vagueness in language will be revealed in real practice.
 
 Having ideas is easy and cheap. If you search the internet carefully you are likely to find ideas similar to yours. The important is to validate and execute the idea.
 
@@ -746,7 +744,7 @@ However, LLM is different to human in many fundamental ways:
 - **Jagged intelligence**. [See also](https://x.com/karpathy/status/1816531576228053133)
   - LLM is good at many things that are hard for human. LLM's knowledge is larger than any individual human.
   - LLM is bad at many things that are easy for human.
-- Most chatbots are trained to sycophants. Asking LLM a loaded question, LLM tend to follow the assumption in question to please the user. Directly asking a question tend to get different answer than asking a question under context (other chat history).
+- Most chatbots are trained to sycophants. Asking LLM a loaded question, LLM tend to follow the assumption in question to please the user. 
 
 > Me to my AI-enabled smart fridge in 2038: Do we have any milk left
 > 
@@ -754,10 +752,11 @@ However, LLM is different to human in many fundamental ways:
 > 
 > [Link](https://x.com/franzsherbert/status/1923395242734060005)
 
-  - LLM sometimes "defend" the things they said in previous context, similar to belief stability of human. However, the "LLM's opinion" is highly dependent to context, not "intrinsic opinion".
+- LLM sometimes "defend" the things they said in previous context, similar to belief stability of human. However, the "LLM's opinion" is often dependent to context, not "intrinsic opinion".
+    - The sycophancy often overrides LLM self-defense. Refute LLM's opinion by seemingly plausible arguments, you may get "You are absolutely right!".
+- Directly asking a question in new session may get different answer than asking the same question under other chat context.
 
-One similarity: Both human and LLM can "hallucinate" in consistent way. When human forgets something, human tend to make up consistent information to fill the hole in memory. LLM's hallucinations are seemingly plausible (maximize likelihood), not just random.
-
+One similarity: Both human and LLM can "hallucinate" in consistent way. When human forgets something, human tend to make up consistent information to fill the hole in memory. LLM's hallucinations are seemingly plausible (maximize likelihood), not just random. LLM's hallucinations tend to be confident, much more confident than average human.
 
 ### Frequency illusion
 
@@ -948,7 +947,7 @@ People tend to value something only after losing it.
 
 > Health is forgotten until it’s the only thing that matters.
 > 
-> \- Bryan Johnson, [Link](https://x.com/bryan_johnson/status/1972674688087445603)
+> [Link](https://x.com/bryan_johnson/status/1972674688087445603)
 
 ### Simpson's paradox and base rate fallacy
 
@@ -1293,7 +1292,7 @@ Mental resting is different to body resting. Intense thinking when lying on the 
 
 > Before you try to increase your willpower, try to decrease the friction in your environment.
 > 
-> \- James Clear, [Link](https://x.com/JamesClear/status/1883877771618738682)
+> [Link](https://x.com/JamesClear/status/1883877771618738682)
 
 ## Memory distortion
 
@@ -1305,7 +1304,7 @@ Memorizing is lossy compression. Recall is lossy decompression, where details ca
 
 > I have a pet theory that when people introspect about themselves, their brain sometimes just scrambles to generate relevant content. So they feel like they're gaining insight into deeper parts of themselves when they're actually just inventing it on the fly.
 > 
-> \- Amanda Askell, [Link](https://x.com/AmandaAskell/status/1931786539002105905)
+> [Link](https://x.com/AmandaAskell/status/1931786539002105905)
 
 **Information is costly to store, and even more costly to index and query**. Sometimes forgetting is just not being able to query the specific memory that is stored in brain (and may be recalled if some cue were found that enables querying it). The "querying capacity" of brain is limited and can be occupied by distracting things. [^about_database]
 
@@ -1374,7 +1373,7 @@ With confirmation bias, more information lead to higher confidence, but not bett
 
 > ... the primary function of conversation is not to communicate facts but to reinforce social ties.
 > 
-> \- Gurwinder, [Link](https://x.com/G_S_Bhogal/status/1898749727417512281)
+> [Link](https://x.com/G_S_Bhogal/status/1898749727417512281)
 
 The 80/20 rule also applies to social media: 80% of the voice come from 20% of users. The dominant narrative on internet may not represent most people's views.
 
@@ -1448,6 +1447,8 @@ It also involves the tradeoff between short-term reward and long-term reward. Lo
 - Time discount. How much reward in future is smaller than reward at now.
 - Risk discount. Doing long-termism action deterministically sacrifices short-term reward, but doesn't necessarily get larger long-term reward (tried hard but failed). It's an investment. The more risky it is, the less "worthy" it is.
 - ...
+
+When friends and partners complain to you, they often just want emotional support instead of solutions. They often already know the solution but cannot apply it for some reasons. (Offering obvious solutions may be treated as insult of intelligence.)
 
 ## Knowing the biases may be not enough
 
