@@ -1147,40 +1147,6 @@ In Rust `'static` just mean its lifetime is not limited to a specific scope. It 
 
 [^about_bottom_type]: Some may intuitively think `'static` is top type (like `any` in TypeScript and `Object` in Java) because it's the most "general". However, in Rust, lifetime is constraint, so the most general one is no constraint, and the most specific one is the hardest constraint. The relation is inverted. In Rust narrowing lifetime is safe but expanding lifetime is not safe, similar to java converting any type to `Object` is safe but converting `Object` to another type doesn't necessarily work.
 
-## Async traps
-
-### Blocking scheduler thread
-
-Async runtimes (like Tokio) has its own scheduler. It's similar to OS thread scheduling but different in many ways:
-
-- It happens within Rust application. It uses Rust async to switch control flow. It doesn't use OS functionalties. It's in userspace.
-- It's coorporative. If the scheduled Rust code don't coorporatively pause, it won't forcefully suspend it, and the scheduler will be always occupied.
-- It's more lightweight than OS thread scheduling. Creating a future is faster and require less memory than creating a OS thread. Switching between different Rust futures is faster than OS context switch.
-
-The normal sleep `std::thread::sleep` and normal locking `std::sync::Mutex` will **block thread using OS functionality**. Async runtime won't be notified when they block the current thread. It will occupy the async runtime's scheduling thread. This causes reduced concurrency and possible deadlocks.
-
-In Tokio, use `tokio::sync::Mutex` for mutex and `tokio::time::sleep` and sleep. They will coorporatively pause and avoid that issue.
-
-That issue is not limited to only locking and sleep. It also involves networking and all kinds of IOs.
-
-**Fixing it require all libraries you use to support async**. If a library you use do some **implicit** networking that don't use `async`, then that issue still applies. 
-
-That issue is **contagious**. you need to check not only your dependencies but also your dependencies' dependencies, and so on. IOs in Rust are implicit and don't appear in function signature [^explicit_io].
-
-[^explicit_io]: Related: New Zig IO interface require function signature to explicitly tell whether it has IO. It makes IO more obvious. [See also](https://andrewkelley.me/post/zig-new-async-io-text-version.html)
-
-### Cancellation safety
-
-Rust's future is very different to Java `CompletableFuture` and JS `Promise` and C# `Task`. In Java/JS/C#, you launch a task then get a future/promise/task object that represents the async task. The task will run regardless whether you discard the future. But in Rust, when you create a future, the task is not yet launched. It will be launched when the future is firstly polled.
-
-In Rust, if a future is dropped or leaked (never being polled again), its task is "cancelled". Note that "cancel" here doesn't mean the system IO operation is actually cancelled. It just means that the Rust async function will stop running.
-
-It's a complex topic. See also: [Cancelling async Rust](https://sunshowers.io/posts/cancelling-async-rust/)
-
-`tokio::select` has traps. See also: [Futurelock](https://rfd.shared.oxide.computer/rfd/0609)
-
-Note that task cancellation is inherently hard. It's also hard in other languages. Java interrupt and Golang context also have traps.
-
 ## Side effect of extracting and inlining variable
 
 In C and GC languages:

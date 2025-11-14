@@ -1060,6 +1060,20 @@ A related concept is **omission bias**: People treats the harm of doing somethin
 
 If there is an option to postpone some work, the work may eventually never be done.
 
+**Path dependence**: sticking to what worked in the past and avoid changing, even when the paradigm has shifted and the past successful decisions are no longer appropriate.
+
+> I think people's thinking process is too bound by convention or analogy to prior experiences. It's rare that people try to think of something on a first principles basis. 
+> 
+> They'll say, "We'll do that because it's always been done that way." Or they'll not do it because "Well, nobody's ever done that, so it must not be good." 
+> 
+> But that's just a ridiculous way to think. 
+> 
+> You have to build up the reasoning from the ground up \- "From the first principles" is the phrase that's used in physics. You look at the fundamentals and construct your reasoning from that, and then you see if you have a conclusion that works or doesn't work, and it may or may not be different from what people have done in the past.
+> 
+> \- Elon Musk
+
+Law of the instrument: "If the only tool you have is a hammer, it is tempting to treat everything as if it were a nail."
+
 ### Action bias
 
 Action bias: In the places where doing action is normal, people prefer to do something instead of doing nothing, even when doing action has no effect or negative effects.
@@ -1114,21 +1128,7 @@ Pepole tend to spend much time making decision on small things but spend very fe
 - So people tend to procrastinate to avoid the unpleasant feeling of thinking about big decisions, or simply follow others (herd metality).
 - The small decisions (e.g. choosing item in shop, choosing restaurant) require less mental efforts and cause less nervous feeling. Thinking on these decisions can give feeling of control. These decisions usually have quick feedback (human crave quick feedback).
 
-### Path dependence
 
-Path dependence means sticking to what worked in the past and avoid changing, even when the paradigm has shifted and the past successful decisions are no longer appropriate.
-
-> I think people's thinking process is too bound by convention or analogy to prior experiences. It's rare that people try to think of something on a first principles basis. 
-> 
-> They'll say, "We'll do that because it's always been done that way." Or they'll not do it because "Well, nobody's ever done that, so it must not be good." 
-> 
-> But that's just a ridiculous way to think. 
-> 
-> You have to build up the reasoning from the ground up \- "From the first principles" is the phrase that's used in physics. You look at the fundamentals and construct your reasoning from that, and then you see if you have a conclusion that works or doesn't work, and it may or may not be different from what people have done in the past.
-> 
-> \- Elon Musk
-
-**Law of the instrument**: "If the only tool you have is a hammer, it is tempting to treat everything as if it were a nail."
 
 ### Herd mentality
 
@@ -1233,7 +1233,6 @@ We tend to regret doing something in short term, but regret not doing something 
 > 'I have led a toothless life', he thought. 'A toothless life. I have never bitten into anything. I was waiting. I was reserving myself for later on \- and I have just noticed that my teeth have gone. ...'
 > 
 > \- Jean-Paul Sartre
-
 
 > Some decisions are consequential and irreversible or nearly irreversible – one-way doors – and these decisions must be made methodically, carefully, slowly, with great deliberation and consultation. If you walk through and don’t like what you see on the other side, you can’t get back to where you were before. We can call these Type 1 decisions. 
 > 

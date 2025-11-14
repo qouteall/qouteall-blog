@@ -91,14 +91,12 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 ### Unicode and text
 
 - Two concepts: code point, grapheme cluster:
-  - Grapheme cluster is the "unit of character" in GUI.
-  - For visible ascii characters, a character is a code point, a character is a grapheme cluster.
-  - An emoji is a grapheme cluster, but it may consist of many code points.
+  - Grapheme cluster is the "unit of character" in GUI. An emoji is a grapheme cluster, but it may consist of many code points.
   - In UTF-8, a code point can be 1, 2, 3 or 4 bytes. The byte number does not necessarily represent code point number.
   - In UTF-16, each UTF-16 code unit is 2 bytes. A code point can be 1 code unit (2 bytes) or 2 code units (4 bytes, surrogate pair).
   - JSON string `\u` escape uses surrogate pair. `"\uD83D\uDE00"` in JSON has only one code point.
 - Strings in different languages:
-  - Rust use UTF-8 for in-memory string. `s.len()` gives byte count. Rust does not allow directly indexing on a `str` (but allows subslicing). `s.chars().count()` gives code point count. Rust is strict in UTF-8 code point validity (for example Rust doesn't allow subslice to cut on invalid code point boundary).
+  - Rust use UTF-8 for in-memory string. `s.len()` gives byte count. Rust does not allow directly indexing on a `str` (but allows subslicing). `s.chars().count()` gives code point count. Rust is strict in UTF-8 code point validity.
   - Java, C# and JS's string encoding is similar to UTF-16 [^string_encoding]. String length is code unit count. Indexing works on code units. Each code unit is 2 bytes. One code point can be 1 code unit or 2 code units.
   - In Python, `len(s)` gives code point count. Indexing gives a string that contains one code point.
   - Golang string has no constraint of encoding and is similar to byte array. String length and indexing works same as byte array. But the most commonly used encoding is UTF-8. [See also](https://go.dev/blog/strings)
@@ -118,7 +116,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 
 ### Floating point
 
-- NaN. Floating point NaN is not equal to any number including itself. NaN == NaN is always false (even if the bits are same). NaN != NaN is always true. Computing on NaN usually gives NaN (it can "contaminate" computation).
+- NaN. Floating point NaN is not equal to any number including itself. NaN == NaN is always false (even if the bits are same). NaN != NaN is always true. Computing on NaN usually gives NaN (it can "contaminate" computation). NaN corresponds to many different binary values.
 - There are +Inf and -Inf. They are not NaN.
 - There is a negative zero -0.0 which is different to normal zero. The negative zero equals zero when using floating point comparision. Normal zero is treated as "positive zero". The two zeros behave differently in some computations (e.g. `1.0 / 0.0 == Inf`, `1.0 / -0.0 == -Inf`, `log(0.0) == -Inf`, `log(-0.0)` is NaN)
 - JSON standard doesn't allow NaN or Inf:
@@ -126,12 +124,11 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
   - Python `json.dumps(...)` will directly write `NaN`, `Infinity` into result, which is not compliant to JSON standard. `json.dumps(..., allow_nan=False)` will raise `ValueError` if has NaN or Inf.
   - Golang `json.Marshal` will give error if has NaN or Inf.
 - Directly compare equality for floating point may fail due to precision loss. Compare equality by things like `abs(a - b) < 0.00001`
-- JS use floating point for all numbers. The max "safe" integer is $2^{53}-1$. The "safe" here means every integer in range can be accurately represented. Outside of the safe range, most integers will be inaccurate. For large integer it's recommended to use `BigInt`.
+- JS use floating point for all numbers. The max "safe" integer is $2^{53}-1$. Outside of the "safe" range, most integers cannot be accurately represented. For large integer it's recommended to use `BigInt`.
   
-  If a JSON contains an integer larger than that, and JS deserializes it using `JSON.parse`, the number in result will be likely inaccurate. The workaround is to use other ways of deserializing JSON or use string for large integer. 
+  If a JSON contains an integer larger than that, and JS deserializes it using `JSON.parse`, the number in result will be likely inaccurate. The workaround is to use other ways of deserializing JSON or use string for large integer. [^safe_int_timestamp]
   
-  (Putting millisecond timestamp integer in JSON fine, as millisecond timestamp exceeds limit in year 287396. But nanosecond timestamp suffers from that issue.)
-- Floating-point is 2-based. It cannot accurately represent most decimals. 0.1+0.2 gets 0.30000000000000004 .
+- Floating-point is 2-based. It cannot accurately represent most decimals. 0.1+0.2 gets 0.30000000000000004 . [^excel_money].
 - Associativity law and distribution law doesn't strictly hold because of precision loss. See also: [Defeating Nondeterminism in LLM Inference](https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference/), [Taming Floating-Point Sums](https://orlp.net/blog/taming-float-sums/)
 - Division is much slower than multiplication (unless using approximation). Dividing many numbers with one number can be optimized by firstly computing reciprocal then multiply by reciprocal.
 - These things can make different hardware have different floating point computation results:
@@ -146,10 +143,14 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - Floating point precision is low for values with very large absolute value or values very close to zero. It's recommended to avoid temporary result to have very large absolute value or be very close-to-zero.
 - Iteration can cause error accumulation. For example, if something need to rotate 1 degree every frame, don't cache the matrix and multiply 1-degree rotation matrix every frame. Compute angle based on time then re-calculate rotation matrix from angle.
 
+[^safe_int_timestamp]: Putting millisecond timestamp integer in JSON fine, as millisecond timestamp exceeds limit in year 287396. But nanosecond timestamp suffers from that issue.
+
+[^excel_money]: It's recommended to NOT use floating point to store money value. Note that Microsoft Excel uses floating point to represent number, and many financial data are processed in Excel. Excel has rounding so that 0.30000000000000004 is displayed as 0.3 . Doing analyze in Excel is mostly fine.
 
 ### Time
 
-- [Leap second](https://en.wikipedia.org/wiki/Leap_second). Unix timestamp is "transparent" to leap second, which means converting between Unix timestamp and UTC time ignores leap second. A common solution is leap smear: make the time measured in Unix timestamp stretch or squeeze near a leap second.
+- [Leap second](https://en.wikipedia.org/wiki/Leap_second). Unix timestamp is "transparent" to leap second, which means converting between Unix timestamp and UTC time ignores leap second. 
+  - A common solution is leap smear: make the time measured in Unix timestamp stretch or squeeze near a leap second.
 - Time zone. UTC and Unix timestamp is globally uniform. But human-readable time is time-zone-dependent. It's recommended to store timestamp in database and convert to human-readable time in UI, instead of storing human-readable time in database.
 - Daylight Saving Time (DST): In some region people adjust clock forward by one hour in warm seasons.
 - Time may "go backward" due to NTP sync.
@@ -189,6 +190,7 @@ This article spans a wide range of knowledge. If you find a mistake or have a su
 - Having interior pointer to an object keeps the whole object alive. This may cause memory leak.
 - Forgetting to cancel context cause `<-ctx.Done()` to deadlock (except for context created by `context.WithValue`).
 - For `WaitGroup`, `Add` must be called before `Wait`. Don't `Add` in a new goroutine (unless with proper synchronization).
+- `sync.Mutex` should be passed by pointer not value. Same applies to `sync.WaitGroup` `sync.Cond` `net.Conn` etc. But slices, maps and channels can be passed by value.
 
 
 ### C/C++
