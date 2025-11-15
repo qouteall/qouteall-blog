@@ -288,6 +288,14 @@ However, due to belief stability, it's hard to persuade/teach others. People dis
 
 Cunningham's Law: The best way to get the right answer on the internet is not to ask a question; it's to post the wrong answer.
 
+People often try hard to show they are smart. But pretending to be stupid (being humble) is sometimes useful:
+
+- Can easily correct mistakes. No need to waste efforts justifying mistakes.
+- Letting others teach you can increase their favorability to you.
+- Decrease others' expectation on you. They will be more surprised when you deliver good results.
+- Reduce unnecessary competition.
+
+
 ### Sunk cost fallacy
 
 Commitment can be a good thing. A lot of goals require continual time, efforts and resources to achieve.
@@ -1311,9 +1319,7 @@ Memorizing is lossy compression. Recall is lossy decompression, where details ca
 
 Taking notes is one way to mitigate the unreliable memory issue.
 
-**Every time a messsage is relayed through a person, some of its information gets lost, and some noise gets added**. The person relaying the message will add their own understanding (which can be misleading), and omit the information that they think is not important (but can be actually important). This issue is very common in big corporation and governments. **Good communication requires reducing middlemen**. [^about_pdf]
-
-[^about_pdf]: PDF is harder to edit than other document formats. This can be a good trait when you don't want information relayers to modify your document. (Note that it's not a perfect solution. Others can still ask AI to transcribe screenshots, take text snippets and form new documents. It only increases difficulty of modifying.)
+**Every time a messsage is relayed through a person, some of its information gets lost, and some noise gets added**. The person relaying the message will add their own understanding (which can be misleading), and omit the information that they think is not important (but can be actually important). This issue is very common in big corporation and governments. **Good communication requires reducing middlemen**.
 
 People usually remember the "special" things well. This is an information compression mechanism that filters out the unimportant details.
 
@@ -1409,7 +1415,7 @@ Antimemes are easier to be forgotten than other information. Some antimemes are 
 
 ### Longing for attention
 
-People wants attention from others. Some people try to gain attention by posting things on the internet.
+People wants attention from others. Having attention from others is useful: it increases exposure to possible allies, mates and opportunities. 
 
 > **Attention is a psychological commodity which people value inherently**.
 >
@@ -1419,7 +1425,7 @@ People wants attention from others. Some people try to gain attention by posting
 >
 > \- [Paying attention](https://karthikecon.github.io/karthiksrinivasan.org/paying_attention.pdf) by Karthik Srinivasan
 
-Having attention from others is indeed useful: it increases exposure to possible allies, mates and opportunities.
+Some people try to gain attention by posting things on the internet. Having attention from internet is only useful when attention comes from the right kinds of persons. Some kinds of attention from internet are harmful.
 
 ### Randomized reward
 
@@ -1447,15 +1453,13 @@ It also involves the tradeoff between short-term reward and long-term reward. Lo
 - Risk discount. Doing long-termism action deterministically sacrifices short-term reward, but doesn't necessarily get larger long-term reward (tried hard but failed). It's an investment. The more risky it is, the less "worthy" it is.
 - ...
 
-When friends and partners complain to you, they often just want emotional support instead of solutions. They often already know the solution but cannot apply it for some reasons. (Offering obvious solutions may be treated as insult of intelligence.)
+When friends and partners complain to you, they often just want emotional support instead of solutions (don't offer solutions unless you can provide a novel and good solution). They often already know the solution but cannot apply it for some reasons.
 
 ## Knowing the biases may be not enough
 
 Unfortunately, just knowing the cognitive biases is not enough to avoid and overcome them. A lot of cognitive biases originate from the biological basis of human's cognitive function, which cannot change from just knowledge.
 
 Related: [Understanding the Limits of Metacognitive Awareness on Debiasing](https://www.hbs.edu/ris/Publication%20Files/21-084_436ebba8-c832-4922-bb6e-49d000a77df3.pdf)
-
-
 
 Note that the **cognitive biases are not necessarily negative things**. They are tradeoffs: sometimes worse, sometimes better.
 

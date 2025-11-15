@@ -9,8 +9,6 @@ A summarization of some traps to developers. There traps are unintuitive things 
 
 <!-- truncate -->
 
-This article spans a wide range of knowledge. If you find a mistake or have a suggestion, please feedback to qouteall@163.com .
-
 ## Summarization of traps
 
 ### HTML and CSS
