@@ -3,7 +3,7 @@ date: 2025-10-25
 tags:
   - Programming
   - Math
-unlisted: true
+unlisted: false
 ---
 
 # Deadlock, Circular Reference and Halting
@@ -16,7 +16,7 @@ Deadlock can be understood via **resource allocation graph**.
 
 It has two kinds of nodes:
 
-- Threads. (Sometimes called processes). Often drawn as circle.
+- Threads (processes, goroutines). Often drawn as circle.
 - Locks. Often drawn as square.
 
 Its edges represent **dependency**. A point to B means A depends on B. Specifically it has two kinds of edges:
@@ -26,38 +26,53 @@ Its edges represent **dependency**. A point to B means A depends on B. Specifica
 
 When that graph forms a cycle, deadlock occurs.
 
-A simple two-lock deadlock
+A simple two-lock deadlock in Golang:
 
 ```go
-func goroutine1(lock1 *sync.Mutex, lock2 *sync.Mutex) {
+func goroutineA(lock1 *sync.Mutex, lock2 *sync.Mutex) {
 	lock1.Lock()
 	defer lock1.Unlock()
 	// ...
-	lock2.Lock()
+	lock2.Lock() // deadlock here
 	defer lock2.Unlock()
 }
 
-func goroutine2(lock2 *sync.Mutex, lock1 *sync.Mutex) {
+func goroutineB(lock2 *sync.Mutex, lock1 *sync.Mutex) {
 	lock2.Lock()
 	defer lock2.Unlock()
 	// ...
-	lock1.Lock()
+	lock1.Lock() // deadlock here
 	defer lock1.Unlock()
 }
 ```
 
-For non-reentrant locks, deadlock can happen with only one lock and one thread.
+Resource allocation graph:
+
+![](circular/deadlock_classical.drawio.png)
+
+Golang's locks are not re-entrant. Deadlock can happen with only one lock and one thread:
 
 ```go
-lock := &sync.Mutex{}
-lock.Lock()
-defer lock.Unlock()
-// ...
-func() {
-	lock.Lock() // deadlock
-	defer lock.Unlock()
-}()
+type SomeObject struct {
+	lock *sync.Mutex
+	// ...
+}
+
+func (o *SomeObject) DoSomething() {
+	o.lock.Lock()
+	defer o.lock.Unlock()
+	// ...
+	o.DoSomeOtherThing()
+}
+
+func (o *SomeObject) DoSomeOtherThing() {
+	o.lock.Lock() // deadlock here
+	defer o.lock.Unlock()
+	// ...
+}
 ```
+
+![](circular/deadlock_one.drawio.png)
 
 ## Priority inversion
 
@@ -73,56 +88,46 @@ The common priority inversion problem involves 3 threads, with low/medium/high p
 
 ## Lock-free deadlock
 
-Deadlock can also happen when there is no explicit lock. I call it **lock-free deadlock**. (That naming is inspired by "[serverless servers](https://vercel.com/blog/serverless-servers-node-js-with-in-function-concurrency)", "constant variables" and "[unnamed namespaces](https://en.cppreference.com/w/cpp/language/namespace.html#Unnamed_namespaces)".)
+Deadlock can also happen when there is no explicit lock. I call it **lock-free deadlock**. (The naming is similar to "[serverless servers](https://vercel.com/blog/serverless-servers-node-js-with-in-function-concurrency)", "constant variables" and "[unnamed namespaces](https://en.cppreference.com/w/cpp/language/namespace.html#Unnamed_namespaces)".)
 
 A simple Golang program showing lock-free deadlock:
 
 ```go
 func goroutineA(aToB chan string, bToA chan string) {
-	aToB <- "Hello from A"
+	aToB <- "Hello from A" // deadlock here
 	msg := <-bToA
-	fmt.Printf("A: Received message: '%s'\n", msg)
 }
 
 func goroutineB(aToB chan string, bToA chan string) {
-	bToA <- "Hello from B"
+	bToA <- "Hello from B" // deadlock here
 	msg := <-aToB
-	fmt.Printf("B: Received message: '%s'\n", msg)
 }
 ```
 
-Output
+In Golang, channels are not buffered by default, then producer waits for consumer. If the two channels are not buffers, it will deadlock:
 
-```
-A: Starting and attempting to send message...
-B: Starting and attempting to send message...
-fatal error: all goroutines are asleep - deadlock!
-```
+![](circular/lock_free_deadlock_1.drawio.png)
 
-(The WaitGroup is to make the main thread wait for two goroutines. Without it, the main thread can exit normally despite goroutine waiting.)
-
-In Golang, channels are not buffered by default, then producer waits for consumer. If you put a thing into a channel that no one will consume, it will wait forever. But changing the channel to buffered channel `make(chan string, 1)` will make the producer to not wait for consumer as long as buffer is not full, so deadlock is solved.
-
-That lock-free deadlock can also be drawn as resource allocation graph. Channel is also a kind of node. `threadA` depends on `aToB` consuming value, `aToB` consuming value depends on `threadB` progress, `threadB` depends on `bToA` consuming value, `bToA` consuming value depends on `threadA` progress.
+If you put a thing into a channel that no one will consume, it will wait forever. But changing the channel to buffered channel `make(chan string, 1)` will make the producer to not wait for consumer as long as buffer is not full. That deadlock can be solved by making channels buffered.
 
 Note that Golang channel buffer must have a constant size limit. There are packages for unbounded channel ([chanx](https://github.com/smallnest/chanx)). However the memory may be not large enough if big bursts occurs. Use disk-backed event queue (e.g. Kafka) to get larger buffer capacity. 
 
-Note that sometimes you need back pressure (stop producer when buffer is full) to improve stability (e.g. avoid using up memory) at the cost of blocking requests.
+Note that sometimes you need back pressure (stop producer when buffer is full) to improve stability (e.g. avoid using up memory) at the cost of blocking (and rejecting) requests.
 
 ### Buffered channels can still deadlock
 
 The previous deadlock can be solved by making channel buffered. However, buffering doesn't solve all lock-free deadlocks. For example:
 
 ```go
-go func() {
-    value := <- ch1
-    ch2 <- "some result"
-} ()
+func goroutineA(aToB chan string, bToA chan string) {
+	msg := <-bToA // deadlock here
+	aToB <- "Hello from A"
+}
 
-go func() {
-    value := <- ch2
-    ch1 <- "some result"
-} ()
+func goroutineB(aToB chan string, bToA chan string) {
+	msg := <-aToB // deadlock here
+	bToA <- "Hello from B"
+}
 ```
 
 ## Channel+Lock deadlock
@@ -130,36 +135,37 @@ go func() {
 Example:
 
 ```go
-go func(m *sync.Mutex, c chan string) {
+func goroutineA(m *sync.Mutex, c chan string) {
     m.Lock()
     defer m.Unlock()
-    value := <-c
-} (m, c)
+    value := <-c // deadlock here (assume goroutineA runs first)
+}
 
-go func(m *sync.Mutex, c chan string) {
-    m.Lock()
+func goroutineB(m *sync.Mutex, c chan string) {
+    m.Lock() // deadlock here (assume goroutineA runs first)
     defer m.Unlock()
     c <- "some result"
-} (m, c)
+}
 ```
 
-## Trap of select
+![](circular/deadlock_channel_lock.png)
+
+## Select leak
 
 For example, do some work with timeout, using channel and select:
 
 ```go
 func doWorkWithTimeout(timeout time.Duration) (string, error) {
-	ch := make(chan string)
+	ch := make(chan string) // unbuffered channel
 	go func() {
 		result := doWork()
 		ch <- result // this blocks
-        fmt.Println("doWork done")
 	}()
 	select {
 	case result := <- ch:
 		return result, nil
 	case <- time.After(timeout):
-		return "", errors.New("timeout")
+		return "", errors.New("timeout") // if this path is taken, ch will never be consumed
 	}
 }
 ```
@@ -172,11 +178,59 @@ Select also has traps in async Rust, but in a different mechanism (cancellation)
 
 ## Livelock
 
-TODO
+Sometimes, replace locking with try-locking and add retrying mechanism can solve some deadlock. But it may also introduce livelock: keep retrying without successfully acquiring lock.
+
+```go
+func WithRetry[T any](attempts int, operation func() (T, error)) (T, error) {
+	i := 0
+	for {
+		result, err := operation()
+		if err == nil {
+			return result, nil
+		}
+		i++
+		if i >= attempts {
+			return result, err
+		}
+	}
+}
+
+func goroutineA(lock1 *sync.Mutex, lock2 *sync.Mutex) (string, error) {
+	return WithRetry(10, func() (string, error) {
+		lock1.Lock()
+		defer lock1.Unlock()
+		// do some work
+
+		if lock2.TryLock() { // this may keep failing
+			defer lock2.Unlock()
+			// do some other work
+			return "success", nil
+		} else {
+			return "", fmt.Errorf("failed to acquire lock2")
+		}
+	})
+}
+
+func goroutineB(lock1 *sync.Mutex, lock2 *sync.Mutex) (string, error) {
+	return WithRetry(10, func() (string, error) {
+		lock2.Lock()
+		defer lock2.Unlock()
+		// do some work
+		
+		if lock1.TryLock() { // this may keep failing
+			defer lock1.Unlock()
+			// do some other work
+			return "success", nil
+		} else {
+			return "", fmt.Errorf("failed to acquire lock1")
+		}
+	})
+}
+```
 
 ## Circular reference counting leak
 
-Reference counting cause memory leak if there exists a cycle of strong references.
+Reference counting leaks memory if there exists a cycle of strong references.
 
 Reference counting is based on the assumption that: if there is no reference to one object, that object can be freed. It's based on local reference to object, not global reachability.
 
@@ -188,11 +242,47 @@ Tracing GC can collect them because tracing GC scans the whole object graph glob
 
 The common solution is to use weak reference counting to cut cycle.
 
-## Rust dislikes circular reference
+## Ordering breaks cycle
 
-TODO
+If there is a globally uniform ordering of acquiring locks, then deadlock won't occur. 
 
-See also [Linear Types One-Pager](https://blog.yoshuawuyts.com/linear-types-one-pager/)
+For example, if there are two locks `lock1` and `lock2`, if I ensure that `lock1`'s locking order if before `lock2`, then there won't be the case that a thread acquired `lock2` and is acquiring `lock1`. Then in resource allocation graph, the path from `lock2` to `lock1` cannot be formed. So deadlock can be prevented.
+
+Rust favors tree-shaped ownership. There is a hierarchy between owner and owned values. This creates an order that prevents cycle. If you use sharing (reference counting) but don't use mutability, then creating new value can only use already-created value, so circular reference is still not possible. Only by combination of sharing and mutability can circular reference be created.
+
+## Observer circular dependency
+
+Observer pattern is common in GUI applications. It's a common pattern to use observer to make some data's update to propagate to other data. However, it may form a circular dependency, then stuck in dead recursion:
+
+```go
+type ObservedValue[T any] struct {
+	Value T
+	Observers []func(T)
+}
+
+func (o *ObservedValue[T]) AddObserver(observer func(T)) {
+	o.Observers = append(o.Observers, observer)
+}
+
+func (o *ObservedValue[T]) SetValue(value T) {
+	o.Value = value
+	for _, observer := range o.Observers {
+		observer(value)
+	}
+}
+
+func main() {
+	a := ObservedValue[int]{Value: 0}
+	b := ObservedValue[int]{Value: 0}
+	a.AddObserver(func(value int) {
+		b.SetValue(value + 1)
+	})
+	b.AddObserver(func(value int) {
+		a.SetValue(value + 1)
+	})
+	a.SetValue(1) // stuck in dead recursion
+}
+```
 
 ## Lazy evaluation circular reference
 
@@ -200,7 +290,7 @@ See also [Linear Types One-Pager](https://blog.yoshuawuyts.com/linear-types-one-
 
 Haskell is a pure functional language where there is no mutable state. Haskell also has lazy evaluation.
 
-Without mutable state and lazy evaluation, reference cycle cannot be created. Because new values can only contain the existing values when creating it.
+Without mutable state and lazy evaluation, reference cycle cannot be created. Because new values can only contain the existing values when creating it (order of evaluation prevents cycle). But with lazy evaluation, the not-yet-created values can be used so circular reference is possible.
 
 Haskell has lazy evaluation so it allows circular reference. Example:
 
@@ -342,7 +432,9 @@ But it doesn't mean nothing can be analyzed. It just means we cannot analyze arb
 
 If we apply some constraints, to make it not Turing complete but still expressive, then halting can be ensured, while being still useful enough, like in Lean.
 
-Rust has a lot of constraints to limit sets of programs to an analyzable subset, so it can analyze about memory safety and thread safety.
+Rust has a lot of constraints to limit sets of programs to an analyzable subset, so it can analyze about memory safety and thread safety. [^rust_rice]
+
+[^rust_rice]: Rust can ensure memory safety (when not using unsafe) and is still Turing-complete. This doesn't contradict with Rice's theorem. Because under Rust's constraint memory safety is a "trivial property".
 
 ## Non-Turing-Complete programming languages
 
@@ -440,8 +532,6 @@ Let `H(x) = unprovable(x(x))`. Then let `G = H(H) = unprovable(H(H)) = unprovabl
 
 The `x(x)` is symbol substitution. replacing the free variable `x` with `x`, while avoid making two different variables same name by renaming when necessary. 
 
-
-
 ## Error of error of error...
 
 > An error rate can be measured. The measurement, in turn, will have an error rate. The measurement of the error rate will have an error rate ...
@@ -453,7 +543,7 @@ The `x(x)` is symbol substitution. replacing the free variable `x` with `x`, whi
 > \- N. N. Taleb, [Link](https://www.fooledbyrandomness.com/notebook.htm)
 
 
-## Reference
+## Related
 
 [Understanding Real-World Concurrency Bugs in Go](https://songlh.github.io/paper/go-study.pdf)
 
