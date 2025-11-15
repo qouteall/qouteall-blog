@@ -16,13 +16,13 @@ Deadlock can be understood via **resource allocation graph**.
 
 It has two kinds of nodes:
 
-- Threads (processes, goroutines). Often drawn as circle.
-- Locks. Often drawn as square.
+- Threads (processes, goroutines, async tasks).
+- Locks.
 
 Its edges represent **dependency**. A point to B means A depends on B. Specifically it has two kinds of edges:
 
-- Assignment edge. A lock points to a thread. It denotes that the thread already holds the lock. The lock's release depends on the thread's progress.
-- Request edge. A thread points to a lock. It denotes that the thread try to hold the lock. The thread's progress depends on acquiring the lock.
+- A lock points to a thread. It denotes that the thread already holds the lock. The lock's release depends on the thread's progress. (Assignment edge)
+- A thread points to a lock. It denotes that the thread try to hold the lock. The thread's progress depends on acquiring the lock. It can be generalized to other synchronization elements like channels. (Request edge)
 
 When that graph forms a cycle, deadlock occurs.
 
@@ -73,18 +73,6 @@ func (o *SomeObject) DoSomeOtherThing() {
 ```
 
 ![](circular/deadlock_one.drawio.png)
-
-## Priority inversion
-
-In some real-time (or near-real-time) systems, important threads have higher priority than other thread. The thread scheduler tries to run higher-priority threads first. 
-
-Priority inversion problem can make high-priority threads keep stuck, effectively similar to deadlock (although it's not strictly deadlock).
-
-The common priority inversion problem involves 3 threads, with low/medium/high priorities respectively:
-
-- The low-priority thread holds a lock.
-- A high-priority thread tries to acquire lock. It cannot and wait for low-priority thread to release lock.
-- Another medium-priority thread keeps running. When medium-priority thread runs, it occupies CPU cores so that low-priority thread cannot run. The high-priority thread's running now indirectly depend on medium-priority thread. If medium-priority thread keeps running, high-priority thread will never run.
 
 ## Lock-free deadlock
 
@@ -227,6 +215,18 @@ func goroutineB(lock1 *sync.Mutex, lock2 *sync.Mutex) (string, error) {
 	})
 }
 ```
+
+## Priority inversion
+
+In some real-time (or near-real-time) systems, important threads have higher priority than other thread. The thread scheduler tries to run higher-priority threads first. 
+
+Priority inversion problem can make high-priority threads keep stuck, effectively similar to deadlock (although it's not strictly deadlock).
+
+The common priority inversion problem involves 3 threads, with low/medium/high priorities respectively:
+
+- The low-priority thread holds a lock.
+- A high-priority thread tries to acquire lock. It cannot and wait for low-priority thread to release lock.
+- Another medium-priority thread keeps running. When medium-priority thread runs, it occupies CPU cores so that low-priority thread cannot run. The high-priority thread's running now indirectly depend on medium-priority thread. If medium-priority thread keeps running, high-priority thread will never run.
 
 ## Circular reference counting leak
 
@@ -440,24 +440,24 @@ Rust has a lot of constraints to limit sets of programs to an analyzable subset,
 
 SQL is not Turing-complete when not using recursive common table extension (`with recursive ...`) and other procedural extensions (e.g. `while`).
 
-The proof languages, like Lean and Idris, are not Turning-complete. Because a valid proof require the corresponding program to halt. They have special mechanisms to ensure that program eventually halts. 
-
-The proof languages describe both program and proof, according to [Curry–Howard correspondence](https://en.wikipedia.org/wiki/Curry%E2%80%93Howard_correspondence).
+The proof languages describe both program and proof, according to [Curry–Howard correspondence](https://en.wikipedia.org/wiki/Curry%E2%80%93Howard_correspondence):
 
 - The propositions, like `1 = 1`, `1 + 1 = 2`, correspond to types. If you can obtain a value of that type, you can prove it (what's inside the value is not important for proof, only the type is important).
 - The function types, like `(x: Integer) -> (x + 0) = x` represent a proposition `x + 0 = x`. Pass argument `1` to that function, you get `(1 + 0) = 1`
 - If you can write a program of that type, without using any side effect , and the program halts, then that theorem corresponding to type is proved.
 - A proof can rely on another proof. For example `((x + 1) + 1) + y = 1 + ((x + 1) + y)` relies on `(x + 1) + y = 1 + (x + y)`, recursively "call function" until the basic case `(0 + 1) + y = 1 + (0 + 1)`
-- To prove theorem corresponding to type `X`, run a program that return `X`. When the program normally halts and output a value of type `X` then it's proved. 
+- To prove theorem corresponding to type `X`, "run" a program that return `X`. When the program normally finishes and output a value of type `X`, it's proved. 
 - If the program don't halt, then value of type `X` can never be obtained.
-- That program should not use any side effect (mutation, external IO, random, etc.).
+- That program should not use any side effect (mutation, fail, external IO, randomness, etc.).
 - In reality, you just need to ensure the program halts and don't need to really execute the program.
+
+The proof languages, like Lean and Idris, are not Turning-complete. Because a valid proof require the corresponding program to halt. They have special mechanisms (halt checker) to ensure that program eventually halts.
 
 Strictly speaking, Turing complete requires infinitely large memory, so all practical computers and languages don't satisfy strict Turing complete. Apart from memory constraint, blockchain applications often consume fee (gas) in each step of execution, but Turing complete requires unlimited execution steps, so they also not strictly Turing complete.
 
 ## Ethernet loop
 
-In the raw form of Ethernet, there is no communication between switches, so one switch cannot know the whole network topology. 
+In the raw form of Ethernet, switches don't communicate topology information to each other.
 
 How raw form of Ethernet do routing:
 
@@ -467,6 +467,12 @@ How raw form of Ethernet do routing:
 It works fine when there is no cycle in network topology. But when there is a cycle, the broadcast will come back to the same switch but from another interface. It not only messes up the self-learning of MAC address table, but can also cause the switch to broadcast the same packet again, and again, causing boradcast storm. 
 
 This is solved in spanning tree protocol, where switches share topology information with each other, then break the loop.
+
+## Service circular dependency
+
+Sometimes a microservice does some initialization on launch. If that initialization requires using another microservice, then it creates a dependency. If dependency forms cycle, they cannot launch after crashing together.
+
+The best solution is to clearly avoid circular dependency. If that circular dependency initialization is really necessary, make initialization run asynchronously (don't block service starting) and use retrying.
 
 ## Circular reference in math
 
