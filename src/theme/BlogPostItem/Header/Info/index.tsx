@@ -49,7 +49,7 @@ function Spacer() {
 
 export default function BlogPostItemHeaderInfo({className}: Props): ReactNode {
   const {metadata} = useBlogPost();
-  const {date, readingTime} = metadata;
+  const {lastUpdatedAt, readingTime} = metadata;
 
   const dateTimeFormat = useDateTimeFormat({
     day: 'numeric',
@@ -58,12 +58,18 @@ export default function BlogPostItemHeaderInfo({className}: Props): ReactNode {
     timeZone: 'UTC',
   });
 
-  const formatDate = (blogDate: string) =>
-    dateTimeFormat.format(new Date(blogDate));
+  const lastUpdateDate = lastUpdatedAt ? new Date(lastUpdatedAt) : null;
 
   return (
     <div className={clsx(styles.container, 'margin-vert--md', className)}>
-      <DateTime date={date} formattedDate={formatDate(date)} />
+      { lastUpdateDate !== null ?
+        <>
+        {"Last updated "}
+        <DateTime date={lastUpdateDate.toISOString()} formattedDate={dateTimeFormat.format(lastUpdateDate)} />
+        </>
+        : undefined
+      }
+      
       {typeof readingTime !== 'undefined' && (
         <>
           <Spacer />
