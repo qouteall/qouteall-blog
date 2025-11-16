@@ -2,7 +2,6 @@
 date: 2025-10-25
 tags:
   - Programming
-  - Math
 ---
 
 # Deadlock, Circular Reference and Halting
@@ -499,22 +498,6 @@ The best solution is to clearly avoid circular dependency. If that circular depe
 ### Circular proof
 
 [Circular proof](https://en.wikipedia.org/wiki/Circular_reasoning): if A then B, if B then A. Circular proof is wrong. It can prove neither A nor B.
-
-A classical example is the deduction of $\frac{d \sin x}{dx}$:
-
-$$
-\frac{d \sin x}{dx} = \lim_{h \to 0} \frac{\sin(x+h)-\sin x}{h}
-$$
-
-$$
-=\lim_{h \to 0} \frac{\sin x \cos h + \cos x \sin h-\sin x}{h}
-$$
-
-$$
-=(\sin x)\lim_{h \to 0} \frac{\cos h - 1}{h} + (\cos x)\lim_{h \to 0}\frac{\sin x}{h}
-$$
-
-By L'Hôpital's rule $\lim_{h \to 0} \frac{\cos h - 1}{h} = 0$, $\lim_{h \to 0}\frac{\sin x}{h} = 1$, so deduction completed: $\frac{d \sin x}{dx} = \cos x$. However, applying L'Hôpital's rule requires knowing the $\frac{d \sin x}{dx}$, which is the result of deduction. So it's circular proof.
 
 ### Russel's paradox
 
