@@ -283,6 +283,27 @@ func main() {
 }
 ```
 
+Similar thing can happen in React:
+
+```js
+function SomeComponent() {
+    const [countA, setCountA] = useState(0);
+    const [countB, setCountB] = useState(0);
+
+    useEffect(() => {
+        setCountB(countA + 1);
+    }, [countA]);
+
+    useEffect(() => {
+        setCountA(countB + 1);
+    }, [countB]);
+    
+    ...
+}
+```
+
+React effect triggers in next iteration of event loop so it won't directly dead recursion, but it will keep doing re-render which costs performance.
+
 ## Lazy evaluation circular reference
 
 ### Infinite container
@@ -324,13 +345,13 @@ newtype RState s a = RState { runRState :: s -> (a, s) }
 
 instance Monad (RState s) where
   ...
-  RState sf >>= f = RState $ \s ->
-    let (a, past)   = sf future
-        (b, future) = runRState (f a) s
-    in (b, past)
+  RState sf >>= f = RState $ \state2 ->
+    let (oldResult, state0) = sf state1
+        (newResult, state1) = runRState (f oldResult) state2
+    in (newResult, state0)
 ```
 
-Note that it has circular dependency: `a` depends on `future`, `future` depends on `a`. It can work due to lazy evalution (it doesn't always work).
+It has circular dependency: `(oldResult, state0) = sf state1` uses `state1` obtained in next line. The next line uses `oldResult` obtained in previous line.
 
 Example usage:
 
@@ -352,10 +373,10 @@ instance Applicative (RState s) where
 
 instance Monad (RState s) where
   return = pure
-  RState sf >>= f = RState $ \s ->
-    let (a, past)   = sf future
-        (b, future) = runRState (f a) s
-    in (b, past)
+  RState sf >>= f = RState $ \state2 ->
+    let (oldResult, state0) = sf state1
+        (newResult, state1) = runRState (f oldResult) state2
+    in (newResult, state0)
 
 get :: RState s s
 get = RState $ \s -> (s, s)

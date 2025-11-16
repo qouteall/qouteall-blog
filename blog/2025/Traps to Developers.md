@@ -340,6 +340,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - About state:
   - State objects themselves should be immutable. Don't directly set fields of state objects. Always recreate whole object.
   - Don't set state directly in component rendering. State can only be set in callbacks.
+- Forget to put dependency value to `useEffect` then the runs after every component render.
 - Forget to include value in `useEffect` dependency array.
 - Forget clean up in `useEffect`.
 - Closure trap. Closure can capture a state. If the state changes, the closure still captures the old state. 

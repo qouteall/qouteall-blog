@@ -1177,6 +1177,8 @@ One similar effect, **in-group bias**: Favoring investments or opinions from peo
 
 [Mimetic desire](https://en.wikipedia.org/wiki/Mimetic_theory): We tend to pursur for thing that other people pursue, not based on personal perferences.
 
+Pack journalism: When journalists communicate together, their views tend to converge to the same.
+
 ### "Because" justification
 
 In [an experiment](https://www.researchgate.net/publication/232505985_The_mindlessness_of_ostensibly_thoughtful_action_The_role_of_placebic_information_in_interpersonal_interaction), requesting jumping the queue of using a copy machine:
@@ -1453,7 +1455,7 @@ It also involves the tradeoff between short-term reward and long-term reward. Lo
 - Risk discount. Doing long-termism action deterministically sacrifices short-term reward, but doesn't necessarily get larger long-term reward (tried hard but failed). It's an investment. The more risky it is, the less "worthy" it is.
 - ...
 
-When friends and partners complain to you, they often just want emotional support instead of solutions (don't offer solutions unless you can provide a novel and good solution). They often already know the solution but cannot apply it for some reasons.
+When friends and partners complain to you, they often just want emotional support instead of solutions. They often already know the solution but cannot apply it for some reasons.
 
 ## Knowing the biases may be not enough
 
