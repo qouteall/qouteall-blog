@@ -3,7 +3,6 @@ date: 2025-10-25
 tags:
   - Programming
   - Math
-unlisted: false
 ---
 
 # Deadlock, Circular Reference and Halting

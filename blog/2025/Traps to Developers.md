@@ -106,7 +106,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - [Confusable characters](https://github.com/unicode-org/icu/blob/main/icu4c/source/data/unidata/confusables.txt).
 - Normalization. For example é can be U+00E9 (one code point) or U+0065 U+0301 (two code points). String comparision works on binary data and don't consider normalization.
 - [Zero-width characters](https://ptiglobal.com/the-beauty-of-unicode-zero-width-characters/), [Invisible characters](https://invisible-characters.com/)
-- Line break. Windows often use CRLF `\r\n` for line break. Linux and MacOS often use LF `\n` for line break.
+- Line break. Windows often use CRLF `\r\n` for line break. Linux and macOS often use LF `\n` for line break.
 - Locale ([elaborated below](#locale)).
 
 
@@ -314,14 +314,14 @@ A summarization of some traps to developers. There traps are unintuitive things 
 
 - If the current directory is moved, `pwd` still shows the original path. `pwd -P` shows the real path.
 - `cmd > file 2>&1` make both stdout and stderr go to file. But `cmd 2>&1 > file` only make stdout go to file but don't redirect stderr.
-- File name is case sensitive (unlike Windows).
 - There is a capability system for executables, apart from file permission sytem. Use `getcap` to see capability.
 - Unset variables. If `DIR` is unset, `rm -rf "$DIR/"` becomes `rm -rf "/"`. Using `set -u` can make bash error when encountering unset variable. 
 - Bash has caching between command name and file path of command. If you move one file in `$PATH` then using that command gives ENOENT. Refresh cache using `hash -r`
 - Using a variable unquoted will make spaces separate it into different arguments. Also it will make its line breaks treated as space.
 - `set -e` can make the script exit immediately when a sub-command fails, but it doesn't work inside function whose result is condition-checked (e.g. the left side of `||`, `&&`, condition of `if`). [See also](https://stratus3d.com/blog/2019/11/29/bash-errexit-inconsistency/)
 - `fork()` creates a new process that has only one thread. If another thread holds lock during forking, that lock will never release. `fork()` also has potential of security issues.
-- File name can contain `\n` `\r` `'`. File name can be invalid UTF-8.
+- File name can contain `\n` `\r` `'` `"`. File name can be invalid UTF-8.
+- In Linux file names are case-sensitive, different to Windows and macOS.
 
 ### Backend-related
 
@@ -365,7 +365,8 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - GitHub by default allows deleting a release tag, and adding a new tag with same name, pointing to another commit. It's not recommended to do that. It breaks build system caching. It can be disabled in rulesets configuration. For external dependencies, hardcoding release tag may be not enough to prevent supply chain risk.
 - `git stash pop` does not drop the stash if there is a conflict.
 - In Windows, Git often auto-convert cloned text files to be CRLF line ending. But in WSL many software (e.g. bash) doesn't work with files with CRLF. Using `git clone --config core.autocrlf=false -c core.eol=lf ...` can make git clone as LF.
-- MacOS auto adds `.DS_Store` files into every folder. It's recommended to add `**/.DS_Store` into `.gitignore`.
+- macOS auto adds `.DS_Store` files into every folder. It's recommended to add `**/.DS_Store` into `.gitignore`.
+- In Windows and macOS, file name is case-insensitive. Renaming file that only change letter case won't be tracked by git (renaming using `git mv` works normally).
 
 [^rewrite_history]: Strictly speaking, rebase doesn't rewrite history if the rebase target branch is based on current branch. If local branch is based on remote branch, then pushing don't require force push. Squashing the local not-yet-pushed commits is fine.
 
