@@ -952,7 +952,7 @@ Fisher information measures how much information a sample can tell us about the 
 When the parameter is an offset and the offset is infinitely small, then the score function is called linear score. If the infinitely small offset is $\theta$. The offseted probability density is $f_2(x \vert \theta) = f(x+\theta)$, then 
 
 $$
-s_\text{linear}(x)=s(\theta;x) = \frac{\partial f_2(x|\theta)}{\partial \theta} = \frac{\partial \log f(x+\overbrace{\theta}^{\approx 0})}{\partial \theta} = \frac{d\log f(x)}{dx}
+s_\text{linear}(x)=s(\theta;x) = \frac{\partial f_2(x|\theta)}{\partial \theta} = \frac{\partial \log f(x+\overbrace{\theta}^{\to 0})}{\partial \theta} = \frac{d\log f(x)}{dx}
 $$
 
 In the places that use score function (and Fisher information) but doesn not specify which parameter, they usually refer to the linear score function.

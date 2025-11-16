@@ -193,6 +193,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 
 ### C/C++
 
+- Don't use `=` to compare equality.
 - Storing a pointer of an element inside `std::vector` and then grow the vector, `vector` may re-allocate content, making element pointer no longer valid.
 - `std::string` created from literal string may be temporary. Taking `c_str()` from a temporary string is wrong.
 - [Iterator invalidation](https://learnmoderncpp.com/2024/09/04/understanding-iterator-invalidation/). Modifying a container when looping on it.
