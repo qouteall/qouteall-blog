@@ -384,7 +384,7 @@ WebAssembly provides sandboxed execution. This can be useful for things like plu
 There are other sandboxed execution solutions:
 
 - [eBPF](https://en.wikipedia.org/wiki/EBPF). It's intended to run code in kernel in a sandboxed way. It has JIT compile.
-- Containers and [gVisor](https://gvisor.dev/).
+- [gVisor](https://gvisor.dev/).
 - Java loading new class at runtime. If the newly loaded classes run in the same JVM as host application, it's not safe (the newly-loaded class has same permission of accessing files and networking like host process). Similar to CLR.
 - [MicroVM](https://firecracker-microvm.github.io/).
 - [LUA](https://www.lua.org/). It's designed to be easily embedded into other applications. LUA is dynamically-typed. Although it has JIT, its performance may not match statically-typed languages.
@@ -393,10 +393,10 @@ There are other sandboxed execution solutions:
 These things also have VMs:
 
 - Font standard TrueType has its own VM and bytecode format. [See also](https://learn.microsoft.com/en-us/typography/opentype/spec/tt_instructions)
-- PDF allows embedding JavaScript.
+- PDF allows embedding JavaScript. (PDF also can embed TrueType which runs TrueType VM)
 - UEFI has a byte code format and VM. [See also](https://uefi.org/specs/UEFI/2.10/22_EFI_Byte_Code_Virtual_Machine.html)
 - SIM cards runs Java.
-- MySQL supports JS stroed procedure. [See also](https://blogs.oracle.com/mysql/post/introducing-javascript-support-in-mysql)
+- MySQL supports JS stored procedure. [See also](https://blogs.oracle.com/mysql/post/introducing-javascript-support-in-mysql)
 - Related: Modern CPUs often have a [microcode](https://en.wikipedia.org/wiki/Microcode) system. The microcode supports conditional jumping and can access things like register and memory bus. It's a "small CPU within CPU".
 
 ### Within-website sub-sandboxing
