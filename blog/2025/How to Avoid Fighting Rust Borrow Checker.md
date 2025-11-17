@@ -980,6 +980,8 @@ Solutions:
 
  These deferred memory reclamation techniques (hazard pointer, epoch-based) are also used in lock-free data structures. If one thread can read an element while another thread removes and frees the same element in parallel, it will not be memory-safe (this issue doesn't exist in GC languages).
 
+Note that using `Arc` doesn't mean every access uses atomic operation. Only cloning and dropping it requires atomic operation. `.borrow()` it doesn't involve atomic operation. Passing `&Arc<T>` instead of `Arc<T>` can improve performance.
+
 ## Reference counting vs tracing GC
 
 There are some ambiguity of the word "GC". Some say reference counting is GC, some say it isn't.
@@ -1345,12 +1347,17 @@ Examples:
   - Rust's generics, traits and standard library design learned from mistakes in C++.
   - ...
 - "Memory safety can only be achieved by Rust." No. Most GC languages are memory-safe. [^gc_memory_safety] Memory safety of existing C/C++ applications can be achieved via [Fil-C](https://github.com/pizlonator/fil-c).
+- "Manual memory management is always faster than tracing GC." No. Moving GCs [^go_gc] can handle fragmentation [^fragmentation] and have better throughput in allocation and deallocation. In manual memory management, freeing a large structure may cause big lag. Using `Arc` involves atomic operations which may become bottleneck in multithreading. 
 
 [^about_heisenbug]: The Heisenbugs may only trigger in relase build, not in debug build, not when sanitizers are on, not when logging is on, not when debugger is on. Because optimization, sanitizer, debugger and logging can change timing and memory layout, which can make memory safety or thread safety bug no longer trigger. Debugging a Heisenbug in large codebase may take weeks even months. Note that not all memory/thread safety bugs are Heisenbugs. Many are still easy to trigger.
 
 [^about_arm_memory_tagging]: [ARM memory tagging](https://developer.arm.com/documentation/108035/0100/Introduction-to-the-Memory-Tagging-Extension) is a low-cost way of checking memory safety issue at runtime, similar to address sanitizer, useful for debugging and security alerting. But ARM memory tagging is not a sound security defense, because it has 1/16 chance of missing memory-unsafe access. If the process auto-restarts after crashing, attacker can retry the attack, eventually hitting the 1/16 probability. [Fil-C](https://github.com/pizlonator/fil-c) can catch memory safety issue in 100% chance, so it's a better security defense.
 
 [^gc_memory_safety]: Golang is not memory-safe under data race.
+
+[^go_gc]: Golang GC is non-moving. Most other mainstream GC (e.g. Hotsopt JVM, CLR) are moving.
+
+[^fragmentation]: Fragmentation can be alleviated by better allocation strategy (similar size-class allocate together). Fragmentation is also alleviated by virtual memory (memory fragmentation in page level don't waste physical memory). Also, RAM is cheaper now, so fragmentation cost is more affordable. Fragmentation is not a big issue now. Moving GC can theoretically improve cache locality by avoiding fragmentation, but manual memory management can improve cache locality by reusing just-freed memory region.
 
 ## Other
 

@@ -1378,10 +1378,6 @@ With confirmation bias, more information lead to higher confidence, but not bett
 - Believing in **false consensus**, the consensus that only exists on an internet community.
 - Overestimating the proportion of bad news, as **bad news travels fast** in social media, thus facilitating cynicism.
 
-> ... the primary function of conversation is not to communicate facts but to reinforce social ties.
-> 
-> [Link](https://x.com/G_S_Bhogal/status/1898749727417512281)
-
 The 80/20 rule also applies to social media: 80% of the voice come from 20% of users. The dominant narrative on internet may not represent most people's views.
 
 What's more, social media may make people:

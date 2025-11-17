@@ -17,10 +17,10 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Horizontal and vertical are different in CSS:
   - Normally `width: auto` tries fill available space in parent. But `height: auto` normally tries to just expand to fit content.
   - For inline elements, inline-block elements and float elements, `width: auto` does not try to expand.
-  - `margin: 0 auto` centers horizontally. But `margin: auto 0` normally become `margin: 0 0` which does not center vertically. In a flexbox with `flex-direction: column`, `margin: auto 0` can center vertically.
+  - `margin: 0 auto` centers horizontally. But `margin: auto 0` normally become `margin: 0 0` which does not center vertically. But in a flexbox with `flex-direction: column`, `margin: auto 0` can center vertically.
   - Percentage `margin-top` `margin-bottom` `padding-top` `padding-bottom` use parent width as base value, not height.
   - Margin collapse happens vertically but not horizontally.
-  - The above flips when layout axis flips (e.g. `writing-mode: vertical-rl`)
+  - Some of the above behave differently when layout axis flips (e.g. `writing-mode: vertical-rl`). [See also](https://drafts.csswg.org/css-writing-modes-4/#abstract-box)
 - Block formatting context (BFC):
   - `display: flow-root` creates a BFC.
     (There are other ways to create BFC, like `overflow: hidden`, `overflow: auto`, `overflow: scroll`, `display:table`, but with side effects)
@@ -53,8 +53,10 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - If the parent's `display` is `flex` or `grid`, then the child's `float` has no effect
 - If the parent's width/height is not pre-determined, then percent width/height (e.g. `width: 50%`, `height: 100%`) doesn't work. [^percent_width_height]
 - About transition:
-  - CSS transition doesn't work between `height: 0` and `height: atuo`. One solution is to use JS to set CSS height to `scrollHeight`. Another solution is to put it in grid and transition from `grid-template-rows: 0fr` to `1fr`. Another solution is to use `calc-size()`, [see also](https://developer.chrome.com/docs/css-ui/animate-to-height-auto) [^calc_size].
-  - Margin collapse can make animation not smooth when starting and ending.
+  - CSS transition doesn't work between `height: 0` and `height: atuo`. Solutions:
+    - Use JS to set CSS height to `scrollHeight`. 
+    - Put it in grid and transition from `grid-template-rows: 0fr` to `1fr`. 
+    - Use `calc-size()`, [see also](https://developer.chrome.com/docs/css-ui/animate-to-height-auto) [^calc_size].
   - When adding a new element, initial transition animation won't work by default. But if you read its layout-related value (e.g. `offsetHeight`) between changing animated attribute, it will trigger a reflow and make initial transition work.
 - In JS, reading size-related value (e.g. `offsetHeight`) cause browser to re-compute layout which may hurt performance.
 - `display: inline` ignores `width` `height` and `margin-top` `margin-bottom`
@@ -65,19 +67,15 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - Any space or line break between two `display: inline-block` elements will be rendered as spacing. This doesn't happen in flexbox or grid.
 - `text-align` aligns text and inline things, but doesn't align block elements (e.g. normal divs).
 - By default `width` and `height` doesn't include padding and border. `width: 100%` with `padding: 10px` can still overflow the parent. `box-sizing: border-box` make the width/height include border and padding.
-- About inheritance:
-  - Things like `color` `line-height` inherits deeply by default.
-  - Things like `<input>` and `<button>` by default don't inherit CSS attributes like `color` and `font-family`.
-  - CSS variables inherit deeply. Changing a CSS variable may cause browser to re-compute styles of all elements inside it, which may cost performance.
 - About override:
   - CSS import order matters. The latter-imported ones can override the earlier ones.
   - JS-set CSS can override attributes in `.css` files (when both are not `!important`). `!important` attribute in `.css` files can override non `!important` JS-set CSS.
+  - Browser puts some user agent styles to `<input>` and `<button>` (e.g. `color`, `font-family`). So `<input>` and `<button>` will not inherit some styles from parent.
   - See [CSS cascade](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_cascade/Cascade) for complete details.
 - About hiding:
   - Parent `visibility: hidden` doesn't enforce all childs to be hidden. If child has `visibility: visible` it will still be shown. This don't apply to `opacity: 0` or `display: none`.
   - An element with `opacity: 0` can still be interacted (e.g. click button). This doesn't apply to `display: none` or `visibility: hidden`.
   - `display: none` removes element from layout. This doesn't apply to `visibility: hidden` or `opacity: 0`.
-  - `opacity: 0` creates stacking context but `visibility: hidden` doesn't.
 - [Cumulative Layout Shift](https://web.dev/articles/cls). It's recommended to specify `width` and `height` attribute in `<img>` to avoid layout shift due to image loading delay.
 - File download request is not shown in Chrome dev tool, because it only shows networking in current tab, but file download is treated as in another tab. To inspect file download request, use `chrome://net-export/`.
 - JS-in-HTML may interfere with HTML parsing. For example `<script>console.log('</script>')</script>` makes browser treat the first `</script>` as ending tag. [See also](https://sirre.al/2025/08/06/safe-json-in-script-tags-how-not-to-break-a-site/)

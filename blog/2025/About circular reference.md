@@ -408,14 +408,11 @@ It will output
 
 Note that reverse state monad is still in a normal Haskell program. It cannot magically "make time flow backwards". It also cannot magically solve equations to compute old state based on new state. If new state relies on old state it will just deadloop.
 
-### Memory leak caused by lazy evaluation
+### Limitations of Haskell lazy evaluation
 
-For example, if you have a large list of integers and you compute sum of it. If the sum value is not used, the list will be kept in memory for future evaluation. The list can only be freed after the sum is evaluated. If the sum result will never be evaluated, it memory leaks (it can trigger without circular reference).
+Haskell lazy evaluation is tied to evaluation order. For `a || b`, it always try to evaluate `a` even if `b` is known to be true.
 
-Lazy evaluation sometimes saves memory and sometimes wastes memory:
-
-- When the input of computation is smaller than output of computation (e.g. generate a big list), lazy evaluation can temporarily save memory.
-- When the input of computation is larger than output of computation (e.g. sum a big list), lazy evaluation can waste or leak memory.
+Lazy evaluation may also cause memory leak. For example, if you have a large list of integers and you compute sum of it. If the sum value is not used, the list will be kept in memory for future evaluation. The list can only be freed after the sum is evaluated. If the sum result will never be evaluated, it memory leaks (it can trigger without circular reference).
 
 ## Halting problem
 
