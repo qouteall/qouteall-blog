@@ -14,15 +14,15 @@ Deadlock can be understood via **resource allocation graph**.
 
 It has two kinds of nodes:
 
-- Threads (processes, goroutines, async tasks).
-- Locks.
+- The unit of execution: Threads, processes, goroutines, async tasks, etc.
+- Synchronization primitives: Locks, channels, etc.
 
 Its edges represent **dependency**. A point to B means A depends on B. Specifically it has two kinds of edges:
 
-- A lock points to a thread. It denotes that the thread already holds the lock. The lock's release depends on the thread's progress. (Assignment edge)
-- A thread points to a lock. It denotes that the thread try to hold the lock. The thread's progress depends on acquiring the lock. It can be generalized to other synchronization elements like channels. (Request edge)
+- Assignment edge. A lock points to a thread. It denotes that the thread already holds the lock. The lock's release depends on the thread's progress.
+- Request edge. A thread points to a lock. It denotes that the thread try to hold the lock. The thread's progress depends on acquiring the lock.
 
-When that graph forms a cycle, deadlock occurs.
+Deadlock occurs when that graph forms a **cycle**.
 
 A simple two-lock deadlock in Golang:
 
@@ -44,7 +44,7 @@ func goroutineB(lock2 *sync.Mutex, lock1 *sync.Mutex) {
 }
 ```
 
-Resource allocation graph:
+Resource allocation graph in deadlock state:
 
 ![](circular/deadlock_classical.drawio.png)
 
@@ -230,23 +230,11 @@ The common priority inversion problem involves 3 threads, with low/medium/high p
 
 Reference counting leaks memory if there exists a cycle of strong references.
 
-Reference counting is based on the assumption that: if there is no reference to one object, that object can be freed. It's based on local reference to object, not global reachability.
+- **Reference counting works locally**. It only tracks how many references point to one object. It only triggers when references to one object adds/removes.
+- **Tracing GC works globally**. It knows all GC roots and scans the whole object graph.
+- **Cycle is a global property**. If the cycle can be arbitrarily large, no local-only mechanism can detect a cycle. However if you limit the cycle size (e.g. at most 3-node cycle) then it's a local property and can be detected by local mechanisms.
 
-However, when there is a cycle, each object in cycle will be kept referced. But if that cycle is isolated, inaccessible to the program (not referencable from global variables and local variables), the object should be collected, but locally it's still referenced.
-
-Tracing GC can collect them because tracing GC scans the whole object graph globally.
-
-**But reference counting works locally**. If the cycle has length limit, such as limiting to 2-object cycles, checking cycle locally can still work. But in real applications the reference cycle can be arbitrarily large, so checking cycle locally won't reliably work. **Tracing GC works globally** so it can handle arbitrarily-large cycles.
-
-The common solution is to use weak reference counting to cut cycle.
-
-## Ordering breaks cycle
-
-If there is a globally uniform ordering of acquiring locks, then deadlock won't occur. 
-
-For example, if there are two locks `lock1` and `lock2`, if I ensure that `lock1`'s locking order if before `lock2`, then there won't be the case that a thread acquired `lock2` and is acquiring `lock1`. Then in resource allocation graph, the path from `lock2` to `lock1` cannot be formed. So deadlock can be prevented.
-
-Rust favors tree-shaped ownership. There is a hierarchy between owner and owned values. This creates an order that prevents cycle. If you use sharing (reference counting) but don't use mutability, then creating new value can only use already-created value, so circular reference is still not possible. Only by combination of sharing and mutability can circular reference be created.
+The common solution is to use weak reference counting to cut cycle, as developers know the reference structure and know where cycles can form.
 
 ## Observer circular dependency
 
@@ -303,13 +291,21 @@ function SomeComponent() {
 
 React effect triggers in next iteration of event loop so it won't directly dead recursion, but it will keep doing re-render which costs performance.
 
+## Ordering breaks cycle
+
+If there is a globally uniform ordering of acquiring locks, then deadlock won't occur. 
+
+For example, if there are two locks `lock1` and `lock2`, if I ensure that `lock1`'s locking order if before `lock2`, then there won't be the case that a thread acquired `lock2` and is acquiring `lock1`. Then in resource allocation graph, the path from `lock2` to `lock1` cannot be formed. So deadlock can be prevented.
+
+Rust favors tree-shaped ownership. There is a hierarchy between owner and owned values. This creates an order that prevents cycle. If you use sharing (reference counting) but don't use mutability, then creating new value can only use already-created value, so circular reference is still not possible. Only by combination of sharing and mutability can circular reference be created.
+
+Without mutability and lazy evaluation, reference cycle cannot be created. Because new values can only contain the existing values when creating it (order of evaluation prevents cycle). But with lazy evaluation, the not-yet-created values can be used so circular reference is possible.
+
 ## Lazy evaluation circular reference
 
 ### Infinite container
 
 Haskell is a pure functional language where there is no mutable state. Haskell also has lazy evaluation.
-
-Without mutable state and lazy evaluation, reference cycle cannot be created. Because new values can only contain the existing values when creating it (order of evaluation prevents cycle). But with lazy evaluation, the not-yet-created values can be used so circular reference is possible.
 
 Haskell has lazy evaluation so it allows circular reference. Example:
 
@@ -410,9 +406,9 @@ Note that reverse state monad is still in a normal Haskell program. It cannot ma
 
 ### Limitations of Haskell lazy evaluation
 
-Haskell lazy evaluation is tied to evaluation order. For `a || b`, it always try to evaluate `a` even if `b` is known to be true.
+Haskell lazy evaluation is tied to evaluation order. For `a || b`, it always try to evaluate `a` even if `b` is known to be true. Haskell lazy evaluation cannot be used for solving equations. 
 
-Lazy evaluation may also cause memory leak. For example, if you have a large list of integers and you compute sum of it. If the sum value is not used, the list will be kept in memory for future evaluation. The list can only be freed after the sum is evaluated. If the sum result will never be evaluated, it memory leaks (it can trigger without circular reference).
+Lazy evaluation may also cause memory leak. For example, if you have a large list of integers and you compute sum of it. If the sum value is never used, the list will be still kept in memory for possible evaluation.
 
 ## Halting problem
 
@@ -490,6 +486,14 @@ Sometimes a microservice does some initialization on launch. If that initializat
 
 The best solution is to clearly avoid circular dependency. If that circular dependency initialization is really necessary, make initialization run asynchronously (don't block service starting) and use retrying.
 
+## Memory leak even when using GC
+
+In C/C++ if developer forgets freeing then it memory leaks. This is mostly solved by tracing GC. 
+
+However it's still possible to leak memory in GC. You can keep adding things into a container and never remove. GC won't collect that because that data is still referenced.
+
+Rice's theorem tells that it's impossible to reliably tell whether program will use a piece of data (unless in trivial case). If an object is unreachable from GC roots, then it obviously won't be used. But if some data won't be used, it may be still referenced. This is the case that tracing GC cannot handle.
+
 ## Circular reference in math
 
 ### Circular proof
@@ -511,7 +515,7 @@ $$
 Y = \lambda f . (\lambda x . f (x \ x)) (\lambda x . f (x \ x))
 $$
 
-[^string_substitution]: Lambda calculus substitutes in a way that avoids naming conflict. It's not simple string substitution.
+[^string_substitution]: Lambda calculus substitutes in a way that avoids naming conflict. It's not simple string substitution. Rigourously speaking, lambda calculus works on abstract lambda terms, not text. Text is just a way of representing them.
 
 Written in TypeScript:
 

@@ -982,6 +982,8 @@ Solutions:
 
 Note that using `Arc` doesn't mean every access uses atomic operation. Only cloning and dropping it requires atomic operation. `.borrow()` it doesn't involve atomic operation. Passing `&Arc<T>` instead of `Arc<T>` can improve performance.
 
+This does NOT mean we should avoid using `Arc`. Only optimize after knowing the bottleneck.
+
 ## Reference counting vs tracing GC
 
 There are some ambiguity of the word "GC". Some say reference counting is GC, some say it isn't.
