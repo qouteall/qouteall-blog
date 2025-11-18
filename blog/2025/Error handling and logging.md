@@ -23,7 +23,7 @@ unlisted: true
   - Retry (with backoff, circuit breaker).
   - Higher availability to user.
 
-The bad design: fail-silent. 
+The bad design: fail-silent. It hide problems. It may cause data corruption unnoticed.
 
 ## OOP exception
 
@@ -32,6 +32,13 @@ TODO
 ## Rust error handling
 
 TODO
+
+In Rust the error is often type-erased for convenience. The common solution is [anyhow](https://docs.rs/anyhow/latest/anyhow/). Without type erasure, you need to write a lot of error types and do conversions between.
+
+Type erasuring error requires putting error into heap allocation. Different error types have different sizes. Turning them into heap allocation makes the memory layout be uniform (all become fat pointer). If error don't occur in hot path then it won't have visible performance cost.
+
+Rust is not good at handling out-of-memory error.
+
 ## Golang error handling
 
 TODO
@@ -42,6 +49,9 @@ TODO
 ## Just error code
 
 TODO
+
+C and Zig commonly use error code.
+
 ## Logging
 
 TODO

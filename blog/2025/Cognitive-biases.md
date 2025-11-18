@@ -460,7 +460,7 @@ There is no perfect strategy that will guarantee success. Overemphasizing short-
 
 The quicker the feedback gives, the quicker people can learn (this also applies to reinforcement learning AI). But if the feedback delays 6 months, it's hard to learn from it, and people may do **wrong hasty generalization using random coincidents**, before the real feedback comes, thus get fooled by randomness.
 
-When feedback comes early, its correlation with previous behavior is high, having high **signal-to-noise ratio**. If feedback comes late, many previous behaviors may correlate with it, so feedback has low signal-to-noise ratio.
+When feedback comes early, its correlation with previous behavior is high, having high **signal-to-noise ratio**. If feedback comes late, many previous behaviors may correlate with it, so feedback has low signal-to-noise ratio, and there are less feedback signals.
 
 Reducing cost by removing safety measures usually does not cause any visible accidents in the short run, but the benefit of reduced costs are immediately visible. When the accident actually happened because of the removed safety measures, it may be years later.
 
@@ -548,7 +548,7 @@ Internet has indeed changed the world. But the dot com bubble burst. It's just t
 
 > The absolute hardest thing to convince people of is that the optimal amount of fraud in a system is not zero. Obviously it would be ideal if there were no fraud, but at some point the cost of catching it outweighs the benefits.
 > 
-> [Link](https://x.com/asymmetricinfo/status/1923112215193714760)
+> \- Megan McArdle, [Link](https://x.com/asymmetricinfo/status/1923112215193714760)
 
 **Strawman argument** is a technique in debating: refute a changed version of opponent's idea. It often utilizes binary thinking: **refute a more extreme version of opponent's idea** (also: slippery slope fallacy). Examples:
 
