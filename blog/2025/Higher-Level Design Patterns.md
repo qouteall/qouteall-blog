@@ -304,31 +304,29 @@ Examples of the generalized view concept:
 
 [^character_to_string]: Specifically, bytes are viewed as code units, code units are viewed as code points, code points are viewed as strings. Code points can also be viewed as grapheme clusters.
 
-More generally:
+**Information is bits+context**. The view is the context. It maps between binary data and information. **Type contains viewing from binary data to information**.
 
-- The mapping between binary data and information is view. **Information is bits+context**. The context is how the bits are mapped between information. **Type contains viewing from binary data to information**.
-- **Abstraction involves viewing different things as the same things**.
+Abstraction involves **viewing different things as the same thing**.
 
 A view can be backed by computation, or by storage, or by a combination of computation and storage. This connects with computation-data duality.
+
+A view can preserve information or simplify information (discard some information). [^isomorphism_homomorphism]
+
+[^isomorphism_homomorphism]: If the conversion doesn't lose any information, it can be called **isomorphic**. If the conversion loses some information, but don't change the result of some operation, it can be called **homomorphic**.
 
 ### Dynamically-typed languages also have "types"
 
 Dynamically-typed languages also have "types". The "type" here is **the mapping between in-memory data and information**.
 
-Even in dynamic languages, the **data still has "shape" at runtime**. **The program only works with specific "shapes" of data**. 
+Even in dynamic languages, the **data still has "shape" at runtime**. **The program only works with specific "shape" of data**. 
 
-For example, in Python, if a function accepts an array of string, but you pass it one string, then it treats each character as a string, which is wrong.
+The "shape" here means 1. what data are valid 2. the mapping between information and the data. Also, the data is constrainted by what the language allows.
 
-Mainstream languages often have relatively simpler and less expressive type systems. Some "shape" of data are complex and cannot be easily expressed in mainstram languages' type system (without type erasure).
+For example, in Python, if a function accepts an array of string, but you pass it one string, then it treats each character as a string, which is wrong. In JS, passing an object to wrong places often get "\[object Object\]".
 
-Dynamic languages' benefits:
+Dynamic typing allows typing fewer and gives more freedom and avoids the shackle of an unexpressive type system. However dynamic typing doesn't auto convert data "shape" for you [^dynamic_language_conversion]. Developer still need to consider the "shape" when programming in dynamic languages. Dynamic languages are embracing data annotations now (TS, Python type annotation).
 
-- Avoid the shackle of an unexpressive type system.
-- Avoid syntax inconvenience related to type erasure (type erasure in typed languages require inconvenient things like type conversion).
-- Can quickly iterate by changing one part of program, before the changes work with other parts of program (in static typed languages, you need to resolve all compile errors in the code that you don't use now). This is double-edged sword. The broken code that was not tested tend to get missed.
-- Save some time typing types and type definitions.
-
-But the statically-typed languages and IDEs are improving. The more expressive type systems reduce friction of typing. Types can help catching mistakes, help understanding code and help IDE functionalities. Type inference and IDE completion saves time of typing types. That's why mainstream dynamic languages (JS, Python) are embracing type annotations.
+[^dynamic_language_conversion]: Dynamic languages may sometimes do auto data conversion, but it's limited to simple conversions. It cannot do advanced conversion that "understands intention". Often the auto conversion is "dumb" and not what developer want (e.g. JS auto convert object to "\[object Object\]").
 
 ### Generalized reference
 
@@ -401,6 +399,7 @@ About transitive rule: if X and Y both follow invariant, then result of "merging
 - ......
 
 [^monoid]: If it has an identity and has associativity, then it's a **monoid**. 
+
 
 ### Invariant in application
 
