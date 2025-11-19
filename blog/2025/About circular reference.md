@@ -72,6 +72,10 @@ func (o *SomeObject) DoSomeOtherThing() {
 
 ![](circular/deadlock_one.drawio.png)
 
+These code examples are simplified. In real-world applications, the deadlock is often not obvious. The locking operations may be hidden by abstractions.
+
+Also, in production environments, deadlocks often rarely trigger (the frequently-triggered ones are caught during testing). Sometimes retrying can solve deadlock, but it may cause livelock explained below.
+
 ## Lock-free deadlock
 
 Deadlock can also happen when there is no explicit lock. I call it **lock-free deadlock**. (The naming is similar to "[serverless servers](https://vercel.com/blog/serverless-servers-node-js-with-in-function-concurrency)", "constant variables" and "[unnamed namespaces](https://en.cppreference.com/w/cpp/language/namespace.html#Unnamed_namespaces)".)
@@ -164,7 +168,9 @@ Select also has traps in async Rust, but in a different mechanism (cancellation)
 
 ## Livelock
 
-Sometimes, replace locking with try-locking and add retrying mechanism can solve some deadlock. But it may also introduce livelock: keep retrying without successfully acquiring lock.
+Sometimes, replace locking with try-locking and add retrying mechanism can solve some deadlocks. Deadlock are often dependent on exact timing, so it may not deadlock in next retry. 
+
+But sometimes retrying cannot avoid deadlock. Then it will become livelock: keep retrying without successfully acquiring lock.
 
 ```go
 func WithRetry[T any](attempts int, operation func() (T, error)) (T, error) {
@@ -235,6 +241,20 @@ Reference counting leaks memory if there exists a cycle of strong references.
 - **Cycle is a global property**. If the cycle can be arbitrarily large, no local-only mechanism can detect a cycle. However if you limit the cycle size (e.g. at most 3-node cycle) then it's a local property and can be detected by local mechanisms.
 
 The common solution is to use weak reference counting to cut cycle, as developers know the reference structure and know where cycles can form.
+
+### Memory leak even when using GC
+
+Tracing GC can handle the unreachable cycle. However it's still possible to leak memory in GC, by keeping the unused data reachable from GC roots. Examples:
+
+- Keep adding things into a container and never remove.
+- Registers a global callback. Forget to unregister callback when it's no longer useful. All data captured by callback will not be collected.
+- There is a large tree structure. Every child in tree references parent (circular reference). When you only need one node of tree, the whole tree is kept reachable.
+
+These memory leaks are often related to containers and non-obvious references. Some memory leaks are related to lambda capture, as it creates non-obvious reference.
+
+With GC it's still possible to leak non-heap resources, like file handles, TCP connections, memory manged by native code, threads/goroutines, etc.
+
+Rice's theorem tells that it's impossible to reliably tell whether program will use a piece of data (unless in trivial case). If an object is unreachable from GC roots, then it obviously won't be used. But if some data won't be used, it may be still referenced. This is the case that tracing GC cannot handle.
 
 ## Observer circular dependency
 
@@ -486,19 +506,20 @@ Sometimes a microservice does some initialization on launch. If that initializat
 
 The best solution is to clearly avoid circular dependency. If that circular dependency initialization is really necessary, make initialization run asynchronously (don't block service starting) and use retrying.
 
-## Memory leak even when using GC
-
-In C/C++ if developer forgets freeing then it memory leaks. This is mostly solved by tracing GC. 
-
-However it's still possible to leak memory in GC. You can keep adding things into a container and never remove. GC won't collect that because that data is still referenced.
-
-Rice's theorem tells that it's impossible to reliably tell whether program will use a piece of data (unless in trivial case). If an object is unreachable from GC roots, then it obviously won't be used. But if some data won't be used, it may be still referenced. This is the case that tracing GC cannot handle.
-
 ## Circular reference in math
 
 ### Circular proof
 
 [Circular proof](https://en.wikipedia.org/wiki/Circular_reasoning): if A then B, if B then A. Circular proof is wrong. It can prove neither A nor B.
+
+A simple example: I want to prove $S = 1 + 2 + 4 + 8 + 16 + ...$ is a finite value. Then:
+
+ 1. $S = 1 + 2 (1 + 2 + 4 + ...)$
+ 2. $S = 1 + 2S$
+ 3. $S-2S=1$
+ 4. $S=-1$, $S$ is a finite value
+
+The jump from 1 to 2 assumes $S$ is a finite value. It's using the result of deduction so it's circular proof.
 
 ### Russel's paradox
 
@@ -508,14 +529,12 @@ Let R be the set of all sets that are not members of themselves. R contains R 
 
 ### Y combinator
 
-Raw lambda calculus only does "string substitution" [^string_substitution] and doesn't allow a function to directly reference itself. But it can be workarounded by Y combinator:
+Raw lambda calculus doesn't allow directly self-reference. It doesn't allow directly writing "recursive function". But it can be workarounded by Y combinator:
 
 
 $$
 Y = \lambda f . (\lambda x . f (x \ x)) (\lambda x . f (x \ x))
 $$
-
-[^string_substitution]: Lambda calculus substitutes in a way that avoids naming conflict. It's not simple string substitution. Rigourously speaking, lambda calculus works on abstract lambda terms, not text. Text is just a way of representing them.
 
 Written in TypeScript:
 
@@ -541,6 +560,7 @@ console.log(factorial(4));
 
 Note that the type of Y combinator requires self-reference, although Y combinator's expression itself don't require self-reference.
 
+Y combinator gives the fixed point of a lambda term. $Y f = f \ (Y f)$.
 
 ### Gödel's incomplete theorem
 

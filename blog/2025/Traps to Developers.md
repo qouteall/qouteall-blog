@@ -326,6 +326,8 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - K8s `livenessProbe` used with debugger. Breakpoint debugger usually block the whole application, making it unable to respond health check request, so it can be killed by K8s `livenessProbe`.
 - Don't use `:latest` image. They can change at any time.
 - In Redis, getting keys by a prefix `KEYS prefix-*` is a slow operation that will traverse all keys. Use Redis hash map for that use case.
+- Kafka's message size limit is 1MB by default.
+- In Kafka, if a consumer processes too slow (no acknowledge within `max.poll.interval.ms`, default 5 min), the consumer will be treated as failed, then a rebalance occurs. That timeout is per-batch. If a batch contains too many messages it may reach that timeout, can decrease by `max.poll.records`.
 
 ### React
 

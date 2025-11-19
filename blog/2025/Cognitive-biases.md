@@ -213,7 +213,7 @@ People tend to fight the things that oppose their desire. Examples:
 - When the love is objected by parents, the love strengthens.
 - Restricting buying something make people buy it more eagerly. Same for restricting selling.
 
-Providing external reward may reduce internal motivation (overjustification effect).
+Providing external reward may reduce internal motivation (overjustification effect). Training child to clean room by giving money reward may backfire.
 
 Being helped doesn't always elicit gratitude. The one being helped may feel being inferior in social status, thus helping may cause hatred, especially when reciprocal helping cannot be done.
 
@@ -622,7 +622,7 @@ Even so, writing the idea down may be still not enough, because **natural langua
 
 Having ideas is easy and cheap. If you search the internet carefully you are likely to find ideas similar to yours. The important is to validate and execute the idea.
 
-Analogies are useful for explaining things to others, but not good at accurately thinking. The analog is similar to the real thing but is different in nuanced ways.
+Analogies are useful for explaining things to others, but not good for accurately thinking. It makes one ignore the nuance difference between the analog and the real thing.
 
 ### Predictive processing
 
@@ -830,7 +830,11 @@ Making a story more reasonable allows better information compression, thus makin
 
 People often assume that others know what they know. So people often **omit important details** when explaining things, causing problems in communication and teaching.
 
-When learning a new domain of knowledge, it's beneficial to ask "stupid questions". These "stupid questions" are actually fundamental questions, but seen as stupid by experts, who already forgot the thinking when not knowing the fundamentals, under curse of knowledge. One benefit of AI is that you can ask "stupid questions" without being humiliated (but be wary of hallucinations).
+When learning a new domain of knowledge, it's beneficial to ask "stupid questions". These "stupid questions" are actually fundamental questions, not stupid at all. But these fundamental questions are seen as stupid by experts, under curse of knowledge. 
+
+One benefit of AI is that you can ask "stupid questions" without being humiliated by experts (but be wary of hallucinations). 
+
+If a "stupid question" doesn't have a sound answer, then maybe something important is overlooked by everyone.
 
 **Simplicity is often confused by familiarity**. If one is very familiar with a complex thing, they tend to think that thing is simple.
 
@@ -937,7 +941,7 @@ The same effect happens in other forms:
 > 
 > As with a crumbling sand pile, it would be foolish to attribute the collapse of a fragile bridge to the last truck that crossed it, and even more foolish to try to predict in advance which truck might bring it down. ...
 > 
-> Obama’s mistake illustrates the illusion of local causal chains\-that is, confusing catalysts for causes and assuming that one can know which catalyst will produce which effect.
+> Obama’s mistake illustrates the illusion of local causal chains \- that is, confusing catalysts for causes and assuming that one can know which catalyst will produce which effect.
 > 
 > \-  The Black Swan of Cairo; How Suppressing Volatility Makes the World Less Predictable and More Dangerous
 
@@ -1057,6 +1061,8 @@ In software product design, the default options in software plays a big role in 
 - If a software functionality require manually enabling it, much fewer users will know and use that functionality.
 - Just 1 second longer page load time may reduce user conversion by 30%. [Source](https://www.cloudflare.com/learning/performance/more/website-performance-conversion-rates/)
 - Each setup procedure will frustrate a portion of users, making them give up installing the software. [Why I’m Done Making Desktop Applications](https://www.kalzumeus.com/2009/09/05/desktop-aps-versus-web-apps/). A good product requires minimal configuration to start working.
+
+Sometimes, if doing something is 10% more difficult, then 50% fewer people will do it, vice versa. It's non-linear.
 
 [Ask for no, don’t ask for yes](https://www.mooreds.com/wordpress/archives/3518). When asking others to approve something they didn't plan, they tend to not approve or delay approving, as the approver bears responsibility. Just proceed by default and ask for no holds more control and bears more responsibility. 
 

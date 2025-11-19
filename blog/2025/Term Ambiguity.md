@@ -24,7 +24,7 @@ A lot of debate happen because same word has different meanings to different peo
 - API. Restful APIs / functions / other forms.
 - Synchronization. In some places, specifying memory ordering and accessing Java volatile are called "synchronization". In some places these are not called synchronization.
 - In English, synchronzied can mean "happen at the same time", which contradicts the fact that caller waiting for the service working. Asynchronous can mean "not happening at the same time", which contradicts the fact that the caller calling an asynchronous interface can run with the called service at the same time.
-- "Low-level". Normally "low-level" usually means entry-level, junior-level. But in programming "low-level" can mean very deep things involving things like OS and hardware internal, which require high-level skill. We can use "deep-level", "infrastructure-level" instead of "low-level" to avoid misunderstanding.
+- "Low-level". Normally "low-level" usually means entry-level, junior-level. But in programming "low-level" can mean very deep things involving things like OS and hardware internal, which require high-level skill.
 - Predict. Normally "predict" means figuring out what happens in the future. But in AI, "predict" means estimating something, not necessarily the things in future. For example: "predict masked token", "predict noise".
 - KB, MB, GB. 
   - Most commonly, 1 KB = 1024 bytes, 1MB = 1024 KB, 1GB = 1024 MB. (Formally they should be written as KiB, MiB, GiB.)
