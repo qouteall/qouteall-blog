@@ -262,7 +262,7 @@ Examples of non-falsifiable explanations:
 
 **Belief bias**: if the conclusion confirms people's existing belief, then people tend to believe it, regardless of the reasoning correctness, vice versa.
 
-**Bullshit asymmetry principle**: Refuting misinformation is much harder than producing misinformation. To produce a misinformation and make it spread, you just need to make it follow people's existing beliefs. But to refute a misinformation, you need to find sound evidences. This is also **reversal of the burden of proof**.
+**Bullshit asymmetry principle**: Refuting misinformation is much harder than producing misinformation. **With AI, it's easy to generate seemingly-plausible bullshit**. To check or refute a misinformation, you need to find sound evidences. This is also **reversal of the burden of proof**.
 
 The good side of stubborness is to maintain diversity of ideas in a society, helping innovation and overcoming of unknown risks.
 
@@ -1156,7 +1156,9 @@ Following the crowd is also a great way of **reducing responsibility**: when eve
 > 
 > \- John Maynard Keynes
 
-When the whole group makes a mistake, the sin of the whole group tend to transfer to a [**scapegoat**](https://en.wikipedia.org/wiki/Scapegoating), then punish the scapegoat.
+When the whole group makes a mistake, the sin of the whole group tend to transfer to a [**scapegoat**](https://en.wikipedia.org/wiki/Scapegoating), then punish the scapegoat. [^scapegoat]
+
+[^scapegoat]: Consultant services (e.g. McKinsey) provide "scapegoat service" that allows company management to shield from responsibility.
 
 When many people follow each other, they will confirm each other, creating self-reinforcing feedback loop. This is also a reason of the momentum in markets. People tend to be overconfident when people around them are confident, and vice versa.
 

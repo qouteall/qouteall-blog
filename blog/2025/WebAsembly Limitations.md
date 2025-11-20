@@ -319,7 +319,7 @@ Generally, WebAssembly runs slower than native applications compiled from the sa
 - The previously mentioned linear memory bounds check.
 - JIT (just-in-time compilation) cost. Native C/C++/Rust applications can be AOTed (ahead-of-time compiled). V8 firstly use a quick simple compiler to compile Wasm into machine code quickly to improve startup speed (but the generated machine code runs slower), then use a slower high-optimization compiler to generated optimized machine code for few hot Wasm code. [See also](https://v8.dev/docs/wasm-compilation-pipeline). That optimization is profile-guided (target on few hot code, use statistical result to guide optimization). Both profiling, optimization and code-switching costs performance.
 - Multi-threading cannot use release-acquire memory ordering, which can improve performance of some atomic oprations. [See also](https://webassembly.github.io/threads/core/exec/relaxed.html)
-- Multi-threading require launching web worker, which is a slow operation.
+- Multi-threading require launching web worker, which is a slow operation. (can be alleviated by web worker pooling)
 - Limited access to hardware functionality, such as some special SIMD instructions. But Wasm already support many common SIMD instructions.
 - Cannot access some OS functionalities, such as `mmap`.
 - Wasm forces structural control flow. See also: [WebAssembly Troubles part 2: Why Do We Need the Relooper Algorithm, Again?](http://troubles.md/why-do-we-need-the-relooper-algorithm-again/). This may reduce the performance of compiling to Wasm and JIT optimization.

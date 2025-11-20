@@ -152,6 +152,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Time may "go backward" due to NTP sync.
 - It's recommended to configure the server's time zone as UTC. Different nodes having different time zones will cause trouble in distributed system. After changing system time zone, the database may need to be reconfigured or restarted.
 - There are two clocks: hardware clock and system clock. The hardware clock itself doesn't care about time zone. Linux treats it as UTC by default. Windows treats it as local time by default.
+- Verification of certificate uses time. If time is inaccurate, SSL/TLS may not work.
 
 
 ### Java
@@ -206,7 +207,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - Integer overflow/underflow is undefined behavior. Note that unsigned integer can underflow below 0.
   - Aliasing.
     - Aliasing means multiple pointers point to the same place in memory.
-    - Strict aliasing rule: If there are two pointers with type `A*` and `B*`, then compiler assumes two pointer can never equal. If they equal, it's undefined behavior. Except in two cases: 1. `A` and `B` has subtyping relation 2. converting pointer to byte pointer (`char*`, `unsigned char*` or `std::byte*`) (the reverse does not apply).
+    - Strict aliasing rule: If there are two pointers with type `A*` and `B*`, then compiler assumes two pointer can never equal. If they equal, using it to access memory undefined behavior. Except in two cases: 1. `A` and `B` has subtyping relation 2. converting pointer to byte pointer (`char*`, `unsigned char*` or `std::byte*`) (the reverse does not apply). [^pointer_type_hold_integer]
     - Pointer provenance. Two pointers from two different provenances are treated as never alias. If their address equals, it's undefined behavior. [See also](https://www.ralfj.de/blog/2020/12/14/provenance.html)
   - In C++ `const` can mean both read-only and truly-immutable. Converting `const T*` to `T*` only works if pointed object is actually mutable. If pointed object is immutable (declared as `const T`) then it's undefined behavior.
   - If `bool`'s binary value is neither 0 or 1, using it is undefined behavior. If an enum's binary value is not valid, using it is undefined behavior.
@@ -219,7 +220,9 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Global variable initialization runs before `main`. [Static Initialization Order Fiasco](https://en.cppreference.com/w/cpp/language/siof.html).
 - Start from C++ 11, destructors, copy constructors and move constructors have `noexcept` by default. If exception is thrown out of a `noexcept` function, whole process will crash.
 
-[^start_object_lifetime]: Directly treating existing binary data as struct is undefined behavior because the object lifetime hasn't started. But using `memcpy` to initialize a struct is fine.
+[^start_object_lifetime]: Directly treating existing binary data as struct is undefined behavior, because the object lifetime hasn't started, so it's treated as using uninitialized memory, even when it's aligned. One solution is to put the struct on stack then use `memcpy` to initialize it.
+
+[^pointer_type_hold_integer]: You can use pointer type to hold integer. It's fine as long as you don't use it to access memory.
 
 ### Python
 
@@ -336,7 +339,6 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - The closure functions that are created in component rendering are also always-new. Use `useCallback` to fix.
   - If an always-new thing is put into `useEffect` dependency array, the effect will run on every component function call. See also [Cloudflare indicent 2025 Sept-12](https://blog.cloudflare.com/deep-dive-into-cloudflares-sept-12-dashboard-and-api-outage/). 
   - Don't forget to include dependencies in the dependency array. And the dependencies also need to be memoed.
-- When using effect to manage `setInterval` `removeInterval`, if the effect has dependency value, it will remove timer and re-add timer when dependency changes, which can mess up the timing.
 - About state:
   - State objects themselves should be immutable. Don't directly set fields of state objects. Always recreate whole object.
   - Don't set state directly in component rendering. State can only be set in callbacks.
@@ -346,11 +348,12 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Closure trap. Closure can capture a state. If the state changes, the closure still captures the old state. 
   - One solution is to make closure not capture state and access state within `useReducer`. 
   - Another solution is to put mutable thing in `useRef` (note that changing value inside ref don't trigger component re-rendering, you need to change state or prop to trigger re-rendering)
-- `useEffect` firstly runs in next iteration of event loop, after browser renders the web page. Doing initialization in `useEffect` is not early enough and may cause visual flicker. Use `useLayoutEffect` for early initialization (it will run in the same iteration of event loop). When using ref to get DOM object, it won't be accessible during first component rendering, but can be accessed in `useLayoutEffect`.
+  - Another solution is to add state to effect dependency array. But if the effect manages `setInterval`, doing this will mess up timing.
+- `useEffect` firstly runs in next iteration of event loop, after browser renders the web page. Doing initialization in `useEffect` is not early enough and may cause visual flicker. Use `useLayoutEffect` for early initialization.
 
 [^js_string_primitive]: In JS, `string` is primitive type, not object type. In JS you don't need to worry about two strings with same content but different reference like in Java. However the `String` in JS is object and use refernce equality.
 
-[^react_rendering]: The React component rendering means calling the component function. It doesn't draw contents on web page. It's different to browser rendering, which draws contents on web page.
+[^react_rendering]: Word "render" has ambiguity. The React component rendering means calling the component function. It doesn't draw contents on web page. It's different to browser rendering, which draws contents on web page.
 
 
 ### Git
@@ -387,8 +390,9 @@ A summarization of some traps to developers. There traps are unintuitive things 
   Generally, if your frontend and backend are in the same website (same domain name and port) then there is no CORS issue.
 - [Reverse path filtering](https://en.wikipedia.org/wiki/Reverse-path_forwarding). When routing is asymmetric, packet from A to B use different interface than packets from B to A, then reverse path filtering rejects valid packets.
 - In old versions of Linux, if `tcp_tw_recycle` is enabled, it aggressively recycles connection based on TCP timestamp. NAT and load balancer can make TCP timestamp not monotonic, so that feature can drop normal connections.
-- SSL needs to connect to CA to work. It may cause problems in private network unconnected to internet.
+- When using SSL/TLS in private network unconnected to internet, the client may try to check certificate revocation status from internet, which will timeout.
 - Certificate expire. Examples: [Starlink incident](https://www.appviewx.com/blogs/expired-certificate-causes-high-profile-service-outage-proving-certificate-automation-is-critical/), [LinkedIn incident](https://www.appviewx.com/blogs/linkedin-certificate-expiry-fiasco-third-times-a-charm/), [Microsoft Teams incident](https://www.exoprise.com/2020/02/04/teams-outage-expired-certificate/)
+
 
 [^keepalive]: Note that [HTTP/1.0 Keep-Alive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Keep-Alive) is different to TCP keepalive.
 
@@ -421,6 +425,9 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - It's recommended to configure billing limit when using cloud services, especially serverless. See also: [ServerlessHorrors](https://serverlesshorrors.com/)
 - Big endian and little endian in binary file and net packet.
 - Blurring in image may not be enough to remove text information. See [Depix](https://github.com/spipm/Depixelization_poc). Opaque covering can fully remove text information.
+- The current working directory can be changed by system call (`chdir`). It's not recommended to do that.
+- Windows limits command size to 32767 characters. [See also](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)[^windows_command_length_workaround]
 
+[^windows_command_length_workaround]: When such issue occurs, shortening the path of your project may workaround it. For example, put your project in `C:\p` instead of `C:\users\xxx\Documents\yyy\zzz` (the project path may appear many times in arguments so it can make a difference). The proper solution is to pass data to CLI program via file, not arguments, but that requires special support of the CLI program.
 
 

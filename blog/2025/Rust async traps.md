@@ -20,11 +20,7 @@ In Tokio, use `tokio::sync::Mutex` for mutex and `tokio::time::sleep` and sleep.
 
 That issue is not limited to only locking and sleep. It also involves networking and all kinds of IOs.
 
-**Fixing it require all libraries you use to support async**. If a library you use do some **implicit** networking that don't use `async`, then that issue still applies. 
-
-That issue is **contagious**. you need to check not only your dependencies but also your dependencies' dependencies, and so on. IOs in Rust are implicit and don't appear in function signature [^explicit_io].
-
-[^explicit_io]: Related: New Zig IO interface require function signature to explicitly tell whether it has IO. It makes IO more obvious. [See also](https://andrewkelley.me/post/zig-new-async-io-text-version.html)
+Tokio supports [`spawn_blocking`](https://dtantsur.github.io/rust-openstack/tokio/task/fn.spawn_blocking.html) which make it run in new scheduler thread. The code that does non-async blocking should be ran in `spawn_blocking`.
 
 ## Cancellation safety
 
