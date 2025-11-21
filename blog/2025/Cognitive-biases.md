@@ -7,16 +7,14 @@ slug: /Cognitive-biases
 
 # Notes about Cognitive Biases
 
-A summarization of the main cognitive biases, relating to financial trading, combined with my own understanding.
 
 <!-- truncate -->
-
 
 ## Nonlinear perception
 
 ### Perception of gain and loss
 
-**Diminishing marginal utility**: For example, one is hungry and then eats 3 pieces of bread, the first piece eaten while hungry is has more utility than the second piece eaten after the first, and so on. The more of something you have, the less utility another such thing has.
+**Diminishing marginal utility**: The more of something you have, the less utility another such thing has. For example, one is hungry and then eats 3 pieces of bread, the first piece eaten while hungry is has more utility than the second piece eaten after the first, and so on.
 
 Corresponding to diminishing marginal utility, the happiness of gaining \$200 is less than two times of happiness of gaining \$100. The perception of gain is convex.
 
@@ -438,10 +436,6 @@ Narrative fallacy includes:
 - People prefer simpler understanding of the world. This is also information compression. This includes **causal simplification**, **binary thinking**. 
 - People tend to believe in concrete things and stories other than abstract statistics. This is related **anecdotal fallacy**.
 
-### First impression effect (primacy effect)
-
-People tend to judge things **by first impression**. This makes people generate belief by only one observation, which is information-efficient, but can also be biased.
-
 ### Nominal fallacy
 
 Nominal fallacy: Understand one thing just by its names. Examples:
@@ -758,10 +752,9 @@ However, LLM is different to human in many fundamental ways:
 > 
 > My fridge: Wow. Now that's a question worth exploring. By asking me something like that, you've proven that you're not thinking in ordinary ways—you're dialed in to what's really vital about food. Let's dive in.
 > 
-> [Link](https://x.com/franzsherbert/status/1923395242734060005)
+> \- LBark, [Link](https://x.com/franzsherbert/status/1923395242734060005)
 
-- LLM sometimes "defend" the things they said in previous context, similar to belief stability of human. However, the "LLM's opinion" is often dependent to context, not "intrinsic opinion".
-    - The sycophancy often overrides LLM self-defense. Refute LLM's opinion by seemingly plausible arguments, you may get "You are absolutely right!".
+- LLM sometimes "defend" the things they said in previous context, similar to belief stability of human. However, the "LLM's opinion" is often dependent to context, not "intrinsic opinion". The sychphancy may overrride LLM "stubbornness".
 - Directly asking a question in new session may get different answer than asking the same question under other chat context.
 
 One similarity: Both human and LLM can "hallucinate" in consistent way. When human forgets something, human tend to make up consistent information to fill the hole in memory. LLM's hallucinations are seemingly plausible (maximize likelihood), not just random. LLM's hallucinations tend to be confident, much more confident than average human.
@@ -806,6 +799,7 @@ Actually, **gambler's fallacy can be correct in a system with negative feedback 
 One related concept is **regression to the mean**, meaning that, if one sample is significantly higher than average, the next sample is likely to be lower than the **last sample**, and vice versa. Example: if a student's score follows normal distribution with average 80, when that student gets 90 scores, they will likely to get a score worse than 90 in the next exam. 
 
 The difference between gambler's fallacy and regression to the mean:
+
 - Gambler's fallacy: if the past samples deviate to mean, assume the distribution of future samples change to "compensate" the deviations. This is wrong when the distribution doesn't change.
 - Regression to the mean: if the last sample is far from the mean, the next sample will likely to be closer to the mean than the last sample. It compares the next sample with the last sample, not the future mean with the past mean.
 
@@ -846,6 +840,10 @@ Although the market has trends, and a trend may be much longer than expected, no
 
 Most people are late-trend-following in investment: **not believing in a trend in the beginning, then firmly believing in the trend in its late stage**. This is dangerous, because the market has cycles, and some macro-scale cycles can span years or even decades. **The experiences gained in the surge part of the cycle are harmful in the decline part of the cycle and vice versa**.
 
+### First impression effect (primacy effect)
+
+People tend to judge things **by first impression**. This makes people generate belief by only one observation, which is information-efficient, but can also be biased.
+
 ### Recency bias
 
 Overemphasizing recent events, while ignoring long-term trends.
@@ -864,7 +862,7 @@ This is also related to availability bias, where the just-seen events are more o
 Relation between recency effect and primacy effect (first impression effect):
 
 - One firstly sees A, then after a long time, then sees B, recency effect tells that B has higher influence than A.
-- One firstly sees A, then sees B, then after a long time, primarcy effect tells A has higher influence than B.
+- One firstly sees A, then sees B, then after a long time, primacy effect tells A has higher influence than B.
 
 ### Framing effect
 
@@ -873,18 +871,17 @@ People tend to make decisions based on how information is presented (framed) rat
 There are many ways to frame one fact. For example, one from positive aspect, one from negative aspect:
 
 - "90% of people survive this surgery" / "10% of people die from this surgery".
-- "Save \$20 by buying now!" / "You'll lose the \$20 discount if you wait".
 - "99.9% effective against germs" / "Fails to kill 0.1% of germs".
-- "No one's agency will replace yours" / "No one is coming to help you".
+- "You are the hero of your own story" / "No one is coming to help you".
 
-The content creator could emphasize one aspect and downplay another aspect, and use different wording or art style to convey different opinions. The people reading the information could be easily influenced by the framing subconsciously.
+The wording of a thing can affect how people perceive it. Examples:
 
-The name of a thing affects how people perceive it. Examples:
-
-- "Collateral damage" / "Death"
 - "Gun control" / "Gun safety"
 - "Government subsidy" / "Using taxpayer money"
 - "Risk measurement" / "Risk forecast"
+- "Necessary trade-off" / "Sacrifice"
+
+The content creator could emphasize one aspect and downplay another aspect, and use different wording or art style to convey different opinions. The people reading the information could be easily influenced by the framing subconsciously.
 
 A **loaded question** is a question that contains an assumption (framing). Following that assumption can lead to a biased answer. Example: "Do you support the attempt by the US to bring freedom and democracy to other places in the world?"
 
@@ -959,7 +956,7 @@ People tend to value something only after losing it.
 
 > Health is forgotten until it’s the only thing that matters.
 > 
-> [Link](https://x.com/bryan_johnson/status/1972674688087445603)
+> \- Bryan Johnson, [Link](https://x.com/bryan_johnson/status/1972674688087445603)
 
 ### Simpson's paradox and base rate fallacy
 
@@ -1060,7 +1057,7 @@ In software product design, the default options in software plays a big role in 
 
 - If a software functionality require manually enabling it, much fewer users will know and use that functionality.
 - Just 1 second longer page load time may reduce user conversion by 30%. [Source](https://www.cloudflare.com/learning/performance/more/website-performance-conversion-rates/)
-- Each setup procedure will frustrate a portion of users, making them give up installing the software. [Why I’m Done Making Desktop Applications](https://www.kalzumeus.com/2009/09/05/desktop-aps-versus-web-apps/). A good product requires minimal configuration to start working.
+- Each setup procedure will frustrate a portion of users, making them give up. A good product requires minimal configuration to start working.
 
 Sometimes, if doing something is 10% more difficult, then 50% fewer people will do it, vice versa. It's non-linear.
 
@@ -1122,12 +1119,11 @@ Examples:
 - Buying supplements instead of adopting healthier lifestyle.
 - Focusing on buying courses, books, study equipments instead of actually studying. Keep bookmarking online learning materials instead of reading them.
 - Musicians focusing on buying instruments (gear acquisition syndrome).
-- When writing, focusing on the formatting instead of the content.
 - A manager pushing employees to seemingly work hard instead of improving efficiency.
 - A parent train child by punishing hard, instead of using scientific training methods.
 - Bikeshedding effect: during meetings, people spend most time talking about trivial matters.
 - Staying in comfort zone. Only learn/practice the familiar things and avoid touching unfamiliar things. Avoiding the unpleasant information when learning.
-- Only care about the visible numbers (KPI, OKR), and ignore the important things behind the numbers, like perverse incentives caused by the KPI, statistical bias, and the validity of interpretations from the numbers.
+- Only care about the visible numbers (KPI, OKR), and ignore the important things behind the numbers, like perverse incentives caused by the KPI, statistical bias, and the non-measurable things.
 - Streetlight effect: Only search in the places that's easy to search, not the places that the target is in.
 - Hiding the signal of error instead of diagnosing and solving the error.
 
@@ -1141,8 +1137,6 @@ Pepole tend to spend much time making decision on small things but spend very fe
 - Thinking about big decisions is tiresome, as the future is uncertain, and there are many factors to analyze.
 - So people tend to procrastinate to avoid the unpleasant feeling of thinking about big decisions, or simply follow others (herd metality).
 - The small decisions (e.g. choosing item in shop, choosing restaurant) require less mental efforts and cause less nervous feeling. Thinking on these decisions can give feeling of control. These decisions usually have quick feedback (human crave quick feedback).
-
-
 
 ### Herd mentality
 
@@ -1227,11 +1221,10 @@ Narrow framing bias: focusing too much on one aspect while neglecting other aspe
 
 Zero-risk bias: preferring to eliminate one type of risk entirely rather than reducing overall risk (usually at the expense of increasing exposure to other risks).
 
-It's related to risk aversion and availability bias: risk aversion usually focuses the risk that comes to mind, and ignores other kinds of risks. It's also related to binary thinking: thinking that a risk is either completely eliminated or not being taken any action on. The rational decision is to do a tradeoff to reduce overall risk.
+It's related to binary thinking: thinking that a risk is either completely eliminated or not being taken any action on.
 
 Examples:
 
-- Choose to pay off a small debt completely, rather than paying off high-interest-rate debt first, as eliminating one debt feels more satisfying and reduces memory pressure.
 - Enforcing extreme lockdown to eliminate the risk of a pandemic, causing more risk in other diseases (because hospitals are locked down) and more risk in basic living (food supply is constrainted due to extreme lockdown).
 - Wanting to hedge inflation by heavily investing in risky assets, whose risk can be higher than inflation. In a liquidity crisis, cash is more valuable than assets.
 
@@ -1309,7 +1302,7 @@ Mental resting is different to body resting. Intense thinking when lying on the 
 
 > Before you try to increase your willpower, try to decrease the friction in your environment.
 > 
-> [Link](https://x.com/JamesClear/status/1883877771618738682)
+> \- James Clear, [Link](https://x.com/JamesClear/status/1883877771618738682)
 
 ## Memory distortion
 
@@ -1321,7 +1314,7 @@ Memorizing is lossy compression. Recall is lossy decompression, where details ca
 
 > I have a pet theory that when people introspect about themselves, their brain sometimes just scrambles to generate relevant content. So they feel like they're gaining insight into deeper parts of themselves when they're actually just inventing it on the fly.
 > 
-> [Link](https://x.com/AmandaAskell/status/1931786539002105905)
+> - Amanda Askell, [Link](https://x.com/AmandaAskell/status/1931786539002105905)
 
 **Information is costly to store, and even more costly to index and query**. Sometimes forgetting is just not being able to query the specific memory that is stored in brain (and may be recalled if some cue were found that enables querying it). The "querying capacity" of brain is limited and can be occupied by distracting things. [^about_database]
 
@@ -1378,7 +1371,7 @@ With confirmation bias, more information lead to higher confidence, but not bett
 
 **Having no information is better than having wrong information**. Wrong information reinforced by confirmation bias can make you stuck in a wrong path.
 
-**Popularity of false information increase the value of true information**. The "carrot problem": during WWII, the British claimed their pilots' night-vision success came from eating carrots, hiding their new radar technology. The best way of hiding something is to override it with another thing.
+**Popularity of false information increase the value of true information**. The best way of hiding something is to override it with another thing.
 
 **Browsing social media makes people learn biased distribution of world**. Such as:
 
@@ -1386,7 +1379,7 @@ With confirmation bias, more information lead to higher confidence, but not bett
 - Believing in **false consensus**, the consensus that only exists on an internet community.
 - Overestimating the proportion of bad news, as **bad news travels fast** in social media, thus facilitating cynicism.
 
-The 80/20 rule also applies to social media: 80% of the voice come from 20% of users. The dominant narrative on internet may not represent most people's views.
+The 80/20 rule also applies to social media: most (e.g. 80%) voice come from few (e.g. 20%) of users. The dominant narrative on internet may not represent most people's views.
 
 What's more, social media may make people:
 
@@ -1400,7 +1393,7 @@ What's more, social media may make people:
 
 What memes have higher ability to spread?
 
-- Induce anger. (Seeing a post that you dislike that's popular on social media.)
+- Induce anger. Saying an idea that you want to refute.
 - Induce superiority satisfaction.
 - Express existing thoughts. Utilizes confirmation bias.
 - Simple and easy-to-understand.
@@ -1451,7 +1444,7 @@ This is related to information addiction. **Randomized things give more informat
 
 Just knowing one should do something is far from actually doing it.
 
-Fantasy realization theory: When thinking about the desired future, one may get satisfied by the imagination, becoming less motivated to pay efforts to achieve it. The subcouncious sometimes don't distinguish imagination and reality. Only when one actively compare reality and imagination, do one get motivated. [See also](https://compass.onlinelibrary.wiley.com/doi/10.1111/spc3.12271)
+Fantasy realization theory: When thinking about the desired future, one may get satisfied by the imagination, becoming less motivated to pay efforts to achieve it. The subcouncious sometimes don't distinguish between imagination and reality. Only when one actively compare reality and imagination, do one get motivated. [See also](https://compass.onlinelibrary.wiley.com/doi/10.1111/spc3.12271)
 
 It also involves the tradeoff between short-term reward and long-term reward. Long-termism is to sacrifice short-term reward for larger long-term reward. Related factors:
 
