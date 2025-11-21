@@ -5,7 +5,7 @@ tags:
 slug: /Cognitive-biases
 ---
 
-# Notes about Cognitive Biases
+# Cognitive Biases
 
 
 <!-- truncate -->
