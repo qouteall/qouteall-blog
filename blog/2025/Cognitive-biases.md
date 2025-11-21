@@ -510,6 +510,8 @@ People often dream of a "silver bullet" that simply magically works:
 
 [^about_ai_race]: It's a common view that AI capability can improve exponetially. And when AI is smart enough to keep improving itself, its intelligence will skyrocket into superintelligence, far above human. But it's highly possible that future AI will still be bottlenecked by 1. energy production 2. compute power 3. getting verification from real world. These 3 factors limits how fast AI can take effect and self-improve. Especially the third limitation (Go game and Lean math proving can be verified purely in computer, but other kinds of science, like chemistry and biology, are too complex to be fully simulated in computer, thus getting verification from real world is a very important bottleneck. Also, some AI researchers say they are bottlecked by training speed rather than ideas. Deep learning has chaotic characteristics, so how fast AI experiments can be done is an important bottleneck in AI self-improve.). There will probably be no dramatic "suddenly winning AI race forever".
 
+[Thought-terminating cliché](https://en.wikipedia.org/wiki/Thought-terminating_clich%C3%A9): A short simple phrase to explain one thing, and give reason to stop caring about one thing. They usually over-simplify things but look reasonable. Examples: "it always depends", "you're overthinking it", "it's just what it is.", "both sides are the same".
+
 ### Binary thinking (false dichotomy)
 
 We tend to simplify things. One way of simplification is to ignore the grey-zone and complex nuance, reducing things into two simple extremes.
@@ -1369,6 +1371,12 @@ Information bias: Seeking out more information even when more information is no 
 
 With confirmation bias, more information lead to higher confidence, but not better accuracy. This is contrary to statistics, where more samples lead to more accurate result (but still suffer from systematic sampling bias).
 
+> Read a lot? No. Be very, very selective & vigilant.
+> 
+> Promiscuous reading destroys one's noise-signal detector, causes atrophy of critical thinking skills.
+> 
+> \- N. N. Taleb
+
 **Having no information is better than having wrong information**. Wrong information reinforced by confirmation bias can make you stuck in a wrong path.
 
 **Popularity of false information increase the value of true information**. The best way of hiding something is to override it with another thing.
@@ -1411,6 +1419,14 @@ Memes facilitate being spreaded. On the contrary, **antimemes** resist being spr
 - The information that conflicts with existing beliefs are also antimemes. (confirmation bias)
 
 Antimemes are easier to be forgotten than other information. Some antimemes are worth reviewing periodically.
+
+> perfect marriages are a Category 1 antimeme
+> 
+> they cannot be depicted in media or fiction, those who have them keep them secret, and those who see them become confused and soon forget
+> 
+> I'm not sure — could never be sure — they exist
+> 
+> \- yashkaf [Link](https://x.com/myhandle/status/1990114978377220124)
 
 ### Longing for attention
 
