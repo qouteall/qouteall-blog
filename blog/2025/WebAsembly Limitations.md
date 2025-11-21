@@ -98,7 +98,7 @@ The Wasm linear memory can be seen as a large array of bytes. Address in linear 
 
 Instruction `memory.grow` can grow a linear memory. However, there is no way to shrink the linear memory.
 
-Wasm applications (that doesn't use Wasm GC) implements their own allocator in Wasm code. The memory regions freed in that allocator can be used in future allocation. However, the **freed memory resources cannot be returned back to OS**. 
+Wasm applications (that doesn't use Wasm GC) implements their own allocator in Wasm code. The memory regions freed in that allocator can be reused by the Wasm application. However, the **freed memory resources cannot be returned back to OS**. 
 
 Mobile platforms (iOS, Android, etc.) often kill background process that has large memory usage, so not returning memory to OS is an important issue. See also: [Wasm needs a better memory management story](https://github.com/WebAssembly/design/issues/1397). 
 
@@ -106,7 +106,6 @@ Due to this limitation, Wasm applications **consume as much physical memory as i
 
 Possible workarounds for reducing peak memory usage: 
 
-- Store large data in JS `ArrayBuffer`. If an `ArrayBuffer` is GC-ed, its physical memory can be returned to OS.
 - Only fetch a small chunk of data from server at a time. Avoid fetching all data then process in batch. Do stream processing.
 - Use [Origin-private file system](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API/Origin_private_file_system) to hold large data, and only load a small chunk into linear memory at once.
 
@@ -140,7 +139,7 @@ The benefit of using Wasm built-in GC:
 
 The important memory management features that Wasm GC doesn't support:
 
-- **GC values cannot be shared across threads**. This is the most important limitation.
+- **GC values cannot be shared across threads**. This is the most important limitation. (Addressed in [shared-everything threads proposal](https://github.com/WebAssembly/shared-everything-threads))
 - No weak reference.
 - No finalizer (run callback when an object is collected by GC).
 - No interior pointer. (Golang has interior pointer)
