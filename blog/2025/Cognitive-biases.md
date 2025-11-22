@@ -510,8 +510,6 @@ People often dream of a "silver bullet" that simply magically works:
 
 [^about_ai_race]: It's a common view that AI capability can improve exponetially. And when AI is smart enough to keep improving itself, its intelligence will skyrocket into superintelligence, far above human. But it's highly possible that future AI will still be bottlenecked by 1. energy production 2. compute power 3. getting verification from real world. These 3 factors limits how fast AI can take effect and self-improve. Especially the third limitation (Go game and Lean math proving can be verified purely in computer, but other kinds of science, like chemistry and biology, are too complex to be fully simulated in computer, thus getting verification from real world is a very important bottleneck. Also, some AI researchers say they are bottlecked by training speed rather than ideas. Deep learning has chaotic characteristics, so how fast AI experiments can be done is an important bottleneck in AI self-improve.). There will probably be no dramatic "suddenly winning AI race forever".
 
-[Thought-terminating cliché](https://en.wikipedia.org/wiki/Thought-terminating_clich%C3%A9): A short simple phrase to explain one thing, and give reason to stop caring about one thing. They usually over-simplify things but look reasonable. Examples: "it always depends", "you're overthinking it", "it's just what it is.", "both sides are the same".
-
 ### Binary thinking (false dichotomy)
 
 We tend to simplify things. One way of simplification is to ignore the grey-zone and complex nuance, reducing things into two simple extremes.
