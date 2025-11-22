@@ -427,6 +427,8 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Blurring in image may not be enough to remove text information. See [Depix](https://github.com/spipm/Depixelization_poc). Opaque covering can fully remove text information.
 - The current working directory can be changed by system call (`chdir`). It's not recommended to do that.
 - Windows limits command size to 32767 characters. [See also](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)[^windows_command_length_workaround]
+- In Windows the default stack size of main thread is 1MB, but in Linux and macOS it's 8MB. It's easier to stack overflow in Windows.
+- In Windoes environment variable names are case-insensitive. It's recommanded to make env var name all upper case.
 
 [^windows_command_length_workaround]: When such issue occurs, shortening the path of your project may workaround it. For example, put your project in `C:\p` instead of `C:\users\xxx\Documents\yyy\zzz` (the project path may appear many times in arguments so it can make a difference). The proper solution is to pass data to CLI program via file, not arguments, but that requires special support of the CLI program.
 
