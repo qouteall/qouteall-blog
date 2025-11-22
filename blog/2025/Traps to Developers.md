@@ -89,7 +89,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Two concepts: code point, grapheme cluster:
   - Grapheme cluster is the "unit of character" in GUI. An emoji is a grapheme cluster, but it may consist of many code points.
   - In UTF-8, a code point can be 1, 2, 3 or 4 bytes. The byte number does not necessarily represent code point number.
-  - In UTF-16, each UTF-16 code unit is 2 bytes. A code point can be 1 code unit (2 bytes) or 2 code units (4 bytes, surrogate pair).
+  - In UTF-16, each UTF-16 code unit is 2 bytes. A code point can be 1 code unit (2 bytes) or 2 code units (4 bytes, surrogate pair [^scalar_value]).
   - JSON string `\u` escape uses surrogate pair. `"\uD83D\uDE00"` in JSON has only one code point.
 - Strings in different languages:
   - Rust use UTF-8 for in-memory string. `s.len()` gives byte count. Rust does not allow directly indexing on a `str` (but allows subslicing). `s.chars().count()` gives code point count. Rust is strict in UTF-8 code point validity.
@@ -99,7 +99,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - In C++, `std::string` has no constraint of encoding and is similar to byte array. String length and indexing is based on bytes.
   - No language mentioned above do string length and indexing based on grapheme cluster.
   - In SQL, `varchar(100)` limits 100 code points (not byte).
-- Some text files have byte order mark (BOM) at the beginning. For example, FE FF means file is in big-endian UTF-16. EF BB BF means UTF-8. It's mainly used in Windows. Some non-Windows software does not handle BOM.
+- Some Windows text files have byte order mark (BOM) at the beginning. It's U+FEFF zero-width no-break space (it's normally invisible). FE FF means file is in big-endian UTF-16. EF BB BF means UTF-8. Some non-Windows software doesn't handle BOM.
 - When converting binary data to string, often the invalid places are replaced by � (U+FFFD)
 - [Confusable characters](https://github.com/unicode-org/icu/blob/main/icu4c/source/data/unidata/confusables.txt).
 - Normalization. For example é can be U+00E9 (one code point) or U+0065 U+0301 (two code points). String comparision works on binary data and don't consider normalization.
@@ -107,8 +107,9 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Line break. Windows often use CRLF `\r\n` for line break. Linux and macOS often use LF `\n` for line break.
 - Locale ([elaborated below](#locale)).
 
+[^scalar_value]: The U+XXXX notation (XXXX is a hex value) represents a code point. The code points that are not surrogates pairs are called scalar value.
 
-[^string_encoding]: Strictly speaking, they use [WTF-16](https://simonsapin.github.io/wtf-8/#ill-formed-utf-16) encoding, which is similar to UTF-16 but allows invalid surrogate pairs. Also, Java has an optimization that use Latin-1 encoding (1 byte per code point) for in-memory string if possible. But the API of `String` still works on WTF-16 code units. Similar things may happen in C# and JS. 
+[^string_encoding]: Strictly speaking, they use [WTF-16](https://simonsapin.github.io/wtf-8/#ill-formed-utf-16) encoding, which is similar to UTF-16 but allows invalid surrogate pairs. That encoding is for API and is not necessarily the actual in-memory representation. For example, Java has an optimization that use Latin-1 encoding (1 byte per code point) for in-memory string if possible.
 
 ### Floating point
 
@@ -426,10 +427,9 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Big endian and little endian in binary file and net packet.
 - Blurring in image may not be enough to remove text information. See [Depix](https://github.com/spipm/Depixelization_poc). Opaque covering can fully remove text information.
 - The current working directory can be changed by system call (`chdir`). It's not recommended to do that.
-- Windows limits command size to 32767 characters. [See also](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)[^windows_command_length_workaround]
+- Windows limits command size to 32767 code units. [See also](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)[^windows_command_length_workaround]
 - In Windows the default stack size of main thread is 1MB, but in Linux and macOS it's 8MB. It's easier to stack overflow in Windows.
 - In Windoes environment variable names are case-insensitive. It's recommanded to make env var name all upper case.
 
-[^windows_command_length_workaround]: When such issue occurs, shortening the path of your project may workaround it. For example, put your project in `C:\p` instead of `C:\users\xxx\Documents\yyy\zzz` (the project path may appear many times in arguments so it can make a difference). The proper solution is to pass data to CLI program via file, not arguments, but that requires special support of the CLI program.
 
 
