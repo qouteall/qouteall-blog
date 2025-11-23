@@ -754,7 +754,7 @@ However, LLM is different to human in many fundamental ways:
 > 
 > \- LBark, [Link](https://x.com/franzsherbert/status/1923395242734060005)
 
-- LLM sometimes "defend" the things they said in previous context, similar to belief stability of human. However, the "LLM's opinion" is often dependent to context, not "intrinsic opinion". The sychphancy may overrride LLM "stubbornness".
+- LLM sometimes "defend" the things they said in previous context, similar to belief stability of human. However, the "LLM's opinion" is often dependent to context, not "intrinsic opinion". The sycophancy may overrride LLM "stubbornness".
 - Directly asking a question in new session may get different answer than asking the same question under other chat context.
 
 One similarity: Both human and LLM can "hallucinate" in consistent way. When human forgets something, human tend to make up consistent information to fill the hole in memory. LLM's hallucinations are seemingly plausible (maximize likelihood), not just random. LLM's hallucinations tend to be confident, much more confident than average human.

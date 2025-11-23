@@ -52,17 +52,15 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - [`backdrop-filter: blur` does not consider ambient things](https://www.joshwcomeau.com/css/backdrop-filter/#the-issue).
 - If the parent's `display` is `flex` or `grid`, then the child's `float` has no effect
 - If the parent's width/height is not pre-determined, then percent width/height (e.g. `width: 50%`, `height: 100%`) doesn't work. [^percent_width_height]
-- About transition:
-  - CSS transition doesn't work between `height: 0` and `height: atuo`. Solutions:
-    - Use JS to set CSS height to `scrollHeight`. 
-    - Put it in grid and transition from `grid-template-rows: 0fr` to `1fr`. 
-    - Use `calc-size()`, [see also](https://developer.chrome.com/docs/css-ui/animate-to-height-auto) [^calc_size].
-  - When adding a new element, initial transition animation won't work by default. But if you read its layout-related value (e.g. `offsetHeight`) between changing animated attribute, it will trigger a reflow and make initial transition work.
-- In JS, reading size-related value (e.g. `offsetHeight`) cause browser to re-compute layout which may hurt performance.
+- CSS transition doesn't work between `height: 0` and `height: auto`. Solutions:
+  - Use JS to set CSS height to `scrollHeight`. 
+  - Put it in grid and transition from `grid-template-rows: 0fr` to `1fr`. 
+  - Use `calc-size()`, [see also](https://developer.chrome.com/docs/css-ui/animate-to-height-auto) [^calc_size].
+- In JS, reading size-related value (e.g. `offsetHeight`) cause browser to re-compute layout which may hurt performance. It can also affect transition animation [^reflow_animation].
 - `display: inline` ignores `width` `height` and `margin-top` `margin-bottom`
 - Whitespace collapse. [See also](https://blog.dwac.dev/posts/html-whitespace/)
   - By default, newlines in html are treated as spaces. Multiple spaces together collapse into one. 
-  - `<pre>` can avoid collapsing whitespace but has weird behavior in the beginning and end of content.
+  - `<pre>` collapses some spaces in the beginning and end of content, but not within content.
   - Often the spaces in the beginning and end of content are ignored, but this doesn't happen in `<a>`.
   - Any space or line break between two `display: inline-block` elements will be rendered as spacing. This doesn't happen in flexbox or grid.
 - `text-align` aligns text and inline things, but doesn't align block elements (e.g. normal divs).
@@ -83,6 +81,8 @@ A summarization of some traps to developers. There traps are unintuitive things 
 [^percent_width_height]: It avoids circular dependency where parent height is determined by content height, but content height is determined by parent height.)
 
 [^calc_size]: In Nov 2025 `calc-size` is not yet supported by FireFox and Safari. Also, there is another solution for transition `height: auto`: transitioning `max-height` from 0 to a large value, but I don't recommend it as it will mess up animation timing.
+
+[^reflow_animation]: When adding a new element, initial transition animation won't work by default. But if you read its layout-related value (e.g. `offsetHeight`) between changing animated attribute, it will trigger a reflow and make initial transition work.
 
 ### Unicode and text
 
@@ -183,7 +183,6 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - Interface `nil` weird behavior. Interface pointer is a fat pointer containing type info and data pointer. If the data pointer is null but type info is not null, then it will not equal `nil`.
   - Receiving from or sending to `nil` channel blocks forever.
 - Before Go 1.22, [loop variable capture issue](https://go.dev/blog/loopvar-preview).
-- Dead wait. [Understanding Real-World Concurrency Bugs in Go](https://songlh.github.io/paper/go-study.pdf)
 - Different kinds of timeout. [The complete guide to Go net/http timeouts](https://blog.cloudflare.com/the-complete-guide-to-golang-net-http-timeouts/)
 - Having interior pointer to an object keeps the whole object alive. This may cause memory leak.
 - Forgetting to cancel context cause `<-ctx.Done()` to deadlock (except for context created by `context.WithValue`).
@@ -219,11 +218,11 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - Alignment can cause padding in struct that waste space.
   - Some SIMD instructions only work with aligned data. For example, AVX instructions usually require 32-byte alignment.
 - Global variable initialization runs before `main`. [Static Initialization Order Fiasco](https://en.cppreference.com/w/cpp/language/siof.html).
-- Start from C++ 11, destructors, copy constructors and move constructors have `noexcept` by default. If exception is thrown out of a `noexcept` function, whole process will crash.
+- Start from C++ 11, destructors have `noexcept` by default. If exception is thrown out of a `noexcept` function, whole process will crash.
 
 [^start_object_lifetime]: Directly treating existing binary data as struct is undefined behavior, because the object lifetime hasn't started, so it's treated as using uninitialized memory, even when it's aligned. One solution is to put the struct on stack then use `memcpy` to initialize it.
 
-[^pointer_type_hold_integer]: You can use pointer type to hold integer. It's fine as long as you don't use it to access memory.
+[^pointer_type_hold_integer]: Using pointer type to hold integer is fine as long as you don't use it to access memory. But it's not recommended to do that.
 
 ### Python
 
@@ -277,6 +276,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - In C#, accesses to the same `volatile` value have release-aquire ordering (CLR will use memory barrier instruction if needed)
   - `volatile` can avoid wrong optimization related to reordering and merging memory reads/writes. (Compiler can merge reads by caching a value in register. Compiler can merge writes by only writing to register and delaying writing to memory. A read after a write can be optimized out.).
 - Time-of-check to time-of-use ([TOCTOU](https://en.wikipedia.org/wiki/Time-of-check_to_time-of-use)).
+- [Deadloc and channel-related deadlock](./About%20circular%20reference).
 - In SQL database, for special uniqueness constraints that doesn't fit simple unique index (e.g. unique across two tables, conditional unique, unique within time range), if the constraint is enforced by application, then:
   - In MySQL (InnoDB), if in repeatable read level, application checks using `select ... for update` then insert, and the unique-checked column has index, then it works due to gap lock. (Note that gap lock may cause deadlock under high concurrency, ensure deadlock detection is on and use retrying).
   - In PostgreSQL, if in repeatable read level, application checks using `select ... for update` then insert, it's not sufficient to enforce constraint under concurrency (due to write skew). Some solutions:
@@ -309,8 +309,8 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - In Java, it's called jar conflict. The conflict is not checked at compile time. May result in `NoSuchMethodError` etc. or weird bugs. 
     - When using wildcard `*` in classpath, the file order (inode order) may affect jar conflict behavior.
     - Shading can make two versions of the same package to co-exist.
-  - In node.js, two version of same package can co-exist. Their global variables and classes will co-exist. If two versions of React use together, it may give "invalid hook call" error.
-  - In Python, pip and uv will give error when installing package if conflict occurs. (uv's error message is often more human-readable than pip's).
+  - In node.js, two version of same package can co-exist. Their `let`, `const` global variables and classes will separately co-exist (but other global variables are shared). If two versions of React use together, it may give "invalid hook call" error.
+  - In Python, pip and uv will give error when installing package if conflict occurs.
 
 ### Linux and bash
 
@@ -362,7 +362,8 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Rebase and squashing will rewrite history. If local history is rewritten, normal push will give conflicts, need to use force push. If remote branch's history is rewritten, normal pull will give conflicts, need to use `--rebase` pulling. [^rewrite_history]
   - Force pushing with `--force-with-lease` can sometimes avoid overwriting other developers' commits. But if you fetch then don't pull, `--force-with-lease` cannot protect.
   - The main purpose of rebase is to make commit graph a straight line. If you don't care about commit graph aesthetics, only using merge can avoid troubles.
-- After commiting files, adding these files into `.gitignore` won't automatically exclude them from git. To exclude them, delete them or use `git rm --cached`. Note that after excluding and pushing, when another coworker pulls, these files will be deleted (not just excluded from git).
+- After commiting files, adding these files into `.gitignore` won't automatically exclude them from git. To exclude them, delete them.
+  - You can also use `git rm --cached` to exclude them without deleting locally. However, after excluding and pushing, when another coworker pulls, these files will be deleted (not just excluded).
 - Reverting a merge doesn't fully cancel the side effect of the merge. If you merge B to A and then revert, merging B to A again has no effect. One solution is to revert the revert of merge. 
   - A cleaner way to cancel a merge, instead of reverting merge, is to 1. backup the branch, 2. hard reset to commit before merge, 3. cherry pick commits after merge, 4. force push.
 - In GitHub, if you accidentally commited secret (e.g. API key) and pushed to public, even if you override it using force push, GitHub will still keep that secret public. [See also](https://trufflesecurity.com/blog/guest-post-how-i-scanned-all-of-github-s-oops-commits-for-leaked-secrets), [Example activity tab](https://github.com/SharonBrizinov/test-oops-commit/compare/e6533c7bd729957b2eb31e88065c5158d1317c5e...9eedfa00983b7269a75d76ec5e008565c2eff2ef)
@@ -427,9 +428,10 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Big endian and little endian in binary file and net packet.
 - Blurring in image may not be enough to remove text information. See [Depix](https://github.com/spipm/Depixelization_poc). Opaque covering can fully remove text information.
 - The current working directory can be changed by system call (`chdir`). It's not recommended to do that.
-- Windows limits command size to 32767 code units. [See also](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)[^windows_command_length_workaround]
+- Windows limits command size to 32767 code units. [See also](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)
 - In Windows the default stack size of main thread is 1MB, but in Linux and macOS it's 8MB. It's easier to stack overflow in Windows.
 - In Windoes environment variable names are case-insensitive. It's recommanded to make env var name all upper case.
+- Code editors often do grouped undo. It may undo many recent edits after pressing ctrl-Z once. Sometimes it will undo the edits outside of view.
 
 
 
