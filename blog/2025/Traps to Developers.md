@@ -254,16 +254,15 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - If a string column is used in index or primary key, it will have length limit. MySQL applies the limitation when changing table schema. PostgreSQL applies the limitation by erroring when inserting or updating data.
 - PostgreSQL `notify` involves global locking if used within transaction, [see also](https://www.recall.ai/blog/postgres-listen-notify-does-not-scale). Also, `listen` malfunctions when used with connection pooling. It also has message size limit.
 - In PostgreSQL, incrementally updating a large `jsonb` is slow, as it internally recreates whole `jsonb` data. It's recommended to separate it if you want incremental update.
-- Storing UUID as string in database wasts performance. It's recommended to use database's built-in UUID type. Also, in some places UUID text omits `-` (e.g. `550e8400e29b41d4a716446655440000` instead of `550e8400-e29b-41d4-a716-446655440000`).
+- Storing UUID as string in database wasts performance. It's recommended to use database's built-in UUID type.
+  - Also, in some places UUID text doesn't have hyphen (e.g. `6cdd4753e57047259dd7024cb27b4c4f` instead of `6cdd4753-e570-4725-9dd7-024cb27b4c4f`).
 - Whole-table locks that can make the service temporarily unusable:
   - In MySQL (InnoDB) 8.0+, adding unique index or foreign key is mostly concurrent (only briefly lock) and won't block operations. But in older versions it may do whole-table lock.
   - `mysqldump` used without `--single-transaction` cause whole-table read lock.
   - In PostgreSQL, `create unique index` or `alter table ... add foreign key` cause whole-table read-lock. To avoid that, use `create unique index concurrently` to add unique index. For foreign key, use `alter table ... add foreign key ... not valid;` then `alter table ... validate constraint ...`.
-- About ranges:
-  - If you store non-overlapping ranges, querying the range containing a point by `select ... from ranges where p >= start and p <= end` is inefficient (even when having composite index of `(start, end)`). An efficient way: `select * from (select ... from ranges where start <= p order by start desc limit 1) where end >= p` (only require index of `start` column).
-  - For overlappable ranges, normal B-tree index is not sufficient for efficient querying. It's recommended to use spatial index in MySQL and GiST in PostgreSQL.
+- Querying which range a point is in by `select ... from ranges where p >= start and p <= end` is inefficient, even when having composite index of `(start, end)`. [^about_ranges]
 
-
+[^about_ranges]: It's recommended to use spatial index in MySQL and GiST in PostgreSQL for ranges. For non-overlappable ranges, it's possible to efficiently query using just B-tree index: `select * from (select ... from ranges where start <= p order by start desc limit 1) where end >= p` (only require index of `start` column). 
 
 
 ### Concurrency and Parallelism
