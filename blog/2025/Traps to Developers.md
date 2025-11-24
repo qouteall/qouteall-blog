@@ -305,14 +305,16 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Confusing default value with missing value. For example, if the balence field is primitive integer, 0 can represent both "balance value not initialized" or "balance is really 0".
 - When using profiler: the profiler may by default only include CPU time which excludes waiting time. If your app spends 90% time waiting (e.g. wait on database), the flamegraph may not include that 90% which is misleading.
 - When listing files in a folder, the order is not deterministic (may depend on inode order). It may behave differently on different machines even with exactly same files. It's recommended to sort by filename then process, making it deterministic. Use `ls -f` to view raw file order.
-- Transitive dependency conflict. Indirectly use different versions of the same package.
+- Transitive dependency conflict. Indirectly use different versions of the same package (diamond dependency issue).
   - In Java, it's called jar conflict. The conflict is not checked at compile time. May result in `NoSuchMethodError` etc. or weird bugs. 
     - When using wildcard `*` in classpath, the file order (inode order) may affect jar conflict behavior.
     - Shading can make two versions of the same package to co-exist.
   - In node.js, two versions of same package can co-exist. Their `let`, `const` global variables and classes will separately co-exist (but other global variables (e.g. `windows`, `globalThis`) are shared). If two versions of React use together, it may give "invalid hook call" error. If two versions of a React component library use together, it may have context-related issues.
   - In Python, pip and uv will give error when installing package if conflict occurs.
   - In C/C++ it may give "duplicate symbol" error during linking.
-- OpenSSL dynamic linking issue (TODO)
+  - If two libraries dynamically links two versions of same library (e.g. OpenSSL [^about_openssl]), and multiple versions are both installed in system, dynamic linker may link the incompatible version.
+
+[^about_openssl]: OpenSSL is often dynamically linked and it's commonly used. It's easy to encounter dependency problems related to OpenSSL. Also OpenSSL depends on glibc so the glibc compatibility issue also interferes. Golang re-implements SSL-related functionality so it's immune to this issue.
 
 ### Linux and bash
 
@@ -327,7 +329,9 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - File name can contain `\n` `\r` `'` `"`. File name can be invalid UTF-8.
 - In Linux file names are case-sensitive, different to Windows and macOS.
 - glibc compatibility issue. A program that's build in a new Linux distribution dynamically links with a new version of glibc, then it may be incompatible with old versions of glibc in old systems. Can be fixed by static linking glibc or using containers.
-- Command line output buffering. For example, when using `sh kafka-console-consumer.sh ... | grep xxx` some results in the end may be not shown due to buffering. (TODO soluton)
+- Command line output buffering. For example, when using `sh kafka-console-consumer.sh ... | grep xxx` some results in the end may be not shown due to buffering. One solution is to use [`unbuffer`](https://linux.die.net/man/1/unbuffer). [^cli_buffering]
+
+[^cli_buffering]: Note that using `grep --line-buffered xxx` doesn't work in that case, because the data is buffered in producer process. This issue also applies to `jq`, etc.
 
 ### Backend-related
 
@@ -336,6 +340,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - In Redis, getting keys by a prefix `KEYS prefix-*` is a slow operation that will traverse all keys. Use Redis hash map for that use case.
 - Kafka's message size limit is 1MB by default.
 - In Kafka, if a consumer processes too slow (no acknowledge within `max.poll.interval.ms`, default 5 min), the consumer will be treated as failed, then a rebalance occurs. That timeout is per-batch. If a batch contains too many messages it may reach that timeout, can decrease by `max.poll.records`.
+- Not doing rolling update. This also applies to file update. [Crowdstrike incident](https://www.crowdstrike.com/wp-content/uploads/2024/08/Channel-File-291-Incident-Root-Cause-Analysis-08.06.2024.pdf) and [Cloudflare incident 2025 Nov-18](https://blog.cloudflare.com/18-november-2025-outage/) could impact much smaller if they do rolling update to files.
 
 ### React
 
