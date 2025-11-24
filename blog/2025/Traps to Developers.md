@@ -107,7 +107,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Line break. Windows often use CRLF `\r\n` for line break. Linux and macOS often use LF `\n` for line break.
 - Locale ([elaborated below](#locale)).
 
-[^scalar_value]: The U+XXXX notation (XXXX is a hex value) represents a code point. The code points that are not surrogates pairs are called scalar value.
+[^scalar_value]: The U+XXXX notation (XXXX is a hex value) represents a code point. There is some ambiguity of "code point". In UTF-16, for a code point formed by two code units (4 bytes), its two individual code units are also code points, but these two are surrogate code points. It can be seen as both one code point and two code points, which is confusing. The code points from U+D800 to U+DFFF are called surrogate code points. The code points that are not surrogate are called scalar values. For that code point formed by two code units (4 bytes), it's one scalar value, it's also two surrogate code points. From string semantic value, it should be seen as one code point (scalar value). This ambiguity doesn't exist in UTF-8. In this article, code point refers to scalar value.
 
 [^string_encoding]: Strictly speaking, they use [WTF-16](https://simonsapin.github.io/wtf-8/#ill-formed-utf-16) encoding, which is similar to UTF-16 but allows invalid surrogate pairs. That encoding is for API and is not necessarily the actual in-memory representation. For example, Java has an optimization that use Latin-1 encoding (1 byte per code point) for in-memory string if possible.
 
@@ -309,8 +309,10 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - In Java, it's called jar conflict. The conflict is not checked at compile time. May result in `NoSuchMethodError` etc. or weird bugs. 
     - When using wildcard `*` in classpath, the file order (inode order) may affect jar conflict behavior.
     - Shading can make two versions of the same package to co-exist.
-  - In node.js, two version of same package can co-exist. Their `let`, `const` global variables and classes will separately co-exist (but other global variables are shared). If two versions of React use together, it may give "invalid hook call" error.
+  - In node.js, two versions of same package can co-exist. Their `let`, `const` global variables and classes will separately co-exist (but other global variables (e.g. `windows`, `globalThis`) are shared). If two versions of React use together, it may give "invalid hook call" error. If two versions of a React component library use together, it may have context-related issues.
   - In Python, pip and uv will give error when installing package if conflict occurs.
+  - In C/C++ it may give "duplicate symbol" error during linking.
+- OpenSSL dynamic linking issue (TODO)
 
 ### Linux and bash
 
@@ -324,6 +326,8 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - `fork()` creates a new process that has only one thread. If another thread holds lock during forking, that lock will never release. `fork()` also has potential of security issues.
 - File name can contain `\n` `\r` `'` `"`. File name can be invalid UTF-8.
 - In Linux file names are case-sensitive, different to Windows and macOS.
+- glibc compatibility issue. A program that's build in a new Linux distribution dynamically links with a new version of glibc, then it may be incompatible with old versions of glibc in old systems. Can be fixed by static linking glibc or using containers.
+- Command line output buffering. For example, when using `sh kafka-console-consumer.sh ... | grep xxx` some results in the end may be not shown due to buffering. (TODO soluton)
 
 ### Backend-related
 
@@ -361,7 +365,6 @@ A summarization of some traps to developers. There traps are unintuitive things 
 
 - Rebase and squashing will rewrite history. If local history is rewritten, normal push will give conflicts, need to use force push. If remote branch's history is rewritten, normal pull will give conflicts, need to use `--rebase` pulling. [^rewrite_history]
   - Force pushing with `--force-with-lease` can sometimes avoid overwriting other developers' commits. But if you fetch then don't pull, `--force-with-lease` cannot protect.
-  - The main purpose of rebase is to make commit graph a straight line. If you don't care about commit graph aesthetics, only using merge can avoid troubles.
 - After commiting files, adding these files into `.gitignore` won't automatically exclude them from git. To exclude them, delete them.
   - You can also use `git rm --cached` to exclude them without deleting locally. However, after excluding and pushing, when another coworker pulls, these files will be deleted (not just excluded).
 - Reverting a merge doesn't fully cancel the side effect of the merge. If you merge B to A and then revert, merging B to A again has no effect. One solution is to revert the revert of merge. 
