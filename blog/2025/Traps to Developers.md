@@ -102,8 +102,11 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - When reading text data in chunk, don't convert individual chunks to string then concat, as it may cut inside a UTF-8 code point.
 - Some Windows text files have byte order mark (BOM) at the beginning. It's U+FEFF zero-width no-break space (it's normally invisible). FE FF means file is in big-endian UTF-16. EF BB BF means UTF-8. Some non-Windows software doesn't handle BOM.
 - When converting binary data to string, often the invalid places are replaced by � (U+FFFD)
-- [Confusable characters](https://github.com/unicode-org/icu/blob/main/icu4c/source/data/unidata/confusables.txt).
-- Microsoft Word and Google Doc auto-replace `"` to `“` `”`. Also auto-replace -- into en dash – which is similar to minus-hyphen -.
+- [Confusable characters](https://github.com/unicode-org/icu/blob/main/icu4c/source/data/unidata/confusables.txt). Some examples:
+  - `"` and `“` `”`. Microsoft Word and Google Doc auto-replace former to latter.
+  - – (en dash) and - (minus-hyphen). Google Doc auto-replace -- to en dash.
+  - Normal space U+0020, no-break space U+00A0, em space U+2003, many other spaces...
+  - ......
 - Normalization. For example é can be U+00E9 (one code point) or U+0065 U+0301 (two code points). String comparision works on binary data and don't consider normalization.
 - [Zero-width characters](https://ptiglobal.com/the-beauty-of-unicode-zero-width-characters/), [Invisible characters](https://invisible-characters.com/)
 - Line break. Windows often use CRLF `\r\n` for line break. Linux and macOS often use LF `\n` for line break.
@@ -184,6 +187,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - Interface `nil` weird behavior. Interface pointer is a fat pointer containing type info and data pointer. If the data pointer is null but type info is not null, then it will not equal `nil`.
   - Receiving from or sending to `nil` channel blocks forever.
 - Before Go 1.22, [loop variable capture issue](https://go.dev/blog/loopvar-preview).
+- [Accidental capturing of mutable local variable](https://gaultier.github.io/blog/a_million_ways_to_data_race_in_go.html#accidental-capture-in-a-closure-of-an-outer-variable) (not loop variable).
 - Different kinds of timeout. [The complete guide to Go net/http timeouts](https://blog.cloudflare.com/the-complete-guide-to-golang-net-http-timeouts/)
 - Having interior pointer to an object keeps the whole object alive. This may cause memory leak.
 - Forgetting to cancel context cause `<-ctx.Done()` to deadlock (except for context created by `context.WithValue`).
@@ -277,7 +281,8 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - In C#, accesses to the same `volatile` value have release-aquire ordering (CLR will use memory barrier instruction if needed)
   - `volatile` can avoid wrong optimization related to reordering and merging memory reads/writes. (Compiler can merge reads by caching a value in register. Compiler can merge writes by only writing to register and delaying writing to memory. A read after a write can be optimized out.).
 - Time-of-check to time-of-use ([TOCTOU](https://en.wikipedia.org/wiki/Time-of-check_to_time-of-use)).
-- [Deadloc and channel-related deadlock](./About%20circular%20reference).
+- Data race (it's a large topic, not elaborate here).
+- [Deadlock and channel-related deadlock](./About%20circular%20reference).
 - In SQL database, for special uniqueness constraints that doesn't fit simple unique index (e.g. unique across two tables, conditional unique, unique within time range), if the constraint is enforced by application, then:
   - In MySQL (InnoDB), if in repeatable read level, application checks using `select ... for update` then insert, and the unique-checked column has index, then it works due to gap lock. (Note that gap lock may cause deadlock under high concurrency, ensure deadlock detection is on and use retrying).
   - In PostgreSQL, if in repeatable read level, application checks using `select ... for update` then insert, it's not sufficient to enforce constraint under concurrency (due to write skew). Some solutions:
@@ -443,6 +448,6 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Blurring in image may not be enough to remove text information. See [Depix](https://github.com/spipm/Depixelization_poc). Opaque covering can fully remove text information.
 - The current working directory can be changed by system call (`chdir`). It's not recommended to do that.
 - Windows limits command size to 32767 code units. [See also](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)
-- In Windows the default stack size of main thread is 1MB, but in Linux and macOS it's 8MB. It's easier to stack overflow in Windows.
+- In Windows the default stack size of main thread is 1MB, but in Linux and macOS it's often 8MB. It's easier to stack overflow in Windows.
 - In Windoes environment variable names are case-insensitive. It's recommanded to make env var name all upper case.
 

@@ -4,11 +4,11 @@ tags:
   - Programming
 ---
 
-# Higher-Level Design Patterns
+# Higher-Level Software Design Ideas
 
 <!-- truncate -->
 
-Higher-level software design patterns:
+Higher-level software design ideas:
 
 - Computation-data duality.
 - Mutation-data duality.
@@ -116,16 +116,22 @@ The benefits:
 - Easier to inspect, audit and debug mutations, because mutations are explicit data, not implicit execution history. Easier to audit and replay.
 - Can replay mutations and rollback easily.
 - Can replicate (sync) data change without sending full data.
-
+- In Rust, [avoid fighting with borrow checker](./How%20to%20Avoid%20Fighting%20Rust%20Borrow%20Checker#defer-mutation-mutation-as-data).
 
 ### Rollback
 
 About rollback:
 
 - Transactional databases allow rolling back a uncommited transaction. (MySQL InnoDB does in-place mutation on disk but writes undo log and redo log. PostgreSQL MVCC write is append-only on disk.)
-- Editing software often need to support undo. It's often implemted by storing previous step's data, while sharing unchanged substructure to optimize.
-- Multiplayer game client that does server-state-prediction (to reduce visible latency) need to rollback when prediction is invalidted by server's message.
+- Editing software often need to support undo.
+- Multiplayer game client that does server-state-prediction (to reduce visible latency) need to rollback when prediction is invalidated by server's message.
 - CPU does branch prediction and speculative execution. If branch prediction fails or there is other failure, it internally rollback. ([Spectre vulnerability](https://en.wikipedia.org/wiki/Spectre_(security_vulnerability)) and [Meltdown vulnerability](https://en.wikipedia.org/wiki/Meltdown_(security_vulnerability)) are caused by rollback not cancelling side effects in cache that can be measured in access speed).
+
+Ways of implementing undoing:
+
+- Separate the base data and mutations in "transaction". View data as base data + mutation.
+- Store previous snapshots. Optimize by sharing unchanged sub-structures (persistent data structure).
+- Record redo-log.
 
 Sometimes, to improve user experience, we need to replay conflicted changes, instead of rolling back them. It's more complex.
 
@@ -212,7 +218,7 @@ Only compute some parts of the data, and keep the information of remaining compu
 - Replace immediately executed code with data (expression tree, DSL, etc.) that will be executed (interpreted) later. Relates to computation-data duality.
 - In multi-stage programming, some data are fixed while some data are unknown. The fixed data can be used for optimization. It can be seen as runtime constant value folding. JIT can be seen as treating bytecode as runtime constant and fold them in interpreter code.
 - Replacing a value with a function or expression tree helps handling the currently-unknown data.
-- Using a future (promise) object to represent a pending computation.
+- Using a future (promise) object to represent a pending computation and its result.
 - In Idris, having a hole and inspecting the type of hole can help proving.
 
 Related: [I'm not mutable, I'm partially instantiated](https://blog.dnmfarrell.com/post/incomplete-data-structures/)
@@ -470,7 +476,7 @@ Concentration and fat-tail distribution (80/20) are common in software world:
 - Most bugs that users see are caused by few easy-to-trigger bugs.
 - Only a small portion of transisters in hardware are used in most times. Many transistors are rarely used. (Many transistors are for rarely-used instructions. Hardware defects related to them have higher probability to evade the test. See also: [Silent Data Corruptions at Scale](https://arxiv.org/pdf/2102.11245), [Cores that don’t count](https://sigops.org/s/conferences/hotos/2021/papers/hotos21-s01-hochschild.pdf))
 
-[^progress_misconception]: For beginners, a common misconception is that "if the software shows things on screen, then it's 90% done". In reality, a proof-of-concept is often just 20% done. There are so many corner cases in real usage. Not handing one corner case is bug. Most code are used for handling corner cases, not common cases. Although each specific corner case triggering probability is often small, triggering any of the many corner cases is high-probability.
+[^progress_misconception]: For beginners, a common misconception is that "if the software shows things on screen, then it's 90% done". In reality, a proof-of-concept is often just 20% done. There are so many corner cases in real usage. Not handing one corner case is bug. Most code are used for handling corner cases, not common cases. Although each specific corner case triggering probability is often small, triggering any of the many corner cases is high-probability. Analogy: A software is a city, each user just visits a small part, but you need to build the whole city, as different users visit different parts.
 
 Many optimizations are based on **assuming the high-probability case happens**:
 
