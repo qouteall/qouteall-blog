@@ -37,6 +37,8 @@ In Rust the error is often type-erased for convenience. The common solution is [
 
 Type erasuring error requires putting error into heap allocation. Different error types have different sizes. Turning them into heap allocation makes the memory layout be uniform (all become fat pointer). If error don't occur in hot path then it won't have visible performance cost.
 
+`anyhow` requires error to be `Send + Sync + 'static`. The `'static` requires that if it contains a string, the string need to be copied (cannot reference other places). This makes it safe to pass error to outer scope, but also add copying cost.
+
 Rust is not good at handling out-of-memory error.
 
 ## Golang error handling

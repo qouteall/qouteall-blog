@@ -100,13 +100,20 @@ In Golang, channels are not buffered by default, then producer waits for consume
 
 If you put a thing into a channel that no one will consume, it will wait forever. But changing the channel to buffered channel `make(chan string, 1)` will make the producer to not wait for consumer as long as buffer is not full. That deadlock can be solved by making channels buffered.
 
-Note that Golang channel buffer must have a constant size limit. There are packages for unbounded channel ([chanx](https://github.com/smallnest/chanx)). However the memory may be not large enough if big bursts occurs. Use disk-backed event queue (e.g. Kafka) to get larger buffer capacity. 
+Note that Golang channel buffer must have a constant size limit. There are packages for unbounded channel ([chanx](https://github.com/smallnest/chanx)). Note that if big bursts happen it may out-of-memory.
 
-Note that sometimes you need back pressure (stop producer when buffer is full) to improve stability (e.g. avoid using up memory) at the cost of blocking (and rejecting) requests.
+Different choices of channel buffer:
+
+- Use fixed-size buffer. When channel is full, producer blocks, this gives **back pressure**. It can avoid out-of-memory or disk full. But it can indirectly block user's request.
+- Use unbounded buffer:
+  - If buffer is in-memory, it can **out-of-memory if big burst occurs**.
+  - Use disk-backed event queue, such as Kafka. Disk can hold more data than memory, but it's still finite. Kafka discards messages according to retention policy.
 
 ### Buffered channels can still deadlock
 
-The previous deadlock can be solved by making channel buffered. However, buffering doesn't solve all lock-free deadlocks. For example:
+The previous deadlock can be solved by making channel buffered. However, buffering doesn't solve all lock-free deadlocks. 
+
+Simple example:
 
 ```go
 func goroutineA(aToB chan string, bToA chan string) {
@@ -119,6 +126,21 @@ func goroutineB(aToB chan string, bToA chan string) {
 	bToA <- "Hello from B"
 }
 ```
+
+Also, if buffer is fixed-sized, when buffer is full, it may still deadlock, but more rare. TODO elaborate
+
+### IO pipe deadlock
+
+If a parent process launches a child process and pipes child's stdin and stdout, then:
+
+- If the stdin pipe buffer is full, parent will block when writing to child stdin. It will resume if child reads from stdin.
+- If the stdout pipe buffer is full, child will block when writing to its stdout. It will resume when parent reads from child stdout.
+
+It may deadlock. TODO example
+
+### Deadlock caused by IO buffering
+
+TODO
 
 ## Channel+Lock deadlock
 
@@ -313,9 +335,11 @@ React effect triggers in next iteration of event loop so it won't directly dead 
 
 ## Ordering breaks cycle
 
-If there is a globally uniform ordering of acquiring locks, then deadlock won't occur. 
+If there is a partial ordering, and edge can only be formed follow the order, then cycle cannot exist.
 
-For example, if there are two locks `lock1` and `lock2`, if I ensure that `lock1`'s locking order if before `lock2`, then there won't be the case that a thread acquired `lock2` and is acquiring `lock1`. Then in resource allocation graph, the path from `lock2` to `lock1` cannot be formed. So deadlock can be prevented.
+Although cycle is a global property, ordering is a local property that can trasitively propagate to global ($a < b \land b < c \Rightarrow a < c$).
+
+If there is a globally uniform ordering of acquiring locks, then deadlock won't occur. For example, if there are two locks `lock1` and `lock2`, if I ensure that `lock1`'s locking order if before `lock2`, then there won't be the case that a thread acquired `lock2` and is acquiring `lock1`. Then in resource allocation graph, the path from `lock2` to `lock1` cannot be formed. So deadlock can be prevented.
 
 Rust favors tree-shaped ownership. There is a hierarchy between owner and owned values. This creates an order that prevents cycle. If you use sharing (reference counting) but don't use mutability, then creating new value can only use already-created value, so circular reference is still not possible. Only by combination of sharing and mutability can circular reference be created.
 

@@ -99,9 +99,11 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - In C++, `std::string` has no constraint of encoding and is similar to byte array. String length and indexing is based on bytes.
   - No language mentioned above do string length and indexing based on grapheme cluster.
   - In SQL, `varchar(100)` limits 100 code points (not byte).
+- When reading text data in chunk, don't convert individual chunks to string then concat, as it may cut inside a UTF-8 code point.
 - Some Windows text files have byte order mark (BOM) at the beginning. It's U+FEFF zero-width no-break space (it's normally invisible). FE FF means file is in big-endian UTF-16. EF BB BF means UTF-8. Some non-Windows software doesn't handle BOM.
 - When converting binary data to string, often the invalid places are replaced by � (U+FFFD)
 - [Confusable characters](https://github.com/unicode-org/icu/blob/main/icu4c/source/data/unidata/confusables.txt).
+- Microsoft Word and Google Doc auto-replace `"` to `“` `”`. Also auto-replace -- into en dash – which is similar to minus-hyphen -.
 - Normalization. For example é can be U+00E9 (one code point) or U+0065 U+0301 (two code points). String comparision works on binary data and don't consider normalization.
 - [Zero-width characters](https://ptiglobal.com/the-beauty-of-unicode-zero-width-characters/), [Invisible characters](https://invisible-characters.com/)
 - Line break. Windows often use CRLF `\r\n` for line break. Linux and macOS often use LF `\n` for line break.
@@ -142,12 +144,11 @@ A summarization of some traps to developers. There traps are unintuitive things 
 
 [^safe_int_timestamp]: Putting millisecond timestamp integer in JSON fine, as millisecond timestamp exceeds limit in year 287396. But nanosecond timestamp suffers from that issue.
 
-[^excel_money]: It's recommended to NOT use floating point to store money value. Note that Microsoft Excel uses floating point to represent number, and many financial data are processed in Excel. Excel has rounding so that 0.30000000000000004 is displayed as 0.3 . Doing analyze in Excel is mostly fine.
+[^excel_money]: It's recommended to NOT use floating point to store money value. Note that Microsoft Excel uses floating point to represent number, and many financial data are processed in Excel. Excel has rounding so that 0.30000000000000004 is displayed as 0.3 . Only use Excel for finance if you don't require high precision. Doing rough financial analyzing in Excel is fine.
 
 ### Time
 
-- [Leap second](https://en.wikipedia.org/wiki/Leap_second). Unix timestamp is "transparent" to leap second, which means converting between Unix timestamp and UTC time ignores leap second. 
-  - A common solution is leap smear: make the time measured in Unix timestamp stretch or squeeze near a leap second.
+- [Leap second](https://en.wikipedia.org/wiki/Leap_second). Unix timestamp is "transparent" to leap second. Converting between Unix timestamp and UTC time assumes leap second doesn't exist. It's used with leap smear: make the time "stretch" or "squeeze" near a leap second to "hide" existence of leap second.
 - Time zone. UTC and Unix timestamp is globally uniform. But human-readable time is time-zone-dependent. It's recommended to store timestamp in database and convert to human-readable time in UI, instead of storing human-readable time in database.
 - Daylight Saving Time (DST): In some region people adjust clock forward by one hour in warm seasons.
 - Time may "go backward" due to NTP sync.
@@ -219,6 +220,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - Some SIMD instructions only work with aligned data. For example, AVX instructions usually require 32-byte alignment.
 - Global variable initialization runs before `main`. [Static Initialization Order Fiasco](https://en.cppreference.com/w/cpp/language/siof.html).
 - Start from C++ 11, destructors have `noexcept` by default. If exception is thrown out of a `noexcept` function, whole process will crash.
+- In signal handler, don't `printf` or `malloc`.
 
 [^start_object_lifetime]: Directly treating existing binary data as struct is undefined behavior, because the object lifetime hasn't started, so it's treated as using uninitialized memory, even when it's aligned. One solution is to put the struct on stack then use `memcpy` to initialize it.
 
@@ -311,9 +313,15 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - In node.js, two versions of same package can co-exist. Their `let`, `const` global variables and classes will separately co-exist (but other global variables (e.g. `windows`, `globalThis`) are shared). If two versions of React use together, it may give "invalid hook call" error. If two versions of a React component library use together, it may have context-related issues.
   - In Python, pip and uv will give error when installing package if conflict occurs.
   - In C/C++ it may give "duplicate symbol" error during linking.
-  - If two libraries dynamically links two versions of same library (e.g. OpenSSL [^about_openssl]), and multiple versions are both installed in system, dynamic linker may link the incompatible version.
+  - Rust allows two different major versions of same crate to co-exist. Rust uses semantic versioning ([See also](https://doc.rust-lang.org/cargo/reference/semver.html)). Their global variables also separately co-exist. [Having two major versions of Tokio causes problem](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/alan_creates_a_hanging_alarm.html#addendum-multiple-tokio-major-versions).
+  - If two libraries dynamically links two versions of same library (e.g. OpenSSL), and multiple versions are both installed in system, dynamic linker may link the incompatible version.
+- IO buffering. 
+  - If you don't flush, it may delay actual write. 
+  - If you write a long-running CLI program that don't flush stdout, it works fine when directly running in terminal, but it delays output when used with pipe `|`.
+  - If program is force-killed (e.g. `kill -9`) some of its last log may not be written to log file.
+  - Flushing too frequent may hurt performance.
 
-[^about_openssl]: OpenSSL is often dynamically linked and it's commonly used. It's easy to encounter dependency problems related to OpenSSL. Also OpenSSL depends on glibc so the glibc compatibility issue also interferes. Golang re-implements SSL-related functionality so it's immune to this issue.
+[^semantic_versioning]: In semantic versioning, changing existing API increments major version. Only adding new API and don't change existing API increments minor version. Small bugfix that does't change API increments patch version. There are some exceptions. If there is a wrongly-designed API that very few people use 
 
 ### Linux and bash
 
@@ -328,9 +336,6 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - File name can contain `\n` `\r` `'` `"`. File name can be invalid UTF-8.
 - In Linux file names are case-sensitive, different to Windows and macOS.
 - glibc compatibility issue. A program that's build in a new Linux distribution dynamically links with a new version of glibc, then it may be incompatible with old versions of glibc in old systems. Can be fixed by static linking glibc or using containers.
-- Command line output buffering. For example, when using `sh kafka-console-consumer.sh ... | grep xxx` some results in the end may be not shown due to buffering. One solution is to use [`unbuffer`](https://linux.die.net/man/1/unbuffer). [^cli_buffering]
-
-[^cli_buffering]: Note that using `grep --line-buffered xxx` doesn't work in that case, because the data is buffered in producer process. This issue also applies to `jq`, etc.
 
 ### Backend-related
 
@@ -338,6 +343,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Don't use `:latest` image. They can change at any time.
 - In Redis, getting keys by a prefix `KEYS prefix-*` is a slow operation that will traverse all keys. Use Redis hash map for that use case.
 - Kafka's message size limit is 1MB by default.
+- In Kafka, across partitions, consume order may be different to produce order. If key is null then message's partition is not deterministic.
 - In Kafka, if a consumer processes too slow (no acknowledge within `max.poll.interval.ms`, default 5 min), the consumer will be treated as failed, then a rebalance occurs. That timeout is per-batch. If a batch contains too many messages it may reach that timeout, can decrease by `max.poll.records`.
 - Not doing rolling update. This also applies to file update. [Crowdstrike incident](https://www.crowdstrike.com/wp-content/uploads/2024/08/Channel-File-291-Incident-Root-Cause-Analysis-08.06.2024.pdf) and [Cloudflare incident 2025 Nov-18](https://blog.cloudflare.com/18-november-2025-outage/) could impact much smaller if they do rolling update to files.
 
@@ -408,9 +414,10 @@ A summarization of some traps to developers. There traps are unintuitive things 
 ### Locale
 
 - The upper case and lower case can be different in other natural languages. In Turkish (tr-TR) lowercase of `I` is `ı` and upper case of `i` is `İ`. The `\w` (word char) in regular expression can be locale-dependent.
-- Letter ordering can be different in other natural languages. Regular expression `[a-z]` may malfunction in other locale.
+- Letter ordering can be different in other natural languages. Regular expression `[a-z]` may malfunction in other locale. 
+- PostgreSQL linguistic sorting (collation) depends on glibc by default. Upgrading glibc may change linguistic order, which may cause index corruption. [See also](https://wiki.postgresql.org/wiki/Locale_data_changes)
 - Text notation of floating-point number is locale-dependent. `1,234.56` in US correspond to `1.234,56` in Germany.
-- CSV use normally use `,` as spearator, but use `;` as separator in German locale.
+- CSV normally use `,` as spearator. But in Germany locale separator is `;`.
 - [Han unification](https://en.wikipedia.org/wiki/Han_unification). Some characters in different language with slightly different appearance use the same code point. Usually a font will contain variants for different languages that render these characters differently. [HTML code](https://github.com/qouteall/qouteall-blog/blob/main/blog/2025/unicode-unification-example.html) ![](unicode_unification_example.png)
 
 ### Regular expression
@@ -438,7 +445,4 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Windows limits command size to 32767 code units. [See also](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)
 - In Windows the default stack size of main thread is 1MB, but in Linux and macOS it's 8MB. It's easier to stack overflow in Windows.
 - In Windoes environment variable names are case-insensitive. It's recommanded to make env var name all upper case.
-- Code editors often do grouped undo. It may undo many recent edits after pressing ctrl-Z once. Sometimes it will undo the edits outside of view.
-
-
 

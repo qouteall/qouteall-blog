@@ -1348,6 +1348,7 @@ Examples:
   - ...
 - "Memory safety can only be achieved by Rust." No. Most GC languages are memory-safe. [^gc_memory_safety] Memory safety of existing C/C++ applications can be achieved via [Fil-C](https://github.com/pizlonator/fil-c).
 - "Manual memory management is always faster than tracing GC." No. Moving GCs [^go_gc] can handle fragmentation [^fragmentation] and have better throughput in allocation and deallocation. In manual memory management, freeing a large structure may cause big lag. Using `Arc` involves atomic operations which may become bottleneck in multithreading. 
+- "The old tools (like sudo and grep) are already battle-tested, so there is no value in rewriting them in Rust." No. If they won't ever add any new feature and don't do any large refactoring, only accepting small bug fixes, then they would become more stable and safe over time. However, if they adds new feature or do large refactoring, then being old doesn't ensure the latest version is safe.
 
 [^about_heisenbug]: The Heisenbugs may only trigger in relase build, not in debug build, not when sanitizers are on, not when logging is on, not when debugger is on. Because optimization, sanitizer, debugger and logging can change timing and memory layout, which can make memory safety or thread safety bug no longer trigger. Debugging a Heisenbug in large codebase may take weeks even months. Note that not all memory/thread safety bugs are Heisenbugs. Many are still easy to trigger.
 
