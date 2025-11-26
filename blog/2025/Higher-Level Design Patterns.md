@@ -75,9 +75,9 @@ However then a tradeoff become salient:
 DSL are useful when:
 
 - It's high in abstraction level. It can work by some simple straightforward configurations.
-- New requirements mostly follow the abstration. No need to break the assumptions and default behaviors of abstraction.
+- New requirements mostly follow the abstration. Doesn't break the assumptions of abstraction. Doesn't require customizing inner default behaviors.
 
-Allowing the user to configure it via UI (no-code platform) is also often appropriate when it's simple to use and is in high abstraction level. The low-abstraction-level config UI is only usable by developers while being less convenient than just coding.
+About visual DSL: There are node-based visual DSL (e.g. UE blueprint, Blender nodes). When most requirements can be satisfied by few nodes it's useful. But for complex novel requirements it will require many nodes and messy connections, which is often harder to maintain than code.
 
 ### Replace calls with data
 
@@ -127,11 +127,11 @@ About rollback:
 - Multiplayer game client that does server-state-prediction (to reduce visible latency) need to rollback when prediction is invalidated by server's message.
 - CPU does branch prediction and speculative execution. If branch prediction fails or there is other failure, it internally rollback. ([Spectre vulnerability](https://en.wikipedia.org/wiki/Spectre_(security_vulnerability)) and [Meltdown vulnerability](https://en.wikipedia.org/wiki/Meltdown_(security_vulnerability)) are caused by rollback not cancelling side effects in cache that can be measured in access speed).
 
-Ways of implementing undoing:
+Ways of implementing rollback:
 
-- Separate the base data and mutations in "transaction". View data as base data + mutation.
+- Separate the base data and mutations in "transaction". View data as base data + mutation. Rollback is just removing mutation.
 - Store previous snapshots. Optimize by sharing unchanged sub-structures (persistent data structure).
-- Record redo-log.
+- Record undo-log. Record the inverse operations. After adding, record deleting operation. After deleting, record adding operation. After changing, record reverse changing operation.
 
 Sometimes, to improve user experience, we need to replay conflicted changes, instead of rolling back them. It's more complex.
 
@@ -302,7 +302,7 @@ Examples of the generalized view concept:
 - Proxy, NAT, firewall, virtualized networking etc. provides manipulated view of network.
 - Transaction isolation in databases provide views of data (e.g. snapshot isolation).
 - Replicated data and redundant data are views to the original data.
-- Multi-tier storage system. From small-fast ones to large-slow ones: register, cache, memory, disk, cloud storage.
+- Multi-tier storage system. From small-fast ones to large-slow ones: register, cache, RAM, disk, cloud storage.
 - Previously mentioned computation-data duality and mutation-data duality can be also seen as viewing.
 - Transposing in Pytorch (by default) doesn't change the underlying matrix data. It only changes how the data is viewed.
 
@@ -332,7 +332,7 @@ For example, in Python, if a function accepts an array of string, but you pass i
 
 Dynamic typing allows typing fewer and gives more freedom and avoids the shackle of an unexpressive type system. However dynamic typing doesn't auto convert data "shape" for you [^dynamic_language_conversion]. Developer still need to consider the "shape" when programming in dynamic languages. Dynamic languages are embracing data annotations now (TS, Python type annotation).
 
-[^dynamic_language_conversion]: Dynamic languages may sometimes do auto data conversion, but it's limited to simple conversions. It cannot do advanced conversion that "understands intention". Often the auto conversion is "dumb" and not what developer want (e.g. JS auto convert object to "\[object Object\]").
+[^dynamic_language_conversion]: Dynamic languages may sometimes do auto data conversion, but it's limited to simple conversions. It cannot do advanced conversion that "understands intention". Sometimes the auto conversion is "dumb" and not what developer want (e.g. JS auto convert object to "\[object Object\]").
 
 ### Generalized reference
 
@@ -371,7 +371,7 @@ The major differences:
   - In reference counting, the coupling of course comes from runtime reference counting.
   - The foreign key constraint of ID is enforced by database.
 
-[^weak_generalized_reference_error_handling]: One kind of error handling is to just crash. Raw pointer is also a kind of weak generalized reference. Another way is to simply not care (e.g. memory safety issue of using dangling raw pointer).
+[^weak_generalized_reference_error_handling]: One kind of error handling is to just crash. Raw pointer is also a kind of weak generalized reference. In C/C++ its error handling strategy is to require developer to not make mistake and doesn't care what happens after error occurs.
 
 If an abstraction that **decouples** object lifetime and how these objects are referenced, then it either:
 

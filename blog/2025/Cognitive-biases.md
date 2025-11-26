@@ -1085,6 +1085,8 @@ If there is an option to postpone some work, the work may eventually never be do
 
 Law of the instrument: "If the only tool you have is a hammer, it is tempting to treat everything as if it were a nail."
 
+> We shape our tools, and thereafter our tools shape us.
+
 ### Action bias
 
 Action bias: In the places where doing action is normal, people prefer to do something instead of doing nothing, even when doing action has no effect or negative effects.
@@ -1411,7 +1413,7 @@ In the ancient world, when there was no algorithmic recommendataion, there was s
 
 Memes facilitate being spreaded. On the contrary, **antimemes** resist being spreaded. 
 
-- Antimemes are usually long, complex and nuanced, reflecting real-world complexity, being hard-to-grasp.
+- Antimemes are usually long, complex and nuanced, reflecting real-world complexity, but hard-to-grasp. (Just being long is enough to scare many readers, "TLDR").
 - Antimemes usually don't spur much emotions.
 - Antimemes are usually boring and "obvious" (hindsight bias).
 - The information that conflicts with existing beliefs are also antimemes. (confirmation bias)

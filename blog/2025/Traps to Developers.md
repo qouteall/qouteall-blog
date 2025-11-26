@@ -105,10 +105,10 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - [Confusable characters](https://github.com/unicode-org/icu/blob/main/icu4c/source/data/unidata/confusables.txt). Some examples:
   - `"` and `“` `”`. Microsoft Word and Google Doc auto-replace former to latter.
   - – (en dash) and - (minus-hyphen). Google Doc auto-replace -- to en dash.
-  - Normal space U+0020, no-break space U+00A0, em space U+2003, many other spaces...
   - ......
 - Normalization. For example é can be U+00E9 (one code point) or U+0065 U+0301 (two code points). String comparision works on binary data and don't consider normalization.
 - [Zero-width characters](https://ptiglobal.com/the-beauty-of-unicode-zero-width-characters/), [Invisible characters](https://invisible-characters.com/)
+  - For example, there are many spaces: Normal space U+0020, no-break space U+00A0, em space U+2003, many other spaces...
 - Line break. Windows often use CRLF `\r\n` for line break. Linux and macOS often use LF `\n` for line break.
 - Locale ([elaborated below](#locale)).
 
@@ -302,7 +302,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 ### Common in many languages
 
 - Forget to check for null/None/nil.
-- Modifying a container when for looping on it. Single-thread "data race".
+- When for looping on a container, inserting to or removing from it (iterator invalidation).
 - Unintended sharing of mutable data. For example in Python `[[0] * 10] * 10` does not create a proper 2D array.
 - For non-negative integer `(low + high) / 2` may overflow. A safer way is `low + (high - low) / 2`.
 - Short circuit. `a() || b()` will not run `b()` if `a()` returns true. `a() && b()` will not run `b()` when `a()` returns false.
@@ -310,20 +310,21 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Assertion should not be used for validating external data. Validating external data should use proper error handling. Assertion should check internal invariants.
 - Confusing default value with missing value. For example, if the balence field is primitive integer, 0 can represent both "balance value not initialized" or "balance is really 0".
 - When using profiler: the profiler may by default only include CPU time which excludes waiting time. If your app spends 90% time waiting (e.g. wait on database), the flamegraph may not include that 90% which is misleading.
-- When listing files in a folder, the order is not deterministic (may depend on inode order). It may behave differently on different machines even with exactly same files. It's recommended to sort by filename then process, making it deterministic. Use `ls -f` to view raw file order.
+- When getting files in a folder, the order is not deterministic (may depend on inode order). It may behave differently on different machines even with exactly same files. It's recommended to sort by filename then process. Note that `ls` by default sorts results. Use `ls -f` to see raw file order.
+- The order in hash map is also non-deterministic (unless using linked hash map).
 - Transitive dependency conflict. Indirectly use different versions of the same package (diamond dependency issue).
   - In Java, it's called jar conflict. The conflict is not checked at compile time. May result in `NoSuchMethodError` etc. or weird bugs. 
     - When using wildcard `*` in classpath, the file order (inode order) may affect jar conflict behavior.
     - Shading can make two versions of the same package to co-exist.
-  - In node.js, two versions of same package can co-exist. Their `let`, `const` global variables and classes will separately co-exist (but other global variables (e.g. `windows`, `globalThis`) are shared). If two versions of React use together, it may give "invalid hook call" error. If two versions of a React component library use together, it may have context-related issues.
+  - In node.js, two versions of same package can co-exist. Their `let`, `const` global variables and classes will separately co-exist (but other global variables are shared). If two versions of React use together, it may give "invalid hook call" error. If two versions of a React component library use together, it may have context-related issues.
   - In Python, pip and uv will give error when installing package if conflict occurs.
   - In C/C++ it may give "duplicate symbol" error during linking.
-  - Rust allows two different major versions of same crate to co-exist. Rust uses semantic versioning ([See also](https://doc.rust-lang.org/cargo/reference/semver.html)). Their global variables also separately co-exist. [Having two major versions of Tokio causes problem](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/alan_creates_a_hanging_alarm.html#addendum-multiple-tokio-major-versions).
+  - Rust allows two different major versions of same crate to co-exist. It de-duplicates according to semantic versioning ([See also](https://doc.rust-lang.org/cargo/reference/semver.html), [See also](https://effective-rust.com/dep-graph.html)). Their global variables also separately co-exist. [Having two major versions of Tokio causes problem](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/alan_creates_a_hanging_alarm.html#addendum-multiple-tokio-major-versions).
   - If two libraries dynamically links two versions of same library (e.g. OpenSSL), and multiple versions are both installed in system, dynamic linker may link the incompatible version.
 - IO buffering. 
   - If you don't flush, it may delay actual write. 
   - If you write a long-running CLI program that don't flush stdout, it works fine when directly running in terminal, but it delays output when used with pipe `|`.
-  - If program is force-killed (e.g. `kill -9`) some of its last log may not be written to log file.
+  - If program is force-killed (e.g. `kill -9`) some of its last log may not be written to log file. But the most important log is often the last log.
   - Flushing too frequent may hurt performance.
 
 [^semantic_versioning]: In semantic versioning, changing existing API increments major version. Only adding new API and don't change existing API increments minor version. Small bugfix that does't change API increments patch version. There are some exceptions. If there is a wrongly-designed API that very few people use 
@@ -378,7 +379,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 
 ### Git
 
-- Rebase and squashing will rewrite history. If local history is rewritten, normal push will give conflicts, need to use force push. If remote branch's history is rewritten, normal pull will give conflicts, need to use `--rebase` pulling. [^rewrite_history]
+- Rebase and squashing rewrite history. If local already-pushed history is rewritten, normal push will give conflicts, need to use force push. If remote history is rewritten, normal pull will give conflicts, need to use `--rebase` pulling. [^rewrite_history]
   - Force pushing with `--force-with-lease` can sometimes avoid overwriting other developers' commits. But if you fetch then don't pull, `--force-with-lease` cannot protect.
 - After commiting files, adding these files into `.gitignore` won't automatically exclude them from git. To exclude them, delete them.
   - You can also use `git rm --cached` to exclude them without deleting locally. However, after excluding and pushing, when another coworker pulls, these files will be deleted (not just excluded).
@@ -391,8 +392,6 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - In Windows, Git often auto-convert cloned text files to be CRLF line ending. But in WSL many software (e.g. bash) doesn't work with files with CRLF. Using `git clone --config core.autocrlf=false -c core.eol=lf ...` can make git clone as LF.
 - macOS auto adds `.DS_Store` files into every folder. It's recommended to add `**/.DS_Store` into `.gitignore`.
 - In Windows and macOS, file name is case-insensitive. Renaming file that only change letter case won't be tracked by git (renaming using `git mv` works normally).
-
-[^rewrite_history]: Strictly speaking, rebase doesn't rewrite history if the rebase target branch is based on current branch. If local branch is based on remote branch, then pushing don't require force push. Squashing the local not-yet-pushed commits is fine.
 
 ### Networking
 

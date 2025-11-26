@@ -41,6 +41,18 @@ Type erasuring error requires putting error into heap allocation. Different erro
 
 Rust is not good at handling out-of-memory error.
 
+lock poisoning [Adding locks disregarding poison · Issue #169 · rust-lang/libs-team](https://github.com/rust-lang/libs-team/issues/169)
+
+when is poisoning useful: use lock to protect mutable data structure. if there is a panic within operation, the data structure may be in an invalid state. 
+
+when poisoning is harmful: for a web server, when there is already database transaction that do proper rollback, so panicking doesn't make the data be invalid. in this case poisoning is not only useless but also harmful. the poisoned mutex in memory prevent new requests from accessing data, which hurts web server reliability.
+
+sometimes panic when holding lock cause data corruption. but there are also many cases where panicking when holding lock doesn't cause data corruption.
+
+panic propagation doesn't work well with web server. panic propagation make requests that use poisoned mutext keep failing (without restart). if during panic unwind the drop uses mutex and use `.unwrap` it may second-panic which crashes whole process.
+
+tokio mutex cancel issue
+
 ## Golang error handling
 
 TODO
