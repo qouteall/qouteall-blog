@@ -1334,7 +1334,7 @@ Examples:
 ## Some arguments
 
 - "Rust doesn't ensure safety of `unsafe` code, so using `unsafe` defeats the purpose of using Rust". No. If you keep the amount of `unsafe` small, then when memory/thread safety issue happens, you can inspect these small amount of `unsafe` code. In C/C++ you need to inspect all related code. It's still not recommended to use many `unsafe` in Rust.
-- "There are sanitizers in C/C++ that help me catch memory safety bugs and thread safety bugs, so Rust has no value." No. Some memory safety and thread safety bugs only trigger in production environments and in client's computers, but don't reproduce in test environment. There are [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug) [^about_heisenbug]. Using sanitizers in production comes with large performance cost. [^about_arm_memory_tagging] In a complex codebase, even if memory/thread safety issue is catched, it's not always easy to fully fix it (sometimes a fix just reduce probability of triggering it).
+- "There are sanitizers in C/C++ that help me catch memory safety bugs and thread safety bugs, so Rust has no value." No. Some memory safety and thread safety bugs only trigger in production environments and in client's computers, but don't reproduce in test environment. There are [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug).
 - "Using arena still face the equivalent of 'use after free', so arena doesn't solve the problem". No. Arenas can make these bugs much more deterministic than raw use-after-free bugs, preventing them from becoming Heisenbugs, making debugging much easier.
 - "Rust borrow checker rejects your code because your code is wrong." No. Rust can reject valid safe code.
 - "Circular reference is bad and should be avoided." No. Circular reference can be useful in many cases. Linux kernel has doubly linked lists. But circular reference do come with risks.
@@ -1349,10 +1349,8 @@ Examples:
   - Rust's generics, traits and standard library design learned from mistakes in C++.
   - ...
 - "Memory safety can only be achieved by Rust." No. Most GC languages are memory-safe. [^gc_memory_safety] Memory safety of existing C/C++ applications can be achieved via [Fil-C](https://github.com/pizlonator/fil-c).
-- "Manual memory management is always faster than tracing GC." No. Moving GCs [^go_gc] can handle fragmentation [^fragmentation] and have better throughput in allocation and deallocation. In manual memory management, freeing a large structure may cause big lag. Using `Arc` involves atomic operations which may become bottleneck in multithreading. 
-- "The old tools (like sudo and grep) are already battle-tested, so there is no value in rewriting them in Rust." No. If they won't ever add any new feature and don't do any large refactoring, only accepting small bug fixes, then they would become more stable and safe over time. However, if they adds new feature or do large refactoring, then being old doesn't ensure the latest version is safe.
-
-[^about_heisenbug]: The Heisenbugs may only trigger in relase build, not in debug build, not when sanitizers are on, not when logging is on, not when debugger is on. Because optimization, sanitizer, debugger and logging can change timing and memory layout, which can make memory safety or thread safety bug no longer trigger. Debugging a Heisenbug in large codebase may take weeks even months. Note that not all memory/thread safety bugs are Heisenbugs. Many are still easy to trigger.
+- "Manual memory management is always faster than tracing GC." No. Moving GCs [^go_gc] can handle fragmentation [^fragmentation] and have better throughput in allocation and deallocation [^gc_throughput]. In manual memory management, freeing a large structure may cause big lag. Using `Arc` involves atomic operations which may become bottleneck in multithreading. 
+- "The old C/C++ codebases are already battle-tested, so there is no value in rewriting them in Rust." No. If they won't ever add any new feature and don't do any large refactoring, only accepting small bug fixes, then they would indeed become more stable and safe over time. However, if they adds new feature or do large refactoring, then new memory/thread safety issues could emerge.
 
 [^about_arm_memory_tagging]: [ARM memory tagging](https://developer.arm.com/documentation/108035/0100/Introduction-to-the-Memory-Tagging-Extension) is a low-cost way of checking memory safety issue at runtime, similar to address sanitizer, useful for debugging and security alerting. But ARM memory tagging is not a sound security defense, because it has 1/16 chance of missing memory-unsafe access. If the process auto-restarts after crashing, attacker can retry the attack, eventually hitting the 1/16 probability. [Fil-C](https://github.com/pizlonator/fil-c) can catch memory safety issue in 100% chance, so it's a better security defense.
 
@@ -1362,10 +1360,30 @@ Examples:
 
 [^fragmentation]: Fragmentation can be alleviated by better allocation strategy (similar size-class allocate together). Fragmentation is also alleviated by virtual memory (memory fragmentation in page level don't waste physical memory). Also, RAM is cheaper now, so fragmentation cost is more affordable. Fragmentation is not a big issue now. Moving GC can theoretically improve cache locality by avoiding fragmentation, but manual memory management can improve cache locality by reusing just-freed memory region.
 
-## Other
+[^gc_throughput]: In Rust, bump allocator can also achieve high throughput of allocation and deallocation. But using bump allocator requires extra work. The conventional "malloc/free" allocators often has lower throughput than an optimized moving GC because they need to do more bookkeeping. Note that moving GC require much more free memory to achieve high throughput. Without enough free memory, moving GC will cause big lag.
 
-Rust is less convenient and harder to learn than other mainstream languages.
+## The yields of paying "Rust cost"
 
-One important purpose of Rust is to **avoid Heisenbugs**. Most Heisenbugs are related to memory safety, thread safety and mutation. 
+Rust has a lot of constraints, add frictions in coding and reduces expressiveness. What are the benefits after paying this cost?
 
-Rust's constraints apply to **both human and AI**. In a large C/C++ codebase, both human and AI can accidentally break memory safety and thread safety in **non-obvious way**. Rust can protect against that. Popular open source projects are often flooded with AI-generated PR. Rust makes reviewing PR easier: as long as CI passes and it doesn't use `unsafe`, it won't break memory and thread safety. Note that Rust doesn't protect against many kinds logical error.
+One important benefit of Rust is to prevent most [**Heisenbugs**](https://en.wikipedia.org/wiki/Heisenbug).
+
+The Heisenbugs are non-deterministic. When you try to debug it, it may stop triggering. Heisenbugs are often **sensitive to timing and memory layout**:
+
+- Enabling logging and enabling sanitizers makes program run slow, which may make Heisenbug no longer trigger.
+- Breakpoint debugger also changes timing when debugging, which may make Heisenbug no longer trigger.
+- Some Heisenbugs only trigger in release build, not debug build. (may be caused by optimization related to undefined behaviors)
+- Some Heisenbugs only trigger in production environment. Some Heisenbugs only happen in client's computer that developer cannot touch.
+
+Heisenbugs are hard to debug, especially in large codebases.
+
+Most Heisenbugs are related to memory safety, thread safety and mutation. Rust prevents most Heisenbugs so it **greatly saves debugging time on Heisenbugs**.
+
+Note that there are still Heisenbugs that Rust cannot catch, including:
+
+- Data race outside of memory (data race in disk, database, etc.).
+- Conditional deadlocks. Conditional `RefCell` borrow conflict.
+- Async cancellation issues.
+- Heisenbugs related to `unsafe` and FFI (foreign function interface).
+
+Also note that not all memory/thread safety bugs are Heisenbugs. Many are still easy to trigger and debug.
