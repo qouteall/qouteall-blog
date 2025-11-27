@@ -41,9 +41,11 @@ The most fighting with borrow checker happens in the **borrow-check-unfriendly c
 
 The solutions in borrow-checker-unfriendly cases (will elaborate below):
 
-- Data-oriented design. **Avoid unnecessary getter and setter**.
-- Do split borrow in outer scope and pass borrowing of each component separately.
-- **Use ID/handle to replace borrow**. Use arena to hold data.
+- **Data-oriented design**. (less OOP)
+  - Avoid unnecessary getter and setter.
+  - **Use ID/handle to replace borrow**. Use arena to hold data.
+  - No need to put one object's all data into one struct. Can seperate to different places.
+- Do split borrow in outer scope, and pass related fields separately.
 - **Defer mutation**. Turn mutation as commands and execute later.
 - **Avoid in-place mutation**. Mutate-by-recreate. Use `Arc` to share immutable data. Use **persistent data structure**.
 - For circular reference:
@@ -1362,8 +1364,8 @@ Examples:
 
 ## Other
 
-**Rust prefers data-oriented design. Rust doesn't fit OOP. Rust dislikes sharing mutable data. Rust dislikes circular reference. Rust is unfriendly to observer pattern**. Getter and setter can easily cause contagious borrow issue. Sharing and mutation has many limitations.
+Rust is less convenient and harder to learn than other mainstream languages.
 
-**Rust is less flexible and does not suit quick iteration** (unless you are a Rust expert).
+One important purpose of Rust is to **avoid Heisenbugs**. Most Heisenbugs are related to memory safety, thread safety and mutation. 
 
 Rust's constraints apply to **both human and AI**. In a large C/C++ codebase, both human and AI can accidentally break memory safety and thread safety in **non-obvious way**. Rust can protect against that. Popular open source projects are often flooded with AI-generated PR. Rust makes reviewing PR easier: as long as CI passes and it doesn't use `unsafe`, it won't break memory and thread safety. Note that Rust doesn't protect against many kinds logical error.
