@@ -72,9 +72,9 @@ func (o *SomeObject) DoSomeOtherThing() {
 
 ![](circular/deadlock_one.drawio.png)
 
-These code examples are simplified. In real-world applications, the deadlock is often not obvious. The locking operations may be hidden by abstractions.
+**These examples are simplified. The real-world deadlocks are less obvious and often only trigger in specific conditions.** Some deadlocks rarely trigger and are hard to reproduce.
 
-Also, in production environments, deadlocks often rarely trigger (the frequently-triggered ones are caught during testing). Sometimes retrying can solve deadlock, but it may cause livelock explained below.
+Sometimes retrying can solve deadlock. Retrying may evade the specific condition that deadlock relies on. But retrying may cause livelock, explained below.
 
 ## Lock-free deadlock
 
@@ -104,10 +104,10 @@ Note that Golang channel buffer must have a constant size limit. There are packa
 
 Different choices of channel buffer:
 
-- Use fixed-size buffer. When channel is full, producer blocks, this gives **back pressure**. It can avoid out-of-memory or disk full. But it can indirectly block user's request.
+- Use fixed-size buffer. When channel is full, producer blocks, this gives **back pressure**. It can avoid out-of-memory or disk full. It's often better for stability (only block some requests rather than letting whole system crash).
 - Use unbounded buffer:
   - If buffer is in-memory, it can **out-of-memory if big burst occurs**.
-  - Use disk-backed event queue, such as Kafka. Disk can hold more data than memory, but it's still finite. Kafka discards messages according to retention policy.
+  - Use disk-backed event queue, such as Kafka. Disk can hold more data than memory, but it's still finite. Kafka discards messages according to retention policy. If disk space is used up, there may be other issues (e.g. database may fail to write).
 
 ### Buffered channels can still deadlock
 
@@ -337,7 +337,7 @@ React effect triggers in next iteration of event loop so it won't directly dead 
 
 If there is a partial ordering, and edge can only be formed follow the order, then cycle cannot exist.
 
-Although cycle is a global property, ordering is a local property that can trasitively propagate to global ($a < b \land b < c \Rightarrow a < c$).
+Although cycle is a global property, **ordering is a local property that can trasitively propagate to global** ($a < b \land b < c \Rightarrow a < c$).
 
 If there is a globally uniform ordering of acquiring locks, then deadlock won't occur. For example, if there are two locks `lock1` and `lock2`, if I ensure that `lock1`'s locking order if before `lock2`, then there won't be the case that a thread acquired `lock2` and is acquiring `lock1`. Then in resource allocation graph, the path from `lock2` to `lock1` cannot be formed. So deadlock can be prevented.
 
@@ -450,7 +450,7 @@ Note that reverse state monad is still in a normal Haskell program. It cannot ma
 
 ### Limitations of Haskell lazy evaluation
 
-Haskell lazy evaluation is tied to evaluation order. For `a || b`, it always try to evaluate `a` even if `b` is known to be true. Haskell lazy evaluation cannot be used for solving equations. 
+Haskell lazy evaluation is tied to evaluation order. For `a || b`, it always try to evaluate `a` even if `b` is known to be true. Haskell lazy evaluation cannot be used for solving equations. (Prolog can be used for solving equations)
 
 Lazy evaluation may also cause memory leak. For example, if you have a large list of integers and you compute sum of it. If the sum value is never used, the list will be still kept in memory for possible evaluation.
 
