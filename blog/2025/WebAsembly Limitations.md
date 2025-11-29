@@ -265,6 +265,8 @@ The current workaround is to notify the web workers to make them proactively loa
 
 There is [shared-everything threads proposal](https://github.com/WebAssembly/shared-everything-threads) that aim to fix that.
 
+Although a web worker can keep running for a long time, it cannot accept new messages without finishing current iteration of its own event loop.
+
 If all web workers utitlize browser's event loop and don't block for long time in each execution, then they can coorporatively load new Wasm code by processing web worker message, without much delay.
 
 ## Wasm-JS passing
