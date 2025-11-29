@@ -419,7 +419,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 
 - The upper case and lower case can be different in other natural languages. In Turkish (tr-TR) lowercase of `I` is `ı` and upper case of `i` is `İ`. The `\w` (word char) in regular expression can be locale-dependent.
 - Letter ordering can be different in other natural languages. Regular expression `[a-z]` may malfunction in other locale. 
-- PostgreSQL linguistic sorting (collation) depends on glibc by default. Upgrading glibc may change linguistic order, which may cause index corruption. [See also](https://wiki.postgresql.org/wiki/Locale_data_changes)
+- PostgreSQL linguistic sorting (collation) depends on glibc by default. Upgrading glibc may change linguistic order, which may cause index corruption. [See also](https://wiki.postgresql.org/wiki/Locale_data_changes), [Docker Postgres Image issue](https://x.com/gwenshap/status/1990942970682749183)
 - Text notation of floating-point number is locale-dependent. `1,234.56` in US correspond to `1.234,56` in Germany.
 - CSV normally use `,` as spearator. But in Germany locale separator is `;`.
 - [Han unification](https://en.wikipedia.org/wiki/Han_unification). Some characters in different language with slightly different appearance use the same code point. Usually a font will contain variants for different languages that render these characters differently. [HTML code](https://github.com/qouteall/qouteall-blog/blob/main/blog/2025/unicode-unification-example.html) ![](unicode_unification_example.png)
