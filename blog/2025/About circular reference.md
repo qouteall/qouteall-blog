@@ -263,6 +263,11 @@ The common priority inversion problem involves 3 threads, with low/medium/high p
 - A high-priority thread tries to acquire lock. It cannot and wait for low-priority thread to release lock.
 - Another medium-priority thread keeps running. When medium-priority thread runs, it occupies CPU cores so that low-priority thread cannot run. The high-priority thread's running now indirectly depend on medium-priority thread. If medium-priority thread keeps running, high-priority thread will never run.
 
+
+## SQL deadlock
+
+TODO upgrade from read lock to write lock
+
 ## Circular reference counting leak
 
 Reference counting leaks memory if there exists a cycle of strong references.

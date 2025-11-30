@@ -341,6 +341,16 @@ $$
 E\left[ \frac{\sum _ {i}((X_i - \hat{\mu})^2)}{n-1} \right] = \sigma^2
 $$
 
+### Other measures of "spreadness"
+
+Mean absolute deviation:
+
+$$
+\text{MeanAbsoluteDeviation}[X] = E[ \left| X - E[X] \right| ]
+$$
+
+Sometimes the $E[X]$ is replaced by median value.
+
 ## Z-score
 
 For a random variable $X$, if we know its mean $\mu$ and standard deviation $\sigma$ then we can "standardize" it so that its mean become 0 and standard deviation become 1:

@@ -1167,6 +1167,8 @@ In "The emperor's new cloth" story, "king is clothless" is originally not common
 
 The forming of new common knowledge is often self-reinforcing feedback loop. Once the momentum forms, it can unleash big power.
 
+Herd mentality can cause self-fulfilling prophecy. This is common in market: if many people expect one thing's price will grow, then people tend to buy it now, then its price do grow, vice versa.
+
 Price grow often depends on "delta" of believers, instead of the existing believers. 
 
 [Veblen good](https://en.wikipedia.org/wiki/Veblen_good): higher price induce more demand, unlike normal commodity.

@@ -61,3 +61,8 @@ In `tokio::select`, for each case, you can:
 [Tokio document 1](https://tokio.rs/tokio/tutorial/select#cancellation), [Tokio document2](https://docs.rs/tokio/latest/tokio/macro.select.html#cancellation-safety)
 
 See also: [Making Async Rust Reliable - Tyler Mandry](https://tmandry.gitlab.io/blog/posts/making-async-reliable/)  [400 - Dealing with cancel safety in async Rust / RFD / Oxide](https://rfd.shared.oxide.computer/rfd/400)   [609 - Futurelock / RFD / Oxide](https://rfd.shared.oxide.computer/rfd/0609)  [FuturesUnordered and the order of futures](https://without.boats/blog/futures-unordered/) [Alan tries to cache requests, which doesn't always happen - wg-async](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/alan_builds_a_cache.html) [Barbara gets burned by select](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/barbara_gets_burned_by_select.html) [Cancelling async Rust](https://sunshowers.io/posts/cancelling-async-rust/)
+
+
+## Stackoverflow caused by large future
+
+TODO
