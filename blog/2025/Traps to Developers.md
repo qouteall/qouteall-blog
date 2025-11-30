@@ -24,7 +24,8 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Block formatting context (BFC):
   - `display: flow-root` creates a BFC.
     (There are other ways to create BFC, like `overflow: hidden`, `overflow: auto`, `overflow: scroll`, `display:table`, but with side effects)
-  - Margin collapse. Two vertically touching siblings can overlap margin. Child margin can "leak" outside of parent. Margin collapse can be avoided by BFC. Margin collapse also doesn't happen when `border` or `padding` spcified
+  - Margin collapse. Two vertically touching siblings can overlap margin. Child margin can "leak" outside of parent. Margin collapse can be avoided by BFC. 
+  - Margin collapse doesn't happen when `border` or `padding` spcified. Don't try to debug margin collapse by coloring border. Debug it using browser's devtools.
   - If a parent only contains floating children, the parent's height will collapse to 0. Can be fixed by BFC.
 - [Stacking context](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_positioned_layout/Stacking_context).
   
@@ -313,21 +314,17 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - When getting files in a folder, the order is not deterministic (may depend on inode order). It may behave differently on different machines even with exactly same files. It's recommended to sort by filename then process. Note that `ls` by default sorts results. Use `ls -f` to see raw file order.
 - The order in hash map is also non-deterministic (unless using linked hash map).
 - Transitive dependency conflict. Indirectly use different versions of the same package (diamond dependency issue).
-  - In Java, it's called jar conflict. The conflict is not checked at compile time. May result in `NoSuchMethodError` etc. or weird bugs. 
-    - When using wildcard `*` in classpath, the file order (inode order) may affect jar conflict behavior.
-    - Shading can make two versions of the same package to co-exist.
-  - In node.js, two versions of same package can co-exist. Their `let`, `const` global variables and classes will separately co-exist (but other global variables are shared). If two versions of React use together, it may give "invalid hook call" error. If two versions of a React component library use together, it may have context-related issues.
-  - In Python, pip and uv will give error when installing package if conflict occurs.
+  - In Java, maven will only pick one version. May result in errors like `NoSuchMethodError` at runtime.
+    - Shading can make two versions of the same package co-exist.
+  - In JS, node.js allows two versions of same package to co-exist. Their `let`, `const` global variables and classes will separately co-exist (but other global variables are shared).
+    - If two versions of React are used together, it may give "invalid hook call" error. If two versions of a React component library use together, it may have context-related issues.
+  - Python doesn't allow two versions os same package to co-exist.
   - In C/C++ it may give "duplicate symbol" error during linking.
   - Rust allows two different major versions of same crate to co-exist. It de-duplicates according to semantic versioning ([See also](https://doc.rust-lang.org/cargo/reference/semver.html), [See also](https://effective-rust.com/dep-graph.html)). Their global variables also separately co-exist. [Having two major versions of Tokio causes problem](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/alan_creates_a_hanging_alarm.html#addendum-multiple-tokio-major-versions).
-  - If two libraries dynamically links two versions of same library (e.g. OpenSSL), and multiple versions are both installed in system, dynamic linker may link the incompatible version.
 - IO buffering. 
   - If you don't flush, it may delay actual write. 
-  - If you write a long-running CLI program that don't flush stdout, it works fine when directly running in terminal, but it delays output when used with pipe `|`.
+    - A CLI program that don't flush stdout works fine when directly running in terminal, but it delays output when used with pipe `|`.
   - If program is force-killed (e.g. `kill -9`) some of its last log may not be written to log file. But the most important log is often the last log.
-  - Flushing too frequent may hurt performance.
-
-[^semantic_versioning]: In semantic versioning, changing existing API increments major version. Only adding new API and don't change existing API increments minor version. Small bugfix that does't change API increments patch version. There are some exceptions. If there is a wrongly-designed API that very few people use 
 
 ### Linux and bash
 
@@ -351,7 +348,6 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Kafka's message size limit is 1MB by default.
 - In Kafka, across partitions, consume order may be different to produce order. If key is null then message's partition is not deterministic.
 - In Kafka, if a consumer processes too slow (no acknowledge within `max.poll.interval.ms`, default 5 min), the consumer will be treated as failed, then a rebalance occurs. That timeout is per-batch. If a batch contains too many messages it may reach that timeout, can decrease by `max.poll.records`.
-- Not doing rolling update. This also applies to file update. [Crowdstrike incident](https://www.crowdstrike.com/wp-content/uploads/2024/08/Channel-File-291-Incident-Root-Cause-Analysis-08.06.2024.pdf) and [Cloudflare incident 2025 Nov-18](https://blog.cloudflare.com/18-november-2025-outage/) could impact much smaller if they do rolling update to files.
 
 ### React
 
