@@ -21,12 +21,12 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - Percentage `margin-top` `margin-bottom` `padding-top` `padding-bottom` use parent width as base value, not height.
   - Margin collapse happens vertically but not horizontally.
   - Some of the above behave differently when layout axis flips (e.g. `writing-mode: vertical-rl`). [See also](https://drafts.csswg.org/css-writing-modes-4/#abstract-box)
-- Block formatting context (BFC):
-  - `display: flow-root` creates a BFC.
-    (There are other ways to create BFC, like `overflow: hidden`, `overflow: auto`, `overflow: scroll`, `display:table`, but with side effects)
-  - Margin collapse. Two vertically touching siblings can overlap margin. Child margin can "leak" outside of parent. Margin collapse can be avoided by BFC. 
+- Margin collapse.
+  - Two vertically touching siblings can overlap vertial margin. Child vertical margin can "leak" outside of parent.
   - Margin collapse doesn't happen when `border` or `padding` spcified. Don't try to debug margin collapse by coloring border. Debug it using browser's devtools.
-  - If a parent only contains floating children, the parent's height will collapse to 0. Can be fixed by BFC.
+  - Margin collapse can be fixed by block formatting context (BFC). `display: flow-root` creates a BFC. (There are other ways to create BFC, like `overflow: hidden`, `overflow: auto`, `overflow: scroll`, `display:table`, but with side effects)
+- If a parent only contains floating children, the parent's height will collapse to 0, and the floating children will leak. Can be fixed by BFC.
+- If the parent's `display` is `flex` or `grid`, then the child's `float` has no effect
 - [Stacking context](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_positioned_layout/Stacking_context).
   
   In these cases, it will start a new stacking context:
@@ -38,20 +38,19 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - `isolation: isolate`
   - ...
   
-   Stacking context can cause these behaviors:
+   Stacking context can cause these behaviors: [^stacking_context_impl]
   
   - `z-index` doesn't work across stacking contexts. It only works within a stacking context.
-  - Stacking context can affect the coordinate of `position: absolute` or `fixed`. (The underlying logic is complex, [see also](https://developer.mozilla.org/en-US/docs/Web/CSS/position) )
-  - `position: sticky` doesn't work across stacking context.
-  - `overflow: visible` will still be clipped by stacking context
-  - `background-attachment: fixed` will position based on stacking context
+  - Stacking context can affect the coordinate of `position: absolute` or `fixed`. (The underlying logic is complex, [see also](https://developer.mozilla.org/en-US/docs/Web/CSS/position))
+  - `position: sticky` doesn't work across stacking contexts.
+  - `overflow: visible` will still be clipped by stacking context.
+  - `background-attachment: fixed` will position based on stacking context.
   - `opacity` is "relative" to parent. Child `opacity:1` in transparent parent won't make it more opaque than parent.
 
-- On mobile browsers, the top address bar and bottom navigation bar can go out of screen when you scroll down. `100vh` correspond to the height when top bar and bottom bar gets out of screen, which is larger than the height when the two bars are on screen. The modern solution is `100dvh`.
+- On mobile browsers, the top address bar and bottom navigation bar can go out of screen when scrolling down. `100vh` correspond to the height when the two bars gets out of screen, which is larger than the height when the two bars are on screen. The modern solution is `100dvh`.
 - `width: 100vw` makes the width-that-excludes-scrollbar to be `100vw`, which can make the total width (including scrollbar) to horizontally overflow. `width: 100%` can avoid that issue.
 - `position: absolute` is not based on its parent. It's based on its nearest positioned ancestor (the nearest ancestor that has `position` be `relative`, `absolute` or creates stacking context).
 - [`backdrop-filter: blur` does not consider ambient things](https://www.joshwcomeau.com/css/backdrop-filter/#the-issue).
-- If the parent's `display` is `flex` or `grid`, then the child's `float` has no effect
 - If the parent's width/height is not pre-determined, then percent width/height (e.g. `width: 50%`, `height: 100%`) doesn't work. [^percent_width_height]
 - CSS transition doesn't work between `height: 0` and `height: auto`. Solutions:
   - Use JS to set CSS height to `scrollHeight`. 
@@ -75,9 +74,12 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - Parent `visibility: hidden` doesn't enforce all childs to be hidden. If child has `visibility: visible` it will still be shown. This don't apply to `opacity: 0` or `display: none`.
   - An element with `opacity: 0` can still be interacted (e.g. click button). This doesn't apply to `display: none` or `visibility: hidden`.
   - `display: none` removes element from layout. This doesn't apply to `visibility: hidden` or `opacity: 0`.
-- [Cumulative Layout Shift](https://web.dev/articles/cls). It's recommended to specify `width` and `height` attribute in `<img>` to avoid layout shift due to image loading delay.
+- [Cumulative Layout Shift](https://web.dev/articles/cls). 
+  - It's recommended to specify `width` and `height` attribute in `<img>` to avoid layout shift due to image loading delay.
 - File download request is not shown in Chrome dev tool, because it only shows networking in current tab, but file download is treated as in another tab. To inspect file download request, use `chrome://net-export/`.
 - JS-in-HTML may interfere with HTML parsing. For example `<script>console.log('</script>')</script>` makes browser treat the first `</script>` as ending tag. [See also](https://sirre.al/2025/08/06/safe-json-in-script-tags-how-not-to-break-a-site/)
+
+[^stacking_context_impl]: Browser will draw the stacking context into a seprate "image", then draw the image to web page (or parent stacking context). The weirdness of stacking context are caused by this separate drawing mechanism.
 
 [^percent_width_height]: It avoids circular dependency where parent height is determined by content height, but content height is determined by parent height.)
 
@@ -102,18 +104,19 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - In SQL, `varchar(100)` limits 100 code points (not byte).
 - When reading text data in chunk, don't convert individual chunks to string then concat, as it may cut inside a UTF-8 code point.
 - Some Windows text files have byte order mark (BOM) at the beginning. It's U+FEFF zero-width no-break space (it's normally invisible). FE FF means file is in big-endian UTF-16. EF BB BF means UTF-8. Some non-Windows software doesn't handle BOM.
-- When converting binary data to string, often the invalid places are replaced by � (U+FFFD)
-- [Confusable characters](https://github.com/unicode-org/icu/blob/main/icu4c/source/data/unidata/confusables.txt). Some examples:
+- When converting binary data to string, often the invalid places are replaced by � (U+FFFD).
+  - Putting binary data to string loses information, except in C++ and Golang. Even in C++ and Golang, it will still lose information after serializing to JSON. It's not recommended to use string to hold binary data. Convert to Base64 to avoid information lost.
+- [Confusable characters](https://github.com/unicode-org/icu/blob/main/icu4c/source/data/unidata/confusables.txt). Some common examples:
   - `"` and `“` `”`. Microsoft Word and Google Doc auto-replace former to latter.
   - – (en dash) and - (minus-hyphen). Google Doc auto-replace -- to en dash.
   - ......
 - Normalization. For example é can be U+00E9 (one code point) or U+0065 U+0301 (two code points). String comparision works on binary data and don't consider normalization.
 - [Zero-width characters](https://ptiglobal.com/the-beauty-of-unicode-zero-width-characters/), [Invisible characters](https://invisible-characters.com/)
-  - For example, there are many spaces: Normal space U+0020, no-break space U+00A0, em space U+2003, many other spaces...
+  - For example, there are many spaces: Normal space U+0020, no-break space U+00A0, em space U+2003, ......
 - Line break. Windows often use CRLF `\r\n` for line break. Linux and macOS often use LF `\n` for line break.
 - Locale ([elaborated below](#locale)).
 
-[^scalar_value]: The U+XXXX notation (XXXX is a hex value) represents a code point. There is some ambiguity of "code point". In UTF-16, for a code point formed by two code units (4 bytes), its two individual code units are also code points, but these two are surrogate code points. It can be seen as both one code point and two code points, which is confusing. The code points from U+D800 to U+DFFF are called surrogate code points. The code points that are not surrogate are called scalar values. For that code point formed by two code units (4 bytes), it's one scalar value, it's also two surrogate code points. From string semantic value, it should be seen as one code point (scalar value). This ambiguity doesn't exist in UTF-8. In this article, code point refers to scalar value.
+[^scalar_value]: The U+XXXX notation (XXXX is a hex value) represents a code point. There is some ambiguity of "code point" in UTF-16. In UTF-16, for a code point formed by two code units (4 bytes), its two individual code units are also code points, but these two are surrogate code points. It can be seen as both one code point and two code points, which is confusing. The code points from U+D800 to U+DFFF are called surrogate code points. The code points that are not surrogate are called scalar values. For that code point formed by two code units (4 bytes), it's one scalar value, it's also two surrogate code points. From string semantic value, it should be seen as one code point (scalar value). This ambiguity doesn't exist in UTF-8. In this article, code point refers to scalar value.
 
 [^string_encoding]: Strictly speaking, they use [WTF-16](https://simonsapin.github.io/wtf-8/#ill-formed-utf-16) encoding, which is similar to UTF-16 but allows invalid surrogate pairs. That encoding is for API and is not necessarily the actual in-memory representation. For example, Java has an optimization that use Latin-1 encoding (1 byte per code point) for in-memory string if possible.
 
@@ -188,10 +191,9 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - Interface `nil` weird behavior. Interface pointer is a fat pointer containing type info and data pointer. If the data pointer is null but type info is not null, then it will not equal `nil`.
   - Receiving from or sending to `nil` channel blocks forever.
 - Before Go 1.22, [loop variable capture issue](https://go.dev/blog/loopvar-preview).
-- [Accidental capturing of mutable local variable](https://gaultier.github.io/blog/a_million_ways_to_data_race_in_go.html#accidental-capture-in-a-closure-of-an-outer-variable) (not loop variable).
 - Different kinds of timeout. [The complete guide to Go net/http timeouts](https://blog.cloudflare.com/the-complete-guide-to-golang-net-http-timeouts/)
 - Having interior pointer to an object keeps the whole object alive. This may cause memory leak.
-- Forgetting to cancel context cause `<-ctx.Done()` to deadlock (except for context created by `context.WithValue`).
+- Forgetting to cancel context cause `<-ctx.Done()` to deadlock.
 - For `WaitGroup`, `Add` must be called before `Wait`. Don't `Add` in a new goroutine (unless with proper synchronization).
 - `sync.Mutex` should be passed by pointer not value. Same applies to `sync.WaitGroup` `sync.Cond` `net.Conn` etc. But slices, maps and channels can be passed by value.
 
@@ -415,7 +417,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 
 - The upper case and lower case can be different in other natural languages. In Turkish (tr-TR) lowercase of `I` is `ı` and upper case of `i` is `İ`. The `\w` (word char) in regular expression can be locale-dependent.
 - Letter ordering can be different in other natural languages. Regular expression `[a-z]` may malfunction in other locale. 
-- PostgreSQL linguistic sorting (collation) depends on glibc by default. Upgrading glibc may change linguistic order, which may cause index corruption. [See also](https://wiki.postgresql.org/wiki/Locale_data_changes), [Docker Postgres Image issue](https://x.com/gwenshap/status/1990942970682749183)
+- PostgreSQL linguistic sorting (collation) depends on glibc by default. Upgrading glibc may cause index corruption due to changing of linguistic order. [See also](https://wiki.postgresql.org/wiki/Locale_data_changes). Related: [Docker Postgres Image issue](https://x.com/gwenshap/status/1990942970682749183)
 - Text notation of floating-point number is locale-dependent. `1,234.56` in US correspond to `1.234,56` in Germany.
 - CSV normally use `,` as spearator. But in Germany locale separator is `;`.
 - [Han unification](https://en.wikipedia.org/wiki/Han_unification). Some characters in different language with slightly different appearance use the same code point. Usually a font will contain variants for different languages that render these characters differently. [HTML code](https://github.com/qouteall/qouteall-blog/blob/main/blog/2025/unicode-unification-example.html) ![](unicode_unification_example.png)

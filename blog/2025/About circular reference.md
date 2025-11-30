@@ -109,6 +109,15 @@ Different choices of channel buffer:
   - If buffer is in-memory, it can **out-of-memory if big burst occurs**.
   - Use disk-backed event queue, such as Kafka. Disk can hold more data than memory, but it's still finite. Kafka discards messages according to retention policy. If disk space is used up, there may be other issues (e.g. database may fail to write).
 
+A simple one-goroutine lock-free deadlock:
+
+```go
+ctx, cancel := context.WithCancel(context.Background())
+defer cancel()
+// ...
+<-ctx.Done() 
+```
+
 ### Buffered channels can still deadlock
 
 The previous deadlock can be solved by making channel buffered. However, buffering doesn't solve all lock-free deadlocks. 
