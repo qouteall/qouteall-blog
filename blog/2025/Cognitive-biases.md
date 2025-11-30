@@ -1531,6 +1531,37 @@ LLM's behavior is very context-dependent. Sometimes it will defend the things th
 
 Both human and LLM can "hallucinate" in consistent way. When human forgets something, human tend to make up consistent information to fill the hole in memory. LLM's hallucinations are seemingly plausible (maximize likelihood), not just random. LLM's hallucinations tend to be confident, much more confident than average human.
 
+<details>
+
+There is a misleading diagram about Jagged Intelligence. That diagram cleverily utilizes **framing bias**, as it drawns complex high-dimensional thing as simple two-dimensional thing:
+
+> ![](./cog_bias/misleading_jagged_intelligence.png)
+> 
+> [Link](https://x.com/tomaspueyo/status/1993360931267473662)
+
+Review from Terence Tao:
+
+> This two-dimensional image has been circulating recently as an metaphor for the current state of AI technology. 
+> 
+> It is admittedly an improvement over one-dimensional narratives in which AI development is presented as a linear (or exponential) progression from sub-human to super-human intelligence. However, it is still a significant oversimplification. 
+> 
+> The space of cognitive tasks is not well modeled by either one or two-dimensional spaces, but is instead **extremely high-dimensional**. 
+> 
+> There are now indeed many directions in this pace in which AI tools can, with minimal supervision, achieve better performance than human experts. But, as per the "**curse of dimensionality**", such directions still remain very sparse.  
+> 
+> Also, human performance is also very spiky and diverse; representing this by a single round disk or ball is also somewhat misleading.
+> 
+> **In high dimensions, the greatest increase in volume often comes from taking combinations of smaller, spikier sets**. 
+> 
+> A team of humans working together, or humans complemented by a variety of AI tools, can achieve a significantly greater performance on many tasks than any single human or AI tool could achieve individually, particularly if they are strong in "orthogonal" directions. 
+> 
+> On the other hand, the choice of combination now matters: the wrong combination could lead to a misalignment between the objective and the actual outcome, in which the stated goal may be nominally achieved, but at the cost of several unwanted secondary effects as well.
+> 
+> TLDR: the topic of intelligence is too high-dimensional for any low-dimensional narrative to be perfectly accurate, and one should take any such narratives with a grain of salt.
+> 
+> \- Terence Tao, [Link](https://mathstodon.xyz/@tao/115620261936846090)
+
+</details>
 
 ## Related books
 
