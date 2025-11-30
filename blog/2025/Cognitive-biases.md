@@ -36,7 +36,7 @@ Expectation management is important. If the outcome is good but doesn't meet the
 
 **Shifting baseline syndrome (boiling frog syndrome)**: If the reality keeps changing slowly, the expectation also tend to keep nudging, eventually move a lot without being noticed. This is also common in long-term psychological manipulation.
 
-**Relative deprivation**: When people expect to have something that they don't have, they think they lose that thing, although they don't actually losing it.
+**Relative deprivation**: When people expect to have something that they don't have, they think they lose that thing, although they don't actually losing it. For example, in a bull market, people near you profit 50% but you just profit 20%.
 
 **Door-in-the-face effect**: Firstly make a large request that will likely be rejected, then make a modest request. The firstly made large request changes expectation to make the subsequent modest request easier to accept.
 
@@ -442,7 +442,7 @@ Nominal fallacy: Understand one thing just by its names. Examples:
 
 - Knowing that LLM has "temperature" so think LLM is heat-based algorithm.
 - Knowing that LLM has "token" so think LLM is a Web3 crypto thing.
-- "How can you be against Patriot Act/Safety Bill/Responsible Disclosure? Do you hate your country/want to kill people/be not responsible?" [Link](https://x.com/onehappyfellow/status/1952258485024084118)
+- Thinking that "chip packaging" is just to put chip into a package. It'a actually a complex process.
 
 ### Outcome bias
 
@@ -806,7 +806,7 @@ When learning a new domain of knowledge, it's beneficial to ask "stupid question
 
 One benefit of AI is that you can ask "stupid questions" without being humiliated by experts (but be wary of hallucinations). 
 
-If a "stupid question" doesn't have a sound answer, then maybe something important is overlooked by everyone.
+**If a "stupid question" doesn't have a sound answer, then maybe something important is overlooked by everyone**.
 
 **Simplicity is often confused by familiarity**. If one is very familiar with a complex thing, they tend to think that thing is simple.
 
@@ -858,6 +858,7 @@ The wording of a thing can affect how people perceive it. Examples:
 - "Government subsidy" / "Using taxpayer money"
 - "Risk measurement" / "Risk forecast"
 - "Necessary trade-off" / "Sacrifice"
+- "Flood of refugees" / "Exodus"
 
 The content creator could emphasize one aspect and downplay another aspect, and use different wording or art style to convey different opinions. The people reading the information could be easily influenced by the framing subconsciously.
 
@@ -888,6 +889,8 @@ The price chart is often drawn by making lowest price at the bottom and highest 
 **Reversal of burden of proof**: One common debating technique is to reverse the burden of proof to opponent: "My claim is true because you cannot prove it is false." "You are guilty because you cannot prove you are innocent."
 
 PowerPoint (keynote, slide) medium is good for persuading, but bad for communicating information. PowerPoint medium encourages author to omit imformation instead of writing details. [Amazon bans PowerPoint for internal usage](https://www.inc.com/justin-bariso/amazon-jeff-bezos-powerpoint-meetings-how-to-think.html). See also: [Columbia Space Shuttle Disaster](https://nicholastoole.wordpress.ncsu.edu/disaster-archive-case-study/columbia-space-shuttle-disaster-and-powerpoint/), [Military spaghetti powerpoint](http://warincontext.org/2010/04/29/the-perils-of-powerpoint/).
+
+Analogies also utilize framing bias. For example: "National deficit is like a credit card bill" / "National deficit is like a business investment".
 
 #### Two talking styles
 
@@ -1041,7 +1044,7 @@ Sometimes, if doing something is 10% more difficult, then 50% fewer people will 
 
 [Ask for no, don’t ask for yes](https://www.mooreds.com/wordpress/archives/3518). When asking others to approve something they didn't plan, they tend to not approve or delay approving, as the approver bears responsibility. Just proceed by default and ask for no holds more control and bears more responsibility. 
 
-Software UX design should avoid confronting user with a must-made decision. Making decision consumes mental efforts and gives feeling of risk. The software should have a reasonable default and let user to customize on demand.
+Software UX design should avoid confronting user with a must-be-made decision. Making decision consumes mental efforts and gives feeling of risk. The software should have a reasonable default and let user to customize on demand.
 
 **Status quo bias**: tend to maintain status quo. This is related to risk aversion, as change may cause risk.
 
@@ -1159,7 +1162,7 @@ One similar effect, **in-group bias**: Favoring investments or opinions from peo
 
 [Bystander effect](https://en.wikipedia.org/wiki/Bystander_effect): People are less likely to help a victim in the presence of other people.
 
-[Mimetic desire](https://en.wikipedia.org/wiki/Mimetic_theory): We tend to pursur for thing that other people pursue, not based on personal perferences.
+[Mimetic desire](https://en.wikipedia.org/wiki/Mimetic_theory): We tend to pursue for thing that other people pursue, not based on personal perferences.
 
 Pack journalism: When journalists communicate together, their views tend to converge to the same.
 
@@ -1235,7 +1238,7 @@ We tend to regret doing something in short term, but regret not doing something 
 > 
 > \- Jeff Bezos
 
-**The more non-trivial things you do, the more mistakes you will make**. No one can make no mistakes when doing many non-trivial things. However, **company KPIs often has large weight on punishing mistakes** (loss aversion in KPI design). This cause veteran employees learn to do non-trivial things as few as possible and as conservative as possible. 
+**The more non-trivial things you do, the more mistakes you will make**. No one can make no mistake when doing non-trivial things. However, **company KPIs often have large weight on punishing mistakes** (loss aversion). This cause veteran employees learn to be overly conservative, resulting in lower competitiveness of the whole company.
 
 ### Risk compensation
 
@@ -1243,7 +1246,7 @@ Having safety measures make people feel safer and take more risks.
 
 For example, drivers may drive faster when safety belt is on, and cyclists may ride faster when wearing helmet.
 
-People tend to be overconfident in familiar situations, but that's where accidents likely to occur:
+People tend to be overconfident in familiar situations, but that's where accidents are likely to occur:
 
 > Most accidents (69%) occurred on slopes that were very familiar to the victims. Fewer accidents occurred on slopes that were somewhat familiar (13%) and unfamiliar (18%) to the victim.
 >
@@ -1296,7 +1299,7 @@ Memorizing is lossy compression. Recall is lossy decompression, where details ca
 
 > I have a pet theory that when people introspect about themselves, their brain sometimes just scrambles to generate relevant content. So they feel like they're gaining insight into deeper parts of themselves when they're actually just inventing it on the fly.
 > 
-> - Amanda Askell, [Link](https://x.com/AmandaAskell/status/1931786539002105905)
+> \- Amanda Askell, [Link](https://x.com/AmandaAskell/status/1931786539002105905)
 
 **Information is costly to store, and even more costly to index and query**. Sometimes forgetting is just not being able to query the specific memory that is stored in brain (and may be recalled if some cue were found that enables querying it). The "querying capacity" of brain is limited and can be occupied by distracting things. [^about_database]
 
@@ -1440,7 +1443,7 @@ This is related to information addiction. **Randomized things give more informat
 
 Just knowing one should do something is far from actually doing it.
 
-Fantasy realization theory: When thinking about the desired future, one may get satisfied by the imagination, becoming less motivated to pay efforts to achieve it. The subcouncious sometimes don't distinguish between imagination and reality. Only when one actively compare reality and imagination, do one get motivated. [See also](https://compass.onlinelibrary.wiley.com/doi/10.1111/spc3.12271)
+Fantasy realization theory: When thinking about the desired future, one may get satisfied by the imagination, becoming less motivated to pay efforts to achieve it. The subcouncious sometimes doesn't distinguish between imagination and reality. Only when one actively compares reality and imagination, do one get motivated. [See also](https://compass.onlinelibrary.wiley.com/doi/10.1111/spc3.12271)
 
 It also involves the tradeoff between short-term reward and long-term reward. Long-termism is to sacrifice short-term reward for larger long-term reward. Related factors:
 
