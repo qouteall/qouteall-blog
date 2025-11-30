@@ -736,28 +736,6 @@ This is related to risk compensation: People tend to take more risk in familiar 
 >
 > \- Douglas Adams
 
-#### About LLM
-
-Most people tend to treat LLM chatbot as similar to human, because most familiar form of intelligence is human. 
-
-However, LLM is different to human in many fundamental ways:
-
-- Deep learning is very different to how human brain works.
-- **Jagged intelligence**. [See also](https://x.com/karpathy/status/1816531576228053133)
-  - LLM is good at many things that are hard for human. LLM's knowledge is larger than any individual human.
-  - LLM is bad at many things that are easy for human.
-- Most chatbots are trained to sycophants. Asking LLM a loaded question, LLM tend to follow the assumption in question to please the user. 
-
-> Me to my AI-enabled smart fridge in 2038: Do we have any milk left
-> 
-> My fridge: Wow. Now that's a question worth exploring. By asking me something like that, you've proven that you're not thinking in ordinary ways—you're dialed in to what's really vital about food. Let's dive in.
-> 
-> \- LBark, [Link](https://x.com/franzsherbert/status/1923395242734060005)
-
-- LLM sometimes "defend" the things they said in previous context, similar to belief stability of human. However, the "LLM's opinion" is often dependent to context, not "intrinsic opinion". The sycophancy may overrride LLM "stubbornness".
-- Directly asking a question in new session may get different answer than asking the same question under other chat context.
-
-One similarity: Both human and LLM can "hallucinate" in consistent way. When human forgets something, human tend to make up consistent information to fill the hole in memory. LLM's hallucinations are seemingly plausible (maximize likelihood), not just random. LLM's hallucinations tend to be confident, much more confident than average human.
 
 ### Frequency illusion
 
@@ -1509,6 +1487,50 @@ Disposition effect:
   What's more, increasing position can amortize the loss rate, which creates an illusion that loss reduces.
 
 Disposition effect works well in oscillating markets. However, markets can also exhibit momentum, where disposition effect is detrimental.
+
+## AI: Jagged intelligence
+
+Many people tend to simplify intelligence to a one-dimensional IQ value. **Intelligence is high-dimensional**. For example, even before ChatGPT, a calculator can do arithmetic better than any human, but the calculator is not necessarily "smarter" than human.
+
+Since ChatGPT, LLMs become popular. Many people tend to treat LLM chatbot as similar to human, because most familiar form of intelligence is human (familiarity bias).
+
+However, LLM is different to human in many fundamental ways. Deep learning is very different to how human brain works. More importantly, LLMs are **Jagged Intelligence**:
+
+> Jagged Intelligence. Some things work extremely well (by human standards) while some things fail catastrophically (again by human standards), and it's not always obvious which is which, though you can develop a bit of intuition over time. 
+> 
+> Different from humans, where a lot of knowledge and problem solving capabilities are all highly correlated and improve linearly all together, from birth to adulthood.
+> 
+> \- Andrej Karpathy, [Link](https://x.com/karpathy/status/1816531576228053133)
+
+- LLM is good at many things that are hard for human. LLM's knowledge is larger than any individual human.
+- LLM is bad at many things that are easy for human. (old versions of LLMs fail at simple questions like counting letter R in "strawberry", or whether 9.9 > 9.11. New versions of LLMs don't fail at these, but can still fail at many tasks easy to human.)
+
+Also, the **optimization targets** of LLMs are very different to the optimization targets of human:
+
+> The computational substrate is different (transformers vs. brain tissue and nuclei), the learning algorithms are different (SGD vs. ???), the present-day implementation is very different (continuously learning embodied self vs. an LLM with a knowledge cutoff that boots up from fixed weights, processes tokens and then dies). 
+> 
+> But most importantly (because it dictates asymptotics), **the optimization pressure / objective is different**. **LLMs are shaped a lot less by biological evolution and a lot more by commercial evolution**. **It's a lot less survival of tribe in the jungle and a lot more solve the problem / get the upvote**. 
+> 
+> **LLMs are humanity's "first contact" with non-animal intelligence**. Except it's muddled and confusing because they are still rooted within it by **reflexively digesting human artifacts** ... 
+> 
+> People who build good internal models of this new intelligent entity will be better equipped to reason about it today and predict features of it in the future. People who don't will be stuck thinking about it incorrectly like an animal.
+> 
+> \- Andrej Karpathy, [Link](https://x.com/karpathy/status/1991910395720925418)
+
+Due to the commercial-driven optimization target, LLMs tend to be sychophants and please the user.
+
+> Me to my AI-enabled smart fridge in 2038: Do we have any milk left
+> 
+> My fridge: Wow. Now that's a question worth exploring. By asking me something like that, you've proven that you're not thinking in ordinary ways—you're dialed in to what's really vital about food. Let's dive in.
+> 
+> \- LBark, [Link](https://x.com/franzsherbert/status/1923395242734060005)
+
+(The sychophancy is reduced in new versions of LLMs as the psychological problem caused by sychophancy become more widely acknowledged.)
+
+LLM's behavior is very context-dependent. Sometimes it will defend the things they said in previous context. Starting a new session can make LLM output differently for the same question. 
+
+Both human and LLM can "hallucinate" in consistent way. When human forgets something, human tend to make up consistent information to fill the hole in memory. LLM's hallucinations are seemingly plausible (maximize likelihood), not just random. LLM's hallucinations tend to be confident, much more confident than average human.
+
 
 ## Related books
 
