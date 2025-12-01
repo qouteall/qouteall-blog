@@ -78,6 +78,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - It's recommended to specify `width` and `height` attribute in `<img>` to avoid layout shift due to image loading delay.
 - File download request is not shown in Chrome dev tool, because it only shows networking in current tab, but file download is treated as in another tab. To inspect file download request, use `chrome://net-export/`.
 - JS-in-HTML may interfere with HTML parsing. For example `<script>console.log('</script>')</script>` makes browser treat the first `</script>` as ending tag. [See also](https://sirre.al/2025/08/06/safe-json-in-script-tags-how-not-to-break-a-site/)
+- Virtual scrolling breaks Ctrl-F search.
 
 [^stacking_context_impl]: Browser will draw the stacking context into a seprate "image", then draw the image to web page (or parent stacking context). The weirdness of stacking context are caused by this separate drawing mechanism.
 
@@ -179,7 +180,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Literal number starting with 0 will be treated as octal number. (`0123` is 83)
 - When debugging, debugger will call `.toString()` to local variables. Some class' `.toString()` has side effect, which cause the code to run differently under debugger. This can be disabled in IDE.
 - Before [Java24](https://openjdk.org/jeps/491) virtual thread can be "pinned" when blocking on `synchronized` lock, which may cause deadlock. It's recommended to upgrade to Java 24 if you use virtual thread.
-- It's not recommended to override `finalize()`. If `finalize()` runs too slow, it can block GC. Exceptions out of `finalize()` are not logged. A dead object can resurrect itself in `finalize()`, and if a resurrected object become dead again, `finalize()` won't be called again. Use [`Cleaner`](https://docs.oracle.com/javase/9/docs/api/java/lang/ref/Cleaner.html) for GC-directed disposal.
+- It's not recommended to override `finalize()`. `finalize()` running too slow blocks GC and cause memory leak. Exceptions out of `finalize()` are not logged. A dead object can resurrect itself in `finalize()`, and if a resurrected object become dead again, `finalize()` won't be called again. Use [`Cleaner`](https://docs.oracle.com/javase/9/docs/api/java/lang/ref/Cleaner.html) for GC-directed disposal.
 
 ### Golang
 

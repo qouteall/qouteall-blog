@@ -213,11 +213,13 @@ People tend to fight the things that oppose their desire. Examples:
 
 Providing external reward may reduce internal motivation (overjustification effect). Training child to clean room by giving money reward may backfire.
 
+Ironic process theory: Trying to suppress a thought can backfire.
+
 Being helped doesn't always elicit gratitude. The one being helped may feel being inferior in social status, thus helping may cause hatred, especially when reciprocal helping cannot be done.
 
 ### Avoid thinking about death
 
-People tend to avoid thinking about inevitable death because it's unpleasant. People may subcounciously feel like they live forever, then:
+People tend to avoid thinking about inevitable death because it's unpleasant. People may subconsciously feel like they live forever, then:
 
 - People feel like having plenty time to procrastinate
 - People tend to not value the present because "life is permanent"
@@ -232,7 +234,7 @@ Stoicism proposes thinking about death all the time (_memento mori_). Thinking a
 - People tend to justify their previous behavior. Behavior can shape attitudes.
 - People have a tendency to pursuade others by their belief (meme spread).
 
-**Confirmation bias**: People tend to seek and accept the evidences that confirm their beliefs, and reluctant to accept contradictory evidences. Confirmation bias can even make one subcounciously ignore some information.
+**Confirmation bias**: People tend to seek and accept the evidences that confirm their beliefs, and reluctant to accept contradictory evidences. Confirmation bias can even make one subconsciously ignore some information.
 
 **Motivated reasoning**: when they does not want to accept contradictory evidences, they may make up and believe in **non-falsifiable explanations** to explain the evidence in a way that follows the original belief.
 
@@ -241,7 +243,7 @@ Examples of non-falsifiable explanations:
 - "There is \[a secret evil group\] that controls everything. You don't see evidence of its existence because it's so powerful that it hides all evidences."
 - "The AI doesn't work on your task just because you prompted it wrongly." (without telling how to "prompt correctly".)
 - "You defend yourself so hard because you know you are guilty." ([Kafka trap](https://debate.fandom.com/wiki/Kafka_Trap))
-- "Absolute free-market capitalism is the only correct path. All problems of market is caused by the market being not free enough." ("free enough" is a very high standard that can never be reached)
+- "Absolute free-market capitalism is the only correct path. All problems of market are caused by the market being not free enough." ("free enough" is a very high standard that can never be reached)
 
 **With confirimation bias, more information increases confidence, but doesn't lead to better understanding**.
 
@@ -624,7 +626,7 @@ According to [predictive processing theory](https://en.wikipedia.org/wiki/Predic
 
 [Body transfer illusion (fake hand experiment)](https://x.com/visualfeastwang/status/1788507432961839469)
 
-Prior belief (confirmation bias) can often greatly affect perception. This not only affects recognition of objects, but also affects reading of text. **Under confirmation bias, when reading text, one may skip important words subcounciously**.
+Prior belief (confirmation bias) can often greatly affect perception. This not only affects recognition of objects, but also affects reading of text. **Under confirmation bias, when reading text, one may skip important words subconsciously**.
 
 **Free energy principle**: The brain tries to minimize free energy.
 
@@ -997,10 +999,10 @@ The placebo effect is also possibly related with priming.
 
 **Spontaneous trait transfer**: listeners tend to associate what the talker say to the talker, even when talker is talking about another person:
 
-- If you praise another person, the listeners tend to subcounciously think that you are also good.
-- If you say something bad about another person, the listeners tend to subcounciously think you are also bad.
+- If you praise another person, the listeners tend to subconsciously think that you are also good.
+- If you say something bad about another person, the listeners tend to subconsciously think you are also bad.
 
-Flattering subcounciously increase favorability, even when knowing it's flattering (this even applies to sycophant AI). Saying harsh criticism subcounciously reduce favorability, even when knowing the criticism is beneficial. Placebo still works even when knowing it's placebo.
+Flattering subconsciously increase favorability, even when knowing it's flattering (this even applies to sycophant AI). Saying harsh criticism subconsciously reduce favorability, even when knowing the criticism is beneficial. Placebo still works even when knowing it's placebo.
 
 ## Efficient decision making
 
@@ -1443,7 +1445,7 @@ This is related to information addiction. **Randomized things give more informat
 
 Just knowing one should do something is far from actually doing it.
 
-Fantasy realization theory: When thinking about the desired future, one may get satisfied by the imagination, becoming less motivated to pay efforts to achieve it. The subcouncious sometimes doesn't distinguish between imagination and reality. Only when one actively compares reality and imagination, do one get motivated. [See also](https://compass.onlinelibrary.wiley.com/doi/10.1111/spc3.12271)
+Fantasy realization theory: When thinking about the desired future, one may get satisfied by the imagination, becoming less motivated to pay efforts to achieve it. The subconscious sometimes doesn't distinguish between imagination and reality. Only when one actively compares reality and imagination, do one get motivated. [See also](https://compass.onlinelibrary.wiley.com/doi/10.1111/spc3.12271)
 
 It also involves the tradeoff between short-term reward and long-term reward. Long-termism is to sacrifice short-term reward for larger long-term reward. Related factors:
 

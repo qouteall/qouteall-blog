@@ -600,7 +600,7 @@ Note that the type of Y combinator requires self-reference, although Y combinato
 
 Y combinator gives the fixed point of a lambda term. $Y f = f \ (Y f)$.
 
-### Gödel's incomplete theorem
+### Gödel's incompleteness theorem
 
 Firstly encode symbols, statements and proofs into data. The statements that contain free variables (e.g. x is a free variable in "x is an even number") can also be encoded (it can represent "functions" and even "higher-order functions").
 
@@ -616,7 +616,7 @@ Let `H(x) = unprovable(x(x))`. Then let `G = H(H) = unprovable(H(H)) = unprovabl
 
 The `x(x)` is symbol substitution. replacing the free variable `x` with `x`, while avoid making two different variables same name by renaming when necessary. 
 
-## Error of error of error...
+### In statistics: Error of error of error...
 
 > An error rate can be measured. The measurement, in turn, will have an error rate. The measurement of the error rate will have an error rate ...
 > 
