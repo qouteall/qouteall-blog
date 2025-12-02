@@ -544,6 +544,18 @@ Sometimes a microservice does some initialization on launch. If that initializat
 
 The best solution is to clearly avoid circular dependency. If that circular dependency initialization is really necessary, make initialization run asynchronously (don't block service starting) and use retrying.
 
+## Service overload
+
+One service A calls another service B. If B is nearly overloaded and process requests slowly, A's requests to B tend to hang for long time, then A also accumulates waiting threads/coroutines. They can cause the overload to propagate from B to A.
+
+Another case: if B is nearly overloaded and process requests slowly, when A's requests timeouts, if A retries request, then B will be even more overloaded (most backend services don't implement early cancellation correctly, so closing TCP connection doesn't immeidately free resources of the request [^early_cancellation].)
+
+[^early_cancellation]: It's hard to implement early cancellation. If the client closes TCP connection during request processing, the backend often don't immediately stop request processing code and free its memory immediately. Directly killing a thread is unsafe as it may cause cleanup (free resource, release mutex) to not run or violate an invariant of data structure. The safe way of cancellation is volunteer cancellation (this is different to cooporative cancellation, TODO elaborate).
+
+Circuit breaker aims to solve that issue. It directly prevents request from being sent when target service is overloaded.
+
+About out-of-memory: For GC applications, when the free memory is not enough, it often stuck in long GC pause instead of directly crashing. This cause the TCP connections of it to not close and the callers of that service to continue waiting until timeout. This issue doesn't exist for non-GC applications, as they tend to directly crash when memory is not enough.
+
 ## Circular reference in math
 
 ### Circular proof

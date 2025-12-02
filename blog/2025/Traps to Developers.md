@@ -106,7 +106,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - When reading text data in chunk, don't convert individual chunks to string then concat, as it may cut inside a UTF-8 code point.
 - Some Windows text files have byte order mark (BOM) at the beginning. It's U+FEFF zero-width no-break space (it's normally invisible). FE FF means file is in big-endian UTF-16. EF BB BF means UTF-8. Some non-Windows software doesn't handle BOM.
 - When converting binary data to string, often the invalid places are replaced by � (U+FFFD).
-  - Putting binary data to string loses information, except in C++ and Golang. Even in C++ and Golang, it will still lose information after serializing to JSON. It's not recommended to use string to hold binary data. Convert to Base64 to avoid information lost.
+  - Directly putting binary data to string loses information, except in C++ and Golang. Even in C++ and Golang, it will still lose information after serializing to JSON. It's not recommended to make string directly hold binary data (recommended to use Base64).
 - [Confusable characters](https://github.com/unicode-org/icu/blob/main/icu4c/source/data/unidata/confusables.txt). Some common examples:
   - `"` and `“` `”`. Microsoft Word and Google Doc auto-replace former to latter.
   - – (en dash) and - (minus-hyphen). Google Doc auto-replace -- to en dash.

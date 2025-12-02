@@ -42,16 +42,20 @@ Expectation management is important. If the outcome is good but doesn't meet the
 
 **Protective pessimism**: Being pessimistic can reduce risk of disappointment.
 
-|                | Be optimistic             | Be pessimistic                        |
-| -------------- | ------------------------- | ------------------------------------- |
-| Result is good | Expected. Mild happiness. | Exceeds expectation. Large happiness. |
-| Result is bad  | Large disappointment.     | Expected. Mild disappointment.        |
+|                | Be optimistic             | Be pessimistic                                                   |
+| -------------- | ------------------------- | ---------------------------------------------------------------- |
+| Result is good | Expected. Mild happiness. | Exceeds expectation. Large happiness. [^pessimistic_good_result] |
+| Result is bad  | Large disappointment.     | Expected. Mild disappointment.                                   |
+
+[^pessimistic_good_result]: True pessimists will still worry when result is good.
 
 Procrastination is also related to protective pessimism. If you believe that the outcome will be bad, then reducing cost (time and efforts put into it) is "beneficial".
 
 ### Loss aversion and risk aversion
 
-In real life, some risks are hard to reverse or are irreversible, so avoiding risk is more important than gaining. In investment, losing 10% requires gaining 11.1% to recover, and losing 50% requires gaining 100% to recover. Keep staying in the game is important as it makes one exposed to future opportunities.
+In real life, some risks are hard to reverse or are irreversible, so avoiding risk is more important than gaining. In investment, losing 10% requires gaining 11.1% to recover, and losing 50% requires gaining 100% to recover. 
+
+Keep staying in the game is important, as it makes one exposed to future opportunities.
 
 So, losses have a larger mental impact than gains of the same size. The pain of losing \$100 is bigger than the happiness of gaining \$100.
 
@@ -146,7 +150,7 @@ In a complex world, **one event can have two contradicting interpretations**. Fo
   - Bearish: that great profit was anticipted and priced in. The potential is being exhausted.
   - Bullish: that company is growing fast.
 - A large company buys a startup at high price.
-  - Bearish: the large company is trapped in bureaucracy. It cannot compete with the startup despite having more resources.
+  - Bearish: the large company is trapped in mismanagement. It cannot compete with the startup despite having more resources.
   - Bullish: the startup's business will synergize with the large company's. It's a strategic move.
 
 People make execuses about their prediction failure, such as:
@@ -444,7 +448,7 @@ Nominal fallacy: Understand one thing just by its names. Examples:
 
 - Knowing that LLM has "temperature" so think LLM is heat-based algorithm.
 - Knowing that LLM has "token" so think LLM is a Web3 crypto thing.
-- Thinking that "chip packaging" is just to put chip into a package. It'a actually a complex process.
+- Thinking that "chip packaging" is just to put chip into a package. It's actually a complex process.
 
 ### Outcome bias
 
@@ -618,7 +622,7 @@ Even so, writing the idea down may be still not enough, because **natural langua
 
 Having ideas is easy and cheap. If you search the internet carefully you are likely to find ideas similar to yours. The important is to validate and execute the idea.
 
-Analogies are useful for explaining things to others, but not good for accurately thinking. It makes one ignore the nuance difference between the analog and the real thing.
+Analogies are useful for explaining things to others, but not good for accurate thinking. It makes one ignore the nuance difference between the analog and the real thing.
 
 ### Predictive processing
 
@@ -707,7 +711,7 @@ When judging on other people's decisions, people often just see visible downside
 
 **Saliency bias**: We pay attention to the salient things that grab attention. The things that we don't pay attention to are ignored. **Attention** is a core mechanism of how brain works [^about_attention].
 
-[^about_attention]: Related: modern deep learning also relies on attention mechanism (transformer).
+[^about_attention]: Related: modern deep learning also relies on attention mechanism (transformer). Note that the "attention" in deep learning is very different to "attenion" of human brain.
 
 ### Anecdotal fallacy
 
