@@ -136,20 +136,56 @@ func goroutineB(aToB chan string, bToA chan string) {
 }
 ```
 
-Also, if buffer is fixed-sized, when buffer is full, it may still deadlock, but more rare. TODO elaborate
+Also, if buffer is fixed-sized, when buffer is full, it may still deadlock. Example
 
-### IO pipe deadlock
+```go
+results := make(chan int, 100)
+var wg sync.WaitGroup
+wg.Add(1)
+go func() {
+    defer wg.Done()
+    for i := 0; i < 200; i++ {
+        results <- i
+    }
+}()
+wg.Wait()
+```
+
+### Pipe buffer full deadlock
 
 If a parent process launches a child process and pipes child's stdin and stdout, then:
 
-- If the stdin pipe buffer is full, parent will block when writing to child stdin. It will resume if child reads from stdin.
-- If the stdout pipe buffer is full, child will block when writing to its stdout. It will resume when parent reads from child stdout.
+- If the stdin pipe buffer is full, parent will block when writing to child stdin, until child reads from it.
+- If the stdout pipe buffer is full, child will block when writing to its stdout, until parent reads from it.
 
-It may deadlock. TODO example
+It may deadlock. Example:
 
-### Deadlock caused by IO buffering
+(`cat` when invoked without any argument will read data from stdin and output same data to stdout. The example launches a subprocess `cat` then write large data to its stdin before reading from its stdout.)
 
-TODO
+```go
+cmd := exec.Command("cat")
+
+stdin, err := cmd.StdinPipe()
+if err != nil { panic(err) }
+defer stdin.Close()
+
+stdout, err := cmd.StdoutPipe()
+if err != nil { panic(err) }
+
+err = cmd.Start()
+if err != nil { panic(err) }
+
+largeData := []byte(strings.Repeat("X", 233333)) // larger than pipe buffer
+
+_, err = stdin.Write(largeData) // deadlock here
+if err != nil { panic(err) }
+
+// read from stdout after writing large data
+buf := make([]byte, len(largeData))
+stdout.Read(buf)
+```
+
+The reading and writing to subprocess should use different goroutine.
 
 ## Channel+Lock deadlock
 
@@ -266,7 +302,13 @@ The common priority inversion problem involves 3 threads, with low/medium/high p
 
 ## SQL deadlock
 
-TODO upgrade from read lock to write lock
+In SQL, explicit `select ... for update` will lock rows. But there are also many ways of implicitly lock rows:
+
+- foreign key
+- gap lock
+- TODO
+
+SQL also allows upgrading a read lock to write lock. This can easily cause deadlock. TODO
 
 ## Circular reference counting leak
 

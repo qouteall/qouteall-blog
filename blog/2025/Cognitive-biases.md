@@ -630,8 +630,6 @@ According to [predictive processing theory](https://en.wikipedia.org/wiki/Predic
 
 [Body transfer illusion (fake hand experiment)](https://x.com/visualfeastwang/status/1788507432961839469)
 
-Prior belief (confirmation bias) can often greatly affect perception. This not only affects recognition of objects, but also affects reading of text. **Under confirmation bias, when reading text, one may skip important words subconsciously**.
-
 **Free energy principle**: The brain tries to minimize free energy.
 
 Free energy = Surprise + Change of Belief
@@ -712,6 +710,18 @@ When judging on other people's decisions, people often just see visible downside
 **Saliency bias**: We pay attention to the salient things that grab attention. The things that we don't pay attention to are ignored. **Attention** is a core mechanism of how brain works [^about_attention].
 
 [^about_attention]: Related: modern deep learning also relies on attention mechanism (transformer). Note that the "attention" in deep learning is very different to "attenion" of human brain.
+
+### "Blind" outside of attention
+
+When people pay attention to one thing, they tend to ignore things that are outside of attention.
+
+[Invisible gorilla test](https://en.wikipedia.org/wiki/Inattentional_blindness#Invisible_Gorilla_Test): when subject is asked to count things in basketball match, they ignore the special one wearing gorilla suit.
+
+Prior belief (confirmation bias) can affect perception. This not only affects recognition of objects, but also affects reading of text. **Under confirmation bias, when reading text, one may skip important words subconsciously**.
+
+If the user using software is focused on finishing a task, **when the software pops out a dialog, the user tend to quickly click out the dialog to continue the task, without reading text in dialog**.
+
+[^about_dialog]: If the dialog is very important, then the dialog shouldn't be easily clicked out (e.g. request user to type some text to proceed). If the dialog is not important, it should be replaced by a notification that can be read later.
 
 ### Anecdotal fallacy
 

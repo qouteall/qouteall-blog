@@ -270,6 +270,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - In MySQL (InnoDB) 8.0+, adding unique index or foreign key is mostly concurrent (only briefly lock) and won't block operations. But in older versions it may do whole-table lock.
   - `mysqldump` used without `--single-transaction` cause whole-table read lock.
   - In PostgreSQL, `create unique index` or `alter table ... add foreign key` cause whole-table read-lock. To avoid that, use `create unique index concurrently` to add unique index. For foreign key, use `alter table ... add foreign key ... not valid;` then `alter table ... validate constraint ...`.
+  - In MySQL (InnoDB) an `update` or `delete` that cannot use index may lock the whole table, not just targeted rows.
 - Querying which range a point is in by `select ... from ranges where p >= start and p <= end` is inefficient, even when having composite index of `(start, end)`. [^about_ranges]
 
 [^about_ranges]: It's recommended to use spatial index in MySQL and GiST in PostgreSQL for ranges. For non-overlappable ranges, it's possible to efficiently query using just B-tree index: `select * from (select ... from ranges where start <= p order by start desc limit 1) where end >= p` (only require index of `start` column). 
