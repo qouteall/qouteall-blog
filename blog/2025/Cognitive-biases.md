@@ -159,6 +159,8 @@ People make execuses about their prediction failure, such as:
 - Blame prediction failure to outside factors, e.g. the statistical data is being manipulated, conspiracy theories.
 - Blame that they are just unlucky as the Black Swan event is low-probability. (Black Swan events are rare, but you are still likely to encounter multiple Black Swan events in life.)
 
+Another example: When one don't know an image is AI-generates it looks good. But if one already know it's AI-generated, then many details are seen as "evidence of AI" even if they didn't notice before knowing it's AI.
+
 ### Fundamental attribution error
 
 - Attribute self success by own characteristics (capability, virtue, etc.).
@@ -719,7 +721,7 @@ When people pay attention to one thing, they tend to ignore things that are outs
 
 Prior belief (confirmation bias) can affect perception. This not only affects recognition of objects, but also affects reading of text. **Under confirmation bias, when reading text, one may skip important words subconsciously**.
 
-If the user using software is focused on finishing a task, **when the software pops out a dialog, the user tend to quickly click out the dialog to continue the task, without reading text in dialog**.
+If the user using software is focused on finishing a task, **when the software pops out a dialog, the user tend to quickly click out the dialog to continue the task, without reading text in dialog**. [^about_dialog]
 
 [^about_dialog]: If the dialog is very important, then the dialog shouldn't be easily clicked out (e.g. request user to type some text to proceed). If the dialog is not important, it should be replaced by a notification that can be read later.
 
@@ -1568,7 +1570,7 @@ Review from Terence Tao:
 > 
 > There are now indeed many directions in this pace in which AI tools can, with minimal supervision, achieve better performance than human experts. But, as per the "**curse of dimensionality**", such directions still remain very sparse.  
 > 
-> Also, human performance is also very spiky and diverse; representing this by a single round disk or ball is also somewhat misleading.
+> Also, **human performance is also very spiky and diverse; representing this by a single round disk or ball is also somewhat misleading**.
 > 
 > **In high dimensions, the greatest increase in volume often comes from taking combinations of smaller, spikier sets**. 
 > 
@@ -1578,9 +1580,13 @@ Review from Terence Tao:
 > 
 > TLDR: the topic of intelligence is too high-dimensional for any low-dimensional narrative to be perfectly accurate, and one should take any such narratives with a grain of salt.
 > 
-> \- Terence Tao, [Link](https://mathstodon.xyz/@tao/115620261936846090)
+> [Link](https://mathstodon.xyz/@tao/115620261936846090)
 
 </details>
+
+Also, AI changes people's value judgement. Before ChatGPT if people see a long article with good writing style they would think the author payed efforts in writing it. But now AI can easily write a long article with similar vibe.
+
+Interestingly, people tend to **judge the value of art by the cost of producing**. If one sees a beautiful image and thinks it's good art, then when they know it's AI-generated, the same image suddenly becomes cheap.
 
 ## Related books
 
