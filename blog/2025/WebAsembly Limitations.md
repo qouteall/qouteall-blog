@@ -45,6 +45,7 @@ The linear memory doesn't hold these things:
 
 - Linear memory doesn't hold the stack. The stack managed by runtime and cannot be read/written by address.
 - The linear memory doesn't hold function references. Unlike function pointers in C, Wasm function references cannot be converted to and from integers. This design can improve safety. A function reference can be on stack or on table or in global, and can be called by special instructions [^function_call_instructions]. Function pointer becomes integer index corresponding to a function reference in table.
+- The linear memory don't hold the globals. Globals don't have address. C/C++/Rust globals are placed in linear memory to have addresses.
 
 [^function_call_instructions]: `call_ref` calls a function reference on stack. `call_indirect` calls a function reference in a table in an index. `return_call_ref`, `return_call_indirect` are for tail call.
 
@@ -174,7 +175,7 @@ for (;;) {
 
 [^web_event_loop]: That's a simplification. Actually there are two event queues in each main thread per tab. One is callback queue for low-priority events. Another is microtask queue for high-priority events. The high-priority ones execute first.
 
-(The `doRendering()` means rendering image and present in browser, not React component "rendering".)
+(It has two layers of loops. One iteration of outer loop is called "one iteration of event loop".)
 
 New events can be added to event queue in many ways:
 
@@ -265,7 +266,7 @@ The current workaround is to notify the web workers to make them proactively loa
 
 There is [shared-everything threads proposal](https://github.com/WebAssembly/shared-everything-threads) that aim to fix that.
 
-Although a web worker can keep running for a long time, it cannot accept new messages without finishing current iteration of its own event loop.
+Although a web worker can keep running for a long time within one iteration of event loop, it cannot accept new messages without finishing current iteration of event loop.
 
 If all web workers utitlize browser's event loop and don't block for long time in each execution, then they can coorporatively load new Wasm code by processing web worker message, without much delay.
 

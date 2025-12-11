@@ -588,11 +588,12 @@ The best solution is to clearly avoid circular dependency. If that circular depe
 
 ## Service overload
 
-One service A calls another service B. If B is nearly overloaded and process requests slowly, A's requests to B tend to hang for long time, then A also accumulates waiting threads/coroutines. They can cause the overload to propagate from B to A.
+One service A calls another service B. If B is nearly overloaded and process requests slowly, then:
 
-Another case: if B is nearly overloaded and process requests slowly, when A's requests timeouts, if A retries request, then B will be even more overloaded (most backend services don't implement early cancellation correctly, so closing TCP connection doesn't immeidately free resources of the request [^early_cancellation].)
+- A's requests to B tend to hang for long time. A also accumulates waiting threads/coroutines. A will use more memory and threads (may use up threads in thread pool, if thread pool limits thread count).
+- If A's requests timeout and retries, then B will be even more overloaded. (most backend services don't implement early cancellation correctly, so closing TCP connection doesn't immeidately free resources of the request [^early_cancellation].)
 
-[^early_cancellation]: It's hard to implement early cancellation. If the client closes TCP connection during request processing, the backend often don't immediately stop request processing code and free its memory immediately. Directly killing a thread is unsafe as it may cause cleanup (free resource, release mutex) to not run or violate an invariant of data structure. The safe way of cancellation is volunteer cancellation (this is different to cooporative cancellation, TODO elaborate).
+[^early_cancellation]: It's hard to implement early cancellation. If the client closes TCP connection during request processing, the backend often don't immediately stop request processing code and free its memory immediately. Directly killing a thread is unsafe as it may cause cleanup (free resource, release mutex) to not run or violate an invariant of data structure.
 
 Circuit breaker aims to solve that issue. It directly prevents request from being sent when target service is overloaded.
 

@@ -25,6 +25,8 @@ unlisted: true
 
 The bad design: fail-silent. It hide problems. It may cause data corruption unnoticed.
 
+TODO fail open fail close
+
 ## OOP exception
 
 TODO

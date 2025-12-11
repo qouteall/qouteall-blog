@@ -27,7 +27,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - Margin collapse can be fixed by block formatting context (BFC). `display: flow-root` creates a BFC. (There are other ways to create BFC, like `overflow: hidden`, `overflow: auto`, `overflow: scroll`, `display:table`, but with side effects)
 - If a parent only contains floating children, the parent's height will collapse to 0, and the floating children will leak. Can be fixed by BFC.
 - If the parent's `display` is `flex` or `grid`, then the child's `float` has no effect
-- [Stacking context](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_positioned_layout/Stacking_context).
+- [Stacking context](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_positioned_layout/Stacking_context):
   
   In these cases, it will start a new stacking context:
   
@@ -50,16 +50,16 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - On mobile browsers, the top address bar and bottom navigation bar can go out of screen when scrolling down. `100vh` correspond to the height when the two bars gets out of screen, which is larger than the height when the two bars are on screen. The modern solution is `100dvh`.
 - About scrollbar:
   - In Windows, scrollbar takes space. But in macOS it doesn't take space by default.
-  - `width: 100vw` makes the width-that-excludes-scrollbar to be `100vw`. If there is scrollbar that takes space, it makes the total width (including scrollbar) to horizontally overflow. `width: 100%` can workaround that issue.
-  - The scrollbar is visually between border and padding. Padding separates scrollbar and content box. But in sizing logic, scrollbar is in content box. Scrollbar can "steal" space of inner content across padding. [^css_box_model]
-  - About scrollbar styling: the [standard scroll bar styling](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Scrollbars_styling) supports color and width but doesn't support many other features. The `-webkit` non-standard pseudo-elements supports many features but FireFox doesn't support them. Chrome supports the webkit scrollbar attributes but it doesn't work when standard scrollbar styling is used.
+  - The space occupied by vertical scrollbar is included in width. Scrollbar "steals" space from inner contents. [^css_box_model_scrollbar]
+  - A top-level element with `width: 100vw` overflows horizontally if viewport has scrollbar that takes space. `width: 100%` can workaround that issue.
+  - About scrollbar styling: the [standard scroll bar styling](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Scrollbars_styling) supports color and width but doesn't support many other features. The [`-webkit-scrollbar`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/::-webkit-scrollbar) non-standard pseudo-elements supports many features (e.g. round corner scrollbar) but FireFox doesn't support them. In modern browser, if standard scrollbar styling is used, then the  `-webkit-scrollbar` has no effect.
 - `position: absolute` is not based on its parent. It's based on its nearest positioned ancestor (the nearest ancestor that has `position` be `relative`, `absolute` or creates stacking context).
 - [`backdrop-filter: blur` does not consider ambient things](https://www.joshwcomeau.com/css/backdrop-filter/#the-issue).
 - If the parent's width/height is not pre-determined, then percent width/height (e.g. `width: 50%`, `height: 100%`) doesn't work. [^percent_width_height]
 - CSS transition doesn't work between `height: 0` and `height: auto`. Solutions:
   - Use JS to set CSS height to `scrollHeight`. 
   - Put it in grid and transition from `grid-template-rows: 0fr` to `1fr`. 
-  - Use `calc-size()`, [see also](https://developer.chrome.com/docs/css-ui/animate-to-height-auto) [^calc_size].
+  - Use `calc-size()`, [see also](https://developer.chrome.com/docs/css-ui/animate-to-height-auto) [^calc_size]. [^animate_height_auto]
 - In JS, reading size-related value (e.g. `offsetHeight`) cause browser to re-compute layout which may hurt performance. It can also affect transition animation [^reflow_animation].
 - `display: inline` ignores `width` `height` and `margin-top` `margin-bottom`
 - Whitespace collapse. [See also](https://blog.dwac.dev/posts/html-whitespace/)
@@ -85,7 +85,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - JS-in-HTML may interfere with HTML parsing. For example `<script>console.log('</script>')</script>` makes browser treat the first `</script>` as ending tag. [See also](https://sirre.al/2025/08/06/safe-json-in-script-tags-how-not-to-break-a-site/)
 - Virtual scrolling breaks Ctrl-F (Cmd-F) search.
 
-[^css_box_model]: The CSS box model mentions padding, border and margin, but it doesn't mention scrolling. When scrolling involves it's quite complex. From outer to inner: margin, border, scrollbar and "viewable window". Within "viewable windows", from outer to inner: padding, content. With `box-sizing: content-box`, if it doesn't overflow horizontally, the `width` is the sum of content width and scrollbar width. In Chrome devtools, the area of padding includes scrollbar, but scrollbar is conceptually not in padding. One may ask "if width includes scrollbar, then why `width: 100vw` cause horizontal overflow"? Because `width: 100vw` applies to an element inside viewport, not viewport itself. Viewport width includes viewport's scrollbar.
+[^css_box_model_scrollbar]: The CSS box model mentions padding, border and margin, but it doesn't mention scrolling. Scrollbar is visually between border and padding, but scrollbar occupies space from content box. In Chrome devtools, the padding highlight area includes scrollbar, but scrollbar is not in padding. One may ask "if width includes scrollbar, then why `width: 100vw` cause horizontal overflow"? Because `width: 100vw` applies to an element inside viewport, not viewport itself. Viewport width includes viewport's scrollbar.
 
 [^css_expand]: CSS only try to expand if the available space is finite. In may cases it has infinite vertical space by default.
 
@@ -93,7 +93,9 @@ A summarization of some traps to developers. There traps are unintuitive things 
 
 [^percent_width_height]: It avoids circular dependency where parent height is determined by content height, but content height is determined by parent height.)
 
-[^calc_size]: In Nov 2025 `calc-size` is not yet supported by FireFox and Safari. Also, there is another solution for transition `height: auto`: transitioning `max-height` from 0 to a large value, but I don't recommend it as it will mess up animation timing.
+[^calc_size]: In Nov 2025 `calc-size` is not yet supported by FireFox and Safari. 
+
+[^animate_height_auto]: Also, there is another solution for transition `height: auto`: transitioning `max-height` from 0 to a large value, but I don't recommend it as it will mess up animation timing.
 
 [^reflow_animation]: When adding a new element, initial transition animation won't work by default. But if you read its layout-related value (e.g. `offsetHeight`) between changing animated attribute, it will trigger a reflow and make initial transition work.
 
@@ -378,7 +380,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Closure trap. Closure can capture a state. If the state changes, the closure still captures the old state. 
   - One solution is to make closure not capture state and access state within `useReducer`. 
   - Another solution is to put mutable thing in `useRef` (note that changing value inside ref don't trigger component re-rendering, you need to change state or prop to trigger re-rendering)
-  - Another solution is to add state to effect dependency array. But if the effect manages `setInterval`, doing this will mess up timing.
+  - Another solution is to add state to effect dependency array. But if the effect manages `setInterval`, doing this will make timing inaccurate.
 - `useEffect` firstly runs in next iteration of event loop, after browser renders the web page. Doing initialization in `useEffect` is not early enough and may cause visual flicker. Use `useLayoutEffect` for early initialization.
 
 [^js_string_primitive]: In JS, `string` is primitive type, not object type. In JS you don't need to worry about two strings with same content but different reference like in Java. However the `String` in JS is object and use refernce equality.

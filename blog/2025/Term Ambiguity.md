@@ -44,6 +44,7 @@ A lot of debate happen because same word has different meanings to different peo
 - Routing. Router determine which interface to relay packet to. / Determine which web page based on URL (and other things). / Determine which Restful API by URL (and other things).
 - Token. Text segment for compiler / Text segment to convert to vector for LLM / Secret data for authorization / Representation of digintal asset in blockchain.
 - Balance. Debt / Asset.
+- Nondeterministic / Random. Nondeterministic means it's not determined but doesn't necessarily follow a specific statistical distribution. It may be related to timing, memory layout, implementation detail, etc. Nondeterministic is different to random.
 
 [^rust_unsafe]: The meaning of `unsafe` in Rust is close to the 3rd interpretation. `unsafe` Rust code can be safe. But some people understand "unsafe" as 2nd interpretation. [See also](https://github.com/rust-lang/rfcs/pull/117)
 

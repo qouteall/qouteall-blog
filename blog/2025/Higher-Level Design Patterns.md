@@ -83,7 +83,7 @@ About visual DSL: There are node-based visual DSL (e.g. UE blueprint, Blender no
 
 [System calls are expensive](https://blog.codingconfessions.com/p/what-makes-system-calls-expensive). Replacing system calls with data can improve performance:
 
-- io_uring: allows submitting many IO tasks by writing into memory, then use one system call to submit them. [^io_uring_polling]
+- io_uring: allows adding many IO tasks by writing into memory, then use one system call to submit them. [^io_uring_polling]
 - Graphics API: Old OpenGL use system calls to change state and dispatch draw call. New Graphics APIs like Vulkan, Metal and WebGPU all use command buffer. Operations are turned to data in command buffer, then one system call to submit many commands.
 
 [^io_uring_polling]: It's possible to use polling to fully avoid system call after initial setup, but with costs.
@@ -113,7 +113,7 @@ Mutation can be represented as data. Data can be interpreted as mutation.
 
 The benefits:
 
-- Easier to inspect, audit and debug mutations, because mutations are explicit data, not implicit execution history. Easier to audit and replay.
+- Easier to inspect, audit and debug mutations, because mutations are explicit data, not implicit execution history.
 - Can replay mutations and rollback easily.
 - Can replicate (sync) data change without sending full data.
 - In Rust, [avoid fighting with borrow checker](./How%20to%20Avoid%20Fighting%20Rust%20Borrow%20Checker#defer-mutation-mutation-as-data).
@@ -165,7 +165,7 @@ If data is fully immutable, then recreating a child requires recreating the pare
 
 In CRDT, the operator of combining mutation $*$:
 
-- It must be commutative. $a * b = b * a$. The order of combinding doesn't matter.
+- It must be commutative. $a * b = b * a$. The order of combining doesn't matter.
 - It must be associative. $a * (b * c) = (a * b) * c$. The order of combining doesn't matter.
 - It must be idempotent: $a * a = a$. Duplicating a mutation won't affect result. (Idempotence is not needed if you ensure exactly-once delivery.)
 
