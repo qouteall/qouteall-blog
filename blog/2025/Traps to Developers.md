@@ -17,7 +17,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Horizontal and vertical are different in CSS:
   - Normally `width: auto` tries fill available space in parent. But `height: auto` normally tries to just expand to fit content.
   - For inline elements, inline-block elements and float elements, `width: auto` does not try to expand.
-  - `margin: 0 auto` centers horizontally. But `margin: auto 0` normally become `margin: 0 0` which does not center vertically. But in a flexbox with `flex-direction: column`, `margin: auto 0` can center vertically.
+  - `margin: 0 auto` centers horizontally. But `margin: auto 0` normally become `margin: 0 0` which does not center vertically. But in a flexbox with `flex-direction: column`, `margin: auto 0` can center vertically. [^css_expand]
   - Percentage `margin-top` `margin-bottom` `padding-top` `padding-bottom` use parent width as base value, not height.
   - Margin collapse happens vertically but not horizontally.
   - Some of the above behave differently when layout axis flips (e.g. `writing-mode: vertical-rl`). [See also](https://drafts.csswg.org/css-writing-modes-4/#abstract-box)
@@ -48,7 +48,11 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - `opacity` is "relative" to parent. Child `opacity:1` in transparent parent won't make it more opaque than parent.
 
 - On mobile browsers, the top address bar and bottom navigation bar can go out of screen when scrolling down. `100vh` correspond to the height when the two bars gets out of screen, which is larger than the height when the two bars are on screen. The modern solution is `100dvh`.
-- `width: 100vw` makes the width-that-excludes-scrollbar to be `100vw`, which can make the total width (including scrollbar) to horizontally overflow. `width: 100%` can avoid that issue.
+- About scrollbar:
+  - In Windows, scrollbar takes space. But in macOS it doesn't take space by default.
+  - `width: 100vw` makes the width-that-excludes-scrollbar to be `100vw`. If there is scrollbar that takes space, it makes the total width (including scrollbar) to horizontally overflow. `width: 100%` can workaround that issue.
+  - The scrollbar is visually between border and padding. Padding separates scrollbar and content box. But in sizing logic, scrollbar is in content box. Scrollbar can "steal" space of inner content across padding. [^css_box_model]
+  - About scrollbar styling: the [standard scroll bar styling](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Scrollbars_styling) supports color and width but doesn't support many other features. The `-webkit` non-standard pseudo-elements supports many features but FireFox doesn't support them. Chrome supports the webkit scrollbar attributes but it doesn't work when standard scrollbar styling is used.
 - `position: absolute` is not based on its parent. It's based on its nearest positioned ancestor (the nearest ancestor that has `position` be `relative`, `absolute` or creates stacking context).
 - [`backdrop-filter: blur` does not consider ambient things](https://www.joshwcomeau.com/css/backdrop-filter/#the-issue).
 - If the parent's width/height is not pre-determined, then percent width/height (e.g. `width: 50%`, `height: 100%`) doesn't work. [^percent_width_height]
@@ -64,6 +68,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - Often the spaces in the beginning and end of content are ignored, but this doesn't happen in `<a>`.
   - Any space or line break between two `display: inline-block` elements will be rendered as spacing. This doesn't happen in flexbox or grid.
 - `text-align` aligns text and inline things, but doesn't align block elements (e.g. normal divs).
+- `text-align: center` will not center when content is too wide. It will align left in that case. [See also](https://stackoverflow.com/questions/6618648/can-overflow-text-be-centered)
 - By default `width` and `height` doesn't include padding and border. `width: 100%` with `padding: 10px` can still overflow the parent. `box-sizing: border-box` make the width/height include border and padding.
 - About override:
   - CSS import order matters. The latter-imported ones can override the earlier ones.
@@ -78,7 +83,11 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - It's recommended to specify `width` and `height` attribute in `<img>` to avoid layout shift due to image loading delay.
 - File download request is not shown in Chrome dev tool, because it only shows networking in current tab, but file download is treated as in another tab. To inspect file download request, use `chrome://net-export/`.
 - JS-in-HTML may interfere with HTML parsing. For example `<script>console.log('</script>')</script>` makes browser treat the first `</script>` as ending tag. [See also](https://sirre.al/2025/08/06/safe-json-in-script-tags-how-not-to-break-a-site/)
-- Virtual scrolling breaks Ctrl-F search.
+- Virtual scrolling breaks Ctrl-F (Cmd-F) search.
+
+[^css_box_model]: The CSS box model mentions padding, border and margin, but it doesn't mention scrolling. When scrolling involves it's quite complex. From outer to inner: margin, border, scrollbar and "viewable window". Within "viewable windows", from outer to inner: padding, content. With `box-sizing: content-box`, if it doesn't overflow horizontally, the `width` is the sum of content width and scrollbar width. In Chrome devtools, the area of padding includes scrollbar, but scrollbar is conceptually not in padding. One may ask "if width includes scrollbar, then why `width: 100vw` cause horizontal overflow"? Because `width: 100vw` applies to an element inside viewport, not viewport itself. Viewport width includes viewport's scrollbar.
+
+[^css_expand]: CSS only try to expand if the available space is finite. In may cases it has infinite vertical space by default.
 
 [^stacking_context_impl]: Browser will draw the stacking context into a seprate "image", then draw the image to web page (or parent stacking context). The weirdness of stacking context are caused by this separate drawing mechanism.
 
