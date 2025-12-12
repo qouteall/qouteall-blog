@@ -580,24 +580,38 @@ It works fine when there is no cycle in network topology. But when there is a cy
 
 This is solved in spanning tree protocol, where switches share topology information with each other, then break the loop.
 
-## Service circular dependency
+## Service overload feedback loop
 
-Sometimes a microservice does some initialization on launch. If that initialization requires using another microservice, then it creates a dependency. If dependency forms cycle, they cannot launch after crashing together.
+One service A calls another service B. If B is nearly overloaded and process requests slowly, then A's requests timeout and retries, then B will be even more overloaded. This creates a feedback loop that turns nearly-overloaded to fully down.
 
-The best solution is to clearly avoid circular dependency. If that circular dependency initialization is really necessary, make initialization run asynchronously (don't block service starting) and use retrying.
-
-## Service overload
-
-One service A calls another service B. If B is nearly overloaded and process requests slowly, then:
-
-- A's requests to B tend to hang for long time. A also accumulates waiting threads/coroutines. A will use more memory and threads (may use up threads in thread pool, if thread pool limits thread count).
-- If A's requests timeout and retries, then B will be even more overloaded. (most backend services don't implement early cancellation correctly, so closing TCP connection doesn't immeidately free resources of the request [^early_cancellation].)
+(Most backend services don't implement early cancellation correctly, so closing TCP connection doesn't immeidately free resources of the request [^early_cancellation].)
 
 [^early_cancellation]: It's hard to implement early cancellation. If the client closes TCP connection during request processing, the backend often don't immediately stop request processing code and free its memory immediately. Directly killing a thread is unsafe as it may cause cleanup (free resource, release mutex) to not run or violate an invariant of data structure.
+
+Another factor: when service A's requests to service B hang for long time, A also accumulates waiting threads/coroutines. A will use more resources (memory, threads, coroutines, etc.) and may also overload or down.
 
 Circuit breaker aims to solve that issue. It directly prevents request from being sent when target service is overloaded.
 
 About out-of-memory: For GC applications, when the free memory is not enough, it often stuck in long GC pause instead of directly crashing. This cause the TCP connections of it to not close and the callers of that service to continue waiting until timeout. This issue doesn't exist for non-GC applications, as they tend to directly crash when memory is not enough.
+
+About database and caching: in some systems, the database cannot handle all requests. The database can only handle requests if there is a cache (e.g. Redis) that handles 90% requests in front of database. After cache service restarts, the database overloads because too many requests hit database. Database can only run if cache fills, but cache cannot be filled because database overloads. Solution is to only allow a small set of requests in gateway and gradually increase the limitation. [Cache stampede](https://en.wikipedia.org/wiki/Cache_stampede).
+
+## Break-my-tool outage
+
+An outage can break your tool for solving the outage:
+
+> In order to make that fix, we needed to access the Kubernetes control plane – which we could not do due to the increased load to the Kubernetes API servers.
+> 
+> [API, ChatGPT & Sora Facing Issues - OpenAI Status](https://status.openai.com/incidents/ctrsv3lwd797)
+
+> All of this happened very fast. And as our engineers worked to figure out what was happening and why, they faced two large obstacles: first, it was not possible to access our data centers through our normal means because their networks were down, and second, the total loss of DNS broke many of the internal tools we’d normally use to investigate and resolve outages like this. 
+> 
+> [More details about the October 4 outage - Engineering at Meta](https://engineering.fb.com/2021/10/05/networking-traffic/outage-details/)
+
+> Many of our internal users and tools experienced similar errors, which added delays to our outage external communication.
+> 
+> [Google Cloud services are experiencing issues and we have an other update at 5:30 PDT](https://status.cloud.google.com/incidents/cFXPsFUnUELR8U2bQeGz)
+
 
 ## Circular reference in math
 
@@ -689,4 +703,6 @@ The `x(x)` is symbol substitution. replacing the free variable `x` with `x`, whi
 [Weakening Cycles So That Turing Can Halt](https://pling.jondgoodwin.com/post/weakening-cycles/)
 
 [A Universal Approach to Self-Referential Paradoxes, Incompleteness and Fixed Points](https://arxiv.org/pdf/math/0305282)
+
+[Quick takes on the recent OpenAI public incident write-up](https://surfingcomplexity.blog/2024/12/14/quick-takes-on-the-recent-openai-public-incident-write-up/)
 

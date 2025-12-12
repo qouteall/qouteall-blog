@@ -1584,9 +1584,11 @@ Review from Terence Tao:
 
 </details>
 
-Also, AI changes people's value judgement. Before ChatGPT if people see a long article with good writing style they would think the author payed efforts in writing it. But now AI can easily write a long article with similar vibe.
+Also, AI changes people's value judgement. Before ChatGPT if people see a long article with fancy writing they would think the author payed efforts in writing it. But now AI can easily write a long article with similar vibe. Now fancy writing is treated as "AI smell".
 
-Interestingly, people tend to **judge the value of art by the cost of producing**. If one sees a beautiful image and thinks it's good art, then when they know it's AI-generated, the same image suddenly becomes cheap.
+People tend to **judge the value of art by the cost of producing**. If one sees a beautiful image and thinks it's good art, then when they know it's AI-generated, the same image suddenly becomes cheap.
+
+However, many old people don't recognize AI and often treat AI output as real good content.
 
 ## Related books
 
