@@ -624,7 +624,11 @@ Even so, writing the idea down may be still not enough, because **natural langua
 
 Having ideas is easy and cheap. If you search the internet carefully you are likely to find ideas similar to yours. The important is to validate and execute the idea.
 
-Analogies are useful for explaining things to others, but not good for accurate thinking. It makes one ignore the nuance difference between the analog and the real thing.
+> People fall in love with ideas because **ideas never fight back**. **Execution does**. It exposes your blind spots, your patience, your habits and your excuses. Most founders learn more from the first week of doing than the first year of imagining.
+> 
+> \- Hiten Shah, [Link](https://x.com/hnshah/status/1998474486149165231)
+
+About analogy: Analogies are useful for explaining things to others, but not good for accurate thinking. It makes one ignore the nuance difference between the analog and the real thing.
 
 ### Predictive processing
 
@@ -827,6 +831,8 @@ One benefit of AI is that you can ask "stupid questions" without being humiliate
 **If a "stupid question" doesn't have a sound answer, then maybe something important is overlooked by everyone**.
 
 **Simplicity is often confused by familiarity**. If one is very familiar with a complex thing, they tend to think that thing is simple.
+
+Curse of knowledge also applies when using AI. If the user assumes AI knows their work detail and don't tell such information to AI, AI tend to output generic useless things. It's recommended to put knowledge of your work (including failed attempts) into a document. It not only reduces your memory pressure but also can be read by AI.
 
 ### Normalcy bias
 
