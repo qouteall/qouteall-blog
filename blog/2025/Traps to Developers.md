@@ -199,7 +199,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - `defer` executes when the function returns, not when the lexical scope exits.
 - `defer` capture mutable variable.
 - About `nil`:
-  - There are nil slice and empty slice (the two are different). But there is no nil string, only empty string. The nil map can be read like an empty map, but nil map cannot be written.
+  - There are nil slice and empty slice (the two are different). But there is no nil string, only empty string. The nil map can be read like an empty map, but nil map cannot be modified.
   - Interface `nil` weird behavior. Interface pointer is a fat pointer containing type info and data pointer. If the data pointer is null but type info is not null, then it will not equal `nil`.
   - Receiving from or sending to `nil` channel blocks forever.
 - Before Go 1.22, [loop variable capture issue](https://go.dev/blog/loopvar-preview).

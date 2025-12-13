@@ -494,16 +494,16 @@ Examples of causal oversimplification:
 
 - Oversimplification: "Poor people are poor because they are lazy."
   
-  Other related factors: Education access, systemic discrimination, health disparities, job market conditions, the Matthew effect, etc.
-- Oversimplification: "Immigrants are the cause of unemployment."
+  Other related factors: Education access, systematic discrimination, job market conditions, the Matthew effect, etc.
+- Oversimplification: "Immigrants caused unemployment."
   
-  Other related factors: Manufacturing relocation, automation technologies, economic cycles, skill mismatches, overall labor market conditions, etc.
+  Other related factors: Manufacturing relocation, automation technologies, economic cycles, education, etc.
 - Oversimplification: "The Great Depression happened because of the stock market crash of 1929."
   
-  Other related factors: Excessive financial risk-taking, lack of regulatory oversight, production overcapacity, wealth inequality, and international economic imbalances, etc.
+  Other related factors: Immature financial regulation, debt accumulation, production overcapacity, reduced demand caused by wealth inequality, international trading imbalances, etc.
 - Oversimplification: "That company succeeded because of the CEO."
   
-  Other related factors: Market conditions, employee contributions, incentive structures, company culture, government-business relationships, competitive landscape, and the cumulative impact of past leadership decisions, etc.
+  Other related factors: Employee contributions, impact of previous CEOs, luck, etc.
 
 > For every complex problem there is an answer that is clear, simple, and wrong.
 > 

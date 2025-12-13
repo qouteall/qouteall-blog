@@ -238,15 +238,19 @@ Other applications of the idea of mutation-as-data:
 
 ## Avoid in-place mutation
 
-The previous problem occurs partially due to mutable borrow exclusiveness. If all borrows are immutable, then contagious borrow is usually not a problem.
+The previous problem can be avoided if you don't do in-place mutation.
 
-The common way of avoiding mutation is **mutate-by-recreate**: All data is immutable. When you want to mutate something, you create a new version of it. Just like in pure functional language (e.g. Haskell).
+One ways is **mutate-by-recreate**: The data is immutable. When you want to mutate something, you create a new version of it. It's widely used in **functional programming**.
 
-Unfortunately, **mutate-by-recreate is also contagious**: if you recreated a new version of a child, you need to also recreate a new version of parent that holds the new child, and parent's parent, and so on. There are abstractions like [lens](https://hackage.haskell.org/package/lens) to make this kind of cascade-recreate more convenient.
+**Sometimes transforming is better than mutating**. Instead of mutating in-place, consume old state and compute new state. 
+
+The old state can use different type than new state, which can improve type safety ([Typestate pattern](https://cliffle.com/blog/rust-typestate/)). For example, if it has an `Option<T>` field that need to be filled in a function, separate input and output as two types, the input type don't have that field, the output has that field of type `T` (not `Option<T>`). This can avoid `.unwrap()`. (Its downside is that you may duplicate some fields and have more types.)
+
+**Mutate-by-recreate is contagious up to parent**: if you recreated a new version of a child, you need to also recreate a new version of parent that holds the new child, and parent's parent, and so on, **until a "mutable root"**. There are abstractions like [lens](https://hackage.haskell.org/package/lens) to make this kind of cascade-recreate more convenient.
 
 Mutate-by-recreate can be useful for cases like:
 
-- Safely sharing data in multithreading (read-copy-update (RCU), copy-on-write (COW))
+- Safely sharing data in multithreading (read-copy-update (RCU), copy-on-write (COW)). Only make one "root reference" be mutable atomically. Mutating is recreating whole object. (It usually requires deferred desctuction, [arc_swap](https://docs.rs/arc-swap/latest/arc_swap/))
 - Take snapshot and rollback efficiently
 
 **Persistent data structure**: they share unchanged sub-structure (structural sharing) to make mutate-by-recreate faster. Some crates of persistent data structures: [rpds](https://docs.rs/rpds/latest/rpds/index.html), [im](https://docs.rs/im/latest/im/), [pvec](https://docs.rs/pvec/latest/pvec/index.html).
@@ -271,6 +275,9 @@ Contagious borrow can also happen in containers. If you borrow one element of a 
 
 - For `Vec` and slice, use [`split_at_mut`](https://doc.rust-lang.org/std/vec/struct.Vec.html#method.split_at_mut)
 - For `HashMap`, use [`get_disjoint_mut`](https://doc.rust-lang.org/std/collections/struct.HashMap.html#method.get_disjoint_mut)
+- For `BTreeMap`, the standard library doesn't provide a way. [^btreemap_split_borrow]
+
+[^btreemap_split_borrow]: Standard library has [`split_off`](https://doc.rust-lang.org/std/collections/struct.BTreeMap.html#method.split_off) that mutates the container. [multi_mut](https://crates.io/crates/multi_mut) provides a solution of split borrow of `BTreeMap`.
 
 ## Avoid iterator. Manually manage index (key) in loop
 
