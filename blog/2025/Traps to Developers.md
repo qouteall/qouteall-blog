@@ -52,7 +52,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - In Windows, scrollbar takes space. But in macOS it doesn't take space by default.
   - The space occupied by vertical scrollbar is included in width. Scrollbar "steals" space from inner contents. [^css_box_model_scrollbar]
   - A top-level element with `width: 100vw` overflows horizontally if viewport has scrollbar that takes space. `width: 100%` can workaround that issue.
-  - About scrollbar styling: the [standard scroll bar styling](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Scrollbars_styling) supports color and width but doesn't support many other features. The [`-webkit-scrollbar`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/::-webkit-scrollbar) non-standard pseudo-elements supports many features (e.g. round corner scrollbar) but FireFox doesn't support them. In modern browser, if standard scrollbar styling is used, then the  `-webkit-scrollbar` has no effect.
+  - About scrollbar styling: the [standard scroll bar styling](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Scrollbars_styling) supports color and width but doesn't support many other features (e.g. round corner scrollbar). The [`-webkit-scrollbar`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/::-webkit-scrollbar) non-standard pseudo-elements supports these features but FireFox doesn't support them. In modern browser, if standard scrollbar styling is used, then the  `-webkit-scrollbar` has no effect.
 - `position: absolute` is not based on its parent. It's based on its nearest positioned ancestor (the nearest ancestor that has `position` be `relative`, `absolute` or creates stacking context).
 - [`backdrop-filter: blur` does not consider ambient things](https://www.joshwcomeau.com/css/backdrop-filter/#the-issue).
 - If the parent's width/height is not pre-determined, then percent width/height (e.g. `width: 50%`, `height: 100%`) doesn't work. [^percent_width_height]
@@ -69,7 +69,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - Any space or line break between two `display: inline-block` elements will be rendered as spacing. This doesn't happen in flexbox or grid.
 - `text-align` aligns text and inline things, but doesn't align block elements (e.g. normal divs).
 - `text-align: center` will not center when content is too wide. It will align left in that case. [See also](https://stackoverflow.com/questions/6618648/can-overflow-text-be-centered)
-- By default `width` and `height` doesn't include padding and border. `width: 100%` with `padding: 10px` can still overflow the parent. `box-sizing: border-box` make the width/height include border and padding.
+- By default `width` and `height` doesn't include padding and border. `width: 100%` with `padding: 10px` can still overflow the parent. `box-sizing: border-box` make the width/height include border and padding. Note that `width` includes scrollbar regardless of `box-sizing`.
 - About override:
   - CSS import order matters. The latter-imported ones can override the earlier ones.
   - JS-set CSS can override attributes in `.css` files (when both are not `!important`). `!important` attribute in `.css` files can override non `!important` JS-set CSS.
