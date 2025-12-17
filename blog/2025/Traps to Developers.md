@@ -5,9 +5,11 @@ tags:
 ---
 # Traps to Developers
 
+<!-- truncate -->
+
 A summarization of some traps to developers. There traps are unintuitive things that are easily misunderstood and cause bugs.
 
-<!-- truncate -->
+This article is mainly summarization. The main purpose is "know this trap exists". This article focuses on technical traps.
 
 ## Summarization of traps
 
@@ -64,7 +66,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - `display: inline` ignores `width` `height` and `margin-top` `margin-bottom`
 - Whitespace collapse. [See also](https://blog.dwac.dev/posts/html-whitespace/)
   - By default, newlines in html are treated as spaces. Multiple spaces together collapse into one. 
-  - `<pre>` collapses some spaces in the beginning and end of content, but not within content.
+  - `<pre>` doesn't collapse whitespace. But HTML parser removes a line break in the beginning and end of `<pre>` content.
   - Often the spaces in the beginning and end of content are ignored, but this doesn't happen in `<a>`.
   - Any space or line break between two `display: inline-block` elements will be rendered as spacing. This doesn't happen in flexbox or grid.
 - `text-align` aligns text and inline things, but doesn't align block elements (e.g. normal divs).
@@ -91,7 +93,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 
 [^stacking_context_impl]: Browser will draw the stacking context into a seprate "image", then draw the image to web page (or parent stacking context). The weirdness of stacking context are caused by this separate drawing mechanism.
 
-[^percent_width_height]: It avoids circular dependency where parent height is determined by content height, but content height is determined by parent height.)
+[^percent_width_height]: It avoids circular dependency where parent height is determined by content height, but content height is determined by parent height.
 
 [^calc_size]: In Nov 2025 `calc-size` is not yet supported by FireFox and Safari. 
 
@@ -169,11 +171,13 @@ A summarization of some traps to developers. There traps are unintuitive things 
 
 - [Leap second](https://en.wikipedia.org/wiki/Leap_second). Unix timestamp is "transparent" to leap second. Converting between Unix timestamp and UTC time assumes leap second doesn't exist. It's used with leap smear: make the time "stretch" or "squeeze" near a leap second to "hide" existence of leap second.
 - Time zone. UTC and Unix timestamp is globally uniform. But human-readable time is time-zone-dependent. It's recommended to store timestamp in database and convert to human-readable time in UI, instead of storing human-readable time in database.
-- Daylight Saving Time (DST): In some region people adjust clock forward by one hour in warm seasons.
-- Time may "go backward" due to NTP sync.
+- Daylight Saving Time (DST): In some regions people adjust clock forward by one hour in warm seasons.
+- NTP sync may cause time to "jump backward" or "jump forward".
 - It's recommended to configure the server's time zone as UTC. Different nodes having different time zones will cause trouble in distributed system. After changing system time zone, the database may need to be reconfigured or restarted.
 - There are two clocks: hardware clock and system clock. The hardware clock itself doesn't care about time zone. Linux treats it as UTC by default. Windows treats it as local time by default.
 - Verification of certificate uses time. If time is inaccurate, SSL/TLS may not work.
+- The "timestamp" may be in seconds, milliseconds or nanoseconds.
+- About `M` and `m` in date format: in Java `SimpleDateFormat`, `M` is month, `m` is minute. But in Python `datetime`, `m` is month, `M` is minute. 
 
 
 ### Java
@@ -213,7 +217,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 ### C/C++
 
 - Don't use `=` to compare equality.
-- Storing a pointer of an element inside `std::vector` and then grow the vector, `vector` may re-allocate content, making element pointer no longer valid.
+- Storing a pointer to an element in `std::vector` and then grow the vector, vector may re-allocate content, making element pointer invalid. Similar to other containers.
 - `std::string` created from literal string may be temporary. Taking `c_str()` from a temporary string is wrong.
 - [Iterator invalidation](https://learnmoderncpp.com/2024/09/04/understanding-iterator-invalidation/). Modifying a container when looping on it.
 - `std::views::filter` malfunctions when element is mutated that predicate result changes in multi-pass iteration. [See also](https://github.com/CppCon/CppCon2024/blob/main/Presentations/Taming_the_Cpp_Filter_View.pdf). `std::views::as_rvalue` with `std::ranges::to` mutates the element which can trigger that issue. [See also](https://github.com/philsquared/cpponsea2025-slides/blob/main/Presentations/Faster_Safer_Better_Ranges.pdf)
@@ -239,7 +243,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
   - Some SIMD instructions only work with aligned data. For example, AVX instructions usually require 32-byte alignment.
 - Global variable initialization runs before `main`. [Static Initialization Order Fiasco](https://en.cppreference.com/w/cpp/language/siof.html).
 - Start from C++ 11, destructors have `noexcept` by default. If exception is thrown out of a `noexcept` function, whole process will crash.
-- In signal handler, don't `printf` or `malloc`.
+- In signal handler, don't do any IO or locking, don't `printf` or `malloc`
 
 [^start_object_lifetime]: Directly treating existing binary data as struct is undefined behavior, because the object lifetime hasn't started, so it's treated as using uninitialized memory, even when it's aligned. One solution is to put the struct on stack then use `memcpy` to initialize it.
 
@@ -253,10 +257,10 @@ A summarization of some traps to developers. There traps are unintuitive things 
 
 ### SQL Databases
 
-- Null is special. 
+- Null is special:
   - `x = null` doesn't work. `x is null` works. Null does not equal itself, similar to NaN.
   - Unique index allows duplicating null (except in Microsoft SQL server). 
-  - `select distinct` may treat nulls as the same (this is database-specific). 
+  - `select distinct` treat nulls as the same in some databases. 
   - `count(x)` and `count(distinct x)` ignore rows where `x` is null.
 - Date implicit conversion can be timezone-dependent.
 - Complex join with disctinct may be slower than nested query. [See also](https://www.red-gate.com/simple-talk/databases/sql-server/t-sql-programming-sql-server/dont-use-distinct-as-a-join-fixer/)
@@ -265,18 +269,20 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - MySQL (InnoDB) can do implicit conversion by default. `select '123abc' + 1;` gives 124.
 - MySQL (InnoDB) gap lock may cause deadlock.
 - In MySQL (InnoDB) you can select a field and group by another field. It gives nondeterministic result.
+- Multi-column index `(x, y)` cannot be used when only filtering on `y`. (except when there are very few different `x` values, database can do a skip scan that uses the index.)
 - In SQLite the field type doesn't matter unless the table is `strict`.
 - SQLite by default does not do vacuum. The file size only increases and won't shrink. To make it shrink you need to either manually `vacuum;` or enable `auto_vacuum`.
 - Foreign key may cause implicit locking, which may cause deadlock.
+- Foreign key may interfere when loading database backup.
 - Locking may break repeatable read isolation (it's database-specific).
 - Distributed SQL database may doesn't support locking or have weird locking behaviors. It's database-specific.
 - If the backend has N+1 query issue, the slowness may won't be shown in slow query log, because the backend does many small queries serially and each individual query is fast.
 - Long-running transaction can cause problems (e.g. locking). It's recommended to make all transactions finish quickly.
 - If a string column is used in index or primary key, it will have length limit. MySQL applies the limitation when changing table schema. PostgreSQL applies the limitation by erroring when inserting or updating data.
 - PostgreSQL `notify` involves global locking if used within transaction, [see also](https://www.recall.ai/blog/postgres-listen-notify-does-not-scale). Also, `listen` malfunctions when used with connection pooling. It also has message size limit.
-- In PostgreSQL, incrementally updating a large `jsonb` is slow, as it internally recreates whole `jsonb` data. It's recommended to separate it if you want incremental update.
+- In PostgreSQL, incrementally updating a large `jsonb` is slow, as it internally recreates whole `jsonb` data. It's recommended to separate it if you do incremental update.
 - Storing UUID as string in database wasts performance. It's recommended to use database's built-in UUID type.
-  - Also, in some places UUID text doesn't have hyphen (e.g. `6cdd4753e57047259dd7024cb27b4c4f` instead of `6cdd4753-e570-4725-9dd7-024cb27b4c4f`).
+  - Also, in some places UUID text doesn't have hyphen (e.g. `6cdd4753e57047259dd7024cb27b4c4f` instead of `6cdd4753-e570-4725-9dd7-024cb27b4c4f`). Need to consider it when parsing and comparing UUID.
 - Whole-table locks that can make the service temporarily unusable:
   - In MySQL (InnoDB) 8.0+, adding unique index or foreign key is mostly concurrent (only briefly lock) and won't block operations. But in older versions it may do whole-table lock.
   - `mysqldump` used without `--single-transaction` cause whole-table read lock.
@@ -292,10 +298,8 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - `volatile`:
   - `volatile` itself cannot replace locks. `volatile` itself doesn't provide atomicity.
   - You don't need `volatile` for data protected by lock. Locking can already establish memory order and prevent some wrong optimizations.
-  - In C/C++, `volatile` only avoids some wrong optimizations, and won't automatically add memory barrier instruction for `volatile` access.
-  - In Java, `volatile` accesses have sequentially-consistent ordering (JVM will use memory barrier instruction if needed)
-  - In C#, accesses to the same `volatile` value have release-aquire ordering (CLR will use memory barrier instruction if needed)
-  - `volatile` can avoid wrong optimization related to reordering and merging memory reads/writes. (Compiler can merge reads by caching a value in register. Compiler can merge writes by only writing to register and delaying writing to memory. A read after a write can be optimized out.).
+  - `volatile` can avoid wrong optimization related to reordering and merging memory reads/writes.
+  - In C/C++, `volatile` doesn't establish memory order. But in Java and C# `volatile` establishes memory order. [^volatile_memory_order]
 - Time-of-check to time-of-use ([TOCTOU](https://en.wikipedia.org/wiki/Time-of-check_to_time-of-use)).
 - Data race (it's a large topic, not elaborate here).
 - [Deadlock and channel-related deadlock](./About%20circular%20reference).
@@ -315,6 +319,8 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - [False sharing](https://en.wikipedia.org/wiki/False_sharing) of the same cache line costs performance.
 - Try to cancel some async operation, but the callback still runs.
 
+[^volatile_memory_order]: In Java, `volatile` accesses have sequentially-consistent ordering (JVM will use memory barrier instruction if needed). In C#, writes to `volatile` have release ordering, reads to `volatile` have acquire ordering (CLR will use memory barrier instruction if needed). Note that "release" and "acquire" in memory order is different to locking (but related to locking).
+
 ### Common in many languages
 
 - Forget to check for null/None/nil.
@@ -326,20 +332,22 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - Assertion should not be used for validating external data. Validating external data should use proper error handling. Assertion should check internal invariants.
 - Confusing default value with missing value. For example, if the balence field is primitive integer, 0 can represent both "balance value not initialized" or "balance is really 0".
 - When using profiler: the profiler may by default only include CPU time which excludes waiting time. If your app spends 90% time waiting (e.g. wait on database), the flamegraph may not include that 90% which is misleading.
-- When getting files in a folder, the order is not deterministic (may depend on inode order). It may behave differently on different machines even with exactly same files. It's recommended to sort by filename then process. Note that `ls` by default sorts results. Use `ls -f` to see raw file order.
+- When getting files in a folder, the order is not deterministic (may depend on inode order). It may behave differently on different machines even with same files. It's recommended to sort by filename then process. 
+  - Note that `ls` by default sorts results. Use `ls -f` to see raw file order.
 - The order in hash map is also non-deterministic (unless using linked hash map).
 - Transitive dependency conflict. Indirectly use different versions of the same package (diamond dependency issue).
-  - In Java, maven will only pick one version. May result in errors like `NoSuchMethodError` at runtime.
-    - Shading can make two versions of the same package co-exist.
+  - In Java, maven will only pick one version. If there is incompatibility, may result in errors like `NoSuchMethodError` at runtime.
+    - Shading can make two versions of the same package co-exist by renaming.
   - In JS, node.js allows two versions of same package to co-exist. Their `let`, `const` global variables and classes will separately co-exist (but other global variables are shared).
-    - If two versions of React are used together, it may give "invalid hook call" error. If two versions of a React component library use together, it may have context-related issues.
-  - Python doesn't allow two versions os same package to co-exist.
+    - If two versions of React are used together, it may give "invalid hook call" error.
+    - If two versions of a React component library use together, it may have context-related issues.
+  - Python doesn't allow two versions os same package to co-exist. (Sometimes this creates "dependency hell".)
   - In C/C++ it may give "duplicate symbol" error during linking.
   - Rust allows two different major versions of same crate to co-exist. It de-duplicates according to semantic versioning ([See also](https://doc.rust-lang.org/cargo/reference/semver.html), [See also](https://effective-rust.com/dep-graph.html)). Their global variables also separately co-exist. [Having two major versions of Tokio causes problem](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/alan_creates_a_hanging_alarm.html#addendum-multiple-tokio-major-versions).
 - IO buffering. 
   - If you don't flush, it may delay actual write. 
     - A CLI program that don't flush stdout works fine when directly running in terminal, but it delays output when used with pipe `|`.
-  - If program is force-killed (e.g. `kill -9`) some of its last log may not be written to log file. But the most important log is often the last log.
+  - If program is force-killed (e.g. `kill -9`) some of its last log may not be written to log file because it's buffered.
 
 ### Linux and bash
 
@@ -362,7 +370,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - In Redis, getting keys by a prefix `KEYS prefix-*` is a slow operation that will traverse all keys. Use Redis hash map for that use case.
 - Kafka's message size limit is 1MB by default.
 - In Kafka, across partitions, consume order may be different to produce order. If key is null then message's partition is not deterministic.
-- In Kafka, if a consumer processes too slow (no acknowledge within `max.poll.interval.ms`, default 5 min), the consumer will be treated as failed, then a rebalance occurs. That timeout is per-batch. If a batch contains too many messages it may reach that timeout, can decrease by `max.poll.records`.
+- In Kafka, if a consumer processes too slow (no acknowledge within `max.poll.interval.ms`, default 5 min), the consumer will be treated as failed, then a rebalance occurs. That timeout is per-batch. If a batch contains too many messages it may reach that timeout even if individual message processing is not slow. Can fix by reducing batch size `max.poll.records`.
 
 ### React
 
@@ -374,13 +382,12 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - About state:
   - State objects themselves should be immutable. Don't directly set fields of state objects. Always recreate whole object.
   - Don't set state directly in component rendering. State can only be set in callbacks.
-- Forget to put dependency value to `useEffect` then the runs after every component render.
-- Forget to include value in `useEffect` dependency array.
+- `useEffect` without dependency array runs on every component render. But `useEffect` with empty dependency array `[]` runs only on component mounting.
 - Forget clean up in `useEffect`.
-- Closure trap. Closure can capture a state. If the state changes, the closure still captures the old state. 
-  - One solution is to make closure not capture state and access state within `useReducer`. 
-  - Another solution is to put mutable thing in `useRef` (note that changing value inside ref don't trigger component re-rendering, you need to change state or prop to trigger re-rendering)
-  - Another solution is to add state to effect dependency array. But if the effect manages `setInterval`, doing this will make timing inaccurate.
+- Closure trap. Closure can capture a state. If the state changes, the closure still captures the old state. Solutions:
+  - Make closure not capture state and access state within `useReducer`. 
+  - Put mutable thing in `useRef` (note that changing value in ref don't trigger component re-rendering, you need to change state or prop to trigger re-rendering)
+  - Add state to effect dependency array. But if the effect manages `setInterval`, doing this will make timing inaccurate.
 - `useEffect` firstly runs in next iteration of event loop, after browser renders the web page. Doing initialization in `useEffect` is not early enough and may cause visual flicker. Use `useLayoutEffect` for early initialization.
 
 [^js_string_primitive]: In JS, `string` is primitive type, not object type. In JS you don't need to worry about two strings with same content but different reference like in Java. However the `String` in JS is object and use refernce equality.
@@ -415,9 +422,7 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - If the backend behind Nginx initiates closing the TCP connection, Nginx passive health check treat it as backend failure and temporarly stop reverse proxying. [See also](https://nginx.org/en/docs/http/ngx_http_upstream_module.html)
 - The HTTP protocol does not explicitly forbit GET and DELETE requests to have body. Some places do use body in GET and DELETE requests. But many libraries and HTTP servers does not support them.
 - One IP can host multiple websites, distinguished by domain name. The HTTP header `Host` and SNI in TLS handshake carries domain name, which are important. Some websites cannot be accessed via IP address.
-- CORS (cross-origin resource sharing). For requests to another website (origin), the browser will prevent JS from getting response, unless the server's response contains header `Access-Control-Allow-Origin` and it matches client website. This requires configuring the backend. If you want to pass cookie to another website it involves more configuration.
-  
-  Generally, if your frontend and backend are in the same website (same domain name and port) then there is no CORS issue.
+- CORS (cross-origin resource sharing). For requests to another website (origin), the browser will prevent JS from getting response, unless the server's response contains header `Access-Control-Allow-Origin` and it matches client website. This requires configuring the backend. Passing cookie to another website involves more configuration. If your frontend and backend are in the same website then there is no CORS issue.
 - [Reverse path filtering](https://en.wikipedia.org/wiki/Reverse-path_forwarding). When routing is asymmetric, packet from A to B use different interface than packets from B to A, then reverse path filtering rejects valid packets.
 - In old versions of Linux, if `tcp_tw_recycle` is enabled, it aggressively recycles connection based on TCP timestamp. NAT and load balancer can make TCP timestamp not monotonic, so that feature can drop normal connections.
 - When using SSL/TLS in private network unconnected to internet, the client may try to check certificate revocation status from internet, which will timeout.
@@ -456,8 +461,8 @@ A summarization of some traps to developers. There traps are unintuitive things 
 - It's recommended to configure billing limit when using cloud services, especially serverless. See also: [ServerlessHorrors](https://serverlesshorrors.com/)
 - Big endian and little endian in binary file and net packet.
 - Blurring in image may not be enough to remove text information. See [Depix](https://github.com/spipm/Depixelization_poc). Opaque covering can fully remove text information.
-- The current working directory can be changed by system call (`chdir`). It's not recommended to do that.
+- The current working directory can be changed by system call (e.g. `chdir`).
 - Windows limits command size to 32767 code units. [See also](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)
-- In Windows the default stack size of main thread is 1MB, but in Linux and macOS it's often 8MB. It's easier to stack overflow in Windows.
-- In Windoes environment variable names are case-insensitive. It's recommanded to make env var name all upper case.
+- In Windows the default stack size of main thread is 1MB, but in Linux and macOS it's often 8MB. It's easier to stack overflow in Windows by default.
+- In Windoes environment variable names are case-insensitive.
 

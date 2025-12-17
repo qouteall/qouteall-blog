@@ -334,6 +334,8 @@ With GC it's still possible to leak non-heap resources, like file handles, TCP c
 
 Rice's theorem tells that it's impossible to reliably tell whether program will use a piece of data (unless in trivial case). If an object is unreachable from GC roots, then it obviously won't be used. But if some data won't be used, it may be still referenced. This is the case that tracing GC cannot handle.
 
+Also, Golang allows interior pointer. Having an interior pointer keeps the whole object alive. This may cause memory leak.
+
 ## Observer circular dependency
 
 Observer pattern is common in GUI applications. It's a common pattern to use observer to make some data's update to propagate to other data. However, it may form a circular dependency, then stuck in dead recursion:

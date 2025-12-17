@@ -246,6 +246,8 @@ One ways is **mutate-by-recreate**: The data is immutable. When you want to muta
 
 The old state can use different type than new state, which can improve type safety ([Typestate pattern](https://cliffle.com/blog/rust-typestate/)). For example, if it has an `Option<T>` field that need to be filled in a function, separate input and output as two types, the input type don't have that field, the output has that field of type `T` (not `Option<T>`). This can avoid `.unwrap()`. (Its downside is that you may duplicate some fields and have more types.)
 
+Not doing in-place mutation can reduce chance of bugs. In OOP languages it's easy to wrongly share mutable object. Mutating a wrongly-shared object may cause bugs. Rust helps reducing these bugs.
+
 **Mutate-by-recreate is contagious up to parent**: if you recreated a new version of a child, you need to also recreate a new version of parent that holds the new child, and parent's parent, and so on, **until a "mutable root"**. There are abstractions like [lens](https://hackage.haskell.org/package/lens) to make this kind of cascade-recreate more convenient.
 
 Mutate-by-recreate can be useful for cases like:
