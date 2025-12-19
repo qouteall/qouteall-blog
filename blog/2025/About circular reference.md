@@ -325,7 +325,7 @@ create table child (
 insert into parent(id, update_time) values (2333, now());
 ```
 
-Then there are two parallel transctions. Each transaction inserts a child then updates parent `update_time`:
+Then there are two concurrent transctions. Each transaction inserts a child then updates parent `update_time`:
 
 | Transaction A                                                                  | Tranaction B                                                                             |
 | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |

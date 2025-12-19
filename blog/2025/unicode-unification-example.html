@@ -20,16 +20,19 @@
             padding: 0 1em;
         }
         h1, h2 {
-            border-bottom: 2px solid #eee;
+            /* border-bottom: 2px solid #eee; */
             padding-bottom: 0.3em;
         }
         table {
-            width: 100%;
+            width: 40%;
             border-collapse: collapse;
             margin-top: 1.5em;
+            table-layout: fixed;
+            border: none;
+            margin: auto;
         }
         th, td {
-            border: 1px solid #ddd;
+            border: none;
             padding: 1em;
             text-align: center;
             vertical-align: middle;
@@ -77,51 +80,52 @@
     </style>
 </head>
 <body>
-    <!-- ======== COMPARISON 1: Han Character '語' ======== -->
-    <h2>U+8A9E</h2>
+    <h2>U+7070</h2>
 
     <table>
-        <thead>
-            <tr>
-                <th>Locale</th>
-                <th>Rendered Character</th>
-            </tr>
-        </thead>
+
+        <colgroup>
+            <col style="width: 30%;">
+            <col style="width: 70%;">
+        </colgroup>
+        
         <tbody>
             <tr>
-                <td>Chinese font variant</td>
+                <td>Chinese</td>
                 <td>
-                    <span class="char-box" lang="zh">語</span>
+                    <span class="char-box" lang="zh">灰</span>
                 </td>
             </tr>
             <tr>
-                <td>Japanese font variant</td>
+                <td>Japanese</td>
                 <td>
-                    <span class="char-box" lang="ja">語</span>
+                    <span class="char-box" lang="ja">灰</span>
                 </td>
             </tr>
         </tbody>
     </table>
 
+    <hr>
+
     <!-- ======== COMPARISON 2: Quotation Mark '“' ======== -->
     <h2>U+201C</h2>
 
     <table>
-        <thead>
-            <tr>
-                <th>Locale</th>
-                <th>Rendered Character</th>
-            </tr>
-        </thead>
+
+        <colgroup>
+            <col style="width: 30%;">
+            <col style="width: 70%;">
+        </colgroup>
+        
         <tbody>
             <tr>
-                <td>Default font variant</td>
+                <td>English</td>
                 <td>
                     <span class="char-box" lang="en">“</span>
                 </td>
             </tr>
             <tr>
-                <td>Chinese font variant</td>
+                <td>Chinese</td>
                 <td>
                     <span class="char-box" lang="zh">“</span>
                 </td>
