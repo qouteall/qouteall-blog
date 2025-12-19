@@ -15,7 +15,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 
 ### HTML and CSS
 
-- `min-width` is `auto` by default. Inside flexbox or grid, `min-width: auto` often makes min width determined by content. It has higher priority than many other CSS attributes including `flex-shrink`, `width: 0` and `max-width: 100%`. It's recommended to set `min-width: 0`. [See also](https://developer.mozilla.org/en-US/docs/Web/CSS/min-width)
+- `min-width` is `auto` by default. Inside flexbox or grid, `min-width: auto` often makes min width determined by content. It overrides effects of `flex-shrink`, `width: 0` and `max-width: 100%`, etc. It's recommended to set `min-width: 0`. Same for `min-height`. [See also](https://developer.mozilla.org/en-US/docs/Web/CSS/min-width)
 - Horizontal and vertical are different in CSS:
   - Normally `width: auto` tries fill available space in parent. But `height: auto` normally tries to just expand to fit content.
   - For inline elements, inline-block elements and float elements, `width: auto` does not try to expand.
