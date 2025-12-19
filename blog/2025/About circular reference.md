@@ -48,7 +48,7 @@ Resource allocation graph in deadlock state:
 
 ![](circular/deadlock_classical.drawio.png)
 
-Golang's locks are not re-entrant. Deadlock can happen with only one lock and one thread:
+Golang's locks are not reentrant. Deadlock can happen with only one lock and one thread:
 
 ```go
 type SomeObject struct {
@@ -71,6 +71,8 @@ func (o *SomeObject) DoSomeOtherThing() {
 ```
 
 ![](circular/deadlock_one.drawio.png)
+
+(Rust's locks are also non-reentrant. But Java `synchronized` and C# `lock` are reentrant. One thread can acquire same lock multiple times.)
 
 **These examples are simplified. The real-world deadlocks are less obvious and often only trigger in specific conditions.** Some deadlocks rarely trigger and are hard to reproduce.
 
@@ -291,7 +293,7 @@ func goroutineB(lock1 *sync.Mutex, lock2 *sync.Mutex) (string, error) {
 
 In some real-time (or near-real-time) systems, important threads have higher priority than other thread. The thread scheduler tries to run higher-priority threads first. 
 
-Priority inversion problem can make high-priority threads keep stuck, effectively similar to deadlock (although it's not strictly deadlock).
+Priority inversion problem can make high-priority threads keep stuck, effectively similar to deadlock (although it's not deadlock).
 
 The common priority inversion problem involves 3 threads, with low/medium/high priorities respectively:
 
@@ -302,13 +304,91 @@ The common priority inversion problem involves 3 threads, with low/medium/high p
 
 ## SQL deadlock
 
-In SQL, explicit `select ... for update` will lock rows. But there are also many ways of implicitly lock rows:
+There are explicit locks (updates, deletes, `select ... for update`, etc.). There are also implicit lockings. Here I will focus on non-obvious deadlocks related to implicit locking.
 
-- foreign key
-- gap lock
-- TODO
+### Foreign key deadlock
 
-SQL also allows upgrading a read lock to write lock. This can easily cause deadlock. TODO
+In MySQL (InnoDB), it implicitly locks foreign-key-referenced row to ensure foreign key validity. But this may cause deadlock. Example:
+
+```sql
+create table parent (
+    id int primary key,
+    update_time timestamp
+) engine=innodb;
+
+create table child (
+    id int primary key,
+    parent_id int,
+    constraint fk_parent foreign key (parent_id) references parent(id)
+) engine=innodb;
+
+insert into parent(id, update_time) values (2333, now());
+```
+
+Then there are two parallel transctions. Each transaction inserts a child then updates parent `update_time`:
+
+| Transaction A                                                                  | Tranaction B                                                                             |
+| ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| `insert into child(id, parent_id) values (1, 2333);`                           |                                                                                          |
+| Implicitly read-lock parent row                                                |                                                                                          |
+|                                                                                | `insert into child(id, parent_id) values (2, 2333);`                                     |
+|                                                                                | Implicitly read-lock parent row                                                          |
+| `update parent set update_time = now() where id = 2333;`                       |                                                                                          |
+| Write-locks parent row. Because it's read-locked by transaction B, wait for B. |                                                                                          |
+|                                                                                | `update parent set update_time = now() where id = 2333;`                                 |
+|                                                                                | Write-locks parent row. Because it's read-locked by transaction A, wait for A. Deadlock. |
+
+That deadlock is caused by **locking more than what it needs to lock**. To ensure the foreign key validity, it only need to ensure parent row don't get deleted (or change primary key). It doesn't need to lock whole parent row.
+
+That deadlock can be prevented by changing timestamp before inserting child. It avoids upgrading read lock to write lock.
+
+In PostgreSQL, when touching child row, it does fine-grained `for key share` locking to parent row. `for key share` doesn't prevent changing parent field other than referenced key. That deadlock case won't happen in PostgreSQL.
+
+But in PostgreSQL foreign key can still deadlock with `for update`. `for update` is exclusive to `for key share`. Two transactions can firstly `for key share` lock the same parent row then `for update` the parent row then deadlock.
+
+### MySQL gap lock deadlock
+
+Normally, a row that does not yet exist cannot be locked. But MySQL can "lock a row that does not yet exist", by locking on a gap in index. It's called gap lock. It's used in repeatable read level. [^predicate_lock]
+
+[^predicate_lock]: Apart from gap lock, there is another way of locking a row that doesn't yet exist: predicate lock. It prevents all new values that follow a predicate. It's used by PostgreSQL in serializable level.
+
+Gap lock can cause deadlock.
+
+For example, I have a table of users. The users with `status=1` cannot duplicate name. But users with other statuses can duplicate name. This "conditional unique" cannot be enforced by a simple unique index. So the application enforces it in backend code.
+
+```sql
+create table users (
+    id int auto_increment primary key,
+    name varchar(50),
+    status int,
+    index name_index (name)
+) engine=innodb character set utf8mb4 collate utf8mb4_bin;
+```
+
+| Transaction A                                                                   | Transaction B                                                                              |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `select id from users where name = 'xxx' and status = 1 for update;`            |                                                                                            |
+| Implicitly do read-gap-lock on `name_index`                                     |                                                                                            |
+|                                                                                 | `select id from users where name = 'xxx' and status = 1 for update;`                       |
+|                                                                                 | Also implicitly do read-gap-lock on `name_index`.                                          |
+| `insert into users(name,status) values ('xxx', 1);`                             |                                                                                            |
+| Try to do write-gap-lock. The same gap is already read-locked by B. Wait for B. |                                                                                            |
+|                                                                                 | `insert into users(name,status) values ('xxx', 1);`                                        |
+|                                                                                 | Try to do write-gap-lock. The same gap is already write-locked by A. Wait for A. Deadlock. |
+
+PostgreSQL doesn't have gap lock and won't deadlock in that case. However, PostgreSQL cannot prevent name duplication in that setup (repeatable read level, `select ... for update`). MySQL gap lock can ensure no duplicaiton in that setup. In PostgreSQL, if you want to ensure conditional uniqueness, it's recommended to use [partial unique index](https://www.postgresql.org/docs/current/indexes-partial.html).
+
+### Common cause: upgrading read lock to write lock
+
+In the previous two deadlocks, the common thing is that it directly upgrades read lock to write lock.
+
+When two transactions (threads) both acquire same read lock, then when they both want to upgrade read lock to write lock, it deadlocks. 
+
+Upgrading read lock to write lock is prone to deadlock. So most in-memory read-write-lock implementations (Golang `RWMutex`, Java `ReentrantReadWriteLock`, Rust `RwLock`, etc.) don't support directly upgrading read lock to write lock. Trying to write lock when holding read lock will directly deadlock.
+
+The in-database deadlocks can be mostly solved by enabling deadlock detection and doing transaction retry.
+
+But the in-memory deadlocks cannot be simply solved by that. Programming languages doesn't do rollback for you. Deadlock detection has limitations (Golang deadlock detection only trigger if all goroutines block). In-memory deadlocks need to be carefully prevented.
 
 ## Circular reference counting leak
 
@@ -397,7 +477,9 @@ If there is a partial ordering, and edge can only be formed follow the order, th
 
 Although cycle is a global property, **ordering is a local property that can trasitively propagate to global** ($a < b \land b < c \Rightarrow a < c$).
 
-If there is a globally uniform ordering of acquiring locks, then deadlock won't occur. For example, if there are two locks `lock1` and `lock2`, if I ensure that `lock1`'s locking order if before `lock2`, then there won't be the case that a thread acquired `lock2` and is acquiring `lock1`. Then in resource allocation graph, the path from `lock2` to `lock1` cannot be formed. So deadlock can be prevented.
+If there is a globally uniform ordering of holding locks, then deadlock won't occur. For example, if there are two locks `lock1` and `lock2`, if I ensure that `lock1` must be already held when locking `lock2`, then there won't be the case that a thread acquired `lock2` is acquiring `lock1`. Then in resource allocation graph, the path from `lock2` to `lock1` cannot be formed. So deadlock can be prevented.
+
+Note that (outside of SQL) "lock order" isn't simply the order of `lock()` operations. If you only hold at most one lock at the same time, then locking in whatever order won't deadlock. Locking A before B means must already hold A when trying to lock B. (In SQL there is no way to release lock within transaction. Locks are automatically released after transaction ends. So in SQL "lock order" correspond to order of locking.)
 
 Rust favors tree-shaped ownership. There is a hierarchy between owner and owned values. This creates an order that prevents cycle. If you use sharing (reference counting) but don't use mutability, then creating new value can only use already-created value, so circular reference is still not possible. Only by combination of sharing and mutability can circular reference be created.
 
