@@ -41,7 +41,7 @@ Type erasuring error requires putting error into heap allocation. Different erro
 
 `anyhow` requires error to be `Send + Sync + 'static`. The `'static` requires that if it contains a string, the string need to be copied (cannot reference other places). This makes it safe to pass error to outer scope, but also add copying cost.
 
-Rust is not good at handling out-of-memory error.
+Rust is not good at handling out-of-memory error. when OS over-commit is enabled, when memory is used up it errors when accessing memory, not when allocating. so doing correct error handling of OOM with over-commit is hard.
 
 lock poisoning [Adding locks disregarding poison · Issue #169 · rust-lang/libs-team](https://github.com/rust-lang/libs-team/issues/169)
 
@@ -66,7 +66,35 @@ TODO
 
 TODO
 
-C and Zig commonly use error code.
+C and Zig commonly use error code. 
+
+For C error code, the error code can be ignored. Sometimes the developer forget that error is possible and ignore the error.
+
+> https://x.com/ErrataRob/status/2001872046515507372
+> 
+> One cause is the "truncated send()" bug. The Sockets send() function queues up the data in kernel buffers. When the kernel runs out of buffers, send() will return having queued only part of the data, returning the number of bytes queued.
+> 
+> It works like this according to the spec on all systems (Windows, Linux, macOS, etc.). You are supposed to check the return value, most don't.
+> 
+> Thus, you may see it send the data and then close the connection, not understanding that not all the data was actually stored in the kernel buffers.
+> 
+> It's a far more common bug than people realize because it'll pass through almost all automated testing. You have to heavily load a server to the point where kernel buffers are all in use before you can detect it, which is beyond the scale of typical Continuous Integration unit/regression tests.
+> 
+> It can continue right through production, because a lot of things correct it, such as automatically restarting a transaction if there's an intermittent failure.
+> 
+> You can see the problem easily looking at the outer SSL headers, by tracking record length fields and error messages.
+> 
+> But if it's the last record before terminating the connection, then you can easily diagnose it.
+> 
+> The problem described is confusing. It talks about half a request when the rest of the text sounds like half a response.
+
+> https://man7.org/linux/man-pages/man2/close.2.html
+> 
+> A careful programmer will check the return value of **close**(), since it is quite possible that errors on a previous [write(2)](https://man7.org/linux/man-pages/man2/write.2.html) operation are reported only on the final **close**() that releases the open file description.  Failing to check the return value when closing a file may lead to _silent_ loss of data.  This can especially be observed with NFS and with disk quota.
+
+Zig error code is better than C as Zig doesn't allow implicitly ignoring error and proceed. 
+
+But Zig doesn't allow attaching data with error so error data can only be passed via side channel (in Zig there is no uniform way of passing error data so each library have their own way that don't work together.)
 
 ## Logging
 

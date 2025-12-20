@@ -135,7 +135,7 @@ People tend to be **overconfident** about themselves:
 The overconfidence is sometimes useful:
 
 - Being confident helps persuading others, increasing social impact.
-- **Self-fulfilling prophecy**: sometimes having confidence make people perform better, make others collaborate more, and then get good result (Note that the power of mere confidence is limited by physical conditions).
+- **Self-fulfilling prophecy**: being confident makes one more eager to do things and withstand failures. Most success require confidence to overcome failures in the process.
 
 ### Hindsight bias
 
@@ -1267,6 +1267,8 @@ We tend to regret doing something in short term, but regret not doing something 
 > As organizations get larger, there seems to be a tendency to use the heavy-weight Type 1 decision-making process on most decisions, including many Type 2 decisions. The end result of this is slowness, unthoughtful risk aversion, failure to experiment sufficiently, and consequently diminished invention.
 > 
 > \- Jeff Bezos
+
+> Forgive yourself for not knowing earlier what only time could teach.
 
 **The more non-trivial things you do, the more mistakes you will make**. No one can make no mistake when doing non-trivial things. However, **company KPIs often have large weight on punishing mistakes** (loss aversion). This cause veteran employees learn to be overly conservative, resulting in lower competitiveness of the whole company.
 

@@ -348,6 +348,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
   - If you don't flush, it may delay actual write. 
     - A CLI program that don't flush stdout works fine when directly running in terminal, but it delays output when used with pipe `|`.
   - If program is force-killed (e.g. `kill -9`) some of its last log may not be written to log file because it's buffered.
+  - In Linux, if `write()` and `close()` both don't return error code, the write may still fail, due to IO buffering. [See also](https://man7.org/linux/man-pages/man2/close.2.html)
 
 ### Linux and bash
 

@@ -232,10 +232,10 @@ Deferred (async) compuation vs immediate compuation:
 - Mobile GPUs often do [tiled rendering](https://en.wikipedia.org/wiki/Tiled_rendering). After vertex shader running, the triangles are not immediately rasterized, but dispatched to tiles (one triangle can go to multiple tiles). Each tile then rasterize and run pixel shader separately. It can reduce memory bandwidth requirement and power consumption.
 - For machine learning inference, collect requests then execute them in batch is deferred computation.
 
-Adding a "middle-stage" can simplify computation and improve generalization:
+Adding a "middle-stage" can simplify computation, improve generalization and improve compatibility. For example, compiler generate cross-platform IR then translate IR to machine code:
 
-- Compiler generate cross-platform IR then translate IR to machine code.
-- ...
+- The LLVM IR makes supporting a new architecture easier. 
+- In CUDA, old GPU can run newly-added feature after driver and compiler update. (On the contrary, if CPU adds new SIMD instruction, old device cannot run it and software need to adapt, and QA need to test on old devices.)
 
 ### Program lifecycle
 
