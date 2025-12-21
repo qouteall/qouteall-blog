@@ -302,22 +302,19 @@ This article is mainly summarization. The main purpose is "know this trap exists
   - In C/C++, `volatile` doesn't establish memory order. But in Java and C# `volatile` establishes memory order. [^volatile_memory_order]
 - Time-of-check to time-of-use ([TOCTOU](https://en.wikipedia.org/wiki/Time-of-check_to_time-of-use)).
 - Data race (it's a large topic, not elaborate here).
-- [Deadlock and channel-related deadlock](./About%20circular%20reference).
-- In SQL database, for special uniqueness constraints that doesn't fit simple unique index (e.g. unique across two tables, conditional unique, unique within time range), if the constraint is enforced by application, then:
-  - In MySQL (InnoDB), if in repeatable read level, application checks using `select ... for update` then insert, and the unique-checked column has index, then it works due to gap lock. (Note that gap lock may cause deadlock under high concurrency, ensure deadlock detection is on and use retrying).
-  - In PostgreSQL, if in repeatable read level, application checks using `select ... for update` then insert, it's not sufficient to enforce constraint under concurrency (due to write skew). Some solutions:
-    - Use serializable level
-    - Don't rely on application to enforce constraint:
-      - For conditional unique, use partial unique index. 
-      - For uniqueness across two tables case, insert redundant data into one extra table with unique index.
-      - For time range exclusiveness case, use range type and exclude constraint.
+- [Deadlock and lock-free deadlock](./About%20circular%20reference).
+- [MySQL (InnoDB) gap lock may deadlock](./About%20circular%20reference#mysql-gap-lock-deadlock).
+- PostgreSQL write skew. In repeatable read level, `select ... where ... for update` cannot prevent another transaction from inserting new rows that satisfy the query condition. It cannot enforce uniqueness. [^pg_write_skew]
 - Atomic reference counting (`Arc`, `shared_ptr`) can be slow when many threads frequently change the same counter. [See also](https://pkolaczk.github.io/server-slower-than-a-laptop/)
 - About read-write lock: trying to write lock when holding read lock will deadlock. The correct way is to firstly release the read lock, then acquire write lock, and the conditions that were checked in read lock need to be re-checked.
+  - SQL allows a transaction that hold read lock to upgrade to write lock. This mechanism is prone to deadlock.
 - Reentrant lock:
   - Reentrant means one thread can lock twice (and unlock twice) without deadlocking. Java `synchronized` and C# `lock` are reentrant.
   - Non-reentrant means if one thread lock twice, it will deadlock. Rust `Mutex` and Golang `sync.Mutex` are not reentrant.
 - [False sharing](https://en.wikipedia.org/wiki/False_sharing) of the same cache line costs performance.
 - Try to cancel some async operation, but the callback still runs.
+
+[^pg_write_skew]: It can be solved in serializable level. Without serializable level, it can also be solved by special constraints. For conditional uniqueness constraint, use partial unique index. For range uniqueness constraint, use range type and exclude constraint. For uniqueness across two tables, insert redundant data into another table with unique constraint. (Related: in MySQL repeatable read level, `select ... for update` will do gap lock on index which can prevent write skew, but gap lock may cause deadlock.)
 
 [^volatile_memory_order]: In Java, `volatile` accesses have sequentially-consistent ordering (JVM will use memory barrier instruction if needed). In C#, writes to `volatile` have release ordering, reads to `volatile` have acquire ordering (CLR will use memory barrier instruction if needed). Note that "release" and "acquire" in memory order is different to locking (but related to locking).
 
@@ -335,20 +332,24 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - When getting files in a folder, the order is not deterministic (may depend on inode order). It may behave differently on different machines even with same files. It's recommended to sort by filename then process. 
   - Note that `ls` by default sorts results. Use `ls -f` to see raw file order.
 - The order in hash map is also non-deterministic (unless using linked hash map).
-- Transitive dependency conflict. Indirectly use different versions of the same package (diamond dependency issue).
-  - In Java, maven will only pick one version. If there is incompatibility, may result in errors like `NoSuchMethodError` at runtime.
-    - Shading can make two versions of the same package co-exist by renaming.
-  - In JS, node.js allows two versions of same package to co-exist. Their `let`, `const` global variables and classes will separately co-exist (but other global variables are shared).
-    - If two versions of React are used together, it may give "invalid hook call" error.
-    - If two versions of a React component library use together, it may have context-related issues.
-  - Python doesn't allow two versions os same package to co-exist. (Sometimes this creates "dependency hell".)
-  - In C/C++ it may give "duplicate symbol" error during linking.
-  - Rust allows two different major versions of same crate to co-exist. It de-duplicates according to semantic versioning ([See also](https://doc.rust-lang.org/cargo/reference/semver.html), [See also](https://effective-rust.com/dep-graph.html)). Their global variables also separately co-exist. [Having two major versions of Tokio causes problem](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/alan_creates_a_hanging_alarm.html#addendum-multiple-tokio-major-versions).
 - IO buffering. 
   - If you don't flush, it may delay actual write. 
     - A CLI program that don't flush stdout works fine when directly running in terminal, but it delays output when used with pipe `|`.
   - If program is force-killed (e.g. `kill -9`) some of its last log may not be written to log file because it's buffered.
   - In Linux, if `write()` and `close()` both don't return error code, the write may still fail, due to IO buffering. [See also](https://man7.org/linux/man-pages/man2/close.2.html)
+
+### Transitive dependency conflict
+
+Indirectly use different versions of the same package (diamond dependency issue).
+
+- In Java, maven will only pick one version. If there is incompatibility, may result in errors like `NoSuchMethodError` at runtime.
+  - Shading can make two versions of the same package co-exist by renaming.
+- In JS, node.js allows two versions of same package to co-exist. Their `let`, `const` global variables and classes will separately co-exist. But other global variables are shared.
+  - If two versions of React are used together, it may give "invalid hook call" error.
+  - If two versions of a React component library use together, it may have context-related issues.
+- Python doesn't allow two versions os same package to co-exist. (Sometimes this creates "dependency hell".)
+- In C/C++ it may give "duplicate symbol" error during linking.
+- Rust allows two different major versions of same crate to co-exist. It de-duplicates according to semantic versioning ([See also](https://doc.rust-lang.org/cargo/reference/semver.html), [See also](https://effective-rust.com/dep-graph.html)). Their global variables also separately co-exist. [Having two major versions of Tokio causes problem](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/alan_creates_a_hanging_alarm.html#addendum-multiple-tokio-major-versions).
 
 ### Linux and bash
 
