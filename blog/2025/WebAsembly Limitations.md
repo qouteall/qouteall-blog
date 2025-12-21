@@ -158,7 +158,7 @@ See also: [C# Wasm GC issue](https://github.com/dotnet/runtime/issues/94420), [G
 ## Multi-threading
 
 
-## The browser event loop
+### The browser event loop
 
 For each web tab, there ia an event loop where JS code runs. There is also an event queue [^web_event_loop].
 
@@ -266,9 +266,9 @@ The current workaround is to notify the web workers to make them proactively loa
 
 There is [shared-everything threads proposal](https://github.com/WebAssembly/shared-everything-threads) that aim to fix that.
 
-Although a web worker can keep running for a long time within one iteration of event loop, it cannot accept new messages without finishing current iteration of event loop.
-
 If all web workers utitlize browser's event loop and don't block for long time in each execution, then they can coorporatively load new Wasm code by processing web worker message, without much delay.
+
+Although a web worker can keep running for a long time within one iteration of event loop, it cannot accept new messages without finishing current iteration of event loop. If it keep running a Wasm scheduler loop to simulate a native thread pool, then you cannot send things like `OffscreenCanvas` to it until the Wasm scheduler loop exits.
 
 ## Wasm-JS passing
 
