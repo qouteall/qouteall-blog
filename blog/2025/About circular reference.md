@@ -8,6 +8,8 @@ tags:
 
 <!-- truncate -->
 
+The 3 concepts: deadlock, circular reference and halting, are deeply connected.
+
 ## Deadlock
 
 Deadlock can be understood via **resource allocation graph**.
@@ -407,14 +409,13 @@ Tracing GC can handle the unreachable cycle. However it's still possible to leak
 - Keep adding things into a container and never remove.
 - Registers a global callback. Forget to unregister callback when it's no longer useful. All data captured by callback will not be collected.
 - There is a large tree structure. Every child in tree references parent (circular reference). When you only need one node of tree, the whole tree is kept reachable.
+- Golang allows interior pointer. Having an interior pointer keeps the whole object alive. Keeping a small slice within a large slice can leak memory.
 
 These memory leaks are often related to containers and non-obvious references. Some memory leaks are related to lambda capture, as it creates non-obvious reference.
 
-With GC it's still possible to leak non-heap resources, like file handles, TCP connections, memory manged by native code, threads/goroutines, etc.
+With GC it's still possible to leak non-heap resources, like file handles, TCP connections, memory manged by native code, etc.
 
 Rice's theorem tells that it's impossible to reliably tell whether program will use a piece of data (unless in trivial case). If an object is unreachable from GC roots, then it obviously won't be used. But if some data won't be used, it may be still referenced. This is the case that tracing GC cannot handle.
-
-Also, Golang allows interior pointer. Having an interior pointer keeps the whole object alive. This may cause memory leak.
 
 ## Observer circular dependency
 

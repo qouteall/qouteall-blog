@@ -238,9 +238,7 @@ However, the main thread cannot be suspended by these instructions. This was due
 
 This restriction makes porting native multi-threaded code to Wasm harder. For example, locking in web worker can use normal locking, but locking in main thread must use spin-lock. Spin-locking for long time costs performance.
 
-The main thread can be blocked using [JS Promise integration](https://github.com/WebAssembly/js-promise-integration). That blocking will allow other code (JS code and Wasm code) to execute when blocking. This is called **reentrancy**. 
-
-Wasm applications often use **shadow stack**. It's a stack that's in linear memory, managed by Wasm app rather than Wasm runtime. Shadow stack must be properly switched when Wasm code suspends and resumes using JS Promise integration. Otherwise, the shadow stack parts of different execution can be mixed and messed up. Other things may also break under reentrancy and need to be taken care of.
+The main thread can be blocked using [JS Promise integration](https://github.com/WebAssembly/js-promise-integration). That blocking will allow other code (JS code and Wasm code) to execute when blocking. This can cause **reentrance** problem described below. 
 
 Also, as previously mentioned, if the canvas drawing code suspends (using JS Promise integration), the half-drawn canvas will be presented to web page. This can be workarounded by using [offscreen canvas](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas), drawn in web worker. 
 
@@ -266,9 +264,35 @@ The current workaround is to notify the web workers to make them proactively loa
 
 There is [shared-everything threads proposal](https://github.com/WebAssembly/shared-everything-threads) that aim to fix that.
 
-If all web workers utitlize browser's event loop and don't block for long time in each execution, then they can coorporatively load new Wasm code by processing web worker message, without much delay.
+### Mismatch between web worker and native threads
 
-Although a web worker can keep running for a long time within one iteration of event loop, it cannot accept new messages without finishing current iteration of event loop. If it keep running a Wasm scheduler loop to simulate a native thread pool, then you cannot send things like `OffscreenCanvas` to it until the Wasm scheduler loop exits.
+Web workers are very different to native threads. Web worker runs in a browser-managed event loop. But a native thread keeps executing a function until it exits. Their core abstractions are different.
+
+It's possible to simulate native threads using web workers. Send one message to a web worker. The whole thread runs in a message callback. It only finish processing message when corresponding "thread" exits.
+
+However, if you want to send JS things (like `OffscreenCanvas`) to the "thread", you cannot put the JS object into linear memory so it can only be sent via web worker message. There is another limitation of web worker: cannot receive new message before finishing current message callback. But in native thread abstraction, it can only finish after thread exits. There is a mismatch. One workaround is to use JS Promise integration to pause Wasm "thread" execution.
+
+Even if passing JS to web worker "thread" can be solved, the callback from JS to Wasm will still be blocked. Many usages of web APIs require callbacks, such as `setTimeout` [`requestAnimationFrame`](https://developer.mozilla.org/en-US/docs/Web/API/DedicatedWorkerGlobalScope/requestAnimationFrame). If the "thread" keeps running, it occupies web worker event loop, then these callbacks cannot run. One way to workaround is to make the "thread" need to periodically "yield" itself using JS promise integration.
+
+Also, after spawning a web worker (`new Worker(...)`), the new web worker only starts running after spawning code finishes its current event processing. So you cannot spawn a "thread" then immediately join[^thread_join] it. It will deadlock. One workaround is to let another web worker to indirectly create new web worker. [See also](https://emscripten.org/docs/porting/pthreads.html#special-considerations), [See also](https://pistonite.github.io/wasm-bindgen-spawn/)
+
+[^thread_join]: Joining a thread means waiting the thread to finish.
+
+Simulating native thread using web worker works fine for pure computing threads that don't use most web APIs (getting time is fine). But when interacting with web APIs, there is "**impedance mismatch**": many workarounds are required, and it introduces new problems (reentrancy).
+
+### Problems of JS Promise integration: Reentrancy
+
+[JS Promise integration](https://github.com/WebAssembly/js-promise-integration) allows Wasm execution to suspend on a JS `Promise`, without changing Wasm code.
+
+As previously mentioned, it can workaround many limitations: cannot block on main thread, cannot send JS value to web worker "thread", and web worker "thread" cannot run web callback.
+
+However, it causes **reentrancy** problem. When a Wasm function suspends, other Wasm code can execute in between. It behaves like multi-threaded but it's not mulit-threaded.
+
+Wasm applications often use **shadow stack**. It's a stack that's in linear memory, managed by Wasm app rather than Wasm runtime. In current shadow stack implementation, reentrance can cause the shadow stack of different execution to be mixed and messed up. This can be workarounded by switching shadow stack before and after reentrance.
+
+Reentrance also can cause **deadlock**. Most native code that do locking assume there is no reentrance. If it suspends when holding lock, then another piece of code runs and try to lock, it deadlocks if the lock is non-reentrant (C++ `std::mutex` is not reentrant. Rust std locks are also not reentrant.). 
+
+Even if the lock is re-entrant, some other invariant may be violated by reentrancy. In C++ it may can cause iterator invalidation (mutate a container when looping on container). In Rust it can cause `RefCell` borrow error in code that normally won't.
 
 ## Wasm-JS passing
 
@@ -320,9 +344,8 @@ Generally, WebAssembly runs slower than native applications compiled from the sa
 
 - The previously mentioned linear memory bounds check.
 - JIT (just-in-time compilation) cost. Native C/C++/Rust applications can be AOTed (ahead-of-time compiled). V8 firstly use a quick simple compiler to compile Wasm into machine code quickly to improve startup speed (but the generated machine code runs slower), then use a slower high-optimization compiler to generated optimized machine code for few hot Wasm code. [See also](https://v8.dev/docs/wasm-compilation-pipeline). That optimization is profile-guided (target on few hot code, use statistical result to guide optimization). Both profiling, optimization and code-switching costs performance.
-- Multi-threading cannot use release-acquire memory ordering, which can improve performance of some atomic oprations. [See also](https://webassembly.github.io/threads/core/exec/relaxed.html)
-- Multi-threading require launching web worker, which is a slow operation. (can be alleviated by web worker pooling)
-- Limited access to hardware functionality, such as some special SIMD instructions. But Wasm already support many common SIMD instructions.
+- Multi-threading cannot use release-acquire memory ordering. Atomics use sequential-consistent ordering. [See also](https://webassembly.github.io/threads/core/exec/relaxed.html). This is addressed by [shared-everything-threads proposal](https://github.com/WebAssembly/shared-everything-threads/blob/main/proposals/shared-everything-threads/Overview.md#memory-model-considerations)
+- Limited access to hardware functionality, such as memory prefetching and some special SIMD instructions. Note that Wasm already support many common SIMD instructions.
 - Cannot access some OS functionalities, such as `mmap`.
 - Wasm forces structural control flow. See also: [WebAssembly Troubles part 2: Why Do We Need the Relooper Algorithm, Again?](http://troubles.md/why-do-we-need-the-relooper-algorithm-again/). This may reduce the performance of compiling to Wasm and JIT optimization.
 
@@ -387,15 +410,15 @@ There are other sandboxed execution solutions:
 
 - [eBPF](https://en.wikipedia.org/wiki/EBPF). It's intended to run code in kernel in a sandboxed way. It has JIT compile.
 - [gVisor](https://gvisor.dev/).
-- Java loading new class at runtime. If the newly loaded classes run in the same JVM as host application, it's not safe (the newly-loaded class has same permission of accessing files and networking like host process). Similar to CLR.
+- Java loading new class at runtime. If the newly loaded classes run in the same JVM as host application, it's not safe (the newly-loaded class has same permission of accessing files and networking like host process) unless launching a new VM. Similar to CLR.
 - [MicroVM](https://firecracker-microvm.github.io/).
 - [LUA](https://www.lua.org/). It's designed to be easily embedded into other applications. LUA is dynamically-typed. Although it has JIT, its performance may not match statically-typed languages.
 - ...
 
 These things also have VMs:
 
-- Font standard TrueType has its own VM and bytecode format. [See also](https://learn.microsoft.com/en-us/typography/opentype/spec/tt_instructions)
-- PDF allows embedding JavaScript. (PDF also can embed TrueType which runs TrueType VM)
+- Font standard TrueType has its own VM and bytecode format. [See also](https://learn.microsoft.com/en-us/typography/opentype/spec/tt_instructions). It runs in browsers and almost all modern GUI.
+- PDF allows embedding JavaScript. (PDF also can embed TrueType which runs TrueType VM.)
 - UEFI has a byte code format and VM. [See also](https://uefi.org/specs/UEFI/2.10/22_EFI_Byte_Code_Virtual_Machine.html)
 - SIM cards runs Java.
 - MySQL supports JS stored procedure. [See also](https://blogs.oracle.com/mysql/post/introducing-javascript-support-in-mysql)

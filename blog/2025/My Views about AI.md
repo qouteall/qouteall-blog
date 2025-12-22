@@ -86,6 +86,20 @@ Review from Terence Tao:
 
 Also, AI changes people's value judgement. Before ChatGPT if people see a long article with fancy writing they would think the author payed efforts in writing it. But now AI can easily write a long article with similar vibe. Now fancy writing is treated as "AI smell".
 
+## Value of art
+
+
 People tend to **judge the value of art by the cost of producing**. If one sees a beautiful image and thinks it's good art, then when they know it's AI-generated, the same image suddenly becomes cheap.
 
 However, many old people don't recognize AI and often treat AI output as real good content.
+
+## A search engine that understands context
+
+If you know one thing's name, you can easily search it via search engine. But there are many cases that you can describe one thing's traits but don't know the name of that thing. LLMs are good at this. They can tell you the name of that thing. 
+
+LLMs can hallucinate, but after knowing the name of the thing you can use search engine to verify.
+
+## Generation difficulty and verification difficulty
+
+
+
