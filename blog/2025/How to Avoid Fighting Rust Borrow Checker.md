@@ -379,6 +379,78 @@ If the data is small, deep cloning is usually fine. If it's not in hot code, dee
 
 For container contagious borrow, a solution is to firstly copy the keys to a new container then use keys to access the container.
 
+## Contagious borrowing of `match` target
+
+It's a common pattern that we cache some things using a map. If the element is not in cache, we compute it and put into map.
+
+In this case we want the borrow of element in cache to avoid cloning:
+
+```rust
+fn get_cached_result(  
+    cache: &mut HashMap<i32, String>,  
+    key: i32  
+) -> &String {  
+    match cache.get(&key) {  
+        None => {  
+            let computed_value = "assume this is result of computation".to_string();  
+            cache.insert(key, computed_value);  
+            cache.get(&key).unwrap() // value is moved into map so get again  
+        }  
+        Some(ref v) => {v}  
+    }  
+}
+```
+
+Then it encounters **contagious borrow of `match` target** problem:
+
+```
+error[E0502]: cannot borrow `*cache` as mutable because it is also borrowed as immutable
+  --> src\main.rs:11:13
+   |
+ 5 |     cache: &mut HashMap<i32, String>,
+   |            - let's call the lifetime of this reference `'1`
+...
+ 8 |     match cache.get(&key) {
+   |           ----- immutable borrow occurs here
+...
+11 |             cache.insert(key, computed_value);
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ mutable borrow occurs here
+...
+14 |         Some(ref v) => {v}
+   |                         - returning this value requires that `*cache` is borrowed for `'1`
+```
+
+Because the match target `cache.get(&key)` indirectly borrows `cache` mutably. This mutable borrow of `cache` is **contagious of the whole `match` expression**. In `cache.insert` it also mutably borrows `cache` so it conflicts.
+
+This will be fixed by [Polonius](https://rust-lang.github.io/polonius/current_status.html) borrow checker. Currently (2025 Aug) it's available in nightly Rust and can be enabled by an option. [See also](https://blog.rust-lang.org/inside-rust/2023/10/06/polonius-update/)
+
+One workaround: By checking `contains_key` as branch condition, the branch condition is just a `bool` which don't indirectly borrow `cache` so it compiles:
+
+```rust
+fn get_cached_result(  
+    cache: &mut HashMap<i32, String>,  
+    key: i32  
+) -> &String {  
+    if cache.contains_key(&key) {  
+        return cache.get(&key).unwrap();  
+    }  
+  
+    let computed_value = "assume this is result of computation".to_string();  
+    cache.insert(key, computed_value);  
+    cache.get(&key).unwrap()  
+}
+```
+
+Another workaround is to use some `HashMap`-specific APIs:
+
+```rust
+fn get_cached_result(cache: &mut HashMap<i32, String>, key: i32) -> &String {  
+    cache.entry(key).or_insert_with(|| {  
+        "assume this is result of computation".to_string()  
+    })  
+}
+```
+
 ## Callbacks
 
 Callbacks are commonly used in GUIs, games and other dynamic reactive systems. If parent want to be notified when some event happens on child, the parent register callback to child, and child calls callback when event happens.
@@ -1093,32 +1165,6 @@ Unfortunately Rust's syntax ergonomics on raw pointer is currently not good:
 - Raw pointer cannot be method receiver (self).
 - There is no "raw pointer to slice". You need to manually `.add()` pointer and dereference. Bound checking is also manual.
 
-## Contagious borrowing between branches
-
-Current borrow checker does coarse-grained analysis on branch. One branch's output's borrowing is contagious to another branch.
-
-Currently, this won't compile ([see also](https://blog.rust-lang.org/inside-rust/2023/10/06/polonius-update/)):
-
-```rust
-fn get_default<'r, K: Hash + Eq + Copy, V: Default>(
-    map: &'r mut HashMap<K, V>,
-    key: K,
-) -> &'r mut V {
-    match map.get_mut(&key) { // -------------+ 'r
-        Some(value) => value,              // |
-        None => {                          // |
-            map.insert(key, V::default()); // |
-            //  ^~~~~~ ERROR               // |
-            map.get_mut(&key).unwrap()     // |
-        }                                  // |
-    }                                      // |
-}   
-```
-
-Becaue the first branch `Some(value) => ...`'s output value indirectly mutably borrows `map`, the second branch has to also indirectly mutably borrow `map`, which conflicts with another mutable borrow in scope.
-
-This will be fixed by [Polonius](https://rust-lang.github.io/polonius/current_status.html) borrow checker. Currently (2025 Aug) it's available in nightly Rust and can be enabled by an option.
-
 ## `Send` and `Sync`
 
 Rust favors tree-shaped ownership. Each object is owned by exactly one place. If you send tree-shaped data to another thread, only one thread can access it, so it's thread-safe. No data race.
@@ -1333,9 +1379,9 @@ Examples:
 ## Summarize the contagious things
 
 - Borrowing that cross function boundary is contagious. Just borrowing a wheel of car indirectly borrows the whole car.
+- The `match`ed value's indirect borrow is contagious to the whole `match` expression.
 - Mutate-by-recreate is contagious. Recreating child require also recreating parent that holds the new child, and parent's parent, and so on.
 - Lifetime annotation is contagious. If a type has a lifetime parameter, then every type that holds it must also have lifetime parameter. Every function that use them also need lifetime parameter (except when lifetime elision works). Adding/removing lifetime parameter to a type may require changing many code.
-- In current borrow checker, one branch's output's borrowing is contagious to the whole branching scope.
 - `async` is contagious. `async` function can call normal function. Normal function cannot easily call `async` function (but it's possible to call by blocking). Many non-blocking functions tend to become async because they may call async function.
 - Being not `Sync`/`Send` is contagious. A struct that indirectly owns a non-`Sync` data is not `Sync`. A struct that indirectly owns a non-`Send` data is not `Send`.
 - Error passing is contagious. If panic is not acceptable, then all functions that indirectly call a fallible function must return `Result`. Related: NaN is contagious in floating point computation.
