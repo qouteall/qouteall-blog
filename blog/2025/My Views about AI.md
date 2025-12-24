@@ -99,7 +99,18 @@ If you know one thing's name, you can easily search it via search engine. But th
 
 LLMs can hallucinate, but after knowing the name of the thing you can use search engine to verify.
 
+## Confusing different things that has similar wording
+
+This issue is commonly encountered in AI coding. For example, `index` can mean the index in different things in different context. To alleviate this issue, the naming should be more informative, such as `index_of_xxx`, `index_of_yyy_in_zzz`. Similarily all context-dependent things should include context in name.
+
+## Context rot issue
+
+
+## No continuous learning
+
+
+
 ## Generation difficulty and verification difficulty
 
-
+For some tasks it's easy to generate solution but hard to verify result. For some tasks it's hard to generate solution but easy to verify result.
 
