@@ -225,6 +225,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - Literal number starting with 0 will be treated as octal number. (`0123` is 83)
 - Destructing a deep tree structure can stack overflow. Solution is to replace recursion with loop in destructor.
 - `std::shared_ptr` itself is not atomic (although its reference count is atomic). Mutating a `shared_ptr` itself is not thread-safe. `std::atomic<std::shared_ptr<...>>` is atomic.
+- For `std::map` and `std::unordered_map`, `map[key]` alone will mutate the map if the corresponding entry doesn't exist. [See also](https://en.cppreference.com/w/cpp/container/map/operator_at.html)
 - Undefined behaviors. The compiler optimization aim to keep defined behavior the same, but can freely change undefined behavior. Relying on undefined behavior can make program break under optimization. [See also](https://russellw.github.io/undefined-behavior)
   - Accessing uninitialized memory is undefined behavior. Converting a `char*` to struct pointer can be seen as accessing uninitialized memory, because the object lifetime hasn't started. It's recommended to put the struct elsewhere and use `memcpy` to initialize it.
   - Accessing invalid memory (e.g. null pointer) is undefined behavior.
@@ -233,8 +234,8 @@ This article is mainly summarization. The main purpose is "know this trap exists
     - Aliasing means multiple pointers point to the same place in memory.
     - Strict aliasing rule: If there are two pointers with type `A*` and `B*`, then compiler assumes two pointer can never equal. If they equal, using it to access memory undefined behavior. Except in two cases: 1. `A` and `B` has subtyping relation 2. converting pointer to byte pointer (`char*`, `unsigned char*` or `std::byte*`) (the reverse does not apply). [^pointer_type_hold_integer]
     - Pointer provenance. Two pointers from two different provenances are treated as never alias. If their address equals, it's undefined behavior. [See also](https://www.ralfj.de/blog/2020/12/14/provenance.html)
-  - In C++ `const` can mean both read-only and truly-immutable. Converting `const T*` to `T*` only works if pointed object is actually mutable. If pointed object is immutable (declared as `const T`) then it's undefined behavior.
-  - If `bool`'s binary value is neither 0 or 1, using it is undefined behavior. If an enum's binary value is not valid, using it is undefined behavior.
+  - In C++ `const` can mean both read-only and immutable. Converting `const T*` to `T*` only works if that `const` means read-only. If pointed object is immutable (declared as `const T`) then mutating it by pointer cast is undefined behavior.
+  - If `bool`'s binary value is neither 0 or 1, using it is undefined behavior. Similarily if an enum's binary value is not valid, using it is undefined behavior.
 - Alignment.
   - For example, 64-bit integer's address need to be disivible by 8. In ARM, accessing memory in unaligned way can cause crash.
   - Unaligned memory access is undefined behavior.

@@ -379,75 +379,128 @@ If the data is small, deep cloning is usually fine. If it's not in hot code, dee
 
 For container contagious borrow, a solution is to firstly copy the keys to a new container then use keys to access the container.
 
-## Contagious borrowing of `match` target
+## Contagious borrowing between branches
 
 It's a common pattern that we cache some things using a map. If the element is not in cache, we compute it and put into map.
 
-In this case we want the borrow of element in cache to avoid cloning:
+We want the borrow the value in cache to avoid cloning the value:
 
 ```rust
-fn get_cached_result(  
-    cache: &mut HashMap<i32, String>,  
-    key: i32  
-) -> &String {  
+fn get_cached_result(cache: &mut HashMap<i32, String>, key: i32) -> &String {  
     match cache.get(&key) {  
         None => {  
             let computed_value = "assume this is result of computation".to_string();  
             cache.insert(key, computed_value);  
             cache.get(&key).unwrap() // value is moved into map so get again  
         }  
-        Some(ref v) => {v}  
+        Some(v) => {v}  
     }  
 }
 ```
 
-Then it encounters **contagious borrow of `match` target** problem:
+It triggers contagious borrow between branches:
 
 ```
 error[E0502]: cannot borrow `*cache` as mutable because it is also borrowed as immutable
-  --> src\main.rs:11:13
+  --> src\main.rs:9:13
    |
- 5 |     cache: &mut HashMap<i32, String>,
-   |            - let's call the lifetime of this reference `'1`
-...
- 8 |     match cache.get(&key) {
+5  | fn get_cached_result(cache: &mut HashMap<i32, String>, key: i32) -> &String {
+   |                             - let's call the lifetime of this reference `'1`
+6  |     match cache.get(&key) {
    |           ----- immutable borrow occurs here
 ...
-11 |             cache.insert(key, computed_value);
+9  |             cache.insert(key, computed_value);
    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ mutable borrow occurs here
 ...
-14 |         Some(ref v) => {v}
-   |                         - returning this value requires that `*cache` is borrowed for `'1`
+12 |         Some(v) => {v}
+   |                     - returning this value requires that `*cache` is borrowed for `'1`
 ```
 
-Because the match target `cache.get(&key)` indirectly borrows `cache` mutably. This mutable borrow of `cache` is **contagious of the whole `match` expression**. In `cache.insert` it also mutably borrows `cache` so it conflicts.
+In Rust, expressions can output a value. In that case the `match` expression outputs a value. That `match` has two branches. Each branch also output a value.
 
-This will be fixed by [Polonius](https://rust-lang.github.io/polonius/current_status.html) borrow checker. Currently (2025 Aug) it's available in nightly Rust and can be enabled by an option. [See also](https://blog.rust-lang.org/inside-rust/2023/10/06/polonius-update/)
+Because the match target `cache.get(&key)` indirectly borrows `cache` mutably. And the second branch `Some(v) => {v}`'s output indirectly borrow match target. This indirect borrow of `cache` is **contagious to the whole `match` expression**. In `cache.insert` it also mutably borrows `cache` so it conflicts.
 
-One workaround: By checking `contains_key` as branch condition, the branch condition is just a `bool` which don't indirectly borrow `cache` so it compiles:
+One workaround: firstly use `containes_key` to check whether should insert. After that, read from the map again:
 
 ```rust
-fn get_cached_result(  
-    cache: &mut HashMap<i32, String>,  
-    key: i32  
-) -> &String {  
-    if cache.contains_key(&key) {  
-        return cache.get(&key).unwrap();  
+fn get_cached_result(cache: &mut HashMap<i32, String>, key: i32) -> &String {  
+    if !cache.contains_key(&key) {  
+        let computed_value = "assume this is result of computation".to_string();  
+        cache.insert(key, computed_value);  
     }  
   
-    let computed_value = "assume this is result of computation".to_string();  
-    cache.insert(key, computed_value);  
     cache.get(&key).unwrap()  
 }
 ```
 
-Another workaround is to use some `HashMap`-specific APIs:
+The `contains_key` gives a `bool` that doesn't borrow anything. The branch also has no output value now.
+
+That solution is not elegant because both `contains_key` and `get` lookups the map. If cache hits it lookups twice but it actually only need once. (The extra cost may can be optimized out by compiler).
+
+A more elegant solution is to use [`entry` API](https://doc.rust-lang.org/std/collections/hash_map/struct.HashMap.html#method.entry):
 
 ```rust
 fn get_cached_result(cache: &mut HashMap<i32, String>, key: i32) -> &String {  
     cache.entry(key).or_insert_with(|| {  
         "assume this is result of computation".to_string()  
     })  
+}
+```
+
+(The `entry` API was specifically designed to workaround this borrow checker limitation.)
+
+This will be fixed by [Polonius](https://rust-lang.github.io/polonius/current_status.html) borrow checker. Currently (2025 Aug) it's available in nightly Rust and can be enabled by an option. [See also](https://blog.rust-lang.org/inside-rust/2023/10/06/polonius-update/)
+
+That issue can also be workarounded by cloning value in map.
+
+### Clarifications about branch contagious borrow
+
+The actual mechanism of that issue not simple. Some clarifications: 
+
+This issue only occurs when one branch's output indirectly borrows matched value. If the matched value (condition of `if`) don't indirectly borrow, then two branches don't interfere. Two branches can both borrow `cache` without interference:
+
+```rust
+fn get_cached_result(cache: &mut HashMap<i32, String>, key: i32) -> &String {  
+    if !cache.contains_key(&key) {  
+        let computed_value = "assume this is result of computation".to_string();  
+        cache.insert(key, computed_value);  
+        cache.get(&key).unwrap()  
+    } else {  
+        cache.get(&key).unwrap()  
+    }
+    // two branches' output both indirectly borrow cache
+    // it works
+}
+```
+
+If the output don't indirectly borrow from matched value it can also compile:
+
+```rust
+fn get_cached_result(cache: &mut HashMap<i32, String>, key: i32) -> &String {  
+    match cache.get(&key) {  
+        None => {  
+            let computed_value = "assume this is result of computation".to_string();  
+            cache.insert(key, computed_value);  
+            cache.get(&key).unwrap()  
+        }  
+        Some(v) => {  
+            // v is not used, can workaround the issue  
+            cache.get(&key).unwrap()  
+        }  
+    }  
+}
+```
+
+The issue applies not only to `match`. The issue also applies to `if let` with early return:
+
+```rust
+fn get_cached_result(cache: &mut HashMap<i32, String>, key: i32) -> &String {  
+    if let Some(v) = cache.get(&key) {  
+        return v;  
+    };  
+    let computed_value = "assume this is result of computation".to_string();  
+    cache.insert(key, computed_value);  // compile error!
+    cache.get(&key).unwrap()  
 }
 ```
 
@@ -1379,7 +1432,7 @@ Examples:
 ## Summarize the contagious things
 
 - Borrowing that cross function boundary is contagious. Just borrowing a wheel of car indirectly borrows the whole car.
-- The `match`ed value's indirect borrow is contagious to the whole `match` expression.
+- Contagious borrow between branches. If the output of a branch indirect borrows matched value, then that borrow contaminates another branch.
 - Mutate-by-recreate is contagious. Recreating child require also recreating parent that holds the new child, and parent's parent, and so on.
 - Lifetime annotation is contagious. If a type has a lifetime parameter, then every type that holds it must also have lifetime parameter. Every function that use them also need lifetime parameter (except when lifetime elision works). Adding/removing lifetime parameter to a type may require changing many code.
 - `async` is contagious. `async` function can call normal function. Normal function cannot easily call `async` function (but it's possible to call by blocking). Many non-blocking functions tend to become async because they may call async function.
@@ -1406,6 +1459,9 @@ Examples:
 - "Memory safety can only be achieved by Rust." No. Most GC languages are memory-safe. [^gc_memory_safety] Memory safety of existing C/C++ applications can be achieved via [Fil-C](https://github.com/pizlonator/fil-c).
 - "Manual memory management is always faster than tracing GC." No. Moving GCs [^go_gc] have better throughput in allocation and deallocation [^gc_throughput] [^fragmentation]. In manual memory management, freeing a large structure may cause big lag. Using `Arc` involves atomic operations which may become bottleneck when contended. 
 - "The old C/C++ codebases are already battle-tested, so there is no value in rewriting them in Rust." No. If they won't ever add any new feature and don't do any large refactoring, only accepting small bug fixes, then they would indeed become more stable and safe over time. However, if they adds new feature or do large refactoring, then new memory/thread safety issues could emerge.
+- "`.unwrap()` should never be used because [Cloudflare outage Nov 18, 2025](https://blog.cloudflare.com/18-november-2025-outage/#memory-preallocation) is caused by `.unwrap()`." No. Although `.unwrap()` is one cause of that Cloudflare outage, there are many other causes, including: no thorough testing in test environment before deploying to production, rolling out change too quick, rollback not early enough, etc. `unwrap()` is sometimes useful for cases that compiler cannot prove impossible. Note that it's still recommended to reduce usages of `unwrap()` in production code (can use `anyhow` crate which allows convenient `?` on most errors [^anyhow]).
+
+[^anyhow]: `anyhow` cannot auto-wrap `Mutex` poison error. Because `anyhow` can only wrap errors that are standalone (`'static`, doesn't borrow non-global thing). Mutex poison error is not standalone. If you don't want to mutex poison to affect web server availability, can use [`parking_lot`](https://docs.rs/parking_lot/latest/parking_lot/) locks.
 
 [^unsafe]: A wrong `unsafe` code in Rust can make memory/thread safety issue trigger in safe code. The impact of `unsafe` code is not limited to `unsafe` code.
 
@@ -1427,14 +1483,14 @@ One important benefit of Rust is to prevent most [**Heisenbugs**](https://en.wik
 
 The Heisenbugs are non-deterministic. When you try to debug it, it may stop triggering. Heisenbugs are often **sensitive to timing and memory layout**:
 
-- Enabling logging and enabling sanitizers makes program run slower, which may make Heisenbug no longer trigger.
+- Enabling logging and enabling sanitizers makes program run slower, which may make Heisenbug no longer trigger (or become much harder to trigger).
 - Breakpoint debugger also changes timing when debugging, which may make Heisenbug no longer trigger.
 - Some Heisenbugs only trigger in release build, not debug build. Sometimes it's due to timing. Sometimes it's caused by optimizations related to undefined behaviors.
 - Some Heisenbugs only trigger in production environment. Some Heisenbugs only happen in client's computer that developer cannot touch.
 
 Heisenbugs are hard to debug, especially in large codebases.
 
-Most Heisenbugs are related to memory safety, thread safety and mutation. Rust prevents most Heisenbugs so it **greatly saves debugging time on Heisenbugs**.
+Most Heisenbugs are related to memory safety, thread safety and mutation. Rust prevents most Heisenbugs compared to C/C++, so it **greatly saves debugging time on Heisenbugs**.
 
 Note that there are still Heisenbugs that Rust cannot catch, including:
 
