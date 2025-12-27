@@ -65,6 +65,19 @@ Unfortunately, loss aversion make being unhappy easier and make being happy hard
 
 It's much easier to increase expectation than to reduce expectation. The knowledge of "better things exist" can be "info hazard", as it makes one harder to accept the things that one gets used to.
 
+#### "Better safe than sorry" assumption
+
+When seeing an unwanted behavior of others, people tend to assume it's malice, according to "better safe than sorry":
+
+- If that unwanted behavior is indeed malice but one don't assume it's malice, then one is in danger.
+- If the unwanted behavior is not malice but one assumes it's malice, it may cause one to miss an opportunity. But it's safer.
+
+But assuming every cue is malice is bad for mental health. There is a saying:
+
+> Never ascribe to malice that which is adequately explained by incompetence. ([See also](https://simple.wikipedia.org/wiki/Hanlon%27s_razor))
+
+It's common that: Most people focus on their own businesses. Most people don't remember about details of you. Most people don't pay attention to what you said just once.
+
 ### Perception of risk
 
 **We prefer deterministic gain instead of risky gain**. A bird in the hand is worth two in the bush. 
