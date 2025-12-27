@@ -697,6 +697,16 @@ An outage can break your tool for solving the outage:
 > 
 > [Google Cloud services are experiencing issues and we have an other update at 5:30 PDT](https://status.cloud.google.com/incidents/cFXPsFUnUELR8U2bQeGz)
 
+## Old Python packaging circular dependency
+
+
+> The problem was [setup.py](https://setuptools.pypa.io/). You couldn’t know a package’s dependencies without running its setup script. But you couldn’t run its setup script without installing its build dependencies. [PEP 518](https://peps.python.org/pep-0518/) in 2016 called this out explicitly: “You can’t execute a setup.py file without knowing its dependencies, but currently there is no standard way to know what those dependencies are in an automated fashion without executing the setup.py file.”
+> 
+> This chicken-and-egg problem forced pip to download packages, execute untrusted code, fail, install missing build tools, and try again. Every install was potentially a cascade of subprocess spawns and arbitrary code execution. Installing a source distribution was essentially `curl | bash` with extra steps.
+> 
+> \- [How uv got so fast](https://nesbitt.io/2025/12/26/how-uv-got-so-fast.html)
+
+That issue was then addressed in new standards.
 
 ## Circular reference in math
 

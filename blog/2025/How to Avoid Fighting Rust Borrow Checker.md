@@ -459,21 +459,7 @@ The actual mechanism of that issue not simple. Some clarifications:
 
 This issue only occurs when one branch's output indirectly borrows matched value. If the matched value (condition of `if`) don't indirectly borrow, then two branches don't interfere. Two branches can both borrow `cache` without interference:
 
-```rust
-fn get_cached_result(cache: &mut HashMap<i32, String>, key: i32) -> &String {  
-    if !cache.contains_key(&key) {  
-        let computed_value = "assume this is result of computation".to_string();  
-        cache.insert(key, computed_value);  
-        cache.get(&key).unwrap()  
-    } else {  
-        cache.get(&key).unwrap()  
-    }
-    // two branches' output both indirectly borrow cache
-    // it works
-}
-```
-
-If the output don't indirectly borrow from matched value it can also compile:
+If the output don't indirectly borrow from matched value it can compile:
 
 ```rust
 fn get_cached_result(cache: &mut HashMap<i32, String>, key: i32) -> &String {  
@@ -491,18 +477,15 @@ fn get_cached_result(cache: &mut HashMap<i32, String>, key: i32) -> &String {
 }
 ```
 
-The issue applies not only to `match`. The issue also applies to `if let` with early return:
+Rust has "indirect borrow". If `a` contains a borrow into `b` then `a` indirectly borrows `b`. To avoid use-after-free, Rust will ensure `b` lives when `a` lives. 
 
-```rust
-fn get_cached_result(cache: &mut HashMap<i32, String>, key: i32) -> &String {  
-    if let Some(v) = cache.get(&key) {  
-        return v;  
-    };  
-    let computed_value = "assume this is result of computation".to_string();  
-    cache.insert(key, computed_value);  // compile error!
-    cache.get(&key).unwrap()  
-}
-```
+In that case the `cache.get(&key)` indirectly borrows `cache`. The `Some(v)` indirectly borrows `cache.get(&key)`. `v` also indirectly borrow `cache.get(&key)` which indirectly borrows `cache`.
+
+If `v` may be output of `match` expression, then whole `match` expression indirectly borrow `cache`. But if `v` cannot be output of `match` expression, then that issue doesn't apply. Triggering that issue requires a "chain" of indirect borrows.
+
+The issue applies not only to `match`. The issue also applies to `if let`, which is also pattern match. 
+
+The issue doesn't apply to normal `if`, because normal `if` can only test on `bool` which cannot indirectly borrow anything.
 
 ## Callbacks
 
@@ -1500,3 +1483,7 @@ Note that there are still Heisenbugs that Rust cannot catch, including:
 - Heisenbugs related to `unsafe` and FFI (foreign function interface).
 
 Also note that not all memory/thread safety bugs are Heisenbugs. Many are still easy to trigger and debug.
+
+Rust is a filter to AI. Rust constraints make it easier to spot some AI-written bugs.
+
+
