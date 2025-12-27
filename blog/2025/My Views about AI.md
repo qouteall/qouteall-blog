@@ -103,6 +103,14 @@ LLMs can hallucinate, but after knowing the name of the thing you can use search
 
 This issue is commonly encountered in AI coding. For example, `index` can mean the index in different things in different context. To alleviate this issue, the naming should be more informative, such as `index_of_xxx`, `index_of_yyy_in_zzz`. Similarily all context-dependent things should include context in name.
 
+
+## In coding: tend to overcomplicate
+
+In coding, AI tend to use complex solutions to solve a problem. Although the complex solution sometimes work, the added complexity adds new sources of bugs. It adds tech debt and is problematic when project is complex.
+
+This is probably related to RL. 
+
+
 ## Context rot issue
 
 

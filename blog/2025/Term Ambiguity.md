@@ -42,7 +42,7 @@ A lot of debate happen because same word has different meanings to different peo
 - RAG (retrieval augmented generation). Sometimes it must involve vector database. Sometimes it involves all kinds of information retrieval methods.
 - Unsafe/safe. "Unsafe" has these nuanced intepretations: 1. it can potentially cause problems, 2. it will definitely cause problems, 3. it will only cause problems if you use it wrongly [^rust_unsafe]
 - Routing. Router determine which interface to relay packet to. / Determine which web page based on URL (and other things). / Determine which Restful API by URL (and other things).
-- Token. Text segment for compiler / Text segment to convert to vector for LLM / Secret data for authorization / Representation of digintal asset in blockchain.
+- Token. Text segment for compiler / Text segment for LLM / Secret data for authentication / Representation of digintal asset in blockchain.
 - Balance. Debt / Asset.
 - Nondeterministic / Random. Nondeterministic means it's not determined but doesn't necessarily follow a specific statistical distribution. It may be related to timing, memory layout, implementation detail, etc. Nondeterministic is different to random.
 
