@@ -171,7 +171,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 
 - [Leap second](https://en.wikipedia.org/wiki/Leap_second). Unix timestamp is "transparent" to leap second. Converting between Unix timestamp and UTC time assumes leap second doesn't exist. It's used with leap smear: make the time "stretch" or "squeeze" near a leap second to "hide" existence of leap second.
 - Time zone. UTC and Unix timestamp is globally uniform. But human-readable time is time-zone-dependent. It's recommended to store timestamp in database and convert to human-readable time in UI, instead of storing human-readable time in database.
-- Daylight Saving Time (DST): In some regions people adjust clock forward by one hour in warm seasons.
+- Daylight Saving Time (DST): In some regions people adjust clock forward by one hour in warm seasons. When DST ends, 1:00 AM to 2:00 AM [^dst_end] will run twice, so converting human-readable time in this range to timestamp is ambiguous. [Python has `fold` to address this ambiguity](https://peps.python.org/pep-0495/).
 - NTP sync may cause time to "jump backward" or "jump forward".
 - It's recommended to configure the server's time zone as UTC. Different nodes having different time zones will cause trouble in distributed system. After changing system time zone, the database may need to be reconfigured or restarted.
 - There are two clocks: hardware clock and system clock. The hardware clock itself doesn't care about time zone. Linux treats it as UTC by default. Windows treats it as local time by default.
@@ -179,6 +179,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - The "timestamp" may be in seconds, milliseconds or nanoseconds.
 - About `M` and `m` in date format: in Java `SimpleDateFormat`, `M` is month, `m` is minute. But in Python `datetime`, `m` is month, `M` is minute. 
 
+[^dst_end]: In some regions it's 2:00 AM to 3:00 AM.
 
 ### Java
 
