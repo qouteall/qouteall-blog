@@ -256,6 +256,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - Default argument is a stored value that will not be re-created on every call.
 - Be careful about indentation when copying and pasting Python code.
 - In conditons, these things are "falsy": 0, `None`, empty string, empty container. Be careful if 0 or empty container represents valid value. Also it can be controlled by implementing `__bool__` method.
+- GIL (global interpreter lock) releases during IO operations (e.g. write file). Two concurrent threads reading and writing same file may cause data race in disk.
 
 ### SQL Databases
 
@@ -469,4 +470,5 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Windows limits command size to 32767 code units. [See also](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)
 - In Windows the default stack size of main thread is 1MB, but in Linux and macOS it's often 8MB. It's easier to stack overflow in Windows by default.
 - In Windoes environment variable names are case-insensitive.
+- Windows limits path length to be 260 code units by default.
 

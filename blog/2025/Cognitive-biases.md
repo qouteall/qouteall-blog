@@ -537,7 +537,7 @@ Also, revolutionary ideas seems outlandish at frist. But not all outlandish idea
 
 Also, if an idea is vague enough, then it can be applied to almost everything. These vague ideas looks fundamental and provides metal satisfaction, but are not useful in actual practice.
 
-### Binary thinking (false dichotomy)
+### Binary thinking
 
 We tend to simplify things. One way of simplification is to ignore the grey-zone and complex nuance, reducing things into two simple extremes.
 
@@ -570,6 +570,8 @@ Internet has indeed changed the world. But the dot com bubble burst. It's just t
 > The absolute hardest thing to convince people of is that the optimal amount of fraud in a system is not zero. Obviously it would be ideal if there were no fraud, but at some point the cost of catching it outweighs the benefits.
 > 
 > \- Megan McArdle, [Link](https://x.com/asymmetricinfo/status/1923112215193714760)
+
+We often underestimate the time and efforts required to do one thing (due to Dunning-Kruger effect etc.). When that thing cannot be done in estimated time and efforts, binary thinking may make us overestimate the difficulty and give up.
 
 **Strawman argument** is a technique in debating: refute a changed version of opponent's idea. It often utilizes binary thinking: **refute a more extreme version of opponent's idea** (also: slippery slope fallacy). Examples:
 
