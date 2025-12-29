@@ -392,6 +392,16 @@ The in-database deadlocks can be mostly solved by enabling deadlock detection an
 
 But the in-memory deadlocks cannot be simply solved by that. Programming languages doesn't do rollback for you. Deadlock detection has limitations (Golang deadlock detection only trigger if all goroutines block). In-memory deadlocks need to be carefully prevented.
 
+## Rust async deadlock
+
+### Blocking executor thread
+
+[How to deadlock Tokio application in Rust with just a single mutex](https://turso.tech/blog/how-to-deadlock-tokio-application-in-rust-with-just-a-single-mutex)
+
+### Futurelock
+
+[Futurelock](https://rfd.shared.oxide.computer/rfd/0609)
+
 ## Circular reference counting leak
 
 Reference counting leaks memory if there exists a cycle of strong references.

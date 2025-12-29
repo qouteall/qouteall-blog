@@ -379,6 +379,10 @@ If the data is small, deep cloning is usually fine. If it's not in hot code, dee
 
 For container contagious borrow, a solution is to firstly copy the keys to a new container then use keys to access the container.
 
+There is a misconception: "I already choosed Rust. So I must optimize performance to justify 'Rust cost'. I must not do unnecessary copy." The performance follows 80/20 rule. 80% of time is spent executing 20% code [^8020]. If some code is not bottleneck, optimizing it has neglegible effect. Only optimize after knowing bottleneck. Also performance is not the sole reason of using Rust (e.g. avoid data race Heisenbug).
+
+[^8020]: Exact numbers may be different. The idea is that the "performance cost contribution" of code is highly biased (fat-tail distribution).
+
 ## Contagious borrowing between branches
 
 It's a common pattern that we cache some things using a map. If the element is not in cache, we compute it and put into map.
