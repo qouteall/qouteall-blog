@@ -105,7 +105,9 @@ LLMs can hallucinate, but after knowing the name of the thing you can use search
 
 ## Confusing different things that has similar wording
 
-This issue is commonly encountered in AI coding. For example, `index` can mean the index in different things in different context. To alleviate this issue, the naming should be more informative, such as `index_of_xxx`, `index_of_yyy_in_zzz`. Similarily all context-dependent things should include context in name.
+This issue is commonly encountered in AI coding. For example, `index` can mean the index in different things in different context. 
+
+To alleviate this issue, the naming should be more informative, such as `index_of_xxx`, `index_of_yyy_in_zzz`. Also tensor name should describe meaning of each dimension ([see also](https://medium.com/@NoamShazeer/shape-suffixes-good-coding-style-f836e72e24fd)). All context-dependent things should include context in name or comments nearby.
 
 
 ## In coding: tend to overcomplicate

@@ -5,7 +5,7 @@ tags:
 unlisted: true
 ---
 
-# Error Handling and Logging
+# Error Handling
 
 <!-- truncate -->
 
@@ -43,6 +43,8 @@ Type erasuring error requires putting error into heap allocation. Different erro
 
 Rust is not good at handling out-of-memory error. when OS over-commit is enabled, when memory is used up it errors when accessing memory, not when allocating. so doing correct error handling of OOM with over-commit is hard.
 
+### Lock poisoning
+
 lock poisoning [Adding locks disregarding poison · Issue #169 · rust-lang/libs-team](https://github.com/rust-lang/libs-team/issues/169)
 
 when is poisoning useful: use lock to protect mutable data structure. if there is a panic within operation, the data structure may be in an invalid state. 
@@ -50,8 +52,6 @@ when is poisoning useful: use lock to protect mutable data structure. if there i
 when poisoning is harmful: for a web server, when there is already database transaction that do proper rollback, so panicking doesn't make the data be invalid. in this case poisoning is not only useless but also harmful. the poisoned mutex in memory prevent new requests from accessing data, which hurts web server reliability.
 
 sometimes panic when holding lock cause data corruption. but there are also many cases where panicking when holding lock doesn't cause data corruption.
-
-panic propagation doesn't work well with web server. panic propagation make requests that use poisoned mutext keep failing (without restart). if during panic unwind the drop uses mutex and use `.unwrap` it may second-panic which crashes whole process.
 
 tokio mutex cancel issue
 
@@ -62,11 +62,8 @@ TODO
 
 TODO
 
-## Just error code
+## C error code
 
-TODO
-
-C and Zig commonly use error code. 
 
 For C error code, the error code can be ignored. Sometimes the developer forget that error is possible and ignore the error.
 
@@ -92,9 +89,49 @@ For C error code, the error code can be ignored. Sometimes the developer forget 
 > 
 > A careful programmer will check the return value of **close**(), since it is quite possible that errors on a previous [write(2)](https://man7.org/linux/man-pages/man2/write.2.html) operation are reported only on the final **close**() that releases the open file description.  Failing to check the return value when closing a file may lead to _silent_ loss of data.  This can especially be observed with NFS and with disk quota.
 
+How does C apps pass error data when it only returns an error code? One common pattern is to put error as global variable. Provide an API for getting last error. But global variables are more error-prone (e.g. data race risk). And if the library user forget to get last error the error is lost. Generally not recommended in modern applications.
+
+## Zig error code
+
 Zig error code is better than C as Zig doesn't allow implicitly ignoring error and proceed. 
 
-But Zig doesn't allow attaching data with error so error data can only be passed via side channel (in Zig there is no uniform way of passing error data so each library have their own way that don't work together.)
+But Zig doesn't allow attaching data with error. (In Rust and Golang, you can easily attach data to error.)
+
+The error code itself only tells very little information. Getting detailed error information is important. There are 100 things that possibly correlate with the same error code. Not knowing error detail may waste developer hours debugging the error.
+
+The common pattern is to pass in a diagnostics object, then write error data into diagnostics object:
+
+```
+pub fn someFunc(
+    ...,
+    diag: ?*Diagnostics,
+) error{ SomeError }!ReturnType {
+    // when error happens, write error data into diag and return error code
+}
+```
+
+See also: [Error Codes for Control Flow](https://matklad.github.io/2025/11/06/error-codes-for-control-flow.html)
+
+This is **less convenient** than Rust and Golang. In Rust and Golang, the error itself contains error data. But in Zig the two things are separated. 
+
+Related:
+
+> I just spent way longer than I should have to debugging an issue of my project's build not working on Windows given that all I had to work with from the zig compiler was an `error: AccessDenied` and the build command that failed. 
+> 
+> ......
+> 
+> While the obvious answer here is "The Zig compiler is a work in progress and eventually we will improve our error messages using the diagnostic pattern [proposed above](https://github.com/ziglang/zig/issues/2647#issuecomment-589829306)..." (or perhaps that this is some Windows specific issue, etc), **I think the fact that even the compiler can't consistently implement this pattern points to it perhaps being too manual/tedious/unergonomic/difficult to expect the Zig ecosystem at large to do the same**.
+> 
+> [Link](https://github.com/ziglang/zig/issues/2647#issuecomment-1444790576)
+
+Sometimes having a separated diagnostics system is useful for showing user-friendly error message. Of course it requires extra efforts of developers.
+
+Currently, Zig doesn't provide an unified interface for diagnostics information. So different libraries tend to have their own diagnostics types which are incompatible with each other. You cannot easily compose the diagnostics of different libraries. This makes it overall less convenient.
+
+The problem is that just returning error code is easy in Zig, but providing diagnoistics information takes more efforts. There is [Principle of least effort](https://en.wikipedia.org/wiki/Principle_of_least_effort). If providing diagnostics is hard then very few libraries in ecosystem will do that.
+
+If the purpose is just to help developer debugging, then logging should be enough. And it takes fewer efforts than maintaining a diagnostics object. But logging then faces log spam issue.
+
 
 ## Logging
 
