@@ -97,7 +97,13 @@ In some sense, when people appreciate art, they are appreaciting the efforts of 
 
 However, many old people don't recognize AI and often treat AI output as real good content.
 
-## A search engine that understands context
+## Not just "mimic pattern in training data"
+
+It's a myth that LLM only "mimic patterns in training data". This is true for autoregressive pretrained LLMs. But with RL (reinforcement learning) it can "predict which thing gives higher reward". RL can make the model's capability go much beyond original training data.
+
+But there is still no clear explanation of inner workings of LLM. We know what matrix multiplications it does. But how the numbers correspond to meaning and how compute correspond to decision-making is not yet fully understood.
+
+## A "search engine" that understands context
 
 If you know one thing's name, you can easily search it via search engine. But there are many cases that you can describe one thing's traits but don't know the name of that thing. LLMs are good at this. They can tell you the name of that thing. 
 
@@ -110,42 +116,47 @@ This issue is commonly encountered in AI coding. For example, `index` can mean t
 To alleviate this issue, the naming should be more informative, such as `index_of_xxx`, `index_of_yyy_in_zzz`. Also tensor name should describe meaning of each dimension ([see also](https://medium.com/@NoamShazeer/shape-suffixes-good-coding-style-f836e72e24fd)). All context-dependent things should include context in name or comments nearby.
 
 
-## In coding: tend to overcomplicate
+## About AI Coding
 
-In coding, AI tend to use complex solutions to solve a problem. Although the complex solution sometimes work, the added complexity adds new sources of bugs. It adds tech debt and is problematic when project is complex.
+### Focus on finishing task, trade off maintainability
 
-This is probably related to RL. 
+Current LLMs are trained to finish specific tasks. The LLM tend to overly focus on current task and don't "consider" future code maintenance.
 
-## Vibe coding is "addictive"
+Also AI tend to use complex solutions to solve a problem. Although the complex solution sometimes work, the added complexity adds new sources of bugs. It adds tech debt and is problematic when project is complex.
+
+Often the bug is partially caused by AI overcomplicating simple things. When human want to fix vibe-coded bug, the first thing to do is to simplify out unnecessary complexity. 
+
+But knowing what can be simplified and what cannot requires some programming experience.
+
+### Save time on learning how to use API
+
+A lot of time in programming is spent on how to use an "API". The "API" here is generalized, including language features, framework usage, config file format, how to deploy, etc.
+
+Each API has its own idiosyncracies. For example, adding one thing can be named "insert", "create", "add", "put", "register", "spawn", etc. These are very ad-hoc and requires learning. Cannot guess from intuition. 
+
+Having to learn these API design is an obstacle in programming that's usually not fun. For example I just want to write a json file, but I have to lookup which API to serialize json and write text file. LLM can free programmer from these.
+
+### Good for new side projects
+
+When vibe coding on a new side project, the overall experience is likely good (or even addictive). New project is simple in the beginning. LLMs are good at coding in simple projects.
 
 Vibe coding is much easier than manual coding. No need to recall about language syntax or how to use an API. No need to search about doc about an API. No need to figure out which library to use. The prompt is often much shorter than code.
 
-(The original meaning of "vibe coding" by Karpathy is to not see the code at all. My definition of "vibe coding" here also includes occasonally review code but don't manually edit code.)
+Model performance also matters. If the model is weak and make mistakes often, vibe coding only gives frustration. Vibe coding only experience good when model is strong. 
 
-After seeing some unwanted things in code, just ask AI to change it. The AI almost always obeys you. This gives satisfaction because human like the feeling of holding power, even if power applies to AI, not human.
+Note that model capability is domain-specific: the model may be good at Python scripting or React web dev but sucks at writing device driver in C. It's highly dependent on training data and model RL targets.
 
-Model performance also matters. If the model is weak and make mistakes often, commanding it only gives frustration. Vibe coding only experience good when model is strong. Note that model capability is domain-specific: the model may be good at Python scripting or React web dev but sucks at writing device driver in C.
+But when applying vibe coding in existing large codebases it tend to perform worse. Changing existing large project without breaking existing functionality is hard even for expert programmers.
 
-However, writing code is easy, but writing working code is hard. When there is a complex bug that asking AI alone cannot fix, there will be frustrations. Also other bugs can emerge after fixing one bug.
+Writing code is easy, but writing working code is hard. When there is a complex bug that asking AI alone cannot fix, there will be frustrations. Also other bugs can emerge after fixing one bug.
 
-Often the bug is caused by AI overcomplicating simple things. When human want to fix vibe-coded bug, the first thing to do is to simplify unnecessary complexity. 
+Vibe coding don't work well in work. When vibe coding a side project, AI is your "employee" that works on your dream. But in work, you work for your manager's dream and AI is just a tool that often make mistakes in large legacy codebase.
 
-But knowing what can be simplified and what cannot requires some programming experience, and that experience is mostly gained by manual coding. So it's kind of irony that fixing vibe-coded bug require manual coding experience.
+### Feels faster but actually slower
 
-## "Taste" in coding
+In this study: [Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity](https://arxiv.org/pdf/2507.09089), developers feels that using AI make developing faster but it's actually slower.
 
-Guiding vibe coding requires "taste". Taste is a kind of aesthetics preference. It's often that there are many ways to implement the same requirement. But some is more "beautiful" than others according to the taste.
-
-The "beauty" is subjective. The "beauty" may come from:
-
-- Simpler, more decoupled, easier to understand, easier to maintain.
-- Code is more explicit but longer. It's easier to understand (Golang philosophy).
-- Code is shorter but harder to understand. It may use some advanced math theory (e.g. use advanced category theory in Haskell). 
-- It's more complex but it can easily accomodate to the predicted future requirement (e.g. can scale to handle millions of users). Although the predicted future requirement often never come.
-- It uses an interesting way to satisfy some constraint, like puzzle solving. The constraint may be performance, fitting into rigid API, reduce code size (or satisfy Rust borrow checker).
-- The design is clever that a small piece of code can handle millions of corner cases.
-
-The "taste" and "beauty" is subjective and different people's view often conflicts.
+Related: https://x.com/QuentinAnthon15/status/1943948791775998069
 
 ## Context rot issue
 
@@ -167,19 +178,19 @@ With reinforcement learning:
 - Anything that can be auto-verified can be used for RL effectively
 - Anything that can be easily judged by human can be used for RL effectively
 
-|                               | Easy to verify         | Hard to verify  |
-| ----------------------------- | ---------------------- | --------------- |
-| Easy to collect training data | AI is good at this     | Full of AI slop |
-| Hard to collect training data | AI is not good at this | Still hard      |
+|                               | Easy to verify          | Hard to verify  |
+| ----------------------------- | ----------------------- | --------------- |
+| Easy to collect training data | AI is good at this      | Full of AI slop |
+| Hard to collect training data | AI is often not helpful | AI is bad at it |
 
 However there are some problems:
 
 - If you use a unit test to judge AI coding result, AI may do **reward hacking**. Exploit the bug in the test. AI gains reward without doing what you want AI to do.
 - For human judged: AI companies hire human to judge and often reward by judge count, not judge quality (judge quality is hard to measure). There there will be "human reward hacking": employed human tend to judge quickly by intuition to maximize income. So AI is trained to give **fancy superficial signal that can confuse intuitions**. The AI output looks good by first glance. But an expert can find it's full of nuanced mistakes. But normal people often won't notice the nuanced mistakes.
 
-## Experts' knowledge undervalues
+## Experts' skill undervalues
 
-AI reduces the cost of doing many things, including the things that only experts can do before. So some experts' knowledge undervalues. This is one reason of disliking AI.
+AI reduces the cost of doing many things, including the things that only experts can do before. So some experts' skill undervalues. This is one reason of disliking AI.
 
 ## Slop prevails when people cannot judge quality
 
@@ -192,4 +203,6 @@ Also, for each person that accept reputation information, they also need to judg
 ## AI detection race
 
 Some people want AI output to be as similar to human output as possible. Some people want to detect whether content is written by human as accurate as possible. There is a constant race.
+
+## AI race between countries
 

@@ -461,7 +461,8 @@ Indirectly use different versions of the same package (diamond dependency issue)
   - YAML doesn't allow using tab for indentation.
   - [Norway country code `NO` become false if unquoted](https://www.bram.us/2022/01/11/yaml-the-norway-problem/).
   - [Git commit hash may become number if unquoted](https://tmendez.dev/posts/rng-git-hash-bug/).
-  - [The yaml document from hell](https://ruudvanasseldonk.com/2023/01/11/the-yaml-document-from-hell)
+  - Two different extensions of YAML file: `.yml` and `.yaml`. Some places only accept one of them.
+  - See also: [The yaml document from hell](https://ruudvanasseldonk.com/2023/01/11/the-yaml-document-from-hell)
 - When using Microsoft Excel to open a CSV file, Excel will do a lot of conversions, such as date conversion (e.g. turn `1/2` and `1-2` into `2-Jan`) and Excel won't show you the original string. [The gene SEPT1 was renamed due to this Excel issue](https://en.wikipedia.org/wiki/SEPTIN1). Excel will also make large numbers inaccurate (e.g. turn `12345678901234567890` into `12345678901234500000`) and won't show you the original accurate number, because Excel internally use floating point for number.
 - It's recommended to configure billing limit when using cloud services, especially serverless. See also: [ServerlessHorrors](https://serverlesshorrors.com/)
 - Big endian and little endian in binary file and net packet.
