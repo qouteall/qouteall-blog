@@ -130,7 +130,7 @@ AI coding performs good in simple projects. The new projects are simple in the b
 
 The good architecture design that can isolate complexity makes coding easier for both human and AI. 
 
-In large codebase it's often that after changing A then B also need to be changed to make it keep working. When B and A are far away (in different foldrs) then AI may only change A and don't change B so it breaks. Sometimes type system can catch the issue. But when it involves config file or cross-language things type system cannot catch it.
+In large codebase it's often that after changing A then B also need to be changed to make it keep working. When B and A are far away (in different foldrs) then AI may only change A and don't change B so it breaks. Sometimes type system can catch the issue. But when it involves config file, or cross-language things, or implicit invariants, then type system cannot catch it.
 
 ### Good for new side projects
 
@@ -175,14 +175,15 @@ Vibe coding is similar to that. Someone see it as another abstraction level abov
 
 But AI coding is a **completely different paradigm** than existing abstraction levels:
 
-| Existing abstraction levels                                                           | AI                                                                                                |
-| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Deterministic, using rigid rules.                                                     | Not deterministic, using black-box deep learning.                                                 |
-| Designed top-down by programmers.                                                     | Trained bottom-up by training data and RL.                                                        |
-| Code contains enough information for software to run. [^enough_information]           | Vague prompt doesn't contain enough information. Require AI to make detail decisions.             |
-| Use hardcoded defaults to handle unspecified details. It's not flexible and adaptive. | Can use "common sense" and patterns learnt from training to fill the gaps of unspecified details. |
+| Existing abstraction levels                                                          | AI                                                                                                |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| Deterministic, using rigid rules.                                                    | Not deterministic, using black-box deep learning.                                                 |
+| Designed top-down by programmers.                                                    | Trained bottom-up by training data and RL.                                                        |
+| Code contains enough information for software to run. [^enough_information]          | Vague prompt doesn't contain enough information. Require AI to make detail decisions.             |
+| Use hardcoded defaults to handle unspecified details. It's not flexible or adaptive. | Can use "common sense" and patterns learnt from training to fill the gaps of unspecified details. |
 
 [^enough_information]: Strictly speaking, code doesn't contain enough information for whole software to run. It may dynamic link another program in system, or it may download plugin etc. from internet. Also, runtime data can be interpreted as code, but how it's interpreted is determined by existing code. The overall idea is that in conventional programming the details are either explicitly specified or delegated to other deterministic software and hardware.
+
 
 ## Context rot issue
 
