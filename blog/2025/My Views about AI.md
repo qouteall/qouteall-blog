@@ -152,11 +152,36 @@ Writing code is easy, but writing working code is hard. When there is a complex 
 
 Vibe coding don't work well in work. When vibe coding a side project, AI is your "employee" that works on your dream. But in work, you work for your manager's dream and AI is just a tool that often make mistakes in large legacy codebase.
 
-### Feels faster but actually slower
+### Feels faster but maybe actually slower
 
 In this study: [Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity](https://arxiv.org/pdf/2507.09089), developers feels that using AI make developing faster but it's actually slower.
 
 Related: https://x.com/QuentinAnthon15/status/1943948791775998069
+
+### Jagged capability
+
+> https://x.com/karpathy/status/1977758204139331904
+> 
+> Good question, it's basically entirely hand-written (with tab autocomplete). I tried to use claude/codex agents a few times but they just didn't work well enough at all and net unhelpful, possibly the repo is too far off the data distribution.
+
+### AI is the new "compiler"?
+
+Programming has evolved from low-level [^low_level] to high-level, from complex to simple, from bare-metal to high-abstraction. Compilers make programmers no need to write raw assembly and makes programming easier.
+
+[^low_level]: The "low-level" here means close to hardware and underlying implementation details, which requires high-level skill.
+
+Vibe coding is similar to that. Someone see it as another abstraction level above code. Prompt is the new programming language. Vibe coders don't need to see code like how normal programmer don't see assembly.
+
+But AI coding is a **completely different paradigm** than existing abstraction levels:
+
+| Existing abstraction levels                                                           | AI                                                                                                |
+| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Deterministic, using rigid rules.                                                     | Not deterministic, using black-box deep learning.                                                 |
+| Designed top-down by programmers.                                                     | Trained bottom-up by training data and RL.                                                        |
+| Code contains enough information for software to run. [^enough_information]           | Vague prompt doesn't contain enough information. Require AI to make detail decisions.             |
+| Use hardcoded defaults to handle unspecified details. It's not flexible and adaptive. | Can use "common sense" and patterns learnt from training to fill the gaps of unspecified details. |
+
+[^enough_information]: Strictly speaking, code doesn't contain enough information for whole software to run. It may dynamic link another program in system, or it may download plugin etc. from internet. Also, runtime data can be interpreted as code, but how it's interpreted is determined by existing code. The overall idea is that in conventional programming the details are either explicitly specified or delegated to other deterministic software and hardware.
 
 ## Context rot issue
 

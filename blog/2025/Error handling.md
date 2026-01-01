@@ -143,3 +143,16 @@ TODO
 
 TODO
 
+
+## Silent errors in AI
+
+In deep learning and RL, bugs often don't give error messages. They just cause model to perform worse. 
+
+Sometimes a bug in evaluation or RL reward make people wrongly think model has high capability.
+
+Sometimes the dataset has many wrong data.
+
+Sometimes even if there is an error model can adapt to it.
+
+After turning data into matrix it's hard to visualize. So issues like flipping image is hardly noticed.
+
