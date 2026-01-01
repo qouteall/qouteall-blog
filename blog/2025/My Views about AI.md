@@ -7,6 +7,7 @@ unlisted: false
 ---
 # My Views about AI
 
+<!-- truncate -->
 
 ## Intelligence is high-dimensional
 
