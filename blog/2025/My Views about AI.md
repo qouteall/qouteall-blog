@@ -2,20 +2,24 @@
 date: 2025-12-20
 tags:
   - AI
-unlisted: true
+  - Programming
+unlisted: false
 ---
 # My Views about AI
 
 
 ## Intelligence is high-dimensional
 
-Many people tend to simplify intelligence to a one-dimensional IQ value. **Intelligence is high-dimensional**. For example, even before ChatGPT, a calculator can do arithmetic better than any human, but the calculator is not necessarily "smarter" than human.
+Many people tend to simplify intelligence to a one-dimensional IQ value. **Intelligence is high-dimensional**. 
 
-Since ChatGPT, LLMs become popular. Many people tend to treat LLM chatbot as similar to human, because most familiar form of intelligence is human.
+For example, even before ChatGPT, a calculator can do arithmetic better than any a mathematician, but the calculator is not "smarter" than mathematician.
 
-However, LLM is different to human in many fundamental ways. Deep learning is very different to how human brain works. 
+Many people tend to treat LLM chatbot as similar to human, because most familiar form of intelligence is human. However, LLM is different to human in many fundamental ways. Deep learning is very different to how human brain works. 
 
 I agree with "jagged intelligence" idea:
+
+- LLM is good at many things that are hard for human. LLM's knowledge is larger than any individual human.
+- LLM is bad at many things that are easy for human. LLM can make mistakes that are obvious to human.
 
 > Jagged Intelligence. Some things work extremely well (by human standards) while some things fail catastrophically (again by human standards), and it's not always obvious which is which, though you can develop a bit of intuition over time. 
 > 
@@ -23,8 +27,21 @@ I agree with "jagged intelligence" idea:
 > 
 > \- Andrej Karpathy, [Link](https://x.com/karpathy/status/1816531576228053133)
 
-- LLM is good at many things that are hard for human. LLM's knowledge is larger than any individual human.
-- LLM is bad at many things that are easy for human.
+> The space of cognitive tasks is not well modeled by either one or two-dimensional spaces, but is instead **extremely high-dimensional**. 
+> 
+> There are now indeed many directions in this pace in which AI tools can, with minimal supervision, achieve better performance than human experts. But, as per the "**curse of dimensionality**", such directions still remain very sparse.  
+> 
+> Also, **human performance is also very spiky and diverse; representing this by a single round disk or ball is also somewhat misleading**.
+> 
+> **In high dimensions, the greatest increase in volume often comes from taking combinations of smaller, spikier sets**. 
+> 
+> A team of humans working together, or humans complemented by a variety of AI tools, can achieve a significantly greater performance on many tasks than any single human or AI tool could achieve individually, particularly if they are strong in "orthogonal" directions. 
+> 
+> On the other hand, the choice of combination now matters: the wrong combination could lead to a misalignment between the objective and the actual outcome, in which the stated goal may be nominally achieved, but at the cost of several unwanted secondary effects as well.
+> 
+> TLDR: the topic of intelligence is too high-dimensional for any low-dimensional narrative to be perfectly accurate, and one should take any such narratives with a grain of salt.
+> 
+> [Link](https://mathstodon.xyz/@tao/115620261936846090)
 
 Also, the **optimization targets** of LLMs are very different to the optimization targets of human:
 
@@ -52,50 +69,15 @@ When trying to brainstrom with LLM, don't tell them your existing thoughts.
 
 LLM's behavior is very context-dependent. Sometimes it will defend the things they said in previous context. Starting a new session can make LLM output differently for the same question. 
 
-Both human and LLM can "hallucinate" in consistent way. When human forgets something, human tend to make up consistent information to fill the hole in memory. LLM's hallucinations are seemingly plausible (maximize likelihood), not just random. LLM's hallucinations tend to be confident, much more confident than average human.
-
-<details>
-
-There is a misleading diagram about Jagged Intelligence. That diagram cleverily utilizes **framing bias**, as it drawns complex high-dimensional thing as simple two-dimensional thing:
-
-> ![](./cog_bias/misleading_jagged_intelligence.png)
-> 
-> [Link](https://x.com/tomaspueyo/status/1993360931267473662)
-
-Review from Terence Tao:
-
-> This two-dimensional image has been circulating recently as an metaphor for the current state of AI technology. 
-> 
-> It is admittedly an improvement over one-dimensional narratives in which AI development is presented as a linear (or exponential) progression from sub-human to super-human intelligence. However, it is still a significant oversimplification. 
-> 
-> The space of cognitive tasks is not well modeled by either one or two-dimensional spaces, but is instead **extremely high-dimensional**. 
-> 
-> There are now indeed many directions in this pace in which AI tools can, with minimal supervision, achieve better performance than human experts. But, as per the "**curse of dimensionality**", such directions still remain very sparse.  
-> 
-> Also, **human performance is also very spiky and diverse; representing this by a single round disk or ball is also somewhat misleading**.
-> 
-> **In high dimensions, the greatest increase in volume often comes from taking combinations of smaller, spikier sets**. 
-> 
-> A team of humans working together, or humans complemented by a variety of AI tools, can achieve a significantly greater performance on many tasks than any single human or AI tool could achieve individually, particularly if they are strong in "orthogonal" directions. 
-> 
-> On the other hand, the choice of combination now matters: the wrong combination could lead to a misalignment between the objective and the actual outcome, in which the stated goal may be nominally achieved, but at the cost of several unwanted secondary effects as well.
-> 
-> TLDR: the topic of intelligence is too high-dimensional for any low-dimensional narrative to be perfectly accurate, and one should take any such narratives with a grain of salt.
-> 
-> [Link](https://mathstodon.xyz/@tao/115620261936846090)
-
-</details>
-
-Also, AI changes people's value judgement. Before ChatGPT if people see a long article with fancy writing they would think the author payed efforts in writing it. But now AI can easily write a long article with similar vibe. Now fancy writing is treated as "AI smell".
-
 ## Value of art
-
 
 People tend to **judge the value of art by the cost of producing**. If one sees a beautiful image and thinks it's good art, then when they know it's AI-generated, the same image suddenly becomes cheap.
 
 In some sense, when people appreciate art, they are appreaciting the efforts of human behind art, not just art itself.
 
 However, many old people don't recognize AI and often treat AI output as real good content.
+
+Similar to art, people's judgements to "fancy writing" has changed. Before ChatGPT, a long article with fancy writing style often means author has high writing skill and puts efforts into writing. But now it's "AI smell".
 
 ## Not just "mimic pattern in training data"
 
@@ -109,12 +91,15 @@ If you know one thing's name, you can easily search it via search engine. But th
 
 LLMs can hallucinate, but after knowing the name of the thing you can use search engine to verify.
 
-## Confusing different things that has similar wording
+## Hallucinations looks plausible
 
-This issue is commonly encountered in AI coding. For example, `index` can mean the index in different things in different context. 
+One important problem: When LLM makes a mistake (hallucinate), the mistake looks plausible. It uses related jargons in related domains. Non-experts cannot tell. 
 
-To alleviate this issue, the naming should be more informative, such as `index_of_xxx`, `index_of_yyy_in_zzz`. Also tensor name should describe meaning of each dimension ([see also](https://medium.com/@NoamShazeer/shape-suffixes-good-coding-style-f836e72e24fd)). All context-dependent things should include context in name or comments nearby.
+Some hallucinations can only be detected by experts. Some hallucinations require large efforts to check even for experts.
 
+**Bullshit asymmetry principle**: Refuting misinformation is much harder than producing misinformation.
+
+Also, RLHF (reinforcement learning with human feedback) makes AI tend to output fancy superficial signal that make human give good feedback in first glance.
 
 ## About AI Coding
 
@@ -132,9 +117,19 @@ But knowing what can be simplified and what cannot requires some programming exp
 
 A lot of time in programming is spent on how to use an "API". The "API" here is generalized, including language features, framework usage, config file format, how to deploy, etc.
 
-Each API has its own idiosyncracies. For example, adding one thing can be named "insert", "create", "add", "put", "register", "spawn", etc. These are very ad-hoc and requires learning. Cannot guess from intuition. 
+Each API has its own idiosyncracies. For example, adding one thing can be named "insert", "create", "add", "put", "new", "register", "spawn", etc. Which exact word/phrase it chooses is ad-hoc. It requires learning and cannot be guessed from intuition. 
 
-Having to learn these API design is an obstacle in programming that's usually not fun. For example I just want to write a json file, but I have to lookup which API to serialize json and write text file. LLM can free programmer from these.
+Having to learn these ad-hoc API design is an obstacle in programming that's usually not fun. For example I just want to write a json file, but I have to lookup which API to serialize json and write text file. LLM can free programmer from these.
+
+### AI capability sensitive to complexity
+
+It's very obvious that, the more complex the task, the harder it's to AI. This principle is obvious but still often forgotten.
+
+AI coding performs good in simple projects. The new projects are simple in the beginning. AI coding is good at them. But AI coding doesn't perform so good in a large existing codebase.
+
+The good architecture design that can isolate complexity makes coding easier for both human and AI. 
+
+In large codebase it's often that after changing A then B also need to be changed to make it keep working. When B and A are far away (in different foldrs) then AI may only change A and don't change B so it breaks. Sometimes type system can catch the issue. But when it involves config file or cross-language things type system cannot catch it.
 
 ### Good for new side projects
 
@@ -150,7 +145,12 @@ But when applying vibe coding in existing large codebases it tend to perform wor
 
 Writing code is easy, but writing working code is hard. When there is a complex bug that asking AI alone cannot fix, there will be frustrations. Also other bugs can emerge after fixing one bug.
 
-Vibe coding don't work well in work. When vibe coding a side project, AI is your "employee" that works on your dream. But in work, you work for your manager's dream and AI is just a tool that often make mistakes in large legacy codebase.
+### Confusing different things with similar wording
+
+This issue is commonly encountered in AI coding. For example, `index` can mean the index in different things in different context. 
+
+To alleviate this issue, the naming should be more informative, such as `index_of_xxx`, `index_of_yyy_in_zzz`. Also tensor name should describe meaning of each dimension ([see also](https://medium.com/@NoamShazeer/shape-suffixes-good-coding-style-f836e72e24fd)). All context-dependent things should include context in name or comments nearby.
+
 
 ### Feels faster but maybe actually slower
 
@@ -185,6 +185,7 @@ But AI coding is a **completely different paradigm** than existing abstraction l
 
 ## Context rot issue
 
+When context is long, LLM will perform worse. For example, ignoring some things in context.
 
 ## No continuous learning
 
@@ -229,5 +230,31 @@ Also, for each person that accept reputation information, they also need to judg
 
 Some people want AI output to be as similar to human output as possible. Some people want to detect whether content is written by human as accurate as possible. There is a constant race.
 
-## AI race between countries
+In old days the em dash "—" is frequently used by AI so it's seen as "AI smell". This affects human writers who use em-dash normally.
 
+The new "AI smell" is negation: "It's not X, it's Y." 
+
+The AI companies are probably trying to use RL to reduce usages of em dash and negation.
+
+## The "AGI race"
+
+It's seen that there is an "AI race" between countries. There are some related assumptions:
+
+- "Who gets AGI first will keep dominating."
+- "The first AGI can recursively improve itself quickly, so it will become superintelligence quickly."
+
+But it's highly possible that future AI will still be bottlenecked by:
+
+- Energy production
+- Compute power (chips, interconnect, etc.)
+- Getting verification from real world
+
+The thrid bottleneck, getting verification, is very important. For example:
+
+- Training a Go game AI requires knowing whether it wins or loses. 
+- Training a programming AI requires running generated code and testing whether program runs as intended. 
+- Training a research AI requires doing experiments in real world and getting real feedback.
+
+The first two can be simulated purely in computer. Doing RL on them is efficient. But for science research that touches real world, getting verification from real world will be an important bottleneck.
+
+Also, if the AI want to improve itself, then the AI need to do AI experiments. But AI experiments costs compute power and energy. So there will probably be no dramatic "AGI quickly improve itself to superintelligence". The progress will be slow (but steady).

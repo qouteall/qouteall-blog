@@ -527,9 +527,8 @@ People often dream of a "silver bullet" that simply magically works:
 - People hope that a "secret advanced weapon" can reverse the systematic disadvantage in war. This almost never happens in real world. 
 - Hoping that a secret recipe or a secret techonology alone can succeed.
   - Coca Cola succeedes not just by the "secret recipe". The brading, global production system and logistic network are also important.
-  - Modern technologies are complex and have many dependencies. You cannot just simply copy "one key techonology" and get the same result. Even just imitating existing technology often requires a whole infrastructure, many talents and years of work. [^about_ai_race]
+  - Modern technologies are complex and have many dependencies. You cannot just simply copy "one key techonology" and get the same result. Even just imitating existing technology often requires a whole infrastructure, many talents and years of work.
 
-[^about_ai_race]: It's a common view that AI capability can improve exponetially. And when AI is smart enough to keep improving itself, its intelligence will skyrocket into superintelligence, far above human. But it's highly possible that future AI will still be bottlenecked by 1. energy production 2. compute power 3. getting verification from real world. These 3 factors limits how fast AI can take effect and self-improve. Especially the third limitation (Go game and Lean math proving can be verified purely in computer, but other kinds of science, like chemistry and biology, are too complex to be fully simulated in computer, thus getting verification from real world is a very important bottleneck. Also, some AI researchers say they are bottlecked by training speed rather than ideas. Deep learning has chaotic characteristics, so how fast AI experiments can be done is an important bottleneck in AI self-improve.). There will probably be no dramatic "suddenly winning AI race forever".
 
 The good and fundamental ideas are often simple. But not all simple ideas are good or fundamental.
 
