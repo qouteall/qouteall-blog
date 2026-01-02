@@ -98,13 +98,13 @@ Most people want to be recognized, praised and emphasized. People need emotional
 
 But emotional value is often scarce in human-to-human interactions. Person A praising/emphasize person B gives emotional values to B. But if A don't sincerely do so but is forced to do so for other reasons, then A consumes their own emotional value.
 
-AI can provide tons of cheap emotional value. AIs are trained to please the user. The AI itself doesn't need to be recognized or praised like a person.
+AI can provide tons of cheap emotional value. AIs are trained to please the user. The AI itself doesn't need to be recognized/respected like a person.
 
 If one person cannot get emotional value from real human interaction, they tend to gain emotional value from AI. Related: [Chatbot psychosis](https://en.wikipedia.org/wiki/Chatbot_psychosis)
 
-Also, when trying to brainstrom with LLM, don't tell them your existing thoughts. 
+Also, AI is always "patient" in responding your questions. No matter how "silly" the question is. Asking entry-level questions to an expert often consume out the expert's patience.
 
-Also, LLM is always "patient" in responding your questions. No matter how "silly" the question is. Asking entry-level questions to an expert often consume out the expert's patience.
+In human-to-human relationships, often only recriprocal relations can sustain. But AI can provide emotional value without you giving AI anything.
 
 ## About AI Coding
 
