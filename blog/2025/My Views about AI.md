@@ -94,15 +94,17 @@ Also, RLHF (reinforcement learning with human feedback) makes AI tend to output 
 
 ## AI provides emotional value
 
-Most people want to be recognized and praised. People need emotional value. 
+Most people want to be recognized, praised and emphasized. People need emotional value. 
 
-But emotional value is often scarce in human-to-human interactions. Person A praising person B gives emotional values to B. But if A don't sincerely praise but is forced to do so for other reasons, then A consumes emotional value.
+But emotional value is often scarce in human-to-human interactions. Person A praising/emphasize person B gives emotional values to B. But if A don't sincerely do so but is forced to do so for other reasons, then A consumes their own emotional value.
 
 AI can provide tons of cheap emotional value. AIs are trained to please the user. The AI itself doesn't need to be recognized or praised like a person.
 
 If one person cannot get emotional value from real human interaction, they tend to gain emotional value from AI. Related: [Chatbot psychosis](https://en.wikipedia.org/wiki/Chatbot_psychosis)
 
 Also, when trying to brainstrom with LLM, don't tell them your existing thoughts. 
+
+Also, LLM is always "patient" in responding your questions. No matter how "silly" the question is. Asking entry-level questions to an expert often consume out the expert's patience.
 
 ## About AI Coding
 
