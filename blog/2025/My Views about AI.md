@@ -193,7 +193,9 @@ But AI coding is a **completely different paradigm** than existing abstraction l
 
 ## Context rot issue
 
-When context is long, LLM will perform worse. For example, ignoring some things in context.
+When context is long, LLM will perform worse. For example, ignore some instructions, ignore some important details in context.
+
+When using AI chat, frequently opening new sessions could improve result quality.
 
 ## No continuous learning
 
@@ -236,7 +238,13 @@ Also, for each person that accept reputation information, they also need to judg
 
 ## Cheap product vs craftsmanship
 
+In the initial phase of industrial revolution, the factory could mass-produce cheap but low-quality products. These cheap products are more affordable. But their quality is worse than the ones produced by expert craftsmen. But many craftsmen lost jobs due to reduced cost of factory products. This resulted in "reduced peak quality".
 
+However, the machines then improved and the factory-produced good's quality surpasses manually-produced items in most areas.
+
+Now some hand-made things could be packaged as luxury. But that only provides much fewer jobs of craftsmen than before industrial revolution.
+
+The same could also apply to AI. Currently, we can say that AI-generated things have worse quality than human-made things. But in the future it will probably change. After AI output quality mostly supass human although there may still be related jobs the jobs will be much fewer.
 
 ## AI detection race
 
