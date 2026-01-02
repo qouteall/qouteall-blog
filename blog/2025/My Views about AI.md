@@ -236,16 +236,6 @@ How to solve that problem? One important way is **reputation**. When a seller is
 
 Also, for each person that accept reputation information, they also need to judge the quality by existing reputation of information provider, as there are false informations.
 
-## Cheap product vs craftsmanship
-
-In the initial phase of industrial revolution, the factory could mass-produce cheap but low-quality products. These cheap products are more affordable. But their quality is worse than the ones produced by expert craftsmen. But many craftsmen lost jobs due to reduced cost of factory products. This resulted in "reduced peak quality".
-
-However, the machines then improved and the factory-produced good's quality surpasses manually-produced items in most areas.
-
-Now some hand-made things could be packaged as luxury. But that only provides much fewer jobs of craftsmen than before industrial revolution.
-
-The same could also apply to AI. Currently, we can say that AI-generated things have worse quality than human-made things. But in the future it will probably change. After AI output quality mostly supass human although there may still be related jobs the jobs will be much fewer.
-
 ## AI detection race
 
 Some people want AI output to be as similar to human output as possible. Some people want to detect whether content is written by human as accurate as possible. There is a constant race.
