@@ -253,7 +253,9 @@ Stoicism proposes thinking about death all the time (_memento mori_). Thinking a
 - People tend to justify their previous behavior. Behavior can shape attitudes.
 - People have a tendency to pursuade others by their belief (meme spread).
 
-**Confirmation bias**: People tend to seek and accept the evidences that confirm their beliefs, and reluctant to accept contradictory evidences. Confirmation bias can even make one subconsciously ignore some information.
+**Confirmation bias**: People tend to seek and accept the evidences that confirm their beliefs, and reluctant to accept contradictory evidences.
+
+Confirmation bias may make one pay attention to the wrong thing. Pay attention to unimportant thing but ignore the significant thing. It can "manipulate" the perception.
 
 **Motivated reasoning**: when they does not want to accept contradictory evidences, they may make up and believe in **non-falsifiable explanations** to explain the evidence in a way that follows the original belief.
 

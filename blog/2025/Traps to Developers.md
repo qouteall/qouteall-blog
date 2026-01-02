@@ -330,6 +330,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - Operator precedence. `a || b && c` is `a || (b && c)`.
 - Assertion should not be used for validating external data. Validating external data should use proper error handling. Assertion should check internal invariants.
 - Confusing default value with missing value. For example, if the balence field is primitive integer, 0 can represent both "balance value not initialized" or "balance is really 0".
+  - The same thing applies to primitive values in protocolbuffer.
 - When using profiler: the profiler may by default only include CPU time which excludes waiting time. If your app spends 90% time waiting (e.g. wait on database), the flamegraph may not include that 90% which is misleading.
 - When getting files in a folder, the order is not deterministic (may depend on inode order). It may behave differently on different machines even with same files. It's recommended to sort by filename then process. 
   - Note that `ls` by default sorts results. Use `ls -f` to see raw file order.

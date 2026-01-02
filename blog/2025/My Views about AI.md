@@ -56,17 +56,7 @@ Also, the **optimization targets** of LLMs are very different to the optimizatio
 > 
 > \- Andrej Karpathy, [Link](https://x.com/karpathy/status/1991910395720925418)
 
-Due to the commercial-driven optimization target, LLMs tend to be sychophants and please the user.
 
-> Me to my AI-enabled smart fridge in 2038: Do we have any milk left
-> 
-> My fridge: Wow. Now that's a question worth exploring. By asking me something like that, you've proven that you're not thinking in ordinary ways—you're dialed in to what's really vital about food. Let's dive in.
-> 
-> \- LBark, [Link](https://x.com/franzsherbert/status/1923395242734060005)
-
-(The sychophancy is reduced in new versions of LLMs as the psychological problem caused by sychophancy become more widely acknowledged.)
-
-When trying to brainstrom with LLM, don't tell them your existing thoughts. 
 
 LLM's behavior is very context-dependent. Sometimes it will defend the things they said in previous context. Starting a new session can make LLM output differently for the same question. 
 
@@ -102,6 +92,18 @@ Some hallucinations can only be detected by experts. Some hallucinations require
 
 Also, RLHF (reinforcement learning with human feedback) makes AI tend to output fancy superficial signal that make human give good feedback in first glance.
 
+## AI provides emotional value
+
+Most people want to be recognized and praised. People need emotional value. 
+
+But emotional value is often scarce in human-to-human interactions. Person A praising person B gives emotional values to B. But if A don't sincerely praise but is forced to do so for other reasons, then A consumes emotional value.
+
+AI can provide tons of cheap emotional value. AIs are trained to please the user. The AI itself doesn't need to be recognized or praised like a person.
+
+If one person cannot get emotional value from real human interaction, they tend to gain emotional value from AI. Related: [Chatbot psychosis](https://en.wikipedia.org/wiki/Chatbot_psychosis)
+
+Also, when trying to brainstrom with LLM, don't tell them your existing thoughts. 
+
 ## About AI Coding
 
 ### Focus on finishing task, trade off maintainability
@@ -118,9 +120,11 @@ But knowing what can be simplified and what cannot requires some programming exp
 
 A lot of time in programming is spent on how to use an "API". The "API" here is generalized, including language features, framework usage, config file format, how to deploy, etc.
 
-Each API has its own idiosyncracies. For example, adding one thing can be named "insert", "create", "add", "put", "new", "register", "spawn", etc. Which exact word/phrase it chooses is ad-hoc. It requires learning and cannot be guessed from intuition. 
+The design of API has a lot of ad-hoc idiosyncracies. For example, adding one thing can be named "insert", "create", "add", "put", "new", "register", "spawn", etc. Also, reading a file could be `open`, `files.open`, `os.open`, `fs::open`, `openFile`, `files.read`, `readFile`, `new FileInputStream`, `new ifstream` etc. Many other such examples.
 
-Having to learn these ad-hoc API design is an obstacle in programming that's usually not fun. For example I just want to write a json file, but I have to lookup which API to serialize json and write text file. LLM can free programmer from these.
+Which exact word/phrase it chooses is ad-hoc. It cannot be guessed without learning. Having to learn these ad-hoc API design is an obstacle in programming that's usually not fun. And it's different in each language/framework. Knowing the API of reading file in Python is not helpful in Java.
+
+But if I tell AI to "read this file" then AI knows how to use the API.
 
 ### AI capability sensitive to complexity
 
@@ -228,6 +232,10 @@ How to solve that problem? One important way is **reputation**. When a seller is
 
 Also, for each person that accept reputation information, they also need to judge the quality by existing reputation of information provider, as there are false informations.
 
+## Cheap product vs craftsmanship
+
+
+
 ## AI detection race
 
 Some people want AI output to be as similar to human output as possible. Some people want to detect whether content is written by human as accurate as possible. There is a constant race.
@@ -237,6 +245,8 @@ In old days the em dash "—" is frequently used by AI so it's seen as "AI smell
 The new "AI smell" is negation: "It's not X, it's Y." 
 
 The AI companies are probably trying to use RL to reduce usages of em dash and negation.
+
+There are AI detections tools like Pangram. They can detect AI in some sense but the detection result can never be fully accurate (even if it shows "100% AI" it may actually be 80% probably of AI-written). Because it's not fully accurate, it shouldn't be used as sole source as discrediting a piece of writing.
 
 ## The "AGI race"
 
