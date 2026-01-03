@@ -231,6 +231,10 @@ How to solve that problem? One important way is **reputation**. When a seller is
 
 Also, for each person that accept reputation information, they also need to judge the quality by existing reputation of information provider, as there are false informations.
 
+AI is very good at faking superficial signals. The AI-written articles use related jargons that looks palusible for non-experts. The AI-written code will also superficially do things you asked, although it may use an API wrongly or violate an invariant so it won't work. The AI-generated photos looks real unless you squint details.
+
+The problems is that faking superficial signal is easier than generating actually high-quality content. This problem already exists before AI. Some human are also good at faking superficial signals. But AI makes it much easier.
+
 ## Benchmark score is not representative
 
 It's hard to test how good a model is. The possible space of tasks is very high-dimensional. And some tasks are hard to judge.
