@@ -207,22 +207,15 @@ Another way is to put your training data to internet, then AI companies will cra
 
 Also AI companies don't give a formal way to submit training data to them (maybe due to fear of some people maliciously submitting poisonous training data).
 
-## Where RL is good at
+## RL reward source
 
-With reinforcement learning:
+The behavior of AI is highly shaped by RL. Doing RL requires judging reward for model. Different kinds of reward source:
 
-- Anything that can be auto-verified can be used for RL effectively
-- Anything that can be easily judged by human can be used for RL effectively
+- Human judge. AI companies hire human to judge and often reward by judge count, not judge quality (judge quality is hard to measure). There there will be "human reward hacking": employed human tend to judge quickly by intuition to maximize income. So AI is trained to give **fancy superficial signal that can confuse intuitions**. The AI output looks good by first glance. But an expert can find it's full of nuanced mistakes. But normal people often won't notice the nuanced mistakes.
+- Given some fixed problems with fixed answers. Only give reward if answer exactly matches. This can be useful for improving test score.
+- Use other program (e.g. unit test) to judge result. For example, if AI-written code passes unit test it gets reward. But there may be bugs in reward judging code. AI may utilize bugs to gains reward without doing what you want AI to do. This is called **reward hacking**.
 
-|                               | Easy to verify          | Hard to verify  |
-| ----------------------------- | ----------------------- | --------------- |
-| Easy to collect training data | AI is good at this      | Full of AI slop |
-| Hard to collect training data | AI is often not helpful | AI is bad at it |
-
-However there are some problems:
-
-- If you use a unit test to judge AI coding result, AI may do **reward hacking**. Exploit the bug in the test. AI gains reward without doing what you want AI to do.
-- For human judged: AI companies hire human to judge and often reward by judge count, not judge quality (judge quality is hard to measure). There there will be "human reward hacking": employed human tend to judge quickly by intuition to maximize income. So AI is trained to give **fancy superficial signal that can confuse intuitions**. The AI output looks good by first glance. But an expert can find it's full of nuanced mistakes. But normal people often won't notice the nuanced mistakes.
+"Reward hacking" is also common in human society. [Perverse incentive](https://en.wikipedia.org/wiki/Perverse_incentive).
 
 ## Experts' skill undervalues
 
@@ -235,6 +228,16 @@ AI reduces the cost of doing many things, including the things that only experts
 How to solve that problem? One important way is **reputation**. When a seller is honest about the lemon quality, people communicate about the information and improve seller's reputation. When seller cheats about lemon quality, people also communicate information and reduce seller's reputation.
 
 Also, for each person that accept reputation information, they also need to judge the quality by existing reputation of information provider, as there are false informations.
+
+## Benchmark score is not representative
+
+It's hard to test how good a model is. The possible space of tasks is very high-dimensional. And some tasks are hard to judge.
+
+[Goodhart's law](https://en.wikipedia.org/wiki/Goodhart%27s_law): When a measure becomes a target, it ceases to be a good measure.
+
+The popular benchmarks (e.g. Humanity's last exam, SWE bench verified) are also AI companies' important optimization targets. They will not do obvious cheating of putting test set into training set. But there are many other ways to indirectly hack the benchmark.
+
+> ([Link](https://www.reddit.com/r/MachineLearning/comments/1pgqbjd/d_how_did_gemini_3_pro_manage_to_get_383_on/)) isparavanje: Tech companies have been paying PhDs to generate HLE-level problems and solution sets via platforms like Scale AI. They pay pretty well, iirc ~$500 per problem. That's likely how. I was an HLE author, and later on I was contacted to join such a programme (I did a few since it's such good money). Obviously I didn't leak my original problems, but there are many I can think of.
 
 ## AI detection race
 
@@ -270,3 +273,17 @@ The thrid bottleneck, getting verification, is very important. For example:
 The first two can be simulated purely in computer. Doing RL on them is efficient. But for science research that touches real world, getting verification from real world will be an important bottleneck.
 
 Also, if the AI want to improve itself, then the AI need to do AI experiments. But AI experiments costs compute power and energy. So there will probably be no dramatic "AGI quickly improve itself to superintelligence". The progress will be slow (but steady).
+
+## Non-linearity of AI usefulness
+
+For example, there is a specific task that experts can do 80 scores. 
+
+- If AI can only do 60 scores then AI is mostly useless in that task. 
+- But if AI can do 70 scores, then AI will be much more useful in that task, although the performance just jumpted from 60 to 70. 
+- If AI can reach 75 scores, then the economical utility of using AI may increase 10 times.
+
+Near the threshold, incremental improvements do big changes.
+
+Also note that intelligence is high-dimensional. Surpassing human in one task doesn't necessarily destroy jobs in that area. 
+
+The nonlinearity-near-threshold effect exists in other domains. Making a software 10% easier to use may double its userbase.
