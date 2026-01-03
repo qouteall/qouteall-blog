@@ -128,6 +128,8 @@ Which exact word/phrase it chooses is ad-hoc. It cannot be guessed without learn
 
 But if I tell AI to "read this file" then AI knows how to use the API.
 
+But AI's ability of using API is bad for rarely used tools/libraries/frameworks/languages. It's correlated with how much related training data and how much related RL is done.
+
 ### AI capability sensitive to complexity
 
 It's very obvious that, the more complex the task, the harder it's to AI. This principle is obvious but still often forgotten.
