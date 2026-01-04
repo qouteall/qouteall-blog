@@ -108,15 +108,15 @@ In human-to-human relationships, often only recriprocal relations can sustain. B
 
 ## About AI Coding
 
-### Focus on finishing task, trade off maintainability
+### Focus too much on current task
 
-Current LLMs are trained to finish specific tasks. The LLM tend to overly focus on current task and don't "consider" future code maintenance.
+Current LLMs are trained to finish specific tasks. The LLM tend to overly focus on current task, then it will "care less" about things like future code maintenance and security.
 
 Also AI tend to use complex solutions to solve a problem. Although the complex solution sometimes work, the added complexity adds new sources of bugs. It adds tech debt and is problematic when project is complex.
 
 Often the bug is partially caused by AI overcomplicating simple things. When human want to fix vibe-coded bug, the first thing to do is to simplify out unnecessary complexity. 
 
-But knowing what can be simplified and what cannot requires some programming experience.
+Vibe-coded app may contain security issues. But if you ask AI to do security review it can find the issue. AI "knows" security but still write insecure code because it was trained to "focus" on finishing current task. The RL rewards are usually simple and don't consider things like security and future maintenance.
 
 ### Save time on learning how to use API
 
@@ -218,10 +218,6 @@ The behavior of AI is highly shaped by RL. Doing RL requires judging reward for 
 - Use other program (e.g. unit test) to judge result. For example, if AI-written code passes unit test it gets reward. But there may be bugs in reward judging code. AI may utilize bugs to gains reward without doing what you want AI to do. This is called **reward hacking**.
 
 "Reward hacking" is also common in human society. [Perverse incentive](https://en.wikipedia.org/wiki/Perverse_incentive).
-
-## Experts' skill undervalues
-
-AI reduces the cost of doing many things, including the things that only experts can do before. So some experts' skill undervalues. This is one reason of disliking AI.
 
 ## Slop prevails when people cannot judge quality
 
