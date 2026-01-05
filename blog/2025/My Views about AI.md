@@ -82,6 +82,8 @@ If you know one thing's name, you can easily search it via search engine. But th
 
 LLMs can hallucinate, but after knowing the name of the thing you can use search engine to verify.
 
+LLMs can also inform you about your **unknown unknown** (something useful that you don't know you don't know),
+
 ## Hallucinations looks plausible
 
 One important problem: When LLM makes a mistake (hallucinate), the mistake looks plausible. It uses related jargons in related domains. Non-experts cannot tell. 
@@ -132,8 +134,6 @@ But AI's ability of using API is bad for rarely used tools/libraries/frameworks/
 
 ### AI capability sensitive to complexity
 
-It's very obvious that, the more complex the task, the harder it's to AI. This principle is obvious but still often forgotten.
-
 AI coding performs good in simple projects. The new projects are simple in the beginning. AI coding is good at them. But AI coding doesn't perform so good in a large existing codebase.
 
 The good architecture design that can isolate complexity makes coding easier for both human and AI. 
@@ -160,6 +160,7 @@ This issue is commonly encountered in AI coding. For example, `index` can mean t
 
 To alleviate this issue, the naming should be more informative, such as `index_of_xxx`, `index_of_yyy_in_zzz`. Also tensor name should describe meaning of each dimension ([see also](https://medium.com/@NoamShazeer/shape-suffixes-good-coding-style-f836e72e24fd)). All context-dependent things should include context in name or comments nearby.
 
+Having more informative naming also helps human.
 
 ### Feels faster but maybe actually slower
 
