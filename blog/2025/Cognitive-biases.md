@@ -78,6 +78,8 @@ But assuming every cue is malice is bad for mental health. There is a saying:
 
 It's common that: Most people focus on their own businesses. Most people don't remember about details of you. Most people don't pay attention to what you said just once.
 
+Related: [Wet bias](https://en.wikipedia.org/wiki/Wet_bias): Overestimate probability of raining to improve the usefulness of forcast.
+
 ### Perception of risk
 
 **We prefer deterministic gain instead of risky gain**. A bird in the hand is worth two in the bush. 

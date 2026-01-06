@@ -22,6 +22,13 @@ That issue is not limited to only locking and sleep. It also involves networking
 
 Tokio supports [`spawn_blocking`](https://dtantsur.github.io/rust-openstack/tokio/task/fn.spawn_blocking.html) which make it run in new scheduler thread. The code that does non-async blocking should be ran in `spawn_blocking`.
 
+### Deadlock caused by blocking scheduler thread
+
+[How to deadlock Tokio application in Rust with just a single mutex](https://turso.tech/blog/how-to-deadlock-tokio-application-in-rust-with-just-a-single-mutex)
+
+[Why do I get a deadlock when using Tokio with a std::sync::Mutex?](https://stackoverflow.com/questions/63712823/why-do-i-get-a-deadlock-when-using-tokio-with-a-stdsyncmutex)
+
+
 ## Cancellation safety
 
 Rust's future is very different to Java `CompletableFuture` and JS `Promise` and C# `Task`. In Java/JS/C#, you launch a task then get a future/promise/task object that represents the async task. The task will run regardless whether you discard the future. But in Rust, when you create a future, the task is not yet launched. It will be launched when the future is firstly polled.

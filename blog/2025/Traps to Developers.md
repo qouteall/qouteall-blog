@@ -26,7 +26,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - Margin collapse.
   - Two vertically touching siblings can overlap vertial margin. Child vertical margin can "leak" outside of parent.
   - Margin collapse doesn't happen when `border` or `padding` spcified. Don't try to debug margin collapse by coloring border. Debug it using browser's devtools.
-  - Margin collapse can be fixed by block formatting context (BFC). `display: flow-root` creates a BFC. (There are other ways to create BFC, like `overflow: hidden`, `overflow: auto`, `overflow: scroll`, `display:table`, but with side effects)
+  - Margin collapse can be avoided by block formatting context (BFC). `display: flow-root` creates a BFC. (There are other ways to create BFC, like `overflow: hidden`, `overflow: auto`, `overflow: scroll`, `display:table`, but with side effects)
 - If a parent only contains floating children, the parent's height will collapse to 0, and the floating children will leak. Can be fixed by BFC.
 - If the parent's `display` is `flex` or `grid`, then the child's `float` has no effect
 - [Stacking context](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_positioned_layout/Stacking_context):
@@ -51,11 +51,12 @@ This article is mainly summarization. The main purpose is "know this trap exists
 
 - On mobile browsers, the top address bar and bottom navigation bar can go out of screen when scrolling down. `100vh` correspond to the height when the two bars gets out of screen, which is larger than the height when the two bars are on screen. The modern solution is `100dvh`.
 - About scrollbar:
-  - In Windows, scrollbar takes space. But in macOS it doesn't take space by default.
+  - In Windows, scrollbar takes space. But in macOS or mobile it doesn't take space [^macos_scrollbar_space].
   - The space occupied by vertical scrollbar is included in width. Scrollbar "steals" space from inner contents. [^css_box_model_scrollbar]
   - A top-level element with `width: 100vw` overflows horizontally if viewport has scrollbar that takes space. `width: 100%` can workaround that issue.
   - About scrollbar styling: the [standard scroll bar styling](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Scrollbars_styling) supports color and width but doesn't support many other features (e.g. round corner scrollbar). The [`-webkit-scrollbar`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/::-webkit-scrollbar) non-standard pseudo-elements supports these features but FireFox doesn't support them. In modern browser, if standard scrollbar styling is used, then the  `-webkit-scrollbar` has no effect.
 - `position: absolute` is not based on its parent. It's based on its nearest positioned ancestor (the nearest ancestor that has `position` be `relative`, `absolute` or creates stacking context).
+- `position: sticky` doesn't work if parent (or indirect parent) has `overflow: hidden`.
 - [`backdrop-filter: blur` does not consider ambient things](https://www.joshwcomeau.com/css/backdrop-filter/#the-issue).
 - If the parent's width/height is not pre-determined, then percent width/height (e.g. `width: 50%`, `height: 100%`) doesn't work. [^percent_width_height]
 - CSS transition doesn't work between `height: 0` and `height: auto`. Solutions:
@@ -72,20 +73,24 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - `text-align` aligns text and inline things, but doesn't align block elements (e.g. normal divs).
 - `text-align: center` will not center when content is too wide. It will align left in that case. [See also](https://stackoverflow.com/questions/6618648/can-overflow-text-be-centered)
 - By default `width` and `height` doesn't include padding and border. `width: 100%` with `padding: 10px` can still overflow the parent. `box-sizing: border-box` make the width/height include border and padding. Note that `width` includes scrollbar regardless of `box-sizing`.
+- The `html` and `body` are two different elements.
+  - Making web page height fill viewport requires both `html` and `body` to be `height: 100%`. (Another solution is `height: 100dvh`)
+  - Browser does some special treatment on background style of `body` and `html` (viewport propagation) (TODO)
 - About override:
   - CSS import order matters. The latter-imported ones can override the earlier ones.
-  - JS-set CSS can override attributes in `.css` files (when both are not `!important`). `!important` attribute in `.css` files can override non `!important` JS-set CSS.
+  - The styles directly written in HTML are inline styles, which can be set by JS. Inline styles can override attributes in `.css` files (when both are not `!important`). `!important` attribute in `.css` files can override non `!important` inline style.
   - Browser puts some user agent styles to `<input>` and `<button>` (e.g. `color`, `font-family`). So `<input>` and `<button>` will not inherit some styles from parent.
   - See [CSS cascade](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_cascade/Cascade) for complete details.
 - About hiding:
-  - Parent `visibility: hidden` doesn't enforce all childs to be hidden. If child has `visibility: visible` it will still be shown. This don't apply to `opacity: 0` or `display: none`.
+  - Parent `visibility: hidden` doesn't enforce all children to be hidden. If child has `visibility: visible` it will still be shown. This don't apply to `opacity: 0` or `display: none`.
   - An element with `opacity: 0` can still be interacted (e.g. click button). This doesn't apply to `display: none` or `visibility: hidden`.
   - `display: none` removes element from layout. This doesn't apply to `visibility: hidden` or `opacity: 0`.
 - [Cumulative Layout Shift](https://web.dev/articles/cls). 
   - It's recommended to specify `width` and `height` attribute in `<img>` to avoid layout shift due to image loading delay.
-- File download request is not shown in Chrome dev tool, because it only shows networking in current tab, but file download is treated as in another tab. To inspect file download request, use `chrome://net-export/`.
 - JS-in-HTML may interfere with HTML parsing. For example `<script>console.log('</script>')</script>` makes browser treat the first `</script>` as ending tag. [See also](https://sirre.al/2025/08/06/safe-json-in-script-tags-how-not-to-break-a-site/)
 - Virtual scrolling breaks Ctrl-F (Cmd-F) search.
+
+[^macos_scrollbar_space]: In macOS it can be configured to make scrollbar take space like in Windows.
 
 [^css_box_model_scrollbar]: The CSS box model includes content box, padding, border and margin, but doesn't mention scrollbar. Scrollbar is visually between border and padding, but scrollbar occupies space from content box ("steal" space across padding). In Chrome devtools, the padding highlight area includes scrollbar, but scrollbar is not in padding. One may ask "if width includes scrollbar, then why `width: 100vw` cause horizontal overflow"? Because `width: 100vw` applies to an element inside viewport, not viewport itself. Viewport width includes viewport's scrollbar.
 
@@ -157,7 +162,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
     - In X86 and ARM, rounding mode is thread-local mutable state can be set by special instructions. It's not recommended to touch the rounding mode as it can affect other code.
     - In GPU, there is no mutable state for rounding mode. Rasterization often use RNTE rounding mode. In CUDA different rounding modes are associated by different instructions.
   - Math functions (e.g. sin, log) may be less accurate in some embedded hardware or old hardware.
-  - X86 has legacy FPU which has 80-bit floating point registers and per-core rounding mode state. It's recommended to not use them.
+  - Legacy X86 FPU (80-bit floating point registers and per-core rounding mode state).
   - ......
 - Floating point precision is low for values with very large absolute value or values very close to zero. It's recommended to avoid temporary result to have very large absolute value or be very close-to-zero.
 - Iteration can cause error accumulation. For example, if something need to rotate 1 degree every frame, don't cache the matrix and multiply 1-degree rotation matrix every frame. Compute angle based on time then re-calculate rotation matrix from angle.
@@ -257,6 +262,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - In conditons, these things are "falsy": 0, `None`, empty string, empty container. Be careful if 0 or empty container represents valid value. Also it can be controlled by implementing `__bool__` method.
 - GIL (global interpreter lock) doesn't protect again on-disk data race. Two concurrent threads reading and writing same file may cause data race in file. GIL releases during IO.
 - `zipfile.ZipFile` doesn't do compression if `compression` argument is not set. (`.zip` format can contain files uncompressed.)
+- Pandas `read_csv` will guess type of each column based on first few rows, if you don't specify `dtype`.
 
 ### SQL Databases
 
@@ -377,6 +383,9 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Kafka's message size limit is 1MB by default.
 - In Kafka, across partitions, consume order may be different to produce order. If key is null then message's partition is not deterministic.
 - In Kafka, if a consumer processes too slow (no acknowledge within `max.poll.interval.ms`, default 5 min), the consumer will be treated as failed, then a rebalance occurs. That timeout is per-batch. If a batch contains too many messages it may reach that timeout even if individual message processing is not slow. Can fix by reducing batch size `max.poll.records`.
+- If you put your backend behind Nginx, you need to configure connection reuse, otherwise under high concurrency, connection between nginx and backend may fail, due to not having enough internal ports.
+- Nginx `proxy_buffering` delays SSE.
+- If the backend behind Nginx initiates closing the TCP connection, Nginx passive health check treat it as backend failure and temporarly stop reverse proxying. [See also](https://nginx.org/en/docs/http/ngx_http_upstream_module.html)
 
 ### React
 
@@ -392,7 +401,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Forget clean up in `useEffect`.
 - Closure trap. Closure can capture a state. If the state changes, the closure still captures the old state. Solutions:
   - Make closure not capture state and access state within `useReducer`. 
-  - Put mutable thing in `useRef` (note that changing value in ref don't trigger component re-rendering, you need to change state or prop to trigger re-rendering)
+  - Put mutable thing in `useRef` (note that changing value in ref don't trigger component re-rendering,)
   - Add state to effect dependency array. But if the effect manages `setInterval`, doing this will make timing inaccurate.
 - `useEffect` firstly runs in next iteration of event loop, after browser renders the web page. Doing initialization in `useEffect` is not early enough and may cause visual flicker. Use `useLayoutEffect` for early initialization.
 
@@ -423,9 +432,6 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - The result of `traceroute` is not reliable. [See also](https://gekk.info/articles/traceroute.htm). Sometimes [tcptraceroute](https://linux.die.net/man/1/tcptraceroute) is useful.
 - TCP slow start can increase latency. Can be fixed by disabling `tcp_slow_start_after_idle`. [See also](https://ably.com/blog/optimizing-global-message-transit-latency-a-journey-through-tcp-configuration)
 - TCP sticky packet. Nagle's algorithm delays packet sending. It will increase latency. Can be fixed by enabling `TCP_NODELAY`. [See also](https://brooker.co.za/blog/2024/05/09/nagle.html) 
-- If you put your backend behind Nginx, you need to configure connection reuse, otherwise under high concurrency, connection between nginx and backend may fail, due to not having enough internal ports.
-- Nginx `proxy_buffering` delays SSE.
-- If the backend behind Nginx initiates closing the TCP connection, Nginx passive health check treat it as backend failure and temporarly stop reverse proxying. [See also](https://nginx.org/en/docs/http/ngx_http_upstream_module.html)
 - The HTTP protocol does not explicitly forbit GET and DELETE requests to have body. Some places do use body in GET and DELETE requests. But many libraries and HTTP servers does not support them.
 - One IP can host multiple websites, distinguished by domain name. The HTTP header `Host` and SNI in TLS handshake carries domain name, which are important. Some websites cannot be accessed via IP address.
 - CORS (cross-origin resource sharing). For requests to another website (origin), the browser will prevent JS from getting response, unless the server's response contains header `Access-Control-Allow-Origin` and it matches client website. This requires configuring the backend. Passing cookie to another website involves more configuration. If your frontend and backend are in the same website then there is no CORS issue.
@@ -444,7 +450,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - PostgreSQL linguistic sorting (collation) depends on glibc by default. Upgrading glibc may cause index corruption due to changing of linguistic order. [See also](https://wiki.postgresql.org/wiki/Locale_data_changes). Related: [Docker Postgres Image issue](https://x.com/gwenshap/status/1990942970682749183)
 - Text notation of floating-point number is locale-dependent. `1,234.56` in US correspond to `1.234,56` in Germany.
 - CSV normally use `,` as spearator. But in Germany locale separator is `;`.
-- [Han unification](https://en.wikipedia.org/wiki/Han_unification). Some characters in different language with slightly different appearance use the same code point. Usually a font will contain variants for different languages that render these characters differently. [HTML code](https://github.com/qouteall/qouteall-blog/blob/main/blog/2025/unicode-unification-example.html) ![](unicode_unification_example.png)
+- [Han unification](https://en.wikipedia.org/wiki/Han_unification). The same code point may appear differently in different locales. Usually a font will contain variants for different locales. Correct localization require choosing the correct font variant. [HTML code](https://github.com/qouteall/qouteall-blog/blob/main/blog/2025/unicode-unification-example.html) ![](unicode_unification_example.png)
 
 ### Regular expression
 
@@ -467,7 +473,6 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - When using Microsoft Excel to open a CSV file, Excel will do a lot of conversions, such as date conversion (e.g. turn `1/2` and `1-2` into `2-Jan`) and Excel won't show you the original string. [The gene SEPT1 was renamed due to this Excel issue](https://en.wikipedia.org/wiki/SEPTIN1). Excel will also make large numbers inaccurate (e.g. turn `12345678901234567890` into `12345678901234500000`) and won't show you the original accurate number, because Excel internally use floating point for number.
 - It's recommended to configure billing limit when using cloud services, especially serverless. See also: [ServerlessHorrors](https://serverlesshorrors.com/)
 - Big endian and little endian in binary file and net packet.
-- Blurring in image may not be enough to remove text information. See [Depix](https://github.com/spipm/Depixelization_poc). Opaque covering can fully remove text information.
 - The current working directory can be changed by system call (e.g. `chdir`).
 - Windows limits command size to 32767 code units. [See also](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)
 - In Windows the default stack size of main thread is 1MB, but in Linux and macOS it's often 8MB. It's easier to stack overflow in Windows by default.
