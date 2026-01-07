@@ -120,6 +120,8 @@ Often the bug is partially caused by AI overcomplicating simple things. When hum
 
 Vibe-coded app may contain security issues. But if you ask AI to do security review it can find the issue. AI "knows" security but still write insecure code because it was trained to "focus" on finishing current task. The RL rewards are usually simple and don't consider things like security and future maintenance.
 
+AI coding works better in maintainable (clear naming, decoupled design, etc.) codebase. Unless you are vibe coding a throwaway app, steering toward better maintainability is important.
+
 ### Save time on learning how to use API
 
 A lot of time in programming is spent on how to use an "API". The "API" here is generalized, including language features, framework usage, config file format, how to deploy, etc.
@@ -148,8 +150,6 @@ Vibe coding is much easier than manual coding. No need to recall about language 
 
 Model performance also matters. If the model is weak and make mistakes often, vibe coding only gives frustration. Vibe coding only experience good when model is strong. 
 
-Note that model capability is domain-specific: the model may be good at Python scripting or React web dev but sucks at writing device driver in C. It's highly dependent on training data and model RL targets.
-
 But when applying vibe coding in existing large codebases it tend to perform worse. Changing existing large project without breaking existing functionality is hard even for expert programmers.
 
 Writing code is easy, but writing working code is hard. When there is a complex bug that asking AI alone cannot fix, there will be frustrations. Also other bugs can emerge after fixing one bug.
@@ -162,6 +162,8 @@ To alleviate this issue, the naming should be more informative, such as `index_o
 
 Having more informative naming also helps human.
 
+Also AI-written document is sometimes technically correct but stress the unimportant thing and omit the important thing.
+
 ### Feels faster but maybe actually slower
 
 In this study: [Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity](https://arxiv.org/pdf/2507.09089), developers feels that using AI make developing faster but it's actually slower.
@@ -169,6 +171,12 @@ In this study: [Measuring the Impact of Early-2025 AI on Experienced Open-Source
 Related: https://x.com/QuentinAnthon15/status/1943948791775998069
 
 ### Jagged capability
+
+Model capability is domain-specific. The model may be good at Python scripting or React web dev, but sucks at writing device driver in C. It's highly dependent on training data and model RL targets.
+
+Because of the jagged capability, the AI evangelists and AI dismissers may both be correct in their area of working.
+
+It also follows Matthew effect. The more popular one thing is, the better AIs are at it.
 
 > https://x.com/karpathy/status/1977758204139331904
 > 
@@ -193,6 +201,25 @@ But AI coding is a **completely different paradigm** than existing abstraction l
 
 [^enough_information]: Strictly speaking, code doesn't contain enough information for whole software to run. It may dynamic link another program in system, or it may download plugin etc. from internet. Also, runtime data can be interpreted as code, but how it's interpreted is determined by existing code. The overall idea is that in conventional programming the details are either explicitly specified or delegated to other deterministic software and hardware.
 
+### AI need to be able to "see results" by itself
+
+AI works best when the AI itself can run code and see results then iterate. If AI cannot run software and relied on human to feedback the result, it will be tiresome for human. The ideal would be that AI finds bug by its own and then fix it, no need for human to manually test then ask it to fix a bug.
+
+If the testing can be done purely in command line then AI is already pretty good at it. CLI is interacted via text, and LLM is good at interacting with text. But sometimes testing requires using GUI of different apps and do different things based on context. This is the case that AI is not yet good at.
+
+### Writing good spec requires skills
+
+In vibe coding you still need to write a spec to tell AI what software you want. But writing a good spec is hard. 
+
+Writing good spec still requires understanding information and computation.
+
+Someone don't know about how computer work may write spec "The app theme color should match the color of phone case." This is an unrealistic spec, because the app running in phone has no way to get the information of phone case color, even if the human knows the phone case color.
+
+Some important questions to consider when writing spec:
+
+- How does my software get the information it needs?
+- Is the information complete? Does it contain ambiguity? How to handle ambiguity or unknown things?
+- If my software need to do some action, does the platform allow it to do this?
 
 ## Context rot issue
 
