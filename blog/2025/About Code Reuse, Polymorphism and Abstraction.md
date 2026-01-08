@@ -81,39 +81,7 @@ Now there are two solutions:
 - Avoid large architectural change. Just add workarounds here and there to make it support the new requirement.
 - Rebuild a new one with the wanted architecture. Partialy "reinvent the wheel".
 
-## Important architectural decisions
 
-These decisions are important and should be made early (when using AI-assisted coding, these decisions sholuld be clearly specified).
-
-- Data modelling:
-  - Which data to store? Which data to compute-on-demand?
-  - How and when is ID allocated?
-  - What lookup acceleration structure or redundant data do we have?
-  - How to migrate schema?
-  - Is there any ambiguity in data model? (two different things correspond to same data)
-- Constraints:
-  - What can change and what cannot change?
-  - What can duplicate (overlap) and what cannot?
-  - Does this ID always point to a valid object?
-  - What constraints does business logic require?
-  - Does this allow concurrency? Will concurrency break the constraints?
-- Dataflow:
-  - Which data is source of truth?
-  - Which data is derived from source of truth?
-  - How is change of source of truth broadcasted to derived data? How is the cache invalidated? How is the lookup acceleration structure maintained to be consistent with source of truth?
-  - What data should we expose to client side?
-  - How and when to validate external data?
-- Separate of responsibility (concern) and encapsulation:
-  - What module is responsible for updating this data?
-  - Should this data be encapsulated or let other modules access?
-  - What module is responsible for keeping that derived data to be consistent with source of truth?
-  - What module is responsible for kepping that constraint?
-- Tradeoffs: 
-  - What tradeoff do we make to simplify it?
-  - What tradeoff do we make to optimize performance?
-  - What tradeoff do we make to maintain compatibility?
-  - What work must be done immediately? What work can be deferred?
-  - What data can be stale? What data cannot be stale?
 
 ## Make things as unrelated as possible
 

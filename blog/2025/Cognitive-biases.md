@@ -749,7 +749,7 @@ When people pay attention to one thing, they tend to ignore things that are outs
 
 Prior belief (confirmation bias) can affect perception. This not only affects recognition of objects, but also affects reading of text. **Under confirmation bias, when reading text, one may skip important words subconsciously**.
 
-If the user using software is focused on finishing a task, **when the software pops out a dialog, the user tend to quickly click out the dialog to continue the task, without reading text in dialog**. [^about_dialog]
+In software UX: if the user is focused on finishing a task, **when the software pops up a dialog, the user tends to quickly close the dialog to continue the task, without reading text in dialog**. [^about_dialog]
 
 [^about_dialog]: If the dialog is very important, then the dialog shouldn't be easily clicked out (e.g. request user to type some text to proceed). If the dialog is not important, it should be replaced by a notification that can be read later.
 
@@ -931,6 +931,8 @@ Just looking confident can often make other people believe. This even applies wh
 **Decoy effect**: Adding a new worse option to make another option look relatively better.
 
 **Lie by omission**: A person can tell a lot of truth while omitting the important facts, stressing unimportant facts (wrong framing), intentially causing misunderstanding, but at the same time be not lying in literal sense.
+
+Sometimes an example or a diagram can be misleading, due to lie by omission. If there are 2 possible cases, but the diagram only draw first case, then the diagram viewer may subconciously ignore possibly of the second case.
 
 The price chart is often drawn by making lowest price at the bottom and highest price at the top. The offset and scale of the chart is also framing. If one stock already have fallen by 30%, the latest price is in the bottom of the chart, so the stock seems cheap when looking at the chart, but it may actually be not cheap at all, and vice versa.
 

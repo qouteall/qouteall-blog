@@ -5,7 +5,7 @@ tags:
   - Programming
 unlisted: false
 ---
-# My Views about AI
+# Some Notes about AI
 
 <!-- truncate -->
 
@@ -207,7 +207,7 @@ AI works best when the AI itself can run code and see results then iterate. If A
 
 If the testing can be done purely in command line then AI is already pretty good at it. CLI is interacted via text, and LLM is good at interacting with text. But sometimes testing requires using GUI of different apps and do different things based on context. This is the case that AI is not yet good at.
 
-### Writing good spec requires skills
+### Writing good spec also requires skills
 
 In vibe coding you still need to write a spec to tell AI what software you want. But writing a good spec is hard. 
 
@@ -220,6 +220,51 @@ Some important questions to consider when writing spec:
 - How does my software get the information it needs?
 - Is the information complete? Does it contain ambiguity? How to handle ambiguity or unknown things?
 - If my software need to do some action, does the platform allow it to do this?
+
+### Architecture design is still important
+
+Vibe coding is easy but vibe debugging is hard. Designing good architecture is important in reducing bugs and making debugging easier.
+
+> for each desired change, make the change easy (warning: this may be hard), then make the easy change
+> 
+> \- Kent Beck, [Link](https://x.com/KentBeck/status/250733358307500032)
+
+In a complex app, don't just ask AI to do some change. Firstly review whether it's easy to make change under current architecture. Then check whether a refactoring is needed. 
+
+If the change doesn't "fit" the architecture, it will be error-prone and more complex than needed. 
+
+If the refactor cannot be done (e.g. too risky, too costly) then all the speciality caused by "piercing" the abstraction need to be explicitly documented and repeated in many places.
+
+Some important architectural decisions:
+
+- Data modelling:
+  - Which data to store? Which data to compute-on-demand?
+  - How and when is ID allocated?
+  - What lookup acceleration structure or redundant data do we have?
+  - Is there any ambiguity in data model? (two different things correspond to same data)
+  - What are the non-temporary mutable state? Can it be avoided?
+- Constraints:
+  - What can change and what cannot change?
+  - What can duplicate (overlap) and what cannot?
+  - Does this ID always point to a valid object?
+  - What constraints does business logic require?
+  - Does this allow concurrency? Will concurrency break the constraints?
+- Dataflow:
+  - Which data is source of truth? Which data is derived from source of truth?
+  - How is change of source of truth notify to change derived data? How is the cache invalidated? How is the lookup acceleration structure maintained to be consistent with source of truth?
+  - What data should we expose to client side?
+  - How and when to validate external data?
+- Separate of responsibility (concern) and encapsulation:
+  - What module is responsible for updating this data?
+  - Should this data be encapsulated or let other modules access?
+  - What module is responsible for keeping that derived data to be consistent with source of truth?
+  - What module is responsible for keeping that constraint?
+- Tradeoffs: 
+  - What tradeoff do we make to simplify it? Is that constraint really necessary?
+  - What tradeoff do we make to optimize performance?
+  - What tradeoff do we make to maintain compatibility?
+  - What work must be done immediately? What work can be deferred?
+  - What data can be stale? What data must be fresh?
 
 ## Context rot issue
 
@@ -269,6 +314,8 @@ The popular benchmarks (e.g. Humanity's last exam, SWE bench verified) are also 
 
 > ([Link](https://www.reddit.com/r/MachineLearning/comments/1pgqbjd/d_how_did_gemini_3_pro_manage_to_get_383_on/)) isparavanje: Tech companies have been paying PhDs to generate HLE-level problems and solution sets via platforms like Scale AI. They pay pretty well, iirc ~$500 per problem. That's likely how. I was an HLE author, and later on I was contacted to join such a programme (I did a few since it's such good money). Obviously I didn't leak my original problems, but there are many I can think of.
 
+Also, the model being good at "needle in haystack" benchmark doesn't mean it's free of context rot issue. The real use case is likely different to artificial "needle in haystack" benchmark.
+
 ## AI detection race
 
 Some people want AI output to be as similar to human output as possible. Some people want to detect whether content is written by human as accurate as possible. There is a constant race.
@@ -317,3 +364,13 @@ Near the threshold, incremental improvements do big changes.
 Also note that intelligence is high-dimensional. Surpassing human in one task doesn't necessarily destroy jobs in that area. 
 
 The nonlinearity-near-threshold effect exists in other domains. Making a software 10% easier to use may double its userbase.
+
+## Moravec's paradox
+
+[Moravec's paradox](https://en.wikipedia.org/wiki/Moravec%27s_paradox): AI is good at doing information work. But the robots that do physical tasks are still immature.
+
+If we consider that there are two worlds: physical world and information world, then
+
+- Human are physical-world-native. Human's abstract information processing ability is secondary.
+- Software and AI are information-world-native. Software's physical motor control ability is secondary.
+
