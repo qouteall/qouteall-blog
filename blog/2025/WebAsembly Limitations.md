@@ -326,6 +326,8 @@ There was [Web IDL Bindings Proposal](https://github.com/WebAssembly/interface-t
 
 Currently Wasm cannot be run in browser without JS code that bootstraps Wasm.
 
+Related: [When Is WebAssembly Going to Get DOM Support?](https://queue.acm.org/detail.cfm?id=3746174)
+
 ## Memory64 performance
 
 The original version of Wasm only supports 32-bit address and up to 4GiB linear memory. 
