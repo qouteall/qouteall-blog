@@ -17,7 +17,7 @@ For example, even before ChatGPT, a calculator can do arithmetic better than any
 
 Many people tend to treat LLM chatbot as similar to human, because most familiar form of intelligence is human. However, LLM is different to human in many fundamental ways. Deep learning is very different to how human brain works. 
 
-I agree with "jagged intelligence" idea:
+Jagged intelligence:
 
 - LLM is good at many things that are hard for human. LLM's knowledge is larger than any individual human.
 - LLM is bad at many things that are easy for human. LLM can make mistakes that are obvious to human.
@@ -94,6 +94,10 @@ Some hallucinations can only be detected by experts. Some hallucinations require
 
 Also, RLHF (reinforcement learning with human feedback) makes AI tend to output fancy superficial signal that make human give good feedback in first glance.
 
+In coding, when LLM hallucinates an API, the naming of API looks like it's real. LLM learned the patterns of API naming instead of strictly memorizing it like a database. **Hallucination is a kind of "generalization"**.
+
+As "hallucination is generalization", the hallucination problem is a fundamental problem that cannot be fixed by just scaling. All applications built on LLM must have ways of dealing with hallucinations.
+
 ## AI provides emotional value
 
 Most people want to be recognized, praised and emphasized. People need emotional value. 
@@ -112,9 +116,9 @@ In human-to-human relationships, often only recriprocal relations can sustain. B
 
 ### Focus too much on current task
 
-Current LLMs are trained to finish specific tasks. The LLM tend to overly focus on current task, then it will "care less" about things like future code maintenance and security.
+Current LLMs are trained to finish specific tasks. The LLM tend to overly "focus" on current task, then it will "care less" about things like future code maintenance and security.
 
-Also AI tend to use complex solutions to solve a problem. Although the complex solution sometimes work, the added complexity adds new sources of bugs. It adds tech debt and is problematic when project is complex.
+Also AI tend to use complex solutions to solve a problem. Although the complex solution sometimes work, the added complexity adds new sources of bugs. It adds tech debt and is problematic when project is big.
 
 Often the bug is partially caused by AI overcomplicating simple things. When human want to fix vibe-coded bug, the first thing to do is to simplify out unnecessary complexity. 
 
@@ -124,11 +128,11 @@ AI coding works better in maintainable (clear naming, decoupled design, etc.) co
 
 ### Save time on learning how to use API
 
-A lot of time in programming is spent on how to use an "API". The "API" here is generalized, including language features, framework usage, config file format, how to deploy, etc.
+A lot of time in programming is spent on knowing how to use an "API". The "API" here is generalized, including language features, framework usage, config file format, how to deploy, etc.
 
-The design of API has a lot of ad-hoc idiosyncracies. For example, adding one thing can be named "insert", "create", "add", "put", "new", "register", "spawn", etc. Also, reading a file could be `open`, `files.open`, `os.open`, `fs::open`, `openFile`, `files.read`, `readFile`, `new FileInputStream`, `new ifstream` etc. Many other such examples.
+The design of API has a lot of ad-hoc idiosyncracies. For example, adding one thing can be named "insert", "create", "add", "put", "new", "register", "spawn", etc. Also, reading a file could be `open`, `files.open`, `os.open`, `fs::open`, `openFile`, `files.read`, `readFile`, `new FileInputStream`, `ifstream` etc. Many other such examples.
 
-Which exact word/phrase it chooses is ad-hoc. It cannot be guessed without learning. Having to learn these ad-hoc API design is an obstacle in programming that's usually not fun. And it's different in each language/framework. Knowing the API of reading file in Python is not helpful in Java.
+Which exact word/phrase it chooses is ad-hoc. It cannot be inferred without learning. Having to learn these ad-hoc API design is an obstacle in programming that's usually not fun. And it's different in each language/framework. Knowing the API of reading file in Python is not helpful in Java.
 
 But if I tell AI to "read this file" then AI knows how to use the API.
 
@@ -136,23 +140,28 @@ But AI's ability of using API is bad for rarely used tools/libraries/frameworks/
 
 ### AI capability sensitive to complexity
 
-AI coding performs good in simple projects. The new projects are simple in the beginning. AI coding is good at them. But AI coding doesn't perform so good in a large existing codebase.
+AI coding performs good in simple projects. The new projects are simple in the beginning. But AI coding doesn't perform so good in a large existing codebase.
 
 The good architecture design that can isolate complexity makes coding easier for both human and AI. 
 
 In large codebase it's often that after changing A then B also need to be changed to make it keep working. When B and A are far away (in different foldrs) then AI may only change A and don't change B so it breaks. Sometimes type system can catch the issue. But when it involves config file, or cross-language things, or implicit invariants, then type system cannot catch it.
 
-### Good for new side projects
+### A demo is different to production software
 
-When vibe coding on a new side project, the overall experience is likely good (or even addictive). New project is simple in the beginning. LLMs are good at coding in simple projects.
+- When making a new app using AI, the result often looks impressive.
+- When using AI in an existing large codebase, the results are often not good.
 
-Vibe coding is much easier than manual coding. No need to recall about language syntax or how to use an API. No need to search about doc about an API. No need to figure out which library to use. The prompt is often much shorter than code.
+For beginners, a common misconception is that "if the software shows things on screen, then it's 90% done". In reality, a proof-of-concept is often just 20% done. 
 
-Model performance also matters. If the model is weak and make mistakes often, vibe coding only gives frustration. Vibe coding only experience good when model is strong. 
+There are so many corner cases in real usage. Not handing one corner case is bug. Most code are used for handling corner cases, not common cases.
 
-But when applying vibe coding in existing large codebases it tend to perform worse. Changing existing large project without breaking existing functionality is hard even for expert programmers.
+Although each specific corner case triggering probability is often small, triggering any of the many corner cases is high-probability. 
 
-Writing code is easy, but writing working code is hard. When there is a complex bug that asking AI alone cannot fix, there will be frustrations. Also other bugs can emerge after fixing one bug.
+Analogy: A software is a city, each user just visits a small part, but you need to build the whole city, as different users visit different parts.
+
+Also, good user experience requires many detail optimizations underneath. The software UI looking simple doesn't mean its internal implementation is simple.
+
+This doesn't apply if you just build a simple tool for personal use, as the personal tool just needs to accomodate to few personal use cases.
 
 ### Confusing different things with similar wording
 
@@ -172,7 +181,7 @@ Related: https://x.com/QuentinAnthon15/status/1943948791775998069
 
 ### Jagged capability
 
-Model capability is domain-specific. The model may be good at Python scripting or React web dev, but sucks at writing device driver in C. It's highly dependent on training data and model RL targets.
+Model capability is domain-specific. The model may be good at Python scripting or React web dev, but sucks at writing device driver in C. It's highly dependent on training data and RL targets in training.
 
 Because of the jagged capability, the AI evangelists and AI dismissers may both be correct in their area of working.
 
@@ -233,7 +242,7 @@ In a complex app, don't just ask AI to do some change. Firstly review whether it
 
 If the change doesn't "fit" the architecture, it will be error-prone and more complex than needed. 
 
-If the refactor cannot be done (e.g. too risky, too costly) then all the speciality caused by "piercing" the abstraction need to be explicitly documented and repeated in many places.
+If refactoring cannot be done (e.g. too risky, too costly), then all the speciality caused by "piercing" the abstraction need to be explicitly documented and repeated in many places.
 
 Some important architectural decisions:
 
@@ -252,19 +261,24 @@ Some important architectural decisions:
 - Dataflow:
   - Which data is source of truth? Which data is derived from source of truth?
   - How is change of source of truth notify to change derived data? How is the cache invalidated? How is the lookup acceleration structure maintained to be consistent with source of truth?
-  - What data should we expose to client side?
+  - What data should we expose to client side? What data shouldn't?
   - How and when to validate external data?
 - Separate of responsibility (concern) and encapsulation:
   - What module is responsible for updating this data?
   - Should this data be encapsulated or let other modules access?
-  - What module is responsible for keeping that derived data to be consistent with source of truth?
-  - What module is responsible for keeping that constraint?
+  - Which module is responsible for keeping that constraint? Which module is responsible for keeping that derived data be consistent with source of truth?
 - Tradeoffs: 
   - What tradeoff do we make to simplify it? Is that constraint really necessary?
   - What tradeoff do we make to optimize performance?
   - What tradeoff do we make to maintain compatibility?
   - What work must be done immediately? What work can be deferred?
   - What data can be stale? What data must be fresh?
+
+### Can easily discard results
+
+Sometimes an architecture looks right before implementing a software. But during implementation, you often discover **unknown unknowns that invalidate previous assumptions**. Then you find out that architecture is no longer good.
+
+If it's coded by human, the human have already payed a lot of efforts, so discarding code makes human developer upset. But if it's AI-coded, you can easily discard the code and rebuild, without upsetting anyone.
 
 ## Context rot issue
 
@@ -356,12 +370,11 @@ Also, if the AI want to improve itself, then the AI need to do AI experiments. B
 For example, there is a specific task that experts can do 80 scores. 
 
 - If AI can only do 60 scores then AI is mostly useless in that task. 
-- But if AI can do 70 scores, then AI will be much more useful in that task, although the performance just jumpted from 60 to 70. 
-- If AI can reach 75 scores, then the economical utility of using AI may increase 10 times.
+- But if AI can do 70 scores, then the economical utility of using AI may increase 10 times, although the performance just jumped from 60 to 70.
 
 Near the threshold, incremental improvements do big changes.
 
-Also note that intelligence is high-dimensional. Surpassing human in one task doesn't necessarily destroy jobs in that area. 
+As intelligence is high-dimensional, if AI capability is only good in one aspect it's still not enough to replace human jobs. See also: 
 
 The nonlinearity-near-threshold effect exists in other domains. Making a software 10% easier to use may double its userbase.
 
@@ -369,8 +382,9 @@ The nonlinearity-near-threshold effect exists in other domains. Making a softwar
 
 [Moravec's paradox](https://en.wikipedia.org/wiki/Moravec%27s_paradox): AI is good at doing information work. But the robots that do physical tasks are still immature.
 
-If we consider that there are two worlds: physical world and information world, then
+There are two worlds: physical world and information world:
 
 - Human are physical-world-native. Human's abstract information processing ability is secondary.
-- Software and AI are information-world-native. Software's physical motor control ability is secondary.
+- Software (including AI) are information-world-native. Software's physical motor control ability is secondary.
 
+Also, creating things in information world is often easier than creating things in physical world. [Reality has a surprising amount of detail](http://johnsalvatier.org/blog/2017/reality-has-a-surprising-amount-of-detail). There is "vibe code an app" but no "vibe assemble a machine".

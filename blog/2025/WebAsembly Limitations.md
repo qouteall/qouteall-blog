@@ -422,6 +422,9 @@ These things also have VMs:
 - UEFI has a byte code format and VM. [See also](https://uefi.org/specs/UEFI/2.10/22_EFI_Byte_Code_Virtual_Machine.html)
 - SIM cards runs Java.
 - MySQL supports JS stored procedure. [See also](https://blogs.oracle.com/mysql/post/introducing-javascript-support-in-mysql)
+- CLI tools like `sed` `awk`  `jq` have their programming language and VM.
+- The build systems: Python `setup.py`, Java Gradle, CMake. They allow Turing-complete buildscripts.
+  - Practially, the Turing-complete build systems are harder to use than declarative build systems (Java Maven, Golang build system, Python `pyproject.toml`). Because more flexibility means slower and more chances of failure.
 - Related: Modern CPUs often have a [microcode](https://en.wikipedia.org/wiki/Microcode) system. The microcode supports conditional jumping and can access things like register and memory bus. It's a "small CPU within CPU".
 
 ### Within-website sub-sandboxing

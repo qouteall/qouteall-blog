@@ -707,6 +707,8 @@ An outage can break your tool for solving the outage:
 > 
 > [Google Cloud services are experiencing issues and we have an other update at 5:30 PDT](https://status.cloud.google.com/incidents/cFXPsFUnUELR8U2bQeGz)
 
+Changing firewall rule can block your SSH connection to the server. In Windows, the domain controller can deploy a firewall rule to subordinate PCs that blocks their connections to domain controller.
+
 ## Old Python packaging circular dependency
 
 
@@ -724,14 +726,15 @@ That issue was then addressed in new standards.
 
 [Circular proof](https://en.wikipedia.org/wiki/Circular_reasoning): if A then B, if B then A. Circular proof is wrong. It can prove neither A nor B.
 
-A simple example: I want to prove $S = 1 + 2 + 4 + 8 + 16 + ...$ is a finite value. Then:
+Example in statistics: Before collecting data, assume that the data follows Gaussian distribution. Then after collecting data, remove the outliers in data. Then verify that the data follows Gaussian distribution. That verification is wrong because removing outlier relies on the assumption that it's Gaussian.
 
- 1. $S = 1 + 2 (1 + 2 + 4 + ...)$
- 2. $S = 1 + 2S$
- 3. $S-2S=1$
- 4. $S=-1$, $S$ is a finite value
-
-The jump from 1 to 2 assumes $S$ is a finite value. It's using the result of deduction so it's circular proof.
+> An error rate can be measured. The measurement, in turn, will have an error rate. The measurement of the error rate will have an error rate ...
+> 
+> We can use the same argument by replacing "measurement" by "estimation" (say estimating the future value of an economic variable, the rainfall in Brazil, or the risk of a nuclear accident). 
+> 
+> What is called a regress argument by philosophers can be used to put some scrutiny on quantitative methods or risk and probability. The mere existence of such regress argument will lead to two different regimes, both leading to the necessity to raise the values of small probabilities, and one of them to the necessity to use power law distributions.
+> 
+> \- N. N. Taleb, [Link](https://www.fooledbyrandomness.com/notebook.htm)
 
 ### Russel's paradox
 
@@ -780,25 +783,20 @@ Firstly encode symbols, statements and proofs into data. The statements that con
 
 Specifically, Gödel encodes symbols, statements and proofs into integer, called Gödel number. There exists many ways of encoding symbols/statements/proofs as data, and which exact way is not important. For simplicity, I will treat them all as data, and ignore the conversion between data and symbol/statements/proofs.
 
-`is_proof(theory, proof)` allows determining whether a proof successfully proves a theory. 
-  
-Then `provable(theory)` is defined as whether there exists a `proof` that satisfies `is_proof(theory, proof)`.
+Define:
 
-Unprovable is inverse of provable: `unprovable(theory) = !provable(theory)`
+- `is_proof(theory, proof)` determines whether a proof successfully proves a theory. It's possible to deterministically verify proof written in special formal language (like Lean).
+- `provable(theory)` gives a boolean value, telling whether there exists a `proof` that satisfies `is_proof(theory, proof)`.
+- `unprovable(theory)` negates result of `provable(theory)`
 
-Let `H(x) = unprovable(x(x))`. Then let `G = H(H) = unprovable(H(H)) = unprovable(G)` (it uses the same form as Y combinator), which creates a self-referencial statement: `G`  means `G` is not provable. If `G` is true, then `G` is not provable, then `G` is false, which is a paradox.
+Then it uses the same form as Y combinator $(\lambda x . f (x \ x)) (\lambda x . f (x \ x))$:
+
+- Define `H(x) = unprovable(x(x))`. This corresponds to $\lambda x. f (x \ x)$ where $f$ is `unprovable`.
+- Define `G = H(H)`. This corresponds to $(\lambda x . f (x \ x)) (\lambda x . f (x \ x))$.
+
+Then `G = H(H) = unprovable(H(H)) = unprovable(G)`. It creates a self-referencial statement: `G`  means `G` is not provable. If `G` is true, then `G` is not provable, then `G` is false, which is a paradox.
 
 The `x(x)` is symbol substitution. replacing the free variable `x` with `x`, while avoid making two different variables same name by renaming when necessary. 
-
-### In statistics: Error of error of error...
-
-> An error rate can be measured. The measurement, in turn, will have an error rate. The measurement of the error rate will have an error rate ...
-> 
-> We can use the same argument by replacing "measurement" by "estimation" (say estimating the future value of an economic variable, the rainfall in Brazil, or the risk of a nuclear accident). 
-> 
-> What is called a regress argument by philosophers can be used to put some scrutiny on quantitative methods or risk and probability. The mere existence of such regress argument will lead to two different regimes, both leading to the necessity to raise the values of small probabilities, and one of them to the necessity to use power law distributions.
-> 
-> \- N. N. Taleb, [Link](https://www.fooledbyrandomness.com/notebook.htm)
 
 
 ## Related

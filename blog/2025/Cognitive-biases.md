@@ -1497,6 +1497,8 @@ Just knowing one should do something is far from actually doing it.
 
 Fantasy realization theory: When thinking about the desired future, one may get satisfied by the imagination, becoming less motivated to pay efforts to achieve it. The subconscious sometimes doesn't distinguish between imagination and reality. Only when one actively compares reality and imagination, do one get motivated. [See also](https://compass.onlinelibrary.wiley.com/doi/10.1111/spc3.12271)
 
+It doesn't mean "imagining is bad". Over-imagining that detaches with reality is bad. The imagining that connects with real world is important for accomplishing big goals.
+
 It also involves the tradeoff between short-term reward and long-term reward. Long-termism is to sacrifice short-term reward for larger long-term reward. Related factors:
 
 - Time discount. How much reward in future is smaller than reward at now.
