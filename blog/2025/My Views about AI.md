@@ -300,12 +300,14 @@ Both of the two views are correct:
 
 The harness can workaround drawbacks of model. For example:
 
-- Keep inserting todo list into context to make model not forget goals
+- Keep inserting todo list into context to make model not forget goals [^goal]
 - Firstly summarize web page then feed into context to reduce chance of prompt injection and reduce context usage
 - Discard some unimportant information in context to reduce context rot
 - Allow the model to see results by its own, so no human labor is needed in the loop
 - Add a new planning phase to reduce the "urge" of quickly doing the task without thinking
 - ...
+
+[^goal]: Keeping goal in "context window" is also beneficial for human to stick on the goal.
 
 Also, model itself has randomness, so some "prompting experience" may be just "fooled by randomness". 
 

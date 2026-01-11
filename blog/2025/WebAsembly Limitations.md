@@ -320,13 +320,21 @@ There are [Wasm-JS string builtins](https://webassembly.github.io/spec/js-api/in
 
 Wasm code cannot directly call Web APIs. Web APIs must be called via JS glue code.
 
-Although all Web's JS APIs have [Web IDL](https://webidl.spec.whatwg.org/) specifications, it involves GCed-objects, iterators and async iterators (e.g. `fetch()` returns `Response`. Its `body` field is `ReadableStream`). These GC-related things and async-related things cannot easily adapt to Wasm code using linear memory. It's hard to design a specification of turning Web IDL interfaces to Wasm interfaces.
+Although all Web's JS APIs have [Web IDL](https://webidl.spec.whatwg.org/) specifications. But that Web IDL interfaces cannot be easily transformed to Wasm interfaces:
+
+- Memory management. The Web IDL is designed for GC languages. It has no interface related to freeing memory and "destructor". And the GC references cannot be put into linear memory.
+- Async and event loop. Many web APIs return a `Promise`. Awaiting on promise doesn't simply block but keeps processing other events in event loop. But in C/C++ the IO are often simple blocking. This can be workarounded by JS Promise integration (but comes with reentrancy issue). (Rust has async so it can be adapted to Rust easier.)
+- Strings are commonly used in API. Some languages use UTF-8. Some languages (e.g. Java, C#) use UTF-16 [^utf16].
+
+[^utf16]: Strictly speaking, Java and C# use WTF-16, which is similar to UTF-16 but allows invalid surrogates.
 
 There was [Web IDL Bindings Proposal](https://github.com/WebAssembly/interface-types/blob/1c46f9fe30143867545c9747fa8a94b72e5d9737/proposals/webidl-bindings/Explainer.md) but superseded by Component Model proposal.
 
-Currently Wasm cannot be run in browser without JS code that bootstraps Wasm.
-
 Related: [When Is WebAssembly Going to Get DOM Support?](https://queue.acm.org/detail.cfm?id=3746174)
+
+The modern JS/Wasm runtimes can do inlining between JS and Wasm, so the cost of JS glue gets smaller.
+
+Currently Wasm cannot be run in browser without JS code that bootstraps Wasm.
 
 ## Memory64 performance
 
@@ -350,6 +358,20 @@ Generally, WebAssembly runs slower than native applications compiled from the sa
 - Limited access to hardware functionality, such as memory prefetching and some special SIMD instructions. Note that Wasm already support many common SIMD instructions.
 - Cannot access some OS functionalities, such as `mmap`.
 - Wasm forces structural control flow. See also: [WebAssembly Troubles part 2: Why Do We Need the Relooper Algorithm, Again?](http://troubles.md/why-do-we-need-the-relooper-algorithm-again/). This may reduce the performance of compiling to Wasm and JIT optimization.
+
+## About binary size
+
+The WebAssembly code format itself is deisgned with size optimization in mind (e.g. use LEB128 instead of fixed-size integer). But the common Wasm apps often have large binary size.
+
+The JS ecosystem cares about code size. Because improving page load speed requires reducing code size. The JS ecosystem has mature tooling about dead code elimination (tree shaking), JS minimization and JS lazy loading. Currently JS ecosystem has code size advantage.
+
+But the native ecosystem often doesn't care much about code size. Because native apps are separately installed before launching. Optimizing an app from 100MB to 30MB doesn't give much advantage.
+
+The Wasm toolchain are often based on native toolchains. It uses compilers/linkers of native languages, and uses libraries for native languages. The tooling for reducing code size and lazy loading is not yet mature.
+
+Also, C++ and Rust duplicates machine code for different generic instantiation (called monomorphization). `Vec<u32>` uses different machine code than `Vec<String>` and `Vec<MyType>`. This factor also bloats code size.
+
+The result is that, when using some heavy framework (e.g. game engine), Wasm binary can easily become larger than 100MB, then the web page will take long time to load.
 
 ## Debugging Wasm running in Chrome
 
