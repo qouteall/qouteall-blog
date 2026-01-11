@@ -319,6 +319,22 @@ The **good prompting is just to give enough information to model**:
 - Tell model which command to test the code
 - Tell model your **root goal** (not just a subtask). When test fails, model can know whether test is wrong or base code is wrong by the root goal.
 
+### "Personal software" is less battle-tested
+
+AI allows generating personal software for each user's specific requests. However, the personal software are less battle-tested than the normal widely-used software.
+
+> Learned this morning that my ai coded app for tracking my body weight, macros and step count has been storing all it's data in sqlite without a year.
+> 
+> So it has stopped working when the year changed.
+> 
+> \[Wait how was it stored before?\]
+> 
+> “12-31”
+> 
+> I was also surprised
+> 
+> \- [Link](https://x.com/mscccc/status/2006749724632822178)
+
 ## Context rot issue
 
 When context is long, LLM will perform worse. For example, ignore some instructions, ignore some important details in context.
