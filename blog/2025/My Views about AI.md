@@ -60,6 +60,17 @@ Also, the **optimization targets** of LLMs are very different to the optimizatio
 
 LLM's behavior is very context-dependent. Sometimes it will defend the things they said in previous context. Starting a new session can make LLM output differently for the same question. 
 
+## Moravec's paradox
+
+[Moravec's paradox](https://en.wikipedia.org/wiki/Moravec%27s_paradox): AI is good at doing information work. But the robots that do physical tasks are still immature.
+
+There are two worlds: physical world and information world:
+
+- Human are physical-world-native. Human's abstract information processing ability is secondary.
+- Software (including AI) are information-world-native. Software's physical motor control ability is secondary.
+
+Also, creating things in information world is often easier than creating things in physical world. [Reality has a surprising amount of detail](http://johnsalvatier.org/blog/2017/reality-has-a-surprising-amount-of-detail). There is "vibe code an app" but no "vibe assemble a machine".
+
 ## Value of art
 
 People tend to **judge the value of art by the cost of producing**. If one sees a beautiful image and thinks it's good art, then when they know it's AI-generated, the same image suddenly becomes cheap.
@@ -280,6 +291,32 @@ Sometimes an architecture looks right before implementing a software. But during
 
 If it's coded by human, the human have already payed a lot of efforts, so discarding code makes human developer upset. But if it's AI-coded, you can easily discard the code and rebuild, without upsetting anyone.
 
+### Prompting/harness
+
+Both of the two views are correct:
+
+- The model capability is fundamental. All prompting and harness are secondary. If model is bad, no prompting or harness can make it good. A good model can perform well with simple prompts.
+- The harness is important. Harness can make the same model perform better.
+
+The harness can workaround drawbacks of model. For example:
+
+- Keep inserting todo list into context to make model not forget goals
+- Firstly summarize web page then feed into context to reduce chance of prompt injection and reduce context usage
+- Discard some unimportant information in context to reduce context rot
+- Allow the model to see results by its own, so no human labor is needed in the loop
+- Add a new planning phase to reduce the "urge" of quickly doing the task without thinking
+- ...
+
+Also, model itself has randomness, so some "prompting experience" may be just "fooled by randomness". 
+
+The "fancy" prompts like "You are 200 IQ", "You are a super smart 100x coder" are not needed for latest models. 
+
+The **good prompting is just to give enough information to model**:
+
+- Put related API doc into repo and tell model
+- Tell model which command to test the code
+- Tell model your **root goal** (not just a subtask). When test fails, model can know whether test is wrong or base code is wrong by the root goal.
+
 ## Context rot issue
 
 When context is long, LLM will perform worse. For example, ignore some instructions, ignore some important details in context.
@@ -378,13 +415,3 @@ As intelligence is high-dimensional, if AI capability is only good in one aspect
 
 The nonlinearity-near-threshold effect exists in other domains. Making a software 10% easier to use may double its userbase.
 
-## Moravec's paradox
-
-[Moravec's paradox](https://en.wikipedia.org/wiki/Moravec%27s_paradox): AI is good at doing information work. But the robots that do physical tasks are still immature.
-
-There are two worlds: physical world and information world:
-
-- Human are physical-world-native. Human's abstract information processing ability is secondary.
-- Software (including AI) are information-world-native. Software's physical motor control ability is secondary.
-
-Also, creating things in information world is often easier than creating things in physical world. [Reality has a surprising amount of detail](http://johnsalvatier.org/blog/2017/reality-has-a-surprising-amount-of-detail). There is "vibe code an app" but no "vibe assemble a machine".
