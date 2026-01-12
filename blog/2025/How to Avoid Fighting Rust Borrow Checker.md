@@ -1263,18 +1263,29 @@ But in Rust it's different.
 
 Simply put:
 
-- Putting a temporary value to local variable usually make it live longer.
-- Inlining a local variable usually make it live shorter.
+- Putting a temporary value to local variable usually makes it live longer.
+- Inlining a local variable usually makes it live shorter.
 
-Specifically:
+One example
 
-- A temporary value drops immediately after evaluating, except when there is a borrow to it, its lifetime extends by the borrow. It's called temporary lifetime extension. 
-  - There are implicit ways of creating borrow. `DeRef` can implicitly borrow, `a.b()` can implicitly borrow `a`
-  - `match`, `if let` or `while let` can also borrow which extend the lifetime
-  - Sometimes temporary lifetime extension doesn't work, such as `let guard = Mutex::new(0).lock().unwrap();`
-- A value that's put into a local variable:
-  - If its type implements `Drop`, then it will drop at the end of scope (one example is `MutexGuard`).
-  - If its type doesn't implement `Drop`, then it will drop after its last use. This is called NLL (non-lexical lifetime). Borrow types `&T` don't implement `Drop` so their lifetime ends after last use (unless extended).
+```rust
+let c: RefCell<Option<String>> = RefCell::new(Option::Some("hello".to_string()));  
+let string: &String = c.borrow().as_ref().unwrap();  
+println!("{}", string);
+```
+
+It will compile error "temporary value dropped while borrowed". Because the result of `c.borrow()` is a temporary value that doesn't live long enough. Solution is to make it a local variable to live longer:
+
+```rust
+let c: RefCell<Option<String>> = RefCell::new(Option::Some("hello".to_string()));  
+let borrowed = c.borrow();  
+let string: &String = borrowed.as_ref().unwrap();  
+println!("{}", string);
+```
+
+Not all temporary values need to be put into local variable. Sometimes `match`, `if let` can implicitly make temporary value live longer.
+
+In other languages, if a local variable is only used once, it's often ok to inline it. But in Rust inlining a local variable that does borrowing can cause compile error.
 
 ### Reborrow
 
@@ -1368,32 +1379,7 @@ async fn main() {
 }
 ```
 
-Note that inlining `data2` local variable make it not compile:
-
-```rust
-#[tokio::main]  
-async fn main() {  
-    let data: Arc<u64> = Arc::new(1);  
-    let task1_handle = tokio::spawn(async move {  
-        println!("From task: Data: {}", *data.clone());  
-    });  
-    println!("From main thread: Data: {}", *data);  
-}
-```
-
-```
-5    |     let data: Arc<u64> = Arc::new(1);
-     |         ---- move occurs because `data` has type `Arc<u64>`, which does not implement the `Copy` trait
-6    |     let task1_handle = tokio::spawn(async move {
-     |                                     ---------- value moved here
-7    |         println!("From task: Data: {}", *data.clone());
-     |                                          ---- variable moved due to use in coroutine
-8    |     });
-9    |     println!("From main thread: Data: {}", *data);
-     |                                             ^^^^ value borrowed here after move
-```
-
-[There is a proposal on improving syntax ergonomic of it.](https://rust-lang.github.io/rust-project-goals/2024h2/ergonomic-rc.html)
+The new local variable `let data2 = data.clone();` is necessary. When there are many such things, it can be cumbersome to write and read. [There is a proposal on improving syntax ergonomic of it.](https://rust-lang.github.io/rust-project-goals/2024h2/ergonomic-rc.html)
 
 ## Nuance of "immutable"
 
@@ -1413,7 +1399,8 @@ Examples:
 - Rust `let x: T` makes `x` fully immutable. Immutability applies to whole ownership tree. If a `Vec` is immutable, its elements are also immutable.
 - Rust `let mut x: &T` makes `x` a mutable-ref-to-immutable-obj.
 - Rust `let x: &mut T` makes `x` an immutable-ref-to-mutable-obj.
-- The above Rust immutable no longer holds when using interior mutability.
+- Rust `let x: &mut &[u8]` makes `x` an immutable-ref-to-mutable-slice-ref. A slice ref contains a pointer and a length. `x` is a pointer to that slice ref, and that slice ref is mutable. Note that `x` itself is immutable. The underlying binary data pointed by slice is also immutable.
+- In Rust, when using interior mutability, an immutable thing can be actually mutable.
 - Git release tag is mutable-ref-to-immutable-obj. The Git commit with specific hash is immutable. But Git allows removing a release tag and create a new same-named release tag to another commit. This can be disabled.
 
 ## Summarize the contagious things

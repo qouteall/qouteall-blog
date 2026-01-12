@@ -164,15 +164,33 @@ In large codebase it's often that after changing A then B also need to be change
 
 For beginners, a common misconception is that "if the software shows things on screen, then it's 90% done". In reality, a proof-of-concept is often just 20% done. 
 
-There are so many corner cases in real usage. Not handing one corner case is bug. Most code are used for handling corner cases, not common cases.
+There are so many corner cases in real usage. Not handing one corner case is bug. The demo that seems working fine often breaks under real usages.
 
-Although each specific corner case triggering probability is often small, triggering any of the many corner cases is high-probability. 
+In mature codebases, most code are used for handling corner cases, not common cases.
+
+Triggering one specific corner case is low-probability. However, there are many corner cases. Triggering at least one of them is high-probability.
 
 Analogy: A software is a city, each user just visits a small part, but you need to build the whole city, as different users visit different parts.
 
 Also, good user experience requires many detail optimizations underneath. The software UI looking simple doesn't mean its internal implementation is simple.
 
-This doesn't apply if you just build a simple tool for personal use, as the personal tool just needs to accomodate to few personal use cases.
+This is less problematic if you just build a simple tool for personal use, as the personal tool just needs to accomodate to few personal use cases. However:
+
+### "Personal software" is less battle-tested
+
+AI allows generating personal software for each user's specific requests. However, the personal software are less battle-tested than the normal widely-used software.
+
+> Learned this morning that my ai coded app for tracking my body weight, macros and step count has been storing all it's data in sqlite without a year.
+> 
+> So it has stopped working when the year changed.
+> 
+> \[Wait how was it stored before?\]
+> 
+> “12-31”
+> 
+> I was also surprised
+> 
+> \- [Link](https://x.com/mscccc/status/2006749724632822178)
 
 ### Confusing different things with similar wording
 
@@ -319,22 +337,6 @@ The **good prompting is just to give enough information to model**:
 - Tell model which command to test the code
 - Tell model your **root goal** (not just a subtask). When test fails, model can know whether test is wrong or base code is wrong by the root goal.
 
-### "Personal software" is less battle-tested
-
-AI allows generating personal software for each user's specific requests. However, the personal software are less battle-tested than the normal widely-used software.
-
-> Learned this morning that my ai coded app for tracking my body weight, macros and step count has been storing all it's data in sqlite without a year.
-> 
-> So it has stopped working when the year changed.
-> 
-> \[Wait how was it stored before?\]
-> 
-> “12-31”
-> 
-> I was also surprised
-> 
-> \- [Link](https://x.com/mscccc/status/2006749724632822178)
-
 ## Context rot issue
 
 When context is long, LLM will perform worse. For example, ignore some instructions, ignore some important details in context.
@@ -360,6 +362,18 @@ The behavior of AI is highly shaped by RL. Doing RL requires judging reward for 
 - Use other program (e.g. unit test) to judge result. For example, if AI-written code passes unit test it gets reward. But there may be bugs in reward judging code. AI may utilize bugs to gains reward without doing what you want AI to do. This is called **reward hacking**.
 
 "Reward hacking" is also common in human society. [Perverse incentive](https://en.wikipedia.org/wiki/Perverse_incentive).
+
+### Reward hacking
+
+Reward hacking is a fundamental problem of reinforcement learning. The reward that you give to the model is different to what you want AI to actually do.
+
+For example, for coding task, if the reward is based on whether it passes unit test, AI may use "creative" ways to write code that pass unit test but doesn't do what you want.
+
+> However, recently released LLMs, such as GPT-5, have a much more insidious method of failure. They often generate code that fails to perform as intended, but which on the surface seems to run successfully, avoiding syntax errors or obvious crashes. It does this by removing safety checks, or by creating fake output that matches the desired format, or through a variety of other techniques to avoid crashing during execution.
+> 
+> \- [Link](https://spectrum.ieee.org/ai-coding-degrades)
+
+So just making whether it passes unit test as reward is not enough. The reward need to align better with human intent.
 
 ## Slop prevails when people cannot judge quality
 
@@ -432,4 +446,10 @@ Near the threshold, incremental improvements do big changes.
 As intelligence is high-dimensional, if AI capability is only good in one aspect it's still not enough to replace human jobs. See also: 
 
 The nonlinearity-near-threshold effect exists in other domains. Making a software 10% easier to use may double its userbase.
+
+## Reducing cost also reduces bottom quality
+
+Many gamers complain that many Unreal Engine 5 (UE5) games are poorly-built, having many bugs and are laggy. They blame UE5. However these games probably won't exist without UE5.
+
+The same applies to AI. There will be much more products that won't exist without AI, and at the same time the bottom quality will be lower.
 
