@@ -1424,7 +1424,7 @@ Examples:
 - "Rust guarantees security." No. Rust doesn't ensure memory/thread safety of `unsafe` code [^unsafe]. Also, not all security issues are memory/thread safety issues. According to [Common Weakness Enumeration 2024](https://cwe.mitre.org/top25/archive/2024/2024_cwe_top25.html), many real-world vulnerabilities are XSS, SQL injection, directory traversal, command injection, missing authentication, etc. that are not memory/thread safety.
 - "Rust makes multi-threading easy, as it prevents data race." No. Although Rust can prevent data race, it cannot prevent deadlocks. Async Rust also has traps including blocking scheduler thread and cancellation safety.
 - "Rust doesn't help other than memory/thread safety." No.
-  - Algebraic data type (e.g. `Option`, `Result`) helps avoid creating illegal data from the source [^adt]. Using ADT data require pattern match all cases, avoiding forgetting handling one case (except when using escape hatch like `unwrap()`).
+  - Algebraic data type (e.g. `Option`, `Result`) helps avoid creating illegal data from the source. Using ADT data require pattern match all cases, avoiding forgetting handling one case (except when using escape hatch like `unwrap()`).
   - Rust reduces bugs caused by unwanted accidental mutation.
   - Explicit `.clone()` avoids accidentally copying container like in C++.
   - Managing dependencies is much easier in Rust than in C/C++.
@@ -1435,7 +1435,6 @@ Examples:
 - "The old C/C++ codebases are already battle-tested, so there is no value in rewriting them in Rust." No. If they won't ever add any new feature and don't do any large refactoring, only accepting small bug fixes, then they would indeed become more stable and safe over time. However, if they adds new feature or do large refactoring, then new memory/thread safety issues could emerge.
 - "`.unwrap()` should never be used because [Cloudflare outage Nov 18, 2025](https://blog.cloudflare.com/18-november-2025-outage/#memory-preallocation) is caused by `.unwrap()`." No. Although `.unwrap()` is one cause of that Cloudflare outage, there are many other causes, including: no thorough testing in test environment before deploying to production, rolling out change too quick, rollback not early enough, etc. `unwrap()` is sometimes useful for cases that compiler cannot prove impossible. Note that it's still recommended to reduce usages of `unwrap()` in production code (can use `anyhow` crate which allows convenient `?` on most errors [^anyhow]).
 
-[^adt]: Note that algebraic data type also have downsides. It makes some illegal states unrepresentable. But a requirement change can make some illegal states legal again. Then ADT would face big refactoring. Using many-nullable-fields require less refactoring than ADT in that case. 
 
 [^anyhow]: `anyhow` cannot auto-wrap `Mutex` poison error. Because `anyhow` can only wrap errors that are standalone (`'static`, doesn't borrow non-global thing). Mutex poison error is not standalone. If you don't want to mutex poison to affect web server availability, can use [`parking_lot`](https://docs.rs/parking_lot/latest/parking_lot/) locks.
 

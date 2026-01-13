@@ -288,7 +288,7 @@ Some important architectural decisions:
   - What constraints does business logic require?
   - Does this allow concurrency? Will concurrency break the constraints?
 - Dataflow:
-  - Which data is source of truth? Which data is derived from source of truth?
+  - Which data is source of truth? Which data is derived from source of truth? [^source_of_truth]
   - How is change of source of truth notify to change derived data? How is the cache invalidated? How is the lookup acceleration structure maintained to be consistent with source of truth?
   - What data should we expose to client side? What data shouldn't?
   - How and when to validate external data?
@@ -302,6 +302,8 @@ Some important architectural decisions:
   - What tradeoff do we make to maintain compatibility?
   - What work must be done immediately? What work can be deferred?
   - What data can be stale? What data must be fresh?
+
+[^source_of_truth]: It's very important to figure out what's the source of truth, and what is derived from source of truth. Related: In OneDrive, [turning off backup deletes all files](https://learn.microsoft.com/en-us/answers/questions/3863319/turning-off-onedrive-backup-for-a-folder-deletes-a), because OneDrive makes cloud the source-of-truth, and turning off backup is treated as deleting all cloud files. [Another victim](https://x.com/jasonkpargin/status/2007659047663874120). The same problem also exists when using IDE's settings sync functionality (it may override locally changed settings).
 
 ### Can easily discard results
 

@@ -109,6 +109,11 @@ Another case is that the software provides orthogonality in interface, and actua
 >
 > \- [My story on “worse is better”](https://www.sigbus.info/worse-is-better)
 
+### About ADT
+
+Algebraic data type (ADT) helps reducing fake orthogonality. It helps avoiding creating invalid data from the source.
+
+ADT makes some illegal states unrepresentable. But a requirement change can make some illegal states legal again. Then using ADT would face big refactoring. Using many-nullable-fields requires less refactoring than ADT in that case.
 
 ## Examples of breaking abstraction
 
