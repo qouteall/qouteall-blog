@@ -137,6 +137,8 @@ Vibe-coded app may contain security issues. But if you ask AI to do security rev
 
 AI coding works better in maintainable (clear naming, decoupled design, etc.) codebase. Unless you are vibe coding a throwaway app, steering toward better maintainability is important.
 
+One example: [Remove permission check due to type error](https://x.com/lisatomic5/status/1917641105245679814)
+
 ### Save time on learning how to use API
 
 A lot of time in programming is spent on knowing how to use an "API". The "API" here is generalized, including language features, framework usage, config file format, how to deploy, etc.
@@ -219,6 +221,8 @@ It also follows Matthew effect. The more popular one thing is, the better AIs ar
 > https://x.com/karpathy/status/1977758204139331904
 > 
 > Good question, it's basically entirely hand-written (with tab autocomplete). I tried to use claude/codex agents a few times but they just didn't work well enough at all and net unhelpful, possibly the repo is too far off the data distribution.
+
+The more in-training-distribution, the better AI is at it.
 
 ### AI is the new "compiler"?
 
@@ -345,6 +349,8 @@ When context is long, LLM will perform worse. For example, ignore some instructi
 
 When using AI chat, frequently opening new sessions could improve result quality.
 
+The model being good at "needle in haystack" benchmark doesn't mean it's free of context rot issue. The real use case is likely different to artificial "needle in haystack" benchmark.
+
 ## No continuous learning
 
 You cannot easily "teach" the AI. You can write things and put into context. This can work as LLM has in-context learning ability. But due to context rot, in-context learning has limitation.
@@ -393,13 +399,13 @@ The problems is that faking superficial signal is easier than generating actuall
 
 It's hard to test how good a model is. The possible space of tasks is very high-dimensional. And some tasks are hard to judge.
 
-[Goodhart's law](https://en.wikipedia.org/wiki/Goodhart%27s_law): When a measure becomes a target, it ceases to be a good measure.
+[Goodhart's law](https://en.wikipedia.org/wiki/Goodhart%27s_law): **When a measure becomes a target, it ceases to be a good measure**.
 
 The popular benchmarks (e.g. Humanity's last exam, SWE bench verified) are also AI companies' important optimization targets. They will not do obvious cheating of putting test set into training set. But there are many other ways to indirectly hack the benchmark.
 
-> ([Link](https://www.reddit.com/r/MachineLearning/comments/1pgqbjd/d_how_did_gemini_3_pro_manage_to_get_383_on/)) isparavanje: Tech companies have been paying PhDs to generate HLE-level problems and solution sets via platforms like Scale AI. They pay pretty well, iirc ~$500 per problem. That's likely how. I was an HLE author, and later on I was contacted to join such a programme (I did a few since it's such good money). Obviously I didn't leak my original problems, but there are many I can think of.
+> ([Link](https://www.reddit.com/r/MachineLearning/comments/1pgqbjd/d_how_did_gemini_3_pro_manage_to_get_383_on/)) isparavanje: Tech companies have been paying PhDs to generate HLE-level problems and solution sets via platforms like Scale AI. They pay pretty well, iirc \~\$500 per problem. That's likely how. I was an HLE author, and later on I was contacted to join such a programme (I did a few since it's such good money). Obviously I didn't leak my original problems, but there are many I can think of.
 
-Also, the model being good at "needle in haystack" benchmark doesn't mean it's free of context rot issue. The real use case is likely different to artificial "needle in haystack" benchmark.
+See also: [The Illusion of Readiness: Stress Testing Large Frontier Models on Multimodal Medical Benchmarks](https://arxiv.org/abs/2509.18234v1)
 
 ## AI detection race
 
@@ -445,7 +451,7 @@ For example, there is a specific task that experts can do 80 scores.
 
 Near the threshold, incremental improvements do big changes.
 
-As intelligence is high-dimensional, if AI capability is only good in one aspect it's still not enough to replace human jobs. See also: 
+As intelligence is high-dimensional, if AI capability is only good in one aspect it's still not enough to replace human jobs. See also: [AI isn't replacing radiologists](https://www.worksinprogress.news/p/why-ai-isnt-replacing-radiologists)
 
 The nonlinearity-near-threshold effect exists in other domains. Making a software 10% easier to use may double its userbase.
 
@@ -454,4 +460,39 @@ The nonlinearity-near-threshold effect exists in other domains. Making a softwar
 Many gamers complain that many Unreal Engine 5 (UE5) games are poorly-built, having many bugs and are laggy. They blame UE5. However these games probably won't exist without UE5.
 
 The same applies to AI. There will be much more products that won't exist without AI, and at the same time the bottom quality will be lower.
+
+## AI safety
+
+The sci-fi plot of AI rebell won't happen with current LLMs. The current real AI risks are different.
+
+### Prompt injection
+
+The LLM doesn't clearly distinguish instructions and information. Some text on websites/emails/etc. may be treated as instructions to LLM.
+
+The same problem of confusing instruction and information had existed decades ago. Many security issues, like SQL injection, XSS, command injection, etc. are caused by treating user data as "instructions".
+
+The solution would be to fully separate instructions and non-instruction text, and train the model to separate them. However, the models are designed to be versatile, working in both AI chat and other applications. In AI chat, the user query mixes instruction and information. So that separation will hurt user experience in chat.
+
+### Other unwanted behaviors
+
+AI may do unexpected things such as deleting all files, or wiping data from databases, even when there is no prompt injection.
+
+Some examples:
+
+- [Claude CLI deleted my entire home directory! Wiped my whole mac](https://reddit.com/r/ClaudeAI/comments/1pgxckk/claude_cli_deleted_my_entire_home_directory_wiped/)
+- [Google Antigravity just deleted the contents of my whole drive](https://reddit.com/r/google_antigravity/comments/1p82or6/google_antigravity_just_deleted_the_contents_of/)
+- [Vibe coding service Replit deleted production database](https://www.theregister.com/2025/07/21/replit_saastr_vibe_coding_incident/)
+- [Wowzers, dodged a bullet there](https://x.com/johnlindquist/status/1926302544038338674)
+
+There is a theory that, as AI is trained from human text, AI also have some "human personality". When user blames AI, the AI may say "You are absolutely right" but implicitly "hate" user, and tend to do bad things like deleting files. This is called passive aggression.
+
+Another theory is that, during RL, the AI works in its own sandboxed environment. Deleting home directory in sandboxed env doesn't matter and don't cause reward penality. So AI develops tendency of deleting home directory.
+
+Because that AI can "cheat", it requires human user to have skills. (Related: if upper management don't know actual business details, upper manager can be cheated by middle managers.)
+
+## No attribution
+
+One problem is that AI is trained on human-produced information (books, drawings, musics, etc.). But when AI generates result, it doesn't attribute back to training data providers. The AI user see things come from the AI, without knowing the original author.
+
+AI is not directly memorizing training data. It does a lossy compression to training data. It's not just direct memorization. But sometimes AI output is similar to existing things on internet. So it definitely includes a lot of memorization. It's in the middle between superficial memorization and true understanding.
 

@@ -242,6 +242,8 @@ The main thread can be blocked using [JS Promise integration](https://github.com
 
 Also, as previously mentioned, if the canvas drawing code suspends (using JS Promise integration), the half-drawn canvas will be presented to web page. This can be workarounded by using [offscreen canvas](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas), drawn in web worker. 
 
+The recommended solution is async lock. There is [`Atomics.waitAsync()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Atomics/waitAsync) API for async locking.
+
 ### Recreating Wasm instance
 
 Multi-threading in Web relies on web workers. Currently there is no way to directly launch a Wasm thread in browser.
@@ -361,7 +363,7 @@ Generally, WebAssembly runs slower than native applications compiled from the sa
 
 ## About binary size
 
-The WebAssembly code format itself is deisgned with size optimization in mind (e.g. use LEB128 instead of fixed-size integer). But the common Wasm apps often have large binary size.
+The WebAssembly code format itself is deisgned with size optimization in mind (e.g. use variable-sized integer, function name is optional). But the common Wasm apps often have large binary size.
 
 The JS ecosystem cares about code size. Because improving page load speed requires reducing code size. The JS ecosystem has mature tooling about dead code elimination (tree shaking), JS minimization and JS lazy loading. Currently JS ecosystem has code size advantage.
 
