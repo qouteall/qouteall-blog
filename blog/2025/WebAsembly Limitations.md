@@ -14,7 +14,6 @@ Background:
 - It's designed with performance concern. It can achieve higher performance than JS [^wasm_js_perf].
 - It's designed with safety concern. Its execution is sandboxed.
 - It can be run in browser. 
-- It's close to native assembly (e.g. X86, ARM) but abstracts in a cross-platform way, so that many C/C++/Rust/etc. applications can be compiled to Wasm (but with limitations).
 - Although its name has "Web", it's is not just for Web. It can be used outside of browser.
 - Although its name has "Assembly", it has features (e.g. [GC](https://github.com/WebAssembly/gc)) that are in a higher abstraction layer than native assembly, similar to JVM bytecode.
 - In browsers, it's the same engine that runs JS and Wasm. Chromium V8 executes both JS and Wasm. Wasm GC use the same GC as JS.
@@ -140,7 +139,7 @@ The benefit of using Wasm built-in GC:
 
 The important memory management features that Wasm GC doesn't support:
 
-- **GC values cannot be shared across threads**. This is the most important limitation. (Addressed in [shared-everything threads proposal](https://github.com/WebAssembly/shared-everything-threads))
+- **GC values cannot be shared across threads**. (Addressed in [shared-everything threads proposal](https://github.com/WebAssembly/shared-everything-threads))
 - No weak reference.
 - No finalizer (run callback when an object is collected by GC).
 - No interior pointer. (Golang has interior pointer)
@@ -265,6 +264,8 @@ The current workaround is to notify the web workers to make them proactively loa
 > [Dynamic Linking — Emscripten](https://emscripten.org/docs/compiling/Dynamic-Linking.html)
 
 There is [shared-everything threads proposal](https://github.com/WebAssembly/shared-everything-threads) that aim to fix that.
+
+Why don't Wasm multithreading design true sharing initially? Because the major JS runtimes are designed for single-threaded execution. Making the JS runtimes adapt to multi-threading is hard. Multi-threading introduces data race risk. But JS runtime cannot simply add locking here and there because it may hurt performance or cause deadlock. WebAssembly uses the same runtime as JS so the same limitation applies. Supporting `SharedArrayBuffer` doesn't require changing JS runtimes' single-threaded architecture so it's implemented first. 
 
 ### Mismatch between web worker and native threads
 
@@ -436,18 +437,20 @@ There are other sandboxed execution solutions:
 
 - [eBPF](https://en.wikipedia.org/wiki/EBPF). It's intended to run code in kernel in a sandboxed way. It has JIT compile.
 - [gVisor](https://gvisor.dev/).
-- Java loading new class at runtime. If the newly loaded classes run in the same JVM as host application, it's not safe (the newly-loaded class has same permission of accessing files and networking like host process) unless launching a new VM. Similar to CLR.
 - [MicroVM](https://firecracker-microvm.github.io/).
 - [LUA](https://www.lua.org/). It's designed to be easily embedded into other applications. LUA is dynamically-typed. Although it has JIT, its performance may not match statically-typed languages.
-- ...
+- ... [^java]
+
+[^java]: Java allows loading new class at runtime. It can be used for making a plugin system. But it's not sandboxed. The newly-loaded classes runs in the same JVM, having the same permission of accessing files and networking like host process. It's possible to launch a new JVM but much less convenient.
 
 These things also have VMs:
 
 - Font standard TrueType has its own VM and bytecode format. [See also](https://learn.microsoft.com/en-us/typography/opentype/spec/tt_instructions). It runs in browsers and almost all modern GUI.
 - PDF allows embedding JavaScript. (PDF also can embed TrueType which runs TrueType VM.)
-- UEFI has a byte code format and VM. [See also](https://uefi.org/specs/UEFI/2.10/22_EFI_Byte_Code_Virtual_Machine.html)
-- SIM cards runs Java.
+- UEFI has a bytecode format and VM. [See also](https://uefi.org/specs/UEFI/2.10/22_EFI_Byte_Code_Virtual_Machine.html)
 - MySQL supports JS stored procedure. [See also](https://blogs.oracle.com/mysql/post/introducing-javascript-support-in-mysql)
+- CMake is Turing-complete.
+- Command line tools like awk, sed and jq are Turing-complete.
 - Related: Modern CPUs often have a [microcode](https://en.wikipedia.org/wiki/Microcode) system. The microcode supports conditional jumping and can access things like register and memory bus. It's a "small CPU within CPU".
 
 ### Within-website sub-sandboxing
@@ -460,4 +463,4 @@ The browser already do sandboxing between website code and browser processes. Bu
 
 The proposal [ShadowRealm API](https://github.com/tc39/proposal-shadowrealm) will ultimately fix it. Before that standardizes and is commonly supported by browsers, Figma's solution is to use a JS interpreter in Wasm to execute plugin code.
 
-See also: [How to build a plugin system on the web and also sleep well at night](https://www.figma.com/blog/how-we-built-the-figma-plugin-system/), [An update on plugin security](https://www.figma.com/blog/an-update-on-plugin-security/)
+See also: [How to build a plugin system on the web and also sleep well at night](https://www.figma.com/blog/how-we-built-the-figma-plugin-system/), [An update on plugin security](https://www.figma.com/blog/an-update-on-plugin-security/), [Realms-shim Security Updates](https://agoric.com/blog/technology/realms-shim-security-updates)

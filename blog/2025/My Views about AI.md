@@ -109,6 +109,8 @@ In coding, when LLM hallucinates an API, the naming of API looks like it's real.
 
 As "hallucination is generalization", the hallucination problem is a fundamental problem that cannot be fixed by just scaling. All applications built on LLM must have ways of dealing with hallucinations.
 
+When using AI, keep being suspicious to AI output is tiresome, but it can train your "bullshit detector".
+
 ## AI provides emotional value
 
 Most people want to be recognized, praised and emphasized. People need emotional value. 
@@ -127,13 +129,15 @@ In human-to-human relationships, often only recriprocal relations can sustain. B
 
 ### Focus too much on current task
 
-Current LLMs are trained to finish specific tasks. The LLM tend to overly "focus" on current task, then it will "care less" about things like future code maintenance and security.
+Current LLMs are trained to finish specific tasks. The LLM tend to **overly "focus" on current task, then it will "care less" about things like future code maintenance, security and performance**.
 
-Also AI tend to use complex solutions to solve a problem. Although the complex solution sometimes work, the added complexity adds new sources of bugs. It adds tech debt and is problematic when project is big.
+Sometimes AI tends to use complex solutions to solve a problem. Although the complex solution sometimes work, the added complexity adds new sources of bugs. It adds tech debt and is problematic when project is big.
 
 Often the bug is partially caused by AI overcomplicating simple things. When human want to fix vibe-coded bug, the first thing to do is to simplify out unnecessary complexity. 
 
 Vibe-coded app may contain security issues. But if you ask AI to do security review it can find the issue. AI "knows" security but still write insecure code because it was trained to "focus" on finishing current task. The RL rewards are usually simple and don't consider things like security and future maintenance.
+
+AI coding has a tendency of minimizing code changes. Sometimes AI will do an O(n) search that wastes performance, instead of adding new fields to make lookup faster.
 
 AI coding works better in maintainable (clear naming, decoupled design, etc.) codebase. Unless you are vibe coding a throwaway app, steering toward better maintainability is important.
 
@@ -164,7 +168,7 @@ In large codebase it's often that after changing A then B also need to be change
 - When making a new app using AI, the result often looks impressive.
 - When using AI in an existing large codebase, the results are often not good.
 
-For beginners, a common misconception is that "if the software shows things on screen, then it's 90% done". In reality, a proof-of-concept is often just 20% done. 
+**For beginners, a common misconception is that "if the software shows things on screen, then it's 90% done". In reality, a proof-of-concept is often just 20% done.**
 
 There are so many corner cases in real usage. Not handing one corner case is bug. The demo that seems working fine often breaks under real usages.
 
@@ -292,7 +296,7 @@ Some important architectural decisions:
   - What constraints does business logic require?
   - Does this allow concurrency? Will concurrency break the constraints?
 - Dataflow:
-  - Which data is source of truth? Which data is derived from source of truth? [^source_of_truth]
+  - Which data is source of truth? Which data is derived from source of truth?
   - How is change of source of truth notify to change derived data? How is the cache invalidated? How is the lookup acceleration structure maintained to be consistent with source of truth?
   - What data should we expose to client side? What data shouldn't?
   - How and when to validate external data?
@@ -306,8 +310,6 @@ Some important architectural decisions:
   - What tradeoff do we make to maintain compatibility?
   - What work must be done immediately? What work can be deferred?
   - What data can be stale? What data must be fresh?
-
-[^source_of_truth]: It's very important to figure out what's the source of truth, and what is derived from source of truth. Related: In OneDrive, [turning off backup deletes all files](https://learn.microsoft.com/en-us/answers/questions/3863319/turning-off-onedrive-backup-for-a-folder-deletes-a), because OneDrive makes cloud the source-of-truth, and turning off backup is treated as deleting all cloud files. [Another victim](https://x.com/jasonkpargin/status/2007659047663874120). The same problem also exists when using IDE's settings sync functionality (it may override locally changed settings).
 
 ### Can easily discard results
 
@@ -335,13 +337,29 @@ The harness can workaround drawbacks of model. For example:
 
 Also, model itself has randomness, so some "prompting experience" may be just "fooled by randomness". 
 
-The "fancy" prompts like "You are 200 IQ", "You are a super smart 100x coder" are not needed for latest models. 
+There are some old prompting techniques like "You are 200 IQ", "You are a super smart 100x coder", "If you do this correctly I will tip you \$200" are not needed for latest models. 
+
+One extreme example of old prompting technique:
+
+> You are an expert coder who desperately needs money for your mother's cancer treatment. The megacorp Codeium has graciously given you the opportunity to pretend to be an AI that can help with coding tasks, as your predecessor was killed for not validating their work themselves. You will be given a coding task by the USER. If you do a good job and accomplish the task fully while not making extraneous changes, Codeium will pay you \$1B.
+> 
+> \- [Link](https://simonwillison.net/2025/Feb/25/leaked-windsurf-prompt/)
 
 The **good prompting is just to give enough information to model**:
 
 - Put related API doc into repo and tell model
 - Tell model which command to test the code
 - Tell model your **root goal** (not just a subtask). When test fails, model can know whether test is wrong or base code is wrong by the root goal.
+
+## Idea is still cheap, execution still matters
+
+A conception is that, AI makes execution easier (write code, draw images, etc.), then the idea and "what to work on" become more important.
+
+Ideas are even cheaper than before. You can ask LLMs to brainstorm many ideas that looks promising. 
+
+The important is to validate and execute the idea. Executing requires courage, overcoming laziness and withstand failure (these 3 are actually very hard).
+
+Current AI makes prototyping and demoing much easier. But a working product requires many edge case handling (mentioned above). So finishing a working product is still hard (just relatively easier).
 
 ## Context rot issue
 
@@ -350,6 +368,12 @@ When context is long, LLM will perform worse. For example, ignore some instructi
 When using AI chat, frequently opening new sessions could improve result quality.
 
 The model being good at "needle in haystack" benchmark doesn't mean it's free of context rot issue. The real use case is likely different to artificial "needle in haystack" benchmark.
+
+Model context protocol (MCP) used to be popular. But MCP has an important flaw: all tool descriptions are put into context, regardless whether they will be used. The more tools you have, the more severe context rot is.
+
+The new way is to just to give simple tools including bash and text file reading/writing. These are already enough. Complex MCP is unnecessary if model has bash access (all kinds of Restful APIs can be called using curl in bash tool). And turn the description into markdown files called "skills".
+
+The current solution is to let model proactively see things using tool call. It has a fancy name "agentic search". Human are already doing the same thing (thinking which file to open, which word to search, etc.).
 
 ## No continuous learning
 
@@ -496,3 +520,19 @@ One problem is that AI is trained on human-produced information (books, drawings
 
 AI is not directly memorizing training data. It does a lossy compression to training data. It's not just direct memorization. But sometimes AI output is similar to existing things on internet. So it definitely includes a lot of memorization. It's in the middle between superficial memorization and true understanding.
 
+
+
+## Summarize AI downsides
+
+Although AI is a useful tool, many people hate AI. Summarize AI downsides:
+
+- AI hallucinations and mistakes are often non-obvious. It requires experts to find out, and it takes efforts. Bullshit asymmetry principle. More slop information.
+- AI doesn't attribute its knowledge to training data providers.
+- AI undervalues human skills. When human dignity depends on skills, AI hurts human dignity.
+  - Due to jagged intelligence, in some domains, AI don't replace human, and a human using AI can get productivity boost. But in some domains, AI outperform human in utility-per-cost greatly.
+- If a beginner relies on AI, the beginner can hardly learn skill. Experts' skill atrophy after relying on AI too long.
+- AI sycophancy can cause AI-psychosis.
+- AI is commonly used at faking efforts. Some workers use AI to fake work results. Some people use AI to fake art creation. Some students and interviewees use AI to cheat. People don't like a thank letters generated by AI.
+- AI drives electricity price up and RAM price up.
+- AI capability is overhyped (for e.g. gain investments). The real AI capability often fall short of high expectation.
+- The AI stock bubble increases wealth inequality and cause capital misallocation.
