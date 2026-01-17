@@ -435,6 +435,14 @@ The popular benchmarks (e.g. Humanity's last exam, SWE bench verified) are also 
 
 See also: [The Illusion of Readiness: Stress Testing Large Frontier Models on Multimodal Medical Benchmarks](https://arxiv.org/abs/2509.18234v1)
 
+Also, sometimes the benchmark is actually low-quality. Most people just see the score and are too lazy to see benchmark content.
+
+> [Link](https://x.com/fujikanaeda/status/2011565035408277996) The presence of a leading whitespace leaks the correct choice selection in the MMLU-Pro benchmark. Am I missing something? Seems to impact Chemistry, Physics, and Math.
+> 
+> [Link](https://x.com/peterbarnett_/status/2011958022592180639) It's even worse. You get a similar boost across the whole benchmark (21% vs 10% for random guessing) if just always guess the longest answer.
+
+
+
 ## AI detection race
 
 Some people want AI output to be as similar to human output as possible. Some people want to detect whether content is written by human as accurate as possible. There is a constant race.
