@@ -955,6 +955,8 @@ Two different talking styles: the charismatic leader one and the intellectual ex
 
 Note that the above are two simplified stereotypes. The real cases may be different.
 
+Related: A good leader should be insistent when the leader is sure it's correct. A good leader should be open-minded when not sure. A bad leader pretends to be nice when knowing sure it's wrong. A bad leader become insecurely aggressive when being challenged for things the leader is not sure.
+
 ### Blame the superficial
 
 "Shooting the messenger" means blaming the one who bring the bad news, even though the messenger has no responsibility of causing the bad news.
