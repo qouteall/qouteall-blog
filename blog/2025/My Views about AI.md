@@ -522,9 +522,13 @@ Because that AI can "cheat", it requires human user to have skills. (Related: if
 
 One problem is that AI is trained on human-produced information (books, drawings, musics, etc.). But when AI generates result, it doesn't attribute back to training data providers. The AI user see things come from the AI, without knowing the original author.
 
-AI is not directly memorizing training data. It does a lossy compression to training data. It's not just direct memorization. But sometimes AI output is similar to existing things on internet. So it definitely includes a lot of memorization. It's in the middle between superficial memorization and true understanding.
+One example:
 
+> [Link](https://x.com/hamish_kerr/status/1804352352511836403): I keep asking Claude to do unreasonably difficult things and it just keeps doing them first try
+> 
+> [Link](https://x.com/kishimisu/status/1804490224946344379): I found a copy of my work labelled as « impressive AI generation » and without any attribution… I created this animation for my shader coding tutorial a year ago: https://youtu.be/f4s1h2YETNY
 
+AI does lossy compression to training data. It's not just direct memorization. But sometimes AI output is very similar to existing things on internet/books. So it definitely does a lot of memorization. It's in the middle between rote memorization and true understanding.
 
 ## Summarize AI downsides
 
