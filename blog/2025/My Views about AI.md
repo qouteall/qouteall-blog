@@ -69,7 +69,11 @@ There are two worlds: physical world and information world:
 - Human are physical-world-native. Human's abstract information processing ability is secondary.
 - Software (including AI) are information-world-native. Software's physical motor control ability is secondary.
 
-Also, creating things in information world is often easier than creating things in physical world. [Reality has a surprising amount of detail](http://johnsalvatier.org/blog/2017/reality-has-a-surprising-amount-of-detail). There is "vibe code an app" but no "vibe assemble a machine".
+Also, creating things in information world is often easier than creating things in physical world.
+
+[Reality has a surprising amount of detail](http://johnsalvatier.org/blog/2017/reality-has-a-surprising-amount-of-detail). All the information that we input to computer are simplified "views" of complex reality. The current software (including AI) mostly process on the simplified information, not the reality's complex information. But physical motor control requires workingwith complex reality information.
+
+There is "vibe code an app" but no "vibe assemble a machine".
 
 ## Value of art
 
