@@ -566,6 +566,10 @@ People's evaluations are anchored on the expectation, and **not meeting an expec
 
 ![](./cog_bias/hype-cycle.png)
 
+> By 2005 or so, it will become clear that the Internet's impact on the economy has been no greater than the fax machine's.
+> 
+> \- Nobel Prize-winning economist, Paul Krugman, in 1998
+
 Internet has indeed changed the world. But the dot com bubble burst. It's just that the power of Internet required time to unleash, and people placed too much expectation in it too early.
 
 **Neglect of probability**: either neglect a risk entirely or overreact to the risk. 
