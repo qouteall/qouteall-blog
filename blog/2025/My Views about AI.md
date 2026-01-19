@@ -387,6 +387,12 @@ Although software is information doesn't rot by itself, the APIs that software r
 > 
 > [Link](https://x.com/heshie/status/2011802022920495449)
 
+### Rust is a filter to AI
+
+Rust is harder to learn and harder to write than other programming languages. Rust's constraints also reduce expressiveness in some cases.
+
+But these are also a filter to AI. In C/C++ AI can write a non-obvious bug that cause memory/thread safety issue. Rust protects against it. In JS/Python/Java/Golang/etc. AI can write a non-obvious bug caused by accidental mutation. Rust's restrictions of mutation make them more obvious. Although there are also escape hatches like `unsafe` and `Arc<Mutex<>>`, they are much more salient and easier to spot.
+
 ## Idea is still cheap, execution still matters
 
 A conception is that, AI makes execution easier (write code, draw images, etc.), then the idea and "what to work on" become more important.
@@ -413,7 +419,7 @@ The current solution is to let model proactively see things using tool call. It 
 
 ## No continuous learning
 
-You cannot easily "teach" the AI. You can write things and put into context. This can work as LLM has in-context learning ability. But due to context rot, in-context learning has limitation.
+You cannot easily "teach" the AI. You can write things and put into context. This can work as LLM has in-context learning ability. But due to context rot, you cannot teach many things in-context.
 
 In current architecture, the most reliable way is still to encode knowledge into model weights.
 
@@ -455,6 +461,18 @@ AI is very good at faking superficial signals. The AI-written articles use relat
 
 The problems is that faking superficial signal is easier than generating actually high-quality content. This problem already exists before AI. Some human are also good at faking superficial signals. But AI makes it much easier.
 
+[Dead Internet theory](https://en.wikipedia.org/wiki/Dead_Internet_theory). Although it's not true 10 years ago, it's kind of true now. There are tons of AI contents all over internet.
+
+One effective way of getting rid of bots is paywall. Although bot owner can pay for bots, it's not economical to pay for thousands of bots. 
+
+There are other methods for detecting/reducing bots: IP reputation, behavior statistics with ML, proof-of-work requirement.
+
+There are also many low-effort AI PR in open source projects. There is an **asymmetry**: the writer maybe pays 1 minute to write prompt but the generated thousands lines of code may require maintainer to pay hours to review. When the maintainer points out a problem, the PR author just copy it to AI then let AI change code.
+
+AI make the existing open source workflow collapse. Some possible solutions: track reputation (new people cannot open PR unless backed by existing contributor), or only allow "prompt contribution": contribute a human-written prompt, maintainer review the prompt, then maintainer run AI by themselves.
+
+There are also some AI-generated open source libraries that doesn't work at all (or even contains malicious code).
+
 ## Benchmark score is not representative
 
 It's hard to test how good a model is. The possible space of tasks is very high-dimensional. And some tasks are hard to judge.
@@ -486,6 +504,8 @@ The new "AI smell" is negation: "It's not X, it's Y."
 The AI companies are probably trying to use RL to reduce usages of em dash and negation.
 
 There are AI detections tools like Pangram. They can detect AI in some sense but the detection result can never be fully accurate (even if it shows "100% AI" it may actually be 80% probably of AI-written). Because it's not fully accurate, it shouldn't be used as sole source as discrediting a piece of writing.
+
+Current AI already can pass Turing test with appropriate prompt. Turing test was treated as some holy grail 5 years ago but now it's not seen as a big deal now. People want utility AI instead of the AI that fakes human.
 
 ## The "AGI race"
 
@@ -582,7 +602,7 @@ Human skill developmen is never as scalable as machines. You cannot simply clone
 
 Also, there is still large room for AI algorithm improvement (in my opinion "think by generating token" is still very inefficient and can be greatly improved). But there is no new technique to make manual practicing 2 times more efficient. Re-programming software is much eaier than re-programming human itself.
 
-Due to these, **once AI capability surpasses human, human will never be able to catchup**. This already happened in Go game. This has some scary implications. This is also one reason why many people hate AI. But note that most future predictions are wrong. No need to overthink about things you cannot control.
+Due to these, **once AI capability surpasses human, human will never be able to catchup**. This already happened in Go game. This has some scary implications. This is also one reason why many people fear/hate AI. But note that most future predictions are wrong. The old sci-fi plot of "AI rebell" doesn't happen now. No sci-fi 10 years before predicted current LLM accurately (as far as I know). Also, no need to overthink about things you cannot control.
 
 ## Summarize AI downsides
 
@@ -597,3 +617,4 @@ Although AI is a useful tool, many people hate AI. Summarize AI downsides:
 - AI drives electricity price up and RAM price up.
 - AI capability is overhyped (for e.g. gain investments). The real AI capability often fall short of high expectation.
 - The AI stock bubble increases wealth inequality and cause capital misallocation.
+- Many companies use AI customer support and fired all human customer supports. AI customer support is often not helpful and infuriates customer.
