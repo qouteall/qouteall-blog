@@ -416,7 +416,7 @@ The common solution is to use weak reference counting to cut cycle, as developer
 
 Tracing GC can handle the unreachable cycle. However it's still possible to leak memory in GC, by keeping the unused data reachable from GC roots. Examples:
 
-- Keep adding things into a container and never remove.
+- Keep adding things into a container and never remove (e.g. in Java forget to override `equals` and `hashcode`).
 - Registers a global callback. Forget to unregister callback when it's no longer useful. All data captured by callback will not be collected.
 - There is a large tree structure. Every child in tree references parent (circular reference). When you only need one node of tree, the whole tree is kept reachable.
 - Golang allows interior pointer. Having an interior pointer keeps the whole object alive. Keeping a small slice within a large slice can leak memory.
@@ -707,7 +707,10 @@ An outage can break your tool for solving the outage:
 > 
 > [Google Cloud services are experiencing issues and we have an other update at 5:30 PDT](https://status.cloud.google.com/incidents/cFXPsFUnUELR8U2bQeGz)
 
-Changing firewall rule can block your SSH connection to the server. In Windows, the domain controller can deploy a firewall rule to subordinate PCs that blocks their connections to domain controller.
+About firewall rule:
+
+- Changing firewall rule can block your SSH connection to the server, then you cannot remove the firewall rule via SSH.
+- In Windows, the domain controller can deploy a firewall rule to subordinate PCs that blocks their connections to domain controller. Then the domain controller cannot revert the firewall rule to PCs.
 
 ## Old Python packaging circular dependency
 
@@ -726,7 +729,7 @@ That issue was then addressed in new standards.
 
 [Circular proof](https://en.wikipedia.org/wiki/Circular_reasoning): if A then B, if B then A. Circular proof is wrong. It can prove neither A nor B.
 
-Example in statistics: Before collecting data, assume that the data follows Gaussian distribution. Then after collecting data, remove the outliers in data. Then verify that the data follows Gaussian distribution. That verification is wrong because removing outlier relies on the assumption that it's Gaussian.
+Example in statistics: After collecting data, remove the outliers in data. Then verify that the data follows Gaussian distribution. That verification is wrong because removing outlier relies on the assumption that it's thin-tail distribution.
 
 > An error rate can be measured. The measurement, in turn, will have an error rate. The measurement of the error rate will have an error rate ...
 > 

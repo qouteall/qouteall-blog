@@ -180,7 +180,7 @@ In mature codebases, most code are used for handling corner cases, not common ca
 
 Triggering one specific corner case is low-probability. However, there are many corner cases. Triggering at least one of them is high-probability.
 
-Analogy: A software is a city, each user just visits a small part, but you need to build the whole city, as different users visit different parts.
+Analogy: A software is a city, each user just visits a small part, but you need to build the whole city, as different users visit different parts. Note that the "city" is not visible. The "city" is in a latent space, "space of possible scenarios that software needs to handle", which is very different to visible GUI. 
 
 Also, good user experience requires many detail optimizations underneath. The software UI looking simple doesn't mean its internal implementation is simple.
 

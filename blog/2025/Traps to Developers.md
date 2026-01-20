@@ -27,6 +27,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
   - Two vertically touching siblings can overlap vertial margin. Child vertical margin can "leak" outside of parent.
   - Margin collapse doesn't happen when `border` or `padding` spcified. Don't try to debug margin collapse by coloring border. Debug it using browser's devtools.
   - Margin collapse can be avoided by block formatting context (BFC). `display: flow-root` creates a BFC. (There are other ways to create BFC, like `overflow: hidden`, `overflow: auto`, `overflow: scroll`, `display:table`, but with side effects)
+  - Related: margin can be negative. Negative margin can make elements overlap and make child leak outside of parent. BFC doesn't prevent this feature of negative margin.
 - If a parent only contains floating children, the parent's height will collapse to 0, and the floating children will leak. Can be fixed by BFC.
 - If the parent's `display` is `flex` or `grid`, then the child's `float` has no effect
 - [Stacking context](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_positioned_layout/Stacking_context):
@@ -73,9 +74,9 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - `text-align` aligns text and inline things, but doesn't align block elements (e.g. normal divs).
 - `text-align: center` will not center when content is too wide. It will align left in that case. [See also](https://stackoverflow.com/questions/6618648/can-overflow-text-be-centered)
 - By default `width` and `height` doesn't include padding and border. `width: 100%` with `padding: 10px` can still overflow the parent. `box-sizing: border-box` make the width/height include border and padding. Note that `width` includes scrollbar regardless of `box-sizing`.
-- The `html` and `body` are two different elements.
+- The `<html>` and `<body>` are two different elements.
   - Making web page height fill viewport requires both `html` and `body` to be `height: 100%`. (Another solution is `height: 100dvh`)
-  - Browser does some special treatment on background style of `body` and `html` (viewport propagation) (TODO)
+  - Viewport propagation. For background-related styles and `overflow`, applying to either `body` or `html` will all make them apply to viewport. But if both `html` and `body` specifies background, `<body>`'s background won't propagate to viewport and only cover `<body>` area. If both `html` and `body` have `overflow: scroll` then there will be two scrollbars.
 - About override:
   - CSS import order matters. The latter-imported ones can override the earlier ones.
   - The styles directly written in HTML are inline styles, which can be set by JS. Inline styles can override attributes in `.css` files (when both are not `!important`). `!important` attribute in `.css` files can override non `!important` inline style.
@@ -85,14 +86,17 @@ This article is mainly summarization. The main purpose is "know this trap exists
   - Parent `visibility: hidden` doesn't enforce all children to be hidden. If child has `visibility: visible` it will still be shown. This don't apply to `opacity: 0` or `display: none`.
   - An element with `opacity: 0` can still be interacted (e.g. click button). This doesn't apply to `display: none` or `visibility: hidden`.
   - `display: none` removes element from layout. This doesn't apply to `visibility: hidden` or `opacity: 0`.
+- The `<!DOCTYPE html>` in the beginning of html is important. Without it, browsers will use "quirks mode" which make many behaviors different. [See also](https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Quirks_mode_and_standards_mode)
 - [Cumulative Layout Shift](https://web.dev/articles/cls). 
   - It's recommended to specify `width` and `height` attribute in `<img>` to avoid layout shift due to image loading delay.
+- In these cases, image aspect ratio will not be preserved:
+  - TODO
 - JS-in-HTML may interfere with HTML parsing. For example `<script>console.log('</script>')</script>` makes browser treat the first `</script>` as ending tag. [See also](https://sirre.al/2025/08/06/safe-json-in-script-tags-how-not-to-break-a-site/)
 - Virtual scrolling breaks Ctrl-F (Cmd-F) search.
 
 [^macos_scrollbar_space]: In macOS it can be configured to make scrollbar take space like in Windows.
 
-[^css_box_model_scrollbar]: The CSS box model includes content box, padding, border and margin, but doesn't mention scrollbar. Scrollbar is visually between border and padding, but scrollbar occupies space from content box ("steal" space across padding). In Chrome devtools, the padding highlight area includes scrollbar, but scrollbar is not in padding. One may ask "if width includes scrollbar, then why `width: 100vw` cause horizontal overflow"? Because `width: 100vw` applies to an element inside viewport, not viewport itself. Viewport width includes viewport's scrollbar.
+[^css_box_model_scrollbar]: The CSS box model includes content box, padding, border and margin, but doesn't mention scrollbar. Scrollbar is visually between border and padding. Scrollbar is conceptually in padding box. But if the inner content is not intrinsically-sized,  scrollbar occupies space from content box ("steal" space across padding). [See also](https://www.w3.org/TR/css-overflow-3/#scrollbar-sizing). One may ask "if width includes scrollbar, then why `width: 100vw` cause horizontal overflow"? Because `width: 100vw` applies to an element inside viewport, not viewport itself. Viewport width includes viewport's scrollbar. 
 
 [^css_expand]: CSS only try to expand if the available space is finite. In may cases it has infinite vertical space by default.
 
@@ -182,8 +186,14 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - Verification of certificate uses time. If time is inaccurate, SSL/TLS may not work.
 - The "timestamp" may be in seconds, milliseconds or nanoseconds.
 - About `M` and `m` in date format: in Java `SimpleDateFormat`, `M` is month, `m` is minute. But in Python `datetime`, `m` is month, `M` is minute. 
+- In DuckDB, when importing a CSV, it guesses date format based on samples by default. There is ambiguity between `DD-MM-YYYY` and `MM-DD-YYYY`. If all days are below 12 DuckDB may guess wrong. [See also](https://duckdb.org/docs/stable/data/csv/auto_detection#dates-and-timestamps)
+- The result of MySQL `timestamp` value and PostgreSQL `timesamp with time zone` (`timestamptz`) depends on session time zone. Session time zone can be changed via SQL (`set time_zone = ...` in MySQL and `set time zone ...` in PostgreSQL). When using connection pooling, the effect of changing session time zone may interfere other places. [^sql_time_zone]
+- MySQL `timestamp` is 32-bit. It cannot represent time after 2038-01-19 03:14:07.
+
 
 [^dst_end]: In some regions it's 2:00 AM to 3:00 AM.
+
+[^sql_time_zone]: It's recommended to avoid using these timezone-related types and avoid changing session time zone. Use timezone-independent types (`datetime` in MySQL and `timestamp without time zone` in PostgreSQL, or`bigint` in both databases) in UTC in database, then convert to local time in UI.
 
 ### Java
 
@@ -234,7 +244,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - Undefined behaviors. The compiler optimization aim to keep defined behavior the same, but can freely change undefined behavior. Relying on undefined behavior can make program break under optimization. [See also](https://russellw.github.io/undefined-behavior)
   - Accessing uninitialized memory is undefined behavior. Converting a `char*` to struct pointer can be seen as accessing uninitialized memory, because the object lifetime hasn't started. It's recommended to put the struct elsewhere and use `memcpy` to initialize it.
   - Accessing invalid memory (e.g. null pointer) is undefined behavior.
-  - Integer overflow/underflow is undefined behavior. Note that unsigned integer can underflow below 0.
+  - Integer overflow/underflow is undefined behavior. Note that unsigned integer can underflow below 0. Don't use `x > x + 1` to check overflow as it will be optimized to false.
   - Aliasing.
     - Aliasing means multiple pointers point to the same place in memory.
     - Strict aliasing rule: If there are two pointers with type `A*` and `B*`, then compiler assumes two pointer can never equal. If they equal, using it to access memory undefined behavior. Except in two cases: 1. `A` and `B` has subtyping relation 2. converting pointer to byte pointer (`char*`, `unsigned char*` or `std::byte*`) (the reverse does not apply). [^pointer_type_hold_integer]
@@ -262,7 +272,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - In conditons, these things are "falsy": 0, `None`, empty string, empty container. Be careful if 0 or empty container represents valid value. Also it can be controlled by implementing `__bool__` method.
 - GIL (global interpreter lock) doesn't protect again on-disk data race. Two concurrent threads reading and writing same file may cause data race in file. GIL releases during IO.
 - `zipfile.ZipFile` doesn't do compression if `compression` argument is not set. (`.zip` format can contain files uncompressed.)
-- Pandas `read_csv` will guess type of each column based on first few rows, if you don't specify `dtype`.
+- Pandas `read_csv` will guess type of each column based on samples, if you don't specify `dtype`. An outlier can change the type of column. (Similar thing applies to DuckDB)
 
 ### SQL Databases
 
@@ -276,13 +286,16 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - In MySQL (InnoDB), if string field doesn't have `character set utf8mb4` then it will error if you try to insert a text containing 4-byte UTF-8 code point.
 - MySQL (InnoDB) default to case-insensitive.
 - MySQL (InnoDB) can do implicit conversion by default. `select '123abc' + 1;` gives 124.
-- MySQL (InnoDB) gap lock may cause deadlock.
+- [MySQL (InnoDB) gap lock may cause deadlock](/About%20circular%20reference#mysql-gap-lock-deadlock).
 - In MySQL (InnoDB) you can select a field and group by another field. It gives nondeterministic result.
-- Multi-column index `(x, y)` cannot be used when only filtering on `y`. (except when there are very few different `x` values, database can do a skip scan that uses the index.)
-- In SQLite the field type doesn't matter unless the table is `strict`.
+- Multi-column index `(x, y)` cannot be used when only filtering on `y`. (Except when there are very few different `x` values, database can do a skip scan that uses the index.)
+- In SQLite, when table is not `strict`, values are dynamically-typed, but it has "type affinity":
+  - The type `floating point` is treated as integer affinity because it contains "int". It will auto-convert real number 1.0 to integer 1.
+  - The type `string` is treated as numeric affinity. It will auto-convert string "01234" to number 1234.
+  - It's recommended to always use `strict` table.
 - SQLite by default does not do vacuum. The file size only increases and won't shrink. To make it shrink you need to either manually `vacuum;` or enable `auto_vacuum`.
-- Foreign key may cause implicit locking, which may cause deadlock.
-- Foreign key may interfere when loading database backup.
+- [Foreign key implicit locking may cause deadlock](./About%20circular%20reference#foreign-key-deadlock).
+- When using foreign key, when loading database backup, if the child table is loaded before parent, it will fail to load due to foreign key violation.
 - Locking may break repeatable read isolation (it's database-specific).
 - Distributed SQL database may doesn't support locking or have weird locking behaviors. It's database-specific.
 - If the backend has N+1 query issue, the slowness may won't be shown in slow query log, because the backend does many small queries serially and each individual query is fast.
@@ -373,7 +386,9 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - `fork()` creates a new process that has only one thread. If another thread holds lock during forking, that lock will never release. `fork()` also has potential of security issues.
 - File name can contain `\n` `\r` `'` `"`. File name can be invalid UTF-8.
 - In Linux file names are case-sensitive, different to Windows and macOS.
-- glibc compatibility issue. A program that's build in a new Linux distribution dynamically links with a new version of glibc, then it may be incompatible with old versions of glibc in old systems. Can be fixed by static linking glibc or using containers.
+- glibc compatibility issue. A program that's build in a new Linux distribution dynamically links with a new version of glibc, then it may be incompatible with old versions of glibc in old systems. Can be fixed by static linking glibc or using containers [^container].
+
+[^container]: There is a "fix problem then create new problem then fix new problem" cycle in deployment. Firstly dynamic linking creates dependency hell, then solve it using containers. But containers are slow to rebuild, which slows down development iteration cycle. Then tools like [tilt](https://tilt.dev/) solve the problem by "hacking" container (replace binary without rebuilding container). There are other hacks such as putting binary in mounted folder outside of container. But the root problem (dynamic linking dependency hell) can be just fixed by static linking.
 
 ### Backend-related
 
@@ -386,6 +401,10 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - If you put your backend behind Nginx, you need to configure connection reuse, otherwise under high concurrency, connection between nginx and backend may fail, due to not having enough internal ports.
 - Nginx `proxy_buffering` delays SSE.
 - If the backend behind Nginx initiates closing the TCP connection, Nginx passive health check treat it as backend failure and temporarly stop reverse proxying. [See also](https://nginx.org/en/docs/http/ngx_http_upstream_module.html)
+- Elasticsearch doesn't allow removing mapping in an index. And Elasticsearch has dynamic mapping: if a new document has a new non-null field it will auto add a mapping that you cannot remove. Removing mapping requires reindexing. Reindexing not only costs performance, but also has risks of losing new data during reindexing, because reindex works on the snapshot. 
+  - Zero-downtime reindexing that doesn't lose new ingested data during reindexing is hard: 1. create new index 2. new document ingests to both old index and new index (dual-writing) 3. reindex 4. make queries go to new index 5. stop ingesting to old index and delete old index [^es_reindex]
+
+[^es_reindex]: It can be simple if you can accept a downtime. It can also be simple if you don't care about losing new data during reindexing. Also if you can accept duplicated query result during reindex, you can use an alias that includes both old and new index, then no dual-writing needed. Another workaround is to rename field before ingestion and don't care about the wrong mapping.
 
 ### React
 
@@ -450,7 +469,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - PostgreSQL linguistic sorting (collation) depends on glibc by default. Upgrading glibc may cause index corruption due to changing of linguistic order. [See also](https://wiki.postgresql.org/wiki/Locale_data_changes). Related: [Docker Postgres Image issue](https://x.com/gwenshap/status/1990942970682749183)
 - Text notation of floating-point number is locale-dependent. `1,234.56` in US correspond to `1.234,56` in Germany.
 - CSV normally use `,` as spearator. But in Germany locale separator is `;`.
-- [Han unification](https://en.wikipedia.org/wiki/Han_unification). The same code point may appear differently in different locales. Usually a font will contain variants for different locales. Correct localization require choosing the correct font variant. [HTML code](https://github.com/qouteall/qouteall-blog/blob/main/blog/2025/unicode-unification-example.html) ![](unicode_unification_example.png)
+- [Han unification](https://en.wikipedia.org/wiki/Han_unification). The same code point may appear differently in different locales. Usually a font will contain variants for different locales. Correct localization requires choosing the correct font variant. [HTML code](https://github.com/qouteall/qouteall-blog/blob/main/blog/2025/unicode-unification-example.html) ![](unicode_unification_example.png)
 
 ### Regular expression
 
