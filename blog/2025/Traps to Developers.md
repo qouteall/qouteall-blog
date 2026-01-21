@@ -286,7 +286,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - In MySQL (InnoDB), if string field doesn't have `character set utf8mb4` then it will error if you try to insert a text containing 4-byte UTF-8 code point.
 - MySQL (InnoDB) default to case-insensitive.
 - MySQL (InnoDB) can do implicit conversion by default. `select '123abc' + 1;` gives 124.
-- [MySQL (InnoDB) gap lock may cause deadlock](/About%20circular%20reference#mysql-gap-lock-deadlock).
+- [MySQL (InnoDB) gap lock may cause deadlock](./About%20circular%20reference#mysql-gap-lock-deadlock).
 - In MySQL (InnoDB) you can select a field and group by another field. It gives nondeterministic result.
 - Multi-column index `(x, y)` cannot be used when only filtering on `y`. (Except when there are very few different `x` values, database can do a skip scan that uses the index.)
 - In SQLite, when table is not `strict`, values are dynamically-typed, but it has "type affinity":

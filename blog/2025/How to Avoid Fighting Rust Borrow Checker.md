@@ -660,11 +660,13 @@ If the data structure inherently requires circular reference, solutions:
 
 Self-reference means a struct contains an interior pointer to another part of data that it owns.
 
-Zero-cost self reference requires `Pin` and `unsafe`. Normal Rust mutable borrow allow moving the value out (by `mem::replace`, or `mem::swap`, etc.). `Pin` disallows that, as self-reference pointer can be invalidated by moving. They are complex and hard to use. 
+Zero-cost self reference requires `Pin` and `unsafe`. Normal Rust mutable borrow allow moving the value out (by `mem::replace`, or `mem::swap`, etc.). `Pin` disallows that, as self-reference pointer can be invalidated by moving.
 
-Using things like reference counting can avoid self-reference in many cases.
+`Pin` is hard to use. If you have a pinned object reference, you cannot get the pinned field reference without unsafe, unless using [pin_project](https://docs.rs/pin-project/latest/pin_project/). Also auto reborrow doesn't work for `Pin`. 
 
 The problems of `Pin` aim to be solved in [`Move` trait](https://github.com/rust-lang/lang-team/issues/354) and [in-place initialization](https://github.com/rust-lang/rust-project-goals/blob/main/src/2025h2/in-place-initialization.md).
+
+Using things like reference counting can avoid self-reference in many cases.
 
 ## Use handle/ID to replace borrow
 
@@ -1327,6 +1329,8 @@ fn mutate_twice(i: &mut u32) -> &mut u32 {
 10 |     mutate(j)
    |     --------- returning this value requires that `*i` is borrowed for `'1`
 ```
+
+The `Pin` doesn't do auto reborrow.
 
 ### Move cloned data into closure
 
