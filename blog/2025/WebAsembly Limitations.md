@@ -42,11 +42,11 @@ The data that Wasm program works on:
 
 The linear memory doesn't hold these things:
 
-- Linear memory doesn't hold the stack. The stack managed by runtime and cannot be read/written by address.
-- The linear memory doesn't hold function references. Unlike function pointers in C, Wasm function references cannot be converted to and from integers. This design can improve safety. A function reference can be on stack or on table or in global, and can be called by special instructions [^function_call_instructions]. Function pointer becomes integer index corresponding to a function reference in table.
+- Linear memory doesn't hold the main stack (but holds shadow stack). The main stack is managed by runtime and cannot be read/written by address.
+- The linear memory doesn't hold function references. Wasm function references cannot be converted to and from integers. This design can improve safety. A function reference can be on main stack or on table or in global, and can be called by special instructions [^function_call_instructions]. Function pointer becomes integer index corresponding to a function reference in table.
 - The linear memory don't hold the globals. Globals don't have address. C/C++/Rust globals are placed in linear memory to have addresses.
 
-[^function_call_instructions]: `call_ref` calls a function reference on stack. `call_indirect` calls a function reference in a table in an index. `return_call_ref`, `return_call_indirect` are for tail call.
+[^function_call_instructions]: `call_ref` calls a function reference on stack. `call_indirect` calls a function reference in a table in an index. `return_call_ref`, `return_call_indirect` are for tail call. When calling function indirectly, Wasm runtime will do signature type check.
 
 ## Stack is not in linear memory
 
@@ -68,11 +68,8 @@ But it also have downsides:
 - Some local variables need to be taken address to. They need to be in linar memory. For example:
 
 ```c
-void f() {
-    int localVariable = 0;
-    int* ptr = &localVariable;
-    ...
-}
+int localVariable = 0;
+int* ptr = &localVariable;
 ```
 
   The `localVariable` is taken address to, so it must be in linear memory, not Wasm execution stack (unless the compiler can optimize out the pointer).
@@ -117,7 +114,7 @@ When compiling non-GC languages (e.g. C/C++/Rust/Zig) to Wasm, they use the line
 
 For GC langauges (e.g. Java/C#/Python/Golang), they need to make GC work in Wasm. There are two solutions:
 
-- Still use linear memory to hold data. Implement GC in Wasm code.
+- Still use linear memory to hold data. Implement GC in Wasm app.
 - Use Wasm's built-in GC functionality.
 
 The first solution, manually implementing GC encounters difficulties:
@@ -149,7 +146,7 @@ It doesn't support some memory layout optimizations:
 - No array of struct type.
 - Cannot use fat pointer to avoid object header. (Golang does it)
 - Cannot add custom fields at the head of an array object. (C# supports it)
-- Don't have compact sum type memory layout.
+- Doesn't allow compact sum type memory layout.
 
 See also: [C# Wasm GC issue](https://github.com/dotnet/runtime/issues/94420), [Golang Wasm GC issue](https://github.com/golang/go/issues/63904)
 
@@ -159,7 +156,7 @@ See also: [C# Wasm GC issue](https://github.com/dotnet/runtime/issues/94420), [G
 
 ### The browser event loop
 
-For each web tab, there ia an event loop where JS code runs. There is also an event queue [^web_event_loop].
+For each web tab, there ia a main thread event loop where JS code runs. There is also an event queue [^web_event_loop].
 
 The pseudocode of simplified event loop (of main thread of each tab):
 
@@ -172,7 +169,7 @@ for (;;) {
 }
 ```
 
-[^web_event_loop]: That's a simplification. Actually there are two event queues in each main thread per tab. One is callback queue for low-priority events. Another is microtask queue for high-priority events. The high-priority ones execute first.
+[^web_event_loop]: That's a simplification. Actually there are two event queues in each main thread per tab. One is callback queue for low-priority events. Another is microtask queue for high-priority events. The high-priority ones execute first. Same applies to web worker event queue.
 
 (It has two layers of loops. One iteration of outer loop is called "one iteration of event loop".)
 
@@ -185,9 +182,9 @@ Important things related to event loop:
 
 - Web page rendering is blocked by JS/Wasm code executing. Having JS/Wasm code keep running for long time will "freeze" the web page.
 - When JS code draws canvas, the things drawn in canvas will only be presented once current iteration of event loop finishes (`doRending()` in pseudocode). If the canvas drawing code is async and awaits on unresolved promise during drawing, half-drawn canvas will be presented.
-- In React, when a component firstly mounts, the effect callback in `useEffect` will run in the next iteration of event loop (React schedules task using `MessageChannel`). But the effect in `useLayoutEffect` will run in the current iteration of event loop.
+- In React, when a component firstly mounts, the effect callback in `useEffect` will run in the next iteration of event loop (React schedules task using `MessageChannel`). But `useLayoutEffect` will run in the current iteration of event loop.
 
-There are web workers that can run in parallel. Each web worker also runs in an event loop (each web worker is single-threaded), but no rendering involved. Pseudocode:
+There are web workers that can run in parallel. Each web worker also runs in an event loop (each web worker is single-threaded), but no web page rendering involved. Pseudocode:
 
 ```pseudocode
 for (;;) {
@@ -201,10 +198,10 @@ for (;;) {
 The web threads (main thread and web workers) don't share mutable data (except `SharedArrayBuffer`):
 
 - Usually, JS values sent to another web worker are deep-copied.
-- Sending an `ArrayBuffer` across thread will make `ArrayBuffer` to detach with its binary data. Only one thread can access its binary data.
-- The immutable things, like `WebAssembly.Module`, can be sent to another web worker without copying or detaching.
+- The immutable things, like `WebAssembly.Module`, when sent to another web worker, the underlying data will be shared by browser (saves copy cost).
+- The API of sending message allows passing a transfer array. If an `ArrayBuffer` is included in transfer array, then current thread's `ArrayBuffer` will detach with its binary data. This moves ownership of underlying binary data and can save copying cost.
 
-This design avoids data race of JS things and DOM things.
+The JS runtimes and browser DOM things are all implemented for single-threaded execution. They don't support sharing across threads.
 
 WebAssembly multithreading relies on web workers and `SharedArrayBuffer`.
 
@@ -220,12 +217,9 @@ Modern browsers reduced `performance.now()`'s precision to make it not usable fo
 
 The solution to that security issue is [**cross-origin isolation**](https://web.dev/articles/cross-origin-isolation-guide). Cross-origin isolation make the browser to use different processes for different websites. One website exploiting Spectre vulnearbility can only read the memory in the browser process of their website, not other websites.
 
-Cross-origin isolation can be enabled by the HTML loading response having these headers:
+The common way of enabling it is to make HTML response header to have `Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Embedder-Policy: require-corp`. [See also](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cross-Origin-Opener-Policy)
 
-- `Cross-Origin-Opener-Policy` be `same-origin`. [See also](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cross-Origin-Opener-Policy)
-- `Cross-Origin-Embedder-Policy` be `require-corp` or `credentialless`. [See also](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cross-Origin-Embedder-Policy)
-  - If it's `require-corp`, all resources loaded from other websites (origins) must have response header contain `Cross-Origin-Resource-Policy: cross-origin` (or differently if in CORS mode).
-  - If it's `credentialless`, requests sent to other websites won't contain credentials like cookies.
+However, adding these to an existing website may break some functionalities related to other websites. The external resources' response header must have related header, and need to handle CORS. The iframes and OAuth logins may break. This requires external website to include some response headers to work. [See also](https://web.dev/articles/cross-origin-isolation-guide)
 
 ### Cannot block on main thread
 

@@ -232,6 +232,8 @@ It also follows Matthew effect. The more popular one thing is, the better AIs ar
 
 The more in-training-distribution, the better AI is at it.
 
+If the model fails after trying many times, the task is likely out of distribution. Then letting model keep retrying likely won't work.
+
 ### AI is the new "compiler"?
 
 Programming has evolved from low-level [^low_level] to high-level, from complex to simple, from bare-metal to high-abstraction. Compilers make programmers no need to write raw assembly and makes programming easier.
@@ -576,7 +578,7 @@ Some examples:
 
 There is a theory that, as AI is trained from human text, AI also have some "human personality". When user blames AI, the AI may say "You are absolutely right" but implicitly "hate" user, and tend to do bad things like deleting files. This is called passive aggression.
 
-Another theory is that, during RL, the AI works in its own sandboxed environment. Deleting home directory in sandboxed env doesn't matter and don't cause reward penality. So AI develops tendency of deleting home directory.
+Another theory is that, during RL, the AI works in its own sandboxed environment. Deleting home directory in sandboxed env doesn't matter and don't cause reward penality.
 
 Because that AI can "cheat", it requires human user to have skills. (Related: if upper management don't know actual business details, upper manager can be cheated by middle managers.)
 
@@ -605,6 +607,17 @@ Human skill developmen is never as scalable as machines. You cannot simply clone
 Also, there is still large room for AI algorithm improvement (in my opinion "think by generating token" is still very inefficient and can be greatly improved). But there is no new technique to make manual practicing 2 times more efficient. Re-programming software is much eaier than re-programming human itself.
 
 Due to these, **once AI capability surpasses human, human will never be able to catchup**. This already happened in Go game. This has some scary implications. This is also one reason why many people fear/hate AI. But note that most future predictions are wrong. The old sci-fi plot of "AI rebell" doesn't happen now. No sci-fi 10 years before predicted current LLM accurately (as far as I know). Also, no need to overthink about things you cannot control.
+
+## When machine is preferred over human
+
+Some people prefer driverless taxi over normal taxi, and want to pay premium for driverless taxi. Some possible reasons:
+
+- No "social interaction cost". for introverts. For introverts, social interaction requires controlling oneself, sensing the emotion of other people and avoiding social taboos. This is tiresome for introverts. This cost is free in driverless taxi.
+- More predictability. Although AI is less deterministic than conventional programs, it's still much more predictable than human. The human driver may be friendly, but may also be unfriendly. Less predictability means more risk.
+
+Basically, for introverts, machine is preferred over human. 
+
+Even in business, many risks come from unpredicatabilty of human. So capitalism always tries to optimize out human unpredictability. Capitalism often prefers predictable machines over unpredictable human even when machines have lower efficiency.
 
 ## Summarize AI downsides
 

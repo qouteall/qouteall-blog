@@ -89,8 +89,6 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - The `<!DOCTYPE html>` in the beginning of html is important. Without it, browsers will use "quirks mode" which make many behaviors different. [See also](https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Quirks_mode_and_standards_mode)
 - [Cumulative Layout Shift](https://web.dev/articles/cls). 
   - It's recommended to specify `width` and `height` attribute in `<img>` to avoid layout shift due to image loading delay.
-- In these cases, image aspect ratio will not be preserved:
-  - TODO
 - JS-in-HTML may interfere with HTML parsing. For example `<script>console.log('</script>')</script>` makes browser treat the first `</script>` as ending tag. [See also](https://sirre.al/2025/08/06/safe-json-in-script-tags-how-not-to-break-a-site/)
 - Virtual scrolling breaks Ctrl-F (Cmd-F) search.
 
