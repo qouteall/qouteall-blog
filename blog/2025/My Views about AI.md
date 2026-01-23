@@ -389,12 +389,6 @@ Although software is information doesn't rot by itself, the APIs that software r
 > 
 > [Link](https://x.com/heshie/status/2011802022920495449)
 
-### Rust is a filter to AI
-
-Rust is harder to learn and harder to write than other programming languages. Rust's constraints also reduce expressiveness in some cases.
-
-But these are also a filter to AI. In C/C++ AI can write a non-obvious bug that cause memory/thread safety issue. Rust protects against it. In JS/Python/Java/Golang/etc. AI can write a non-obvious bug caused by accidental mutation. Rust's restrictions of mutation make them more obvious. Although there are also escape hatches like `unsafe` and `Arc<Mutex<>>`, they are much more salient and easier to spot.
-
 ## Idea is still cheap, execution still matters
 
 A conception is that, AI makes execution easier (write code, draw images, etc.), then the idea and "what to work on" become more important.

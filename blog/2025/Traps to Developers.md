@@ -286,7 +286,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - MySQL (InnoDB) can do implicit conversion by default. `select '123abc' + 1;` gives 124.
 - [MySQL (InnoDB) gap lock may cause deadlock](./About%20circular%20reference#mysql-gap-lock-deadlock).
 - In MySQL (InnoDB) you can select a field and group by another field. It gives nondeterministic result.
-- Multi-column index `(x, y)` cannot be used when only filtering on `y`. (Except when there are very few different `x` values, database can do a skip scan that uses the index.)
+- Multi-column index `(x, y)` cannot be used when only filtering on `y`. (Except when there are very few different `x` values, database can do a skip scan that uses the index.) Similarily `like 'abc%'` can use index but `like '%abc'` cannot.
 - In SQLite, when table is not `strict`, values are dynamically-typed, but it has "type affinity":
   - The type `floating point` is treated as integer affinity because it contains "int". It will auto-convert real number 1.0 to integer 1.
   - The type `string` is treated as numeric affinity. It will auto-convert string "01234" to number 1234.
@@ -471,7 +471,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 
 ### Regular expression
 
-- Regular expression cannot parse the syntax that allows infinite nesting (because regular expression engine use finite state machine. Infinite nesting require infinite states to parse). HTML allows infinite nesting. But it's ok to use regex to parse HTML of a specific website.
+- Regular expression cannot parse the syntax that allows infinite nesting (because it uses finite state machine. Infinite nesting require infinite states). HTML allows infinite nesting. But it's ok to use regex to parse HTML of a specific website.
 - Regular expression behavior can be locale-dependent (depending on which regular expression engine).
 - There are many different "dialects" of regular expression. Don't assume a regular expression that works in JS can work in Java.
 - A separate regular expression validation can be out-of-sync with actual data format. [Crowdstrike incident](https://www.crowdstrike.com/wp-content/uploads/2024/08/Channel-File-291-Incident-Root-Cause-Analysis-08.06.2024.pdf) was caused by a wrong separate regular expression validation. It's recommended to **avoid separate regular expression validation. Reuse parsing code for validation**. See also: [Parse, don't validate](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/)

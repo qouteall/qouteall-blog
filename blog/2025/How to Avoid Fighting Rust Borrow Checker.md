@@ -658,15 +658,18 @@ If the data structure inherently requires circular reference, solutions:
 
 ## Self-reference
 
-Self-reference means a struct contains an interior pointer to another part of data that it owns.
+Self-reference means a struct contains an interior pointer to another part of its own data.
 
-Zero-cost self reference requires `Pin` and `unsafe`. Normal Rust mutable borrow allow moving the value out (by `mem::replace`, or `mem::swap`, etc.). `Pin` disallows that, as self-reference pointer can be invalidated by moving.
+Some crates for providing safe interface of using self-reference:
 
-`Pin` is hard to use. If you have a pinned object reference, you cannot get the pinned field reference without unsafe, unless using [pin_project](https://docs.rs/pin-project/latest/pin_project/). Also auto reborrow doesn't work for `Pin`. 
+- [self_cell](https://github.com/Voultapher/self_cell)
+- [yoke](https://docs.rs/yoke/0.8.1/yoke/)
+
+There is `Pin` for avoiding an object from being moved in memory. Normal Rust mutable borrow allow moving the value out (by `mem::replace`, or `mem::swap`, etc.). `Pin` is hard to use. If you have a pinned object reference, you cannot get the pinned field reference without unsafe, unless using [pin_project](https://docs.rs/pin-project/latest/pin_project/). Also auto reborrow doesn't work for `Pin`. 
 
 The problems of `Pin` aim to be solved in [`Move` trait](https://github.com/rust-lang/lang-team/issues/354) and [in-place initialization](https://github.com/rust-lang/rust-project-goals/blob/main/src/2025h2/in-place-initialization.md).
 
-Using things like reference counting can avoid self-reference in many cases.
+`Pin` also appears in futures. Because an async function may have a local variable reference another local variable, and local variables can be put into `Future` state machines, so the `Future` will have self-reference.
 
 ## Use handle/ID to replace borrow
 
@@ -716,7 +719,7 @@ Entity component system (ECS) is a way of organizing data that's different to OO
 
 ECS also favors composition over inheritance. Inheritance tend to bind code with specific types that cannot easily compose.
 
-(For example, in an OOP game, `Player` extends `Entity`, `Enemy` extends `Entity`. There is a special enemy `Ghost` that ignores collision and also extends `Enemy`. But one day if you want to add a new player skill that temporarily ignores collision like `Ghost`, you cannot make `Player` extend `Ghost` and have to duplicate code. In ECS that can be solved by just combining special collision component.)
+For example, in an OOP game, `Player` extends `Entity`, `Enemy` extends `Entity`. There is a special enemy `Ghost` that ignores collision and also extends `Enemy`. But one day if you want to add a new player skill that temporarily ignores collision like `Ghost`, you cannot make `Player` extend `Ghost`. Then the logic of ignoring collision has to be lifted into superclass `Entity` (or duplicated in both `Ghost` and `Player`). After many of these, `Entity` will contain many mixed logic, which defeats abstraction. In ECS it can be solved by just changing collision component.
 
 
 ## Mutable borrow exclusiveness
@@ -968,9 +971,7 @@ Because the borrow got from `RefCell` is not normal borrow, it's actually `Ref`.
 
 The "help: consider borrowing here" suggestion won't solve the compiler error. Don't blindly follow compiler's suggestions.
 
-One solution is to return `&RefCell<HashMap<String, Entry>>`, instead of returning `&HashMap<String, Entry>`.
-
-Returning `Ref<HashMap<String, Entry>>` or returning `impl Deref<Target=HashMap<String, Entry>>`) can also work, but they are not recommended.
+One solution is to return `&RefCell<HashMap<String, Entry>>`. Then `RefCell` "invades" the getter signature and make abstraction leaky. (Returning `Ref<HashMap<String, Entry>>` or `impl Deref<Target=HashMap<String, Entry>>` can also work but all not good.)
 
 ### `Rc<RefCell<...>>` and `Arc<Mutex<...>>` are not panacea
 
@@ -1157,13 +1158,15 @@ It takes immutable borrow of `Bump` (it has interior mutability). It moves `val`
 If you want to keep the borrow of allocated result for long time, then **lifetime annotation is often required**. In Rust, **lifetime annotation is also contagious**:
 
 - Every struct that holds bump-allocated borrow need to also have lifetime annotation of the bump allocator. 
-- Every function that use it also needs lifetime annotation. Rust has [lifetime elision](https://doc.rust-lang.org/nomicon/lifetime-elision.html), which allows you to omit lifetime in function signature in some cases. However you still need to write a lot of things like `<'_>`. And it doesn't work in all cases.
+- Every function that use it also needs lifetime annotation. Rust has [lifetime elision](https://doc.rust-lang.org/nomicon/lifetime-elision.html), which allows you to omit lifetime in function signature in some cases. However you still need to write a lot of things like `<'_>`.
 
 Adding or removing lifetime for one thing may involve refactoring many code that use it, which can be huge work. (AI can help in these kinds of refactoring.)
 
+[yoke](https://docs.rs/yoke/0.8.1/yoke/) allows getting rid of lifetime annotation by combining bump-allocated structure together with the bump allocator.
+
 `Bump` doesn't implement `Sync`, so `&Bump` is not `Send`. It cannot be shared across threads (even if it can share, there will be lifetime constraint that force you to use structured concurrency). It's recommended to have separated bump allocator in each thread, locally.
 
-Putting a `Bump` with its allocated references together creates self-reference, which is hard and requires unsafe. It's recommended to just put `Bump` on stack and use it temporarily.
+Putting a `Bump` with its allocated references together creates self-reference. It's more tricky (can use [yoke](https://docs.rs/yoke/0.8.1/yoke/)).
 
 Note that bumpalo by default don't run `drop` to improve performance. Use `bumpalo::boxed::Box<T>` for things that require invoking `drop`.
 
@@ -1479,6 +1482,6 @@ Note that there are still Heisenbugs that Rust cannot catch, including:
 
 Also note that not all memory/thread safety bugs are Heisenbugs. Many are still easy to trigger and debug.
 
-Rust is a filter to AI. Rust constraints make it easier to spot some AI-written bugs.
+Rust is also a filter to AI. Rust constraints can catch some kinds of bugs. (Although Rust takes more tokens, because AI often need to edit multiple times to make code compile.)
 
 
