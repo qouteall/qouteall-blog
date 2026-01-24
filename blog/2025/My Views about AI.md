@@ -174,6 +174,10 @@ In large codebase it's often that after changing A then B also need to be change
 
 **For beginners, a common misconception is that "if the software shows things on screen, then it's 90% done". In reality, a proof-of-concept is often just 20% done.**
 
+> [Link](https://x.com/stuffyokodraws/status/2013373307291340870): One reason vibe coding is so addictive is that you are always *almost* there but not 100% there. The agent implements an amazing feature and got maybe 10% of the thing wrong, and you are like "hey I can fix this if i just prompt it for 5 more mins" 
+> 
+> And that was 5 hrs ago.
+
 There are so many corner cases in real usage. Not handing one corner case is bug. The demo that seems working fine often breaks under real usages.
 
 In mature codebases, most code are used for handling corner cases, not common cases.
