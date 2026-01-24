@@ -403,6 +403,8 @@ Sometimes you want an external service to return error then you need to write a 
 
 Generally, testing corner case is often much harder than writing code for handling corner case.
 
+There are also cases where it needs thousands lines of visualization code to debug a bug that's fixed by 10-line change. Or write thousands of lines of testing harness to trigger a Heisenbug.
+
 ## Idea is still cheap, execution still matters
 
 A conception is that, AI makes execution easier (write code, draw images, etc.), then the idea and "what to work on" become more important.
@@ -615,6 +617,13 @@ Human skill developmen is never as scalable as machines. You cannot simply clone
 Also, there is still large room for AI algorithm improvement (in my opinion "think by generating token" is still very inefficient and can be greatly improved). But there is no new technique to make manual practicing 2 times more efficient. Re-programming software is much eaier than re-programming human itself.
 
 Due to these, **once AI capability surpasses human, human will never be able to catchup**. This already happened in Go game. This has some scary implications. This is also one reason why many people fear/hate AI. But note that most future predictions are wrong. The old sci-fi plot of "AI rebell" doesn't happen now. No sci-fi 10 years before predicted current LLM accurately (as far as I know). Also, no need to overthink about things you cannot control.
+
+There are two different thinkings:
+
+- Want to be valuable by having skill in capitalism. Want to be respected by having skills.
+- Just want to make some dreamed thing. No matter whether it's made by self, by other people or by AI.
+
+The second thinking will be fine with AI and even get more excited with AI.
 
 ## When machine is preferred over human
 

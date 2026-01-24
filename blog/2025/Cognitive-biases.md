@@ -238,6 +238,8 @@ Ironic process theory: Trying to suppress a thought can backfire.
 
 Being helped doesn't always elicit gratitude. The one being helped may feel being inferior in social status, thus helping may cause hatred, especially when reciprocal helping cannot be done.
 
+People love to nitpick others' work. There is a trick: before presenting a solution to client, add obvious minor flaws to the solution. The client will point them out and get more satisfied. ([The queen's duck](https://bwiggs.com/notebook/queens-duck/))
+
 ### Avoid thinking about death
 
 People tend to avoid thinking about inevitable death because it's unpleasant. People may subconsciously feel like they live forever, then:
