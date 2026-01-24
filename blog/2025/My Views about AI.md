@@ -389,6 +389,20 @@ Although software is information doesn't rot by itself, the APIs that software r
 > 
 > [Link](https://x.com/heshie/status/2011802022920495449)
 
+### Testing a corner case is often harder than writing code
+
+The "testing" by casually using software is easy. But if you want to test a specific corner case, then it's much harder, often much harder than writing code.
+
+Testing a specific corner case often requrie creating special data, and changing ("hacking") execution environment.
+
+If there are some code that's resonpsible for recovering from an error state, then if you don't test it, it likely won't work. But creating that error state is often hard.
+
+And artificially-induced error may be different to actual error. Out-of-memory caused by reducing OS memory limit likely results in different scenario than out-of-memory caused by large data. 
+
+Sometimes you want an external service to return error then you need to write a mock service. If you want to create a malformed binary file you cannot use existing libraries to create the file and need to research file format.
+
+Generally, testing corner case is often much harder than writing code for handling corner case.
+
 ## Idea is still cheap, execution still matters
 
 A conception is that, AI makes execution easier (write code, draw images, etc.), then the idea and "what to work on" become more important.
