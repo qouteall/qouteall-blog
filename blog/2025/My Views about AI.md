@@ -638,7 +638,7 @@ Some people prefer driverless taxi over normal taxi, and want to pay premium for
 
 Basically, for introverts, machine is preferred over human. 
 
-Even in business, many risks come from unpredicatabilty of human. So capitalism always tries to optimize out human unpredictability. Capitalism often prefers predictable machines over unpredictable human even when machines have lower efficiency.
+Even in business, many risks come from unpredicatabilty of human. So capitalism always tries to optimize out human unpredictability. Capitalism often prefers predictable machines over unpredictable human even when machines produce lower-quality results.
 
 ## Summarize AI downsides
 
