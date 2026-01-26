@@ -713,6 +713,16 @@ The important things about arena:
 
 Some may think "using arena cannot protect you from equivalent of 'use after free' so it doesn't solve problem". But arena can greatly improve determinism of bugs, making debugging much easier. A randomly-occuring memory safety [Heisenbug](https://en.wikipedia.org/wiki/Heisenbug) may no longer trigger when you enable sanitizer, as sanitizer can change memory layout.
 
+#### About linked list
+
+In Rust, writing a pointer-based linked list is hard. Writing zero-cost pointer-based doubly-linked list in safe Rust is impossible.
+
+But that only applies to pointer-based linked list. The conventional pointer-based linked list often has bad cache locality (because it uses global allocator, nodes may scatter in memory space).
+
+Writing arena-based linked list in Rust is easy. And it can have better cache locality. And you can use 32-bit index instread of 64-bit pointer which also improves cache locality by reducing space usage.
+
+The pointer-based linked list can also be optimized by making one node hold many elements.
+
 ### Entity component system
 
 Entity component system (ECS) is a way of organizing data that's different to OOP. In OOP, an object's fields are laid together in memory. But in ECS, each object is separated into components. The same kind of components for different entities are managed together (often laid together in memory). It can improve cache-friendliness. (Note that performance is affected by many factors and depends on exact case.)
@@ -1405,9 +1415,14 @@ Examples:
 - Rust `let x: T` makes `x` fully immutable. Immutability applies to whole ownership tree. If a `Vec` is immutable, its elements are also immutable.
 - Rust `let mut x: &T` makes `x` a mutable-ref-to-immutable-obj.
 - Rust `let x: &mut T` makes `x` an immutable-ref-to-mutable-obj.
-- Rust `let x: &mut &[u8]` makes `x` an immutable-ref-to-mutable-slice-ref. A slice ref contains a pointer and a length. `x` is a pointer to that slice ref, and that slice ref is mutable. Note that `x` itself is immutable. The underlying binary data pointed by slice is also immutable.
+- Rust `let x: &mut &[u8]` makes `x` an immutable-ref-to-mutable-slice-ref-to-immutable-binary-data (this is sometimes used in binary data parsing):
+  - `[u8]` is slice of binary data. It's a variable-sized type.
+  - `&[u8]` is slice ref, containing a pointer and a length.
+  - `mut &[u8]` is mutable slice ref. The pointer and length is mutable, but binary data in slice is immutable.
+  - `x` is a pointer to that mutable slice ref.  `x` itself is immutable.
 - In Rust, when using interior mutability, an immutable thing can be actually mutable.
 - Git release tag is mutable-ref-to-immutable-obj. The Git commit with specific hash is immutable. But Git allows removing a release tag and create a new same-named release tag to another commit. This can be disabled.
+
 
 ## Summarize the contagious things
 

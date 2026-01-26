@@ -407,8 +407,6 @@ Sometimes you want an external service to return error then you need to write a 
 
 Generally, testing corner case is often much harder than writing code for handling corner case.
 
-There are also cases where it needs thousands lines of visualization code to debug a bug that's fixed by 10-line change. Or write thousands of lines of testing harness to trigger a Heisenbug.
-
 ## Idea is still cheap, execution still matters
 
 A conception is that, AI makes execution easier (write code, draw images, etc.), then the idea and "what to work on" become more important.
