@@ -16,7 +16,7 @@ Background:
 - It can be run in browser. 
 - Although its name has "Web", it's is not just for Web. It can be used outside of browser.
 - Although its name has "Assembly", it has features (e.g. [GC](https://github.com/WebAssembly/gc)) that are in a higher abstraction layer than native assembly, similar to JVM bytecode.
-- In browsers, it's the same engine that runs JS and Wasm. Chromium V8 executes both JS and Wasm. Wasm GC use the same GC as JS.
+- Wasm and JS are executed by the same engine in browsers. In Chrome, V8 executes both JS and Wasm. Wasm GC use the same GC as JS.
 
 [^wasm_js_perf]: WebAssembly is not always faster than JS. Currently Wasm can only access Web APIs via JS. If the app require frequently copying data between JS and Wasm, it's likely slower than using just JS. WebAssembly by itself has higher potential of performance than JS. JS has a lot of flexibility. Flexibility costs performance. JS runtime often use runtime statistics to find unused flexibility and optimize accordingly. But statistics cannot be really sure so JS runtime still have to "prepare" for flexibility. The runtime statistics and "prepare for flexibility" all costs performance, in a way that cannot be optimized without changing code format and execution model.
 
@@ -29,24 +29,22 @@ The data that Wasm program works on:
 - Runtime-managed stack. It has local variables, function arguments, return code addresses, etc. It's managed by the runtime. It's not in linear memory.
 - Linear memory. 
   - A linear memory is an array of bytes. Can be read/written by address (address can be seen as index in array). 
-  - Wasm supports having multiple linear memories.
   - A linear memory's size can grow. But currently a linear memory's size cannot shrink.
   - A linear memory can be shared by multiple Wasm instances, see multi-threading section below.
+  - (Wasm supports having multiple linear memories, but most apps just use one linear memory.)
 - Table. Each table is a (growable) array that can hold:
-  - Function references.
-  - Extern value references. Extern value can be JS value or other things, depending on environment.
-  - Exception references.
-  - GC value references.
-- Heap. Holds GC values. Explained later.
-- Globals. A global can hold a number (`i32`, `i64`, `f32`, `f64`), an `i128` or a reference (including function reference, GC value reference, extern value reference, etc.). The globals are not in linear memory.
+  - Wasm Function references.
+  - JS values or other external things.
+  - Wasm Exception references.
+  - Wasm GC value references.
+- Heap. Holds GC values. It's the same heap that JS uses. Explained later.
+- Globals. A global can hold a number (`i32`, `i64`, `f32`, `f64`), an `i128` or a reference (including function reference, GC value reference, extern value reference, etc.).
 
 The linear memory doesn't hold these things:
 
 - Linear memory doesn't hold the main stack (but holds shadow stack). The main stack is managed by runtime and cannot be read/written by address.
-- The linear memory doesn't hold function references. Wasm function references cannot be converted to and from integers. This design can improve safety. A function reference can be on main stack or on table or in global, and can be called by special instructions [^function_call_instructions]. Function pointer becomes integer index corresponding to a function reference in table.
+- The linear memory doesn't hold function references. Wasm function references cannot be converted to and from integers. This design can improve safety. Wasm function reference can be put in table (or in global or in main stack). Function pointer becomes integer index corresponding to a function reference in table.
 - The linear memory don't hold the globals. Globals don't have address. C/C++/Rust globals are placed in linear memory to have addresses.
-
-[^function_call_instructions]: `call_ref` calls a function reference on stack. `call_indirect` calls a function reference in a table in an index. `return_call_ref`, `return_call_indirect` are for tail call. When calling function indirectly, Wasm runtime will do signature type check.
 
 ## Stack is not in linear memory
 
@@ -87,8 +85,6 @@ Summarize 2 different stacks:
 
 There is a [stack switching proposal](https://github.com/WebAssembly/stack-switching) that aim to allow Wasm to do stack switching. This make it easier to implement lightweight thread (virtual thread, goroutine, etc.), without transforming the code and add many branches.
 
-Using shadow stack involves issue of reentrancy explained below.
-
 ## Memory deallocation
 
 The Wasm linear memory can be seen as a large array of bytes. Address in linear memory is the index into the array.
@@ -99,12 +95,7 @@ Wasm applications (that doesn't use Wasm GC) implements their own allocator in W
 
 Mobile platforms (iOS, Android, etc.) often kill background process that has large memory usage, so not returning memory to OS is an important issue. See also: [Wasm needs a better memory management story](https://github.com/WebAssembly/design/issues/1397). 
 
-Due to this limitation, Wasm applications **consume as much physical memory as its peak memory usage**. 
-
-Possible workarounds for reducing peak memory usage: 
-
-- Only fetch a small chunk of data from server at a time. Avoid fetching all data then process in batch. Do stream processing.
-- Use [Origin-private file system](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API/Origin_private_file_system) to hold large data, and only load a small chunk into linear memory at once.
+Due to this limitation, Wasm applications **consume as much memory as its peak memory usage**. 
 
 There is a [memory control proposal](https://github.com/WebAssembly/memory-control) that addresses this issue.
 
@@ -267,7 +258,7 @@ Web workers are very different to native threads. Web worker runs in a browser-m
 
 It's possible to simulate native threads using web workers. Send one message to a web worker. The whole thread runs in a message callback. It only finish processing message when corresponding "thread" exits.
 
-However, if you want to send JS things (like `OffscreenCanvas`) to the "thread", you cannot put the JS object into linear memory so it can only be sent via web worker message. There is another limitation of web worker: cannot receive new message before finishing current message callback. But in native thread abstraction, it can only finish after thread exits. There is a mismatch. One workaround is to use JS Promise integration to pause Wasm "thread" execution.
+However, if you want to send JS things (like `OffscreenCanvas`) to the "thread", you cannot put the JS object into linear memory so it can only be sent via web worker message. There is another limitation: **web worker cannot receive new message before finishing current message callback**. But in native thread abstraction, it can only finish after thread exits. There is a mismatch. One workaround is to use JS Promise integration to pause Wasm "thread" execution.
 
 Even if passing JS to web worker "thread" can be solved, the callback from JS to Wasm will still be blocked. Many usages of web APIs require callbacks, such as `setTimeout` [`requestAnimationFrame`](https://developer.mozilla.org/en-US/docs/Web/API/DedicatedWorkerGlobalScope/requestAnimationFrame). If the "thread" keeps running, it occupies web worker event loop, then these callbacks cannot run. One way to workaround is to make the "thread" need to periodically "yield" itself using JS promise integration.
 
@@ -301,7 +292,7 @@ Passing a JS string to Wasm requires:
 - allocate memory in Wasm linear memory,
 - copy transcoded string into Wasm linear memory,
 - pass address and length into Wasm code,
-- Wasm code need to care about deallocating the string.
+- Wasm code needs to care about deallocating the string.
 
 Similarily passing a string in Wasm linear memory to JS is also not easy. 
 
@@ -341,7 +332,7 @@ In Wasm, a linear memory has a finite size. Accessing an address out of size nee
 
 But Wasm runtimes have an optimization: map the 4GB linear memory to a virtual memory space. The out-of-range pages are not allocated from OS, so accessing them cause error from OS. Wasm runtime can use signal handling to handle these error. No range checking branch needed.
 
-That optimization doesn't work when supporting 64-bit address. There is no enough virtual address space to hold Wasm linear memory. So the branches of range checking still need to be inserted for every linear memory access. This costs performance.
+That optimization doesn't work when supporting 64-bit address. There is no enough virtual address space to hold Wasm linear memory. So the branches of range checking still need to be inserted for (almost) every linear memory access. This costs performance.
 
 See also: [Is Memory64 actually worth using?](https://spidermonkey.dev/blog/2025/01/15/is-memory64-actually-worth-using.html)
 
@@ -354,7 +345,7 @@ Generally, WebAssembly runs slower than native applications compiled from the sa
 - Multi-threading cannot use release-acquire memory ordering. Atomics use sequential-consistent ordering. [See also](https://webassembly.github.io/threads/core/exec/relaxed.html). This is addressed by [shared-everything-threads proposal](https://github.com/WebAssembly/shared-everything-threads/blob/main/proposals/shared-everything-threads/Overview.md#memory-model-considerations)
 - Limited access to hardware functionality, such as memory prefetching and some special SIMD instructions. Note that Wasm already support many common SIMD instructions.
 - Cannot access some OS functionalities, such as `mmap`.
-- Wasm forces structural control flow. See also: [WebAssembly Troubles part 2: Why Do We Need the Relooper Algorithm, Again?](http://troubles.md/why-do-we-need-the-relooper-algorithm-again/). This may reduce the performance of compiling to Wasm and JIT optimization.
+- Wasm forces structural control flow. See also: [WebAssembly Troubles part 2: Why Do We Need the Relooper Algorithm, Again?](http://troubles.md/why-do-we-need-the-relooper-algorithm-again/). This may reduce the performance of compiling and JIT optimization.
 
 ## About binary size
 
@@ -368,19 +359,19 @@ The Wasm toolchain are often based on native toolchains. It uses compilers/linke
 
 Also, C++ and Rust duplicates machine code for different generic instantiation (called monomorphization). `Vec<u32>` uses different machine code than `Vec<String>` and `Vec<MyType>`. This factor also bloats code size.
 
-The result is that, when using some heavy framework (e.g. game engine), Wasm binary can easily become larger than 100MB, then the web page will take long time to load.
+The result is that, when using some heavy framework (e.g. game engine), Wasm binary can easily become larger than 30MB, then the web page will take long time to load.
+
+(In debug mode, debugging info also takes a lot of space in Wasm binary.)
 
 ## Debugging Wasm running in Chrome
 
 Firstly, the `.wasm` file need to have [DWARF](https://dwarfstd.org/) debug information in custom section.
 
-There is a [C/C++ DevTools Support (DWARF) plugin](https://chromewebstore.google.com/detail/cc++-devtools-support-dwa/pdcpmagijalfljmkmjngeonclgbbannb)  ([Source code](https://github.com/ChromeDevTools/devtools-frontend/tree/main/extensions/cxx_debugging)). That plugin is designed to work with C/C++. When using it on Rust, breakpoints and inspecting integer local variables work, but other functionalities (inspecting string, inspecting global, evaluate expression, etc.) are not supported.
+There is a [C/C++ DevTools Support (DWARF) plugin](https://chromewebstore.google.com/detail/cc++-devtools-support-dwa/pdcpmagijalfljmkmjngeonclgbbannb)  ([Source code](https://github.com/ChromeDevTools/devtools-frontend/tree/main/extensions/cxx_debugging)).
 
-VSCode can debug Wasm running in Chrome, using [vscode-js-debug plugin](https://github.com/microsoft/vscode-js-debug). [Documentation](https://code.visualstudio.com/docs/nodejs/browser-debugging), [Documentation](https://code.visualstudio.com/docs/nodejs/nodejs-debugging#_debugging-webassembly). It allows inspecting integer local variable. But the local variable view doesn't show string content. Can only see string content by inspecting linear memory. The debug console expression evaluation doesn't allow call functions.
+VSCode can debug Wasm running in Chrome, using [vscode-js-debug plugin](https://github.com/microsoft/vscode-js-debug). [Documentation](https://code.visualstudio.com/docs/nodejs/browser-debugging), [Documentation](https://code.visualstudio.com/docs/nodejs/nodejs-debugging#_debugging-webassembly). It allows inspecting integer local variable. But the local variable view doesn't show string content. Can only see string content by inspecting linear memory. The debug console expression evaluation doesn't allow call functions. It also requires VSCode [WebAssembly DWARF Debugging](https://marketplace.visualstudio.com/items?itemName=ms-vscode.wasm-dwarf-debugging) extension.
 
-(It also requires VSCode [WebAssembly DWARF Debugging](https://marketplace.visualstudio.com/items?itemName=ms-vscode.wasm-dwarf-debugging) extension. Currently (2025 Sept) that extension doesn't exist in Cursor.)
-
-Chromium [debugging API](https://chromedevtools.github.io/devtools-protocol/tot/Debugger/).
+Wasm debugging in Chrome cannot reuse native debugging tools. It must rely on Chromium [debugging API](https://chromedevtools.github.io/devtools-protocol/tot/Debugger/).
 
 ## Appendix
 
@@ -391,9 +382,9 @@ Background:
 - CPU has a cache for accelerating memory access. Some parts of memory are put into cache. Accessing these memory can be done by accessing cache, which is faster. 
 - The cache size is limited. Accessing new memory can evict existing data in cache, and put newly accessed data into cache.
 - Whether a content of memory is in cache can be tested by memory access latency.
-- CPU does speculative execution and branch prediction. CPU tries to execute as many as possible instructions in parallel. When CPU sees a branch (e.g. `if`), it tries to predict the branch and speculatively execute code in branch. 
+- CPU does speculative execution and branch prediction. CPU tries to execute as many as possible instructions in parallel. When CPU sees a branch (corresponding to e.g. `if`), it tries to predict the branch and speculatively execute code in branch. 
 - If CPU later find branch prediction to be wrong, the effects of speculative execution (e.g. written registers, written memory) will be rolled back. However, memory access leaves side effect on cache, and that side effect won't be cancelled by rollback. 
-- The branch predictor relies on statistical data, so it can be "trained". If one branch keeps go to first path for many times, the branch predictor will predict it will always go to the first path.
+- The branch predictor relies on statistical data, so it can be "trained". If one branch keeps going to first path for many times, the branch predictor will predict it will always go to the first path.
 
 Specture vulneability (Variant 1) core exploit JS code ([see also](https://spectreattack.com/spectre.pdf)):
 
@@ -414,7 +405,7 @@ The `|0` is for converting value to 32-bit integer, helping JS runtime to optimi
 - Then attacker executes that code using a specific out-of-bound `index`:
   - CPU speculatively reads `simpleByteArray[index]`. It's out-of-bound. That result is the secret in browser process's memory.
   - Then CPU speculatively reads `probeTable`, using an index that's computed from that secret.
-  - One specific memory region in `probeTable` will be loaded into cache. Accessing that region is faster.
+  - One specific memory region in `probeTable` will be loaded into cache. Accessing that region will be faster.
   - CPU found that branch prediction is wrong and rolls back, but doesn't rollback side effect on cache.
 - The attacker measures memory read latency in `probeTable`. Which place access faster correspond to the value of secret.
 - To accurately measure memory access latency, `performance.now()` is not accurate enough. It need to use a multi-threaded counter timer: One thread (web worker) keeps increasing a shared counter in a loop. The attacking thread reads that counter to get "time". The cross-thread counter sharing requires `SharedArrayBuffer`. Although it cannot measure time in standard units (e.g. nanosecond), it's accurate enough to distinguish latency difference between fast cache access and slow RAM access.
@@ -444,7 +435,7 @@ These things also have VMs:
 - UEFI has a bytecode format and VM. [See also](https://uefi.org/specs/UEFI/2.10/22_EFI_Byte_Code_Virtual_Machine.html)
 - MySQL supports JS stored procedure. [See also](https://blogs.oracle.com/mysql/post/introducing-javascript-support-in-mysql)
 - CMake is Turing-complete.
-- Command line tools like awk, sed and jq are Turing-complete.
+- Command line tools awk, sed and jq are Turing-complete.
 - Related: Modern CPUs often have a [microcode](https://en.wikipedia.org/wiki/Microcode) system. The microcode supports conditional jumping and can access things like register and memory bus. It's a "small CPU within CPU".
 
 ### Within-website sub-sandboxing

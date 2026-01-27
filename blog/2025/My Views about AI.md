@@ -314,6 +314,7 @@ Some important architectural decisions:
   - What module is responsible for updating this data?
   - Should this data be encapsulated or let other modules access?
   - Which module is responsible for keeping that constraint? Which module is responsible for keeping that derived data be consistent with source of truth?
+  - What's the boundary of validation and authorization?
 - Tradeoffs: 
   - What tradeoff do we make to simplify it? Is that constraint really necessary?
   - What tradeoff do we make to optimize performance?
