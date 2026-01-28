@@ -287,11 +287,9 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - [MySQL (InnoDB) gap lock may cause deadlock](./About%20circular%20reference#mysql-gap-lock-deadlock).
 - In MySQL (InnoDB) you can select a field and group by another field. It gives nondeterministic result.
 - Multi-column index `(x, y)` cannot be used when only filtering on `y`. (Except when there are very few different `x` values, database can do a skip scan that uses the index.) Similarily `like 'abc%'` can use index but `like '%abc'` cannot.
-- In SQLite, when table is not `strict`, values are dynamically-typed, but it has "type affinity":
-  - The type `floating point` is treated as integer affinity because it contains "int". It will auto-convert real number 1.0 to integer 1.
-  - The type `string` is treated as numeric affinity. It will auto-convert string "01234" to number 1234.
-  - It's recommended to always use `strict` table.
+- In SQLite, when table is not `strict`, values are dynamically-typed, but it has "type affinity" that does implicit conversion. The type `floating point` has integer affinity and will auto-convert real number 1.0 to integer 1. The type `string` has numeric affinity and will auto-convert string "01234" to number 1234. It's recommended to always use `strict` table.
 - SQLite by default does not do vacuum. The file size only increases and won't shrink. To make it shrink you need to either manually `vacuum;` or enable `auto_vacuum`.
+- In SQLite if you don't set `busy_timeout`, operations will fail directly if database is locked, without auto retry.
 - [Foreign key implicit locking may cause deadlock](./About%20circular%20reference#foreign-key-deadlock).
 - When using foreign key, when loading database backup, if the child table is loaded before parent, it will fail to load due to foreign key violation.
 - Locking may break repeatable read isolation (it's database-specific).
