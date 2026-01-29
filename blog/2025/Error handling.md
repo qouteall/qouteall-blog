@@ -5,7 +5,7 @@ tags:
 unlisted: true
 ---
 
-# Error Handling
+# About Error Handling
 
 <!-- truncate -->
 
@@ -29,11 +29,17 @@ TODO fail open fail close
 
 ## OOP exception
 
-TODO
+OOP exception allows easily putting error data into error object. This aspect is better than C-style error code.
+
+But OOP exception adds implicit control flow, which may cause implicit bugs.
+
+And unwinding is a little error-prone. In C++ if destructor throws exception during unwinding, whole process will crash.
+
+Java checked exception can "enhance type safety" but it creates more trouble than it solves. 
 
 ## Rust error handling
 
-TODO
+Rust makes error explicit data. Rust also makes it easy to attach data to error.
 
 In Rust the error is often type-erased for convenience. The common solution is [anyhow](https://docs.rs/anyhow/latest/anyhow/). Without type erasure, you need to write a lot of error types and do conversions between.
 
@@ -42,6 +48,8 @@ Type erasuring error requires putting error into heap allocation. Different erro
 `anyhow` requires error to be `Send + Sync + 'static`. The `'static` requires that if it contains a string, the string need to be copied (cannot reference other places). This makes it safe to pass error to outer scope, but also add copying cost.
 
 Rust is not good at handling out-of-memory error. when OS over-commit is enabled, when memory is used up it errors when accessing memory, not when allocating. so doing correct error handling of OOM with over-commit is hard.
+
+Rust has `?` syntax which is convenient. But currently (Jan 2025) IDEs don't support putting breakpoint into `?` error branch. You need to change code to place a breakpoint in it.
 
 ### Lock poisoning
 
@@ -57,7 +65,10 @@ tokio mutex cancel issue
 
 ## Golang error handling
 
-TODO
+Although `if err != nil { return err }` is more verbose than Rust `?`, it allows directly putting breakpoint into `return err`, but Rust side IDE doesn't support putting breakpoint into `?` error branch.
+
+Golang doesn't use elegant ADT (algebraic data type). Technically a method can return both error and result nil, or return both error and result not nil.
+
 ### IDE can "fix" the language
 
 TODO
@@ -114,6 +125,8 @@ See also: [Error Codes for Control Flow](https://matklad.github.io/2025/11/06/er
 
 This is **less convenient** than Rust and Golang. In Rust and Golang, the error itself contains error data. But in Zig the two things are separated. 
 
+Note that if you don't care about error data then Zig error handling is convenient.
+
 Related:
 
 > I just spent way longer than I should have to debugging an issue of my project's build not working on Windows given that all I had to work with from the zig compiler was an `error: AccessDenied` and the build command that failed. 
@@ -128,23 +141,15 @@ Sometimes having a separated diagnostics system is useful for showing user-frien
 
 Currently, Zig doesn't provide an unified interface for diagnostics information. So different libraries tend to have their own diagnostics types which are incompatible with each other. You cannot easily compose the diagnostics of different libraries. This makes it overall less convenient.
 
-The problem is that just returning error code is easy in Zig, but providing diagnoistics information takes more efforts. There is [Principle of least effort](https://en.wikipedia.org/wiki/Principle_of_least_effort). If providing diagnostics is hard then very few libraries in ecosystem will do that.
+The problem is that just returning error code is easy in Zig, but providing diagnoistics information takes more efforts. 
+
+There is [Principle of least effort](https://en.wikipedia.org/wiki/Principle_of_least_effort). If providing diagnostics is hard then very few libraries in ecosystem will do that.
 
 If the purpose is just to help developer debugging, then logging should be enough. And it takes fewer efforts than maintaining a diagnostics object. But logging then faces log spam issue.
 
 
-## Logging
 
-TODO
-### Log spam
-
-TODO
-### Structural logging
-
-TODO
-
-
-## Silent errors in AI
+## Silent errors in AI systems
 
 In deep learning and RL, bugs often don't give error messages. They just cause model to perform worse. 
 

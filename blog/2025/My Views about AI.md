@@ -255,7 +255,9 @@ But AI coding is a **completely different paradigm** than existing abstraction l
 | Code contains enough information for software to run. [^enough_information]          | Vague prompt doesn't contain enough information. Require AI to make detail decisions.             |
 | Use hardcoded defaults to handle unspecified details. It's not flexible or adaptive. | Can use "common sense" and patterns learnt from training to fill the gaps of unspecified details. |
 
-[^enough_information]: Strictly speaking, code doesn't contain enough information for whole software to run. It may dynamic link another program in system, or it may download plugin etc. from internet. Also, runtime data can be interpreted as code, but how it's interpreted is determined by existing code. The overall idea is that in conventional programming the details are either explicitly specified or delegated to other deterministic software and hardware.
+[^enough_information]: Note that it focuses just one software module. The code can call external API, or dynamic link another program in system, or download plugin from internet, so one piece of code doesn't contain enough information for whole system to run, because it interacts with environment. But in conventional programming, the code provides enough information for one software module itself to run.
+
+A vague prompt itself doesn't contain enough information to produce code. But LLM has "common sense" that fill these gaps. The "common sense" is implicit, nondeterministic and not explainable. It depends on training data and RL many random factors.
 
 ### AI need to be able to "see results" by itself
 
@@ -606,27 +608,6 @@ One example:
 > [Link](https://x.com/kishimisu/status/1804490224946344379): I found a copy of my work labelled as « impressive AI generation » and without any attribution… I created this animation for my shader coding tutorial a year ago: https://youtu.be/f4s1h2YETNY
 
 AI does lossy compression to training data. It's not just direct memorization. But sometimes AI output is very similar to existing things on internet/books. So it definitely does a lot of memorization. It's in the middle between rote memorization and true understanding.
-
-## Fear of AI improving
-
-Current AI already makes some entry-level workers lose job (e.g. entry-level translation, entry-level paintaing). Currently AI is still jagged intelligence and fails in many things. Expert-level workers still have job. And experts can be more efficient with AI.
-
-Even if AI can do 99.9% things, there is still economical value for human to do the remaining 0.1% things. But this affects unevenly to different people and increases wealth gap.
-
-However, AI is still improving fast.
-
-Human skill developmen is never as scalable as machines. You cannot simply clone one expert's skill to another person. Each person need to develop their skills separately. But a trained model can be deployed to many machines, without each machine re-learning same thing.
-
-Also, there is still large room for AI algorithm improvement (in my opinion "think by generating token" is still very inefficient and can be greatly improved). But there is no new technique to make manual practicing 2 times more efficient. Re-programming software is much eaier than re-programming human itself.
-
-Due to these, **once AI capability surpasses human, human will never be able to catchup**. This already happened in Go game. This has some scary implications. This is also one reason why many people fear/hate AI. But note that most future predictions are wrong. The old sci-fi plot of "AI rebell" doesn't happen now. No sci-fi 10 years before predicted current LLM accurately (as far as I know). Also, no need to overthink about things you cannot control.
-
-There are two different thinkings:
-
-- Want to be valuable by having skill in capitalism. Want to be respected by having skills.
-- Just want to make some dreamed thing. No matter whether it's made by self, by other people or by AI.
-
-The second thinking will be fine with AI and even get more excited with AI.
 
 ## When machine is preferred over human
 
