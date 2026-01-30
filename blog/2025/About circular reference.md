@@ -496,6 +496,26 @@ Rust favors tree-shaped ownership. There is a hierarchy between owner and owned 
 
 Without mutability and lazy evaluation, reference cycle cannot be created. Because new values can only contain the existing values when creating it (order of evaluation prevents cycle). But with lazy evaluation, the not-yet-created values can be used so circular reference is possible.
 
+## Preventing deadlock in type system
+
+Some deadlocks only trigger in specific cases with specific timing. These deadlocks are hard to reproduce and debug. Is it possible to prevent deadlock from type system in compile time? Yes but at the expense of reduced expressiveness.
+
+One way is to encode the locking status into type. For example, if you have 3 locks, A, B, C. You want to enforce consistent locking order. Then there will be these "token" types: `CanLockABC`, `CanLockBC`, `CanLockC`, `CanLockNothing`. The token type is linear. It cannot be cloned. Locking consumes a token and gives another token. Unlocking also consumes token and gives back token. Locking B requires token of type `CanLockABC` or `CanLockBC`, then gives `CanLockC`. This design enforces consistent locking order. But it requires many token passing. These token passing will interfere with app logic. If some locking logic is conditional to runtime data, then dependent type will probably be needed. It will get very hard to write.
+
+Another way is to simply doesn't allow a thread to hold another lock when holding lock. If a thread wants to hold two locks, it needs to hold two locks together in one time.
+
+The previous solutions doesn't consider non-lock waiting. Non-lock waiting means waiting for a channel/future/waitgroup/condvar/event/etc. Handling non-lock waiting requires more complex solutions.
+
+[Related](https://medium.com/@adetaylor/can-the-rust-type-system-prevent-deadlocks-9ae6e4123037), [Related](https://www.botahamec.dev/blog/how-happylock-works.html)
+
+## Runtime deadlock detection
+
+SQL databases can reliably detect deadlock. In SQL, a transaction keeps acquiring locks and only release when transaction ends. There is no non-lock waiting. It's simple.
+
+In normal programs, threre are non-lock waiting so it's more complex. If a thread waits on a channel to consume, you need to know which thread may produce to that channel to know the resource allocation graph. Sometimes a thread can reference a channel but won't produce to it. And it gets more complex when select is involved. It will encounter limitation of **Rice's theorem** (explained later). There is no easy way to comprehensively and reliably detect deadlock in normal programs (detecting deadlock of only locks is easy, just track locking order).
+
+Also, SQL database can rollback transaction. So you can easily retry the transaction when deadlock is detected. But in normal programs, there is no built-in way to rollback the modifications in memory, so you cannot easily retry without leaving unwanted side effects. 
+
 ## Lazy evaluation circular reference
 
 ### Infinite container
