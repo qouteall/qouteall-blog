@@ -91,6 +91,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
   - It's recommended to specify `width` and `height` attribute in `<img>` to avoid layout shift due to image loading delay.
 - JS-in-HTML may interfere with HTML parsing. For example `<script>console.log('</script>')</script>` makes browser treat the first `</script>` as ending tag. [See also](https://sirre.al/2025/08/06/safe-json-in-script-tags-how-not-to-break-a-site/)
 - Virtual scrolling breaks Ctrl-F (Cmd-F) search.
+- Trailing slash in URL. If current URL is `https://xxx.com/aaa/bbb`, then `<img src="image.png">` use image `https://xxx.com/aaa/image.png`. But if current URL is `https://xxx.com/aaa/bbb/` (with trailing slash), then image path is `https://xxx.com/aaa/bbb/image.png`
 
 [^macos_scrollbar_space]: In macOS it can be configured to make scrollbar take space like in Windows.
 
@@ -245,9 +246,12 @@ This article is mainly summarization. The main purpose is "know this trap exists
   - Integer overflow/underflow is undefined behavior. Note that unsigned integer can underflow below 0. Don't use `x > x + 1` to check overflow as it will be optimized to false.
   - Aliasing.
     - Aliasing means multiple pointers point to the same place in memory.
-    - Strict aliasing rule: If there are two pointers with type `A*` and `B*`, then compiler assumes two pointer can never equal. If they equal, using it to access memory undefined behavior. Except in two cases: 1. `A` and `B` has subtyping relation 2. converting pointer to byte pointer (`char*`, `unsigned char*` or `std::byte*`) (the reverse does not apply). [^pointer_type_hold_integer]
+    - Strict aliasing rule: If there are two pointers with type `A*` and `B*`, then compiler assumes two pointer can never equal. If they equal, using it to access memory is undefined behavior. Except in two cases: 1. `A` and `B` has subtyping relation 2. converting pointer to byte pointer (`char*`, `unsigned char*` or `std::byte*`) (the reverse does not apply). [^pointer_type_hold_integer]
     - Pointer provenance. Two pointers from two different provenances are treated as never alias. If their address equals, it's undefined behavior. [See also](https://www.ralfj.de/blog/2020/12/14/provenance.html)
-  - In C++ `const` can mean both read-only and immutable. Converting `const T*` to `T*` only works if that `const` means read-only. If pointed object is immutable (declared as `const T`) then mutating it by pointer cast is undefined behavior.
+  - `const` can mean both read-only and immutable:
+    - If the original declared object is not `const`, you can turn pointer to it as `const T*`, in this case `const` means read-only [^readonly]. You can change the object without triggering undefined behavior.
+    - If the original declared object is `const`, then it's deemed immutable. For the `const T*` pointer to it, `const` means actually immutable. If you use `const_cast` to turn it to `T*` then change content, it's undefined behavior. [^cpp_mutable]
+    - Use `const volatile T*` for read-only pointer to data changable by other threads or outer system.
   - If `bool`'s binary value is neither 0 or 1, using it is undefined behavior. Similarily if an enum's binary value is not valid, using it is undefined behavior.
 - Alignment.
   - For example, 64-bit integer's address need to be disivible by 8. In ARM, accessing memory in unaligned way can cause crash.
@@ -257,11 +261,16 @@ This article is mainly summarization. The main purpose is "know this trap exists
   - Some SIMD instructions only work with aligned data. For example, AVX instructions usually require 32-byte alignment.
 - Global variable initialization runs before `main`. [Static Initialization Order Fiasco](https://en.cppreference.com/w/cpp/language/siof.html).
 - Start from C++ 11, destructors have `noexcept` by default. If exception is thrown out of a `noexcept` function, whole process will crash.
+- Compiler can auto-generate copy constructor that does shallow copy. It may cause wrong implicit copy then cause double free.
 - In signal handler, don't do any IO or locking, don't `printf` or `malloc`
 
 [^start_object_lifetime]: Directly treating existing binary data as struct is undefined behavior, because the object lifetime hasn't started, so it's treated as using uninitialized memory, even when it's aligned. One solution is to put the struct on stack then use `memcpy` to initialize it.
 
 [^pointer_type_hold_integer]: Using pointer type to hold integer is fine as long as you don't use it to access memory. But it's not recommended to do that.
+
+[^readonly]: The read-only here means in-language constraint. It should not be confused with read-only memory which is actually immutable.
+
+[^cpp_mutable]: In C++, changing `mutable` field of a `const` object is not undefined behavior. [See also](https://en.cppreference.com/w/cpp/language/cv.html).
 
 ### Python
 
@@ -369,7 +378,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
   - If two versions of React are used together, it may give "invalid hook call" error.
   - If two versions of a React component library use together, it may have context-related issues.
 - Python doesn't allow two versions os same package to co-exist. (Sometimes this creates "dependency hell".)
-- In C/C++ it may give "duplicate symbol" error during linking.
+- In C/C++ it may give "duplicate symbol" error in static linking.
 - Rust allows two different major versions of same crate to co-exist. It de-duplicates according to semantic versioning ([See also](https://doc.rust-lang.org/cargo/reference/semver.html), [See also](https://effective-rust.com/dep-graph.html)). Their global variables also separately co-exist. [Having two major versions of Tokio causes problem](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/alan_creates_a_hanging_alarm.html#addendum-multiple-tokio-major-versions).
 
 ### Linux and bash
@@ -385,6 +394,9 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - File name can contain `\n` `\r` `'` `"`. File name can be invalid UTF-8.
 - In Linux file names are case-sensitive, different to Windows and macOS.
 - glibc compatibility issue. A program that's build in a new Linux distribution dynamically links with a new version of glibc, then it may be incompatible with old versions of glibc in old systems. Can be fixed by static linking glibc or using containers [^container].
+- Path trailing slash:
+  - If `/aaa/bbb` is a symbolic link to a folder, `rm /aaa/bbb` removes the symbolic link, but `rm /aaa/bbb/` may remove files in pointed folder.
+  - For `mv x.txt /aaa/bbb`, if `/aaa/bbb` is a folder it will move file into the folder, but if `/aaa/bbb` doesn't exist it will rename file name to `bbb`.
 
 [^container]: There is a "fix problem then create new problem then fix new problem" cycle in deployment. Firstly dynamic linking creates dependency hell, then solve it using containers. But containers are slow to rebuild, which slows down development iteration cycle. Then tools like [tilt](https://tilt.dev/) solve the problem by "hacking" container (replace binary without rebuilding container). There are other hacks such as putting binary in mounted folder outside of container. But the root problem (dynamic linking dependency hell) can be just fixed by static linking.
 
@@ -399,6 +411,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - If you put your backend behind Nginx, you need to configure connection reuse, otherwise under high concurrency, connection between nginx and backend may fail, due to not having enough internal ports.
 - Nginx `proxy_buffering` delays SSE.
 - If the backend behind Nginx initiates closing the TCP connection, Nginx passive health check treat it as backend failure and temporarly stop reverse proxying. [See also](https://nginx.org/en/docs/http/ngx_http_upstream_module.html)
+- Nginx configuration URL trailing slash. [See also](https://dev.to/danielkun/nginx-everything-about-proxypass-2ona)
 - Elasticsearch doesn't allow removing mapping in an index. And Elasticsearch has dynamic mapping: if a new document has a new non-null field it will auto add a mapping that you cannot remove. Removing mapping requires reindexing. Reindexing not only costs performance, but also has risks of losing new data during reindexing, because reindex works on the snapshot. 
   - Zero-downtime reindexing that doesn't lose new ingested data during reindexing is hard: 1. create new index 2. new document ingests to both old index and new index (dual-writing) 3. reindex 4. make queries go to new index 5. stop ingesting to old index and delete old index [^es_reindex]
 
@@ -456,6 +469,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - In old versions of Linux, if `tcp_tw_recycle` is enabled, it aggressively recycles connection based on TCP timestamp. NAT and load balancer can make TCP timestamp not monotonic, so that feature can drop normal connections.
 - When using SSL/TLS in private network unconnected to internet, the client may try to check certificate revocation status from internet, which will timeout.
 - Certificate expire. Examples: [Starlink incident](https://www.appviewx.com/blogs/expired-certificate-causes-high-profile-service-outage-proving-certificate-automation-is-critical/), [LinkedIn incident](https://www.appviewx.com/blogs/linkedin-certificate-expiry-fiasco-third-times-a-charm/), [Microsoft Teams incident](https://www.exoprise.com/2020/02/04/teams-outage-expired-certificate/)
+  - Auto certificate renewal may silently stop working. [Example](https://github.com/bazelbuild/bazel/issues/28101#issuecomment-3693346788)
 
 
 [^keepalive]: Note that [HTTP/1.0 Keep-Alive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Keep-Alive) is different to TCP keepalive.
@@ -463,7 +477,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 ### Locale
 
 - The upper case and lower case can be different in other natural languages. In Turkish (tr-TR) lowercase of `I` is `ı` and upper case of `i` is `İ`. The `\w` (word char) in regular expression can be locale-dependent.
-- Letter ordering can be different in other natural languages. Regular expression `[a-z]` may malfunction in other locale. 
+- Letter ordering is different in some other natural languages. Regular expression `[a-z]` may malfunction in other locale. 
 - PostgreSQL linguistic sorting (collation) depends on glibc by default. Upgrading glibc may cause index corruption due to changing of linguistic order. [See also](https://wiki.postgresql.org/wiki/Locale_data_changes). Related: [Docker Postgres Image issue](https://x.com/gwenshap/status/1990942970682749183)
 - Text notation of floating-point number is locale-dependent. `1,234.56` in US correspond to `1.234,56` in Germany.
 - CSV normally use `,` as spearator. But in Germany locale separator is `;`.
@@ -491,7 +505,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - It's recommended to configure billing limit when using cloud services, especially serverless. See also: [ServerlessHorrors](https://serverlesshorrors.com/)
 - Big endian and little endian in binary file and net packet.
 - The current working directory can be changed by system call (e.g. `chdir`).
-- Windows limits command size to 32767 code units. [See also](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)
+- Windows limits command length to 32767 code units. [See also](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)
 - In Windows the default stack size of main thread is 1MB, but in Linux and macOS it's often 8MB. It's easier to stack overflow in Windows by default.
 - In Windoes environment variable names are case-insensitive.
 - Windows limits path length to be 260 code units by default.

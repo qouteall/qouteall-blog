@@ -1463,7 +1463,7 @@ Examples:
 
 [^about_arm_memory_tagging]: [ARM memory tagging](https://developer.arm.com/documentation/108035/0100/Introduction-to-the-Memory-Tagging-Extension) is a low-cost way of checking memory safety issue at runtime, similar to address sanitizer, useful for debugging and security alerting. But ARM memory tagging is not a sound security defense, because it has 1/16 chance of missing memory-unsafe access. If the process auto-restarts after crashing, attacker can retry the attack, eventually hitting the 1/16 probability. [Fil-C](https://github.com/pizlonator/fil-c) can catch memory safety issue in 100% chance, so it's a better security defense.
 
-[^gc_memory_safety]: Golang is not memory-safe under data race.
+[^gc_memory_safety]: Golang is not memory-safe under data race. Golang strings, fat pointers and slices has tearing issue. Golang map is not thread-safe. 
 
 [^go_gc]: Golang GC is non-moving. Most other mainstream GC (e.g. Hotsopt JVM, CLR) are moving.
 
