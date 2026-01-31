@@ -1,8 +1,8 @@
 ---
 date: 2025-12-20
 tags:
-  - AI
   - Programming
+  - Misc
 unlisted: false
 ---
 # Some Notes about AI
