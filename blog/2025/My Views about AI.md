@@ -466,6 +466,14 @@ For example, for coding task, if the reward is based on whether it passes unit t
 
 So just making whether it passes unit test as reward is not enough. The reward need to align better with human intent.
 
+## Predict-next-token architecture
+
+In current common LLM architecture, text is split into tokens. A token sequence is feed into the model, then model outputs probabilities of each possible token. Then do a random sampling based on probability to produce next token, append it into input sequence, and repeat.
+
+LLM has no way to "backspace" or "change position of cursor". If LLM randomly outputs a wrong token, then that token can become "precondition" then LLM tend to generate new text that's consistent with the precondition. If LLM made a mistake it tends to "justify" the mistake. In modern LLMs this behavior is reduced due to RL.
+
+The inability to "backspace" or "change cursor" is workarounded by agentic tool call. LLM can edit a file iteratively using tool calls.
+
 ## Slop prevails when people cannot judge quality
 
 [Lemon market problem](https://en.wikipedia.org/wiki/The_Market_for_Lemons): The sellers know the quality of the lemons. But the buyers don't know and is hard to judge from lemon appearance. There is an information asymmetry. The result is that good lemon is undervalued. Bad lemons prevail the market.
@@ -618,7 +626,7 @@ Some people prefer driverless taxi over normal taxi, and want to pay premium for
 
 Basically, for introverts, machine is preferred over human. 
 
-Even in business, many risks come from unpredicatabilty of human. So capitalism always tries to optimize out human unpredictability. Capitalism often prefers predictable machines over unpredictable human even when machines produce lower-quality results.
+Also, in business, many risks come from unpredicatabilty of human. So **capitalism always tries to optimize out human unpredictability**. Capitalism often prefers predictable machines over unpredictable human even when machines produce lower-quality results.
 
 ## Summarize AI downsides
 

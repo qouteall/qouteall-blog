@@ -948,6 +948,8 @@ PowerPoint (keynote, slide) medium is good for persuading, but bad for communica
 
 Analogies also utilize framing bias. For example: "National deficit is like a credit card bill" / "National deficit is like a business investment".
 
+Some media often do **quoting out of context** (断章取义). Natural language is often vague and the meaning highly depends on context. Removing context can easily cause misleading understanding. This also utilizes framing bias.
+
 #### Two talking styles
 
 Two different talking styles: the charismatic leader one and the intellectual expert type:
@@ -1426,7 +1428,7 @@ With confirmation bias, more information lead to higher confidence, but not bett
 
 **Browsing social media makes people learn biased distribution of world**. Such as:
 
-- **Overestimating the amount of perfect parters**, who are beautiful/handsome, have high income and does exaggeraged love.
+- **Overestimating the amount of perfect partners**, who are beautiful/handsome, have high income and does exaggeraged love.
 - Believing in **false consensus**, the consensus that only exists on an internet community.
 - Overestimating the proportion of bad news, as **bad news travels fast** in social media, thus facilitating cynicism.
 
