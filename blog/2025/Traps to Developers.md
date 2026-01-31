@@ -294,7 +294,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - MySQL (InnoDB) default to case-insensitive.
 - MySQL (InnoDB) can do implicit conversion by default. `select '123abc' + 1;` gives 124.
 - [MySQL (InnoDB) gap lock may cause deadlock](./About%20circular%20reference#mysql-gap-lock-deadlock).
-- In MySQL (InnoDB) you can select a field and group by another field. It gives nondeterministic result.
+- In MySQL, you can select a field and group by another field. It gives nondeterministic result. (this is disabled start from MySQL 5.7.5, [see also](https://dev.mysql.com/doc/refman/8.4/en/sql-mode.html#sqlmode_only_full_group_by)) 
 - Multi-column index `(x, y)` cannot be used when only filtering on `y`. (Except when there are very few different `x` values, database can do a skip scan that uses the index.) Similarily `like 'abc%'` can use index but `like '%abc'` cannot.
 - In SQLite, when table is not `strict`, values are dynamically-typed, but it has "type affinity" that does implicit conversion. The type `floating point` has integer affinity and will auto-convert real number 1.0 to integer 1. The type `string` has numeric affinity and will auto-convert string "01234" to number 1234. It's recommended to always use `strict` table.
 - SQLite by default does not do vacuum. The file size only increases and won't shrink. To make it shrink you need to either manually `vacuum;` or enable `auto_vacuum`.
@@ -444,6 +444,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 
 - Rebase and squashing rewrite history. If local already-pushed history is rewritten, normal push will give conflicts, need to use force push. If remote history is rewritten, normal pull will give conflicts, need to use `--rebase` pulling.
   - Force pushing with `--force-with-lease` can sometimes avoid overwriting other developers' commits. But if you fetch then don't pull, `--force-with-lease` cannot protect.
+- Sometimes rebasing requires you to solve the same conflict many times (because multiple commits touch the same conflict line). Squashing changes before rebasing can avoid it.
 - After commiting files, adding these files into `.gitignore` won't automatically exclude them from git. To exclude them, delete them.
   - You can also use `git rm --cached` to exclude them without deleting locally. However, after excluding and pushing, when another coworker pulls, these files will be deleted (not just excluded).
 - Reverting a merge doesn't fully cancel the side effect of the merge. If you merge B to A and then revert, merging B to A again has no effect. One solution is to revert the revert of merge. 
