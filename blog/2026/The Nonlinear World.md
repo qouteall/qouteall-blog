@@ -416,6 +416,10 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   - A lot of great talents require more resource investment to exhibit ability, but they may lose the ruthless competition because they initially don't win and can never obtain enough resource.
   - Fitness is high-dimensional. High medical fee selects out healthy persons but filters out talents that occasionally get ill.
 
+- First-order effect: Copyright law protects artists because it makes consumers pay artists.
+
+  Second-order effect: The publishers and distribution channels form monopoly naturally. There is no "free market" for artists. Artists have to commission copyright to publishers and distributors. Artists only get a small share of profits.
+
 ### In Health and Biology
 
 - First-order effect: Antibiotics cure bacterial infections.

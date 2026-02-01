@@ -474,6 +474,22 @@ LLM has no way to "backspace" or "change position of cursor". If LLM randomly ou
 
 The inability to "backspace" or "change cursor" is workarounded by agentic tool call. LLM can edit a file iteratively using tool calls.
 
+## Context bottleneck
+
+**Most knowledge work is bottlenecked by high signal-to-noise context, rather than reasoning on context**.
+
+Doing knowledge work requires finding useful information in the sea of unrelated information and garbage information. Once the useful infomation has been found, doing reasoning on them is often simple. But if you don't have the useful information, pure reasoning can't give useful results.
+
+The same applies to programming in large codebases. If you don't know some implicit business logic or hidden invariants, changing code will likely break things. But if you know them, it only requires simple reasoning to avoid breaking them.
+
+But many important knowledge is only in employee's memory ([institutional knowledge](https://en.wikipedia.org/wiki/Institutional_memory)). Most of them are not written down. The written-down information may be outdated and misleading. 
+
+If AI don't know your institutional knowledge, then AI cannot work on you problem in useful ways. 
+
+Taking notes is important. Taking notes makes work more efficient as it saves time "re-discover" forgotten knowledge. Taking notes also give AI important relevant context.
+
+The failed attempts also need to be written to notes. It's not only useful for AI but also shows work when there is no successful result.
+
 ## Slop prevails when people cannot judge quality
 
 [Lemon market problem](https://en.wikipedia.org/wiki/The_Market_for_Lemons): The sellers know the quality of the lemons. But the buyers don't know and is hard to judge from lemon appearance. There is an information asymmetry. The result is that good lemon is undervalued. Bad lemons prevail the market.

@@ -235,6 +235,7 @@ Other applications of the idea of mutation-as-data:
 - Event sourcing. Derive the latest state from events and previous checkpoint. Distributes systems often use consensus protocol (like Raft) to replicate log (events, mutations). The mutable data is derived from logs and previous checkpoint.
 - The idea of turning operations into data is also adopted by [io_uring](https://en.wikipedia.org/wiki/Io_uring) and modern graphics APIs (Vulkan, Metal, WebGPU).
 - The idea of turning mutation into insertion is also adopted by ClickHouse. In ClickHouse, direct mutaiton is not performant. Mutate-by-insert is faster, but querying require aggregate both the old data and new mutations.
+- In modern CPUs, writing to memory is (often) appending data to store buffer. The actual memory write is delayed and batched.
 
 ## Avoid in-place mutation
 
