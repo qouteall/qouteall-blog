@@ -413,12 +413,14 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   
   - It may select out the people that are good at competition but bad at coorporating. 
   - The talents tend to seek safe environments instead of ruthless unsafe environment. Even the top talents cannot ensure they don't make any mistake and always win.
-  - A lot of great talents require more resource investment to exhibit ability, but they may lose the ruthless competition because they initially don't win and can never obtain enough resource.
+  - A lot of great talents require more resource investment to exhibit ability, but they may lose the ruthless competition because they initially don't win and can never obtain enough resource. [^qianlima]
   - Fitness is high-dimensional. High medical fee selects out healthy persons but filters out talents that occasionally get ill.
 
 - First-order effect: Copyright law protects artists because it makes consumers pay artists.
 
   Second-order effect: The publishers and distribution channels form monopoly naturally. There is no "free market" for artists. Artists have to commission copyright to publishers and distributors. Artists only get a small share of profits.
+
+[^qianlima]: Related: [Qianlima](https://en.wikipedia.org/wiki/Qianlima) (千里马). The high-capacity horse require more food to show its capacity. But without showing its capacity it can never get enough food supply. 
 
 ### In Health and Biology
 

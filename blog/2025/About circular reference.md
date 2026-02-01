@@ -512,9 +512,9 @@ The previous solutions doesn't consider non-lock waiting. Non-lock waiting means
 
 SQL databases can reliably detect deadlock. In SQL, a transaction keeps acquiring locks and only release when transaction ends. There is no non-lock waiting. It's simple.
 
-In normal programs, threre are non-lock waiting so it's more complex. If a thread waits on a channel to consume, you need to know which thread may produce to that channel to know the resource allocation graph. Sometimes a thread can reference a channel but won't produce to it. And it gets more complex when select is involved. It will encounter limitation of **Rice's theorem** (explained later). There is no easy way to comprehensively and reliably detect deadlock in normal programs (detecting deadlock of only locks is easy, just track locking order).
+In normal programs, detecting deadlocks caused by only locks is easy. Because it can track what threads holds a lock. Then it knows a lock's release depends on which thread's progress.
 
-Also, SQL database can rollback transaction. So you can easily retry the transaction when deadlock is detected. But in normal programs, there is no built-in way to rollback the modifications in memory, so you cannot easily retry without leaving unwanted side effects. 
+But for non-lock waiting, detecting deadlock is not that easy. If a thread waits on a channel to consume, you need to know which thread may produce to that channel. Sometimes a thread can reference a channel but won't produce to it. Knowing it accurately requires analyzing the program's behavior in the future. If the analysis is rough, it will give many false positives. Analyzing accurately will encounter limitation of Rice's theorem (explained below).
 
 ## Lazy evaluation circular reference
 

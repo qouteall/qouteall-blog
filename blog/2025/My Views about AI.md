@@ -434,6 +434,22 @@ The new way is to just to give simple tools including bash and text file reading
 
 The current solution is to let model proactively see things using tool call. It has a fancy name "agentic search". Human are already doing the same thing (thinking which file to open, which word to search, etc.).
 
+## Context bottleneck
+
+**Most knowledge work is bottlenecked by high signal-to-noise context, rather than reasoning on context**.
+
+Doing knowledge work requires finding useful information in the sea of unrelated information and garbage information. Once the useful infomation has been found, doing reasoning on them is often simple. But if you don't have the useful information, pure reasoning can't give useful results.
+
+The same applies to programming in large codebases. If you don't know some implicit business logic or hidden invariants, changing code will likely break things. But if you know them, it only requires simple reasoning to avoid breaking them.
+
+But many important knowledge is only in employee's memory ([institutional knowledge](https://en.wikipedia.org/wiki/Institutional_memory)). Most of them are not written down. The written-down information may be outdated and misleading. 
+
+If AI don't know your institutional knowledge, then AI cannot work on you problem in useful ways. 
+
+Taking notes is important. Taking notes makes work more efficient as it saves time "re-discover" forgotten knowledge. Taking notes also give AI important relevant context.
+
+The failed attempts also need to be written to notes. It's not only useful for AI but also shows work when there is no successful result.
+
 ## No continuous learning
 
 You cannot easily "teach" the AI. You can write things and put into context. This can work as LLM has in-context learning ability. But due to context rot, you cannot teach many things in-context.
@@ -473,22 +489,6 @@ In current common LLM architecture, text is split into tokens. A token sequence 
 LLM has no way to "backspace" or "change position of cursor". If LLM randomly outputs a wrong token, then that token can become "precondition" then LLM tend to generate new text that's consistent with the precondition. If LLM made a mistake it tends to "justify" the mistake. In modern LLMs this behavior is reduced due to RL.
 
 The inability to "backspace" or "change cursor" is workarounded by agentic tool call. LLM can edit a file iteratively using tool calls.
-
-## Context bottleneck
-
-**Most knowledge work is bottlenecked by high signal-to-noise context, rather than reasoning on context**.
-
-Doing knowledge work requires finding useful information in the sea of unrelated information and garbage information. Once the useful infomation has been found, doing reasoning on them is often simple. But if you don't have the useful information, pure reasoning can't give useful results.
-
-The same applies to programming in large codebases. If you don't know some implicit business logic or hidden invariants, changing code will likely break things. But if you know them, it only requires simple reasoning to avoid breaking them.
-
-But many important knowledge is only in employee's memory ([institutional knowledge](https://en.wikipedia.org/wiki/Institutional_memory)). Most of them are not written down. The written-down information may be outdated and misleading. 
-
-If AI don't know your institutional knowledge, then AI cannot work on you problem in useful ways. 
-
-Taking notes is important. Taking notes makes work more efficient as it saves time "re-discover" forgotten knowledge. Taking notes also give AI important relevant context.
-
-The failed attempts also need to be written to notes. It's not only useful for AI but also shows work when there is no successful result.
 
 ## Slop prevails when people cannot judge quality
 

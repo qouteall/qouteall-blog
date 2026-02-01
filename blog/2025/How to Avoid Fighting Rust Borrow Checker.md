@@ -1103,6 +1103,10 @@ Modern CPUs use cache coherency protocol (e.g. [MOESI](https://en.wikipedia.org/
 
 [Example 1](https://web.archive.org/web/20250708051211/https://www.conviva.com/platform/the-concurrency-trap-how-an-atomic-counter-stalled-a-pipeline/), [Example 2](https://pkolaczk.github.io/server-slower-than-a-laptop/)
 
+Using `Arc` wrongly may result in slower performance than using GC languages. In GC languages, reading an on-heap reference often only involve a simple memory read [^gc_load_barrier], without atomic read-modify-write operation.
+
+[^gc_load_barrier]: Some GC (e.g. ZGC) use load barrier. But that load barrier doesn't involve atomic read-modify-write operation so it's faster than cloning `Arc`.
+
 Atomic reference counting is still fast if not contended (mostly only one thread change reference count). Atomic reference counting is faster on Apple silicon than Intel CPUs. [^apple_silicon_reference_counting]
 
 [^apple_silicon_reference_counting]: [See also](https://blog.metaobject.com/2020/11/m1-memory-and-performance.html). That was in 2020. Unsure whether it changed now. One possible reason is that ARM allows weaker memory order than X86. Also, Swift and Objective-C use reference counting almost everywhere, so possibly Apple payed more efforts in optimizing atomic reference counting.

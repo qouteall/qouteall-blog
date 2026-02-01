@@ -73,3 +73,8 @@ See also: [Making Async Rust Reliable - Tyler Mandry](https://tmandry.gitlab.io/
 ## Stackoverflow caused by large future
 
 TODO
+
+---
+
+https://without.boats/blog/why-async-rust/
+
