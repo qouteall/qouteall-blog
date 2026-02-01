@@ -1112,7 +1112,8 @@ Solutions:
 - [trc](https://docs.rs/trc/1.2.4/trc/) and [hybrid_rc](https://docs.rs/hybrid-rc/latest/hybrid_rc/). They use per-thread non-atomic counter, and another shared atomic counter for how many threads use it. This can make atomic operations be less frequent, getting higher performance.
 - For scenario of frequent short-term reads:
   - [arc_swap](https://docs.rs/arc-swap/latest/arc_swap/). It uses [hazard pointer](https://en.wikipedia.org/wiki/Hazard_pointer) and other mechanics to improve performance.
-  - [aarc](https://docs.rs/aarc/latest/aarc/) and [crossbeam_epoch](https://docs.rs/crossbeam-epoch/latest/crossbeam_epoch/). Use [epoch-based memory reclamation](https://aturon.github.io/blog/2015/08/27/epoch/#epoch-based-reclamation).
+  - [crossbeam_epoch](https://docs.rs/crossbeam-epoch/latest/crossbeam_epoch/). It uses [epoch-based memory reclamation](https://aturon.github.io/blog/2015/08/27/epoch/#epoch-based-reclamation).
+  - [aarc](https://docs.rs/aarc/latest/aarc/)
 
  These deferred memory reclamation techniques (hazard pointer, epoch-based) are also used in lock-free data structures. If one thread can read an element while another thread removes and frees the same element in parallel, it will not be memory-safe (this issue doesn't exist in GC languages).
 
