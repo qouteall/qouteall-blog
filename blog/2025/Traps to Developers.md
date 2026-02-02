@@ -263,6 +263,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - Start from C++ 11, destructors have `noexcept` by default. If exception is thrown out of a `noexcept` function, whole process will crash.
 - Compiler can auto-generate copy constructor that does shallow copy. It may cause wrong implicit copy then cause double free.
 - In signal handler, don't do any IO or locking, don't `printf` or `malloc`
+- Compare signed number with unsigned number. If `a` is signed -1, `b` is unsigned 0, then `a > b` is true, because it auto-converts `a` into unsigned number.
 
 [^start_object_lifetime]: Directly treating existing binary data as struct is undefined behavior, because the object lifetime hasn't started, so it's treated as using uninitialized memory, even when it's aligned. One solution is to put the struct on stack then use `memcpy` to initialize it.
 
