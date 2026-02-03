@@ -374,10 +374,6 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 - First-order effect: Subsidizing buying house reduces housing cost.
 
   Second-order effect: Housing price increased because of increased purchase power. The surging housing price attracts more real estate investments, driving housing price up even more.
-
-- First-order effect: Giving away free things can generate goodwill and appreciation.
-
-  Second-order effect: Some recipients may take free things for granted, complain about not receiving more, or criticize the quality of what's given.
   
 - First-order effect: The release of positive news about a stock causes its price to increase. 
 
@@ -419,6 +415,10 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 - First-order effect: Copyright law protects artists because it makes consumers pay artists.
 
   Second-order effect: The publishers and distribution channels form monopoly naturally. There is no "free market" for artists. Artists have to commission copyright to publishers and distributors. Artists only get a small share of profits.
+
+- First-order effect: Mineral resources make the country rich.
+
+  Second-order effect: [Resource curse](https://en.wikipedia.org/wiki/Resource_curse). Profits in mineral export makes country's currency overvalued. Then importing becomes cheaper than country's own products. so the domestic argiculture and industries cannot develop. Having "easy money" also make people not work hard. When the international mineral price drops, economy collapses.
 
 [^qianlima]: Related: [Qianlima](https://en.wikipedia.org/wiki/Qianlima) (千里马). The high-capacity horse require more food to show its capacity. But without showing its capacity it can never get enough food supply. 
 
@@ -475,7 +475,11 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: Smart people's beliefs are more correct because they are smart.
 
-  Second-order effect: Smart people are also more smart in making up reasons for **motivated reasoning and confirmation bias**.
+  Second-order effect: Smart people are also more smart in making up reasons to justify their own belief (motivated reasoning and confirmation bias).
+
+- First-order effect: Giving away free things can generate goodwill and appreciation.
+
+  Second-order effect: Some recipients may take free things for granted, complain about not receiving more, or criticize the quality. The recipient also may feel having lower social status and may develop hatred.
 
 ### In Cybersecurity
 

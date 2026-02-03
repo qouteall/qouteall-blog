@@ -633,9 +633,15 @@ impl ParentComponent {
 
 In backend applications, it's common to use external message broker (e.g. Kafka) to pass message. Using them also requires turning event into data.
 
-## Avoid child-to-parent circular reference
+## Other circular references
 
-In OOP languages, it's common that parent references child, and child references parent. It's convenient because you can access parent data in child's method, without passing parent as argument. That creates circular reference.
+Grouping two things together can create circular reference:
+
+![](./circular/grouping_cycle.drawio.png)
+
+It's similar to contagious borrow issue. Putting two things into one struct can create new circular reference, which is unfriendly to borrow checker. No need to put one object's all data into one struct. One object's data can be scattered in many places.
+
+In OOP languages, it's a common pattern that parent references child, and child references parent. It's convenient because you can access parent data in child's method, without passing parent as argument. That creates circular reference.
 
 However, Rust is unfriendly to circular reference, so the just-for-convenience circular reference should be avoided. It's recommended to **pass extra arguments instead of having circular reference**.
 

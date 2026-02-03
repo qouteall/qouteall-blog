@@ -222,6 +222,8 @@ In this study: [Measuring the Impact of Early-2025 AI on Experienced Open-Source
 
 Related: https://x.com/QuentinAnthon15/status/1943948791775998069
 
+When waiting for AI to code, if the human picks up phone and start doomscrolling, then the human will be distracted and not go back immediately when AI finishes coding. This factor greatly reduces productivity.
+
 ### Jagged capability
 
 Model capability is domain-specific. The model may be good at Python scripting or React web dev, but sucks at writing device driver in C. It's highly dependent on training data and RL targets in training.
@@ -489,6 +491,8 @@ In current common LLM architecture, text is split into tokens. A token sequence 
 LLM has no way to "backspace" or "change position of cursor". If LLM randomly outputs a wrong token, then that token can become "precondition" then LLM tend to generate new text that's consistent with the precondition. If LLM made a mistake it tends to "justify" the mistake. In modern LLMs this behavior is reduced due to RL.
 
 The inability to "backspace" or "change cursor" is workarounded by agentic tool call. LLM can edit a file iteratively using tool calls.
+
+There are diffusion LLMs. But as far as I know, the current diffusion LLMs are still "rigid": during diffusion it only changes each token vector but doesn't dynamically insert/delete token in sequence.
 
 ## Slop prevails when people cannot judge quality
 

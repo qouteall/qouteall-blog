@@ -496,6 +496,12 @@ Rust favors tree-shaped ownership. There is a hierarchy between owner and owned 
 
 Without mutability and lazy evaluation, reference cycle cannot be created. Because new values can only contain the existing values when creating it (order of evaluation prevents cycle). But with lazy evaluation, the not-yet-created values can be used so circular reference is possible.
 
+## Grouping can create cycle
+
+![](./circular/grouping_cycle.drawio.png)
+
+Some deadlocks come from too-coarse-grained locking (lock more than what you need to lock). But some deadlocks can be prevented by making locking more coarse-grained.
+
 ## Preventing deadlock in type system
 
 Some deadlocks only trigger in specific cases with specific timing. These deadlocks are hard to reproduce and debug. Is it possible to prevent deadlock from type system in compile time? Yes but at the expense of reduced expressiveness.
