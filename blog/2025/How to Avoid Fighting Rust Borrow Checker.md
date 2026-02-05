@@ -1218,6 +1218,7 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
 - `a = b` will drop the original object in place of `a`. If `a` is uninitialized, then it will drop an unitialized object, which is undefined behavior. Use `addr_of_mut!(...).write(...)` [Related](https://lucumr.pocoo.org/2022/1/30/unsafe-rust/)
 - Handle panic unwinding. If unsafe code turn data into temporarily-invalid state, you need to make it valid again during unwinding. [See also](https://doc.rust-lang.org/nomicon/unwinding.html).
 - Reading/writing to mutable data that's shared between threads need to use atomic, or volatile access ([`read_volatile`](https://doc.rust-lang.org/std/ptr/fn.read_volatile.html), [`write_volatile`](https://doc.rust-lang.org/beta/std/ptr/fn.write_volatile.html)), or use other synchronization (like locking). If not, optimizer may wrongly merge and reorder reads/writes. Note that volatile access themself doesn't establish memory order (unlike Java/C# `volatile`).
+- If the binary data violates the type's constraint, it's undefined behavior. For example, `bool`'s binary data can only be 0 or 1. Making it 2 is undefined behavior. Creating a `str` whose binary data is not valid UTF-8 is also undefined behavior.
 - If you want to `mem::transmute`, it's recommended to use [zerocopy](https://docs.rs/zerocopy/latest/zerocopy/) which has compile-time checks to ensure memory layout are the same. For simple wrapper types, use `#[repr(transparent)]`.
 - ......
 
@@ -1435,6 +1436,30 @@ Examples:
 - In Rust, when using interior mutability, an immutable thing can be actually mutable.
 - Git release tag is mutable-ref-to-immutable-obj. The Git commit with specific hash is immutable. But Git allows removing a release tag and create a new same-named release tag to another commit. This can be disabled.
 
+
+## String types
+
+In GC languages, strings are simple. There is often one commonly-used immutable string type (`String` in java, `string` in JS). But in Rust there are many string types:
+
+- `str`, a variable-sized type. Its content should be valid UTF-8.
+- `&str`, a borrow to `str`. It contains a pointer and a length.
+- `String`.It also has a pointer and a length (and a capacity number). It heap-allocates the binary data and owns binary data. `&str` borrows binary data from elsewhere.
+- `OsString` / `OsStr`. These exist because Rust string enforces UTF-8 encoding, but operating systems APIs can use non-UTF-8 string. In Linux, file name can be invalid UTF-8. In Windows APIs, strings use encoding similar to UTF-16 but allows invalid surrogates (technically called WTF-16).
+- `CString` / `CStr`. C-style null-terminated string. Used for interop with C library.
+
+In C++ and Golang, strings are just binary data with no encoding constraint. Rust enforces UTF-8 and makes it more complex. But enforcing UTF-8 has benefits: no need to worry about encoding mismatch within Rust program. It also improves security because many text processing code assumes string is valid UTF-8, e.g. [CVE-2024-56732](https://www.sentinelone.com/vulnerability-database/cve-2024-56732/), [CVE-2026-0810](https://www.sentinelone.com/vulnerability-database/cve-2026-0810/).
+
+Using unsafe to create a `str` containing invalid UTF-8 is undefined behavior.
+
+Note that Rust only care about UTF-8 code point validity, not grapheme cluster validity.
+
+About nullable string comparision: In Java you can directly `equals`. In JS you can directly `===`. But in Rust, comparing optionsl strings is not trivial:
+
+- Comparing a `Option<String>` with `&str`:  `a.as_deref() == Some(b)`
+- Comparing a `Option<&str>` with `String`:  `a == Some(b.as_str())`
+- Comparing a `Option<String>` with `Option<&str>`: `a.as_deref() == b`
+
+The `as_deref` is not intuitive. It turns `Option<String>` into `Option<&str>`. The `as_str` turns `String` into `&str`. Rust has deref auto conversion that can auto convert `&String` to `&str`, but that auto conversion sometimes doesn't work with generics, so some `as_deref` `as_str` is required.
 
 ## Summarize the contagious things
 

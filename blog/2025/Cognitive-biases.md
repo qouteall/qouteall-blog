@@ -617,7 +617,7 @@ This is related to **narrative fallacy**: people like to make up reasons explain
 >
 > \- _The Black Swan_
 
-People dislike uncertain future and keep predicting the future, while ignoring their terrible past prediction record (hindsight bias).
+People dislike uncertain future and keep predicting the future, while ignoring their terrible past prediction record.
 
 People like to wrongly apply a theory to real world, because applying the theory can give results. Example: assuming that an unknown distribution is gaussian even when it's not.
 
@@ -757,7 +757,7 @@ Prior belief (confirmation bias) can affect perception. This not only affects re
 
 In software UX: if the user is focused on finishing a task, **when the software pops up a dialog, the user tends to quickly close the dialog to continue the task, without reading text in dialog**. [^about_dialog]
 
-[^about_dialog]: If the dialog is very important, then the dialog shouldn't be easily clicked out (e.g. request user to type some text to proceed). If the dialog is not important, it should be replaced by a notification that can be read later.
+[^about_dialog]: If the dialog is very important, then the dialog shouldn't be easily closable (e.g. request user to type some text to proceed). If the dialog is not important, it should be replaced by a notification that can be read later.
 
 ### Anecdotal fallacy
 
@@ -891,7 +891,7 @@ This is also related to availability bias, where the just-seen events are more o
 
 **Normalcy bias means underreact** to new events, but **recency bias means overreact** to new events, which is the opposite of normalcy bias. These two are actually not conflicting. Which one takes effect initially is related to actual situation and existing beliefs (**confirmation bias**). When one person does not believe in a trend but the trend continued for a long time, **binary thinking** may make that person turn their belief 180 degrees and deeply believe in the trend.
 
-Relation between recency effect and primacy effect (first impression effect):
+Relation between recency effect and primacy effect:
 
 - One firstly sees A, then after a long time, then sees B, recency effect tells that B has higher influence than A.
 - One firstly sees A, then sees B, then after a long time, primacy effect tells A has higher influence than B.
@@ -1439,6 +1439,8 @@ What's more, social media may make people:
 - Get used to interesting easy-to-digest information and become less tolerant to not-so-interesting hard-to-digest information.
 - Get used to moving attention (distraction) and not get used to keeping attention. In social media, different posts are usually irrelevant and understanding them requires moving attention (forget previous context).
 - Have less intention of trying things via real world practice. Watching videos about a new experience is much easier than experiencing in real life.
+
+Getting information from real practice is often better than keep browsing information from internet.
 
 ### Natural selection of memes
 

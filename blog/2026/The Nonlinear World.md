@@ -414,7 +414,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: Copyright law protects artists because it makes consumers pay artists.
 
-  Second-order effect: The publishers and distribution channels form monopoly naturally. There is no "free market" for artists. Artists have to commission copyright to publishers and distributors. Artists only get a small share of profits.
+  Second-order effect: The publishers and distribution channels form monopoly naturally. There is no "free market" for artists. Artists have to commission copyright to publishers and distributors. Artists only get a small share of profits. Also, the publisher can restrict usage of the artwork so that it's harder to get popular.
 
 - First-order effect: Mineral resources make the country rich.
 

@@ -74,6 +74,49 @@ See also: [Making Async Rust Reliable - Tyler Mandry](https://tmandry.gitlab.io/
 
 TODO
 
+## No parallelism by default
+
+Example
+
+```rust
+#[tokio::main]  
+async fn main() {  
+    let mut result: Vec<_> = futures::stream::iter(1..=65535)  
+        .map(|port| {  
+            let host_port = format!("127.0.0.1:{port}");  
+            async move {  
+                println!("Testing port: {} {:?}", port, thread::current().id());  
+                if let Ok(Ok(_)) =  
+                    tokio::time::timeout(Duration::from_millis(200), TcpStream::connect(host_port))  
+                        .await  
+                {  
+                    Some(port)  
+                } else {  
+                    None  
+                }  
+            }  
+        })  
+        .buffer_unordered(999999999)  
+        .filter_map(|port| async move { port })  
+        .collect()  
+        .await;  
+}
+```
+
+It will print 
+
+```
+Testing port: 1 ThreadId(1)
+Testing port: 2 ThreadId(1)
+Testing port: 3 ThreadId(1)
+Testing port: 4 ThreadId(1)
+...
+```
+
+All of them execute on main thread. There is no parallelism. The parallelism can be enabled by using `tokio::spawn`. But without `tokio::spawn` it has no parallelism by default.
+
+This trap doesn't exist in Golang. In Golang, goroutines are parallel.
+
 ---
 
 https://without.boats/blog/why-async-rust/
