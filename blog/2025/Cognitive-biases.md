@@ -80,6 +80,8 @@ It's common that: Most people focus on their own businesses. Most people don't r
 
 Related: [Wet bias](https://en.wikipedia.org/wiki/Wet_bias): Overestimate probability of raining to improve the usefulness of forcast.
 
+Related: Believing a false conspiracy theory often can effectively reduce risk. Conspiracy theories have real utility according to the "better safe than sorry" principle.
+
 ### Perception of risk
 
 **We prefer deterministic gain instead of risky gain**. A bird in the hand is worth two in the bush. 

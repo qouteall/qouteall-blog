@@ -199,7 +199,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - `==` compares object reference. Should use `.equals` to compare object content. 
 - Forget to override `equals` and `hashcode`. It will use object identity equality by default in map key and set.
 - Mutate the content of map key object (or set element object) makes the container malfunciton (unless the mutation doesn't affect `equals` and `hashcode`).
-- A method that returns `List<T>` may sometimes return mutable `ArrayList`, but sometimes return `Collections.emptyList()` which cannot be mutated.
+- Not all `List<T>` are mutable. `Collection.emptyList()` gives immutable list. `Arrays.asList()` gives list that cannot add element.
 - A method that returns `Optional<T>` may return `null`.
 - Null is ambiguous. If `get()` on a map returns null, it may be either value is missing or value exists but it's null (can distinguish by `containsKey`). Null field and missing field in JSON are all mapped to null in Java object. [See also](https://committing-crimes.com/articles/2025-09-16-null-and-absence/). Similarily, privimtive value 0 can also be ambiguous.
 - Implicitly converting `Integer` to `int` can cause `NullPointerException`, same for `Float`, `Long`, etc.
@@ -209,7 +209,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - Literal number starting with 0 will be treated as octal number. (`0123` is 83)
 - When debugging, debugger will call `.toString()` to local variables. Some class' `.toString()` has side effect, which cause the code to run differently under debugger. This can be disabled in IDE.
 - Before [Java24](https://openjdk.org/jeps/491) virtual thread can be "pinned" when blocking on `synchronized` lock, which may cause deadlock. It's recommended to upgrade to Java 24 if you use virtual thread.
-- It's not recommended to override `finalize()`. `finalize()` running too slow blocks GC and cause memory leak. Exceptions out of `finalize()` are not logged. A dead object can resurrect itself in `finalize()`, and if a resurrected object become dead again, `finalize()` won't be called again. Use [`Cleaner`](https://docs.oracle.com/javase/9/docs/api/java/lang/ref/Cleaner.html) for GC-directed disposal.
+- `finalize()` running too slow blocks GC and cause memory leak. Exceptions out of `finalize()` are not logged. A dead object can resurrect itself in `finalize()`. It's recommended to use [`Cleaner`](https://docs.oracle.com/javase/9/docs/api/java/lang/ref/Cleaner.html) rather than overriding `finalize`.
 
 ### Golang
 
@@ -242,6 +242,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - For `std::map` and `std::unordered_map`, `map[key]` alone will mutate the map if the corresponding entry doesn't exist. [See also](https://en.cppreference.com/w/cpp/container/map/operator_at.html)
 - Undefined behaviors. The compiler optimization aim to keep defined behavior the same, but can freely change undefined behavior. Relying on undefined behavior can make program break under optimization. [See also](https://russellw.github.io/undefined-behavior)
   - Accessing uninitialized memory is undefined behavior. Converting a `char*` to struct pointer can be seen as accessing uninitialized memory, because the object lifetime hasn't started. It's recommended to put the struct elsewhere and use `memcpy` to initialize it.
+    - Directly trating binary data as struct is undefined behavior, even if the memory is initialized. Because it's treated as object lifetime hasn't started. It also may involve alignment issue. One solution is to put the struct on stack then use `memcpy` to initialize it.
   - Accessing invalid memory (e.g. null pointer) is undefined behavior.
   - Integer overflow/underflow is undefined behavior. Note that unsigned integer can underflow below 0. Don't use `x > x + 1` to check overflow as it will be optimized to false.
   - Aliasing.
@@ -254,18 +255,14 @@ This article is mainly summarization. The main purpose is "know this trap exists
     - Use `const volatile T*` for read-only pointer to data changable by other threads or outer system.
   - If `bool`'s binary value is neither 0 or 1, using it is undefined behavior. Similarily if an enum's binary value is not valid, using it is undefined behavior.
 - Alignment.
-  - For example, 64-bit integer's address need to be disivible by 8. In ARM, accessing memory in unaligned way can cause crash.
-  - Unaligned memory access is undefined behavior.
-  - Directly treating a part of byte buffer as a struct is undefined behavior. Not only due to alignment, but also due to object lifetime not yet started [^start_object_lifetime].
+  - For example, 64-bit integer's address need to be disivible by 8. Unaligned memory access is undefined behavior. In ARM, accessing memory in unaligned way can cause crash.
   - Alignment can cause padding in struct that waste space.
-  - Some SIMD instructions only work with aligned data. For example, AVX instructions usually require 32-byte alignment.
+  - Some SIMD instructions only work with aligned data.
 - Global variable initialization runs before `main`. [Static Initialization Order Fiasco](https://en.cppreference.com/w/cpp/language/siof.html).
 - Start from C++ 11, destructors have `noexcept` by default. If exception is thrown out of a `noexcept` function, whole process will crash.
 - Compiler can auto-generate copy constructor that does shallow copy. It may cause wrong implicit copy then cause double free.
 - In signal handler, don't do any IO or locking, don't `printf` or `malloc`
 - Compare signed number with unsigned number. If `a` is signed -1, `b` is unsigned 0, then `a > b` is true, because it auto-converts `a` into unsigned number.
-
-[^start_object_lifetime]: Directly treating existing binary data as struct is undefined behavior, because the object lifetime hasn't started, so it's treated as using uninitialized memory, even when it's aligned. One solution is to put the struct on stack then use `memcpy` to initialize it.
 
 [^pointer_type_hold_integer]: Using pointer type to hold integer is fine as long as you don't use it to access memory. But it's not recommended to do that.
 
