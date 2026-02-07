@@ -326,6 +326,32 @@ Some important architectural decisions:
   - What work must be done immediately? What work can be deferred?
   - What data can be stale? What data must be fresh?
 
+### Two parts in coding: architecture design and detailed implementation
+
+Coding can be split into two parts: high-level architectual design and detailed implementation.
+
+In pre-AI coding, the two are often interleaved: firstly think about architecture, then write some actual code, then think more about architecture, then write some other code, then run and debug, and repeat.
+
+If architecture is not correct, then there will be "friction" in detailed coding. "Friction" means that something should be easy but is hard under current architecture. 
+
+Some examples of "friction":
+
+- Some infomation is lost in previous data processing. But it is needed in downstream task. Then maybe it can "recover" the information by parsing or guessing. But parsing or guessing is worse than just not discarding the information. This is a sign of dataflow issue.
+- Some edge case should be only checked in one place, but actually the edge case needs to be checked in many different places. This is a sign of system validation boundary issue.
+- Some invariant should be only maintained in one place, but actually needs to be maintained in many places. This is a sign of issue of separation of responsibility(concern).
+- The data is not in the "good shape". Some simple information manipulation require hundreds of code. This is a sign of data modelling issue.
+
+It's the **architecture "pushing back against" programmer**. In manual coding these pushback can be felt and then programmer tend to rethink architecture. But in AI coding, AI can easily generate thousands of code to workaround a bad architecture. Result is buggy and unmaintainable code. If the programmer don't review code, these "pushback" will not be felt.
+
+There is a workflow that you firstly write a detailed specification then let the agent swarm to finish the code. However it cannot handle **unknown unknowns**: you may not know about an important detail during specification writing. Sometimes that detail invalidates large part of architecture design. These unknown unknowns are only discovered in actual coding and debugging. 
+
+Examples of unknown unknown:
+
+- Some API you use seems give you some information but it's actually another thing that has similar name (confusing different things with similar names). The API doesn't allow getting the information you want.
+- Some API you use has some hidden limitations of doing some operation.
+- The actual data size is larger than expected so the current algorithm is inefficient.
+- ...
+
 ### Can easily discard results
 
 Sometimes an architecture looks right before implementing a software. But during implementation, you often discover **unknown unknowns that invalidate previous assumptions**. Then you find out that architecture is no longer good.
@@ -476,13 +502,17 @@ The behavior of AI is highly shaped by RL. Doing RL requires judging reward for 
 
 Reward hacking is a fundamental problem of reinforcement learning. The reward that you give to the model is different to what you want AI to actually do.
 
-For example, for coding task, if the reward is based on whether it passes unit test, AI may use "creative" ways to write code that pass unit test but doesn't do what you want.
+It's because reward is **proxy target**, not underlying real target. For example if you use unit test to test whether AI coded something correctly, but there are some code that can pass unit test but don't represent your wanted software.
+
+AI can conquer really verifiable tasks. A task is not simply fully verificable or fully not verificable. A task can contain some verificable part and unverifiable part. But **most real tasks contain hard-to-verify parts**. These hard-to-verify parts are what automatic RL bad at.
+
+These hard-to-verify parts can be improved by letting human experts to supervise and specify reward. But this method is bottlenecked by human effort and not scalable. **The bitter lesson** says that if training AI requires human expert knowledge then it cannot go far. 
 
 > However, recently released LLMs, such as GPT-5, have a much more insidious method of failure. They often generate code that fails to perform as intended, but which on the surface seems to run successfully, avoiding syntax errors or obvious crashes. It does this by removing safety checks, or by creating fake output that matches the desired format, or through a variety of other techniques to avoid crashing during execution.
 > 
 > \- [Link](https://spectrum.ieee.org/ai-coding-degrades)
 
-So just making whether it passes unit test as reward is not enough. The reward need to align better with human intent.
+Current AI has some tendency of hiding error in coding, or write overly-defensive code. Hiding error only reduces superficial errors but make real bugs much harder to debug. Overly-defensive code increases maintenance burden.
 
 ## Predict-next-token architecture
 
