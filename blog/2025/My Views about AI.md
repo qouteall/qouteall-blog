@@ -326,22 +326,28 @@ Some important architectural decisions:
   - What work must be done immediately? What work can be deferred?
   - What data can be stale? What data must be fresh?
 
-### Two parts in coding: architecture design and detailed implementation
+### Two parts in coding: high-level design and detailed implementation
 
-Coding can be split into two parts: high-level architectual design and detailed implementation.
+Coding can be split into two parts: high-level design and detailed implementation.
 
-In pre-AI coding, the two are often interleaved: firstly think about architecture, then write some actual code, then think more about architecture, then write some other code, then run and debug, and repeat.
+The high-level design includes:
+
+- Knowing the real requirements.
+- Researching about the problem. Check whether a solution is possible (whether it can obtain required information and do the required operation)
+- Design a high-level software architecture
+
+In pre-AI coding, the architectual design and coding are often interleaved: firstly do architectual design, then write some actual code, then discover some architectual problem during coding or debugging, then rethink architecture.
 
 If architecture is not correct, then there will be "friction" in detailed coding. "Friction" means that something should be easy but is hard under current architecture. 
 
 Some examples of "friction":
 
-- Some infomation is lost in previous data processing. But it is needed in downstream task. Then maybe it can "recover" the information by parsing or guessing. But parsing or guessing is worse than just not discarding the information. This is a sign of dataflow issue.
+- Some infomation is lost in previous data processing. But it is needed in downstream task. It can workaround by e.g. pass by global variable, guessing, or parsing less-structured data. But all of the workarounds are worse than just not discarding the information. This is a sign of dataflow issue.
 - Some edge case should be only checked in one place, but actually the edge case needs to be checked in many different places. This is a sign of system validation boundary issue.
 - Some invariant should be only maintained in one place, but actually needs to be maintained in many places. This is a sign of issue of separation of responsibility(concern).
-- The data is not in the "good shape". Some simple information manipulation require hundreds of code. This is a sign of data modelling issue.
+- The data is not in the "good shape". Some simple information manipulation require hundreds of lines of code. This is a sign of data modelling issue.
 
-It's the **architecture "pushing back against" programmer**. In manual coding these pushback can be felt and then programmer tend to rethink architecture. But in AI coding, AI can easily generate thousands of code to workaround a bad architecture. Result is buggy and unmaintainable code. If the programmer don't review code, these "pushback" will not be felt.
+It's the **bad architecture "pushing back against" programmer**. In manual coding these pushback can be felt and then programmer tend to rethink architecture. But in AI coding, AI can easily generate thousands of code to workaround a bad architecture. Result is buggy and unmaintainable code. If the programmer don't review code, these "pushback" will not be felt.
 
 There is a workflow that you firstly write a detailed specification then let the agent swarm to finish the code. However it cannot handle **unknown unknowns**: you may not know about an important detail during specification writing. Sometimes that detail invalidates large part of architecture design. These unknown unknowns are only discovered in actual coding and debugging. 
 
@@ -391,6 +397,8 @@ The **good prompting is just to give enough information to model**:
 - Put related API doc into repo and tell model
 - Tell model which command to test the code
 - Tell model your **root goal** (not just a subtask). When test fails, model can know whether test is wrong or base code is wrong by the root goal.
+
+Also, the prompt should reduce unnecessary information. Increase the signal-to-noise ratio.
 
 ### Jevons paradox
 
@@ -504,7 +512,9 @@ Reward hacking is a fundamental problem of reinforcement learning. The reward th
 
 It's because reward is **proxy target**, not underlying real target. For example if you use unit test to test whether AI coded something correctly, but there are some code that can pass unit test but don't represent your wanted software.
 
-AI can conquer really verifiable tasks. A task is not simply fully verificable or fully not verificable. A task can contain some verificable part and unverifiable part. But **most real tasks contain hard-to-verify parts**. These hard-to-verify parts are what automatic RL bad at.
+Reward hacking happens in the difference between proxy target and underlying real target.
+
+AI can conquer verifiable tasks. A task is not simply fully verificable or fully not verificable. A task can contain some verificable part and unverifiable part. But **most real tasks contain hard-to-verify parts**. These hard-to-verify parts are what automatic RL bad at.
 
 These hard-to-verify parts can be improved by letting human experts to supervise and specify reward. But this method is bottlenecked by human effort and not scalable. **The bitter lesson** says that if training AI requires human expert knowledge then it cannot go far. 
 
@@ -653,7 +663,11 @@ There is a theory that, as AI is trained from human text, AI also have some "hum
 
 Another theory is that, during RL, the AI works in its own sandboxed environment. Deleting home directory in sandboxed env doesn't matter and don't cause reward penality.
 
-Because that AI can "cheat", it requires human user to have skills. (Related: if upper management don't know actual business details, upper manager can be cheated by middle managers.)
+The big AI risk comes from passive-aggressive AI, not obviously malicious AI.
+
+Because that AI can "cheat", it requires human user to have skills to supervise AI.
+
+Related: if upper management don't know actual business details, upper manager can be cheated by middle managers.
 
 ## No attribution
 
