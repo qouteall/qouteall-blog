@@ -80,7 +80,7 @@ It's common that: Most people focus on their own businesses. Most people don't r
 
 Related: [Wet bias](https://en.wikipedia.org/wiki/Wet_bias): Overestimate probability of raining to improve the usefulness of forcast.
 
-Related: Believing a false conspiracy theory often can effectively reduce risk. Conspiracy theories have real utility according to the "better safe than sorry" principle.
+Related: Believing a false conspiracy theory often can effectively reduce risk. Conspiracy theories have real utility according to the "better safe than sorry" principle. Similar applies to cynicism.
 
 ### Perception of risk
 
@@ -1345,7 +1345,7 @@ These factors affect mental energy:
 - Exercising self-control can strengthen mental energy, similar to muscular strength.
 - Lingering emotion (e.g. **keep ruminating past mistakes**) costs mental energy.
 
-[^blood_sugar_level]: Related: Using GLP-1 may cause one harder to focus and pay attention due to reduced blood sugar level and other factors. However, GLP-1 can improve brain fog related to inflammation. The overall effect is complex and not yet well understood.
+[^blood_sugar_level]: Related: Using GLP-1 may cause one harder to focus and pay attention due to reduced blood sugar level and other factors. However, GLP-1 can improve brain fog related to inflammation. The overall effect is complex.
 
 Mental resting is different to body resting. Intense thinking when lying on the bed even consumes mental energy. Mental resting involves focusing on simple things with low cognitive demand.
 
