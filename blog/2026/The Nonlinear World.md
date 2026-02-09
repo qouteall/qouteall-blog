@@ -256,6 +256,8 @@ Redundancy tackles risk. Two kinds of redundancy:
 - Resource redundancy. Example: save more cash, hoard emergency food.
 - Functional redundancy. Example: be more versatile and can change profession, having a plan B when plan A fails.
 
+Diversification is also a way to handle risks. Note that diversification only works when they are not correlated or only weakly correlated. But many financial assets are highly correlated under Black Swan event.
+
 ## Good side of incident
 
 - it reveals problems and gives pressure to improve
