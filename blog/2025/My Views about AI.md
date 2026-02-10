@@ -332,9 +332,14 @@ Coding can be split into two parts: high-level design and detailed implementatio
 
 The high-level design includes:
 
-- Knowing the real requirements.
+- Knowing the real requirements. [^real_requirement]
 - Researching about the problem. Check whether a solution is possible (whether it can obtain required information and do the required operation)
+- When there is implementation constraint, find tradeoffs (e.g. get rid of unnecessary but complexity-introducing requirements [^complexity_distribution]).
 - Design a high-level software architecture
+
+[^real_requirement]: Many development efforts are wasted because of misunderstanding real user requirement. The user often don't know what they actually need in detail. Figuring out the right requirement can save a lot of downstream work.
+
+[^complexity_distribution]: Some software features are isolated and don't add much complexity. But some features interact with almost all other features. These features add a lot essential complexity. Note 80/20 rule: 90% complexity come from 20% features, and 80% users use 20% features. If the complexity-introducing feature requirement can be satisfied by other less complex features, it's often not worth implementing.
 
 In pre-AI coding, the architectual design and coding are often interleaved: firstly do architectual design, then write some actual code, then discover some architectual problem during coding or debugging, then rethink architecture.
 
@@ -668,6 +673,22 @@ The big AI risk comes from passive-aggressive AI, not obviously malicious AI.
 Because that AI can "cheat", it requires human user to have skills to supervise AI.
 
 Related: if upper management don't know actual business details, upper manager can be cheated by middle managers.
+
+## Skill development hurt by AI
+
+> [Link](https://www.reddit.com/r/codereview/comments/1qwlgt3/noticed_junior_devs_cant_explain_their_prs/)
+> 
+> noticed junior devs can't explain their PRs anymore. thinking of removing AI tools from their setup.
+> 
+> hired 3 juniors in the last 6 months. all use AI heavily (cursor, copilot, claude). they ship features fast. tests pass. looks fine. but in PR review when i ask "why did you structure it this way?" or "what happens if X is null?" they genuinely don't know. one said "claude suggested this pattern" when i asked about their error handling. couldn't explain what the pattern actually does or why it's better. another copy-pasted a complex async implementation. works perfectly. asked them to add a timeout. took them 4 hours because they didn't understand promises like broooooo 😭.
+> 
+> we even have automated tools hooked up to help them understand their own PRs. they just ignore the diagrams and ask AI to explain instead. At this point they're dependent on AI for everything.
+> 
+> Can't debug without it. can't explain their own code. can't modify anything without re-prompting. Starting to think we need to pull AI access for their first 6 months. wdyt?? is this too harsh? After automated tools hooked up: “like codeant.ai for visualizing execution flow, sequence diagrams showing what code actually does at runtime”
+
+Learning skill takes efforts. But using AI allow doing work without the efforts, which hurts skill development.
+
+As previously mentioned, if human don't know work details, then human cannot supervise AI effectively.
 
 ## No attribution
 
