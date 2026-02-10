@@ -660,6 +660,8 @@ Having ideas is easy and cheap. If you search the internet carefully you are lik
 > 
 > \- Hiten Shah, [Link](https://x.com/hnshah/status/1998474486149165231)
 
+Dunning-Kruger effect also applies to idea generation. An unexperienced one tend to think that their ideas are all good. But an experienced one sees that most ideas fails. Incompetent leaders often criticize experienced workers being not "creative" enough.
+
 About analogy: Analogies are useful for explaining things to others, but not good for accurate thinking. It makes one ignore the nuance difference between the analog and the real thing.
 
 ### Predictive processing

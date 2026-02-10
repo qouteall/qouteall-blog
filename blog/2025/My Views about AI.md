@@ -451,6 +451,16 @@ Sometimes you want an external service to return error then you need to write a 
 
 Generally, testing corner case is often much harder than writing code for handling corner case.
 
+Good tests are hard to write.
+
+### Mythical man month strikes again
+
+Mythical man month says that if a software takes one programmer 10 months, you cannot simply make 10 programmers finish in 1 month.
+
+The same also applies to AI. You can spawn hundreds of AI agents that work together. But the communication cost make agents lose each other's context then create buggy bloated software.
+
+Software development is context-heavy (unless in small toy projects). Context communication is an important bottleneck.
+
 ## Idea is still cheap, execution still matters
 
 A conception is that, AI makes execution easier (write code, draw images, etc.), then the idea and "what to work on" become more important.
@@ -519,7 +529,9 @@ It's because reward is **proxy target**, not underlying real target. For example
 
 Reward hacking happens in the difference between proxy target and underlying real target.
 
-AI can conquer verifiable tasks. A task is not simply fully verificable or fully not verificable. A task can contain some verificable part and unverifiable part. But **most real tasks contain hard-to-verify parts**. These hard-to-verify parts are what automatic RL bad at.
+AI can conquer verifiable tasks. A task is not simply fully verificable or fully not verificable. A task can contain some verificable part and unverifiable part. But **most real tasks contain hard-to-verify parts**. These hard-to-verify parts are what automatic RL bad at. 
+
+The main value of human worker will move to unverifiable tasks.
 
 These hard-to-verify parts can be improved by letting human experts to supervise and specify reward. But this method is bottlenecked by human effort and not scalable. **The bitter lesson** says that if training AI requires human expert knowledge then it cannot go far. 
 
@@ -675,16 +687,6 @@ Because that AI can "cheat", it requires human user to have skills to supervise 
 Related: if upper management don't know actual business details, upper manager can be cheated by middle managers.
 
 ## Skill development hurt by AI
-
-> [Link](https://www.reddit.com/r/codereview/comments/1qwlgt3/noticed_junior_devs_cant_explain_their_prs/)
-> 
-> noticed junior devs can't explain their PRs anymore. thinking of removing AI tools from their setup.
-> 
-> hired 3 juniors in the last 6 months. all use AI heavily (cursor, copilot, claude). they ship features fast. tests pass. looks fine. but in PR review when i ask "why did you structure it this way?" or "what happens if X is null?" they genuinely don't know. one said "claude suggested this pattern" when i asked about their error handling. couldn't explain what the pattern actually does or why it's better. another copy-pasted a complex async implementation. works perfectly. asked them to add a timeout. took them 4 hours because they didn't understand promises like broooooo 😭.
-> 
-> we even have automated tools hooked up to help them understand their own PRs. they just ignore the diagrams and ask AI to explain instead. At this point they're dependent on AI for everything.
-> 
-> Can't debug without it. can't explain their own code. can't modify anything without re-prompting. Starting to think we need to pull AI access for their first 6 months. wdyt?? is this too harsh? After automated tools hooked up: “like codeant.ai for visualizing execution flow, sequence diagrams showing what code actually does at runtime”
 
 Learning skill takes efforts. But using AI allow doing work without the efforts, which hurts skill development.
 
