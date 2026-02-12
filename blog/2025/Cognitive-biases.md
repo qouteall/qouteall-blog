@@ -234,11 +234,11 @@ People tend to fight the things that oppose their desire. Examples:
 - When the love is objected by parents, the love strengthens.
 - Restricting buying something make people buy it more eagerly. Same for restricting selling.
 
-Providing external reward may reduce internal motivation (overjustification effect). Training child to clean room by giving money reward may backfire.
-
-Ironic process theory: Trying to suppress a thought can backfire.
+Overjustification effect: Providing external reward reduces internal motivation. Training child to clean room by giving money reward will backfire.
 
 Being helped doesn't always elicit gratitude. The one being helped may feel being inferior in social status, thus helping may cause hatred, especially when reciprocal helping cannot be done.
+
+Ironic process theory: Trying to suppress a thought can backfire. In "Don't think about elephant", the sentence literally contains "elephant", so it will provoke thoughts about "elephant". The solution is to think about other things rather than suppressing the thought. Replacement is more effective than negation.
 
 People love to nitpick others' work. There is a trick: before presenting a solution to client, add obvious minor flaws to the solution. The client will point them out and get more satisfied. ([The queen's duck](https://bwiggs.com/notebook/queens-duck/))
 

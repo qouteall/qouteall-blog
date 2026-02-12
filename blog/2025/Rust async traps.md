@@ -74,6 +74,8 @@ See also: [Making Async Rust Reliable - Tyler Mandry](https://tmandry.gitlab.io/
 
 TODO
 
+https://github.com/rust-lang/rust-project-goals/blob/main/src/2026/async-future-memory-optimisation.md
+
 ## No parallelism by default
 
 Example

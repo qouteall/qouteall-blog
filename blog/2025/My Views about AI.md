@@ -259,7 +259,7 @@ But AI coding is a **completely different paradigm** than existing abstraction l
 
 [^enough_information]: Note that it focuses just one software module. The code can call external API, or dynamic link another program in system, or download plugin from internet, so one piece of code doesn't contain enough information for whole system to run, because it interacts with environment. But in conventional programming, the code provides enough information for one software module itself to run.
 
-A vague prompt itself doesn't contain enough information to produce code. But LLM has "common sense" that fill these gaps. The "common sense" is implicit, nondeterministic and not explainable. It depends on training data and RL many random factors.
+A vague prompt itself doesn't contain enough information to produce code. But LLM has "common sense" that fill these gaps. The "common sense" is implicit, nondeterministic and not explainable. It depends on training data and RL and many random factors.
 
 ### AI need to be able to "see results" by itself
 
@@ -302,24 +302,23 @@ Some important architectural decisions:
   - How and when is ID allocated?
   - What lookup acceleration structure or redundant data do we have?
   - Is there any ambiguity in data model? (two different things correspond to same data)
-  - What are the non-temporary mutable state? Can it be avoided?
+  - What are the non-temporary mutable states? Can it be avoided?
 - Constraints:
   - What can change and what cannot change?
   - What can duplicate (overlap) and what cannot?
   - Does this ID always point to a valid object?
   - What constraints does business logic require?
-  - Does this allow concurrency? Will concurrency break the constraints?
+  - Will concurrency break the constraints?
 - Dataflow:
   - Which data is source of truth? Which data is derived from source of truth?
   - How is change of source of truth notify to change derived data? How is the cache invalidated? How is the lookup acceleration structure maintained to be consistent with source of truth?
   - What data should we expose to client side? What data shouldn't?
-  - How and when to validate external data?
 - Separate of responsibility (concern) and encapsulation:
   - What module is responsible for updating this data?
   - Should this data be encapsulated or let other modules access?
   - Which module is responsible for keeping that constraint? Which module is responsible for keeping that derived data be consistent with source of truth?
   - What's the boundary of validation and authorization?
-- Tradeoffs: 
+- Tradeoffs:
   - What tradeoff do we make to simplify it? Is that constraint really necessary?
   - What tradeoff do we make to optimize performance?
   - What tradeoff do we make to maintain compatibility?
@@ -352,20 +351,18 @@ Some examples of "friction":
 - Some invariant should be only maintained in one place, but actually needs to be maintained in many places. This is a sign of issue of separation of responsibility(concern).
 - The data is not in the "good shape". Some simple information manipulation require hundreds of lines of code. This is a sign of data modelling issue.
 
-It's the **bad architecture "pushing back against" programmer**. In manual coding these pushback can be felt and then programmer tend to rethink architecture. But in AI coding, AI can easily generate thousands of code to workaround a bad architecture. Result is buggy and unmaintainable code. If the programmer don't review code, these "pushback" will not be felt.
+It's the **bad architecture "pushing back against" programmer**. In manual coding these pushback can be felt and then programmer tend to rethink architecture. But in AI coding, **AI can easily generate thousands of code to workaround a bad architecture**. The vibe coder don't feel the pushback. Result is buggy and unmaintainable code.
 
-There is a workflow that you firstly write a detailed specification then let the agent swarm to finish the code. However it cannot handle **unknown unknowns**: you may not know about an important detail during specification writing. Sometimes that detail invalidates large part of architecture design. These unknown unknowns are only discovered in actual coding and debugging. 
+### Meeting unknown unknowns
+
+Sometimes an architecture looks right before implementing a software. But during implementation, you often discover **unknown unknowns that invalidate previous assumptions**. Then you find out that architecture is no longer good.
 
 Examples of unknown unknown:
 
-- Some API you use seems give you some information but it's actually another thing that has similar name (confusing different things with similar names). The API doesn't allow getting the information you want.
-- Some API you use has some hidden limitations of doing some operation.
-- The actual data size is larger than expected so the current algorithm is inefficient.
+- There are some hidden limitations of the platform/framework/library that you use.
+- Misunderstanding due to confusing different things with similar names.
+- The actual data size is larger than expected, so the current design is inefficient.
 - ...
-
-### Can easily discard results
-
-Sometimes an architecture looks right before implementing a software. But during implementation, you often discover **unknown unknowns that invalidate previous assumptions**. Then you find out that architecture is no longer good.
 
 If it's coded by human, the human have already payed a lot of efforts, so discarding code makes human developer upset. But if it's AI-coded, you can easily discard the code and rebuild, without upsetting anyone.
 
@@ -397,13 +394,9 @@ One extreme example of old prompting technique:
 > 
 > \- [Link](https://simonwillison.net/2025/Feb/25/leaked-windsurf-prompt/)
 
-The **good prompting is just to give enough information to model**:
+**Good prompting has high signal-to-noise ratio**. Use simple words. Clarfiy ambiguity. Include important information. Reduce unnecessary information.
 
-- Put related API doc into repo and tell model
-- Tell model which command to test the code
-- Tell model your **root goal** (not just a subtask). When test fails, model can know whether test is wrong or base code is wrong by the root goal.
-
-Also, the prompt should reduce unnecessary information. Increase the signal-to-noise ratio.
+Also, the prompt should include the **root goal** (not just a subtask). This can help long-term planning. When test fails, model can know whether test is wrong or base code is wrong by the root goal.
 
 ### Jevons paradox
 
@@ -483,13 +476,13 @@ Model context protocol (MCP) used to be popular. But MCP has an important flaw: 
 
 The new way is to just to give simple tools including bash and text file reading/writing. These are already enough. Complex MCP is unnecessary if model has bash access (all kinds of Restful APIs can be called using curl in bash tool). And turn the description into markdown files called "skills".
 
-The current solution is to let model proactively see things using tool call. It has a fancy name "agentic search". Human are already doing the same thing (thinking which file to open, which word to search, etc.).
+The current solution is to let model proactively see things using tool call. It has a fancy name "agentic search". Human are already doing the same thing (thinking which file to open, which word to search, etc.). (There is another issue, sometimes model has "urge" to quickly do the task and is too "lazy" to check these information.)
 
 ## Context bottleneck
 
-**Most knowledge work is bottlenecked by high signal-to-noise context, rather than reasoning on context**.
+**Most knowledge work is bottlenecked in finding useful information in the sea of information**, rather than raw reasoning. High signal-to-noise ratio context is important.
 
-Doing knowledge work requires finding useful information in the sea of unrelated information and garbage information. Once the useful infomation has been found, doing reasoning on them is often simple. But if you don't have the useful information, pure reasoning can't give useful results.
+Once the useful infomation has been found, doing reasoning on them is often simple. But if you don't have the useful information, pure reasoning can't give useful results.
 
 The same applies to programming in large codebases. If you don't know some implicit business logic or hidden invariants, changing code will likely break things. But if you know them, it only requires simple reasoning to avoid breaking them.
 

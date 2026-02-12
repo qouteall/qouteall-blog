@@ -1216,7 +1216,7 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
 - Using uninitialized memory is undefined behavior. [`MaybeUninit`](https://doc.rust-lang.org/beta/std/mem/union.MaybeUninit.html)
   - Normally a byte has 256 possible values. But in LLVM a byte has 258 possible values. The extra two are 1. uninitialized 2. poison (computed from other undefined behaviors). Like pointer provenance, the two extra values only exist in compile time.
 - `a = b` will drop the original object in place of `a`. If `a` is uninitialized, then it will drop an unitialized object, which is undefined behavior. Use `addr_of_mut!(...).write(...)` [Related](https://lucumr.pocoo.org/2022/1/30/unsafe-rust/)
-- Handle panic unwinding. If unsafe code turn data into temporarily-invalid state, you need to make it valid again during unwinding. [See also](https://doc.rust-lang.org/nomicon/unwinding.html).
+- Handle panic unwinding. If unsafe code turn data into temporarily-invalid state, you need to make it valid again during unwinding. [See also](https://doc.rust-lang.org/nomicon/unwinding.html). [Related](https://smallcultfollowing.com/babysteps/blog/2024/05/02/unwind-considered-harmful/)
 - Reading/writing to mutable data that's shared between threads need to use atomic, or volatile access ([`read_volatile`](https://doc.rust-lang.org/std/ptr/fn.read_volatile.html), [`write_volatile`](https://doc.rust-lang.org/beta/std/ptr/fn.write_volatile.html)), or use other synchronization (like locking). If not, optimizer may wrongly merge and reorder reads/writes. Note that volatile access themself doesn't establish memory order (unlike Java/C# `volatile`).
 - If the binary data violates the type's constraint, it's undefined behavior. For example, `bool`'s binary data can only be 0 or 1. Making it 2 is undefined behavior. Creating a `str` whose binary data is not valid UTF-8 is also undefined behavior.
 - If you want to `mem::transmute`, it's recommended to use [zerocopy](https://docs.rs/zerocopy/latest/zerocopy/) which has compile-time checks to ensure memory layout are the same. For simple wrapper types, use `#[repr(transparent)]`.
@@ -1232,6 +1232,16 @@ Unfortunately Rust's syntax ergonomics on raw pointer is currently not good:
 - If `p` is a raw pointer, you cannot write `p->field` (like in C/C++), and can only write `(*p).field`
 - Raw pointer cannot be method receiver (self).
 - There is no "raw pointer to slice". You need to manually `.add()` pointer and dereference. Bound checking is also manual.
+
+## Rust doesn't allow "temporary void"
+
+In safe Rust, the in-memory data has to be always valid.
+
+You cannot implement `mem::swap` or `mem::replace` in safe Rust. Because Rust is procedural, so doing these have to temporarily make some in-memory data invalid. But Rust borrow checker ensures all data is always in valid state.
+
+Implement a singly-linked-list require `mem::replace`, [see also](https://rust-unofficial.github.io/too-many-lists/first-push.html).
+
+This restriction is related to unwinding, [see also](https://smallcultfollowing.com/babysteps/blog/2024/05/02/unwind-considered-harmful/).
 
 ## `Send` and `Sync`
 
