@@ -751,6 +751,16 @@ About firewall rule:
 
 That issue was then addressed in new standards.
 
+## Layouting infinite iteration
+
+Footnote oscillation problem: in book layouting, if a footnote mark is near bottom of page, the footnote content takes space and push the footnote mark into the next page, then the footnote content also need to move to next page, but then there is more free space in original page so the footnote mark moves back. One solution is to allow footnote content to be in next page. [Related](https://tex.stackexchange.com/questions/490416/allow-footnote-to-appear-on-next-page)
+
+Scrollbar layout: In web page it's common that scrollbar only appears when content is too high. But scrollbar itself takes width in desktop platforms[^scrollbar]. Scrollbar reduces available width so content may be higher. It's possible that scrollbar is needed when scrollbar is present, and scrollbar is not needed when scrollbar is not present.
+
+[^scrollbar]: In macOS scrollbar does not take space by default.
+
+If the layout changes based on whether width reach a threshold, scrollbar may cause infinite flicker. For example, for GUI, if its available space is larger than 900px then it's treated as desktop and shows large detailed info. But if its available space is smaller than 900px, it's treated as mobile and shows small summarized info. Near the threshold, it's possible that 1. in desktop view, content is too high, scrollbar appears and taks space 2. available width become lower than threshold due to scrollbar 3. become mobile view, content is not high enough and scrollbar disappears 4. available width above threshold, become desktop view 5. repeat. [One similar example](https://github.com/jbaysolutions/vue-grid-layout/issues/715).
+
 ## Circular reference in math
 
 ### Circular proof

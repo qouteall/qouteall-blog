@@ -240,18 +240,18 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - Destructing a deep tree structure can stack overflow. Solution is to replace recursion with loop in destructor.
 - `std::shared_ptr` itself is not atomic (although its reference count is atomic). Mutating a `shared_ptr` itself is not thread-safe. `std::atomic<std::shared_ptr<...>>` is atomic.
 - For `std::map` and `std::unordered_map`, `map[key]` alone will mutate the map if the corresponding entry doesn't exist. [See also](https://en.cppreference.com/w/cpp/container/map/operator_at.html)
+- For `std::vector<bool>`, result of `operator[]` is a proxy object, not `bool&`.
 - Undefined behaviors. The compiler optimization aim to keep defined behavior the same, but can freely change undefined behavior. Relying on undefined behavior can make program break under optimization. [See also](https://russellw.github.io/undefined-behavior)
   - Accessing uninitialized memory is undefined behavior. Converting a `char*` to struct pointer can be seen as accessing uninitialized memory, because the object lifetime hasn't started. It's recommended to put the struct elsewhere and use `memcpy` to initialize it.
     - Directly trating binary data as struct is undefined behavior, even if the memory is initialized. Because it's treated as object lifetime hasn't started. It also may involve alignment issue. One solution is to put the struct on stack then use `memcpy` to initialize it.
   - Accessing invalid memory (e.g. null pointer) is undefined behavior.
-  - Integer overflow/underflow is undefined behavior. Note that unsigned integer can underflow below 0. Don't use `x > x + 1` to check overflow as it will be optimized to false.
+  - Integer overflow/underflow is undefined behavior. Note that unsigned integer can underflow below 0. Don't use `x > x + 1` to check overflow as it will be optimized to `false`.
   - Aliasing.
-    - Aliasing means multiple pointers point to the same place in memory.
     - Strict aliasing rule: If there are two pointers with type `A*` and `B*`, then compiler assumes two pointer can never equal. If they equal, using it to access memory is undefined behavior. Except in two cases: 1. `A` and `B` has subtyping relation 2. converting pointer to byte pointer (`char*`, `unsigned char*` or `std::byte*`) (the reverse does not apply). [^pointer_type_hold_integer]
-    - Pointer provenance. Two pointers from two different provenances are treated as never alias. If their address equals, it's undefined behavior. [See also](https://www.ralfj.de/blog/2020/12/14/provenance.html)
+    - Pointer provenance. Two pointers from two different provenances are treated as never equal. If their address equals, it's undefined behavior. [See also](https://www.ralfj.de/blog/2020/12/14/provenance.html)
   - `const` can mean both read-only and immutable:
     - If the original declared object is not `const`, you can turn pointer to it as `const T*`, in this case `const` means read-only [^readonly]. You can change the object without triggering undefined behavior.
-    - If the original declared object is `const`, then it's deemed immutable. For the `const T*` pointer to it, `const` means actually immutable. If you use `const_cast` to turn it to `T*` then change content, it's undefined behavior. [^cpp_mutable]
+    - If the original declared object is `const`, then it's deemed immutable. If you use `const_cast` to turn its pointer to `T*` then change content, it's undefined behavior. [^cpp_mutable]
     - Use `const volatile T*` for read-only pointer to data changable by other threads or outer system.
   - If `bool`'s binary value is neither 0 or 1, using it is undefined behavior. Similarily if an enum's binary value is not valid, using it is undefined behavior.
 - Alignment.
