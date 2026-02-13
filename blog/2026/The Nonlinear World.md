@@ -2,7 +2,7 @@
 date: 2026-01-31
 tags:
   - Misc
-unlisted: true
+unlisted: false
 ---
 
 # The Nonlinear World
@@ -69,6 +69,7 @@ For them, the mean and variance may be misleading. Median is more representative
 ## Self-balancing feedback loops and cycles
 
 Examples:
+
 - In nature: predator-prey relation, climate systems.
 - In human body: temperature adjustment, blood glucose adjustment, etc.
 - In machines: thermostat, etc.
@@ -99,19 +100,18 @@ The force behind a self-balancing feedback loop may drive self-reinforcing feedb
 
 The **"competition"** between self-reinforcing feedback loops and self-balancing feedback loops:
 
-|                             | Self-reinforcing                                                    | Self-balancing                                                                     |
-| --------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Population growth           | Exponential growth                                                  | Limited food supply, living resources and jobs; Higher competition                 |
-| Asset price grow            | Confidence spread                                                   | Long force depletes; Short force accumulates                                       |
-| Asset price drop            | Panic spread                                                        | Short force depletes; Long force accumulates                                       |
-| Debt growth and inflation   | Economy growth; Facilitates investments and debt                    | Cost of excess invstment and debt; Monetary tightening for keeping currency credit |
-| Debt collapse and deflation | Cadcade credit collapse during financial crisis; Lose of confidence | Countermeasures for crisis; Fiscal and monetary stimulus                           |
-| Monopoly                    | Matthew effect; Economies of scale; Brand recognition               | Antitrust; Safety concerns; Innovator's dillema; Bureaucracy within large company  |
-| Scaling of production       | Amortize cost                                                       | Harder to manage; Diminishing marginal return; Higher risk                         |
-| Virus spread                | The more it infects, the quicker it spreads                         | Immunity; Societal countermeasures; Medication; Natural selection                  |
-| Spread of information       | The more people know it, the quicker it spreads                     | Saturation of acceptors; Lose of interest                                          |
-| Popularity of meme          | Fad following; Algorithimic recommendation                          | Boredom                                                                            |
-| Scaling in AI               | Scaling gives better performance                                    | Higher cost in training and inference                                              |
+|                             | Self-reinforcing                                                                            | Self-balancing                                                                     |
+| --------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Population growth           | Exponential growth                                                                          | Limited food supply, living resources and jobs; Higher competition                 |
+| Asset price grow            | Confidence spread                                                                           | Long force depletes; Short force accumulates                                       |
+| Asset price drop            | Panic spread                                                                                | Short force depletes; Long force accumulates                                       |
+| Debt growth and inflation   | Economy growth; Facilitates investments and debt                                            | Cost of excess invstment and debt; Monetary tightening for keeping currency credit |
+| Debt collapse and deflation | Cadcade credit collapse during financial crisis; Lose of confidence                         | Countermeasures for crisis; Fiscal and monetary stimulus                           |
+| Monopoly                    | Matthew effect; Economies of scale; Brand recognition                                       | Antitrust; Safety concerns; Innovator's dillema; Bureaucracy within large company  |
+| Scaling of production       | Amortize cost                                                                               | Harder to manage; Diminishing marginal return; Higher risk                         |
+| Virus spread                | The more it infects, the quicker it spreads                                                 | Immunity; Societal countermeasures; Medication; Natural selection                  |
+| Spread of information       | The more people know it, the quicker it spreads; Fad following; Algorithmic recommendataion | Saturation of acceptors; Lose of interest                                          |
+| Scaling in AI               | Scaling gives better performance                                                            | Higher cost in training and inference                                              |
 
 Note that nonlinear systems are complex. They are more than just two kinds of feedback loops.
 
@@ -124,7 +124,6 @@ In nonlinear systems, there are often the accumulation of potential and the sudd
   
   Release: Once a techonology is improved up to a threshold, it may suddenly become popular and get deployed widely.
 
-
 - Accumulation: Overvaluation of assets.
   
   Release: A sudden bubble burst leads to market corrections.
@@ -134,8 +133,7 @@ In nonlinear systems, there are often the accumulation of potential and the sudd
 
 - Accumulation: Geological plates shifting builds up stress along fault lines.
   
-  Release: The stress is suddenly released in the form of an earthquake.
-
+  Release: The stress is suddenly released as earthquake.
 
 - Accumulation: Gradual accumulation of pollution without immediate consequences.
   
@@ -155,6 +153,8 @@ There are emergent properties that only emerge if scale becomes big enough:
 - Scaling up (model size, data, etc.) in deep learning lead to new behavior (e.g. in-context learning, pass Turing test).
 - Ant colony, bird flock behavior, etc.
 - ...
+
+Composition fallacy: composing things together may give surprising results. Two good things composed may be bad, and two bad things composed may be good.
 
 ## Fractal properties
 
@@ -202,129 +202,9 @@ For a long cycle that spans decades (e.g. macro debt cycle), entering the next s
 
 Experiences may be obsolete or even harmful after a paradigm shift. Ideas, methods, cultures and systems may only work in specific paradigms.
 
-## Nonlinear systems have second-order effects and unity of opposites
+## Second-order effect
 
-**Goodhart's law**: When a measure becomes a target, it ceases to be a good measure.
-
-- The actions we do may backfire. Safety measures and safety tools may backfire.
-- Trying to eliminate risk and optimize out diversity can deprive positive black swans and antifragility.
-- Most coorporations and governments have measures to punish mistakes. However, it's often that the more one do, the more mistake one makes. People in these environments tend to do things as few as possible.
-- Abundance could lead to waste. Scarcity could lead to efficiency. 
-- Laziness could lead to innovation. Diligence faces diminishing marginal return and involution.
-- Danger could lead to deterrence and unity. Safety could lead to ignorance and fragility.
-- Being advanced could lead to path dependence. Monopoly make competitors search for alternatives that may lead to disruptive innovation.
-- The most severe risk could come from the thing you trust the most.
-- Freedom can lead to imitation. Constraint can lead to innovation.
-- The fundamental is the simplest (大道至简). The profound intelligence appears foolish (大智若愚). [The rise of worse is better](https://www.dreamsongs.com/RiseOfWorseIsBetter.html).
-- Knowing more isn't necessarily better. Knowledge may make you stuck in confirmation bias and stay further from practice. Green lumber fallacy.
-
-## About optimizations
-
-- Almost all **optimizations are tradeoffs**. Some tradeoffs are hidden. Optimizations may make the system more fragile and unadaptive to paradigm shifts.
-
-- Different cases suit different tradeoffs. No one-size-fits-all.
-
-- Optimization may backfire (perverse incentive, iatrogenesis, etc.). Reduce naive interventionism.
-
-- 80/20 rule. Optimize the important part first. Also note that not everything can be 80/20-ed.
-
-- Optimization has diminishing marginal return. Overly optimize one aspect is usually a bad tradeoff. Pursuing perfection is often unrealistic.
-
-- Yerkes–Dodson law: Medium motivation or stress works the best. Too much or too few motivation or stress don't work well.
-
-- It's often that long-term benefit requires short-term cost. Getting out of a local minima often requires temporarily increasing loss. There will be temporary pain.
-
-- Optimize for the root goal instead of sub-goals. A sub-goal may originally serve for the root goal but now conflict with the root goal. Be ware of **means-end inversion**.
-
-  Question the constraints of the optimization. Some constraints are actually unnecessary for the root goal. There are also cases where a constraint leads to innovation.
-
-- Right decision can fail and bad decision can succeed due to randomness. Results may be misleading
-
-- [Theory of the second best](https://en.wikipedia.org/wiki/Theory_of_the_second_best). If something is imperfect, adding more imperfection may be better overall.
-
-## 3 kinds of risks
-
-
-- the risk we know and prepared, 
-- the unknown unknown (Black Swan), 
-- and the risk that we know but don't want to accept and act on (Grey Rhino, ostrich effect, elephant in the room).
-
-## Redundancy
-
-Redundancy tackles risk. Two kinds of redundancy:
-
-- Resource redundancy. Example: save more cash, hoard emergency food.
-- Functional redundancy. Example: be more versatile and can change profession, having a plan B when plan A fails.
-
-Diversification is also a way to handle risks. Note that diversification only works when they are not correlated or only weakly correlated. But many financial assets are highly correlated under Black Swan event.
-
-## Good side of incident
-
-- it reveals problems and gives pressure to improve
-- it makes people appreciate the good instead of taking things for granted
-- ...
-
-## On positive black swans
-
-In theory, betting on positive black swan is good because it has large upsides and limited downsides. 
-
-However, in real world, **positive Black Swan may come very late or never come**.
-
-- Avoid fatal risk. Don't all-in. Stop-loss is important.
-- Normal people don't suit winner-take-all profession (e.g. actor, social media influencer). Take a normal profession and do winner-take-all things in part time.
-- Doing more things can improve exposure to positive black swan.
-- Be patient and reduce expectation. 
-
-
-Be flexible in correcting mistakes. Beware of sunk cost fallacy. Stop-loss is important. It's impossible to plan everything right in the beginning. Success usually requires a lot of trial and error. Be more forgiving to the many failures in the process of trial and error. (It's also hard to do.)
-
-Embrace some randomness instead of paranoidly avoiding randomness.
-
-Barbell strategy: 10-15% high-risk high-payoff diverse investments and 85-90% safe liquid investments. (Don't trust seemingly middle-risk investments.) Short but intense activitity can be better than continuous mild activitity.
-
-## Contrarian strategy
-
-- The seemingly good opportunities are often highly-competitive and not worth joining. Being the upstream or downstream of a highly-competitive field could be better ("Picks and Shovels" strategy).
-- The seemingly bad opportunities are worth considering. These are not competitive. 
-
-Many good ideas initially look bad:
-
-> By 2005 or so, it will become clear that the Internet's impact on the economy has been no greater than the fax machine's.
-> 
-> \- Nobel Prize-winning economist, Paul Krugman, in 1998
-
-Note that competitiveness is relative to the market size. A quickly-growing market is not competitive even if it seems so.
-
-## The flip side of advanced technologies
-
-Technology advancement usually involves **scaling**: 
-
-- scaling size
-- scaling energy
-- scaling speed
-- scaling precision
-- scaling density
-- scaling connection
-- scaling computation
-- ...
-
-Scaling often involves higher fragility and higher cost (e.g. advanced chip manufacturing), and eventually facing diminishing marginal return. Scaling of connection also boost concentration and Matthew effect.
-
-Advanced technology is often more fragile or has unobvious downsides. It often requires a balance between convenience of advanced technology and reliability of provimitive methods.
-
-Advanced but expensive technology may defeat due to financial sustainability.
-
-In capitalism, technologies are usually developed for profit, not for human well-being (e.g. processed food, algorithmic recommendation, AI training data collection).
-
-Time is the ultimate test of new technologies.
-
-## Automation side effects
-
-When automation works, it's good. But automation may break. And when it breaks, no one has experience to fix it, because it rarely breaks.
-
-## Second-order effects with inverse results
-
-In nonlinear world, many things may "backfire".
+Nonlinear systems have second-order effects. Many things may "backfire".
 
 Note: **"X may backfire" should not be simplified to "X is bad".**
 
@@ -352,14 +232,23 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: Hiring a UI designer can improve the UI of the product.
 
-  Second-order effect: The UI designer may redesign the UI to justify their value. The users that get used to old UI may be frustrated by the new unfamiliar UI. The new UI may sacrifice usability for aethetics.
-
+  Second-order effect: The UI designer may redesign the UI to justify their value. The users that get used to old UI may be frustrated by the new unfamiliar UI. The new UI may sacrifice usability for aesthetics.
 
 ### In Economy and Finance
 
 - First-order effect: The British government in colonial India provided bonus for dead cobra. The bonus could incentivize cobra hunting.
 
   Second-order effect: Breeding cobra is easier than hunting wild cobra, so people started breeding it. When the policy is removed, the breeders released their cobra to the wild. This is called **cobra effect** and [perverse incentive](https://en.wikipedia.org/wiki/Perverse_incentive).
+
+- First-order effect: Using measured mumbers is an objective way of judging people performance.
+
+  Second-order effect: **Goodhart's law**. When a measure becomes target, it ceases to be a good measure. Examples:
+
+  - When doctors are judged by patient satisfaction survey, doctors tend to do treatments that improve short-term comfort but sacrifice long-term health.
+  - When KPI judges success rate regardless of difficulty, then employee choose to do only easy tasks and avoid hard tasks. **The more non-trivial things one do, the more mistakes one will make**.
+  - When salesmen are judged by sale amount, salesperson tend to lie to consumers and hurt company reputation.
+  - Judging AI models by benchmark scores cause AI companies to train models that get high score in benchmark but bad at real-world tasks.
+  - ...
 
 - First-order effect: After improving the steam engine, it requires less coal to do the same work, so the demand of coal will reduce.
 
@@ -369,7 +258,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: Improving a product may make it more popular and attract more customers that doesn't fit the product, which may hurt the reputation.
 
-- First-order effect: Price controls reduce price.
+- First-order effect: Price control reduces price.
 
   Second-order effect: Price control disincentivize production, causing reduced supply, making real price higher. Price control hinders transaction, but people's demand persists, so it leads to black markets, increasing transaction costs.
 
@@ -422,6 +311,14 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: [Resource curse](https://en.wikipedia.org/wiki/Resource_curse). Profits in mineral export makes country's currency overvalued. Then importing becomes cheaper than country's own products. so the domestic argiculture and industries cannot develop. Having "easy money" also make people not work hard. When the international mineral price drops, economy collapses.
 
+- First-order effect: Adding more roads makes traffic faster.
+
+  Second-order effect: [Braess paradox](https://en.wikipedia.org/wiki/Braess%27s_paradox). Adding more roads can make overall traffic slower.
+
+- First-order effect: Quantitive easing reduces financial risk because it increases money supply.
+
+  Second-order effect: It inflates asset bubbles and cause more potential risk in the future. It also causes moral hazard and encourages careless risk-takers.
+
 [^qianlima]: Related: [Qianlima](https://en.wikipedia.org/wiki/Qianlima) (千里马). The high-capacity horse require more food to show its capacity. But without showing its capacity it can never get enough food supply. 
 
 ### In Health and Biology
@@ -441,7 +338,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   - Wrong diagnosis and wrong medication
   - Side effect of medication
   - Infect at the hospital
-  - Antibiotics disrupt the gut biome, then interfere with immune system
+  - Antibiotics disrupt the gut biome, then interfere with immune system.
   - (Also: Issues caused by financial hardship due to large medical bill.)
   - ...
 
@@ -459,15 +356,15 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   
   Second-order effect: Praisng a product raises people's expectation, which may lead to disappointment if the actual usage experience doesn't meet the high expectation.
 
-- First-order effect: Having eagerness can help achieving some goal.
+- First-order effect: Having eagerness helps achieving the goal.
   
-  Second-order effect: Being too eager may deplete patience when facing failures. Yerkes-Dodson law.
+  Second-order effect: Being too eager may deplete patience when facing failures. Yerkes-Dodson law. Also, eagerness is a sign of low confidence. In dating, sales and interviewing, signs of low confidence reduces chance of success.
 
 - First-order effect: Suppressing the publication of some information stops it being spread.
 
   Second-order effect: Trying to suppressing information may make people gain more interest in that information. [Streisand effect](https://en.wikipedia.org/wiki/Streisand_effect).
 
-- First-order effect: Disallowing kid to play videogames will make them not do it.
+- First-order effect: Disallowing kid to play videogames makes kid not play videogames.
 
   Second-order effect: [Reverse psychology](https://en.wikipedia.org/wiki/Reverse_psychology). The kid being not allowed to play videogames may become more eager to play them.
 
@@ -482,6 +379,14 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 - First-order effect: Giving away free things can generate goodwill and appreciation.
 
   Second-order effect: Some recipients may take free things for granted, complain about not receiving more, or criticize the quality. The recipient also may feel having lower social status and may develop hatred.
+
+- First-order effect: Giving clear unambiguous feedback helps learning. It makes learning faster.
+
+  Second-order effect: It makes student overly rely on external feedback. Then the student can hardly develop internal judgement, thus perform worse in real-world tasks that don't have clear feedback. [See also](http://www.macrocognition.com/documents/CTT%2012-29-08.pdf)
+
+- First-order effect: Knowledge helps decision-making.
+
+  Second-order effect: Believing too much on a piece of knowledge makes one stuck in **confirmation bias** and stay furthur from truth. It may also make one distract in unimportant things. Green lumber fallacy.
 
 ### In Cybersecurity
 
@@ -539,6 +444,119 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 > 
 > — [New Linux glibc flaw lets attackers get root on major distros](https://www.bleepingcomputer.com/news/security/new-linux-glibc-flaw-lets-attackers-get-root-on-major-distros/)
 
+
+## Unity of opposites
+
+- Abundance could lead to waste. Scarcity could lead to efficiency. 
+- Laziness could lead to innovation. Diligence faces diminishing marginal return and involution.
+- Danger could lead to deterrence and unity. Safety could lead to ignorance and fragility.
+- Being advanced could lead to path dependence. Monopoly make competitors search for alternatives that may lead to disruptive innovation.
+- The most severe risk could come from the thing you trust the most.
+- Freedom can lead to imitation. Constraint can lead to innovation.
+- The fundamental is the simplest (大道至简). The profound intelligence appears foolish (大智若愚). [The rise of worse is better](https://www.dreamsongs.com/RiseOfWorseIsBetter.html).
+
+## About optimizations
+
+- Almost all **optimizations are tradeoffs**. Some tradeoffs are hidden. Optimizations may make the system more fragile and unadaptive to paradigm shifts.
+
+- Different cases suit different tradeoffs. No one-size-fits-all.
+
+- Optimization may backfire (perverse incentive, iatrogenesis, etc.). Reduce naive interventionism.
+
+- 80/20 rule. Optimize the important part first. Also note that not everything can be 80/20-ed.
+
+- Optimization has diminishing marginal return. Overly optimize one aspect is usually a bad tradeoff. Pursuing perfection is often unrealistic.
+
+- Yerkes-Dodson law: Medium motivation or stress works the best. Too much or too few motivation or stress don't work well.
+
+- It's often that long-term benefit requires short-term cost. Getting out of a local minima often requires temporarily increasing loss. There will be temporary pain.
+
+- Optimize for the root goal instead of sub-goals. A sub-goal may originally serve for the root goal but now conflict with the root goal. Be ware of **means-end inversion**.
+
+  Question the constraints of the optimization. Some constraints are actually unnecessary for the root goal. There are also cases where a constraint leads to innovation.
+
+- Right decision can fail and bad decision can succeed due to randomness. Results may be misleading
+
+- [Theory of the second best](https://en.wikipedia.org/wiki/Theory_of_the_second_best). If something is imperfect, adding more imperfection may be better overall.
+
+## 3 kinds of risks
+
+
+- The risk we know and prepared, 
+- The unknown unknown (Black Swan), 
+- The risk that we know but don't want to accept and act on (Grey Rhino, ostrich effect, elephant in the room).
+
+## Redundancy
+
+Redundancy tackles risk. Two kinds of redundancy:
+
+- Resource redundancy. Example: save more cash, hoard emergency food.
+- Functional redundancy. Example: be more versatile and can change profession, having a plan B when plan A fails.
+
+Diversification is also a way to handle risks. Note that diversification only works when they are not correlated or only weakly correlated. But many financial assets are highly correlated under Black Swan event.
+
+## Good side of incident
+
+- it reveals problems and gives pressure to improve
+- it makes people appreciate the good instead of taking things for granted
+- ...
+
+## On positive black swans
+
+In theory, betting on positive black swan is good because it has large upsides and limited downsides. 
+
+However, in real world, **positive Black Swan may come very late or never come**.
+
+- Avoid fatal risk. Don't all-in. Stop-loss is important.
+- Normal people don't suit winner-take-all profession (e.g. actor, social media influencer). Take a normal profession and do winner-take-all things in part time.
+- Doing more things can improve exposure to positive black swan.
+- Be patient and reduce expectation. 
+
+Embrace some randomness instead of paranoidly avoiding randomness.
+
+Barbell strategy: 10-15% high-risk high-payoff diverse investments and 85-90% safe liquid investments. (Don't trust seemingly middle-risk investments.) Short but intense activitity can be better than continuous mild activitity.
+
+## On planning
+
+In many cases, the real-world feedback invalidates assumptions in the plan. Then it's important to correct the plan. Beware of sunk cost fallacy.
+
+Success usually requires a lot of trial and error. Be more forgiving to the many failures in the process of trial and error. (It's also hard to do.)
+
+## Contrarian strategy
+
+- The seemingly good opportunities are often highly-competitive and not worth joining. Being the upstream or downstream of a highly-competitive field could be better ("Picks and Shovels" strategy).
+- The seemingly bad opportunities are worth considering. These are not competitive. 
+
+Many good ideas initially look bad:
+
+> By 2005 or so, it will become clear that the Internet's impact on the economy has been no greater than the fax machine's.
+> 
+> \- Nobel Prize-winning economist, Paul Krugman, in 1998
+
+Note that competitiveness is relative to the market size. A quickly-growing market is not competitive even if it seems so.
+
+## The flip side of advanced technologies
+
+Technology advancement usually involves **scaling**: 
+
+- scaling size
+- scaling energy
+- scaling speed
+- scaling precision
+- scaling density
+- scaling connection
+- scaling computation
+- ...
+
+Scaling often involves higher fragility and higher cost (e.g. advanced chip manufacturing), and eventually facing diminishing marginal return. Scaling of connection also boost concentration and Matthew effect.
+
+Advanced technology is often more fragile or has unobvious downsides. It often requires a balance between convenience of advanced technology and reliability of provimitive methods.
+
+Advanced but expensive technology may defeat due to financial sustainability.
+
+In capitalism, technologies are usually developed for profit, not for human well-being (e.g. processed food, algorithmic recommendation, AI training data collection).
+
+When automation works, it's good. But automation may break. And when it breaks, no one has experience to fix it, because it rarely breaks.
 
 # Related
 
