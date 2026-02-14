@@ -353,6 +353,18 @@ Some examples of "friction":
 
 It's the **bad architecture "pushing back against" programmer**. In manual coding these pushback can be felt and then programmer tend to rethink architecture. But in AI coding, **AI can easily generate thousands of code to workaround a bad architecture**. The vibe coder don't feel the pushback. Result is buggy and unmaintainable code.
 
+### Theory behind the code
+
+Software development is not just coding. An important part is to develop the theory behind code. That theory includes:
+
+- The business logic. Including many corner case handling method.
+- The historical reason behind a design decision.
+- The invariants behind code. Breaking one invariant introduces bug.
+
+Often some important theory is not documented. Or it was documented but changed so documentation is outdated. Many of the theories only exist in employee's memory (institutional knowledge).
+
+This doesn't mean they are tacit knowledge that cannot be written. These knowledge can be written, but maintaining documentation is hard. Utility of documentation is hard to quantify, so it's often overlooked.
+
 ### Meeting unknown unknowns
 
 Sometimes an architecture looks right before implementing a software. But during implementation, you often discover **unknown unknowns that invalidate previous assumptions**. Then you find out that architecture is no longer good.

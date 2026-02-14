@@ -10,7 +10,7 @@ tags:
 
 The 3 important facts in Rust:
 
-- **Tree-shaped ownership**. In Rust's ownership system, one object can own many children or no chlld, but must be owned by **exactly one parent**. Ownership relations form a tree. [^about_sharing]
+- **Tree-shaped ownership**. In Rust's ownership system, one object can own many children or no child, but must be owned by **exactly one parent**. Ownership relations form a tree. [^about_sharing]
 - **Mutable borrow exclusiveness**. If there exists one mutable borrow for an object, then no other borrow to that object can exist. Mutable borrow is exclusive.
 - **Borrow is contagious**. If you borrow a child, you indirectly borrow the parent (and parent's parent, and so on). Mutably borrowing one wheel of a car makes you borrow the whole car, preventing another wheel from being borrowed. It can be avoided by **split borrow** which only works within one scope.
 
@@ -44,7 +44,7 @@ The solutions in borrow-checker-unfriendly cases (will elaborate below):
 - **Data-oriented design**. (less OOP)
   - Avoid unnecessary getter and setter.
   - **Use ID/handle to replace borrow**. Use arena to hold data.
-  - No need to put one object's all data into one struct. Can seperate to different places.
+  - No need to put one object's all data into one struct. Can seprate to different places.
 - Do split borrow in outer scope, and pass related fields separately.
 - **Defer mutation**. Turn mutation as commands and execute later.
 - **Avoid in-place mutation**. Mutate-by-recreate. Use `Arc` to share immutable data. Use **persistent data structure**.
@@ -150,7 +150,7 @@ The deeper cause is that:
 
 - **Information is lost in function signature**: the borrowing information becomes coarse-grained and is simplified in function signature. The type system does not allow expressing borrowing only one field, and can only express borrowing the whole object.
   
-  There are propsed solutions: [view type](https://smallcultfollowing.com/babysteps/blog/2025/02/25/view-types-redux/). It encodes field-level borrow information into type [^solving_container_contagious_borrow].
+  There are proposed solutions: [view type](https://smallcultfollowing.com/babysteps/blog/2025/02/25/view-types-redux/). It encodes field-level borrow information into type [^solving_container_contagious_borrow].
 
 [^solving_container_contagious_borrow]: The view type solves struct field contagious borrow but doesn't solve container contagious borrow. To encode the information of borrowing `i`-th element of a `Vec` into type, it requires dependent type, depending on runtime value of `i`. Adding dependent type into language is much more complex.
 
@@ -234,8 +234,10 @@ Other applications of the idea of mutation-as-data:
 - Transactional databases often use write-ahead log (WAL) to help atomicity of transactions. Database writs all mutations into WAL. Then after some time the mutations in WAL will be merged to base data in disk.
 - Event sourcing. Derive the latest state from events and previous checkpoint. Distributes systems often use consensus protocol (like Raft) to replicate log (events, mutations). The mutable data is derived from logs and previous checkpoint.
 - The idea of turning operations into data is also adopted by [io_uring](https://en.wikipedia.org/wiki/Io_uring) and modern graphics APIs (Vulkan, Metal, WebGPU).
-- The idea of turning mutation into insertion is also adopted by ClickHouse. In ClickHouse, direct mutaiton is not performant. Mutate-by-insert is faster, but querying require aggregate both the old data and new mutations.
-- In modern CPUs, writing to memory is (often) appending data to store buffer. The actual memory write is delayed and batched.
+- In ClickHouse, mutation can be achieved by insertion-and-aggregation (e.g. addition becomes sum aggregation, overwriting becomes max-by-timestamp aggregation). [^clickhouse_mutation]
+- In modern CPUs, writing to memory is often putting data to store buffer. The actual memory write is delayed and batched.
+
+[^clickhouse_mutation]: In old versions of ClickHouse, doing direct mutation is not performant, so developers wanting high-throughput mutation have to manually turn updates into aggregations. But modern versions of ClickHouse supports fast direct update, [see also](https://clickhouse.com/blog/updates-in-clickhouse-2-sql-style-updates). It's also implemented using mutation-as-data idea: changes are written to "patch parts". Quering checks patch parts. Patch parts are merged into base data in background.
 
 ## Avoid in-place mutation
 
