@@ -168,7 +168,7 @@ Summarize solutions (workarounds) of contagious borrow issue (elaborated below):
 - Just clone the data (can be shallow-clone).
 - Use **interior mutability** (cells and locks).
 
-[^refactor]: Often the borrow checker issues (including contagious borrow issue) can be workarounded by **refactoring**: reorganize data structure, reorganize code and abstractions. However, **new requirements can easily break existing architecture**, so using refactoring to tackle borrow checker issues will **require frequent large refactoring**. "The most fundamental issue is that the borrow checker _forces_ a refactor at the most inconvenient times." [See also](https://loglog.games/blog/leaving-rust-gamedev/#once-you-get-good-at-rust-all-of-these-problems-will-go-away) . If you don't want frequent refactoring, one solution is to use the combination of: arenas + persistent containers + deferred mutation (deferred event handling).
+[^refactor]: Often the borrow checker issues (including contagious borrow issue) can be workarounded by **refactoring**: reorganize data structure, reorganize code and abstractions. However, **new requirements can easily break existing architecture**, so using refactoring to tackle borrow checker issues will **require frequent large refactoring**. "The most fundamental issue is that the borrow checker _forces_ a refactor at the most inconvenient times." [See also](https://loglog.games/blog/leaving-rust-gamedev/#once-you-get-good-at-rust-all-of-these-problems-will-go-away). If most mutable data is put into arena in the right beginning, then it will require fewer refactoring on requirement change.
 
 ## Defer mutation. Mutation-as-data
 
@@ -1222,7 +1222,7 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
 - Reading/writing to mutable data that's shared between threads need to use atomic, or volatile access ([`read_volatile`](https://doc.rust-lang.org/std/ptr/fn.read_volatile.html), [`write_volatile`](https://doc.rust-lang.org/beta/std/ptr/fn.write_volatile.html)), or use other synchronization (like locking). If not, optimizer may wrongly merge and reorder reads/writes. Note that volatile access themself doesn't establish memory order (unlike Java/C# `volatile`).
 - If the binary data violates the type's constraint, it's undefined behavior. For example, `bool`'s binary data can only be 0 or 1. Making it 2 is undefined behavior. Creating a `str` whose binary data is not valid UTF-8 is also undefined behavior.
 - If you want to `mem::transmute`, it's recommended to use [zerocopy](https://docs.rs/zerocopy/latest/zerocopy/) which has compile-time checks to ensure memory layout are the same. For simple wrapper types, use `#[repr(transparent)]`.
-- A C dynamic library (crate type `cdylib`) will embed its own copy of standard library and allocator. One allocation in one dynamic library should not be deallocated in another dynamic library. The global variables and thread local variables can duplicately co-exist.
+- The Rust crate exposed as C dynamic library (crate type `cdylib`) embeds its own copy of standard library and allocator. One allocation in one dynamic library should not be deallocated in another dynamic library. The global variables and thread local variables can duplicately co-exist.
 - ......
 
 [^miri_pointer_provenance]: When running in tools like [Miri](https://github.com/rust-lang/miri), the pointer provenance will be tracked at runtime.
@@ -1231,7 +1231,7 @@ Modern compilers tries to optimize as much as possible. **To optimize as much as
 
 Unfortunately Rust's syntax ergonomics on raw pointer is currently not good:
 
-- If `p` is a raw pointer, you cannot write `p->field` (like in C/C++), and can only write `(*p).field`
+- If `p` is a raw pointer, you cannot write `p->field` (like in C/C++), and can only write `(*p).field`. (This will be addressed in [field projections](https://github.com/rust-lang/rust-project-goals/blob/main/src/2026/field-projections.md))
 - Raw pointer cannot be method receiver (self).
 - There is no "raw pointer to slice". You need to manually `.add()` pointer and dereference. Bound checking is also manual.
 
