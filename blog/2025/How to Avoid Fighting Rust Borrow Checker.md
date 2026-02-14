@@ -44,7 +44,7 @@ The solutions in borrow-checker-unfriendly cases (will elaborate below):
 - **Data-oriented design**. (less OOP)
   - Avoid unnecessary getter and setter.
   - **Use ID/handle to replace borrow**. Use arena to hold data.
-  - No need to put one object's all data into one struct. Can seprate to different places.
+  - No need to put one object's all data into one struct. Can separate to different places.
 - Do split borrow in outer scope, and pass related fields separately.
 - **Defer mutation**. Turn mutation as commands and execute later.
 - **Avoid in-place mutation**. Mutate-by-recreate. Use `Arc` to share immutable data. Use **persistent data structure**.
