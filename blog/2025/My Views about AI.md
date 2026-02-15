@@ -121,13 +121,17 @@ Most people want to be recognized, praised and emphasized. People need emotional
 
 But emotional value is often scarce in human-to-human interactions. Person A praising/emphasize person B gives emotional values to B. But if A don't sincerely do so but is forced to do so for other reasons, then A consumes their own emotional value.
 
-AI can provide tons of cheap emotional value. AIs are trained to please the user. The AI itself doesn't need to be recognized/respected like a person.
+In human-to-human relationships, often only recriprocal relations can sustain. But AI can provide emotional value without you giving AI anything.
+
+How AI provides emotional value better than human:
+
+- AI has infinite patience. No matter how "silly" the question is.
+- AI is almost always available.
+- You can tell your private matters to AI, and AI won't leak it. Although the data is sent to cloud, the AI companies have no intention of telling your private info to people near you.
+- AI don't judge you. AI itself don't need to gain emotional value by showing its superiority.
+- AI doesn't require user to provide reciprocal emotional value. The AI itself doesn't need to be recognized/respected like a person.
 
 If one person cannot get emotional value from real human interaction, they tend to gain emotional value from AI. Related: [Chatbot psychosis](https://en.wikipedia.org/wiki/Chatbot_psychosis)
-
-Also, AI is always "patient" in responding your questions. No matter how "silly" the question is. Asking entry-level questions to an expert often consume out the expert's patience.
-
-In human-to-human relationships, often only recriprocal relations can sustain. But AI can provide emotional value without you giving AI anything.
 
 ## About AI Coding
 
@@ -177,6 +181,8 @@ In large codebase it's often that after changing A then B also need to be change
 > [Link](https://x.com/stuffyokodraws/status/2013373307291340870): One reason vibe coding is so addictive is that you are always *almost* there but not 100% there. The agent implements an amazing feature and got maybe 10% of the thing wrong, and you are like "hey I can fix this if i just prompt it for 5 more mins" 
 > 
 > And that was 5 hrs ago.
+
+Vibe coding creates feeling of "agency" and is sometimes addictive. See also: [Breaking the Spell of Vibe Coding](https://www.fast.ai/posts/2026-01-28-dark-flow/).
 
 There are so many corner cases in real usage. Not handing one corner case is bug. The demo that seems working fine often breaks under real usages.
 

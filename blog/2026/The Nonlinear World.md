@@ -62,7 +62,7 @@ Examples of concentration and 80/20 rule (Pareto principle):
 - If some work seems huge, if it follows 80/20, doing just 20% of it can get 80% of effects.
 - ...
 
-They exhibit **fat-tailed distributions** instead of normal distributions. 
+They have **fat-tailed distributions** instead of normal distributions. 
 
 For them, the mean and variance may be misleading. Median is more representative than mean. The sample variance is likely very underestimated.
 
@@ -247,7 +247,8 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   - When doctors are judged by patient satisfaction survey, doctors tend to do treatments that improve short-term comfort but sacrifice long-term health.
   - When KPI judges success rate regardless of difficulty, then employee choose to do only easy tasks and avoid hard tasks. **The more non-trivial things one do, the more mistakes one will make**.
   - When salesmen are judged by sale amount, salesperson tend to lie to consumers and hurt company reputation.
-  - Judging AI models by benchmark scores cause AI companies to train models that get high score in benchmark but bad at real-world tasks.
+  - Training AI model to increase user satisfaction score will make the AI sycophant.
+  - When promotion is judged by task difficulty, then people do useless hard things instead of important but easy things.
   - ...
 
 - First-order effect: After improving the steam engine, it requires less coal to do the same work, so the demand of coal will reduce.
@@ -286,9 +287,9 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 ![](./steel-tariff.png)
 
-- First-order effect: Advertisement make the product more popular.
+- First-order effect: Advertizements make the product more popular.
   
-  Second-order effect: Too much ads may annoy customers. A bad ad can hurt the brand. The ad that mentions competitor may actually help competitor.
+  Second-order effect: Too much ads may annoy customers[^sleeper_effect]. A bad ad can hurt the brand. The ad that mentions competitor may actually help competitor.
 
 - First-order effect: Restricting foreign exchange helps maintaining foreign currency reserves.
 
@@ -300,7 +301,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   
   - It may select out the people that are good at competition but bad at coorporating. 
   - The talents tend to seek safe environments instead of ruthless unsafe environment. Even the top talents cannot ensure they don't make any mistake and always win.
-  - A lot of great talents require more resource investment to exhibit ability, but they may lose the ruthless competition because they initially don't win and can never obtain enough resource. [^qianlima]
+  - A lot of great talents require more resource investment to show ability, but they may lose the ruthless competition because they initially don't win and can never obtain enough resource. [^qianlima]
   - Fitness is high-dimensional. High medical fee selects out healthy persons but filters out talents that occasionally get ill.
 
 - First-order effect: Copyright law protects artists because it makes consumers pay artists.
@@ -320,6 +321,8 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   Second-order effect: It inflates asset bubbles and cause more potential risk in the future. It also causes moral hazard and encourages careless risk-takers.
 
 [^qianlima]: Related: [Qianlima](https://en.wikipedia.org/wiki/Qianlima) (千里马). The high-capacity horse require more food to show its capacity. But without showing its capacity it can never get enough food supply. 
+
+[^sleeper_effect]: There is a third-order effect. If consumer hates the ad, seeing more ads hate more, but the ads still leave "footprint" in memory. Due to [sleeper effect](https://en.wikipedia.org/wiki/Sleeper_effect) the customer may start liking the product after some time.
 
 ### In Health and Biology
 
