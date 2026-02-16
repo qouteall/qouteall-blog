@@ -65,6 +65,8 @@ Unfortunately, loss aversion make being unhappy easier and make being happy hard
 
 It's much easier to increase expectation than to reduce expectation. The knowledge of "better things exist" can be "info hazard", as it makes one harder to accept the things that one gets used to.
 
+Loss aversion doesn't contradict the fact that many people don't care about long-term health or cybersecurity. Because these potential risks are very abstract and unclear.
+
 #### "Better safe than sorry" assumption
 
 When seeing an unwanted behavior of others, people tend to assume it's malice, according to "better safe than sorry":
@@ -164,6 +166,8 @@ The overconfidence is sometimes useful:
 
 - Being confident helps persuading others, increasing social impact.
 - **Self-fulfilling prophecy**: being confident makes one more eager to do things and withstand failures. Most success require confidence to overcome failures in the process.
+
+People are often overconfident in their health condition. After the doctor tell people to exercise more, reduce screen time and reduce eating sugar, they tend to not follow after some time, partially because they are overconfident in their health condition.
 
 ### Hindsight bias
 
@@ -928,6 +932,7 @@ The wording of a thing can affect how people perceive it. Examples:
 - "Risk measurement" / "Risk forecast"
 - "Necessary trade-off" / "Sacrifice"
 - "Flood of refugees" / "Exodus"
+- "Be rejected" / "Dodged a bullet"
 
 The content creator could emphasize one aspect and downplay another aspect, and use different wording or art style to convey different opinions. The people reading the information could be easily influenced by the framing subconsciously.
 

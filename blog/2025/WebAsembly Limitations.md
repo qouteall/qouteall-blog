@@ -357,11 +357,9 @@ But the native ecosystem often doesn't care much about code size. Because native
 
 The Wasm toolchain are often based on native toolchains. It uses compilers/linkers of native languages, and uses libraries for native languages. The tooling for reducing code size and lazy loading is not yet mature.
 
-Also, C++ and Rust duplicates machine code for different generic instantiation (called monomorphization). `Vec<u32>` uses different machine code than `Vec<String>` and `Vec<MyType>`. This factor also bloats code size.
+Also, C++ and Rust duplicatedly generate code for different generic instantiation (called monomorphization). `Vec<u32>` uses different Wasm code than `Vec<String>` and `Vec<MyType>`. This factor also bloats binary size. (Modern linkers can do identical code folding (ICF) which can alleviate this issue.) 
 
-The result is that, when using some heavy framework (e.g. game engine), Wasm binary can easily become larger than 30MB, then the web page will take long time to load.
-
-(In debug mode, debugging info also takes a lot of space in Wasm binary.)
+In debug mode, debugging info also takes a lot of space in Wasm binary.
 
 ## Debugging Wasm running in Chrome
 
