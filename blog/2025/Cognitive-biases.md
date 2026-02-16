@@ -1075,7 +1075,7 @@ Note that the famous "age priming" effect (walk more slowly after reminding agin
 
 The placebo effect is also possibly related with priming.
 
-Slot machines have a mechanism: losses disguised as wins (LDWs). When the gambler losses, the machine shows fancy visuals and play exciting sounds. These stimulate the gambler, creating a feeling of win. But when the gambler actually wins, the machine doesn't gives no such effect or much weaker effect. [See also](https://www.greo.ca/Modules/EvidenceCentre/files/Graydon%20et%20al%20(2020)_Do%20losses%20disguised%20as%20wins%20create%20sweet%20spot_final.pdf).
+Slot machines have a mechanism: losses disguised as wins (LDWs). When gambler wins, the machine shows fancy lights and plays sounds, stimulating the gambler. But when the gambler slightly losses, the machine still give light and sound stimulus, creating a feeling of win. Then gambler then feels win more than actual wins.
 
 **Spontaneous trait transfer**: listeners tend to associate what the talker say to the talker, even when talker is talking about another person:
 
