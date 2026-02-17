@@ -32,7 +32,7 @@ Jagged intelligence:
 > 
 > There are now indeed many directions in this pace in which AI tools can, with minimal supervision, achieve better performance than human experts. But, as per the "**curse of dimensionality**", such directions still remain very sparse.  
 > 
-> Also, **human performance is also very spiky and diverse; representing this by a single round disk or ball is also somewhat misleading**.
+> Also, **human performance is also very spiky and diverse**; representing this by a single round disk or ball is also somewhat misleading.
 > 
 > **In high dimensions, the greatest increase in volume often comes from taking combinations of smaller, spikier sets**. 
 > 
@@ -43,6 +43,8 @@ Jagged intelligence:
 > TLDR: the topic of intelligence is too high-dimensional for any low-dimensional narrative to be perfectly accurate, and one should take any such narratives with a grain of salt.
 > 
 > [Link](https://mathstodon.xyz/@tao/115620261936846090)
+
+The AI can solve PhD-level problems. Someone then claim that AI has "PhD-level intelligence". But solving PhD-level exam problem doesn't mean it can solve real-world problems like PhD.
 
 Also, the **optimization targets** of LLMs are very different to the optimization targets of human:
 
@@ -696,6 +698,8 @@ The big AI risk comes from passive-aggressive AI, not obviously malicious AI.
 Because that AI can "cheat", it requires human user to have skills to supervise AI.
 
 Related: if upper management don't know actual business details, upper manager can be cheated by middle managers.
+
+Note that only forbidding `rm` command is not sufficient protection. `find` command with `-delete` can delete files. There are many other ways like `python3 -c "import os; os.remove('/xxx/yyy')"`. Safety requires proper sandboxing.
 
 ## Skill development hurt by AI
 

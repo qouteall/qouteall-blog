@@ -405,7 +405,7 @@ We can learn from the world in an **information-efficient** way: learning from v
 
 The flip side of information-efficient learning is **hasty generalization**. We tend to generalize from very few examples quickly, rather than using logical reasoning and statistical evidence, thus easily get fooled by randomness.
 
-The reality is complex, so **we need to simplify things to make them easier to understand and easier to remember. However, the simplification can get wrong.** There are too many informations in the world. We have some heuristics for filtering information.
+The reality is complex, so **we need to simplify things to make them easier to understand and easier to remember. However, the simplification can get wrong.** There is too much information. We have some heuristics for filtering information.
 
 To simplify, we tend to **make up reasons of why things happen**. A reasonable thing is simpler and easier to memorize than raw complex facts. This process is also compression. [^lossy_compression_ai]
 

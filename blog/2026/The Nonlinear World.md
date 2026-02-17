@@ -14,19 +14,20 @@ unlisted: false
 Examples:
 
 - Matthew effect. Having money helps earning money and vice versa.
-- Network effect. The more people using a platform (like X(Twitter), Facebook) the more people will choose it. Same as flywheel effect.
+- Network effect. The more people using a platform (like X(Twitter), Facebook, Uber) the more usable platform is, so more people use it.
+- Flywheel effect. Some operations are initially costly and inefficient. But keep doing it makes it easier and easier.
 - Economies of scale. Increase production can amortize research costs, marketing costs and other fixed costs. Financing is also easier on larger scale.
-- Virus spread. The more it infects, the quicker it will spread.
-- Self-fulfilling prophecy. Prasing can improve performance. Confidence helps collaboration. Distrust can make things worse (e.g. bank run).
-- Motivation and result. Good result increases motivation and increase the likelyhood of getting good results, vice versa.
-- Attitude can shape behavior. Behavior can shape attitude (One like to persuade self to justify decisions).
+- Virus spread. The more it infects, the more sperading sources.
+- Self-fulfilling prophecy. Confidence helps collaboration and gives motivation. Distrust can make things worse and confirm distrust (e.g. bank run).
+- Motivation and feedback. Good feedback increases motivation and increase the likelyhood of getting good results, vice versa.
+- Attitude can shape behavior. Behavior can shape attitude. Persuade self to justify decisions.
 - Social interaction. One being angry to another may make two both more angry. Also applys to friendliness and trust/distrust.
 - Herd mentality. Some people do something, more people follow.
 - Financial market momentum.
 - Debt can both accelerate growth and accelerate bankruptcy.
 - Information spread (meme spread). The more popular a piece of information is, the more chance it spreads.
 - Avalanche.
-- Cascade failure in software systems.
+- Cascade failure.
 - ...
 
 ## Concentration
@@ -48,23 +49,21 @@ Examples of concentration and 80/20 rule (Pareto principle):
   - Most issues that user see are caused by few common bugs.
   - Most complexity (and bugs) come from very few features and requirements.
   - Most development efforts are for fixing edge cases. Few development efforts are spent on main case handling.
-  - Most time is spent executing few hot code.
-  - Most developers use few languages and frameworks.
 - The most social connections are related to few core people.
 - The most decisions are made by few important information.
 - In financial market:
   - The most volatility concentrates on small time intervals.
-  - The most profit (and loss) come from few important investments.
+  - The most profit and loss come from few important investments.
   - The most market value and trading volume concentrates on few assets.
 - About risk:
   - Most car crashes are caused by few drivers.
   - The most negative impact come from very few severe incidents.
-- If some work seems huge, if it follows 80/20, doing just 20% of it can get 80% of effects.
-- ...
 
 They have **fat-tailed distributions** instead of normal distributions. 
 
 For them, the mean and variance may be misleading. Median is more representative than mean. The sample variance is likely very underestimated.
+
+If some work seems huge, if it follows 80/20, doing just 20% of it can get 80% of effects. However note that not all work can be 80-20-ed.
 
 ## Self-balancing feedback loops and cycles
 
@@ -86,15 +85,15 @@ Examples:
 - The Kondratiev cycle. New technology drives growth and investments. The application of new teconology matures and growth plateaus, creating excess investment, excess debts and inflation. Then recession comes. A new radical innovation drives a new cycle.
 - The demographic cycle. Ancient China suffers from [Malthusian trap](https://en.wikipedia.org/wiki/Malthusianism): Population grows, farmland per capita reduces, food supply cannot catch up population. When it's close to threshold, a natural disaster can cause famine (and war), reducing populatoin.
 - Economies of scale eventually faces diminishing marginal return. And larger scale makes management harder.
-- Over-concentration of wealth and power reduces efficiency and stability of society. The inefficient and unstable societies tend to eventually either collapse or reform (or be colonized). Religions, culture and inter-society connection play a role in controlling inequality.
+- Over-concentration of wealth and power reduces efficiency and stability of society.
 - Large companies are likely to be inefficient due to bureaucracy.
 - The innovator's dillema. Large companies are bad at innovation.
 - "Hard times create strong men. Strong men create good times. Good times create weak men. Weak men create hard times." ― G. Michael Hopf
-- Boredom with memes. Talking too much about one thing on internet cause boredom, making people move attention. Attention span on internet is short.
+- Boredom with memes. Attention span on internet is short. No meme can keep dominating.
 - Elo-score-based matching in PvP games. If you lose, you will match with lower-skilled players and be more likely to win, and vice versa.
 - Cry wolf syndrome. False warning make people less and less sensitive.
 
-(Side note: The phrase "negative feedback loop" means self-balancing feedback loop, but sometimes is also (mis)used to describe "self-reinforcing feedback loop with negative effect" like financial crisis.)
+Note that "negative feedback loop" means self-balancing feedback loop, but sometimes it is also (mis)used to describe "self-reinforcing feedback loop with negative effect" like financial crisis.
 
 The force behind a self-balancing feedback loop may drive self-reinforcing feedback loop in the next stage of cycle.
 
@@ -119,33 +118,10 @@ Note that nonlinear systems are complex. They are more than just two kinds of fe
 
 In nonlinear systems, there are often the accumulation of potential and the sudden release of them:
 
-
-- Accumulation: Development of a technology without widespread adoption.
-  
-  Release: Once a techonology is improved up to a threshold, it may suddenly become popular and get deployed widely.
-
-- Accumulation: Overvaluation of assets.
-  
-  Release: A sudden bubble burst leads to market corrections.
-  
-  The reverse also applied. Undervalued asset price may one day suddenly grow.
-
-
-- Accumulation: Geological plates shifting builds up stress along fault lines.
-  
-  Release: The stress is suddenly released as earthquake.
-
-- Accumulation: Gradual accumulation of pollution without immediate consequences.
-  
-  Release: A large disaster, like [the Great Smog of London](https://en.wikipedia.org/wiki/Great_Smog_of_London), shows the accumulated environmental damage.
-  
-- Accumulation: Reduced safety investment for years without immediate consequences.
-
-  Release: A large incident shows the consequence of reduced safety investment.
-
-- Accumulation: Reality has silently shifted greatly.
-
-  Release: A special event showing it. The knowledge suddenly becomes common knowledge. Stock price may move a lot quickly.
+- A technology used to be bad but keeps improving. Once it improves above a threshold, it suddenly becomes economically valuable and get deployed widely.
+- An undervalued asset's fundamental keeps improving. Once there is some public event showing it, its price may suddenly grow a lot. Vice versa for bubble assets.
+- A system cuts cost by reducing safety investments. The existing safety investments gradually decay. When it decays to a point, a random event can trigger a large incident.
+- ...
 
 There are emergent properties that only emerge if scale becomes big enough:
 
