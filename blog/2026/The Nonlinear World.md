@@ -77,13 +77,13 @@ Examples:
 - In financial market:
   - Price grow create potential for selling and vice versa. Market momentum cannot continue forever (although it may be much longer than expected).
   - Profit reduces as trading size grows when it drains up liquidity.
-  - If one financial trading strategy is effective and many people use it, then that strategy will cease to be effective. If everyone believe that one strategy is ineffective, then it may be actually effective. Market is **anti-inductive**.
+  - If one financial trading strategy is effective and many people use it, then that strategy will cease to be effective. If everyone believe that one strategy is ineffective, then it may be actually effective. Market is [**anti-inductive**](https://www.lesswrong.com/posts/h24JGbmweNpWZfBkM/markets-are-anti-inductive).
   - Low volatility induce higher leverage that potential increase volatility. High volatility provide potential profit for hedging that may lead to reduced volatility.
   - Two uncorrelated assets may be commonly diversified together that may potentially increase their correlation. 
 - The debt cycle. Economy growth parallels debt growth. Higher debt impose higher risk and more interest cost. Then debt collapses and inefficient companies bankrupt. The economy becomes more frugal and more efficient. The debt level becomes low again.
 - The cycle of money supply. The Federal Reserve keeps trying to balance between controlling inflation and providing enough money (to keep economy healthy).
 - The Kondratiev cycle. New technology drives growth and investments. The application of new teconology matures and growth plateaus, creating excess investment, excess debts and inflation. Then recession comes. A new radical innovation drives a new cycle.
-- The demographic cycle. Ancient China suffers from [Malthusian trap](https://en.wikipedia.org/wiki/Malthusianism): Population grows, farmland per capita reduces, food supply cannot catch up population. When it's close to threshold, a natural disaster can cause famine (and war), reducing populatoin.
+- The demographic cycle. Ancient China suffers from [Malthusian trap](https://en.wikipedia.org/wiki/Malthusianism): Population grows, farmland per capita reduces, food supply cannot catch up population. When it's close to threshold, a natural disaster can cause famine (and war), reducing population.
 - Economies of scale eventually faces diminishing marginal return. And larger scale makes management harder.
 - Over-concentration of wealth and power reduces efficiency and stability of society.
 - Large companies are likely to be inefficient due to bureaucracy.
@@ -102,15 +102,15 @@ The **"competition"** between self-reinforcing feedback loops and self-balancing
 |                             | Self-reinforcing                                                                            | Self-balancing                                                                     |
 | --------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | Population growth           | Exponential growth                                                                          | Limited food supply, living resources and jobs; Higher competition                 |
-| Asset price grow            | Confidence spread                                                                           | Long force depletes; Short force accumulates                                       |
-| Asset price drop            | Panic spread                                                                                | Short force depletes; Long force accumulates                                       |
+| Asset price grow            | Trend following investments; Fear of missing out; Overconfidence; Leverage                  | Long force depletes; Short potential accumulates                                   |
+| Asset price drop            | Panic; Margin call                                                                          | Short force depletes; Long potential accumulates                                   |
 | Debt growth and inflation   | Economy growth; Facilitates investments and debt                                            | Cost of excess invstment and debt; Monetary tightening for keeping currency credit |
 | Debt collapse and deflation | Cadcade credit collapse during financial crisis; Lose of confidence                         | Countermeasures for crisis; Fiscal and monetary stimulus                           |
 | Monopoly                    | Matthew effect; Economies of scale; Brand recognition                                       | Antitrust; Safety concerns; Innovator's dillema; Bureaucracy within large company  |
 | Scaling of production       | Amortize cost                                                                               | Harder to manage; Diminishing marginal return; Higher risk                         |
 | Virus spread                | The more it infects, the quicker it spreads                                                 | Immunity; Societal countermeasures; Medication; Natural selection                  |
 | Spread of information       | The more people know it, the quicker it spreads; Fad following; Algorithmic recommendataion | Saturation of acceptors; Lose of interest                                          |
-| Scaling in AI               | Scaling gives better performance                                                            | Higher cost in training and inference                                              |
+| Scaling in AI               | Scaling gives better performance                                                            | Higher cost in training and inference; Dinimishing marginal utility                |
 
 Note that nonlinear systems are complex. They are more than just two kinds of feedback loops.
 
@@ -169,12 +169,11 @@ For a long cycle that spans decades (e.g. macro debt cycle), entering the next s
 
 > History and societies do not crawl. They make jumps.
 > 
-> ― _The Black Swan_
+> \- _The Black Swan_
 
 > There are decades where nothing happens; and there are weeks where decades happen.
 > 
-> ― Vladimir Ilyich Lenin
-
+> \- Vladimir Ilyich Lenin
 
 Experiences may be obsolete or even harmful after a paradigm shift. Ideas, methods, cultures and systems may only work in specific paradigms.
 
@@ -210,6 +209,10 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: The UI designer may redesign the UI to justify their value. The users that get used to old UI may be frustrated by the new unfamiliar UI. The new UI may sacrifice usability for aesthetics.
 
+- First-order effect: Increasing the sensitivity of alarm improves security because it can catch more anomalies.
+
+  Second-order effect: Increasing alarm sensitivity also increases false alarms. Cry wolf syndrome. People are tired of false alarms and care less about alarms.
+
 ### In Economy and Finance
 
 - First-order effect: The British government in colonial India provided bonus for dead cobra. The bonus could incentivize cobra hunting.
@@ -225,6 +228,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   - When salesmen are judged by sale amount, salesperson tend to lie to consumers and hurt company reputation.
   - Training AI model to increase user satisfaction score will make the AI sycophant.
   - When promotion is judged by task difficulty, then people do useless hard things instead of important but easy things.
+  - AB test shows that adding annoying popups and manipulative texts increase conversion rate. However it drives away high-value costumers.
   - ...
 
 - First-order effect: After improving the steam engine, it requires less coal to do the same work, so the demand of coal will reduce.
@@ -365,7 +369,12 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: Knowledge helps decision-making.
 
-  Second-order effect: Believing too much on a piece of knowledge makes one stuck in **confirmation bias** and stay furthur from truth. It may also make one distract in unimportant things. Green lumber fallacy.
+  Second-order effect: 
+  
+  - Believing too much on a piece of knowledge makes one stuck in **confirmation bias** and stay furthur from truth. 
+  - Knowing more about possible risks make one hesitate in making decisions, losing agency.
+  
+  Green lumber fallacy. Deep understanding is often not required for real-world success. The idiom "knowledge is power" is not always true. The knowledge also includes when to not use knowledge.
 
 ### In Cybersecurity
 
@@ -406,14 +415,14 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 > In short, the root cause was a new telemetry service configuration that unexpectedly generated massive Kubernetes API load across large clusters, overwhelming the control plane and breaking DNS-based service discovery.
 > 
-> — [Incident Report for OpenAI](https://status.openai.com/incidents/ctrsv3lwd797)
+> \- [Incident Report for OpenAI](https://status.openai.com/incidents/ctrsv3lwd797)
 
 > Once a system reaches a certain level of reliability, most major incidents will involve:
 > 
 > - A manual intervention that was intended to mitigate a minor incident, _or_
 > - Unexpected behavior of a subsystem _whose primary purpose was to improve reliability_
 > 
-> — [A conjecture on why reliable systems fail](https://surfingcomplexity.blog/2017/06/24/a-conjecture-on-why-reliable-systems-fail/)
+> \- [A conjecture on why reliable systems fail](https://surfingcomplexity.blog/2017/06/24/a-conjecture-on-why-reliable-systems-fail/)
 
 - First-order effect: Static analysis tools are good for improving security.
 
@@ -421,7 +430,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 > The bug is due to a heap-based buffer overflow weakness accidentally introduced in glibc 2.37 in August 2022 and later backported to glibc 2.36 when addressing a less severe vulnerability tracked as CVE-2022-39046.
 > 
-> — [New Linux glibc flaw lets attackers get root on major distros](https://www.bleepingcomputer.com/news/security/new-linux-glibc-flaw-lets-attackers-get-root-on-major-distros/)
+> \- [New Linux glibc flaw lets attackers get root on major distros](https://www.bleepingcomputer.com/news/security/new-linux-glibc-flaw-lets-attackers-get-root-on-major-distros/)
 
 
 ## Unity of opposites
