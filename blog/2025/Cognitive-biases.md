@@ -167,6 +167,8 @@ The overconfidence is sometimes useful:
 - Being confident helps persuading others, increasing social impact.
 - **Self-fulfilling prophecy**: being confident makes one more eager to do things and withstand failures. Most success require confidence to overcome failures in the process.
 
+If there is a risky innovation that has only 1% success rate, and if everyone is rational and is not overconfident, then no one will do it. Overconfidence is sometimes beneficial for society.
+
 People are often overconfident in their health condition. After the doctor tell people to exercise more, reduce screen time and reduce eating sugar, they tend to not follow after some time, partially because they are overconfident in their health condition.
 
 ### Hindsight bias
@@ -1376,6 +1378,8 @@ Mental resting is different to body resting. Intense thinking when lying on the 
 > Before you try to increase your willpower, try to decrease the friction in your environment.
 > 
 > \- James Clear, [Link](https://x.com/JamesClear/status/1883877771618738682)
+
+For normal people, doing a task consumes willpower. But if one loves doing the task, then one gains willpower instead of consuming when doing the task. It's a big advantage.
 
 ## Memory distortion
 

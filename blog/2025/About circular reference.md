@@ -675,16 +675,7 @@ Rust has a lot of constraints to limit sets of programs to an analyzable subset,
 
 SQL is not Turing-complete when not using recursive common table extension (`with recursive ...`) and other procedural extensions (e.g. `while`).
 
-The proof languages describe both program and proof, according to [Curry–Howard correspondence](https://en.wikipedia.org/wiki/Curry%E2%80%93Howard_correspondence):
-
-- The propositions, like `1 = 1`, `1 + 1 = 2`, correspond to types. If you can obtain a value of that type, you can prove it (what's inside the value is not important for proof, only the type is important).
-- The function types, like `(x: Integer) -> (x + 0) = x` represent a proposition `x + 0 = x`. Pass argument `1` to that function, you get `(1 + 0) = 1`
-- If you can write a program of that type, without using any side effect , and the program halts, then that theorem corresponding to type is proved.
-- A proof can rely on another proof. For example `((x + 1) + 1) + y = 1 + ((x + 1) + y)` relies on `(x + 1) + y = 1 + (x + y)`, recursively "call function" until the basic case `(0 + 1) + y = 1 + (0 + 1)`
-- To prove theorem corresponding to type `X`, "run" a program that return `X`. When the program normally finishes and output a value of type `X`, it's proved. 
-- If the program don't halt, then value of type `X` can never be obtained.
-- That program should not use any side effect (mutation, fail, external IO, randomness, etc.).
-- In reality, you just need to ensure the program halts and don't need to really execute the program.
+The proof languages describe both program and proof, according to [Curry–Howard correspondence](https://en.wikipedia.org/wiki/Curry%E2%80%93Howard_correspondence). The propositions, like `1 + 1 = 2`,  `x -> (x + 0 = x)`, correspond to types. Getting a value of a type is treated as proving the proposition corresponding to the type. It only works in pure functional programming where there is no side effect (e.g. IO, mutation) or randomness. It also requires the program to always halt given any valid input, because a program that deadloops cannot compute the output value.
 
 The proof languages, like Lean and Idris, are not Turning-complete. Because a valid proof require the corresponding program to halt. They have special mechanisms (halt checker) to ensure that program eventually halts.
 
@@ -702,6 +693,12 @@ How raw form of Ethernet do routing:
 It works fine when there is no cycle in network topology. But when there is a cycle, the broadcast will come back to the same switch but from another interface. It not only messes up the self-learning of MAC address table, but can also cause the switch to broadcast the same packet again, and again, causing boradcast storm. 
 
 This is solved in spanning tree protocol, where switches share topology information with each other, then break the loop.
+
+## Networking protocol circular dependency
+
+- DNS over HTTPS (DoS). Normally HTTPS requires DNS to resolve domain name to IP address. But DoS requires using HTTPS. It's fine because HTTPS allows sending request using raw IP address, and certificates can work for raw IP address.
+- BGP. BGP is used for communicating routing-related information, which is used in IP protocol. But BGP uses TCP, which depends on IP. This is fine because BGP's external commmunication only targets directly-connected neighbors.
+- Network time security (NTS) protocol depends on TLS. But TLS verifies certificate using current time. If current time is outside of certificate valid range it cannot sync time. Can be workarounded by manually setting time to current time.
 
 ## Service overload feedback loop
 

@@ -74,7 +74,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - `text-align` aligns text and inline things, but doesn't align block elements (e.g. normal divs).
 - `text-align: center` will not center when content is too wide. It will align left in that case. [See also](https://stackoverflow.com/questions/6618648/can-overflow-text-be-centered)
 - By default `width` and `height` doesn't include padding and border. `width: 100%` with `padding: 10px` can still overflow the parent. `box-sizing: border-box` make the width/height include border and padding. Note that `width` includes scrollbar regardless of `box-sizing`.
-- The `<html>` and `<body>` are two different elements.
+- The `<html>` and `<body>` and viewport are 3 different things.
   - Making web page height fill viewport requires both `html` and `body` to be `height: 100%`. (Another solution is `height: 100dvh`)
   - Viewport propagation. For background-related styles and `overflow`, applying to either `body` or `html` will all make them apply to viewport. But if both `html` and `body` specifies background, `<body>`'s background won't propagate to viewport and only cover `<body>` area. If both `html` and `body` have `overflow: scroll` then there will be two scrollbars.
 - About override:
@@ -120,7 +120,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
   - Rust use UTF-8 for in-memory string. `s.len()` gives byte count. Rust does not allow directly indexing on a `str` (but allows subslicing). `s.chars().count()` gives code point count. Rust is strict in UTF-8 code point validity.
   - Java, C# and JS's string encoding is similar to UTF-16 [^string_encoding]. String length is code unit count. Indexing works on code units. Each code unit is 2 bytes. One code point can be 1 code unit or 2 code units.
   - In Python, `len(s)` gives code point count. Indexing gives a string that contains one code point.
-  - C++ `std::string` and Golang string have no constraint of encoding and is similar to byte array.
+  - C++ `std::string` and Golang `string` have no constraint of encoding and are similar to byte arrays.
   - No language mentioned above do string length and indexing based on grapheme cluster.
   - In SQL, `varchar(100)` limits 100 code points (not bytes).
 - When reading text data in chunk, don't convert individual chunks to string then concat, as it may cut inside a UTF-8 code point.
@@ -155,7 +155,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
   
   If a JSON contains an integer larger than that, and JS deserializes it using `JSON.parse`, the number in result will be likely inaccurate. The workaround is to use other ways of deserializing JSON or use string for large integer. [^safe_int_timestamp]
   
-- Floating-point is 2-based. It cannot accurately represent most decimals. 0.1+0.2 gets 0.30000000000000004 . [^excel_money].
+- Floating-point is 2-based. It cannot accurately represent most decimals. 0.1+0.2 gets 0.30000000000000004 .[^excel_money]
 - Associativity law and distribution law doesn't strictly hold because of precision loss. See also: [Defeating Nondeterminism in LLM Inference](https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference/), [Taming Floating-Point Sums](https://orlp.net/blog/taming-float-sums/)
 - Division is much slower than multiplication (unless using approximation). Dividing many numbers with one number can be optimized by firstly computing reciprocal then multiply by reciprocal.
 - These things can make different hardware have different floating point computation results:
@@ -386,7 +386,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - `cmd > file 2>&1` make both stdout and stderr go to file. But `cmd 2>&1 > file` only make stdout go to file but don't redirect stderr.
 - There is a capability system for executables, apart from file permission sytem. Use `getcap` to see capability.
 - Unset variables. If `DIR` is unset, `rm -rf "$DIR/"` becomes `rm -rf "/"`. Using `set -u` can make bash error when encountering unset variable. 
-- Bash has caching between command name and file path of command. If you move one file in `$PATH` then using that command gives ENOENT. Refresh cache using `hash -r`
+- Bash has caching between command name and file path of command. If you move one file in `$PATH` then invoking it in command gives ENOENT. Refresh cache using `hash -r`
 - Using a variable unquoted will make spaces separate it into different arguments. Also it will make its line breaks treated as space.
 - `set -e` can make the script exit immediately when a sub-command fails, but it doesn't work inside function whose result is condition-checked (e.g. the left side of `||`, `&&`, condition of `if`). [See also](https://stratus3d.com/blog/2019/11/29/bash-errexit-inconsistency/)
 - `fork()` creates a new process that has only one thread. If another thread holds lock during forking, that lock will never release. `fork()` also has potential of security issues.
@@ -441,7 +441,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 
 ### Git
 
-- Rebase and squashing rewrite history. If local already-pushed history is rewritten, normal push will give conflicts, need to use force push. If remote history is rewritten, normal pull will give conflicts, need to use `--rebase` pulling.
+- Rebasing and squashing rewrite history. If local already-pushed history is rewritten, normal push will give conflicts, need to use force push. If remote history is rewritten, normal pull will give conflicts, need to use `--rebase` pulling.
   - Force pushing with `--force-with-lease` can sometimes avoid overwriting other developers' commits. But if you fetch then don't pull, `--force-with-lease` cannot protect.
 - Sometimes rebasing requires you to solve the same conflict many times (because multiple commits touch the same conflict line). Squashing changes before rebasing can avoid it.
 - After commiting files, adding these files into `.gitignore` won't automatically exclude them from git. To exclude them, delete them.
@@ -452,9 +452,11 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - In GitHub, if there is a private repo A and you forked it as B (also private), then when A becomes public, the private repo B's content is also publicly accessible, even after deleting B. [See also](https://trufflesecurity.com/blog/anyone-can-access-deleted-and-private-repo-data-github).
 - GitHub by default allows deleting a release tag, and adding a new tag with same name, pointing to another commit. It's not recommended to do that. It breaks build system caching. It can be disabled in rulesets configuration. For external dependencies, hardcoding release tag may be not enough to prevent supply chain risk.
 - `git stash pop` does not drop the stash if there is a conflict.
-- In Windows, Git often auto-convert cloned text files to be CRLF line ending. But in WSL many software (e.g. bash) doesn't work with files with CRLF. Using `git clone --config core.autocrlf=false -c core.eol=lf ...` can make git clone as LF.
+- In Windows, Git often auto-convert cloned text files to be CRLF line ending. But in WSL many software (e.g. bash) doesn't work with files with CRLF. [^git_clone_crlf]
 - macOS auto adds `.DS_Store` files into every folder. It's recommended to add `**/.DS_Store` into `.gitignore`.
 - In Windows and macOS, file name is case-insensitive. Renaming file that only change letter case won't be tracked by git (renaming using `git mv` works normally).
+
+[^git_clone_crlf]: Using `git clone --config core.autocrlf=false -c core.eol=lf ...` can make git clone as LF.
 
 ### Networking
 
