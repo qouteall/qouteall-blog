@@ -46,6 +46,7 @@ A lot of debate happen because same word has different meanings to different peo
 - Balance. Debt / Asset.
 - Nondeterministic / Random. Nondeterministic means it's not determined but doesn't necessarily follow a specific statistical distribution. It may be related to timing, memory layout, implementation detail, etc. Nondeterministic is different to random.
 - Or. In English, "or" usually means XOR. "A or B" means either A or B but not both. However the logical "OR" means at least one option is true, including the case that both is true.
+- Size, length. Sometimes mean element count. Sometimes mean total byte count. Similarily, "offset" can mean element index offset or byte address offset.
 
 [^rust_unsafe]: The meaning of `unsafe` in Rust is close to the 3rd interpretation. `unsafe` Rust code can be safe. But some people understand "unsafe" as 2nd interpretation. [See also](https://github.com/rust-lang/rfcs/pull/117)
 

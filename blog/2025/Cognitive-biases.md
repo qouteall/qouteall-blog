@@ -72,7 +72,7 @@ Loss aversion doesn't contradict the fact that many people don't care about long
 When seeing an unwanted behavior of others, people tend to assume it's malice, according to "better safe than sorry":
 
 - If that unwanted behavior is indeed malice but one don't assume it's malice, then one is in danger.
-- If the unwanted behavior is not malice but one assumes it's malice, it may cause one to miss an opportunity. But it's safer.
+- If the unwanted behavior is not malice but one assumes it's malice, it may cause missing an opportunity. But it's safer.
 
 But assuming every cue is malice is bad for mental health. There is a saying:
 
@@ -86,7 +86,7 @@ Believing a false conspiracy theory often can effectively reduce risk. Conspirac
 
 Bad news travels fast. Tragedy news can gain more attention than happy news:
 
-- Sharing happy news is often seen as bragging or advertisement, because the happy thing applies to other people. But sharing tragedy news signals care and emphathy.
+- Sharing happy news is often seen as bragging or advertisement, because the happy thing applies to other people. But sharing tragedy news signals care and empathy.
 - Tragedy news give more information about potential risk. When reading a tragedy, the reader tend to think "why the tragedy happen? what should I do to avoid it?"
 - Negaive emotion is more persistent due to loss aversion.
 - In a group, sharing bad news caused by group's common enemy can strengthen the social approval in group.
@@ -253,7 +253,7 @@ Overjustification effect: Providing external reward reduces internal motivation.
 
 Being helped doesn't always elicit gratitude. The one being helped may feel being inferior in social status, thus helping may cause hatred, especially when reciprocal helping cannot be done.
 
-Ironic process theory: Trying to suppress a thought can backfire. In "Don't think about elephant", the sentence literally contains "elephant", so it will provoke thoughts about "elephant". The solution is to think about other things rather than suppressing the thought. Replacement is more effective than negation.
+Ironic process theory: Trying to suppress a thought can backfire. In "Don't think about elephant", the sentence literally contains "elephant", so it will provoke thoughts about "elephant". Actively suppressing a thought will fail. But trying to use other things to distract away from a thought is also suppressing, so it will also fail. Ironically, after accepting the thought and stop wanting to kill it, the thought can become boring and weakens. 
 
 People love to nitpick others' work. There is a trick: before presenting a solution to client, add obvious minor flaws to the solution. The client will point them out and get more satisfied. ([The queen's duck](https://bwiggs.com/notebook/queens-duck/))
 
@@ -596,6 +596,8 @@ Internet has indeed changed the world. But the dot com bubble burst. It's just t
 > The absolute hardest thing to convince people of is that the optimal amount of fraud in a system is not zero. Obviously it would be ideal if there were no fraud, but at some point the cost of catching it outweighs the benefits.
 > 
 > \- Megan McArdle, [Link](https://x.com/asymmetricinfo/status/1923112215193714760)
+
+Between two opposing groups, proposing middle ground will often be seen as enemy by both sides.
 
 We often underestimate the time and efforts required to do one thing (due to Dunning-Kruger effect etc.). When that thing cannot be done in estimated time and efforts, binary thinking may make us overestimate the difficulty and give up.
 
@@ -1407,7 +1409,7 @@ People usually remember the "special" things well. This is an information compre
 
 ## Information addiction and curiosity
 
-People seeks information that they are interested in. The seeking of interesting information drives **both curiosity and information addiction**.
+People seek information that they are interested in. The seeking of interesting information drives **both curiosity and information addiction**.
 
 > As with food, we spent most of our history deprived of information and craving it; now we have way too much of it to function and manage its entropy and toxicity. 
 >
@@ -1467,6 +1469,8 @@ What's more, social media may make people:
 Getting information from real practice is often better than keep browsing information from internet.
 
 ### Natural selection of memes
+
+Note that "meme" here generally means the information that spreads itself, not limited to entertainment internet memes.
 
 **Social medias are doing "natural selection" to memes**. The recommendation algorithm makes the posts that induce more interactions (likes and arguing) more popular. **It selects the memes that are good at letting human to spread them**.
 

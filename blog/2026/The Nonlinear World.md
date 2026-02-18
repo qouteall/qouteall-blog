@@ -376,6 +376,10 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   
   Green lumber fallacy. Deep understanding is often not required for real-world success. The idiom "knowledge is power" is not always true. The knowledge also includes when to not use knowledge.
 
+- First-order effect: Punishing mistakes will push people make fewer mistakes.
+
+  Second-order effect: It cause one to be scared of practicing, thus gain less experience. Lacking of experience make them more likely to make mistakes.
+
 ### In Cybersecurity
 
 - First-order effect: Forcing the user to login again every 5 minutes can improve security.
