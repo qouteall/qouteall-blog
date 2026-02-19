@@ -394,15 +394,6 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   
   Second-order effect: The user may reduce the memory pressure by using regular passwords (like AAABBB111, CCCDDD222), to avoid the trouble of reseting password every time.
 
-- First-order effect: Encryption and 2FA (two-factor authentication) helps security.
-  
-  Second-order effect: If you lose the key and didn't backup the key, you may be unable to access the encrypted file. 2FA makes it harder to access account if you lost your phone and didn't backup. 
-
-- First-order effect: Antimalwares improve security.
-
-  Second-order effect: Antimalwares may break the system. [CrowdStrike incident](https://en.wikipedia.org/wiki/2024_CrowdStrike-related_IT_outages) broke 8.5 million computers.
-
-
 ### In Software Development
 
 - First-order effect: Adding developers to a software project can accelerate it.
