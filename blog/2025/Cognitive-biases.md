@@ -91,6 +91,8 @@ Bad news travels fast. Tragedy news can gain more attention than happy news:
 - Negaive emotion is more persistent due to loss aversion.
 - In a group, sharing bad news caused by group's common enemy can strengthen the social approval in group.
 
+Tragedy stories often feel more "true" than happy stories.
+
 Browsing social media can make one stuck in negative emotions.
 
 For fictions it's different. Popular non-literature fictions often contain the transition from tragedy to happy ending.

@@ -224,6 +224,19 @@ Having more informative naming also helps human.
 
 Also AI-written document is sometimes technically correct but stress the unimportant thing and omit the important thing.
 
+Naming in coding is important. It's even more important in AI coding.
+
+Sometimes the name in code is misleading. Some examples:
+
+- Function `create_xxx` not only creates xxx but also mutates yyy.
+- Function `change_xxx` doesn't change it but enqueues a task to apply change later.
+- `patch_file` doesn't do the patching but only gives the path of "patch file".
+- One naming is originally appropriate, but after some other change its meaning is generalized.
+
+### Comment implicit "links" in code
+
+Often the AI only do a local change and don't care about other places, then it breaks an implicit "link". For example, some type definition corresponds to some JSON that's used by other external program. Some field name correspond to something in config file. These implicit "links" should be commented on both sides so that AI will know it.
+
 ### Feels faster but maybe actually slower
 
 In this study: [Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity](https://arxiv.org/pdf/2507.09089), developers feels that using AI make developing faster but it's actually slower.
@@ -503,6 +516,14 @@ The current solution is to let model proactively see things using tool call. It 
 **Most knowledge work is bottlenecked in finding useful information in the sea of information**, rather than raw reasoning. High signal-to-noise ratio context is important.
 
 Once the useful infomation has been found, doing reasoning on them is often simple. But if you don't have the useful information, pure reasoning can't give useful results.
+
+Different kinds of coding tasks:
+
+- High-reasoning, low-context. Example: LeetCode hard problems. The problem itself is self-contained and has small context. A new kind of LeetCode problem requires large amount of reasoning to solve [^leetcode].
+- Low-reasoning, high-context. Example: changing a large existing codebase. If you are familiar with the codebase (know context) then doing the correct change is easy and requires few reasoning. But if you don't know the context, reasoning alone cannot tell how to change it correctly.
+- High-reasoning, high-context. Open-ended hard problems. Understanding the problem requires knowing many domain knowledge (context is large). It also requires large amounts of reasoning (many possible solution paths to explore).
+
+[^leetcode]: If one firsly meets the problem it requires a lot of reasoning to solve. However, if one memorized similar problems, one can directly solve using memorized solution.
 
 The same applies to programming in large codebases. If you don't know some implicit business logic or hidden invariants, changing code will likely break things. But if you know them, it only requires simple reasoning to avoid breaking them.
 
