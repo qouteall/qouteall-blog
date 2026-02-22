@@ -226,7 +226,7 @@ The main thread can be blocked using [JS Promise integration](https://github.com
 
 Also, as previously mentioned, if the canvas drawing code suspends (using JS Promise integration), the half-drawn canvas will be presented to web page. This can be workarounded by using [offscreen canvas](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas), drawn in web worker. 
 
-The recommended solution is async lock. There is [`Atomics.waitAsync()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Atomics/waitAsync) API for async locking.
+For locking, the recommended solution is async lock. There is [`Atomics.waitAsync()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Atomics/waitAsync) API for async locking.
 
 ### Recreating Wasm instance
 
@@ -330,9 +330,9 @@ The original version of Wasm only supports 32-bit address and up to 4GiB linear 
 
 In Wasm, a linear memory has a finite size. Accessing an address out of size need to trigger a [trap](https://webassembly.github.io/spec/core/intro/overview.html) that aborts execution. Normally, to implement that range checking, the runtime need to insert branches for each linear memory access (like `if (address >= memorySize) {trap();}`). 
 
-But Wasm runtimes have an optimization: map the 4GB linear memory to a virtual memory space. The out-of-range pages are not allocated from OS, so accessing them cause error from OS. Wasm runtime can use signal handling to handle these error. No range checking branch needed.
+But Wasm runtimes have an optimization: reserve 4GB (and more) space virtual memory address space. The out-of-range pages are not allocated from OS, so accessing them cause error from OS. Wasm runtime can use signal handling to handle these error. No range checking branch needed. It uses hardware and OS functionality for range checking.
 
-That optimization doesn't work when supporting 64-bit address. There is no enough virtual address space to hold Wasm linear memory. So the branches of range checking still need to be inserted for (almost) every linear memory access. This costs performance.
+That optimization doesn't work when supporting 64-bit address. The virtual address space for 64-bit linear memory is as large as host process virtual address space. So the branches of range checking still need to be inserted for (almost) every linear memory access. This costs performance.
 
 See also: [Is Memory64 actually worth using?](https://spidermonkey.dev/blog/2025/01/15/is-memory64-actually-worth-using.html)
 
@@ -340,8 +340,9 @@ See also: [Is Memory64 actually worth using?](https://spidermonkey.dev/blog/2025
 
 Generally, WebAssembly runs slower than native applications compiled from the same source code. Because of many factors:
 
-- The previously mentioned linear memory bounds check.
 - JIT (just-in-time compilation) cost. Native C/C++/Rust applications can be AOTed (ahead-of-time compiled). V8 firstly use a quick simple compiler to compile Wasm into machine code quickly to improve startup speed (but the generated machine code runs slower), then use a slower high-optimization compiler to generated optimized machine code for few hot Wasm code. [See also](https://v8.dev/docs/wasm-compilation-pipeline). That optimization is profile-guided (target on few hot code, use statistical result to guide optimization). Both profiling, optimization and code-switching costs performance.
+- The previously mentioned linear memory bounds check for memory64.
+- Shadow stack cost.
 - Multi-threading cannot use release-acquire memory ordering. Atomics use sequential-consistent ordering. [See also](https://webassembly.github.io/threads/core/exec/relaxed.html). This is addressed by [shared-everything-threads proposal](https://github.com/WebAssembly/shared-everything-threads/blob/main/proposals/shared-everything-threads/Overview.md#memory-model-considerations)
 - Limited access to hardware functionality, such as memory prefetching and some special SIMD instructions. Note that Wasm already support many common SIMD instructions.
 - Cannot access some OS functionalities, such as `mmap`.

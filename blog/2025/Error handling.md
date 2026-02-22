@@ -59,7 +59,11 @@ when is poisoning useful: use lock to protect mutable data structure. if there i
 
 when poisoning is harmful: for a web server, when there is already database transaction that do proper rollback, so panicking doesn't make the data be invalid. in this case poisoning is not only useless but also harmful. the poisoned mutex in memory prevent new requests from accessing data, which hurts web server reliability.
 
+note that poisoning only alerts possible data corruption. poisoning itself cannot fix data corruption.
+
 sometimes panic when holding lock cause data corruption. but there are also many cases where panicking when holding lock doesn't cause data corruption.
+
+propagate panic on poison is fail-closed. no poison or ignore poison is fail-open.
 
 tokio mutex cancel issue
 

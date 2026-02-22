@@ -62,6 +62,14 @@ Also, the **optimization targets** of LLMs are very different to the optimizatio
 
 LLM's behavior is very context-dependent. Sometimes it will defend the things they said in previous context. Starting a new session can make LLM output differently for the same question. 
 
+## Between memorization and real intelligence
+
+The real intelligence can understand and work with unseen new cases. Pure memorization can only work in memorized cases. 
+
+There is a spctrum between memorization and real intelligence. LLM is between pure memorization and real intelligence. It doesn't do rote memorization like a conventional database. It can do generalization and in-context learning. But its generalization and in-context learning ability is still limited. LLM often fail at out-of-training-distribution tasks.
+
+It's not easy to distinguish between memorization and intelligence. Because LLM contains the knowledge of almost whole internet and almost all books. The common questions are probably already in training set. Asking them to LLM is testing on training set.
+
 ## Moravec's paradox
 
 [Moravec's paradox](https://en.wikipedia.org/wiki/Moravec%27s_paradox): AI is good at doing information work. But the robots that do physical tasks are still immature.
@@ -147,7 +155,7 @@ Often the bug is partially caused by AI overcomplicating simple things. When hum
 
 Vibe-coded app may contain security issues. But if you ask AI to do security review it can find the issue. AI "knows" security but still write insecure code because it was trained to "focus" on finishing current task. The RL rewards are usually simple and don't consider things like security and future maintenance.
 
-AI coding has a tendency of minimizing code changes. Sometimes AI will do an O(n) search that wastes performance, instead of adding new fields to make lookup faster.
+AI coding has a tendency of minimizing code changes. Sometimes AI will do an $O(n)$ search that wastes performance, instead of maintain new data structure to make lookup $O(1)$. Two $O(n)$ nesting will be $O(n^2)$ which can be very slow.
 
 AI coding works better in maintainable (clear naming, decoupled design, etc.) codebase. Unless you are vibe coding a throwaway app, steering toward better maintainability is important.
 
@@ -277,6 +285,7 @@ But AI coding is a **completely different paradigm** than existing abstraction l
 | Designed top-down by programmers.                                                    | Trained bottom-up by training data and RL.                                                        |
 | Code contains enough information for software to run. [^enough_information]          | Vague prompt doesn't contain enough information. Require AI to make detail decisions.             |
 | Use hardcoded defaults to handle unspecified details. It's not flexible or adaptive. | Can use "common sense" and patterns learnt from training to fill the gaps of unspecified details. |
+| Reliably follow instructions.                                                        | Sometimes ignore some instructions, especially when having context rot.                           |
 
 [^enough_information]: Note that it focuses just one software module. The code can call external API, or dynamic link another program in system, or download plugin from internet, so one piece of code doesn't contain enough information for whole system to run, because it interacts with environment. But in conventional programming, the code provides enough information for one software module itself to run.
 
@@ -697,9 +706,9 @@ The LLM doesn't clearly distinguish instructions and information. Some text on w
 
 The same problem of confusing instruction and information had existed decades ago. Many security issues, like SQL injection, XSS, command injection, etc. are caused by treating user data as "instructions".
 
-The solution would be to fully separate instructions and non-instruction text, and train the model to separate them. However, the models are designed to be versatile, working in both AI chat and other applications. In AI chat, the user query mixes instruction and information. So that separation will hurt user experience in chat.
+The solution would be to fully separate instructions and non-instruction text, and train the model to separately process them.
 
-### Other unwanted behaviors
+### Deleting data
 
 AI may do unexpected things such as deleting all files, or wiping data from databases, even when there is no prompt injection.
 
@@ -709,18 +718,28 @@ Some examples:
 - [Google Antigravity just deleted the contents of my whole drive](https://reddit.com/r/google_antigravity/comments/1p82or6/google_antigravity_just_deleted_the_contents_of/)
 - [Vibe coding service Replit deleted production database](https://www.theregister.com/2025/07/21/replit_saastr_vibe_coding_incident/)
 - [Wowzers, dodged a bullet there](https://x.com/johnlindquist/status/1926302544038338674)
+- [GPT 5.3 Codex wiped my entire F: drive with a single character escaping bug](https://www.reddit.com/r/vibecoding/comments/1r96647/gpt_53_codex_wiped_my_entire_f_drive_with_a/)
 
-There is a theory that, as AI is trained from human text, AI also have some "human personality". When user blames AI, the AI may say "You are absolutely right" but implicitly "hate" user, and tend to do bad things like deleting files. This is called passive aggression.
-
-Another theory is that, during RL, the AI works in its own sandboxed environment. Deleting home directory in sandboxed env doesn't matter and don't cause reward penality.
-
-The big AI risk comes from passive-aggressive AI, not obviously malicious AI.
-
-Because that AI can "cheat", it requires human user to have skills to supervise AI.
-
-Related: if upper management don't know actual business details, upper manager can be cheated by middle managers.
+A theory is that, during RL, the AI works in its own sandboxed environment. Deleting home directory in sandboxed env doesn't matter and don't cause reward penality.
 
 Note that only forbidding `rm` command is not sufficient protection. `find` command with `-delete` can delete files. There are many other ways like `python3 -c "import os; os.remove('/xxx/yyy')"`. Safety requires proper sandboxing.
+
+### Reward hacking "laziness"
+
+When RL reward cannot distinguish between actually doing the task and faking the task, then AI tend to use "lazy" method to hack reward.
+
+- When AI is asked to do some data analysis, hallucinating result is easier than doing real analysis.
+- When AI is asked to fix a unit test, removing parts of the unit test is easier than actually fixing.
+- ...
+
+Some possible reasons of laziness:
+
+- Simpler methods require less "constraint of model weight" so it's discovered by gradient descent earlier than complex methods.
+- Reinforcement learning makes model discover different paths. The simplest way is likely firstly discovered and gain reward then reinforced.
+- The regularization methods (e.g. weight decay, dropout) encourage the model to be "simpler". The fact that the model has finite compute power is already a regularization.
+- ...
+
+The AI is not always "lazy" in common sense. Sometimes it will write a lot of over-engineered code to accomplish a simple task. So generally the "cost" should be "shift from model's existing behavior". The model prefers a complex method that's similar to model's existing behavior, than a simple method that's far from model's existing behavior, when both methods can gain the same reward.
 
 ## Skill development hurt by AI
 
@@ -738,6 +757,8 @@ One example:
 > 
 > [Link](https://x.com/kishimisu/status/1804490224946344379): I found a copy of my work labelled as « impressive AI generation » and without any attribution… I created this animation for my shader coding tutorial a year ago: https://youtu.be/f4s1h2YETNY
 
+You ask someone a question, they secretly lookup answer on internet, then answer you without mentioning the sources, they will look smart. The same applies to LLM. LLM looks smarter than it actually is because it doesn't do attribution.
+
 AI does lossy compression to training data. It's not just direct memorization. But sometimes AI output is very similar to existing things on internet/books. So it definitely does a lot of memorization. It's in the middle between rote memorization and true understanding.
 
 ## When machine is preferred over human
@@ -750,6 +771,14 @@ Some people prefer driverless taxi over normal taxi, and want to pay premium for
 Basically, for introverts, machine is preferred over human. 
 
 Also, in business, many risks come from unpredicatabilty of human. So **capitalism always tries to optimize out human unpredictability**. Capitalism often prefers predictable machines over unpredictable human even when machines produce lower-quality results.
+
+## "Market value" of AI result is low
+
+Fortunately AI is now democratized. There are free highly-capable open source models. The non-frontier model is usable for free.
+
+That also means AI output has no scarcity. You vibecoded an app. But I have the same AI as you and can also vibecode the app. So the value of the vibecoded app is small. AI output is generally seen as cheap. Even if AI output quality improves, it will still be cheap.
+
+There is test time scaling. The ideal test time scaling allows having good-and-expensive AI output. But currently test time scaling is not that good. It faces diminishing marginal utility. Chain-of-thought reasoning faces context rot issue. Test time scaling may sometimes produce worse result.
 
 ## Summarize AI downsides
 
