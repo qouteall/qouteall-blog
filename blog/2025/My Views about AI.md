@@ -237,8 +237,8 @@ Naming in coding is important. It's even more important in AI coding.
 Sometimes the name in code is misleading. Some examples:
 
 - Function `create_xxx` not only creates xxx but also mutates yyy.
-- Function `change_xxx` doesn't change it but enqueues a task to apply change later.
-- `patch_file` doesn't do the patching but only gives the path of "patch file".
+- Function `some_verb` doesn't do the `verb` but prepares doing it.
+- One word can be both noun and verb. For example, `patch_file` doesn't do the patching but only gives the path of "patch file".
 - One naming is originally appropriate, but after some other change its meaning is generalized.
 
 ### Comment implicit "links" in code

@@ -149,10 +149,6 @@ The deeper cause is that:
   - It improves decoupling. You don't need to worry a library's changing of function body makes your code stop compling. That decoupling is also required by dynamic linking.
 
 - **Information is lost in function signature**: the borrowing information becomes coarse-grained and is simplified in function signature. The type system does not allow expressing borrowing only one field, and can only express borrowing the whole object.
-  
-  There are proposed solutions: [view type](https://smallcultfollowing.com/babysteps/blog/2025/02/25/view-types-redux/). It encodes field-level borrow information into type [^solving_container_contagious_borrow].
-
-[^solving_container_contagious_borrow]: The view type solves struct field contagious borrow but doesn't solve container contagious borrow. To encode the information of borrowing `i`-th element of a `Vec` into type, it requires dependent type, depending on runtime value of `i`. Adding dependent type into language is much more complex.
 
 Summarize solutions (workarounds) of contagious borrow issue (elaborated below):
 
@@ -169,6 +165,13 @@ Summarize solutions (workarounds) of contagious borrow issue (elaborated below):
 - Use **interior mutability** (cells and locks).
 
 [^refactor]: Often the borrow checker issues (including contagious borrow issue) can be workarounded by **refactoring**: reorganize data structure, reorganize code and abstractions. However, **new requirements can easily break existing architecture**, so using refactoring to tackle borrow checker issues will **require frequent large refactoring**. "The most fundamental issue is that the borrow checker _forces_ a refactor at the most inconvenient times." [See also](https://loglog.games/blog/leaving-rust-gamedev/#once-you-get-good-at-rust-all-of-these-problems-will-go-away). If most mutable data is put into arena in the right beginning, then it will require fewer refactoring on requirement change.
+
+There are proposed language design solutions to contagious borrow issue: [^solving_container_contagious_borrow]
+
+- Encode field-level borrow information in type. [Vew type](https://smallcultfollowing.com/babysteps/blog/2025/02/25/view-types-redux/). 
+- Do implicit field-level borrow analysis in private functions. Avoid exposing partial borrow in public API, so it desn't need to be explicitly written in types. [Automatic partial borrows for private methods](https://dioxus.notion.site/Dioxus-Labs-High-level-Rust-5fe1f1c9c8334815ad488410d948f05e).
+
+[^solving_container_contagious_borrow]: These two solutions address struct field contagious borrow. But contagious borrow can also happen to containers. To encode the information of borrowing `i`-th element of a `Vec` into type, it requires dependent type, depending on runtime value of `i`. Adding dependent type into language is much more complex.
 
 ## Defer mutation. Mutation-as-data
 
@@ -997,7 +1000,7 @@ One solution is to return `&RefCell<HashMap<String, Entry>>`. Then `RefCell` "in
 `Rc<RefCell<...>>` and `Arc<Mutex<...>>` allows freely copying reference and freely mutating things, just like in other languages. Finally "get rid of shackle of borrow checker". However, there are **traps**:
 
 - **Contagious borrowing**. As previously mentioned, `RefCell` wrapping parent doesn't solve contagious borrowing. `Mutex` also won't. Violating mutable borrow exclusiveness in the same thread is panic (or error) in `RefCell` and **deadlock** in `Mutex`. Rust lock is not re-entrant, [explained below](#rust-lock-is-not-re-entrant).
-- Need to cut cycle using `Weak`, unless it will memory leak.
+- Need to cut cycle using `Weak`, or it will memory leak.
 - **Performance**. `Rc` and `RefCell` has relatively small performance cost. But for `Arc<Mutex<...>>`, unnecessary locking can hurt performance. `Arc` also can have performance issue, [explained below](#arc-is-not-always-fast). It's still ok to use them when not in performance bottleneck.
 - Their syntax ergonomic is not good. The code will have a lot of "noise" like `.borrow().borrow_mut()`.
 
@@ -1103,9 +1106,7 @@ Another important thing is that Rust only unlocks at the end of scope by default
 
 ## `Arc` is not always fast
 
-`Arc` uses atomic operations to change its reference count. (Cloning and dropping `Arc` changes reference count, but borrowing `Arc` doesn't.)
-
-However, when many threads frequently change the same atomic counter, performance can degrade. The more threads touching it, the slower it is.
+Cloning and dropping `Arc` involves atomic operations of changing reference count. When many threads frequently change the same atomic counter, performance can degrade.
 
 Modern CPUs use cache coherency protocol (e.g. [MOESI](https://en.wikipedia.org/wiki/MOESI_protocol)). **Atomic operations often require the CPU core to hold "exclusive ownership" to cache line** (this may vary between different hardware). Many threads frequently doing so cause cache contention, similar to locking, but on hardware.
 
@@ -1115,9 +1116,9 @@ Using `Arc` wrongly may result in slower performance than using GC languages. In
 
 [^gc_load_barrier]: Some GC (e.g. ZGC) use load barrier. But that load barrier doesn't involve atomic read-modify-write operation so it's faster than cloning `Arc`.
 
-Atomic reference counting is still fast if not contended (mostly only one thread change reference count). Atomic reference counting is faster on Apple silicon than Intel CPUs. [^apple_silicon_reference_counting]
+Atomic reference counting is still fast if not contended (when mostly only one thread change reference count). Atomic reference counting is faster on Apple silicon than Intel CPUs. [^apple_silicon_reference_counting]
 
-[^apple_silicon_reference_counting]: [See also](https://blog.metaobject.com/2020/11/m1-memory-and-performance.html). That was in 2020. Unsure whether it changed now. One possible reason is that ARM allows weaker memory order than X86. Also, Swift and Objective-C use reference counting almost everywhere, so possibly Apple payed more efforts in optimizing atomic reference counting.
+[^apple_silicon_reference_counting]: [See also](https://blog.metaobject.com/2020/11/m1-memory-and-performance.html). That was in 2020. Unsure whether it changed now. One possible reason is that ARM allows weaker memory order than X86. Also, Apple's languages Swift and Objective-C use reference counting almost everywhere, so possibly Apple payed more efforts in optimizing atomic reference counting in hardware.
 
 Solutions:
 
@@ -1128,7 +1129,7 @@ Solutions:
   - [crossbeam_epoch](https://docs.rs/crossbeam-epoch/latest/crossbeam_epoch/). It uses [epoch-based memory reclamation](https://aturon.github.io/blog/2015/08/27/epoch/#epoch-based-reclamation).
   - [aarc](https://docs.rs/aarc/latest/aarc/)
 
- These deferred memory reclamation techniques (hazard pointer, epoch-based) are also used in lock-free data structures. If one thread can read an element while another thread removes and frees the same element in parallel, it will not be memory-safe (this issue doesn't exist in GC languages).
+ These deferred memory reclamation techniques (hazard pointer, epoch) are also used in lock-free data structures. If one thread can read an element while another thread removes and frees the same element in parallel, it will not be memory-safe (this issue doesn't exist in GC languages).
 
 Note that using `Arc` doesn't mean every access uses atomic operation. Only cloning and dropping it requires atomic operation. `.borrow()` it doesn't involve atomic operation. Passing `&Arc<T>` instead of `Arc<T>` can improve performance.
 
@@ -1202,21 +1203,20 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
 
 - Don't violate mutable borrow exclusiveness. 
   - A `&mut` should not overlap with any other borrows and raw pointers. Including temporary borrows. Note that `obj.method()` can implicity create borrow to `obj`.
-  - The overlap here also includes interior pointer. A `&mut` to a piece of data cannot co-exist with any other borrow into any part within that data.
   - Violating that rule cause undefined behavior and can cause wrong optimization. Rust adds `noalias` attribute for mutable borrows into LLVM IR. LLVM will heavily optimize based on `noalias`. [See also](https://doc.rust-lang.org/nomicon/aliasing.html)
   - Multiple mutable raw pointers `*mut T` can point to same data. But raw pointer cannot coexist with mutable borrow to same data.
-  - Converting a `&T` to `*mut T` then mutate pointed data is undefined behavior. For that use case, wrap `T` in `UnsafeCell<T>`. `UnsafeCell` is specially treated by compiler. Normal `&T` has LLVM `readonly` attribute which can enable some optimizations, but if `T` contains `UnsafeCell` then compiler won't add `readonly`.
   - [Related1](https://chadaustin.me/2024/10/intrusive-linked-list-in-rust/), [Related2](https://web.archive.org/web/20230307172822/https://zackoverflow.dev/writing/unsafe-rust-vs-zig/)
+- Converting a `&T` to `*mut T` then mutate pointed data is undefined behavior, unless using `UnsafeCell`. Normal `&T` has LLVM `readonly` attribute which can enable some optimizations, but if `T` contains `UnsafeCell` then compiler won't add `readonly`.
 - [Pointer provenance](https://doc.rust-lang.org/std/ptr/index.html#provenance).
   - For to-heap pointers, different allocations are different provenances. For to-stack pointers, different local variables are different provenances.
-  - Two pointers created from two provenances is considered to never alias. If their address equals, it's undefined behavior.
+  - Two pointers created from two provenances are treated as never alias. If their address equals, it's undefined behavior.
   - Converting an integer to pointer gets a pointer with no provenance, using that pointer is undefined behavior, unless in these two cases:
     - The integer was converted from a pointer using `.expose_provenance()` and then integer converts to pointer using `with_exposed_provenance()`
     - The integer `i` is converted to pointer using `p.with_addr(i)` (`p` is another pointer that has provenance). The result has same provenance of `p`.
   - Adding a pointer with an integer doesn't change provenance.
   - The provenance is tracked by compiler in compile time. In actual execution, pointer is still integer address that doesn't attach provenance information [^miri_pointer_provenance].
 - Using uninitialized memory is undefined behavior. [`MaybeUninit`](https://doc.rust-lang.org/beta/std/mem/union.MaybeUninit.html)
-  - Normally a byte has 256 possible values. But in LLVM a byte has 258 possible values. The extra two are 1. uninitialized 2. poison (computed from other undefined behaviors). Like pointer provenance, the two extra values only exist in compile time.
+  - Normally a byte has 256 possible values. But in LLVM a byte has 258 possible values [^llvm_constraint]. The extra two are 1. uninitialized 2. poison (computed from other undefined behaviors). Like pointer provenance, the two extra values only exist in compile time.
 - `a = b` will drop the original object in place of `a`. If `a` is uninitialized, then it will drop an unitialized object, which is undefined behavior. Use `(&raw mut x).write(...)` [Related](https://lucumr.pocoo.org/2022/1/30/unsafe-rust/)
 - Handle panic unwinding. If unsafe code turn data into temporarily-invalid state, you need to make it valid again during unwinding. [See also](https://doc.rust-lang.org/nomicon/unwinding.html). [Related](https://smallcultfollowing.com/babysteps/blog/2024/05/02/unwind-considered-harmful/)
 - Reading/writing to mutable data that's shared between threads need to use atomic, or volatile access ([`read_volatile`](https://doc.rust-lang.org/std/ptr/fn.read_volatile.html), [`write_volatile`](https://doc.rust-lang.org/beta/std/ptr/fn.write_volatile.html)), or use other synchronization (like locking). If not, optimizer may wrongly merge and reorder reads/writes. Note that volatile access themself doesn't establish memory order (unlike Java/C# `volatile`).
@@ -1225,9 +1225,11 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
 - The Rust crate exposed as C dynamic library (crate type `cdylib`) embeds its own copy of standard library and allocator. One allocation in one dynamic library should not be deallocated in another dynamic library. The global variables and thread local variables can duplicately co-exist.
 - ......
 
+[^llvm_constraint]: When there is some other constraint, a byte can have less than 258 possible values in LLVM.
+
 [^miri_pointer_provenance]: When running in tools like [Miri](https://github.com/rust-lang/miri), the pointer provenance will be tracked at runtime.
 
-Modern compilers tries to optimize as much as possible. **To optimize as much as possible, the compiler makes assumptions as much as possible. Breaking any of these assumption can lead to wrong optimization.** That's why it's so complex. [See also](https://queue.acm.org/detail.cfm?id=3212479)
+Modern compilers tries to optimize as much as possible. **To optimize as much as possible, the compiler makes assumptions as much as possible. Breaking any of these assumption can lead to wrong optimization.** That's why it's so complex. See also: [C Is Not a Low-level Language](https://queue.acm.org/detail.cfm?id=3212479)
 
 Unfortunately Rust's syntax ergonomics on raw pointer is currently not good:
 
@@ -1237,7 +1239,7 @@ Unfortunately Rust's syntax ergonomics on raw pointer is currently not good:
 
 ## Rust doesn't allow "temporary void"
 
-In safe Rust, the in-memory data has to be always valid.
+In safe Rust, the reachable data has to be always valid. Safe Rust cannot move some reachable data to elsewhere, creating a "temporary void" then fill the void.
 
 You cannot implement `mem::swap` or `mem::replace` in safe Rust. Because Rust is procedural, so doing these have to temporarily make some in-memory data invalid. But Rust borrow checker ensures all data is always in valid state.
 
@@ -1251,7 +1253,7 @@ Rust favors tree-shaped ownership. Each object is owned by exactly one place. If
 
 Sending an immutable borrow to another thread is also fine as long as the shared data is actually immutable.
 
-But there are exceptions. One exception is interior mutability. Because of interior mutability, the data pointed by immutable borrow `&T` may no longer actually be immutable. So Rust prevents sharing `&Cell<T>` and `&RefCell<T>` by making `Cell<T>` and `RefCell<T>` not `Sync`. If `X` is `Sync` then `&X` is `Send`. If `X` is not `Sync` then `&X` is not `Send`. This prevents `Cell` and `RefCell` from being shared across threads.
+But there are exceptions. One exception is interior mutability. Because of interior mutability, the data pointed by immutable borrow `&T` may no longer actually be immutable. So Rust prevents sharing `&Cell<T>` and `&RefCell<T>` by making `Cell<T>` and `RefCell<T>` not `Sync`. If `X` is not `Sync` then `&X` is not `Send`. This prevents `Cell` and `RefCell` from being shared across threads.
 
 `Rc` also has internal shared mutable reference counter. It's not atomic, so `Rc` cannot be passed between threads. It's neither `Send` or `Sync`.
 
@@ -1300,8 +1302,6 @@ In C and GC languages:
 But in Rust it's different. 
 
 ### Lifetime of temporary value
-
-Simply put:
 
 - Putting a temporary value to local variable usually makes it live longer.
 - Inlining a local variable usually makes it live shorter.
@@ -1368,8 +1368,6 @@ fn mutate_twice(i: &mut u32) -> &mut u32 {
 10 |     mutate(j)
    |     --------- returning this value requires that `*i` is borrowed for `'1`
 ```
-
-The `Pin` doesn't do auto reborrow.
 
 ### Move cloned data into closure
 
@@ -1438,7 +1436,7 @@ Examples:
 - Java `final` reference ensures reference itself is immutable. If pointed object is mutable then its's immutable-ref-to-mutable-obj.
 - Java `Collections.unmodifiableList()` gives read-only view.
 - Copy-on-write (COW) and read-copy-write (RCU) are mutable-ref-to-immutable-obj.
-- Rust `let x: T` makes `x` fully immutable. Immutability applies to whole ownership tree. If a `Vec` is immutable, its elements are also immutable.
+- Rust `let x: T` makes `x` fully immutable[^immutable]. Immutability applies to whole ownership tree. If a `Vec` is immutable, its elements are also immutable.
 - Rust `let mut x: &T` makes `x` a mutable-ref-to-immutable-obj.
 - Rust `let x: &mut T` makes `x` an immutable-ref-to-mutable-obj.
 - Rust `let x: &mut &[u8]` makes `x` an immutable-ref-to-mutable-slice-ref-to-immutable-binary-data (this is sometimes used in binary data parsing):
@@ -1446,23 +1444,26 @@ Examples:
   - `&[u8]` is slice ref, containing a pointer and a length.
   - `mut &[u8]` is mutable slice ref. The pointer and length is mutable, but binary data in slice is immutable.
   - `x` is a pointer to that mutable slice ref.  `x` itself is immutable.
-- In Rust, when using interior mutability, an immutable thing can be actually mutable.
 - Git release tag is mutable-ref-to-immutable-obj. The Git commit with specific hash is immutable. But Git allows removing a release tag and create a new same-named release tag to another commit. This can be disabled.
 
+[^immutable]: It's actually "treated as immutable". It can be actually mutable when interior mutability is involved.
 
 ## String types
 
 In GC languages, strings are simple. There is often one commonly-used immutable string type (`String` in java, `string` in JS). But in Rust there are many string types:
 
 - `str`, a variable-sized type. Its content should be valid UTF-8.
-- `&str`, a borrow to `str`. It contains a pointer and a length.
+- `&str`, an immutable borrow to `str`. It contains a pointer and a length.
 - `String`.It also has a pointer and a length (and a capacity number). It heap-allocates the binary data and owns binary data. `&str` borrows binary data from elsewhere.
 - `OsString` / `OsStr`. These exist because Rust string enforces UTF-8 encoding, but operating systems APIs can use non-UTF-8 string. In Linux, file name can be invalid UTF-8. In Windows APIs, strings use encoding similar to UTF-16 but allows invalid surrogates (technically called WTF-16).
 - `CString` / `CStr`. C-style null-terminated string. Used for interop with C library.
 
-In C++ and Golang, strings are just binary data with no encoding constraint. Rust enforces UTF-8 and makes it more complex. But enforcing UTF-8 has benefits: no need to worry about encoding mismatch within Rust program. It also improves security because many text processing code assumes string is valid UTF-8, e.g. [CVE-2024-56732](https://www.sentinelone.com/vulnerability-database/cve-2024-56732/), [CVE-2026-0810](https://www.sentinelone.com/vulnerability-database/cve-2026-0810/).
+In C++ and Golang, strings are just binary data with no encoding constraint. Rust enforces UTF-8 and makes it more complex.
 
-Using unsafe to create a `str` containing invalid UTF-8 is undefined behavior.
+Rust's enforcing of UTF-8 may improve security but may also reduce security:
+
+- [CVE-2024-56732](https://www.sentinelone.com/vulnerability-database/cve-2024-56732/) is triggered when non-UTF-8 string data. It's in C++. This can be avoided if the outer string source validates UTF-8. This is the case where Rust's design can improve security.
+- Rust `str` enforces UTF-8 so Rust code trust `str` to be UTF-8 and don't do internal validation. But using unsafe to create invalid UTF-8 `str` causes security risk. [CVE-2026-0810](https://www.sentinelone.com/vulnerability-database/cve-2026-0810/) is caused by Rust code creating `str` including invalid UTF-8. This is the case where Rust's design actually reduces security.
 
 Note that Rust only care about UTF-8 code point validity, not grapheme cluster validity.
 
