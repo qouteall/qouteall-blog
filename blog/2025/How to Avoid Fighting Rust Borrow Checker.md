@@ -1463,7 +1463,7 @@ In C++ and Golang, strings are just binary data with no encoding constraint. Rus
 Rust's enforcing of UTF-8 may improve security but may also reduce security:
 
 - [CVE-2024-56732](https://www.sentinelone.com/vulnerability-database/cve-2024-56732/) is triggered when non-UTF-8 string data. It's in C++. This can be avoided if the outer string source validates UTF-8. This is the case where Rust's design can improve security.
-- Rust `str` enforces UTF-8 so Rust code trust `str` to be UTF-8 and don't do internal validation. But using unsafe to create invalid UTF-8 `str` causes security risk. [CVE-2026-0810](https://www.sentinelone.com/vulnerability-database/cve-2026-0810/) is caused by Rust code creating `str` including invalid UTF-8. This is the case where Rust's design actually reduces security.
+- Rust `str` enforces UTF-8 so Rust code trust `str` to be UTF-8 and don't do internal validation. In Rust, using unsafe to **create a `str` containing invalid UTF-8 is undefined behavior and can cause security risk**. [CVE-2026-0810](https://www.sentinelone.com/vulnerability-database/cve-2026-0810/) is caused by it.
 
 Note that Rust only care about UTF-8 code point validity, not grapheme cluster validity.
 
