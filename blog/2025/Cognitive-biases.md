@@ -1474,6 +1474,16 @@ What's more, social media may make people:
 
 Getting information from real practice is often better than keep browsing information from internet.
 
+Two different kinds of information digest: long-attention and short-attention:
+
+| Long-attention                                                             | Short-attention                                                          |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Example in text: Reading long novel                                        | Example in text: Browsing X(Twitter)                                     |
+| Example in video: Watching movie                                           | Example in video: Wathing TikTok                                         |
+| Next content is highly relevant to previous content                        | Next content is likely irrelevant to previous content                    |
+| Brain needs to remember previous context to better understand next content | Brain needs to ignore previous context to better understand next content |
+| Practices keeping attention                                                | Practices moving attention                                               |
+
 ### Natural selection of memes
 
 Note that "meme" here generally means the information that spreads itself, not limited to entertainment internet memes.

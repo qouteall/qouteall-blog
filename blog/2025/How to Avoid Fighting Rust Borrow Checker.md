@@ -1467,7 +1467,7 @@ Rust's enforcing of UTF-8 may improve security but may also reduce security:
 
 Note that Rust only care about UTF-8 code point validity, not grapheme cluster validity.
 
-About nullable string comparision: In Java you can directly `equals`. In JS you can directly `===`. But in Rust, comparing optionsl strings is not trivial:
+About nullable string comparision: In Java you can directly `Objects.equals`. In JS you can directly `===`. But in Rust, comparing optional strings is not trivial:
 
 - Comparing a `Option<String>` with `&str`:  `a.as_deref() == Some(b)`
 - Comparing a `Option<&str>` with `String`:  `a == Some(b.as_str())`
@@ -1548,6 +1548,6 @@ Note that there are still Heisenbugs that Rust cannot catch, including:
 
 Also note that not all memory/thread safety bugs are Heisenbugs. Many are still easy to trigger and debug.
 
-Rust is also a filter to AI. Rust constraints can catch some kinds of bugs. (Although Rust takes more tokens, because AI often need to edit multiple times to make code compile.)
+Rust is also a filter to AI. Rust constraints can catch some kinds of bugs. (Although Rust takes more tokens, because AI often need to edit multiple times to make code compile. Reducing bugs is more important than reducing token usage so it's worth it.)
 
 
