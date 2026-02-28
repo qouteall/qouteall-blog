@@ -1208,13 +1208,14 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
   - [Related1](https://chadaustin.me/2024/10/intrusive-linked-list-in-rust/), [Related2](https://web.archive.org/web/20230307172822/https://zackoverflow.dev/writing/unsafe-rust-vs-zig/)
 - Converting a `&T` to `*mut T` then mutate pointed data is undefined behavior, unless using `UnsafeCell`. Normal `&T` has LLVM `readonly` attribute which can enable some optimizations, but if `T` contains `UnsafeCell` then compiler won't add `readonly`.
 - [Pointer provenance](https://doc.rust-lang.org/std/ptr/index.html#provenance).
-  - For to-heap pointers, different allocations are different provenances. For to-stack pointers, different local variables are different provenances.
-  - Two pointers created from two provenances are treated as never alias. If their address equals, it's undefined behavior.
-  - Converting an integer to pointer gets a pointer with no provenance, using that pointer is undefined behavior, unless in these two cases:
-    - The integer was converted from a pointer using `.expose_provenance()` and then integer converts to pointer using `with_exposed_provenance()`
-    - The integer `i` is converted to pointer using `p.with_addr(i)` (`p` is another pointer that has provenance). The result has same provenance of `p`.
+  - For to-heap pointers, different allocations are different provenances. Different local variables and global variables are different provenances.
+  - Two pointers created from two provenances are treated as never alias. If their address equals, accessing memory using them is undefined behavior.
+  - Directly converting an integer to pointer gets a pointer with no provenance, using that pointer to access memory is undefined behavior, except when:
+    - If the integer `i` is converted to pointer using `p.with_addr(i)` (`p` is another pointer that has provenance). The result has same provenance of `p`.
+    - For memory-mapped IO (MMIO), always access memory using [`read_volatile`](https://doc.rust-lang.org/core/ptr/fn.read_volatile.html) and [`write_volatile`](https://doc.rust-lang.org/core/ptr/fn.write_volatile.html). These two functions work for MMIO when pointer has no provenance.
   - Adding a pointer with an integer doesn't change provenance.
   - The provenance is tracked by compiler in compile time. In actual execution, pointer is still integer address that doesn't attach provenance information [^miri_pointer_provenance].
+  - The [XOR linked list](https://en.wikipedia.org/wiki/XOR_linked_list) likely breaks due to pointer provenance issue. It's not recommended to use it.
 - Using uninitialized memory is undefined behavior. [`MaybeUninit`](https://doc.rust-lang.org/beta/std/mem/union.MaybeUninit.html)
   - Normally a byte has 256 possible values. But in LLVM a byte has 258 possible values [^llvm_constraint]. The extra two are 1. uninitialized 2. poison (computed from other undefined behaviors). Like pointer provenance, the two extra values only exist in compile time.
 - `a = b` will drop the original object in place of `a`. If `a` is uninitialized, then it will drop an unitialized object, which is undefined behavior. Use `(&raw mut x).write(...)` [Related](https://lucumr.pocoo.org/2022/1/30/unsafe-rust/)
@@ -1222,7 +1223,7 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
 - Reading/writing to mutable data that's shared between threads need to use atomic, or volatile access ([`read_volatile`](https://doc.rust-lang.org/std/ptr/fn.read_volatile.html), [`write_volatile`](https://doc.rust-lang.org/beta/std/ptr/fn.write_volatile.html)), or use other synchronization (like locking). If not, optimizer may wrongly merge and reorder reads/writes. Note that volatile access themself doesn't establish memory order (unlike Java/C# `volatile`).
 - If the binary data violates the type's constraint, it's undefined behavior. For example, `bool`'s binary data can only be 0 or 1. Making it 2 is undefined behavior. Creating a `str` whose binary data is not valid UTF-8 is also undefined behavior.
 - If you want to `mem::transmute`, it's recommended to use [zerocopy](https://docs.rs/zerocopy/latest/zerocopy/) which has compile-time checks to ensure memory layout are the same. For simple wrapper types, use `#[repr(transparent)]`.
-- The Rust crate exposed as C dynamic library (crate type `cdylib`) embeds its own copy of standard library and allocator. One allocation in one dynamic library should not be deallocated in another dynamic library. The global variables and thread local variables can duplicately co-exist.
+- The Rust crate exposed as C dynamic library (crate type `cdylib`) may embed its own allocator. One allocation from one allocator should not be freed in another allocator.
 - ......
 
 [^llvm_constraint]: When there is some other constraint, a byte can have less than 258 possible values in LLVM.
@@ -1483,7 +1484,11 @@ The `as_deref` is not intuitive. It turns `Option<String>` into `Option<&str>`. 
 - Lifetime annotation is contagious. If a type has a lifetime parameter, then every type that holds it must also have lifetime parameter. Every function that use them also need lifetime parameter (except when lifetime elision works). Adding/removing lifetime parameter to a type may require changing many code.
 - `async` is contagious. `async` function can call normal function. Normal function cannot easily call `async` function (but it's possible to call by blocking). Many non-blocking functions tend to become async because they may call async function.
 - Being not `Sync`/`Send` is contagious. A struct that indirectly owns a non-`Sync` data is not `Sync`. A struct that indirectly owns a non-`Send` data is not `Send`.
-- Error passing is contagious. If panic is not acceptable, then all functions that indirectly call a fallible function must return `Result`. Related: NaN is contagious in floating point computation.
+- Error passing is contagious. If panic is not acceptable, then all functions that indirectly call a fallible function must return `Result`. 
+  - Related: NaN is contagious in floating point computation.
+  - Related: To handle out-of-memory gracefully, all dependencies must be able to handle out-of-memory gracefully. Many community crates (e.g. `anyhow`) cannot be used. [One example](https://github.com/bytecodealliance/wasmtime/issues/12069). [^oom] 
+
+[^oom]: Also, in Linux it requires disabling OS overcommit. With overcommit, allocation can succeed even when not having enough free memory, then accessing memory can cause crash. macOS always overcommits and it cannot be disabled.
 
 ## Some arguments
 

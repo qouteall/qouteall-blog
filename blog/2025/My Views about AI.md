@@ -496,6 +496,12 @@ The same also applies to AI. You can spawn hundreds of AI agents that work toget
 
 Software development is context-heavy (unless in small toy projects). Context communication is an important bottleneck.
 
+### Tests are important
+
+Good tests can catch AI-written bugs and help AI finish work by itself.
+
+But this only applies to good comprehensive tests. Tests themselves can have bugs. AI-written tests may test the wrong thing.
+
 ## Idea is still cheap, execution still matters
 
 A conception is that, AI makes execution easier (write code, draw images, etc.), then the idea and "what to work on" become more important.

@@ -151,7 +151,7 @@ There is [Principle of least effort](https://en.wikipedia.org/wiki/Principle_of_
 
 If the purpose is just to help developer debugging, then logging should be enough. And it takes fewer efforts than maintaining a diagnostics object. But logging then faces log spam issue.
 
-
+Zig's design has one advantage: handling out-of-memory gracefully is easier (given that overcommit is disabled). In other languages, it's common to propagate error by wrapping into new error object. It's also common to use type erasure by heap allocation in error object. It's also common to put heap-allocated string into error object. So propagating out-of-memory error can involve allocation so it can fail. In Zig out-of-memory error just exits code without doing any allocation.
 
 ## Silent errors in AI systems
 

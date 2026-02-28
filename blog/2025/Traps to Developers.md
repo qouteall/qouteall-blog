@@ -210,6 +210,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - When debugging, debugger will call `.toString()` to local variables. Some class' `.toString()` has side effect, which cause the code to run differently under debugger. This can be disabled in IDE.
 - Before [Java24](https://openjdk.org/jeps/491) virtual thread can be "pinned" when blocking on `synchronized` lock, which may cause deadlock. It's recommended to upgrade to Java 24 if you use virtual thread.
 - `finalize()` running too slow blocks GC and cause memory leak. Exceptions out of `finalize()` are not logged. A dead object can resurrect itself in `finalize()`. It's recommended to use [`Cleaner`](https://docs.oracle.com/javase/9/docs/api/java/lang/ref/Cleaner.html) rather than overriding `finalize`.
+- `OmitStackTraceInFastThrow` optimization causes exception to have no stacktrace. [See also](https://stackoverflow.com/questions/58696093/when-does-jvm-start-to-omit-stack-traces). The first few exceptions have stacktrace, so the stacktrace may be in early logs.
 
 ### Golang
 
@@ -411,10 +412,9 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Nginx `proxy_buffering` delays SSE.
 - If the backend behind Nginx initiates closing the TCP connection, Nginx passive health check treat it as backend failure and temporarly stop reverse proxying. [See also](https://nginx.org/en/docs/http/ngx_http_upstream_module.html)
 - Nginx configuration URL trailing slash. [See also](https://dev.to/danielkun/nginx-everything-about-proxypass-2ona)
-- Elasticsearch doesn't allow removing mapping in an index. And Elasticsearch has dynamic mapping: if a new document has a new non-null field it will auto add a mapping that you cannot remove. Removing mapping requires reindexing. Reindexing not only costs performance, but also has risks of losing new data during reindexing, because reindex works on the snapshot. 
-  - Zero-downtime reindexing that doesn't lose new ingested data during reindexing is hard: 1. create new index 2. new document ingests to both old index and new index (dual-writing) 3. reindex 4. make queries go to new index 5. stop ingesting to old index and delete old index [^es_reindex]
+- Elasticsearch doesn't allow removing mapping in an index. Dynamic mapping can auto-add mappings that you cannot remove, and it's enabled by default. [^es_reindex]
 
-[^es_reindex]: It can be simple if you can accept a downtime. It can also be simple if you don't care about losing new data during reindexing. Also if you can accept duplicated query result during reindex, you can use an alias that includes both old and new index, then no dual-writing needed. Another workaround is to rename field before ingestion and don't care about the wrong mapping.
+[^es_reindex]: Removing mapping requires reindexing. Reindexing not only costs performance, but also has risks of losing new data during reindexing, because reindex works on the snapshot. Zero-downtime reindexing that doesn't lose new ingested data during reindexing is hard: 1. create new index 2. new document ingests to both old index and new index (dual-writing) 3. reindex 4. make queries go to new index 5. stop ingesting to old index and delete old index. It can be simple if you can accept a downtime. It can also be simple if you don't care about losing new data during reindexing. Also if you can accept duplicated query result during reindex, you can use an alias that includes both old and new index, then no dual-writing needed.
 
 ### React
 
