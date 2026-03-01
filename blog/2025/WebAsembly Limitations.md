@@ -117,13 +117,13 @@ The first solution, manually implementing GC encounters difficulties:
 
 [^safepoint_mechanism]: Safepoint mechanism allows a thread to cooporatively pause at specific points. Scanning a running thread's stack is not reliable, due to memory order issues and race conditions, and some pointers may be in register, not stack. If the thread is suspended using OS functionality, some local variable may be in register, and it's hard to tell whether data in register is pointer or other data (treating integer as pointer may cause memory safety issue or memory leak). If a thread is coorporatively paused in specific places, the references can be reliably scanned. One way to implement safepoint is to have a global safepoint flag. The code frequently reads the safepoint flag and pause if flag is true. There exists optimizations such as using OS page fault signal handler.
 
-What about using Wasm's built-in GC functionality? It requires mapping the data structure to Wasm GC data structure. Wasm's GC data structure allows Java-like class (with object header), Java-like prefix subtyping, and Java-like arrays. 
-
 The benefit of using Wasm built-in GC:
 
 - It reuses highly-optimized JS GC. No need to re-implement GC in Wasm application code.
 - Wasm GC references can be passed to JS. (But currently JS code cannot directly access fields of Wasm GC object. The primary usage is to pass them back to Wasm code.)
 - Can collect a cycle between Wasm GC object and JS object.
+
+But using Wasm GC **requires mapping the language's data structure to Wasm GC data structure**. Wasm's GC data structure allows Java-like class (with object header), Java-like prefix subtyping, and Java-like arrays. But it's **still not expressive enough**.
 
 The important memory management features that Wasm GC doesn't support:
 
@@ -140,7 +140,6 @@ It doesn't support some memory layout optimizations:
 - Doesn't allow compact sum type memory layout.
 
 See also: [C# Wasm GC issue](https://github.com/dotnet/runtime/issues/94420), [Golang Wasm GC issue](https://github.com/golang/go/issues/63904)
-
 
 ## Multi-threading
 
@@ -282,7 +281,31 @@ Reentrance also can cause **deadlock**. Most native code that do locking assume 
 
 Even if the lock is re-entrant, some other invariant may be violated by reentrancy. In C++ it may can cause iterator invalidation (mutate a container when looping on container). In Rust it can cause `RefCell` borrow error in code that normally won't.
 
+## Cannot directly call Web APIs
+
+Wasm code cannot directly call Web APIs. Web APIs must be called via JS glue code.
+
+Although all Web's JS APIs have [Web IDL](https://webidl.spec.whatwg.org/) specifications. But that Web IDL interfaces cannot be easily transformed to Wasm interfaces:
+
+- Memory management. The Web IDL is designed for GC languages. It has no interface related to freeing memory and "destructor".
+- Async and event loop. Many web APIs return a `Promise`. Awaiting on promise doesn't simply block but continues processing other events in event loop. But in C/C++ the IO are often simple blocking. This can be workarounded by JS Promise integration (but with reentrancy issue mentioned previously). (Rust has async so it can be adapted to Rust easier.)
+- Strings are commonly used in API. Some languages use UTF-8. Some languages (e.g. Java, C#) use UTF-16 [^utf16].
+
+[^utf16]: Strictly speaking, Java and C# use WTF-16, which is similar to UTF-16 but allows invalid surrogates.
+
+There was [Web IDL Bindings Proposal](https://github.com/WebAssembly/interface-types/blob/1c46f9fe30143867545c9747fa8a94b72e5d9737/proposals/webidl-bindings/Explainer.md) but superseded by [Component Model](https://component-model.bytecodealliance.org/) proposal.
+
+Related: [When Is WebAssembly Going to Get DOM Support?](https://queue.acm.org/detail.cfm?id=3746174)
+
+The modern JS/Wasm runtimes can do inlining between JS and Wasm, so the cost of JS glue gets smaller.
+
+Currently Wasm cannot be run in browser without JS code that bootstraps Wasm.
+
+See also: [Why is WebAssembly a second-class language on the web?](https://hacks.mozilla.org/2026/02/making-webassembly-a-first-class-language-on-the-web/)
+
 ## Wasm-JS passing
+
+Because that Wasm cannot directly call web APIs, it requires interacting with JS and passing value between Wasm and JS.
 
 Numbers (`i32`, `i64`, `f32`, `f64`) can be directly passed between JS and Wasm (`i64` maps to `BigInt` in JS, other 3 maps to `number`).
 
@@ -303,26 +326,6 @@ Modern Wasm/JS runtime (including V8) can JIT and inline the cross calling betwe
 The [Wasm Component Model](https://component-model.bytecodealliance.org/introduction.html) aim to solve this. It allows passing higher-level types such as string, record (struct), list, enum in interface. But different components cannot share memory, and the passed data need to be copied.
 
 There are [Wasm-JS string builtins](https://webassembly.github.io/spec/js-api/index.html#builtins-js-string) that aim to reduce the cost of string passing between Wasm and JS.
-
-## Cannot directly call Web APIs
-
-Wasm code cannot directly call Web APIs. Web APIs must be called via JS glue code.
-
-Although all Web's JS APIs have [Web IDL](https://webidl.spec.whatwg.org/) specifications. But that Web IDL interfaces cannot be easily transformed to Wasm interfaces:
-
-- Memory management. The Web IDL is designed for GC languages. It has no interface related to freeing memory and "destructor". And the GC references cannot be put into linear memory.
-- Async and event loop. Many web APIs return a `Promise`. Awaiting on promise doesn't simply block but keeps processing other events in event loop. But in C/C++ the IO are often simple blocking. This can be workarounded by JS Promise integration (but comes with reentrancy issue). (Rust has async so it can be adapted to Rust easier.)
-- Strings are commonly used in API. Some languages use UTF-8. Some languages (e.g. Java, C#) use UTF-16 [^utf16].
-
-[^utf16]: Strictly speaking, Java and C# use WTF-16, which is similar to UTF-16 but allows invalid surrogates.
-
-There was [Web IDL Bindings Proposal](https://github.com/WebAssembly/interface-types/blob/1c46f9fe30143867545c9747fa8a94b72e5d9737/proposals/webidl-bindings/Explainer.md) but superseded by Component Model proposal.
-
-Related: [When Is WebAssembly Going to Get DOM Support?](https://queue.acm.org/detail.cfm?id=3746174)
-
-The modern JS/Wasm runtimes can do inlining between JS and Wasm, so the cost of JS glue gets smaller.
-
-Currently Wasm cannot be run in browser without JS code that bootstraps Wasm.
 
 ## Memory64 performance
 
@@ -358,7 +361,7 @@ But the native ecosystem often doesn't care much about code size. Because native
 
 The Wasm toolchain are often based on native toolchains. It uses compilers/linkers of native languages, and uses libraries for native languages. The tooling for reducing code size and lazy loading is not yet mature.
 
-Also, C++ and Rust duplicatedly generate code for different generic instantiation (called monomorphization). `Vec<u32>` uses different Wasm code than `Vec<String>` and `Vec<MyType>`. This factor also bloats binary size. (Modern linkers can do identical code folding (ICF) which can alleviate this issue.) 
+Also, C++ and Rust duplicatedly generate code for different generic instantiation (called monomorphization). `Vec<u32>` uses different Wasm code than `Vec<String>` and `Vec<MyType>`. This bloats binary size compared to JS. Modern linkers can do identical code folding (ICF) which can alleviate this issue.
 
 In debug mode, debugging info also takes a lot of space in Wasm binary.
 
