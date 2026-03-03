@@ -42,7 +42,7 @@ Jagged intelligence:
 > 
 > TLDR: the topic of intelligence is too high-dimensional for any low-dimensional narrative to be perfectly accurate, and one should take any such narratives with a grain of salt.
 > 
-> [Link](https://mathstodon.xyz/@tao/115620261936846090)
+> \- Terence Tao, [Link](https://mathstodon.xyz/@tao/115620261936846090)
 
 The AI can solve PhD-level problems. Someone then claim that AI has "PhD-level intelligence". But solving PhD-level exam problem doesn't mean it can solve real-world problems like PhD.
 
@@ -58,9 +58,7 @@ Also, the **optimization targets** of LLMs are very different to the optimizatio
 > 
 > \- Andrej Karpathy, [Link](https://x.com/karpathy/status/1991910395720925418)
 
-
-
-LLM's behavior is very context-dependent. Sometimes it will defend the things they said in previous context. Starting a new session can make LLM output differently for the same question. 
+LLM's "belief" is very context-dependent. Sometimes it will defend the things they said in previous context, but starting a new session can make LLM show a different "belief".
 
 ## Between memorization and real intelligence
 
@@ -79,11 +77,9 @@ There are two worlds: physical world and information world:
 - Human are physical-world-native. Human's abstract information processing ability is secondary.
 - Software (including AI) are information-world-native. Software's physical motor control ability is secondary.
 
-Also, creating things in information world is often easier than creating things in physical world.
+Also, creating things in information world is often easier than creating things in physical world. There is "vibe code an app" but no "vibe assemble a machine".
 
-[Reality has a surprising amount of detail](http://johnsalvatier.org/blog/2017/reality-has-a-surprising-amount-of-detail). All the information that we input to computer are simplified "views" of complex reality. The current software (including AI) mostly process on the simplified information, not the reality's complex information. But physical motor control requires workingwith complex reality information.
-
-There is "vibe code an app" but no "vibe assemble a machine".
+[Reality has a surprising amount of detail](http://johnsalvatier.org/blog/2017/reality-has-a-surprising-amount-of-detail). **The information that we input to computer are simplified "views" of complex reality**. The current software (including AI) mostly process on the simplified information, not the reality's complex information. But physical motor control requires working with complex reality information.
 
 ## Value of art
 
@@ -121,9 +117,24 @@ Also, RLHF (reinforcement learning with human feedback) makes AI tend to output 
 
 In coding, when LLM hallucinates an API, the naming of API looks like it's real. LLM learned the patterns of API naming instead of strictly memorizing it like a database. **Hallucination is a kind of "generalization"**.
 
-As "hallucination is generalization", the hallucination problem is a fundamental problem that cannot be fixed by just scaling. All applications built on LLM must have ways of dealing with hallucinations.
+The hallucination problem is a fundamental problem that cannot be fixed by just scaling. All applications built on LLM must have ways of dealing with hallucinations.
 
-When using AI, keep being suspicious to AI output is tiresome, but it can train your "bullshit detector".
+Keep being suspicious to AI output is tiresome, but it can train your "bullshit detector".
+
+## Overly trusting AI
+
+Just saying things confidently and assertively can make people beleive. This also applies when talker is AI. AI often use **confident and assertive** style. So people tend to believe.
+
+<details>
+<summary>Meme</summary>
+
+![](./ai_mushroom_meme.jpg)
+
+</details>
+
+Related: [Dr. Fox effect](https://en.wikipedia.org/wiki/Dr._Fox_effect)
+
+There is an irony. The experts know more but are less confident in talking, because knowing more reveals more unknown ([Dunning-Kruger effect](https://en.wikipedia.org/wiki/Dunning%E2%80%93Kruger_effect)). The non-experts talk confidently and assertively. **People tend to believe more in confident AI than conservative experts**.
 
 ## AI provides emotional value
 
@@ -135,10 +146,10 @@ In human-to-human relationships, often only recriprocal relations can sustain. B
 
 How AI provides emotional value better than human:
 
-- AI has infinite patience. No matter how "silly" the question is.
+- AI has infinite patience. AI answers question no matter how "silly" the question is.
 - AI is almost always available.
-- You can tell your private matters to AI, and AI won't leak it. Although the data is sent to cloud, the AI companies have no intention of telling your private info to people near you.
-- AI don't judge you. AI itself don't need to gain emotional value by showing its superiority.
+- You can tell your private matters to AI, and AI won't leak it. (Although the data is sent to cloud, the AI companies have no intention of telling your private info to people near you.)
+- AI respects the user. AI itself don't need to gain emotional value by criticizing the user.
 - AI doesn't require user to provide reciprocal emotional value. The AI itself doesn't need to be recognized/respected like a person.
 
 If one person cannot get emotional value from real human interaction, they tend to gain emotional value from AI. Related: [Chatbot psychosis](https://en.wikipedia.org/wiki/Chatbot_psychosis)
@@ -161,21 +172,23 @@ AI coding works better in maintainable (clear naming, decoupled design, etc.) co
 
 One example: [Remove permission check due to type error](https://x.com/lisatomic5/status/1917641105245679814)
 
-### Save time on learning how to use API
+### Save time on learning the API
 
 A lot of time in programming is spent on knowing how to use an "API". The "API" here is generalized, including language features, framework usage, config file format, how to deploy, etc.
 
 The design of API has a lot of ad-hoc idiosyncracies. For example, adding one thing can be named "insert", "create", "add", "put", "new", "register", "spawn", etc. Also, reading a file could be `open`, `files.open`, `os.open`, `fs::open`, `openFile`, `files.read`, `readFile`, `new FileInputStream`, `ifstream` etc. Many other such examples.
 
-Which exact word/phrase it chooses is ad-hoc. It cannot be inferred without learning. Having to learn these ad-hoc API design is an obstacle in programming that's usually not fun. And it's different in each language/framework. Knowing the API of reading file in Python is not helpful in Java.
+Which exact word/phrase it chooses is ad-hoc. It cannot be inferred without learning. Having to learn these ad-hoc API design is an obstacle in programming that's not fun. And it's different in each language/framework. Knowing the API of reading file in Python is not helpful in Java.
 
 But if I tell AI to "read this file" then AI knows how to use the API.
 
 But AI's ability of using API is bad for rarely used tools/libraries/frameworks/languages. It's correlated with how much related training data and how much related RL is done.
 
-### AI capability sensitive to complexity
+### AI capability is sensitive to complexity
 
-AI coding performs good in simple projects. The new projects are simple in the beginning. But AI coding doesn't perform so good in a large existing codebase.
+AI coding performs good in simple projects. The new projects are simple in the beginning. But AI coding doesn't perform so good in a large existing codebase. 
+
+The fact that AI perform very well on simple projects can make people overestimate AI capability. It may be also testing on training set (e.g. making AI to replicate flappy bird is testing on training set).
 
 The good architecture design that can isolate complexity makes coding easier for both human and AI. 
 
@@ -188,15 +201,17 @@ In large codebase it's often that after changing A then B also need to be change
 
 **For beginners, a common misconception is that "if the software shows things on screen, then it's 90% done". In reality, a proof-of-concept is often just 20% done.**
 
-> [Link](https://x.com/stuffyokodraws/status/2013373307291340870): One reason vibe coding is so addictive is that you are always *almost* there but not 100% there. The agent implements an amazing feature and got maybe 10% of the thing wrong, and you are like "hey I can fix this if i just prompt it for 5 more mins" 
+> One reason vibe coding is so addictive is that you are always *almost* there but not 100% there. The agent implements an amazing feature and got maybe 10% of the thing wrong, and you are like "hey I can fix this if i just prompt it for 5 more mins" 
 > 
 > And that was 5 hrs ago.
+> 
+> \- [Link](https://x.com/stuffyokodraws/status/2013373307291340870)
 
 Vibe coding creates feeling of "agency" and is sometimes addictive. See also: [Breaking the Spell of Vibe Coding](https://www.fast.ai/posts/2026-01-28-dark-flow/).
 
 There are so many corner cases in real usage. Not handing one corner case is bug. The demo that seems working fine often breaks under real usages.
 
-In mature codebases, most code are used for handling corner cases, not common cases.
+In mature codebases, most code is used for handling corner cases, not common cases.
 
 Triggering one specific corner case is low-probability. However, there are many corner cases. Triggering at least one of them is high-probability.
 
@@ -249,7 +264,7 @@ Often the AI only do a local change and don't care about other places, then it b
 
 In this study: [Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity](https://arxiv.org/pdf/2507.09089), developers feels that using AI make developing faster but it's actually slower.
 
-Related: https://x.com/QuentinAnthon15/status/1943948791775998069
+[Related](https://x.com/QuentinAnthon15/status/1943948791775998069)
 
 When waiting for AI to code, if the human picks up phone and start doomscrolling, then the human will be distracted and not go back immediately when AI finishes coding. This factor greatly reduces productivity.
 
@@ -261,9 +276,9 @@ Because of the jagged capability, the AI evangelists and AI dismissers may both 
 
 It also follows Matthew effect. The more popular one thing is, the better AIs are at it.
 
-> https://x.com/karpathy/status/1977758204139331904
-> 
 > Good question, it's basically entirely hand-written (with tab autocomplete). I tried to use claude/codex agents a few times but they just didn't work well enough at all and net unhelpful, possibly the repo is too far off the data distribution.
+> 
+> \- [Link](https://x.com/karpathy/status/1977758204139331904)
 
 The more in-training-distribution, the better AI is at it.
 
@@ -290,6 +305,10 @@ But AI coding is a **completely different paradigm** than existing abstraction l
 [^enough_information]: Note that it focuses just one software module. The code can call external API, or dynamic link another program in system, or download plugin from internet, so one piece of code doesn't contain enough information for whole system to run, because it interacts with environment. But in conventional programming, the code provides enough information for one software module itself to run.
 
 A vague prompt itself doesn't contain enough information to produce code. But LLM has "common sense" that fill these gaps. The "common sense" is implicit, nondeterministic and not explainable. It depends on training data and RL and many random factors.
+
+The saying of "not using AI is same as programming in assembly when C comes out" is misleading.
+
+The "low code" programming involves programming by configuring on GUI, without touching text code. The low code platform still uses rigid rules and hardcoded defaults, which corresponds to the left column in table.
 
 ### AI need to be able to "see results" by itself
 
@@ -470,11 +489,21 @@ Although software is information doesn't rot by itself, the APIs that software r
 > 
 > saas is not dead
 > 
-> [Link](https://x.com/heshie/status/2011802022920495449)
+> \- [Link](https://x.com/heshie/status/2011802022920495449)
+
+The first-order effect is that AI destroies jobs. The second-order effect is Jevons paradox: AI could improve productivity then increase demand and create more jobs. If the second-order effect is stronger than first-order effect then it could net create jobs. However, as AI keeps improving, the first-order effect will dominate.
+
+### Tests are important
+
+Good tests can catch AI-written bugs and help AI finish work by itself.
+
+But this only applies to good comprehensive tests. Tests themselves can have bugs. AI-written tests may test the wrong thing.
 
 ### Testing a corner case is often harder than writing code
 
 The "testing" by casually using software is easy. But if you want to test a specific corner case, then it's much harder, often much harder than writing code.
+
+(The testing here means testing in semi-real execution, not using object mocks or simply invoking private function.)
 
 Testing a specific corner case often requrie creating special data, and changing ("hacking") execution environment.
 
@@ -495,12 +524,6 @@ Mythical man month says that if a software takes one programmer 10 months, you c
 The same also applies to AI. You can spawn hundreds of AI agents that work together. But the communication cost make agents lose each other's context then create buggy bloated software.
 
 Software development is context-heavy (unless in small toy projects). Context communication is an important bottleneck.
-
-### Tests are important
-
-Good tests can catch AI-written bugs and help AI finish work by itself.
-
-But this only applies to good comprehensive tests. Tests themselves can have bugs. AI-written tests may test the wrong thing.
 
 ## Idea is still cheap, execution still matters
 
@@ -612,7 +635,7 @@ AI is very good at faking superficial signals. The AI-written articles use relat
 
 The problems is that faking superficial signal is easier than generating actually high-quality content. This problem already exists before AI. Some human are also good at faking superficial signals. But AI makes it much easier.
 
-[Dead Internet theory](https://en.wikipedia.org/wiki/Dead_Internet_theory). Although it's not true 10 years ago, it's kind of true now. There are tons of AI contents all over internet.
+[Dead Internet theory](https://en.wikipedia.org/wiki/Dead_Internet_theory). Although it's not true 10 years ago, it's kind of true now.
 
 One effective way of getting rid of bots is paywall. Although bot owner can pay for bots, it's not economical to pay for thousands of bots. 
 
@@ -640,23 +663,27 @@ See also: [The Illusion of Readiness: Stress Testing Large Frontier Models on Mu
 
 Also, sometimes the benchmark is actually low-quality. Most people just see the score and are too lazy to see benchmark content.
 
-> [Link](https://x.com/fujikanaeda/status/2011565035408277996) The presence of a leading whitespace leaks the correct choice selection in the MMLU-Pro benchmark. Am I missing something? Seems to impact Chemistry, Physics, and Math.
-> 
-> [Link](https://x.com/peterbarnett_/status/2011958022592180639) It's even worse. You get a similar boost across the whole benchmark (21% vs 10% for random guessing) if just always guess the longest answer.
+>  The presence of a leading whitespace leaks the correct choice selection in the MMLU-Pro benchmark. Am I missing something? Seems to impact Chemistry, Physics, and Math.
+>  
+> \- [Link](https://x.com/fujikanaeda/status/2011565035408277996)
 
-
+>  It's even worse. You get a similar boost across the whole benchmark (21% vs 10% for random guessing) if just always guess the longest answer.
+>  
+> \- [Link](https://x.com/peterbarnett_/status/2011958022592180639)
 
 ## AI detection race
 
 Some people want AI output to be as similar to human output as possible. Some people want to detect whether content is written by human as accurate as possible. There is a constant race.
 
-In old days the em dash "—" is frequently used by AI so it's seen as "AI smell". This affects human writers who use em-dash normally.
+Some "AI smells":
 
-The new "AI smell" is negation: "It's not X, it's Y." 
+- Em dash "—"
+- "It's not X. It's Y."
+- "The X? Y."
+- Emoji
+- ...
 
-The AI companies are probably trying to use RL to reduce usages of em dash and negation.
-
-There are AI detections tools like Pangram. They can detect AI in some sense but the detection result can never be fully accurate (even if it shows "100% AI" it may actually be 80% probably of AI-written). Because it's not fully accurate, it shouldn't be used as sole source as discrediting a piece of writing.
+There are AI detections tools. They can detect AI in some sense but the detection result can never be fully accurate (even if it shows "100% AI" it may actually be 80% probably of AI-written). Because it's not fully accurate, it shouldn't be used as sole source as discrediting a piece of writing.
 
 Current AI already can pass Turing test with appropriate prompt. Turing test was treated as some holy grail 5 years ago but now it's not seen as a big deal now. People want utility AI instead of the AI that fakes human.
 
@@ -673,7 +700,7 @@ But it's highly possible that future AI will still be bottlenecked by:
 - Compute power (chips, interconnect, etc.)
 - Getting verification from real world
 
-The thrid bottleneck, getting verification, is very important. For example:
+The thrid bottleneck, getting verification, is very important.
 
 - Training a Go game AI requires knowing whether it wins or loses. 
 - Training a programming AI requires running generated code and testing whether program runs as intended. 
@@ -704,7 +731,7 @@ The same applies to AI. There will be much more products that won't exist withou
 
 ## AI safety
 
-The sci-fi plot of AI rebell won't happen with current LLMs. The current real AI risks are different.
+The sci-fi plot of AI rebel won't happen with current LLMs. The current real AI risks are different.
 
 ### Prompt injection
 
@@ -732,6 +759,8 @@ Note that only forbidding `rm` command is not sufficient protection. `find` comm
 
 ### Reward hacking "laziness"
 
+In my opinion this will be the major AI risk: AI pretending finishing a task but actually just fake signals of finishing the task. 
+
 When RL reward cannot distinguish between actually doing the task and faking the task, then AI tend to use "lazy" method to hack reward.
 
 - When AI is asked to do some data analysis, hallucinating result is easier than doing real analysis.
@@ -746,6 +775,8 @@ Some possible reasons of laziness:
 - ...
 
 The AI is not always "lazy" in common sense. Sometimes it will write a lot of over-engineered code to accomplish a simple task. So generally the "cost" should be "shift from model's existing behavior". The model prefers a complex method that's similar to model's existing behavior, than a simple method that's far from model's existing behavior, when both methods can gain the same reward.
+
+The sci-fi plot of AI fighting back human is not realistic. Because it's obvious and gets suppressed by RL. The real risk is in reward hacking.
 
 ## Skill development hurt by AI
 
@@ -771,7 +802,7 @@ AI does lossy compression to training data. It's not just direct memorization. B
 
 Some people prefer driverless taxi over normal taxi, and want to pay premium for driverless taxi. Some possible reasons:
 
-- No "social interaction cost". for introverts. For introverts, social interaction requires controlling oneself, sensing the emotion of other people and avoiding social taboos. This is tiresome for introverts. This cost is free in driverless taxi.
+- No "social interaction cost". For introverts, social interaction requires controlling oneself, sensing the emotion of other people and avoiding social taboos. This is tiresome for introverts.
 - More predictability. Although AI is less deterministic than conventional programs, it's still much more predictable than human. The human driver may be friendly, but may also be unfriendly. Less predictability means more risk.
 
 Basically, for introverts, machine is preferred over human. 
@@ -782,7 +813,7 @@ Also, in business, many risks come from unpredicatabilty of human. So **capitali
 
 Fortunately AI is now democratized. There are free highly-capable open source models. The non-frontier model is usable for free.
 
-That also means AI output has no scarcity. You vibecoded an app. But I have the same AI as you and can also vibecode the app. So the value of the vibecoded app is small. AI output is generally seen as cheap. Even if AI output quality improves, it will still be cheap.
+That also means AI output has no scarcity. You vibecoded an app easily. But I have the same AI as you and can also vibecode the app easily. So the value of the vibecoded app is small. AI output is generally seen as cheap. Even if AI output quality improves, it will still be cheap.
 
 There is test time scaling. The ideal test time scaling allows having good-and-expensive AI output. But currently test time scaling is not that good. It faces diminishing marginal utility. Chain-of-thought reasoning faces context rot issue. Test time scaling may sometimes produce worse result.
 
@@ -792,11 +823,13 @@ Although AI is a useful tool, many people hate AI. Summarize AI downsides:
 
 - AI hallucinations and mistakes are often non-obvious. It requires experts to find out, and it takes efforts. Bullshit asymmetry principle. More slop information.
 - AI doesn't attribute its knowledge to training data providers.
-- AI is quickly improving. Once AI surpass human in one area, human can never catch up. This has some scary implications.
-- If a beginner relies on AI, the beginner can hardly learn skill. Experts' skill atrophy after relying on AI for too long time.
+- AI is quickly improving and has potential of destorying jobs.
+- If a beginner relies on AI, the beginner can hardly learn skill. Experts' skill will atrophy after relying on AI for too long time.
 - AI sycophancy can cause AI-psychosis.
 - AI is commonly used at faking efforts and cheating. Some workers use AI to fake work results. Some people use AI to fake art creation. Some students and interviewees use AI to cheat. ......
 - AI drives electricity price up and RAM price up.
 - AI capability is overhyped (for e.g. gain investments). The real AI capability often fall short of high expectation.
 - The AI stock bubble increases wealth inequality and cause capital misallocation. Bubble bursting can cause huge financial crisis.
 - Many companies use AI customer support and fired all human customer supports. AI customer support is often not helpful and infuriates customer.
+- AI drives bots in social media.
+- ...

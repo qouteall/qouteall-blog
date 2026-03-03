@@ -413,6 +413,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - If the backend behind Nginx initiates closing the TCP connection, Nginx passive health check treat it as backend failure and temporarly stop reverse proxying. [See also](https://nginx.org/en/docs/http/ngx_http_upstream_module.html)
 - Nginx configuration URL trailing slash. [See also](https://dev.to/danielkun/nginx-everything-about-proxypass-2ona)
 - Elasticsearch doesn't allow removing mapping in an index. Dynamic mapping can auto-add mappings that you cannot remove, and it's enabled by default. [^es_reindex]
+- Elasticsearch terms aggregation result is inaccurate on large datasets. Increasing `shard_size` can alleviate but increase resource usage. Composite aggregation is more accurate.
 
 [^es_reindex]: Removing mapping requires reindexing. Reindexing not only costs performance, but also has risks of losing new data during reindexing, because reindex works on the snapshot. Zero-downtime reindexing that doesn't lose new ingested data during reindexing is hard: 1. create new index 2. new document ingests to both old index and new index (dual-writing) 3. reindex 4. make queries go to new index 5. stop ingesting to old index and delete old index. It can be simple if you can accept a downtime. It can also be simple if you don't care about losing new data during reindexing. Also if you can accept duplicated query result during reindex, you can use an alias that includes both old and new index, then no dual-writing needed.
 
@@ -494,6 +495,14 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Email validation is not easy. [See also](https://stackoverflow.com/questions/201323/how-can-i-validate-an-email-address-using-a-regular-expression)
 - Backtracking performance issue. See also: [Cloudflare indicent 2019 July-2](https://blog.cloudflare.com/details-of-the-cloudflare-outage-on-july-2-2019/), [Stack Exchange incident 2016 July-20](https://stackstatus.tumblr.com/post/147710624694/outage-postmortem-july-20-2016)
 
+### Microsoft-related
+
+- When using Microsoft Excel to open a CSV file, Excel will do a lot of conversions, such as date conversion (e.g. turn `1/2` and `1-2` into `2-Jan`) and Excel won't show you the original string. [The gene SEPT1 was renamed due to this Excel issue](https://en.wikipedia.org/wiki/SEPTIN1). Excel will also make large numbers inaccurate (e.g. turn `12345678901234567890` into `12345678901234500000`) and won't show you the original accurate number, because Excel internally use floating point for number. Related: [2010 British intelligence phone number issue](https://blog.statwolf.com/when-common-excel-mistakes-have-gotten-people-into-trouble-and-how-you-can-avoid-them).
+- Windows limits command length to 32767 code units. [See also](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)
+- In Windows the default stack size of main thread is 1MB, but in Linux and macOS it's often 8MB. It's easier to stack overflow in Windows by default.
+- In Windoes, environment variable names are case-insensitive.
+- Windows limits path length to be 260 code units by default.
+
 ### Other
 
 - YAML:
@@ -503,13 +512,8 @@ Indirectly use different versions of the same package (diamond dependency issue)
   - [Git commit hash may become number if unquoted](https://tmendez.dev/posts/rng-git-hash-bug/).
   - Two different extensions of YAML file: `.yml` and `.yaml`. Some places only accept one of them.
   - See also: [The yaml document from hell](https://ruudvanasseldonk.com/2023/01/11/the-yaml-document-from-hell)
-- When using Microsoft Excel to open a CSV file, Excel will do a lot of conversions, such as date conversion (e.g. turn `1/2` and `1-2` into `2-Jan`) and Excel won't show you the original string. [The gene SEPT1 was renamed due to this Excel issue](https://en.wikipedia.org/wiki/SEPTIN1). Excel will also make large numbers inaccurate (e.g. turn `12345678901234567890` into `12345678901234500000`) and won't show you the original accurate number, because Excel internally use floating point for number.
 - It's recommended to configure billing limit when using cloud services, especially serverless. See also: [ServerlessHorrors](https://serverlesshorrors.com/)
 - Big endian and little endian in binary file and net packet.
 - The current working directory can be changed by system call (e.g. `chdir`).
-- Windows limits command length to 32767 code units. [See also](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)
-- In Windows the default stack size of main thread is 1MB, but in Linux and macOS it's often 8MB. It's easier to stack overflow in Windows by default.
-- In Windoes environment variable names are case-insensitive.
-- Windows limits path length to be 260 code units by default.
 - The formats `.zip` and `.mp4` are container formats. They can hold many different kinds of formats inside.
 

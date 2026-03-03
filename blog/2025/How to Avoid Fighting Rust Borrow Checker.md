@@ -901,6 +901,8 @@ Rust's mutable borrow exclusiveness creates a lot of troubles in single-threaded
   - The above give compiler a lot of freedom of transforming code, which enables many other optimizations.
   - Without `noalias`, the optimizer must consider all possible reads/writes to the same value to do above transformation. In many cases, compiler don't have enough information, so much fewer optimizations can be done.
 
+Related: CPU internally optimizes by assuming two seprately-calculated addresses are different (assuming no alias), then rollback if assumption is wrong. [Memory disambiguation](https://en.wikipedia.org/wiki/Memory_disambiguation).
+
 ### Interior mutability summary
 
 Mutable borrow exclusiveness is overly restrictive. It is not necessary for memory safety in single-threaded code when not using interior pointer. There is **interior mutability** that allows getting rid of that constraint.
