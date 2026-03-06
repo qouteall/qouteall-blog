@@ -25,7 +25,8 @@ Examples:
 - Herd mentality. Some people do something, more people follow.
 - Financial market momentum.
 - Debt can both accelerate growth and accelerate bankruptcy.
-- Information spread (meme spread). The more popular a piece of information is, the more chance it spreads.
+- Spread of information and idea. The more popular a piece of information is, the more chance it spreads.
+- Sunk cost. The more resources put in, the higher sunk cost is, the harder to stop loss.
 - Avalanche.
 - Cascade failure.
 - ...
@@ -134,9 +135,7 @@ Composition fallacy: composing things together may give surprising results. Two 
 
 ## Fractal properties
 
-The relation between cycle and trends is similar to fractal. There are trends in cycles. There are also cycles in trends. There are cycles in cycles.
-
-Trend following investment and contrarian investment can work at same time at different scales, due to the fractal-like structure: large trends contain small cycles, large cycles contain small trends, large cycles contain small cycles.
+The relation between cycle and trends is similar to fractal. There are small trends in cycles. There are also small cycles in trends. There are small cycles in cycles.
 
 Investing in index is long-term trend following, as the index selects the winning stocks. If the index has positon limitation for each individual stock, then it also incorporates contrarian investment.
 
@@ -197,21 +196,25 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: The convenience of online shopping can lead to impulse purchases of unnecessary things, causing larger overall spending.
 
-- First-order effect: Better hardware makes software run faster.
-
-  Second-order effect: Better hardware performance make software developers focus less on optimization, resulting in slow software.
-
 - First-order effect: Email spam filters can reduce disturbance.
 
   Second-order effect: A wrong filtering may make you miss an important email.
 
-- First-order effect: Hiring a UI designer can improve the UI of the product.
+- First-order effect: Hiring a new UI designer can improve the UI of the product.
 
-  Second-order effect: The UI designer may redesign the UI to justify their value. The users that get used to old UI may be frustrated by the new unfamiliar UI. The new UI may sacrifice usability for aesthetics.
+  Second-order effect: The new UI designer may redesign the UI to justify their value. The users that get used to old UI may be frustrated by the new unfamiliar UI. The new UI may sacrifice usability for aesthetics.
 
 - First-order effect: Increasing the sensitivity of alarm improves security because it can catch more anomalies.
 
   Second-order effect: Increasing alarm sensitivity also increases false alarms. Cry wolf syndrome. People are tired of false alarms and care less about alarms.
+
+- First-order effect: Constraints are bad. It increases cost and reduces possible solutions.
+
+  Second-order effect: Constraint can breed creativity. Working in different constraints give different solutions. The variability of solutions can help getting out of local optima.
+
+- First-order effect: Adding more roads makes traffic faster.
+
+  Second-order effect: [Braess paradox](https://en.wikipedia.org/wiki/Braess%27s_paradox). Adding more roads can make overall traffic slower.
 
 ### In Economy and Finance
 
@@ -275,7 +278,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: Restricting foreign exchange makes foreign investors panic, promoting capital outflows through unregulated ways.
 
-- First-order effect: Ruthless competition (social Darwinism) will select out the best talents.
+- First-order effect: Ruthless competition (social Darwinism) will select the best talents.
 
   Second-order effect: 
   
@@ -291,10 +294,6 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 - First-order effect: Mineral resources make the country rich.
 
   Second-order effect: [Resource curse](https://en.wikipedia.org/wiki/Resource_curse). Profits in mineral export makes country's currency overvalued. Then importing becomes cheaper than country's own products. so the domestic argiculture and industries cannot develop. Having "easy money" also make people not work hard. When the international mineral price drops, economy collapses.
-
-- First-order effect: Adding more roads makes traffic faster.
-
-  Second-order effect: [Braess paradox](https://en.wikipedia.org/wiki/Braess%27s_paradox). Adding more roads can make overall traffic slower.
 
 - First-order effect: Quantitive easing reduces financial risk because it increases money supply.
 
@@ -321,8 +320,8 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   - Wrong diagnosis and wrong medication
   - Side effect of medication
   - Infect at the hospital
-  - Antibiotics disrupt the gut biome, then interfere with immune system.
-  - (Also: Issues caused by financial hardship due to large medical bill.)
+  - Antibiotics disrupt the gut biome, then interfere with immune system
+  - (Also: Issues caused by financial hardship due to large medical bill)
   - ...
 
 ### In Psychology
@@ -339,9 +338,12 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   
   Second-order effect: Praisng a product raises people's expectation, which may lead to disappointment if the actual usage experience doesn't meet the high expectation.
 
-- First-order effect: Having eagerness helps achieving the goal.
+- First-order effect: Having eagerness helps achieve the goal.
   
-  Second-order effect: Being too eager may deplete patience when facing failures. Yerkes-Dodson law. Also, eagerness is a sign of low confidence. In dating, sales and interviewing, signs of low confidence reduces chance of success.
+  Second-order effect: 
+
+  - Being too eager may deplete patience when faced with failures. Yerkes-Dodson law. 
+  - Desperate eagerness is a sign of low confidence. In dating, sales and interviewing, signs of low confidence reduce chance of success.
 
 - First-order effect: Suppressing the publication of some information stops it being spread.
 
@@ -382,7 +384,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 ### In Cybersecurity
 
-- First-order effect: Forcing the user to login again every 5 minutes can improve security.
+- First-order effect: Forcing the user to login again after inactive for 2 minutes can improve security.
 
   Second-order effect: Users are frustrated by frequent logins and may try to make login as easy as possible, like using simple passwords or keeping passwords in clipboard. Also auto log-out may happen during critical work.
 
@@ -395,6 +397,10 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   Second-order effect: The user may reduce the memory pressure by using regular passwords (like AAABBB111, CCCDDD222), to avoid the trouble of reseting password every time.
 
 ### In Software Development
+
+- First-order effect: Better hardware makes software run faster.
+
+  Second-order effect: Better hardware performance make software developers focus less on optimization, resulting in slow software.
 
 - First-order effect: Adding developers to a software project can accelerate it.
 
@@ -541,7 +547,11 @@ In capitalism, technologies are usually developed for profit, not for human well
 
 When automation works, it's good. But automation may break. And when it breaks, no one has experience to fix it, because it rarely breaks.
 
-# Related
+## Short-termism and long-termism
+
+Long-termism can usually gain advantage. However long-termism is often more fragile because it involves more investments. Investments can break. Long-termism only works in stable and safe environments.
+
+## Related
 
 Many ideas in this article are learned from N. N. Taleb's books: _The Black Swan_, _Antifragile_.
 

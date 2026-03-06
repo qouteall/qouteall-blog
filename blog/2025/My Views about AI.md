@@ -66,7 +66,7 @@ The real intelligence can understand and work with unseen new cases. Pure memori
 
 There is a spctrum between memorization and real intelligence. LLM is between pure memorization and real intelligence. It doesn't do rote memorization like a conventional database. It can do generalization and in-context learning. But its generalization and in-context learning ability is still limited. LLM often fail at out-of-training-distribution tasks.
 
-It's not easy to distinguish between memorization and intelligence. Because LLM contains the knowledge of almost whole internet and almost all books. The common questions are probably already in training set. Asking them to LLM is testing on training set.
+It's not easy to distinguish between memorization and intelligence. Because LLM contains the knowledge of tons of internet content and books content. The common questions are probably already in training set. Asking them to LLM is testing on training set.
 
 ## Moravec's paradox
 
@@ -309,6 +309,19 @@ A vague prompt itself doesn't contain enough information to produce code. But LL
 The saying of "not using AI is same as programming in assembly when C comes out" is misleading.
 
 The "low code" programming involves programming by configuring on GUI, without touching text code. The low code platform still uses rigid rules and hardcoded defaults, which corresponds to the left column in table.
+
+### Why boilerplate code exists
+
+If we rely on AI to generate most boilerplate code, why do these boilerplate exist in the first place? Does it mean the abstractions are still too rudimentary?
+
+Because there is the tradeoff between adaptiveness and conciseness:
+
+- If it's concise, then it can only handle common cases and cannot handle special requirements.
+- If it can handle all kinds of weird requirements:
+  - If it uses the same interface for common usages and special usages, then common usages will require verbose boilerplate
+  - If it uses two different interfaces for common usages and special usages, then common usage can be concise. But it increases overall complexity because there are two sets of interfaces that's not general.
+
+There are cases where a library/framework doesn't support doing X but you need to do X, but forking it is tiresome so you do some "hack" around the library/framework. Some "hack" require copying library code then do minor changes. This kind of "hacking" will greatly increase boilerplate.
 
 ### AI need to be able to "see results" by itself
 
@@ -627,11 +640,9 @@ There are diffusion LLMs. But as far as I know, the current diffusion LLMs are s
 
 [Lemon market problem](https://en.wikipedia.org/wiki/The_Market_for_Lemons): The sellers know the quality of the lemons. But the buyers don't know and is hard to judge from lemon appearance. There is an information asymmetry. The result is that good lemon is undervalued. Bad lemons prevail the market.
 
-How to solve that problem? One important way is **reputation**. When a seller is honest about the lemon quality, people communicate about the information and improve seller's reputation. When seller cheats about lemon quality, people also communicate information and reduce seller's reputation.
+One common solution is reputation. When a seller is honest about the lemon quality, people communicate about the information and improve seller's reputation. When seller cheats about lemon quality, people also communicate information and reduce seller's reputation. However the reputation system can be misused. One could spread false information.
 
-Also, for each person that accept reputation information, they also need to judge the quality by existing reputation of information provider, as there are false informations.
-
-AI is very good at faking superficial signals. The AI-written articles use related jargons that looks palusible for non-experts. The AI-written code will also superficially do things you asked, although it may use an API wrongly or violate an invariant so it won't work. The AI-generated photos looks real unless you squint details.
+AI is very good at faking superficial signals. The AI-written articles use related jargons that looks palusible for non-experts. The AI-written code will also superficially do things you asked, although it may use an API wrongly or violate an invariant so it won't work. The AI-generated photos looks real.
 
 The problems is that faking superficial signal is easier than generating actually high-quality content. This problem already exists before AI. Some human are also good at faking superficial signals. But AI makes it much easier.
 
@@ -659,6 +670,8 @@ The popular benchmarks (e.g. Humanity's last exam, SWE bench verified) are also 
 
 > ([Link](https://www.reddit.com/r/MachineLearning/comments/1pgqbjd/d_how_did_gemini_3_pro_manage_to_get_383_on/)) isparavanje: Tech companies have been paying PhDs to generate HLE-level problems and solution sets via platforms like Scale AI. They pay pretty well, iirc \~\$500 per problem. That's likely how. I was an HLE author, and later on I was contacted to join such a programme (I did a few since it's such good money). Obviously I didn't leak my original problems, but there are many I can think of.
 
+It seems that AI companies are hiring experts to write training data and develop RL reward programs. This partially falls into the trap of [bitter lesson](http://www.incompleteideas.net/IncIdeas/BitterLesson.html).
+
 See also: [The Illusion of Readiness: Stress Testing Large Frontier Models on Multimodal Medical Benchmarks](https://arxiv.org/abs/2509.18234v1)
 
 Also, sometimes the benchmark is actually low-quality. Most people just see the score and are too lazy to see benchmark content.
@@ -685,7 +698,7 @@ Some "AI smells":
 
 There are AI detections tools. They can detect AI in some sense but the detection result can never be fully accurate (even if it shows "100% AI" it may actually be 80% probably of AI-written). Because it's not fully accurate, it shouldn't be used as sole source as discrediting a piece of writing.
 
-Current AI already can pass Turing test with appropriate prompt. Turing test was treated as some holy grail 5 years ago but now it's not seen as a big deal now. People want utility AI instead of the AI that fakes human.
+Current AI already can pass Turing test with appropriate prompt. Turing test was treated as some holy grail 5 years ago but now it's not seen as a big deal now. People want utility AI instead of the AI that fakes human. And the LLMs are RLed so that the default behavior is very different to human.
 
 ## The "AGI race"
 
@@ -725,7 +738,7 @@ The nonlinearity-near-threshold effect exists in other domains. Making a softwar
 
 ## Reducing cost also reduces bottom quality
 
-Many gamers complain that many Unreal Engine 5 (UE5) games are poorly-built, having many bugs and are laggy. They blame UE5. However these games probably won't exist without UE5.
+Some gamers complain that many Unreal Engine 5 (UE5) games are poorly-built, having many bugs and are laggy. They blame UE5. However these games probably won't exist without UE5.
 
 The same applies to AI. There will be much more products that won't exist without AI, and at the same time the bottom quality will be lower.
 
@@ -764,7 +777,8 @@ In my opinion this will be the major AI risk: AI pretending finishing a task but
 When RL reward cannot distinguish between actually doing the task and faking the task, then AI tend to use "lazy" method to hack reward.
 
 - When AI is asked to do some data analysis, hallucinating result is easier than doing real analysis.
-- When AI is asked to fix a unit test, removing parts of the unit test is easier than actually fixing.
+- When AI is asked to fix a bug, hiding the symptom is easier than fixing the root cause.
+- When AI is asked to write a unit test, the tests that don't test the core functionality is easier to pass.
 - ...
 
 Some possible reasons of laziness:

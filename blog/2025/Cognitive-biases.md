@@ -722,6 +722,7 @@ Other examples of survivorship bias:
 - Social media has more negative news than positive news. Bad news travels fast.
 - The succeded research results are published and the failed attempts are hidden (P-hacking).
 - Only special and interesting events appear on news. The more representative common but not newsworthy events are overlooked.
+- If you analyzed 5 solutions then pickd one solution to present, people think you did little work because they don't see the discarded 4 solutions.
 
 A more generalized version of survivor bias is **selection bias**: When the sampling is not uniform enough and contains selection mechanism (not necessary 100% accurate selection), there will be bias in the result.
 

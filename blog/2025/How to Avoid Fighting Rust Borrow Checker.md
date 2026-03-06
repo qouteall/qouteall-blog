@@ -159,19 +159,22 @@ Summarize solutions (workarounds) of contagious borrow issue (elaborated below):
 - Reorganize code and data structure. [^refactor]
 - **Defer mutation**
 - **Avoid in-place mutation**
-- Do a split borrow on the outer scope. Or just get rid of struct, pass fields as separate arguments. (This is inconvenient. Unfortunately, borrowing is unfriendly to composition.)
+- Do a split borrow on the outer scope. Or just get rid of struct, pass fields as separate arguments. (This is inconvenient.)
 - Manually manage index (or key) in container for-loop. Borrow as temporary as possible. 
 - Just clone the data (can be shallow-clone).
+- Use the [borrow](https://docs.rs/borrow/latest/borrow/) crate. After borrowing one field the remaining fields' borrowing are put into another value in new type, using "macro magic". [^borrow_crate]
 - Use **interior mutability** (cells and locks).
 
 [^refactor]: Often the borrow checker issues (including contagious borrow issue) can be workarounded by **refactoring**: reorganize data structure, reorganize code and abstractions. However, **new requirements can easily break existing architecture**, so using refactoring to tackle borrow checker issues will **require frequent large refactoring**. "The most fundamental issue is that the borrow checker _forces_ a refactor at the most inconvenient times." [See also](https://loglog.games/blog/leaving-rust-gamedev/#once-you-get-good-at-rust-all-of-these-problems-will-go-away). If most mutable data is put into arena in the right beginning, then it will require fewer refactoring on requirement change.
 
 There are proposed language design solutions to contagious borrow issue: [^solving_container_contagious_borrow]
 
-- Encode field-level borrow information in type. [Vew type](https://smallcultfollowing.com/babysteps/blog/2025/02/25/view-types-redux/). 
-- Do implicit field-level borrow analysis in private functions. Avoid exposing partial borrow in public API, so it desn't need to be explicitly written in types. [Automatic partial borrows for private methods](https://dioxus.notion.site/Dioxus-Labs-High-level-Rust-5fe1f1c9c8334815ad488410d948f05e).
+- Encode field-level borrow information in type. [Vew type](https://smallcultfollowing.com/babysteps/blog/2025/02/25/view-types-redux/). It doen't work well with encapsulation (internal field info is leaked into type). And handling private fields while keeping API compatibility is hard.
+- Do implicit field-level borrow analysis in private functions. Avoid exposing partial borrow in public API. It avoids API compatibility issue. It makes borrow checking inter-function (not just check function signature). [Automatic partial borrows for private methods](https://dioxus.notion.site/Dioxus-Labs-High-level-Rust-5fe1f1c9c8334815ad488410d948f05e).
 
 [^solving_container_contagious_borrow]: These two solutions address struct field contagious borrow. But contagious borrow can also happen to containers. To encode the information of borrowing `i`-th element of a `Vec` into type, it requires dependent type, depending on runtime value of `i`. Adding dependent type into language is much more complex.
+
+[^borrow_crate]: The [borrow](https://docs.rs/borrow/latest/borrow/) crate creates many new types for different combinations of field borrows. One downside is that the remaining un-borrowed parts need to be manually passed. It also faces the same issue as view type: doesn't work well with encapsulation, because internal field info is leaked into type.
 
 ## Defer mutation. Mutation-as-data
 
@@ -949,6 +952,8 @@ fn main() {
 It will panic with `RefCell already borrowed` error.
 
 `RefCell` still follows mutable borrow exclusiveness rule, just checked at runtime, not compile time. Borrowing one field inside `RefCell` still borrows the whole `RefCell`.
+
+**Contagious borrow can cause `RefCell` borrow error, even if actual borrows don't conflict**.
 
 **Wrapping parent in `RefCell` cannot fix contagious borrow, but putting individual children into `RefCell` can work, as it makes borrow more fine-grained**.
 
