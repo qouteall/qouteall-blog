@@ -315,6 +315,8 @@ This article is mainly summarization. The main purpose is "know this trap exists
   - In PostgreSQL, `create unique index` or `alter table ... add foreign key` cause whole-table read-lock. To avoid that, use `create unique index concurrently` to add unique index. For foreign key, use `alter table ... add foreign key ... not valid;` then `alter table ... validate constraint ...`.
   - In MySQL (InnoDB) an `update` or `delete` that cannot use index may lock the whole table, not just targeted rows.
 - Querying which range a point is in by `select ... from ranges where p >= start and p <= end` is inefficient, even when having composite index of `(start, end)`. [^about_ranges]
+- In Microsoft SQL server, the tailing space(s) in string is ignored in comparision.
+- Comparing two strings in different collations may cause error, or degrade performance because index cannot be used.
 
 [^about_ranges]: It's recommended to use spatial index in MySQL and GiST in PostgreSQL for ranges. For non-overlappable ranges, it's possible to efficiently query using just B-tree index: `select * from (select ... from ranges where start <= p order by start desc limit 1) where end >= p` (only require index of `start` column). 
 
@@ -480,6 +482,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 ### Locale
 
 - The upper case and lower case can be different in other natural languages. In Turkish (tr-TR) lowercase of `I` is `ı` and upper case of `i` is `İ`. The `\w` (word char) in regular expression can be locale-dependent.
+- In German, the upper case of ß is SS (two characters, not one). But the lower case of SS is ss, not ß.
 - Letter ordering is different in some other natural languages. Regular expression `[a-z]` may malfunction in other locale. 
 - PostgreSQL linguistic sorting (collation) depends on glibc by default. Upgrading glibc may cause index corruption due to changing of linguistic order. [See also](https://wiki.postgresql.org/wiki/Locale_data_changes). Related: [Docker Postgres Image issue](https://x.com/gwenshap/status/1990942970682749183)
 - Text notation of floating-point number is locale-dependent. `1,234.56` in US correspond to `1.234,56` in Germany.
