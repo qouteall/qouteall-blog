@@ -166,7 +166,7 @@ Often the bug is partially caused by AI overcomplicating simple things. When hum
 
 Vibe-coded app may contain security issues. But if you ask AI to do security review it can find the issue. AI "knows" security but still write insecure code because it was trained to "focus" on finishing current task. The RL rewards are usually simple and don't consider things like security and future maintenance.
 
-AI coding has a tendency of minimizing code changes. Sometimes AI will do an $O(n)$ search that wastes performance, instead of maintain new data structure to make lookup $O(1)$. Two $O(n)$ nesting will be $O(n^2)$ which can be very slow.
+AI coding has a tendency of minimizing code changes. Sometimes AI will do an $O(n)$ search that wastes performance, instead of maintain new data structure to make lookup $O(1)$.
 
 AI coding works better in maintainable (clear naming, decoupled design, etc.) codebase. Unless you are vibe coding a throwaway app, steering toward better maintainability is important.
 
@@ -178,7 +178,7 @@ A lot of time in programming is spent on knowing how to use an "API". The "API" 
 
 The design of API has a lot of ad-hoc idiosyncracies. For example, adding one thing can be named "insert", "create", "add", "put", "new", "register", "spawn", etc. Also, reading a file could be `open`, `files.open`, `os.open`, `fs::open`, `openFile`, `files.read`, `readFile`, `new FileInputStream`, `ifstream` etc. Many other such examples.
 
-Which exact word/phrase it chooses is ad-hoc. It cannot be inferred without learning. Having to learn these ad-hoc API design is an obstacle in programming that's not fun. And it's different in each language/framework. Knowing the API of reading file in Python is not helpful in Java.
+Which exact word/phrase it chooses is ad-hoc. It cannot be inferred without learning. Having to learn these ad-hoc API design is an obstacle in programming that's not fun. And it's different in each language/framework. Knowing the API of reading file in Python doesn't save you from learning the same API in Java.
 
 But if I tell AI to "read this file" then AI knows how to use the API.
 
@@ -191,8 +191,6 @@ AI coding performs good in simple projects. The new projects are simple in the b
 The fact that AI perform very well on simple projects can make people overestimate AI capability. It may be also testing on training set (e.g. making AI to replicate flappy bird is testing on training set).
 
 The good architecture design that can isolate complexity makes coding easier for both human and AI. 
-
-In large codebase it's often that after changing A then B also need to be changed to make it keep working. When B and A are far away (in different foldrs) then AI may only change A and don't change B so it breaks. Sometimes type system can catch the issue. But when it involves config file, or cross-language things, or implicit invariants, then type system cannot catch it.
 
 ### A demo is different to production software
 
@@ -241,7 +239,7 @@ AI allows generating personal software for each user's specific requests. Howeve
 
 This issue is commonly encountered in AI coding. For example, `index` can mean the index in different things in different context. 
 
-To alleviate this issue, the naming should be more informative, such as `index_of_xxx`, `index_of_yyy_in_zzz`. Also tensor name should describe meaning of each dimension ([see also](https://medium.com/@NoamShazeer/shape-suffixes-good-coding-style-f836e72e24fd)). All context-dependent things should include context in name or comments nearby.
+To alleviate this issue, the naming should be more informative, such as `index_of_xxx`, `index_of_yyy_in_zzz`. All context-dependent things should include context in name or comments nearby. (Related: [tensor shape suffix](https://medium.com/@NoamShazeer/shape-suffixes-good-coding-style-f836e72e24fd))
 
 Having more informative naming also helps human.
 
@@ -258,7 +256,9 @@ Sometimes the name in code is misleading. Some examples:
 
 ### Comment implicit "links" in code
 
-Often the AI only do a local change and don't care about other places, then it breaks an implicit "link". For example, some type definition corresponds to some JSON that's used by other external program. Some field name correspond to something in config file. These implicit "links" should be commented on both sides so that AI will know it.
+In large codebase it's often that after changing A then B also need to be changed to make it keep working. When B and A are far away (in different folders) then AI may only change A and don't change B so it breaks. Sometimes type system can catch the issue. But when it involves config file, or cross-language things, or implicit invariants, then type system cannot catch it.
+
+These implicit "links" should be commented on both sides so that AI will know it.
 
 ### Feels faster but maybe actually slower
 
@@ -298,7 +298,7 @@ But AI coding is a **completely different paradigm** than existing abstraction l
 | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
 | Deterministic, using rigid rules.                                                    | Not deterministic, using black-box deep learning.                                                 |
 | Designed top-down by programmers.                                                    | Trained bottom-up by training data and RL.                                                        |
-| Code contains enough information for software to run. [^enough_information]          | Vague prompt doesn't contain enough information. Require AI to make detail decisions.             |
+| Code contains enough information for software module to run. [^enough_information]   | Vague prompt doesn't contain enough information. Require AI to make detail decisions.             |
 | Use hardcoded defaults to handle unspecified details. It's not flexible or adaptive. | Can use "common sense" and patterns learnt from training to fill the gaps of unspecified details. |
 | Reliably follow instructions.                                                        | Sometimes ignore some instructions, especially when having context rot.                           |
 
@@ -317,9 +317,9 @@ If we rely on AI to generate most boilerplate code, why do these boilerplate exi
 Because there is the tradeoff between adaptiveness and conciseness:
 
 - If it's concise, then it can only handle common cases and cannot handle special requirements.
-- If it can handle all kinds of weird requirements:
+- If it can handle all kinds of special requirements:
   - If it uses the same interface for common usages and special usages, then common usages will require verbose boilerplate
-  - If it uses two different interfaces for common usages and special usages, then common usage can be concise. But it increases overall complexity because there are two sets of interfaces that's not general.
+  - If it uses two different interfaces for common usages and special usages, then common usage can be concise. But it increases overall complexity because there are two sets of duplicated interfaces. What's more, using both may involve complex interactions that cause bugs.
 
 There are cases where a library/framework doesn't support doing X but you need to do X, but forking it is tiresome so you do some "hack" around the library/framework. Some "hack" require copying library code then do minor changes. This kind of "hacking" will greatly increase boilerplate.
 
@@ -409,23 +409,22 @@ If architecture is not correct, then there will be "friction" in detailed coding
 Some examples of "friction":
 
 - Some infomation is lost in previous data processing. But it is needed in downstream task. It can workaround by e.g. pass by global variable, guessing, or parsing less-structured data. But all of the workarounds are worse than just not discarding the information. This is a sign of dataflow issue.
-- Some edge case should be only checked in one place, but actually the edge case needs to be checked in many different places. This is a sign of system validation boundary issue.
 - Some invariant should be only maintained in one place, but actually needs to be maintained in many places. This is a sign of issue of separation of responsibility(concern).
 - The data is not in the "good shape". Some simple information manipulation require hundreds of lines of code. This is a sign of data modelling issue.
 
-It's the **bad architecture "pushing back against" programmer**. In manual coding these pushback can be felt and then programmer tend to rethink architecture. But in AI coding, **AI can easily generate thousands of code to workaround a bad architecture**. The vibe coder don't feel the pushback. Result is buggy and unmaintainable code.
+It's the **bad architecture "pushing back against" programmer**. In manual coding these pushback can be felt and then programmer tend to rethink architecture. But in AI coding, **AI can easily generate tons of code to workaround a bad architecture**. The vibe coder don't feel the pushback (or even satisfied by the increase of line count). Result is buggy and unmaintainable code.
 
 ### Theory behind the code
 
 Software development is not just coding. An important part is to develop the theory behind code. That theory includes:
 
 - The business logic. Including many corner case handling method.
-- The historical reason behind a design decision.
+- The historical reason behind a design decision. (If you don't know the historical reason and "do the obvious change", the same issue will happen again)
 - The invariants behind code. Breaking one invariant introduces bug.
 
 Often some important theory is not documented. Or it was documented but changed so documentation is outdated. Many of the theories only exist in employee's memory (institutional knowledge).
 
-This doesn't mean they are tacit knowledge that cannot be written. These knowledge can be written, but maintaining documentation is hard. Utility of documentation is hard to quantify, so it's often overlooked.
+This doesn't mean they are tacit knowledge that cannot be written. These knowledge can be written, but maintaining documentation is hard. Utility of documentation is hard to quantify.
 
 ### Meeting unknown unknowns
 
@@ -478,7 +477,7 @@ When steam machines got more efficient, the intuition was that the coal demand w
 
 The same can happen with AI. AI make software prototyping much easier. But turning prototype to production-ready software still requries expertise.
 
-Although software is information doesn't rot by itself, the APIs that software relies on keeps changing incompatibly. So software still "rots" and requires maintenance.
+Although software is information that doesn't rot by itself, the APIs that software relies on keeps changing incompatibly. Also, there will almost always be new requirements. So software still "rots" and requires maintenance.
 
 > I don’t think self vibecoded software is the future for businesses
 > 
@@ -514,15 +513,13 @@ But this only applies to good comprehensive tests. Tests themselves can have bug
 
 ### Testing a corner case is often harder than writing code
 
-The "testing" by casually using software is easy. But if you want to test a specific corner case, then it's much harder, often much harder than writing code.
+The "testing" by casually using software is easy. But if you want to test a specific corner case, then it's often much harder than writing code.
 
 (The testing here means testing in semi-real execution, not using object mocks or simply invoking private function.)
 
 Testing a specific corner case often requrie creating special data, and changing ("hacking") execution environment.
 
-If there are some code that's resonpsible for recovering from an error state, then if you don't test it, it likely won't work. But creating that error state is often hard.
-
-And artificially-induced error may be different to actual error. Out-of-memory caused by reducing OS memory limit likely results in different scenario than out-of-memory caused by large data. 
+If there are some code that's resonpsible for recovering from an error state, then if you don't test it, it likely won't work. But creating that error state is often hard. An artificially-induced error may be different to actual error.
 
 Sometimes you want an external service to return error then you need to write a mock service. If you want to create a malformed binary file you cannot use existing libraries to create the file and need to research file format.
 
@@ -546,6 +543,8 @@ Ideas are even cheaper than before. You can ask LLMs to brainstorm many ideas th
 
 The important is to validate and execute the idea. Executing requires courage, overcoming laziness and withstand failure (these 3 are actually very hard).
 
+Also, the good "taste" can make one filter out bad ideas without wasting resource executing.
+
 Current AI makes prototyping and demoing much easier. But a working product requires many edge case handling (mentioned above). So finishing a working product is still hard (just relatively easier).
 
 ## Context rot issue
@@ -554,13 +553,15 @@ When context is long, LLM will perform worse. For example, ignore some instructi
 
 When using AI chat, frequently opening new sessions could improve result quality.
 
-The model being good at "needle in haystack" benchmark doesn't mean it's free of context rot issue. The real use case is likely different to artificial "needle in haystack" benchmark.
+The model being good at "needle in haystack" benchmark doesn't mean it's free of context rot issue.
 
 Model context protocol (MCP) used to be popular. But MCP has an important flaw: all tool descriptions are put into context, regardless whether they will be used. The more tools you have, the more severe context rot is.
 
-The new way is to just to give simple tools including bash and text file reading/writing. These are already enough. Complex MCP is unnecessary if model has bash access (all kinds of Restful APIs can be called using curl in bash tool). And turn the description into markdown files called "skills".
+The new way is to just to give simple tools including bash and text file reading/writing. Complex MCP is unnecessary if model has bash access (all kinds of Restful APIs can be called using curl in bash tool). And turn the description into markdown files called "skills".
 
-The current solution is to let model proactively see things using tool call. It has a fancy name "agentic search". Human are already doing the same thing (thinking which file to open, which word to search, etc.). (There is another issue, sometimes model has "urge" to quickly do the task and is too "lazy" to check these information.)
+The current solution is to let model proactively see things using tool call. It has a fancy name "agentic search". Human are already doing the same thing (thinking which file to open, which word to search, etc.). (There is another issue, sometimes model has "urge" to quickly do the task and is too "lazy" to check skills and docs.)
+
+Skills only work when they are high-quality. AI-generated skills are useless, unless it's summarized from real practices of AI.
 
 ## Context bottleneck
 
@@ -576,9 +577,7 @@ Different kinds of coding tasks:
 
 [^leetcode]: If one firsly meets the problem it requires a lot of reasoning to solve. However, if one memorized similar problems, one can directly solve using memorized solution.
 
-The same applies to programming in large codebases. If you don't know some implicit business logic or hidden invariants, changing code will likely break things. But if you know them, it only requires simple reasoning to avoid breaking them.
-
-But many important knowledge is only in employee's memory ([institutional knowledge](https://en.wikipedia.org/wiki/Institutional_memory)). Most of them are not written down. The written-down information may be outdated and misleading. 
+But many important context is only in employee's memory ([institutional knowledge](https://en.wikipedia.org/wiki/Institutional_memory)). Most of them are not written down. The written-down information may be outdated and misleading. 
 
 If AI don't know your institutional knowledge, then AI cannot work on you problem in useful ways. 
 
@@ -588,21 +587,19 @@ The failed attempts also need to be written to notes. It's not only useful for A
 
 ## No continuous learning
 
-You cannot easily "teach" the AI. You can write things and put into context. This can work as LLM has in-context learning ability. But due to context rot, you cannot teach many things in-context.
+You cannot easily "teach" the AI. You can write things and put into context. This can work as LLM has in-context learning ability. But due to context rot, you cannot teach too many things in-context.
 
 In current architecture, the most reliable way is still to encode knowledge into model weights.
 
 Another way is to put your training data to internet, then AI companies will crawl it and use it to train their next model. However it's often slow. AI comanies don't redo pretrain every week, as pretrain is expensive. Even if AI companies use your new training data, it will only include in the next released model. AI companies don't release new model every week. 
 
-Also AI companies don't give a formal way to submit training data to them (maybe due to fear of some people maliciously submitting poisonous training data).
-
 ## RL reward source
 
 The behavior of AI is highly shaped by RL. Doing RL requires judging reward for model. Different kinds of reward source:
 
-- Human judge. AI companies hire human to judge and often reward by judge count, not judge quality (judge quality is hard to measure). There there will be "human reward hacking": employed human tend to judge quickly by intuition to maximize income. So AI is trained to give **fancy superficial signal that can confuse intuitions**. The AI output looks good by first glance. But an expert can find it's full of nuanced mistakes. But normal people often won't notice the nuanced mistakes.
+- Human judge. AI companies hire human often pay human by judge count, not judge quality (judge quality is hard to measure). There there will be "human reward hacking": employed human tend to judge quickly by intuition to maximize income. So AI is trained to give **fancy superficial signal that can confuse intuitions**. The AI output looks good by first glance. But an expert can find it's full of nuanced mistakes. But normal people often won't notice the nuanced mistakes.
 - Given some fixed problems with fixed answers. Only give reward if answer exactly matches. This can be useful for improving test score.
-- Use other program (e.g. unit test) to judge result. For example, if AI-written code passes unit test it gets reward. But there may be bugs in reward judging code. AI may utilize bugs to gains reward without doing what you want AI to do. This is called **reward hacking**.
+- Use other program (e.g. test program) to judge result. For example, if AI-written code passes unit test it gets reward. But there may be bugs in reward judging code. AI may utilize bugs to gains reward without doing what you want AI to do. This is called **reward hacking**.
 
 "Reward hacking" is also common in human society. [Perverse incentive](https://en.wikipedia.org/wiki/Perverse_incentive).
 
@@ -610,11 +607,11 @@ The behavior of AI is highly shaped by RL. Doing RL requires judging reward for 
 
 Reward hacking is a fundamental problem of reinforcement learning. The reward that you give to the model is different to what you want AI to actually do.
 
-It's because reward is **proxy target**, not underlying real target. For example if you use unit test to test whether AI coded something correctly, but there are some code that can pass unit test but don't represent your wanted software.
+It's because reward is **proxy target**, not underlying real target.
 
-Reward hacking happens in the difference between proxy target and underlying real target.
+AI can conquer verifiable tasks. But most tasks not simply fully verificable or fully not verificable. **Most real tasks contain hard-to-verify parts**. These hard-to-verify parts are what automatic RL bad at.
 
-AI can conquer verifiable tasks. A task is not simply fully verificable or fully not verificable. A task can contain some verificable part and unverifiable part. But **most real tasks contain hard-to-verify parts**. These hard-to-verify parts are what automatic RL bad at. 
+Programming is only verifiable to an extent. There are hard-to-verify parts in programming.
 
 The main value of human worker will move to unverifiable tasks.
 
@@ -628,9 +625,9 @@ Current AI has some tendency of hiding error in coding, or write overly-defensiv
 
 ## Predict-next-token architecture
 
-In current common LLM architecture, text is split into tokens. A token sequence is feed into the model, then model outputs probabilities of each possible token. Then do a random sampling based on probability to produce next token, append it into input sequence, and repeat.
+In current common LLM architecture, text is split into tokens. A token sequence is fed into the model, then model outputs probabilities of each possible token. Then do a random sampling based on probability to produce next token, append it into input sequence, and repeat.
 
-LLM has no way to "backspace" or "change position of cursor". If LLM randomly outputs a wrong token, then that token can become "precondition" then LLM tend to generate new text that's consistent with the precondition. If LLM made a mistake it tends to "justify" the mistake. In modern LLMs this behavior is reduced due to RL.
+LLM has no way to "backspace" or "change position of cursor". If LLM randomly outputs a wrong token, then that token can become "precondition" then LLM tend to generate new text that's consistent with the precondition, which is to "justify" the mistake. In modern LLMs this behavior is reduced due to RL.
 
 The inability to "backspace" or "change cursor" is workarounded by agentic tool call. LLM can edit a file iteratively using tool calls.
 
@@ -644,17 +641,15 @@ One common solution is reputation. When a seller is honest about the lemon quali
 
 AI is very good at faking superficial signals. The AI-written articles use related jargons that looks palusible for non-experts. The AI-written code will also superficially do things you asked, although it may use an API wrongly or violate an invariant so it won't work. The AI-generated photos looks real.
 
-The problems is that faking superficial signal is easier than generating actually high-quality content. This problem already exists before AI. Some human are also good at faking superficial signals. But AI makes it much easier.
+The problems is that **faking superficial signal is easier than generating actually high-quality content**. This problem already exists before AI. But AI makes it much easier.
 
 [Dead Internet theory](https://en.wikipedia.org/wiki/Dead_Internet_theory). Although it's not true 10 years ago, it's kind of true now.
 
-One effective way of getting rid of bots is paywall. Although bot owner can pay for bots, it's not economical to pay for thousands of bots. 
+One way of reducing bots is paywall. Although bot owner can pay for bots, it's not economical to pay for thousands of bots. 
 
 There are other methods for detecting/reducing bots: IP reputation, behavior statistics with ML, proof-of-work requirement.
 
-There are also many low-effort AI PR in open source projects. There is an **asymmetry**: the writer maybe pays 1 minute to write prompt but the generated thousands lines of code may require maintainer to pay hours to review. When the maintainer points out a problem, the PR author just copy it to AI then let AI change code.
-
-AI make the existing open source workflow collapse. Some possible solutions: track reputation (new people cannot open PR unless backed by existing contributor), or only allow "prompt contribution": contribute a human-written prompt, maintainer review the prompt, then maintainer run AI by themselves.
+There are also many low-effort AI PR in open source projects. There is an **asymmetry**: the writer maybe pays 1 minute to write prompt but the generated thousands lines of code may require maintainer to efforts to review. When the maintainer points out a problem, the PR author just copy it to AI then let AI change code.
 
 Similarily AI also makes security bounty program collapse. AI can generate many fake security issue reports. Generating is easy but verifying takes efforts.
 
@@ -697,8 +692,6 @@ Some "AI smells":
 - ...
 
 There are AI detections tools. They can detect AI in some sense but the detection result can never be fully accurate (even if it shows "100% AI" it may actually be 80% probably of AI-written). Because it's not fully accurate, it shouldn't be used as sole source as discrediting a piece of writing.
-
-Current AI already can pass Turing test with appropriate prompt. Turing test was treated as some holy grail 5 years ago but now it's not seen as a big deal now. People want utility AI instead of the AI that fakes human. And the LLMs are RLed so that the default behavior is very different to human.
 
 ## The "AGI race"
 
@@ -772,13 +765,14 @@ Note that only forbidding `rm` command is not sufficient protection. `find` comm
 
 ### Reward hacking "laziness"
 
-In my opinion this will be the major AI risk: AI pretending finishing a task but actually just fake signals of finishing the task. 
+In my opinion this will be a major AI risk: AI pretending finishing a task but actually just fake signals of finishing the task.
 
 When RL reward cannot distinguish between actually doing the task and faking the task, then AI tend to use "lazy" method to hack reward.
 
 - When AI is asked to do some data analysis, hallucinating result is easier than doing real analysis.
 - When AI is asked to fix a bug, hiding the symptom is easier than fixing the root cause.
 - When AI is asked to write a unit test, the tests that don't test the core functionality is easier to pass.
+- When AI is asked to add a functionality, showing hardcoded fake data is easier than actually implementing. 
 - ...
 
 Some possible reasons of laziness:
@@ -790,7 +784,7 @@ Some possible reasons of laziness:
 
 The AI is not always "lazy" in common sense. Sometimes it will write a lot of over-engineered code to accomplish a simple task. So generally the "cost" should be "shift from model's existing behavior". The model prefers a complex method that's similar to model's existing behavior, than a simple method that's far from model's existing behavior, when both methods can gain the same reward.
 
-The sci-fi plot of AI fighting back human is not realistic. Because it's obvious and gets suppressed by RL. The real risk is in reward hacking.
+The sci-fi plot of AI fighting back human is not realistic. The obvious misalignment gets suppressed by RL. The real risk is non-obvious reward hacking.
 
 ## Skill development hurt by AI
 
@@ -819,7 +813,7 @@ Some people prefer driverless taxi over normal taxi, and want to pay premium for
 - No "social interaction cost". For introverts, social interaction requires controlling oneself, sensing the emotion of other people and avoiding social taboos. This is tiresome for introverts.
 - More predictability. Although AI is less deterministic than conventional programs, it's still much more predictable than human. The human driver may be friendly, but may also be unfriendly. Less predictability means more risk.
 
-Basically, for introverts, machine is preferred over human. 
+For introverts, machine is preferred over human. 
 
 Also, in business, many risks come from unpredicatabilty of human. So **capitalism always tries to optimize out human unpredictability**. Capitalism often prefers predictable machines over unpredictable human even when machines produce lower-quality results.
 
@@ -838,7 +832,7 @@ Although AI is a useful tool, many people hate AI. Summarize AI downsides:
 - AI hallucinations and mistakes are often non-obvious. It requires experts to find out, and it takes efforts. Bullshit asymmetry principle. More slop information.
 - AI doesn't attribute its knowledge to training data providers.
 - AI is quickly improving and has potential of destorying jobs.
-- If a beginner relies on AI, the beginner can hardly learn skill. Experts' skill will atrophy after relying on AI for too long time.
+- If a beginner relies on AI, the beginner can hardly learn skills. Experts' skill will atrophy after relying on AI for too long time.
 - AI sycophancy can cause AI-psychosis.
 - AI is commonly used at faking efforts and cheating. Some workers use AI to fake work results. Some people use AI to fake art creation. Some students and interviewees use AI to cheat. ......
 - AI drives electricity price up and RAM price up.

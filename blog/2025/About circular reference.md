@@ -528,14 +528,16 @@ But for non-lock waiting, detecting deadlock is not that easy. If a thread waits
 
 Starting from Python 3.13, Python supports free threading, getting rid of global interpreter lock (GIL). But then the Python's container operations may cause data race, without the protection of GIL. 
 
-So Python adds a lock to every container. But naively adding locking on every container operation can cause deadlock. For example, one thread loops on contains A and change B during loop, another thread loops on container B and change A during loop. Making lock more fine-granular can introduce new deadlock.
+So Python adds locks to every container. But naively adding locking on every container operation can cause deadlock that doesn't exist with GIL.
 
 Python solves that issue using [Python critical sections](https://peps.python.org/pep-0703/#python-critical-sections):
 
 - One thread only holds one container lock at a time. If the thread locks container A then try to do something on container B, it firstly release lock on A.
   - There are operations that involve two containers, like `list.extend(iterable)`. It can alternate between locking `list` and locking `iterable`, only locking one at once. This also means that the `list.extend(iterable)` operation won't be atomic.
-- The thread temporarily releases lock on suspend. Suspend can be caused by IO.
+- The thread temporarily releases lock on suspend.
 - Some operations are lock-free.
+
+The free-threading Python has lower single-threaded performance due to more lock operations.
 
 ## Lazy evaluation circular reference
 
@@ -690,9 +692,11 @@ SQL is not Turing-complete when not using recursive common table extension (`wit
 
 The proof languages describe both program and proof, according to [Curry–Howard correspondence](https://en.wikipedia.org/wiki/Curry%E2%80%93Howard_correspondence). The propositions, like `1 + 1 = 2`,  `x -> (x + 0 = x)`, correspond to types. Getting a value of a type is treated as proving the proposition corresponding to the type. It only works in pure functional programming where there is no side effect (e.g. IO, mutation) or randomness. It also requires the program to always halt given any valid input, because a program that deadloops cannot compute the output value.
 
-The proof languages, like Lean and Idris, are not Turning-complete. Because a valid proof require the corresponding program to halt. They have special mechanisms (halt checker) to ensure that program eventually halts.
+The proof languages Lean is not Turning-complete. Because a valid proof require the corresponding program to halt. They have special mechanisms (halt checker) to ensure that program eventually halts. 
 
-Strictly speaking, Turing complete requires infinitely large memory, so all practical computers and languages don't satisfy strict Turing complete. Apart from memory constraint, blockchain applications often consume fee (gas) in each step of execution, but Turing complete requires unlimited execution steps, so they also not strictly Turing complete.
+The existence halt checker doesn't violate halting problem because it's overly strict (may treat some halting program as non-halting).
+
+Strictly speaking, Turing complete requires infinitely large memory, so all practical computers and languages don't satisfy strict Turing complete.
 
 ## Ethernet loop
 

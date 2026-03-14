@@ -27,6 +27,7 @@ Examples:
 - Debt can both accelerate growth and accelerate bankruptcy.
 - Spread of information and idea. The more popular a piece of information is, the more chance it spreads.
 - Sunk cost. The more resources put in, the higher sunk cost is, the harder to stop loss.
+  - This especially applies to war. When both sides costed a lot in war, the war is hard to stop.
 - Avalanche.
 - Cascade failure.
 - ...
@@ -50,8 +51,9 @@ Examples of concentration and 80/20 rule (Pareto principle):
   - Most issues that user see are caused by few common bugs.
   - Most complexity (and bugs) come from very few features and requirements.
   - Most development efforts are for fixing edge cases. Few development efforts are spent on main case handling.
+  - One bug applies to all instances of the software version.
 - The most social connections are related to few core people.
-- The most decisions are made by few important information.
+- The most decisions are made based on few important information.
 - In financial market:
   - The most volatility concentrates on small time intervals.
   - The most profit and loss come from few important investments.
@@ -82,7 +84,7 @@ Examples:
   - Low volatility induce higher leverage that potential increase volatility. High volatility provide potential profit for hedging that may lead to reduced volatility.
   - Two uncorrelated assets may be commonly diversified together that may potentially increase their correlation. 
 - The debt cycle. Economy growth parallels debt growth. Higher debt impose higher risk and more interest cost. Then debt collapses and inefficient companies bankrupt. The economy becomes more frugal and more efficient. The debt level becomes low again.
-- The cycle of money supply. The Federal Reserve keeps trying to balance between controlling inflation and providing enough money (to keep economy healthy).
+- The cycle of money supply. The central bank keeps trying to balance between controlling inflation and providing enough money.
 - The Kondratiev cycle. New technology drives growth and investments. The application of new teconology matures and growth plateaus, creating excess investment, excess debts and inflation. Then recession comes. A new radical innovation drives a new cycle.
 - The demographic cycle. Ancient China suffers from [Malthusian trap](https://en.wikipedia.org/wiki/Malthusianism): Population grows, farmland per capita reduces, food supply cannot catch up population. When it's close to threshold, a natural disaster can cause famine (and war), reducing population.
 - Economies of scale eventually faces diminishing marginal return. And larger scale makes management harder.
@@ -105,7 +107,7 @@ The **"competition"** between self-reinforcing feedback loops and self-balancing
 | Population growth           | Exponential growth                                                                          | Limited food supply, living resources and jobs; Higher competition                 |
 | Asset price grow            | Trend following investments; Fear of missing out; Overconfidence; Leverage                  | Long force depletes; Short potential accumulates                                   |
 | Asset price drop            | Panic; Margin call                                                                          | Short force depletes; Long potential accumulates                                   |
-| Debt growth and inflation   | Economy growth; Facilitates investments and debt                                            | Cost of excess invstment and debt; Monetary tightening for keeping currency credit |
+| Debt growth and inflation   | Economy growth; Higher confidence                                                           | Cost of excess invstment and debt; Monetary tightening for keeping currency credit |
 | Debt collapse and deflation | Cadcade credit collapse during financial crisis; Lose of confidence                         | Countermeasures for crisis; Fiscal and monetary stimulus                           |
 | Monopoly                    | Matthew effect; Economies of scale; Brand recognition                                       | Antitrust; Safety concerns; Innovator's dillema; Bureaucracy within large company  |
 | Scaling of production       | Amortize cost                                                                               | Harder to manage; Diminishing marginal return; Higher risk                         |
@@ -357,6 +359,8 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: May waste more time considering which choice is better.
 
+  Divination has real utility: it makes one quickly make decision, stopping wasting time considering which is better.
+
 - First-order effect: Smart people's beliefs are more correct because they are smart.
 
   Second-order effect: Smart people are also more smart in making up reasons to justify their own belief (motivated reasoning and confirmation bias).
@@ -539,7 +543,7 @@ Technology advancement usually involves **scaling**:
 
 Scaling often involves higher fragility and higher cost (e.g. advanced chip manufacturing), and eventually facing diminishing marginal return. Scaling of connection also boost concentration and Matthew effect.
 
-Advanced technology is often more fragile or has unobvious downsides. It often requires a balance between convenience of advanced technology and reliability of provimitive methods.
+Advanced technology is often more fragile or has unobvious downsides. It often requires a balance between convenience of advanced technology and reliability of primitive methods.
 
 Advanced but expensive technology may defeat due to financial sustainability.
 
@@ -553,5 +557,5 @@ Long-termism can usually gain advantage. However long-termism is often more frag
 
 ## Related
 
-Many ideas in this article are learned from N. N. Taleb's books: _The Black Swan_, _Antifragile_.
+Many ideas in this article are learnt from N. N. Taleb's books: _The Black Swan_, _Antifragile_.
 
