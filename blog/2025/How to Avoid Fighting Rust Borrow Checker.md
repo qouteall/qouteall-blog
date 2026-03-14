@@ -1204,7 +1204,7 @@ Note that bumpalo by default don't run `drop` to improve performance. Use `bumpa
 
 ## Using unsafe
 
-By using unsafe you can freely manipulate pointers and are not restricted by borrow checker. But writing unsafe Rust is harder than just writing C, because you need to **carefully avoid breaking the constraints that safe Rust code relies on**. A bug in unsafe code can cause issue in safe code.
+By using unsafe you can freely manipulate pointers and are not restricted by borrow checker. But writing unsafe Rust is harder than just writing C/C++, because you need to **carefully avoid breaking the constraints that safe Rust code relies on**. A bug in unsafe code can cause issue in safe code.
 
 Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
 
@@ -1213,7 +1213,7 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
   - Violating that rule cause undefined behavior and can cause wrong optimization. Rust adds `noalias` attribute for mutable borrows into LLVM IR. LLVM will heavily optimize based on `noalias`. [See also](https://doc.rust-lang.org/nomicon/aliasing.html)
   - Multiple mutable raw pointers `*mut T` can point to same data. But raw pointer cannot coexist with mutable borrow to same data.
   - [Related1](https://chadaustin.me/2024/10/intrusive-linked-list-in-rust/), [Related2](https://web.archive.org/web/20230307172822/https://zackoverflow.dev/writing/unsafe-rust-vs-zig/)
-  - Also, the type that has self-reference should be `!Unpin` (once pinned, cannot be unpinned). If `T` is `!Unpin` then `&mut T` has no `noalias`. (However, there is still [potential unsoundness related to self-reference](https://github.com/rust-lang/rust/issues/63818))
+  - Also, the type that has self-reference should be `!Unpin`. If `T` is `!Unpin` then `&mut T` has no `noalias`. (However, there is still [potential unsoundness related to self-reference](https://github.com/rust-lang/rust/issues/63818))
 - Converting a `&T` to `*mut T` then mutate pointed data is undefined behavior, unless using `UnsafeCell`. Normal `&T` has LLVM `readonly` attribute which can enable some optimizations, but if `T` contains `UnsafeCell` then compiler won't add `readonly`.
 - [Pointer provenance](https://doc.rust-lang.org/std/ptr/index.html#provenance).
   - For to-heap pointers, different allocations are different provenances. Different local variables and global variables are different provenances.

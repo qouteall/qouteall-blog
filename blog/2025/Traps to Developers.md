@@ -232,8 +232,8 @@ This article is mainly summarization. The main purpose is "know this trap exists
 ### C/C++
 
 - Don't use `=` to compare equality.
-- Storing a pointer to an element in `std::vector` and then grow the vector, vector may re-allocate content, making element pointer invalid. Similar to other containers.
-- `std::string` created from literal string may be temporary. Taking `c_str()` from a temporary string is wrong.
+- Storing a pointer to an element in `std::vector` and then grow the vector, vector may re-allocate content, making element pointer invalid. Same applies to other containers.
+- If a function accepts `std::string&`, and literal string (e.g. `"x"`) is passed as argument, the `std::string` object will be short-lived.
 - [Iterator invalidation](https://learnmoderncpp.com/2024/09/04/understanding-iterator-invalidation/). Modifying a container when looping on it.
 - `std::views::filter` malfunctions when element is mutated that predicate result changes in multi-pass iteration. [See also](https://github.com/CppCon/CppCon2024/blob/main/Presentations/Taming_the_Cpp_Filter_View.pdf). `std::views::as_rvalue` with `std::ranges::to` mutates the element which can trigger that issue. [See also](https://github.com/philsquared/cpponsea2025-slides/blob/main/Presentations/Faster_Safer_Better_Ranges.pdf)
 - `std::remove` doesn't remove but just rearrange elements. `erase` actually removes.
@@ -243,12 +243,12 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - For `std::map` and `std::unordered_map`, `map[key]` alone will mutate the map if the corresponding entry doesn't exist. [See also](https://en.cppreference.com/w/cpp/container/map/operator_at.html)
 - For `std::vector<bool>`, result of `operator[]` is a proxy object, not `bool&`.
 - Undefined behaviors. The compiler optimization aim to keep defined behavior the same, but can freely change undefined behavior. Relying on undefined behavior can make program break under optimization. [See also](https://russellw.github.io/undefined-behavior)
-  - Accessing uninitialized memory is undefined behavior. Converting a `char*` to struct pointer can be seen as accessing uninitialized memory, because the object lifetime hasn't started. It's recommended to put the struct elsewhere and use `memcpy` to initialize it.
-    - Directly trating binary data as struct is undefined behavior, even if the memory is initialized. Because it's treated as object lifetime hasn't started. It also may involve alignment issue. One solution is to put the struct on stack then use `memcpy` to initialize it.
-  - Accessing invalid memory (e.g. null pointer) is undefined behavior.
+  - Accessing uninitialized memory is undefined behavior.
+    - Converting binary data pointer `char*` to struct pointer is treated as using uninitialized memory, even if the memory is initialized, because the object [lifetime](https://en.cppreference.com/w/cpp/language/lifetime.html) hasn't started.
+  - Accessing invalid memory (null pointer, dangling pointer) is undefined behavior.
   - Integer overflow/underflow is undefined behavior. Note that unsigned integer can underflow below 0. Don't use `x > x + 1` to check overflow as it will be optimized to `false`.
   - Aliasing.
-    - Strict aliasing rule: If there are two pointers with type `A*` and `B*`, then compiler assumes two pointer can never equal. If they equal, using it to access memory is undefined behavior. Except in two cases: 1. `A` and `B` has subtyping relation 2. converting pointer to byte pointer (`char*`, `unsigned char*` or `std::byte*`) (the reverse does not apply). [^pointer_type_hold_integer]
+    - Strict aliasing rule: If there are two pointers with type `A*` and `B*`, then compiler assumes two pointer can never equal. If they equal, using it to access memory is undefined behavior. Except in two cases: 1. `A` and `B` has subtyping relation 2. converting pointer to byte pointer (`char*`, `unsigned char*` or `std::byte*`) (the reverse does not apply). [^pointer_type_hold_integer] [^strict_aliasing_linus]
     - Pointer provenance. Two pointers from two different provenances are treated as never equal. If their address equals, it's undefined behavior. [See also](https://www.ralfj.de/blog/2020/12/14/provenance.html)
   - `const` can mean both read-only and immutable:
     - If the original declared object is not `const`, you can turn pointer to it as `const T*`, in this case `const` means read-only [^readonly]. You can change the object without triggering undefined behavior.
@@ -261,11 +261,13 @@ This article is mainly summarization. The main purpose is "know this trap exists
   - Some SIMD instructions only work with aligned data.
 - Global variable initialization runs before `main`. [Static Initialization Order Fiasco](https://en.cppreference.com/w/cpp/language/siof.html).
 - Start from C++ 11, destructors have `noexcept` by default. If exception is thrown out of a `noexcept` function, whole process will crash.
-- Compiler can auto-generate copy constructor that does shallow copy. It may cause wrong implicit copy then cause double free.
+- If destructor is implemented, then you should implement copy constructor or disable copy constructor. If not, it can implicitly copy then double free.
 - In signal handler, don't do any IO or locking, don't `printf` or `malloc`
 - Compare signed number with unsigned number. If `a` is signed -1, `b` is unsigned 0, then `a > b` is true, because it auto-converts `a` into unsigned number.
 
 [^pointer_type_hold_integer]: Using pointer type to hold integer is fine as long as you don't use it to access memory. But it's not recommended to do that.
+
+[^strict_aliasing_linus]: [Linus is against strict aliasing rule](https://lkml.org/lkml/2018/6/5/769).The Linux kernel disables strict aliasing rule and makes integer overflow defined behavior.
 
 [^readonly]: The read-only here means in-language constraint. It should not be confused with read-only memory which is actually immutable.
 

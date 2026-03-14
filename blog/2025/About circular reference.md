@@ -524,6 +524,19 @@ In normal programs, detecting deadlocks caused by only locks is easy. Because it
 
 But for non-lock waiting, detecting deadlock is not that easy. If a thread waits on a channel to consume, you need to know which thread may produce to that channel. Sometimes a thread can reference a channel but won't produce to it. Knowing it accurately requires analyzing the program's behavior in the future. If the analysis is rough, it will give many false positives. Analyzing accurately will encounter limitation of Rice's theorem (explained below).
 
+## How free-threading Python handles container locking
+
+Starting from Python 3.13, Python supports free threading, getting rid of global interpreter lock (GIL). But then the Python's container operations may cause data race, without the protection of GIL. 
+
+So Python adds a lock to every container. But naively adding locking on every container operation can cause deadlock. For example, one thread loops on contains A and change B during loop, another thread loops on container B and change A during loop. Making lock more fine-granular can introduce new deadlock.
+
+Python solves that issue using [Python critical sections](https://peps.python.org/pep-0703/#python-critical-sections):
+
+- One thread only holds one container lock at a time. If the thread locks container A then try to do something on container B, it firstly release lock on A.
+  - There are operations that involve two containers, like `list.extend(iterable)`. It can alternate between locking `list` and locking `iterable`, only locking one at once. This also means that the `list.extend(iterable)` operation won't be atomic.
+- The thread temporarily releases lock on suspend. Suspend can be caused by IO.
+- Some operations are lock-free.
+
 ## Lazy evaluation circular reference
 
 ### Infinite container
