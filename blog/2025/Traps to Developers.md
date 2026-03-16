@@ -111,18 +111,18 @@ This article is mainly summarization. The main purpose is "know this trap exists
 
 ### Unicode and text
 
-- Two concepts: code point, grapheme cluster:
-  - Grapheme cluster is the "unit of character" in GUI. An emoji is a grapheme cluster, but it may consist of many code points.
-  - In UTF-8, a code point can be 1, 2, 3 or 4 bytes. The byte number does not necessarily represent code point number.
-  - In UTF-16, each UTF-16 code unit is 2 bytes. A code point can be 1 code unit (2 bytes) or 2 code units (4 bytes, surrogate pair [^scalar_value]).
-  - JSON string `\u` escape uses surrogate pair. `"\uD83D\uDE00"` in JSON has only one code point.
+- The concepts: code point, scalar value, grapheme cluster:
+  - Grapheme cluster is the "unit of character" in GUI. An emoji is a grapheme cluster, but it may consist of many scalar values.
+  - In UTF-8, code point and scalar value are the same thing. A code point can be 1, 2, 3 or 4 bytes.
+  - In UTF-16, each UTF-16 code unit is 2 bytes. A scalar value can be 1 code unit (2 bytes) or 2 code units (4 bytes, surrogate pair [^scalar_value]).
+  - JSON string `\u` escape uses surrogate pair. `"\uD83D\uDE00"` in JSON is only one scalar value.
 - Strings in different languages:
   - Rust use UTF-8 for in-memory string. `s.len()` gives byte count. Rust does not allow directly indexing on a `str` (but allows subslicing). `s.chars().count()` gives code point count. Rust is strict in UTF-8 code point validity.
-  - Java, C# and JS's string encoding is similar to UTF-16 [^string_encoding]. String length is code unit count. Indexing works on code units. Each code unit is 2 bytes. One code point can be 1 code unit or 2 code units.
-  - In Python, `len(s)` gives code point count. Indexing gives a string that contains one code point.
+  - Java, C# and JS's string encoding is similar to UTF-16 [^string_encoding]. String length is code unit count. Indexing works on code units. Each code unit is 2 bytes. One scalar value can be 1 code unit or 2 code units.
+  - In Python, `len(s)` gives scalar value count. Indexing gives a string that contains one scalar value.
   - C++ `std::string` and Golang `string` have no constraint of encoding and are similar to byte arrays.
   - No language mentioned above do string length and indexing based on grapheme cluster.
-  - In SQL, `varchar(100)` limits 100 code points (not bytes).
+  - In SQL, `varchar(100)` limits 100 scalar values (not bytes).
 - When reading text data in chunk, don't convert individual chunks to string then concat, as it may cut inside a UTF-8 code point.
 - Some Windows text files have byte order mark (BOM) at the beginning. It's U+FEFF zero-width no-break space (it's normally invisible). FE FF means file is in big-endian UTF-16. EF BB BF means UTF-8. Some non-Windows software doesn't handle BOM.
 - When converting binary data to string, often the invalid places are replaced by � (U+FFFD).
@@ -137,7 +137,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - Line break. Windows often use CRLF `\r\n` for line break. Linux and macOS often use LF `\n` for line break.
 - Locale ([elaborated below](#locale)).
 
-[^scalar_value]: The U+XXXX notation (XXXX is a hex value) represents a code point. There is some ambiguity of "code point" in UTF-16. In UTF-16, for a code point formed by two code units (4 bytes), its two individual code units are also code points, but these two are surrogate code points. It can be seen as both one code point and two code points, which is confusing. The code points from U+D800 to U+DFFF are called surrogate code points. The code points that are not surrogate are called scalar values. For that code point formed by two code units (4 bytes), it's one scalar value, it's also two surrogate code points. From string semantic value, it should be seen as one code point (scalar value). This ambiguity doesn't exist in UTF-8. In this article, code point refers to scalar value.
+[^scalar_value]: The U+XXXX notation (XXXX is a hex value) represents a code point. In UTF-8, code point and scalar value are the same thing. But in UTF-16, it's complex. You can understand scalar value as "real code point" that has semantic meaning. The "fake code point" is surrogate code point (U+D800 to U+DFFF). One surrogate code point itself has no semantic meaning. Two surrogate code units form a 4-byte scalar value, called surrogate pair. Note that a surrogate pair can both be seen as one code point or two code points. Because that UTF-8 is widely used, it's often that "code point" means scalar value ("real code point").
 
 [^string_encoding]: Strictly speaking, they use [WTF-16](https://simonsapin.github.io/wtf-8/#ill-formed-utf-16) encoding, which is similar to UTF-16 but allows invalid surrogate pairs. That encoding is for API and is not necessarily the actual in-memory representation. For example, Java has an optimization that use Latin-1 encoding (1 byte per code point) for in-memory string if possible.
 
@@ -300,7 +300,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - In SQLite, when table is not `strict`, values are dynamically-typed, but it has "type affinity" that does implicit conversion. The type `floating point` has integer affinity and will auto-convert real number 1.0 to integer 1. The type `string` has numeric affinity and will auto-convert string "01234" to number 1234. It's recommended to always use `strict` table.
 - SQLite by default does not do vacuum. The file size only increases and won't shrink. To make it shrink you need to either manually `vacuum;` or enable `auto_vacuum`.
 - In SQLite if you don't set `busy_timeout`, operations will fail directly if database is locked, without auto retry.
-- [Foreign key implicit locking may cause deadlock](./About%20circular%20reference#foreign-key-deadlock).
+- [Foreign key implicit locking may cause deadlock](./About%20circular%20reference#mysql-foreign-key-deadlock).
 - When using foreign key, when loading database backup, if the child table is loaded before parent, it will fail to load due to foreign key violation.
 - Locking may break repeatable read isolation (it's database-specific).
 - Distributed SQL database may doesn't support locking or have weird locking behaviors. It's database-specific.
@@ -433,10 +433,8 @@ Indirectly use different versions of the same package (diamond dependency issue)
   - Don't set state directly in component rendering. State can only be set in callbacks.
 - `useEffect` without dependency array runs on every component render. But `useEffect` with empty dependency array `[]` runs only on component mounting.
 - Forget clean up in `useEffect`.
-- Closure trap. Closure can capture a state. If the state changes, the closure still captures the old state. Solutions:
-  - Make closure not capture state and access state within `useReducer`. 
-  - Put mutable thing in `useRef` (note that changing value in ref don't trigger component re-rendering,)
-  - Add state to effect dependency array. But if the effect manages `setInterval`, doing this will make timing inaccurate.
+- Closure trap (stale closure). Closure can capture a state. If the state changes, the closure still captures the old state. The modern solution is [`useEffectEvent`](https://react.dev/reference/react/useEffectEvent). The old workaround is `useRef`.
+  - Note: simply adding state to dependency array may cause unwanted effect cleanup (for `setTimeout`, it can mess up timing, because change of dependency clears and re-adds timeout).
 - `useEffect` firstly runs in next iteration of event loop, after browser renders the web page. Doing initialization in `useEffect` is not early enough and may cause visual flicker. Use `useLayoutEffect` for early initialization.
 
 [^js_string_primitive]: In JS, `string` is primitive type, not object type. In JS you don't need to worry about two strings with same content but different reference like in Java. However the `String` in JS is object and use refernce equality.
@@ -451,7 +449,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Sometimes rebasing requires you to solve the same conflict many times (because multiple commits touch the same conflict line). Squashing changes before rebasing can avoid it.
 - After commiting files, adding these files into `.gitignore` won't automatically exclude them from git. To exclude them, delete them.
   - You can also use `git rm --cached` to exclude them without deleting locally. However, after excluding and pushing, when another coworker pulls, these files will be deleted (not just excluded).
-- Reverting a merge doesn't fully cancel the side effect of the merge. If you merge B to A and then revert, merging B to A again has no effect. One solution is to revert the revert of merge. 
+- Reverting a merge doesn't fully cancel the side effect of the merge. If you merge B to A and then revert, merging B to A again has no effect. One solution is to revert the revert of merge.
   - A cleaner way to cancel a merge, instead of reverting merge, is to 1. backup the branch, 2. hard reset to commit before merge, 3. cherry pick commits after merge, 4. force push.
 - In GitHub, if you accidentally commited secret (e.g. API key) and pushed to public, even if you override it using force push, GitHub will still keep that secret public. [See also](https://trufflesecurity.com/blog/guest-post-how-i-scanned-all-of-github-s-oops-commits-for-leaked-secrets), [Example activity tab](https://github.com/SharonBrizinov/test-oops-commit/compare/e6533c7bd729957b2eb31e88065c5158d1317c5e...9eedfa00983b7269a75d76ec5e008565c2eff2ef)
 - In GitHub, if there is a private repo A and you forked it as B (also private), then when A becomes public, the private repo B's content is also publicly accessible, even after deleting B. [See also](https://trufflesecurity.com/blog/anyone-can-access-deleted-and-private-repo-data-github).
@@ -505,7 +503,6 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - When using Microsoft Excel to open a CSV file, Excel will do a lot of conversions, such as date conversion (e.g. turn `1/2` and `1-2` into `2-Jan`) and Excel won't show you the original string. [The gene SEPT1 was renamed due to this Excel issue](https://en.wikipedia.org/wiki/SEPTIN1). Excel will also make large numbers inaccurate (e.g. turn `12345678901234567890` into `12345678901234500000`) and won't show you the original accurate number, because Excel internally use floating point for number. Related: [2010 British intelligence phone number issue](https://blog.statwolf.com/when-common-excel-mistakes-have-gotten-people-into-trouble-and-how-you-can-avoid-them).
 - Windows limits command length to 32767 code units. [See also](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)
 - In Windows the default stack size of main thread is 1MB, but in Linux and macOS it's often 8MB. It's easier to stack overflow in Windows by default.
-- In Windoes, environment variable names are case-insensitive.
 - Windows limits path length to be 260 code units by default.
 
 ### Other

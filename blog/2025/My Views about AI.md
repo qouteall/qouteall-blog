@@ -184,6 +184,14 @@ But if I tell AI to "read this file" then AI knows how to use the API.
 
 But AI's ability of using API is bad for rarely used tools/libraries/frameworks/languages. It's correlated with how much related training data and how much related RL is done.
 
+### AI refactoring
+
+Modern IDE already supports refactoring like renaming, extract function, inline function, etc. And they can work reliably. They can work with name collision because they uses semantic AST.
+
+But the IDE refactoring is still based on rigid rules. They cannot do context-sensitive refactoring. For example, change code and config file accordingly, add same argument to many functions and pass, etc. This is a good use case of AI.
+
+But AI is not very reliable, especially when there are same-named-but-different things. Things like renaming is still better done via IDE.
+
 ### AI capability is sensitive to complexity
 
 AI coding performs good in simple projects. The new projects are simple in the beginning. But AI coding doesn't perform so good in a large existing codebase. 
@@ -475,7 +483,7 @@ Also, the prompt should include the **root goal** (not just a subtask). This can
 
 When steam machines got more efficient, the intuition was that the coal demand will reduce, because it requires less coal for same work. However there is a **second-order effect**: as steam machines become more efficient, they get deployed more. The overall coal demand greatly increased. This is [Jevons paradox](https://en.wikipedia.org/wiki/Jevons_paradox).
 
-The same can happen with AI. AI make software prototyping much easier. But turning prototype to production-ready software still requries expertise.
+The same can happen with AI. AI make software prototyping much easier. There will be much more prototypes. But turning prototype to production-ready software still requries expertise. So the work of fixing prototype increases.
 
 Although software is information that doesn't rot by itself, the APIs that software relies on keeps changing incompatibly. Also, there will almost always be new requirements. So software still "rots" and requires maintenance.
 
@@ -503,7 +511,7 @@ Although software is information that doesn't rot by itself, the APIs that softw
 > 
 > \- [Link](https://x.com/heshie/status/2011802022920495449)
 
-The first-order effect is that AI destroies jobs. The second-order effect is Jevons paradox: AI could improve productivity then increase demand and create more jobs. If the second-order effect is stronger than first-order effect then it could net create jobs. However, as AI keeps improving, the first-order effect will dominate.
+However, as AI keeps improving, the demand of "fixing AI prototype" will reduce.
 
 ### Tests are important
 
@@ -534,6 +542,12 @@ Mythical man month says that if a software takes one programmer 10 months, you c
 The same also applies to AI. You can spawn hundreds of AI agents that work together. But the communication cost make agents lose each other's context then create buggy bloated software.
 
 Software development is context-heavy (unless in small toy projects). Context communication is an important bottleneck.
+
+## Verification is less fun than generation?
+
+Work involves two parts: generation (e.g. draw things, write code), verification (e.g. evaluate whether drawing is good, test whether code works). Before AI, both parts are done by human. But after AI, human don't do generation and only do verification.
+
+In one aspect, verification is tiresome because you bear the responsibility of the result. In another aspect, you have the veto power on the AI.
 
 ## Idea is still cheap, execution still matters
 
@@ -622,6 +636,8 @@ These hard-to-verify parts can be improved by letting human experts to supervise
 > \- [Link](https://spectrum.ieee.org/ai-coding-degrades)
 
 Current AI has some tendency of hiding error in coding, or write overly-defensive code. Hiding error only reduces superficial errors but make real bugs much harder to debug. Overly-defensive code increases maintenance burden.
+
+Also, the RL may make model have a tendency too strong that it ignores instruction. For example, the model insists to keep backward compatibility for a just-written functionality, and ignore instructions for not doing it.
 
 ## Predict-next-token architecture
 
@@ -715,6 +731,8 @@ The thrid bottleneck, getting verification, is very important.
 The first two can be simulated purely in computer. Doing RL on them is efficient. But for science research that touches real world, getting verification from real world will be an important bottleneck.
 
 Also, if the AI want to improve itself, then the AI need to do AI experiments. But AI experiments costs compute power and energy. So there will probably be no dramatic "AGI quickly improve itself to superintelligence". The progress will be slow (but steady).
+
+The brute force scaling of model size and pretrain data faces dimishing marginal return. The new focus is RL and architecture. Better RL can make same-sized model perform better.
 
 ## Non-linearity of AI usefulness
 

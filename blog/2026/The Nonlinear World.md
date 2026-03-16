@@ -314,7 +314,11 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 - First-order effect: Just eating very few reduces caloric intake, helping weight loss.
   
   Second-order effect: A large calorie deficit may cause higher level of cortiso, inhibiting fat burning, facilitating muscle breakdown, slowing down metabolism, hindering weight loss efforts. Weight loss requires scientific diet.
-  
+
+- First-order effect: Raising children in clean environments make them healthy because they avoids most pathogen.
+
+  Second-order effect: Lacking touch with pathogen may cause immune system issues, then may facilitate autoimmune disease.
+
 - First-order effect: Medication cure diseases.
 
   Second-order effect: There are [iatrogenesis](https://en.wikipedia.org/wiki/Iatrogenesis), which means the harm caused by medical treatment. Iagrogenesis can be caused my many ways, such as:
@@ -486,7 +490,9 @@ Redundancy tackles risk. Two kinds of redundancy:
 - Resource redundancy. Example: save more cash, hoard emergency food.
 - Functional redundancy. Example: be more versatile and can change profession, having a plan B when plan A fails.
 
-Diversification is also a way to handle risks. Note that diversification only works when they are not correlated or only weakly correlated. But many financial assets are highly correlated under Black Swan event.
+Diversification is also a way to handle risks. Note that diversification only works when correlation is low. But many financial assets are highly correlated under Black Swan event.
+
+Harvest optionality: being able to delay harvest when market price is low. For example, timberland can delay cutting tree when wood price is low, brewhouse can keep brewing when alcohol price is low.
 
 ## Good side of incident
 

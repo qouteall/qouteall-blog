@@ -12,9 +12,7 @@ The 3 concepts: deadlock, circular reference and halting, are deeply connected.
 
 ## Deadlock
 
-Deadlock can be understood via **resource allocation graph**.
-
-It has two kinds of nodes:
+Deadlock can be understood via **resource allocation graph**. It has two kinds of nodes:
 
 - The unit of execution: Threads, processes, goroutines, async tasks, etc.
 - Synchronization primitives: Locks, channels, etc.
@@ -308,7 +306,7 @@ The common priority inversion problem involves 3 threads, with low/medium/high p
 
 There are explicit locks (updates, deletes, `select ... for update`, etc.). There are also implicit lockings. Here I will focus on non-obvious deadlocks related to implicit locking.
 
-### Foreign key deadlock
+### MySQL foreign key deadlock
 
 In MySQL (InnoDB), it implicitly locks foreign-key-referenced row to ensure foreign key validity. But this may cause deadlock. Example:
 
@@ -421,7 +419,7 @@ Tracing GC can handle the unreachable cycle. However it's still possible to leak
 - There is a large tree structure. Every child in tree references parent (circular reference). When you only need one node of tree, the whole tree is kept reachable.
 - Golang allows interior pointer. Having an interior pointer keeps the whole object alive. Keeping a small slice within a large slice can leak memory.
 
-These memory leaks are often related to containers and non-obvious references. Some memory leaks are related to lambda capture, as it creates non-obvious reference.
+These memory leaks are often related to containers and lambda capture.
 
 With GC it's still possible to leak non-heap resources, like file handles, TCP connections, memory manged by native code, etc.
 
@@ -520,9 +518,9 @@ The previous solutions doesn't consider non-lock waiting. Non-lock waiting means
 
 SQL databases can reliably detect deadlock. In SQL, a transaction keeps acquiring locks and only release when transaction ends. There is no non-lock waiting. It's simple.
 
-In normal programs, detecting deadlocks caused by only locks is easy. Because it can track what threads holds a lock. Then it knows a lock's release depends on which thread's progress.
+In normal programs, detecting deadlocks caused by only locks is easy. Because it can track what threads holds a lock. Then it knows a lock's release depends on which thread's progress. It only needs to track program's current behavior, and don't need to predict program's future behavior.
 
-But for non-lock waiting, detecting deadlock is not that easy. If a thread waits on a channel to consume, you need to know which thread may produce to that channel. Sometimes a thread can reference a channel but won't produce to it. Knowing it accurately requires analyzing the program's behavior in the future. If the analysis is rough, it will give many false positives. Analyzing accurately will encounter limitation of Rice's theorem (explained below).
+But for non-lock waiting, detecting deadlock is not that easy. If a thread waits on a channel to consume, you need to know which thread may produce to that channel. Sometimes a thread can reference a channel but won't produce to it. Knowing it accurately requires analyzing the program's behavior in the **future**. If the analysis is rough, it will give many false positives. Analyzing accurately will encounter limitation of Rice's theorem (explained below).
 
 ## How free-threading Python handles container locking
 
@@ -536,8 +534,6 @@ Python solves that issue using [Python critical sections](https://peps.python.or
   - There are operations that involve two containers, like `list.extend(iterable)`. It can alternate between locking `list` and locking `iterable`, only locking one at once. This also means that the `list.extend(iterable)` operation won't be atomic.
 - The thread temporarily releases lock on suspend.
 - Some operations are lock-free.
-
-The free-threading Python has lower single-threaded performance due to more lock operations.
 
 ## Lazy evaluation circular reference
 
@@ -773,7 +769,7 @@ Scrollbar layout: In web page it's common that scrollbar only appears when conte
 
 [^scrollbar]: In macOS scrollbar does not take space by default.
 
-If the layout changes based on whether width reach a threshold, scrollbar may cause infinite flicker. For example, for GUI, if its available space is larger than 900px then it's treated as desktop and shows large detailed info. But if its available space is smaller than 900px, it's treated as mobile and shows small summarized info. Near the threshold, it's possible that 1. in desktop view, content is too high, scrollbar appears and taks space 2. available width become lower than threshold due to scrollbar 3. become mobile view, content is not high enough and scrollbar disappears 4. available width above threshold, become desktop view 5. repeat. [One similar example](https://github.com/jbaysolutions/vue-grid-layout/issues/715).
+If the layout changes based on whether width reach a threshold, scrollbar may cause infinite flicker. For example, if its available width is larger than 900px then it's treated as desktop and shows large detailed info. But if its available width is smaller than 900px, it's treated as mobile and shows small summarized info. Near the threshold, it's possible that 1. in desktop view, content is too high, scrollbar appears and taks space 2. available width become lower than threshold due to scrollbar 3. become mobile view, content is not high enough and scrollbar disappears 4. available width above threshold, become desktop view 5. repeat. [One similar example](https://github.com/jbaysolutions/vue-grid-layout/issues/715).
 
 ## Circular reference in math
 
@@ -834,13 +830,15 @@ Y combinator gives the fixed point of a lambda term. $Y f = f \ (Y f)$.
 
 ### Gödel's incompleteness theorem
 
-Firstly encode symbols, statements and proofs into data. The statements that contain free variables (e.g. x is a free variable in "x is an even number") can also be encoded (it can represent "functions" and even "higher-order functions").
+It applies to the formal system. The formal system can deterministically verify whether a proof is true. The formal system also can encode the symbols/statements/proofs in the formal system itself.
 
-Specifically, Gödel encodes symbols, statements and proofs into integer, called Gödel number. There exists many ways of encoding symbols/statements/proofs as data, and which exact way is not important. For simplicity, I will treat them all as data, and ignore the conversion between data and symbol/statements/proofs.
+Firstly encode symbols, statements and proofs into data. The statements that contain free variables (e.g. x is a free variable in "x is an even number") can also be encoded. It can represent "functions" and even "higher-order functions". It can substitute a free variable with another thing (and do renaming to avoid name collision). It can "evaluate function".
+
+Specifically, Gödel encodes symbols/statements/proofs into integers. But there are many ways of encoding, and which exact way of encoding is not important.
 
 Define:
 
-- `is_proof(theory, proof)` determines whether a proof successfully proves a theory. It's possible to deterministically verify proof written in special formal language (like Lean).
+- `is_proof(theory, proof)` determines whether a proof successfully proves a theory. It's doable in a formal system.
 - `provable(theory)` gives a boolean value, telling whether there exists a `proof` that satisfies `is_proof(theory, proof)`.
 - `unprovable(theory)` negates result of `provable(theory)`
 
@@ -849,10 +847,9 @@ Then it uses the same form as Y combinator $(\lambda x . f (x \ x)) (\lambda x .
 - Define `H(x) = unprovable(x(x))`. This corresponds to $\lambda x. f (x \ x)$ where $f$ is `unprovable`.
 - Define `G = H(H)`. This corresponds to $(\lambda x . f (x \ x)) (\lambda x . f (x \ x))$.
 
-Then `G = H(H) = unprovable(H(H)) = unprovable(G)`. It creates a self-referencial statement: `G`  means `G` is not provable. If `G` is true, then `G` is not provable, then `G` is false, which is a paradox.
+Then `G = H(H) = unprovable(H(H)) = unprovable(G)`. It creates a self-referencial statement: `G`  means `G` is not provable. If `G` is true, then `G` is not provable. If `G` is false then `G` is provable which is a paradox. 
 
-The `x(x)` is symbol substitution. replacing the free variable `x` with `x`, while avoid making two different variables same name by renaming when necessary. 
-
+So the consistent formal system will have non-provable true statement.
 
 ## Related
 

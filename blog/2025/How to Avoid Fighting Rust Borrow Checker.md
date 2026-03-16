@@ -174,7 +174,7 @@ There are proposed language design solutions to contagious borrow issue: [^solvi
 
 [^solving_container_contagious_borrow]: These two solutions address struct field contagious borrow. But contagious borrow can also happen to containers. To encode the information of borrowing `i`-th element of a `Vec` into type, it requires dependent type, depending on runtime value of `i`. Adding dependent type into language is much more complex.
 
-[^borrow_crate]: The [borrow](https://docs.rs/borrow/latest/borrow/) crate creates many new types for different combinations of field borrows. One downside is that the remaining un-borrowed parts need to be manually passed. It also faces the same issue as view type: doesn't work well with encapsulation, because internal field info is leaked into type.
+[^borrow_crate]: The [borrow](https://docs.rs/borrow/latest/borrow/) crate creates many new types for different combinations of field borrows. One downside is that the remaining un-borrowed parts need to be manually passed. It also faces the same issue as view type: doesn't work well with encapsulation, because internal field info is leaked into type. But the borrow crate is more reliable than `RefCell`: no need to worry runtime panic as long as it compiles.
 
 ## Defer mutation. Mutation-as-data
 
@@ -1220,10 +1220,10 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
   - Two pointers created from two provenances are treated as never alias. If their address equals, accessing memory using them is undefined behavior.
   - Directly converting an integer to pointer gets a pointer with no provenance, using that pointer to access memory is undefined behavior, except when:
     - If the integer `i` is converted to pointer using `p.with_addr(i)` (`p` is another pointer that has provenance). The result has same provenance of `p`.
-    - For memory-mapped IO (MMIO), always access memory using [`read_volatile`](https://doc.rust-lang.org/core/ptr/fn.read_volatile.html) and [`write_volatile`](https://doc.rust-lang.org/core/ptr/fn.write_volatile.html). These two functions work for MMIO when pointer has no provenance.
+    - For the memory that's not managed by Rust (including native C library memory, memory-mapped IO (MMIO) memory, file mmap memory, etc.), accessing them using [`read_volatile`](https://doc.rust-lang.org/core/ptr/fn.read_volatile.html) and [`write_volatile`](https://doc.rust-lang.org/core/ptr/fn.write_volatile.html) is fine and doesn't require pointer provenance.
   - Adding a pointer with an integer doesn't change provenance.
   - The provenance is tracked by compiler in compile time. In actual execution, pointer is still integer address that doesn't attach provenance information [^miri_pointer_provenance].
-  - The [XOR linked list](https://en.wikipedia.org/wiki/XOR_linked_list) likely breaks due to pointer provenance issue. It's not recommended to use it.
+  - The [XOR linked list](https://en.wikipedia.org/wiki/XOR_linked_list) breaks under pointer provenance. It's not recommended to use it.
 - Using uninitialized memory is undefined behavior. [`MaybeUninit`](https://doc.rust-lang.org/beta/std/mem/union.MaybeUninit.html)
   - Normally a byte has 256 possible values. But in LLVM a byte has 258 possible values [^llvm_constraint]. The extra two are 1. uninitialized 2. poison (computed from other undefined behaviors). Like pointer provenance, the two extra values only exist in compile time.
 - `a = b` will drop the original object in place of `a`. If `a` is uninitialized, then it will drop an unitialized object, which is undefined behavior. Use `(&raw mut x).write(...)` [Related](https://lucumr.pocoo.org/2022/1/30/unsafe-rust/)
