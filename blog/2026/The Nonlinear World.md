@@ -28,6 +28,8 @@ Examples:
 - Spread of information and idea. The more popular a piece of information is, the more chance it spreads.
 - Sunk cost. The more resources put in, the higher sunk cost is, the harder to stop loss.
   - This especially applies to war. When both sides costed a lot in war, the war is hard to stop.
+- Banks only loan to companies with good financial status.
+- The worse health condition is, the more expensive health insurance is, the less likely one affords treatment.
 - Avalanche.
 - Cascade failure.
 - ...
@@ -145,22 +147,20 @@ Heinrich's law: for every accident that causes a major injury, there are 29 acci
 
 ## Nonlinear systems are hard to understand and predict
 
-Nonlinear systems are chaotic. Predicting them accurately is practically impossible. You can only do some blurry inaccurate predictions. There are unknown unknowns and [Black Swan events](https://en.wikipedia.org/wiki/Black_swan_theory).
+Nonlinear systems are chaotic. Predicting them accurately is practically impossible.
 
 But people tend to think they understand and can predict, while they cannot (hindsight bias, confirmation bias, narrative fallacy, etc.).
 
 In prediction: 
 
-- Pursue simpler predictions instead of fragile complex accurate predictions. Many tightly-dependent predictions tend to fail together.
-- Try to be less wrong, not perfectly correct. Just being less wrong than others can outcompete sometimes.
+- Pursue simpler predictions instead of fragile complex specific predictions. Many tightly-dependent predictions tend to fail together.
+- Try to be less wrong, not perfectly correct. Just being less wrong than others can gain advantage sometimes.
 - Have plan-B instead of relying on prediction.
 - The real difficulties will likely to be different to the difficulties you predicted.
 
 Nonliear systems are hard to understand. If something appears irrational but existed for a long time, it's likely that you don't understand it. What everyone believes may one day turn out to be false.
 
-There are great ideas that are hard to discover, but once discovered, become very obvious and very natural (also hindsight bias).
-
-(Knowing these may reduce courage and reduce agency)
+There are great ideas that are hard to discover, but once discovered, become very obvious and very natural (hindsight bias).
 
 ## Nonlinear systems have paradigm shifts
 

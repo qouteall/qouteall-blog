@@ -245,9 +245,7 @@ AI allows generating personal software for each user's specific requests. Howeve
 
 ### Confusing different things with similar wording
 
-This issue is commonly encountered in AI coding. For example, `index` can mean the index in different things in different context. 
-
-To alleviate this issue, the naming should be more informative, such as `index_of_xxx`, `index_of_yyy_in_zzz`. All context-dependent things should include context in name or comments nearby. (Related: [tensor shape suffix](https://medium.com/@NoamShazeer/shape-suffixes-good-coding-style-f836e72e24fd))
+This issue is commonly encountered in AI coding. For example, `index` can mean the index in different things in different context. LLM may confuse the same word in different context. The naming should be more informative, such as `index_of_xxx`, `index_of_yyy_in_zzz`. All context-dependent things should include context in name or comments nearby. (Related: [tensor shape suffix](https://medium.com/@NoamShazeer/shape-suffixes-good-coding-style-f836e72e24fd))
 
 Having more informative naming also helps human.
 
@@ -406,7 +404,7 @@ The high-level design includes:
 - When there is implementation constraint, find tradeoffs (e.g. get rid of unnecessary but complexity-introducing requirements [^complexity_distribution]).
 - Design a high-level software architecture
 
-[^real_requirement]: Many development efforts are wasted because of misunderstanding real user requirement. The user often don't know what they actually need in detail. Figuring out the right requirement can save a lot of downstream work.
+[^real_requirement]: Figuring out the real user requirement is obvious important, because doing it wrong cause wasted work. However, sometimes no one can figure out real requirement before actually using the software in real environments. Also, doing strict validation to requirement hinders innovation. So sometimes doing quick iteration is better than spending efforts validating requirement.
 
 [^complexity_distribution]: Some software features are isolated and don't add much complexity. But some features interact with almost all other features. These features add a lot essential complexity. Note 80/20 rule: 90% complexity come from 20% features, and 80% users use 20% features. If the complexity-introducing feature requirement can be satisfied by other less complex features, it's often not worth implementing.
 
@@ -486,30 +484,6 @@ When steam machines got more efficient, the intuition was that the coal demand w
 The same can happen with AI. AI make software prototyping much easier. There will be much more prototypes. But turning prototype to production-ready software still requries expertise. So the work of fixing prototype increases.
 
 Although software is information that doesn't rot by itself, the APIs that software relies on keeps changing incompatibly. Also, there will almost always be new requirements. So software still "rots" and requires maintenance.
-
-> I don’t think self vibecoded software is the future for businesses
-> 
-> A couple of months ago I vibecoded a tool for a friends business 
-> 
-> his entire staff has been using it for six months now (37 people)
-> 
-> the thing is, he’s constantly sending me feature requests, bug fixes
-> 
-> The app is pretty complicated since it deals with insurance benefits verification 
-> 
-> so for someone that doesn’t have software development experience you can’t just prompt to fix it (believe me, he tried)
-> 
-> recently, the API provider changed something that broke everything
-> 
-> he’s getting really tired of dealing with it
-> 
-> and as Peer points out that’s why saas was built in the first place
-> 
-> somebody who’s not in the software business will find it really annoying to now have to deal with all the maintenance
-> 
-> saas is not dead
-> 
-> \- [Link](https://x.com/heshie/status/2011802022920495449)
 
 However, as AI keeps improving, the demand of "fixing AI prototype" will reduce.
 
@@ -691,10 +665,6 @@ Also, sometimes the benchmark is actually low-quality. Most people just see the 
 >  
 > \- [Link](https://x.com/fujikanaeda/status/2011565035408277996)
 
->  It's even worse. You get a similar boost across the whole benchmark (21% vs 10% for random guessing) if just always guess the longest answer.
->  
-> \- [Link](https://x.com/peterbarnett_/status/2011958022592180639)
-
 ## AI detection race
 
 Some people want AI output to be as similar to human output as possible. Some people want to detect whether content is written by human as accurate as possible. There is a constant race.
@@ -852,8 +822,8 @@ Although AI is a useful tool, many people hate AI. Summarize AI downsides:
 - AI is quickly improving and has potential of destorying jobs.
 - If a beginner relies on AI, the beginner can hardly learn skills. Experts' skill will atrophy after relying on AI for too long time.
 - AI sycophancy can cause AI-psychosis.
-- AI is commonly used at faking efforts and cheating. Some workers use AI to fake work results. Some people use AI to fake art creation. Some students and interviewees use AI to cheat. ......
-- AI drives electricity price up and RAM price up.
+- AI is commonly used at faking efforts and cheating. Some students and interviewees use AI to cheat.
+- Asymmetry of effort: generating content using AI is easy, understanding content is hard. Popular open source projects are flodded with low-effort AI content. At work, other people can use AI to generate requirement document that adds work burden to you.
 - AI capability is overhyped (for e.g. gain investments). The real AI capability often fall short of high expectation.
 - The AI stock bubble increases wealth inequality and cause capital misallocation. Bubble bursting can cause huge financial crisis.
 - Many companies use AI customer support and fired all human customer supports. AI customer support is often not helpful and infuriates customer.

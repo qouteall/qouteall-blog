@@ -303,7 +303,7 @@ Currently Wasm cannot be run in browser without JS code that bootstraps Wasm.
 
 See also: [Why is WebAssembly a second-class language on the web?](https://hacks.mozilla.org/2026/02/making-webassembly-a-first-class-language-on-the-web/)
 
-## Wasm-JS passing
+### Wasm-JS passing
 
 Because that Wasm cannot directly call web APIs, it requires interacting with JS and passing value between Wasm and JS.
 
@@ -323,9 +323,25 @@ Passing strings between Wasm and JS can be a performance bottleneck. If your app
 
 Modern Wasm/JS runtime (including V8) can JIT and inline the cross calling between Wasm and JS. But the copying cost still cannot be optimized out.
 
-The [Wasm Component Model](https://component-model.bytecodealliance.org/introduction.html) aim to solve this. It allows passing higher-level types such as string, record (struct), list, enum in interface. But different components cannot share memory, and the passed data need to be copied.
-
 There are [Wasm-JS string builtins](https://webassembly.github.io/spec/js-api/index.html#builtins-js-string) that aim to reduce the cost of string passing between Wasm and JS.
+
+### Wasm component model
+
+The [Wasm Component Model](https://component-model.bytecodealliance.org/introduction.html) aim to create a unified interface cross-language interaction. It is ambitious. It aims to make Wasm be able to directly call web APIs. It also aims to create a "cross-language glue standard" that allows different languages call each other.
+
+In its design, Wasm code is packaged to components. Components don't share mutable memory with each other. They can only pass immutable data, in the interface type.
+
+The interface type is a new type system. It can express data structure using records (structs), variants, lists, etc. There is also a new language [WIT](https://github.com/WebAssembly/component-model/blob/main/design/mvp/WIT.md) to describe the interfaces. There is complex [Canonical ABI](https://github.com/WebAssembly/component-model/blob/main/design/mvp/CanonicalABI.md) for adapting between interface type data and linear memory data.
+
+It also supports threading, which makes it more complex.
+
+Components don't share mutable data, all data passing conceptually copies. It requires the data to directly copy to the other side, without creating an intermediary data structure:
+
+> A component runtime implements value passing between component instances without ever creating an intermediate O(n) copy of aggregate data types, outside of either component instance's explicitly-allocated linear memory.
+> 
+> \- [Link](https://github.com/WebAssembly/component-model/blob/main/design/high-level/UseCases.md#performance)
+
+Although it still has copy, it can avoid the intermediary step of copying to JS data structure.
 
 ## Memory64 performance
 
@@ -403,14 +419,14 @@ if (index < simpleByteArray.length) {
 The `|0` is for converting value to 32-bit integer, helping JS runtime to optimize it into integer operation (JS is dynamic, without that the JITed code may do other things). The `localJunk` is to prevent these read opearations from being optimized out.
 
 - The attacker firstly execute that code many times with in-bound `index` to "train" branch predictor. 
-- Then the attacker access many other different memory locations to invalidate the cache.
+- Then the attacker accesses many other different memory locations to invalidate the cache.
 - Then attacker executes that code using a specific out-of-bound `index`:
   - CPU speculatively reads `simpleByteArray[index]`. It's out-of-bound. That result is the secret in browser process's memory.
   - Then CPU speculatively reads `probeTable`, using an index that's computed from that secret.
   - One specific memory region in `probeTable` will be loaded into cache. Accessing that region will be faster.
   - CPU found that branch prediction is wrong and rolls back, but doesn't rollback side effect on cache.
 - The attacker measures memory read latency in `probeTable`. Which place access faster correspond to the value of secret.
-- To accurately measure memory access latency, `performance.now()` is not accurate enough. It need to use a multi-threaded counter timer: One thread (web worker) keeps increasing a shared counter in a loop. The attacking thread reads that counter to get "time". The cross-thread counter sharing requires `SharedArrayBuffer`. Although it cannot measure time in standard units (e.g. nanosecond), it's accurate enough to distinguish latency difference between fast cache access and slow RAM access.
+- To accurately measure memory access latency, `performance.now()` is not accurate enough. It need to use a multi-threaded counter timer: One thread (web worker) keeps increasing a shared counter in a loop. The attacking thread reads that counter to get "time". The cross-thread counter sharing requires `SharedArrayBuffer`. Although it cannot measure time in standard units (e.g. nanosecond), it's can distinguish latency difference between fast cache access and slow RAM access.
 
 The same thing can also be done via equivalent Wasm code using `SharedArrayBuffer`.
 
@@ -442,9 +458,9 @@ These things also have VMs:
 
 ### Within-website sub-sandboxing
 
-Figma has a plugin system that runs within browser. These plugins executes JS code. To enhance security, Figma cannot allow plugins to call arbitrary web APIs.
+Figma has a plugin system that runs within browser. These plugins executes JS code. For security, Figma cannot allow plugins to call arbitrary web APIs.
 
-However, the web API currently doesn't allow directly running JS code in a way that prevents some web API usage. Running JS code in another iframe has sandboxing but require larger communication cost.
+However, the web API currently doesn't support limiting functionality to directly-ran JS. Running JS code in another iframe has sandboxing but require larger communication cost.
 
 The browser already do sandboxing between website code and browser processes. But that plugin system requries an extra sandboxing layer between website code and the plugin running in website code.
 
