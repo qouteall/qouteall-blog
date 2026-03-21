@@ -186,7 +186,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - The "timestamp" may be in seconds, milliseconds or nanoseconds.
 - About `M` and `m` in date format: in Java `SimpleDateFormat`, `M` is month, `m` is minute. But in Python `datetime`, `m` is month, `M` is minute. 
 - In Java `Date` and JS `Date`, month number starts by 0, but day number starts by 1.
-- In DuckDB, when importing a CSV, it guesses date format based on samples by default. There is ambiguity between `DD-MM-YYYY` and `MM-DD-YYYY`. If all day numbers <= 12 DuckDB may guess wrong. [See also](https://duckdb.org/docs/stable/data/csv/auto_detection#dates-and-timestamps)
+- In DuckDB, when importing a CSV, it guesses date format based on samples by default. There is ambiguity between `DD-MM-YYYY` and `MM-DD-YYYY`. If all day numbers \<\= 12 DuckDB may guess wrong. [See also](https://duckdb.org/docs/stable/data/csv/auto_detection#dates-and-timestamps)
 - The result of MySQL `timestamp` value and PostgreSQL `timesamp with time zone` (`timestamptz`) depends on session time zone. Session time zone can be changed via SQL (`set time_zone = ...` in MySQL and `set time zone ...` in PostgreSQL). When using connection pooling, the effect of changing session time zone may interfere other places. [^sql_time_zone]
 - MySQL `timestamp` is 32-bit. It cannot represent time after 2038-01-19 03:14:07.
 
