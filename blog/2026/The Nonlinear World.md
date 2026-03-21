@@ -151,18 +151,15 @@ Nonlinear systems are chaotic. Predicting them accurately is practically impossi
 
 But people tend to think they understand and can predict, while they cannot (hindsight bias, confirmation bias, narrative fallacy, etc.).
 
-In prediction: 
+Pursue simpler predictions instead of fragile complex specific predictions. Many tightly-dependent predictions tend to fail together.
 
-- Pursue simpler predictions instead of fragile complex specific predictions. Many tightly-dependent predictions tend to fail together.
-- Try to be less wrong, not perfectly correct. Just being less wrong than others can gain advantage sometimes.
-- Have plan-B instead of relying on prediction.
-- The real difficulties will likely to be different to the difficulties you predicted.
+Sometimes, just being less wrong than others can gain advantage.
 
 Nonliear systems are hard to understand. If something appears irrational but existed for a long time, it's likely that you don't understand it. What everyone believes may one day turn out to be false.
 
 There are great ideas that are hard to discover, but once discovered, become very obvious and very natural (hindsight bias).
 
-## Nonlinear systems have paradigm shifts
+## Paradigm shifts
 
 Paradigm shift could be caused by radical technological innovations (e.g. invention of Internet), natural disasters (e.g. Covid-19), or a release of accumulated potential.
 
@@ -222,7 +219,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: The British government in colonial India provided bonus for dead cobra. The bonus could incentivize cobra hunting.
 
-  Second-order effect: Breeding cobra is easier than hunting wild cobra, so people started breeding it. When the policy is removed, the breeders released their cobra to the wild. This is called **cobra effect** and [perverse incentive](https://en.wikipedia.org/wiki/Perverse_incentive).
+  Second-order effect: Breeding cobra is easier than hunting wild cobra, so people started breeding it. When the policy is removed, the breeders released their cobra to the wild. This is called cobra effect and [perverse incentive](https://en.wikipedia.org/wiki/Perverse_incentive).
 
 - First-order effect: Using measured mumbers is an objective way of judging people performance.
 
@@ -230,10 +227,11 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   - When doctors are judged by patient satisfaction survey, doctors tend to do treatments that improve short-term comfort but sacrifice long-term health.
   - When KPI judges success rate regardless of difficulty, then employee choose to do only easy tasks and avoid hard tasks. **The more non-trivial things one do, the more mistakes one will make**.
-  - When salesmen are judged by sale amount, salesperson tend to lie to consumers and hurt company reputation.
+  - When salesmen are judged by sale amount, salesmen tend to lie to custumers and hurt company reputation.
   - Training AI model to increase user satisfaction score will make the AI sycophant.
   - When promotion is judged by task difficulty, then people do useless hard things instead of important but easy things.
   - AB test shows that adding annoying popups and manipulative texts increase conversion rate. However it drives away high-value costumers.
+  - When researchers are judged by paper reference count, there will be researcher groups referencing each other in group.
   - ...
 
 - First-order effect: After improving the steam engine, it requires less coal to do the same work, so the demand of coal will reduce.
@@ -315,7 +313,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   
   Second-order effect: A large calorie deficit may cause higher level of cortiso, inhibiting fat burning, facilitating muscle breakdown, slowing down metabolism, hindering weight loss efforts. Weight loss requires scientific diet.
 
-- First-order effect: Raising children in clean environments make them healthy because they avoids most pathogen.
+- First-order effect: Raising children in clean environments make them healthy because they avoid most pathogen.
 
   Second-order effect: Lacking touch with pathogen may cause immune system issues, then may facilitate autoimmune disease.
 
@@ -326,7 +324,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   - Wrong diagnosis and wrong medication
   - Side effect of medication
   - Infect at the hospital
-  - Antibiotics disrupt the gut biome, then interfere with immune system
+  - Antibiotics disrupt the gut biome, thus interfere with immune system
   - (Also: Issues caused by financial hardship due to large medical bill)
   - ...
 
@@ -364,6 +362,8 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   Second-order effect: May waste more time considering which choice is better.
 
   Divination has real utility: it makes one quickly make decision, stopping wasting time considering which is better.
+
+  In bargaining, the party that has no choice but fight has advantage over the party that has fallback choice.
 
 - First-order effect: Smart people's beliefs are more correct because they are smart.
 
@@ -458,7 +458,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - Different cases suit different tradeoffs. No one-size-fits-all.
 
-- Optimization may backfire (perverse incentive, iatrogenesis, etc.). Reduce naive interventionism.
+- Optimization may backfire (perverse incentive, iatrogenesis, etc.). Sometimes not optimizing is better.
 
 - 80/20 rule. Optimize the important part first. Also note that not everything can be 80/20-ed.
 
@@ -466,13 +466,13 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - Yerkes-Dodson law: Medium motivation or stress works the best. Too much or too few motivation or stress don't work well.
 
-- It's often that long-term benefit requires short-term cost. Getting out of a local minima often requires temporarily increasing loss. There will be temporary pain.
+- It's often that long-term benefit requires short-term cost. Getting out of a local minima often requires temporarily increasing loss.
 
 - Optimize for the root goal instead of sub-goals. A sub-goal may originally serve for the root goal but now conflict with the root goal. Be ware of **means-end inversion**.
 
   Question the constraints of the optimization. Some constraints are actually unnecessary for the root goal. There are also cases where a constraint leads to innovation.
 
-- Right decision can fail and bad decision can succeed due to randomness. Results may be misleading
+- Right decision can fail and bad decision can succeed due to randomness. Results may be misleading.
 
 - [Theory of the second best](https://en.wikipedia.org/wiki/Theory_of_the_second_best). If something is imperfect, adding more imperfection may be better overall.
 
@@ -521,6 +521,11 @@ In many cases, the real-world feedback invalidates assumptions in the plan. Then
 
 Success usually requires a lot of trial and error. Be more forgiving to the many failures in the process of trial and error. (It's also hard to do.)
 
+> A complex system that works is invariably found to have evolved from a simple system that worked. A complex system designed from scratch never works and cannot be patched up to make it work. You have to start over with a working simple system.
+> 
+> \- Systemantics: How Systems Work and Especially How They Fail
+
+
 ## Contrarian strategy
 
 - The seemingly good opportunities are often highly-competitive and not worth joining. Being the upstream or downstream of a highly-competitive field could be better ("Picks and Shovels" strategy).
@@ -549,7 +554,7 @@ Technology advancement usually involves **scaling**:
 
 Scaling often involves higher fragility and higher cost (e.g. advanced chip manufacturing), and eventually facing diminishing marginal return. Scaling of connection also boost concentration and Matthew effect.
 
-Advanced technology is often more fragile or has unobvious downsides. It often requires a balance between convenience of advanced technology and reliability of primitive methods.
+Advanced technology is often more fragile or has unobvious downsides. It often requires a balance between convenience of advanced technology, and reliability of primitive methods.
 
 Advanced but expensive technology may defeat due to financial sustainability.
 
@@ -557,9 +562,15 @@ In capitalism, technologies are usually developed for profit, not for human well
 
 When automation works, it's good. But automation may break. And when it breaks, no one has experience to fix it, because it rarely breaks.
 
+If a piece of software has a bug, then every copy of the same version of software has the same bug. This is a source of fragility. For example, if a self-driving algorithm has a bug, then many self-driving cars that deploy such algorithm has the same bug. If an AI model has a bias, then all usages to the same AI model suffers from the same bias.
+
 ## Short-termism and long-termism
 
-Long-termism can usually gain advantage. However long-termism is often more fragile because it involves more investments. Investments can break. Long-termism only works in stable and safe environments.
+Long-termism can usually gain advantage. However long-termism is often fragile because it involves more investments. Investments can break. Long-termism only works in stable and safe environments.
+
+Also, reducing fragility requires safety investments that require long-termism. The short-termism cutting safety investment increases fragility.
+
+When the large environment is unstable and unsuitable for long-termism, it requires local small safe stable environments to make long-termism work.
 
 ## Related
 

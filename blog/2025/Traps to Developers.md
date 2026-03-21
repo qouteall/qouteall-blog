@@ -185,7 +185,8 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - Verification of certificate uses time. If time is inaccurate, SSL/TLS may not work.
 - The "timestamp" may be in seconds, milliseconds or nanoseconds.
 - About `M` and `m` in date format: in Java `SimpleDateFormat`, `M` is month, `m` is minute. But in Python `datetime`, `m` is month, `M` is minute. 
-- In DuckDB, when importing a CSV, it guesses date format based on samples by default. There is ambiguity between `DD-MM-YYYY` and `MM-DD-YYYY`. If all days are below 12 DuckDB may guess wrong. [See also](https://duckdb.org/docs/stable/data/csv/auto_detection#dates-and-timestamps)
+- In Java `Date` and JS `Date`, month number starts by 0, but day number starts by 1.
+- In DuckDB, when importing a CSV, it guesses date format based on samples by default. There is ambiguity between `DD-MM-YYYY` and `MM-DD-YYYY`. If all day numbers <= 12 DuckDB may guess wrong. [See also](https://duckdb.org/docs/stable/data/csv/auto_detection#dates-and-timestamps)
 - The result of MySQL `timestamp` value and PostgreSQL `timesamp with time zone` (`timestamptz`) depends on session time zone. Session time zone can be changed via SQL (`set time_zone = ...` in MySQL and `set time zone ...` in PostgreSQL). When using connection pooling, the effect of changing session time zone may interfere other places. [^sql_time_zone]
 - MySQL `timestamp` is 32-bit. It cannot represent time after 2038-01-19 03:14:07.
 
@@ -248,7 +249,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
   - Accessing invalid memory (null pointer, dangling pointer) is undefined behavior.
   - Integer overflow/underflow is undefined behavior. Note that unsigned integer can underflow below 0. Don't use `x > x + 1` to check overflow as it will be optimized to `false`.
   - Aliasing.
-    - Strict aliasing rule: If there are two pointers with type `A*` and `B*`, then compiler assumes two pointer can never equal. If they equal, using it to access memory is undefined behavior. Except in two cases: 1. `A` and `B` has subtyping relation 2. converting pointer to byte pointer (`char*`, `unsigned char*` or `std::byte*`) (the reverse does not apply). [^pointer_type_hold_integer] [^strict_aliasing_linus]
+    - Strict aliasing rule: If there are two pointers with type `A*` and `B*`, then compiler assumes two pointer can never equal. If they equal, using it to access memory is undefined behavior. Except in two cases: 1. `A` and `B` has subtyping relation 2. converting object pointer to byte pointer (`char*`, `unsigned char*` or `std::byte*`) 3. after converting object pointer to byte pointer, convert back [^strict_aliasing]
     - Pointer provenance. Two pointers from two different provenances are treated as never equal. If their address equals, it's undefined behavior. [See also](https://www.ralfj.de/blog/2020/12/14/provenance.html)
   - `const` can mean both read-only and immutable:
     - If the original declared object is not `const`, you can turn pointer to it as `const T*`, in this case `const` means read-only [^readonly]. You can change the object without triggering undefined behavior.
@@ -265,9 +266,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - In signal handler, don't do any IO or locking, don't `printf` or `malloc`
 - Compare signed number with unsigned number. If `a` is signed -1, `b` is unsigned 0, then `a > b` is true, because it auto-converts `a` into unsigned number.
 
-[^pointer_type_hold_integer]: Using pointer type to hold integer is fine as long as you don't use it to access memory. But it's not recommended to do that.
-
-[^strict_aliasing_linus]: [Linus is against strict aliasing rule](https://lkml.org/lkml/2018/6/5/769).The Linux kernel disables strict aliasing rule and makes integer overflow defined behavior.
+[^strict_aliasing]: Using pointer type to hold integer is fine as long as you don't use it to access memory. Also, [Linus is against strict aliasing rule](https://lkml.org/lkml/2018/6/5/769).The Linux kernel disables strict aliasing rule and makes integer overflow defined behavior.
 
 [^readonly]: The read-only here means in-language constraint. It should not be confused with read-only memory which is actually immutable.
 
@@ -396,6 +395,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - `set -e` can make the script exit immediately when a sub-command fails, but it doesn't work inside function whose result is condition-checked (e.g. the left side of `||`, `&&`, condition of `if`). [See also](https://stratus3d.com/blog/2019/11/29/bash-errexit-inconsistency/)
 - `fork()` creates a new process that has only one thread. If another thread holds lock during forking, that lock will never release. `fork()` also has potential of security issues.
 - File name can contain `\n` `\r` `'` `"`. File name can be invalid UTF-8.
+- Symbolic link can point to parent, forming cycle.
 - In Linux file names are case-sensitive, different to Windows and macOS.
 - glibc compatibility issue. A program that's build in a new Linux distribution dynamically links with a new version of glibc, then it may be incompatible with old versions of glibc in old systems. Can be fixed by static linking glibc or using containers [^container].
 - Path trailing slash:
@@ -470,7 +470,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - The HTTP protocol does not explicitly forbit GET and DELETE requests to have body. Some places do use body in GET and DELETE requests. But many libraries and HTTP servers does not support them.
 - One IP can host multiple websites, distinguished by domain name. The HTTP header `Host` and SNI in TLS handshake carries domain name, which are important. Some websites cannot be accessed via IP address.
 - CORS (cross-origin resource sharing). For requests to another website (origin), the browser will prevent JS from getting response, unless the server's response contains header `Access-Control-Allow-Origin` and it matches client website. This requires configuring the backend. Passing cookie to another website involves more configuration. If your frontend and backend are in the same website then there is no CORS issue.
-- [Reverse path filtering](https://en.wikipedia.org/wiki/Reverse-path_forwarding). When routing is asymmetric, packet from A to B use different interface than packets from B to A, then reverse path filtering rejects valid packets.
+- [Reverse path filtering](https://en.wikipedia.org/wiki/Reverse-path_forwarding). When routing is asymmetric, packets from A to B use different interface than packets from B to A, then reverse path filtering rejects valid packets.
 - In old versions of Linux, if `tcp_tw_recycle` is enabled, it aggressively recycles connection based on TCP timestamp. NAT and load balancer can make TCP timestamp not monotonic, so that feature can drop normal connections.
 - When using SSL/TLS in private network unconnected to internet, the client may try to check certificate revocation status from internet, which will timeout.
 - Certificate expire. Examples: [Starlink incident](https://www.appviewx.com/blogs/expired-certificate-causes-high-profile-service-outage-proving-certificate-automation-is-critical/), [LinkedIn incident](https://www.appviewx.com/blogs/linkedin-certificate-expiry-fiasco-third-times-a-charm/), [Microsoft Teams incident](https://www.exoprise.com/2020/02/04/teams-outage-expired-certificate/)

@@ -121,6 +121,18 @@ All of them execute on main thread. There is no parallelism. The parallelism can
 
 This trap doesn't exist in Golang. In Golang, goroutines are parallel.
 
+## Lacking concurrency
+
+https://tmandry.gitlab.io/blog/posts/for-await-buffered-streams/
+
+https://without.boats/blog/poll-progress/
+
+## Blocking on async
+
+An async function can easily call async function and normal function. But for a normal function, calling async function is not easy. It requries blocking on it.
+
+However there is a case where an async function calls normal function, then the normal function blocks on another async function call. This is async-sync-async sandwich problem. 
+
 ---
 
 https://without.boats/blog/why-async-rust/

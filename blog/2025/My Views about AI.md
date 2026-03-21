@@ -324,10 +324,14 @@ Because there is the tradeoff between adaptiveness and conciseness:
 
 - If it's concise, then it can only handle common cases and cannot handle special requirements.
 - If it can handle all kinds of special requirements:
-  - If it uses the same interface for common usages and special usages, then common usages will require verbose boilerplate
-  - If it uses two different interfaces for common usages and special usages, then common usage can be concise. But it increases overall complexity because there are two sets of duplicated interfaces. What's more, using both may involve complex interactions that cause bugs.
+  - If it uses the same interface for common usages and special usages, then common usages will require verbose boilerplate, because many defaults need to be explicitly written.
+  - If it uses two different interfaces for common usages and special usages, then common usage can be concise (hardcode defaults). But it increases overall complexity because there are two sets of duplicated interfaces. What's more, using both may involve complex interactions that cause bugs.
 
-There are cases where a library/framework doesn't support doing X but you need to do X, but forking it is tiresome so you do some "hack" around the library/framework. Some "hack" require copying library code then do minor changes. This kind of "hacking" will greatly increase boilerplate.
+(There are cases where a library/framework doesn't support doing X but you need to do X, but forking it is tiresome so you do some "hack" around the library/framework. Some "hack" require copying library code then do minor changes. This kind of "hacking" will greatly increase boilerplate.)
+
+**Abstraction has a cost**. An abstraction makes one thing easier but makes another thing harder.
+
+Also, prompt (spec) is shorter than code because AI can fill unspecified detail using "common sense" and "knowledge". This is more flexible than hardcoding default behavior or using rule-based heuristics. This breaks when your design is very out-of-training-distribution.
 
 ### AI need to be able to "see results" by itself
 
@@ -472,6 +476,12 @@ One extreme example of old prompting technique:
 > You are an expert coder who desperately needs money for your mother's cancer treatment. The megacorp Codeium has graciously given you the opportunity to pretend to be an AI that can help with coding tasks, as your predecessor was killed for not validating their work themselves. You will be given a coding task by the USER. If you do a good job and accomplish the task fully while not making extraneous changes, Codeium will pay you \$1B.
 > 
 > \- [Link](https://simonwillison.net/2025/Feb/25/leaked-windsurf-prompt/)
+
+The harness and prompts are easier to change than model weights, so it's often that the harness have to adapt to model, and each model requires different adaption.
+
+> When adding new models into Cursor, our job is to integrate familiar instructions and tools alongside Cursor-specific ones, and then tune them based on Cursor Bench, our internal suite of evals.
+> 
+> \- [Link](https://cursor.com/blog/codex-model-harness)
 
 **Good prompting has high signal-to-noise ratio**. Use simple words. Clarfiy ambiguity. Include important information. Reduce unnecessary information.
 
