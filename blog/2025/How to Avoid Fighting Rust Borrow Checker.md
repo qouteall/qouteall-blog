@@ -728,6 +728,8 @@ The important things about arena:
 
 Some may think "using arena cannot protect you from equivalent of 'use after free' so it doesn't solve problem". But arena can greatly improve determinism of bugs, making debugging much easier. A randomly-occuring memory safety [Heisenbug](https://en.wikipedia.org/wiki/Heisenbug) may no longer trigger when you enable sanitizer, as sanitizer can change memory layout.
 
+The Rust compiler commonly use arenas. And it uses simple array-based arena, not generational arena. The local variables in function are stored in the function's own arena. The local variable id is index. The map whose key is local variable id can be a simple array. The set of local variable ids can be a simple bitset. The id is 32-bit which is smaller than 64-bit pointer.
+
 #### About linked list
 
 In Rust, writing a pointer-based linked list is hard. Writing zero-cost pointer-based doubly-linked list in safe Rust is impossible.
@@ -1228,6 +1230,7 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
   - Normally a byte has 256 possible values. But in LLVM a byte has 258 possible values [^llvm_constraint]. The extra two are 1. uninitialized 2. poison (computed from other undefined behaviors). Like pointer provenance, the two extra values only exist in compile time.
 - `a = b` will drop the original object in place of `a`. If `a` is uninitialized, then it will drop an unitialized object, which is undefined behavior. Use `(&raw mut x).write(...)` [Related](https://lucumr.pocoo.org/2022/1/30/unsafe-rust/)
 - Handle panic unwinding. If unsafe code turn data into temporarily-invalid state, you need to make it valid again during unwinding. [See also](https://doc.rust-lang.org/nomicon/unwinding.html). [Related](https://smallcultfollowing.com/babysteps/blog/2024/05/02/unwind-considered-harmful/)
+  - In Rust, future can poison. This is different to lock poison. When an async function panics, the future goes into "poison state", then polling it again will panic. This needs to be considered when manually implementing `Future` trait.
 - Reading/writing to mutable data that's shared between threads need to use atomic, or volatile access ([`read_volatile`](https://doc.rust-lang.org/std/ptr/fn.read_volatile.html), [`write_volatile`](https://doc.rust-lang.org/beta/std/ptr/fn.write_volatile.html)), or use other synchronization (like locking). If not, optimizer may wrongly merge and reorder reads/writes. Note that volatile access themself doesn't establish memory order (unlike Java/C# `volatile`).
 - If the binary data violates the type's constraint, it's undefined behavior. For example, `bool`'s binary data can only be 0 or 1. Making it 2 is undefined behavior. Creating a `str` whose binary data is not valid UTF-8 is also undefined behavior.
 - If you want to `mem::transmute`, it's recommended to use [zerocopy](https://docs.rs/zerocopy/latest/zerocopy/) which has compile-time checks to ensure memory layout are the same. For simple wrapper types, use `#[repr(transparent)]`.

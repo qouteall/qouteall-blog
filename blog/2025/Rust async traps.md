@@ -11,7 +11,7 @@ unlisted: true
 Async runtimes (like Tokio) has its own scheduler. It's similar to OS thread scheduling but different in many ways:
 
 - It happens within Rust application. It uses Rust async to switch control flow. Scheduling doesn't use OS functionalties.
-- It's coorporative. If the scheduled Rust code don't coorporatively pause, it won't forcefully suspend it, and the scheduler will be always occupied.
+- **It's coorporative. If the scheduled Rust code don't coorporatively pause, the scheduler won't forcefully suspend it, and the scheduler thread will be always occupied.**
 - It's more lightweight than OS thread scheduling. Creating a future is faster and require less memory than creating a OS thread. Switching between different Rust futures is faster than OS context switch.
 
 The normal sleep `std::thread::sleep` and normal locking `std::sync::Mutex` will **block thread using OS functionality**. Async runtime won't be notified when they block the current thread. It will occupy the async runtime's scheduling thread. This causes reduced concurrency and possible deadlocks.
@@ -31,9 +31,20 @@ Tokio supports [`spawn_blocking`](https://dtantsur.github.io/rust-openstack/toki
 
 ## Cancellation safety
 
-Rust's future is very different to Java `CompletableFuture` and JS `Promise` and C# `Task`. In Java/JS/C#, you launch a task then get a future/promise/task object that represents the async task. The task will run regardless whether you discard the future. But in Rust, when you create a future, the task is not yet launched. It will be launched when the future is firstly polled.
+Rust's future is very different to Java `CompletableFuture` and JS `Promise` and C# `Task`. 
 
-In Rust, an async function may suddenly stop executing in an `await` point.
+In Java/JS/C#, you launch a task then get a future/promise/task object that represents the async task. The task will run regardless whether you discard the future. But in Rust, when you create a future, the task is not yet launched. It will be launched when the future is firstly polled (awaited).
+
+In Java/JS/C# when you discard the future/promise/task, the underlying task still runs. But in Rust, dropping future cancels it.
+
+|                                 | In Java/JS/C#                                 | In Rust async                               |
+| ------------------------------- | --------------------------------------------- | ------------------------------------------- |
+| Start running inner code        | The same time as creating future/promise/task | When the future is firstly polled (awaited) |
+| Discard the future/promise/task | Task keeps running                            | It's cancelled                              |
+
+Cancelling a future means the async function suddenly stops executing in an await point.
+
+In Java/JS/C# when there is an exception the remaining code also stops executing. But exceptions can be catched and exceptions are often logged. In Rust, cancelling a future before completion doesn't do any logging and cancelling cannot be "catched" (in Tokio, the "cancel chain" stops at `tokio::spawn`).
 
 In Rust, futures are not background tasks. Futures only progress when polled. There are two kinds of async cancellation in Rust:
 
@@ -72,11 +83,13 @@ See also: [Making Async Rust Reliable - Tyler Mandry](https://tmandry.gitlab.io/
 Future cancellation is also a major reason why Rust cannot provide safe zero-cost io_uring interface: https://without.boats/blog/io-uring/
 
 
-## Stackoverflow caused by large future
+## Stack overflow caused by large future
 
 TODO
 
 https://github.com/rust-lang/rust-project-goals/blob/main/src/2026/async-future-memory-optimisation.md
+
+heap-allocating the future can avoid it. but rust currently has no in-place initialization. conceptually, it firstly creates future on stack then move to heap. in release mode it can be optimized to directly creating on heap. but in debug it still involves creating on stack first.
 
 ## No parallelism by default
 
@@ -133,7 +146,23 @@ An async function can easily call async function and normal function. But for a 
 
 However there is a case where an async function calls normal function, then the normal function blocks on another async function call. This is async-sync-async sandwich problem. 
 
+Due to the problems of normal function calling async function, the most common way is to make an async function's caller also async. This makes async contagious.
+
+## Poison
+
+In Rust, if a panic unwinds out of an async function, the future is considered "poisoned". Note that it's different to the lock poison but it's a similar concept.
+
+Poinson is a specific state of future. If a future is poisoned, the next `poll` will panic.
+
+Normally the async runtime will handle it.
+
+## Using multiple async runtimes together
+
+Using multiple async runtimes together is possible but is hard and error-prone. And there are many async-runtime-specific types. So async runtime naturally has exclusion. Then the most popular async runtime Tokio has monopoly.
+
 ---
 
 https://without.boats/blog/why-async-rust/
+
+https://web.archive.org/web/20241120111341/https://trouble.mataroa.blog/blog/asyncawait-is-real-and-can-hurt-you/
 

@@ -11,14 +11,12 @@ tags:
 Background:
 
 - [WebAssembly](https://webassembly.org/) is an execution model and a code format.
-- It's designed with performance concern. It can achieve higher performance than JS [^wasm_js_perf].
+- It's designed with performance concern. It by its own can achieve higher performance than JS.
 - It's designed with safety concern. Its execution is sandboxed.
 - It can be run in browser. 
 - Although its name has "Web", it's is not just for Web. It can be used outside of browser.
 - Although its name has "Assembly", it has features (e.g. [GC](https://github.com/WebAssembly/gc)) that are in a higher abstraction layer than native assembly, similar to JVM bytecode.
 - Wasm and JS are executed by the same engine in browsers. In Chrome, V8 executes both JS and Wasm. Wasm GC use the same GC as JS.
-
-[^wasm_js_perf]: WebAssembly is not always faster than JS. Currently Wasm can only access Web APIs via JS. If the app require frequently copying data between JS and Wasm, it's likely slower than using just JS. WebAssembly by itself has higher potential of performance than JS. JS has a lot of flexibility. Flexibility costs performance. JS runtime often use runtime statistics to find unused flexibility and optimize accordingly. But statistics cannot be really sure so JS runtime still have to "prepare" for flexibility. The runtime statistics and "prepare for flexibility" all costs performance, in a way that cannot be optimized without changing code format and execution model.
 
 This article focuses on in-browser Wasm.
 
@@ -288,7 +286,9 @@ Wasm code cannot directly call Web APIs. Web APIs must be called via JS glue cod
 Although all Web's JS APIs have [Web IDL](https://webidl.spec.whatwg.org/) specifications. But that Web IDL interfaces cannot be easily transformed to Wasm interfaces:
 
 - Memory management. The Web IDL is designed for GC languages. It has no interface related to freeing memory and "destructor".
+  - Some web APIs require passing a callback. A callback can capture values. The lifetime of callback is managed by JS GC.
 - Async and event loop. Many web APIs return a `Promise`. Awaiting on promise doesn't simply block but continues processing other events in event loop. But in C/C++ the IO are often simple blocking. This can be workarounded by JS Promise integration (but with reentrancy issue mentioned previously). (Rust has async so it can be adapted to Rust easier.)
+- Many other JS-specific things like iterators.
 - Strings are commonly used in API. Some languages use UTF-8. Some languages (e.g. Java, C#) use UTF-16 [^utf16].
 
 [^utf16]: Strictly speaking, Java and C# use WTF-16, which is similar to UTF-16 but allows invalid surrogates.
@@ -300,8 +300,6 @@ Related: [When Is WebAssembly Going to Get DOM Support?](https://queue.acm.org/d
 The modern JS/Wasm runtimes can do inlining between JS and Wasm, so the cost of JS glue gets smaller.
 
 Currently Wasm cannot be run in browser without JS code that bootstraps Wasm.
-
-See also: [Why is WebAssembly a second-class language on the web?](https://hacks.mozilla.org/2026/02/making-webassembly-a-first-class-language-on-the-web/)
 
 ### Wasm-JS passing
 
@@ -319,29 +317,20 @@ Passing a JS string to Wasm requires:
 
 Similarily passing a string in Wasm linear memory to JS is also not easy. 
 
-Passing strings between Wasm and JS can be a performance bottleneck. If your application involve frequent Wasm-JS data passing, then replacing JS by Wasm may actually reduce performance.
+Passing strings between Wasm and JS can be a performance bottleneck. **If your application involve frequent Wasm-JS data passing, then replacing JS by Wasm may actually reduce performance**.
 
 Modern Wasm/JS runtime (including V8) can JIT and inline the cross calling between Wasm and JS. But the copying cost still cannot be optimized out.
 
 There are [Wasm-JS string builtins](https://webassembly.github.io/spec/js-api/index.html#builtins-js-string) that aim to reduce the cost of string passing between Wasm and JS.
 
-### Wasm component model
+### Two goals of Wasm
 
-The [Wasm Component Model](https://component-model.bytecodealliance.org/introduction.html) aim to create a unified interface cross-language interaction. It is ambitious. It aims to make Wasm be able to directly call web APIs. It also aims to create a "cross-language glue standard" that allows different languages call each other.
+There are two goals of Wasm. Both of them is only partially fulfilled now:
 
-In its design, Wasm code is packaged to components. Components don't share mutable memory with each other. They can only pass immutable data, in the interface type.
+- Increase performance of code running in the web. Exception: The Wasm itself is faster than JS, but Wasm-JS data passing is slow. Sometimes JS only is faster than JS+Wasm due to data passing cost.
+- Make other languages runnable in the web, ending the JS monolopy in the web. Exception: Loading Wasm and calling Web APIs still require JS glue. Although the core code can be in other languages, there is still burden of maintaining and deploying JS glue code.
 
-The interface type is a new type system. It can express data structure using records (structs), variants, lists, etc. There is also a new language [WIT](https://github.com/WebAssembly/component-model/blob/main/design/mvp/WIT.md) to describe the interfaces. There is complex [Canonical ABI](https://github.com/WebAssembly/component-model/blob/main/design/mvp/CanonicalABI.md) for adapting between interface type data and linear memory data.
-
-It also supports threading, which makes it more complex.
-
-Components don't share mutable data, all data passing conceptually copies. It requires the data to directly copy to the other side, without creating an intermediary data structure:
-
-> A component runtime implements value passing between component instances without ever creating an intermediate O(n) copy of aggregate data types, outside of either component instance's explicitly-allocated linear memory.
-> 
-> \- [Link](https://github.com/WebAssembly/component-model/blob/main/design/high-level/UseCases.md#performance)
-
-Although it still has copy, it can avoid the intermediary step of copying to JS data structure.
+See also: [Why is WebAssembly a second-class language on the web?](https://hacks.mozilla.org/2026/02/making-webassembly-a-first-class-language-on-the-web/)
 
 ## Memory64 performance
 
@@ -355,10 +344,11 @@ That optimization doesn't work when supporting 64-bit address. The virtual addre
 
 See also: [Is Memory64 actually worth using?](https://spidermonkey.dev/blog/2025/01/15/is-memory64-actually-worth-using.html)
 
-## Other performance constraints
+## Summarize Wasm performance constraints
 
-Generally, WebAssembly runs slower than native applications compiled from the same source code. Because of many factors:
+Possible reasons that Wasm performance being slower than native execution:
 
+- The cost of passing data between Wasm and JS. (This is often the biggest performance loss for web apps.)
 - JIT (just-in-time compilation) cost. Native C/C++/Rust applications can be AOTed (ahead-of-time compiled). V8 firstly use a quick simple compiler to compile Wasm into machine code quickly to improve startup speed (but the generated machine code runs slower), then use a slower high-optimization compiler to generated optimized machine code for few hot Wasm code. [See also](https://v8.dev/docs/wasm-compilation-pipeline). That optimization is profile-guided (target on few hot code, use statistical result to guide optimization). Both profiling, optimization and code-switching costs performance.
 - The previously mentioned linear memory bounds check for memory64.
 - Shadow stack cost.
@@ -366,6 +356,7 @@ Generally, WebAssembly runs slower than native applications compiled from the sa
 - Limited access to hardware functionality, such as memory prefetching and some special SIMD instructions. Note that Wasm already support many common SIMD instructions.
 - Cannot access some OS functionalities, such as `mmap`.
 - Wasm forces structural control flow. See also: [WebAssembly Troubles part 2: Why Do We Need the Relooper Algorithm, Again?](http://troubles.md/why-do-we-need-the-relooper-algorithm-again/). This may reduce the performance of compiling and JIT optimization.
+
 
 ## About binary size
 
@@ -467,3 +458,11 @@ The browser already do sandboxing between website code and browser processes. Bu
 The proposal [ShadowRealm API](https://github.com/tc39/proposal-shadowrealm) will ultimately fix it. Before that standardizes and is commonly supported by browsers, Figma's solution is to use a JS interpreter in Wasm to execute plugin code.
 
 See also: [How to build a plugin system on the web and also sleep well at night](https://www.figma.com/blog/how-we-built-the-figma-plugin-system/), [An update on plugin security](https://www.figma.com/blog/an-update-on-plugin-security/), [Realms-shim Security Updates](https://agoric.com/blog/technology/realms-shim-security-updates)
+
+### The limits of JS runtime performance optimization
+
+There are many efforts put into optimizing JS performance. And JS do run faster. But it has a limit. No matter how much efforts are put into JS runtime optimization, it cannot be as fast as C.
+
+Because the JS runtime optimization must keep compatibility of JS semantics. JS is dynamic and has a lot of flexibility. **Flexibility costs performance**. JS runtime often use runtime statistics to find unused flexibility and optimize accordingly. But statistics cannot be really sure, so JS runtime still have to "prepare" for flexibility. The runtime statistics and "prepare for flexibility" all costs performance, in a way that cannot be optimized without changing code format and execution model.
+
+Also, JS has no share-memory parallelism. Moving a byte buffer between web worker involve no copy, but many other cross-worker communication require copy.

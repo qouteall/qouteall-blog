@@ -118,7 +118,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
   - JSON string `\u` escape uses surrogate pair. `"\uD83D\uDE00"` in JSON is only one scalar value.
 - Strings in different languages:
   - Rust use UTF-8 for in-memory string. `s.len()` gives byte count. Rust does not allow directly indexing on a `str` (but allows subslicing). `s.chars().count()` gives code point count. Rust is strict in UTF-8 code point validity.
-  - Java, C# and JS's string encoding is similar to UTF-16 [^string_encoding]. String length is code unit count. Indexing works on code units. Each code unit is 2 bytes. One scalar value can be 1 code unit or 2 code units.
+  - Java, C# and JS's string encoding is [WTF-16](https://simonsapin.github.io/wtf-8/#ill-formed-utf-16). WTF-16 is similar to UTF-16 but allows invalid surrogates. String length is code unit count. Indexing works on code units. Each code unit is 2 bytes. One scalar value can be 1 code unit or 2 code units. [^string_encoding]
   - In Python, `len(s)` gives scalar value count. Indexing gives a string that contains one scalar value.
   - C++ `std::string` and Golang `string` have no constraint of encoding and are similar to byte arrays.
   - No language mentioned above do string length and indexing based on grapheme cluster.
@@ -126,7 +126,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - When reading text data in chunk, don't convert individual chunks to string then concat, as it may cut inside a UTF-8 code point.
 - Some Windows text files have byte order mark (BOM) at the beginning. It's U+FEFF zero-width no-break space (it's normally invisible). FE FF means file is in big-endian UTF-16. EF BB BF means UTF-8. Some non-Windows software doesn't handle BOM.
 - When converting binary data to string, often the invalid places are replaced by � (U+FFFD).
-  - Directly putting binary data to string loses information, except in C++ and Golang. Even in C++ and Golang it will still lose information after serializing to JSON (use Base64 for binary data in JSON).
+  - Directly putting binary data to string loses information, except in C++ and Golang. Even in C++ and Golang it will still lose information after serializing to JSON. Its recommended to use Base64 for binary data in JSON.
 - [Confusable characters](https://github.com/unicode-org/icu/blob/main/icu4c/source/data/unidata/confusables.txt). Some common examples:
   - `"` and `“` `”`. Microsoft Word and Google Doc auto-replace former to latter.
   - – (en dash) and - (minus-hyphen). Google Doc auto-replace -- to en dash.
@@ -139,7 +139,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 
 [^scalar_value]: The U+XXXX notation (XXXX is a hex value) represents a code point. In UTF-8, code point and scalar value are the same thing. But in UTF-16, it's not simple. You can understand scalar value as "real code point" that has semantic meaning. The "fake code point" is surrogate code point (U+D800 to U+DFFF). One surrogate code point itself has no semantic meaning. Two surrogate code units form a 4-byte scalar value, called surrogate pair. Note that a surrogate pair can both be seen as one code point or two code points. Because that UTF-8 is widely used, it's often that "code point" means scalar value ("real code point").
 
-[^string_encoding]: Strictly speaking, they use [WTF-16](https://simonsapin.github.io/wtf-8/#ill-formed-utf-16) encoding, which is similar to UTF-16 but allows invalid surrogate pairs. That encoding is for API and is not necessarily the actual in-memory representation. For example, Java has an optimization that use Latin-1 encoding (1 byte per code point) for in-memory string if possible.
+[^string_encoding]: The encoding in API is not necessarily the actual in-memory representation. For example, Java has an optimization that use Latin-1 encoding (1 byte per code point) for in-memory string if possible.
 
 ### Floating point
 
@@ -235,6 +235,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - Don't use `=` to compare equality.
 - Storing a pointer to an element in `std::vector` and then grow the vector, vector may re-allocate content, making element pointer invalid. Same applies to other containers.
 - If a function accepts `std::string&`, and literal string (e.g. `"x"`) is passed as argument, the `std::string` object will be short-lived.
+- C++ does implicit copy in many places. Implicit copy can hurt performance.
 - [Iterator invalidation](https://learnmoderncpp.com/2024/09/04/understanding-iterator-invalidation/). Modifying a container when looping on it.
 - `std::views::filter` malfunctions when element is mutated that predicate result changes in multi-pass iteration. [See also](https://github.com/CppCon/CppCon2024/blob/main/Presentations/Taming_the_Cpp_Filter_View.pdf). `std::views::as_rvalue` with `std::ranges::to` mutates the element which can trigger that issue. [See also](https://github.com/philsquared/cpponsea2025-slides/blob/main/Presentations/Faster_Safer_Better_Ranges.pdf)
 - `std::remove` doesn't remove but just rearrange elements. `erase` actually removes.
@@ -400,19 +401,19 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - glibc compatibility issue. A program that's build in a new Linux distribution dynamically links with a new version of glibc, then it may be incompatible with old versions of glibc in old systems. Can be fixed by static linking glibc or using containers [^container].
 - Path trailing slash:
   - If `/aaa/bbb` is a symbolic link to a folder, `rm /aaa/bbb` removes the symbolic link, but `rm /aaa/bbb/` may remove files in pointed folder.
-  - For `mv x.txt /aaa/bbb`, if `/aaa/bbb` is a folder it will move file into the folder, but if `/aaa/bbb` doesn't exist it will rename file name to `bbb`.
+  - For `mv x.txt /aaa/bbb`, if `/aaa/bbb` is a folder it will move file into the folder without changing name, but if `/aaa/bbb` doesn't exist it will rename file name to `bbb`.
 
-[^container]: There is a "fix problem then create new problem then fix new problem" cycle in deployment. Firstly dynamic linking creates dependency hell, then solve it using containers. But containers are slow to rebuild, which slows down development iteration cycle. Then tools like [tilt](https://tilt.dev/) solve the problem by "hacking" container (replace binary without rebuilding container). There are other hacks such as putting binary in mounted folder outside of container. But the root problem (dynamic linking dependency hell) can be just fixed by static linking.
+[^container]: There is a "fix problem then create new problem then fix new problem" cycle in deployment. Firstly dynamic linking creates dependency hell, then solve it using containers. But container images are slow to rebuild. It slows down development iteration cycle. Then tools like [tilt](https://tilt.dev/) solve the problem by "hacking" container (replace binary in running container without rebuilding container image). There are other hacks such as putting binary in mounted folder outside of container. But the root problem (dynamic linking dependency hell) can be just fixed by static linking.
 
 ### Backend-related
 
-- K8s `livenessProbe` used with debugger. Breakpoint debugger usually block the whole application, making it unable to respond health check request, so it can be killed by K8s `livenessProbe`.
+- K8s `livenessProbe` used with debugger. Breakpoint debugger usually block the whole application, making it unable to respond health check request, thus killed by K8s.
 - Don't use `:latest` image. They can change at any time.
 - In Redis, getting keys by a prefix `KEYS prefix-*` is a slow operation that will traverse all keys. Use Redis hash map for that use case.
 - Kafka's message size limit is 1MB by default.
 - In Kafka, across partitions, consume order may be different to produce order. If key is null then message's partition is not deterministic.
 - In Kafka, if a consumer processes too slow (no acknowledge within `max.poll.interval.ms`, default 5 min), the consumer will be treated as failed, then a rebalance occurs. That timeout is per-batch. If a batch contains too many messages it may reach that timeout even if individual message processing is not slow. Can fix by reducing batch size `max.poll.records`.
-- If you put your backend behind Nginx, you need to configure connection reuse, otherwise under high concurrency, connection between nginx and backend may fail, due to not having enough internal ports.
+- If Nginx config doesn't include connection reuse, internal ports may be used up under high concurrency, then connection between Nginx and backend may fail.
 - Nginx `proxy_buffering` delays SSE.
 - If the backend behind Nginx initiates closing the TCP connection, Nginx passive health check treat it as backend failure and temporarly stop reverse proxying. [See also](https://nginx.org/en/docs/http/ngx_http_upstream_module.html)
 - Nginx configuration URL trailing slash. [See also](https://dev.to/danielkun/nginx-everything-about-proxypass-2ona)
@@ -501,9 +502,9 @@ Indirectly use different versions of the same package (diamond dependency issue)
 ### Microsoft-related
 
 - When using Microsoft Excel to open a CSV file, Excel will do a lot of conversions, such as date conversion (e.g. turn `1/2` and `1-2` into `2-Jan`) and Excel won't show you the original string. [The gene SEPT1 was renamed due to this Excel issue](https://en.wikipedia.org/wiki/SEPTIN1). Excel will also make large numbers inaccurate (e.g. turn `12345678901234567890` into `12345678901234500000`) and won't show you the original accurate number, because Excel internally use floating point for number. Related: [2010 British intelligence phone number issue](https://blog.statwolf.com/when-common-excel-mistakes-have-gotten-people-into-trouble-and-how-you-can-avoid-them).
-- Windows limits command length to 32767 code units. [See also](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)
+- Windows limits command length to 32767 WTF-16 code units. [See also](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)
 - In Windows the default stack size of main thread is 1MB, but in Linux and macOS it's often 8MB. It's easier to stack overflow in Windows by default.
-- Windows limits path length to be 260 code units by default.
+- Windows limits path length to be 260 WTF-16 code units by default.
 
 ### Other
 

@@ -9,175 +9,9 @@ unlisted: false
 
 <!-- truncate -->
 
-## Self-reinforcing feedback loops
-
-Examples:
-
-- Matthew effect. Having money helps earning money and vice versa.
-- Network effect. The more people using a platform (like X(Twitter), Facebook, Uber) the more usable platform is, so more people use it.
-- Flywheel effect. Some operations are initially costly and inefficient. But keep doing it makes it easier and easier.
-- Economies of scale. Increase production can amortize research costs, marketing costs and other fixed costs. Financing is also easier on larger scale.
-- Virus spread. The more it infects, the more sperading sources.
-- Self-fulfilling prophecy. Confidence helps collaboration and gives motivation. Distrust can make things worse and confirm distrust (e.g. bank run).
-- Motivation and feedback. Good feedback increases motivation and increase the likelyhood of getting good results, vice versa.
-- Attitude can shape behavior. Behavior can shape attitude. Persuade self to justify decisions.
-- Social interaction. One being angry to another may make two both more angry. Also applys to friendliness and trust/distrust.
-- Herd mentality. Some people do something, more people follow.
-- Financial market momentum.
-- Debt can both accelerate growth and accelerate bankruptcy.
-- Spread of information and idea. The more popular a piece of information is, the more chance it spreads.
-- Sunk cost. The more resources put in, the higher sunk cost is, the harder to stop loss.
-  - This especially applies to war. When both sides costed a lot in war, the war is hard to stop.
-- Banks only loan to companies with good financial status.
-- The worse health condition is, the more expensive health insurance is, the less likely one affords treatment.
-- Avalanche.
-- Cascade failure.
-- ...
-
-## Concentration
-
-Self-reinforcing feedback loops cause concentration and winner-take-all effect.
-
-Examples of concentration and 80/20 rule (Pareto principle):
-
-- For business:
-  - Most profit often come from very few products.
-  - For to-business products, most profit often come from few enterprise customers.
-  - Most complains often come from very few users. 
-  - Most meaningful work is often done by very few employees.
-- On internet:
-  - The most engagement come from very few posts.
-  - The most voice on internet comes from a minority of users. The dominant narrative on internet may not represent most people's views.
-- In software:
-  - Most users use few common features. 
-  - Most issues that user see are caused by few common bugs.
-  - Most complexity (and bugs) come from very few features and requirements.
-  - Most development efforts are for fixing edge cases. Few development efforts are spent on main case handling.
-  - One bug applies to all instances of the software version.
-- The most social connections are related to few core people.
-- The most decisions are made based on few important information.
-- In financial market:
-  - The most volatility concentrates on small time intervals.
-  - The most profit and loss come from few important investments.
-  - The most market value and trading volume concentrates on few assets.
-- About risk:
-  - Most car crashes are caused by few drivers.
-  - The most negative impact come from very few severe incidents.
-
-They have **fat-tailed distributions** instead of normal distributions. 
-
-For them, the mean and variance may be misleading. Median is more representative than mean. The sample variance is likely very underestimated.
-
-If some work seems huge, if it follows 80/20, doing just 20% of it can get 80% of effects. However note that not all work can be 80-20-ed.
-
-## Self-balancing feedback loops and cycles
-
-Examples:
-
-- In nature: predator-prey relation, climate systems.
-- In human body: temperature adjustment, blood glucose adjustment, etc.
-- In machines: thermostat, etc.
-- Planet movements: day-night alternation, seasons, the [Milankovitch cycle](https://en.wikipedia.org/wiki/Milankovitch_cycles).
-- Demand-supply relation: high demand increase price. High price facilitates investments in supply (this can take time) and reduces demand (people search for alternatives), thus causing price drop.
-- In financial market:
-  - Price grow create potential for selling and vice versa. Market momentum cannot continue forever (although it may be much longer than expected).
-  - Profit reduces as trading size grows when it drains up liquidity.
-  - If one financial trading strategy is effective and many people use it, then that strategy will cease to be effective. If everyone believe that one strategy is ineffective, then it may be actually effective. Market is [**anti-inductive**](https://www.lesswrong.com/posts/h24JGbmweNpWZfBkM/markets-are-anti-inductive).
-  - Low volatility induce higher leverage that potential increase volatility. High volatility provide potential profit for hedging that may lead to reduced volatility.
-  - Two uncorrelated assets may be commonly diversified together that may potentially increase their correlation. 
-- The debt cycle. Economy growth parallels debt growth. Higher debt impose higher risk and more interest cost. Then debt collapses and inefficient companies bankrupt. The economy becomes more frugal and more efficient. The debt level becomes low again.
-- The cycle of money supply. The central bank keeps trying to balance between controlling inflation and providing enough money.
-- The Kondratiev cycle. New technology drives growth and investments. The application of new teconology matures and growth plateaus, creating excess investment, excess debts and inflation. Then recession comes. A new radical innovation drives a new cycle.
-- The demographic cycle. Ancient China suffers from [Malthusian trap](https://en.wikipedia.org/wiki/Malthusianism): Population grows, farmland per capita reduces, food supply cannot catch up population. When it's close to threshold, a natural disaster can cause famine (and war), reducing population.
-- Economies of scale eventually faces diminishing marginal return. And larger scale makes management harder.
-- Over-concentration of wealth and power reduces efficiency and stability of society.
-- Large companies are likely to be inefficient due to bureaucracy.
-- The innovator's dillema. Large companies are bad at innovation.
-- "Hard times create strong men. Strong men create good times. Good times create weak men. Weak men create hard times." ― G. Michael Hopf
-- Boredom with memes. Attention span on internet is short. No meme can keep dominating.
-- Elo-score-based matching in PvP games. If you lose, you will match with lower-skilled players and be more likely to win, and vice versa.
-- Cry wolf syndrome. False warning make people less and less sensitive.
-
-Note that "negative feedback loop" means self-balancing feedback loop, but sometimes it is also (mis)used to describe "self-reinforcing feedback loop with negative effect" like financial crisis.
-
-The force behind a self-balancing feedback loop may drive self-reinforcing feedback loop in the next stage of cycle.
-
-The **"competition"** between self-reinforcing feedback loops and self-balancing feedback loops:
-
-|                             | Self-reinforcing                                                                            | Self-balancing                                                                     |
-| --------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Population growth           | Exponential growth                                                                          | Limited food supply, living resources and jobs; Higher competition                 |
-| Asset price grow            | Trend following investments; Fear of missing out; Overconfidence; Leverage                  | Long force depletes; Short potential accumulates                                   |
-| Asset price drop            | Panic; Margin call                                                                          | Short force depletes; Long potential accumulates                                   |
-| Debt growth and inflation   | Economy growth; Higher confidence                                                           | Cost of excess invstment and debt; Monetary tightening for keeping currency credit |
-| Debt collapse and deflation | Cadcade credit collapse during financial crisis; Lose of confidence                         | Countermeasures for crisis; Fiscal and monetary stimulus                           |
-| Monopoly                    | Matthew effect; Economies of scale; Brand recognition                                       | Antitrust; Safety concerns; Innovator's dillema; Bureaucracy within large company  |
-| Scaling of production       | Amortize cost                                                                               | Harder to manage; Diminishing marginal return; Higher risk                         |
-| Virus spread                | The more it infects, the quicker it spreads                                                 | Immunity; Societal countermeasures; Medication; Natural selection                  |
-| Spread of information       | The more people know it, the quicker it spreads; Fad following; Algorithmic recommendataion | Saturation of acceptors; Lose of interest                                          |
-| Scaling in AI               | Scaling gives better performance                                                            | Higher cost in training and inference; Dinimishing marginal utility                |
-
-Note that nonlinear systems are complex. They are more than just two kinds of feedback loops.
-
-## More is different
-
-In nonlinear systems, there are often the accumulation of potential and the sudden release of them:
-
-- A technology used to be bad but keeps improving. Once it improves above a threshold, it suddenly becomes economically valuable and get deployed widely.
-- An undervalued asset's fundamental keeps improving. Once there is some public event showing it, its price may suddenly grow a lot. Vice versa for bubble assets.
-- A system cuts cost by reducing safety investments. The existing safety investments gradually decay. When it decays to a point, a random event can trigger a large incident.
-- ...
-
-There are emergent properties that only emerge if scale becomes big enough:
-
-- The market price comes from the decisions of many individuals (and quantitive trading programs).
-- Scaling up (model size, data, etc.) in deep learning lead to new behavior (e.g. in-context learning, pass Turing test).
-- Ant colony, bird flock behavior, etc.
-- ...
-
-Composition fallacy: composing things together may give surprising results. Two good things composed may be bad, and two bad things composed may be good.
-
-## Fractal properties
-
-The relation between cycle and trends is similar to fractal. There are small trends in cycles. There are also small cycles in trends. There are small cycles in cycles.
-
-Investing in index is long-term trend following, as the index selects the winning stocks. If the index has positon limitation for each individual stock, then it also incorporates contrarian investment.
-
-Heinrich's law: for every accident that causes a major injury, there are 29 accidents that cause minor injuries and 300 accidents that cause no injuries.
-
-## Nonlinear systems are hard to understand and predict
-
-Nonlinear systems are chaotic. Predicting them accurately is practically impossible.
-
-But people tend to think they understand and can predict, while they cannot (hindsight bias, confirmation bias, narrative fallacy, etc.).
-
-Pursue simpler predictions instead of fragile complex specific predictions. Many tightly-dependent predictions tend to fail together.
-
-Sometimes, just being less wrong than others can gain advantage.
-
-Nonliear systems are hard to understand. If something appears irrational but existed for a long time, it's likely that you don't understand it. What everyone believes may one day turn out to be false.
-
-There are great ideas that are hard to discover, but once discovered, become very obvious and very natural (hindsight bias).
-
-## Paradigm shifts
-
-Paradigm shift could be caused by radical technological innovations (e.g. invention of Internet), natural disasters (e.g. Covid-19), or a release of accumulated potential.
-
-For a long cycle that spans decades (e.g. macro debt cycle), entering the next stage of cycle is a paradigm shift.
-
-> History and societies do not crawl. They make jumps.
-> 
-> \- _The Black Swan_
-
-> There are decades where nothing happens; and there are weeks where decades happen.
-> 
-> \- Vladimir Ilyich Lenin
-
-Experiences may be obsolete or even harmful after a paradigm shift. Ideas, methods, cultures and systems may only work in specific paradigms.
-
 ## Second-order effect
 
-Nonlinear systems have second-order effects. Many things may "backfire".
+In this complex world, there are second-order effects. Many things may "backfire".
 
 Note: **"X may backfire" should not be simplified to "X is bad".**
 
@@ -299,6 +133,14 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: It inflates asset bubbles and cause more potential risk in the future. It also causes moral hazard and encourages careless risk-takers.
 
+- First-order effect: Increasing interest reduces inflation, because it reduces money supply.
+
+  Second-order effect: Many inflations are caused by reduced supply, not increased demand. Increasing interest rate reduces productivity investment, thus curb supply increase, thus may boost inflation.
+
+- First-order effect: Promoting employees that did great job incentivizes employee, so it makes the company more efficient.
+
+  Second-order effect: [Peter principle](https://en.wikipedia.org/wiki/Peter_principle). The employee that perform bad in raised position is rarely demoted. But the promoted employee is not necessarily good in new work because the work changes. So "being good at work" is unstable state but "being bad at work" is stable state. Eventually it likely reaches stable state: most employees do the work they are bad at.
+
 [^qianlima]: Related: [Qianlima](https://en.wikipedia.org/wiki/Qianlima) (千里马). The high-capacity horse require more food to show its capacity. But without showing its capacity it can never get enough food supply. 
 
 [^sleeper_effect]: There is a third-order effect. If consumer hates the ad, seeing more ads hate more, but the ads still leave "footprint" in memory. Due to [sleeper effect](https://en.wikipedia.org/wiki/Sleeper_effect) the customer may start liking the product after some time.
@@ -373,7 +215,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: Some recipients may take free things for granted, complain about not receiving more, or criticize the quality. The recipient also may feel having lower social status and may develop hatred.
 
-- First-order effect: Giving clear unambiguous feedback helps learning. It makes learning faster.
+- First-order effect: Giving clear unambiguous feedback helps learning.
 
   Second-order effect: It makes student overly rely on external feedback. Then the student can hardly develop internal judgement, thus perform worse in real-world tasks that don't have clear feedback. [See also](http://www.macrocognition.com/documents/CTT%2012-29-08.pdf)
 
@@ -389,6 +231,10 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 - First-order effect: Punishing mistakes will push people make fewer mistakes.
 
   Second-order effect: It cause one to be scared of practicing, thus gain less experience. Lacking of experience make them more likely to make mistakes.
+
+- First-order effect: Only reporting successful results and not reporting failed attempts could increase others' impression on you.
+
+  Second-order effect: If you haven't obtained successful results for some time, not reporting makes people question that you are not working.
 
 ### In Cybersecurity
 
@@ -442,6 +288,174 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 > \- [New Linux glibc flaw lets attackers get root on major distros](https://www.bleepingcomputer.com/news/security/new-linux-glibc-flaw-lets-attackers-get-root-on-major-distros/)
 
 
+## Feedback loops
+
+### Self-reinforcing feedback loops
+
+Examples:
+
+- Matthew effect. Having money helps earning money and vice versa.
+- Network effect. The more people using a platform (like X(Twitter), Facebook, Uber) the more usable platform is, so more people use it.
+- Flywheel effect. Some operations are initially costly and inefficient. But keep doing it makes it easier and easier.
+- Economies of scale. Increase production can amortize research costs, marketing costs and other fixed costs. Financing is also easier on larger scale.
+- Virus spread. The more it infects, the more sperading sources.
+- Self-fulfilling prophecy. Confidence helps collaboration and gives motivation. Distrust can make things worse and confirm distrust (e.g. bank run).
+- Motivation and feedback. Good feedback increases motivation and increase the likelyhood of getting good results, vice versa.
+- Attitude can shape behavior. Behavior can shape attitude. Persuade self to justify decisions.
+- Social interaction. One being angry to another may make two both more angry. Also applys to friendliness and trust/distrust.
+- Herd mentality. Some people do something, more people follow.
+- Financial market momentum.
+- Debt can both accelerate growth and accelerate bankruptcy.
+- Spread of information and idea. The more popular a piece of information is, the more chance it spreads.
+- Sunk cost. The more resources put in, the higher sunk cost is, the harder to stop loss.
+  - This especially applies to war. When both sides costed a lot in war, the war is hard to stop.
+- Banks only loan to companies with good financial status.
+- The worse health condition is, the more expensive health insurance is, the less likely one affords treatment.
+- Avalanche.
+- Cascade failure.
+- ...
+
+### Concentration
+
+Self-reinforcing feedback loops cause concentration and winner-take-all effect.
+
+Examples of concentration and 80/20 rule (Pareto principle):
+
+- For business:
+  - Most profit often come from very few products.
+  - For to-business products, most profit often come from few enterprise customers.
+  - Most complains often come from very few users. 
+  - Most meaningful work is often done by very few employees.
+- On internet:
+  - The most engagement come from very few posts.
+  - The most voice on internet comes from a minority of users. The dominant narrative on internet may not represent most people's views.
+- In software:
+  - Most users use few common features. 
+  - Most issues that user see are caused by few common bugs.
+  - Most complexity (and bugs) come from very few features and requirements.
+  - Most development efforts are for fixing edge cases. Few development efforts are spent on main case handling.
+  - One bug applies to all instances of the software version.
+- The most social connections are related to few core people.
+- The most decisions are made based on few important information.
+- In financial market:
+  - The most volatility concentrates on small time intervals.
+  - The most profit and loss come from few important investments.
+  - The most market value and trading volume concentrates on few assets.
+- About risk:
+  - Most car crashes are caused by few drivers.
+  - The most negative impact come from very few severe incidents.
+
+They have **fat-tailed distributions** instead of normal distributions. 
+
+For them, the mean and variance may be misleading. Median is more representative than mean. The sample variance is likely very underestimated.
+
+If some work seems huge, if it follows 80/20, doing just 20% of it can get 80% of effects. However note that not all work can be 80-20-ed.
+
+### Self-balancing feedback loops and cycles
+
+Examples:
+
+- In nature: predator-prey relation, climate systems.
+- In human body: temperature adjustment, blood glucose adjustment, etc.
+- In machines: thermostat, etc.
+- Planet movements: day-night alternation, seasons, the [Milankovitch cycle](https://en.wikipedia.org/wiki/Milankovitch_cycles).
+- Demand-supply relation: high demand increase price. High price facilitates investments in supply (this can take time) and reduces demand (people search for alternatives), thus causing price drop.
+- In financial market:
+  - Price grow create potential for selling and vice versa. Market momentum cannot continue forever (although it may be much longer than expected).
+  - Profit reduces as trading size grows when it drains up liquidity.
+  - If one financial trading strategy is effective and many people use it, then that strategy will cease to be effective. If everyone believe that one strategy is ineffective, then it may be actually effective. Market is [**anti-inductive**](https://www.lesswrong.com/posts/h24JGbmweNpWZfBkM/markets-are-anti-inductive).
+  - Low volatility induce higher leverage that potential increase volatility. High volatility provide potential profit for hedging that may lead to reduced volatility.
+  - Two uncorrelated assets may be commonly diversified together that may potentially increase their correlation. 
+- The debt cycle. Economy growth parallels debt growth. Higher debt impose higher risk and more interest cost. Then debt collapses and inefficient companies bankrupt. The economy becomes more frugal and more efficient. The debt level becomes low again.
+- The cycle of money supply. The central bank keeps trying to balance between controlling inflation and providing enough money.
+- The Kondratiev cycle. New technology drives growth and investments. The application of new teconology matures and growth plateaus, creating excess investment, excess debts and inflation. Then recession comes. A new radical innovation drives a new cycle.
+- The demographic cycle. Ancient China suffers from [Malthusian trap](https://en.wikipedia.org/wiki/Malthusianism): Population grows, farmland per capita reduces, food supply cannot catch up population. When it's close to threshold, a natural disaster can cause famine (and war), reducing population.
+- Economies of scale eventually faces diminishing marginal return. And larger scale makes management harder.
+- Over-concentration of wealth and power reduces efficiency and stability of society.
+- Large companies are likely to be inefficient due to bureaucracy.
+- The innovator's dillema. Large companies are bad at innovation.
+- "Hard times create strong men. Strong men create good times. Good times create weak men. Weak men create hard times." ― G. Michael Hopf
+- Boredom with memes. Attention span on internet is short. No meme can keep dominating.
+- Elo-score-based matching in PvP games. If you lose, you will match with lower-skilled players and be more likely to win, and vice versa.
+- Cry wolf syndrome. False warning make people less and less sensitive.
+
+Note that "negative feedback loop" means self-balancing feedback loop, but sometimes it is also (mis)used to describe "self-reinforcing feedback loop with negative effect" like financial crisis.
+
+The force behind a self-balancing feedback loop may drive self-reinforcing feedback loop in the next stage of cycle.
+
+The **"competition"** between self-reinforcing feedback loops and self-balancing feedback loops:
+
+|                             | Self-reinforcing                                                                            | Self-balancing                                                                     |
+| --------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Population growth           | Exponential growth                                                                          | Limited food supply, living resources and jobs; Higher competition                 |
+| Asset price grow            | Trend following investments; Fear of missing out; Overconfidence; Leverage                  | Long force depletes; Short potential accumulates                                   |
+| Asset price drop            | Panic; Margin call                                                                          | Short force depletes; Long potential accumulates                                   |
+| Debt growth and inflation   | Economy growth; Higher confidence                                                           | Cost of excess invstment and debt; Monetary tightening for keeping currency credit |
+| Debt collapse and deflation | Cadcade credit collapse during financial crisis; Lose of confidence                         | Countermeasures for crisis; Fiscal and monetary stimulus                           |
+| Monopoly                    | Matthew effect; Economies of scale; Brand recognition                                       | Antitrust; Safety concerns; Innovator's dillema; Bureaucracy within large company  |
+| Scaling of production       | Amortize cost                                                                               | Harder to manage; Diminishing marginal return; Higher risk                         |
+| Virus spread                | The more it infects, the quicker it spreads                                                 | Immunity; Societal countermeasures; Medication; Natural selection                  |
+| Spread of information       | The more people know it, the quicker it spreads; Fad following; Algorithmic recommendataion | Saturation of acceptors; Lose of interest                                          |
+| Scaling in AI               | Scaling gives better performance                                                            | Higher cost in training and inference; Dinimishing marginal utility                |
+
+Note that nonlinear systems are complex. They are more than just two kinds of feedback loops.
+
+## More is different
+
+In nonlinear systems, there are often the accumulation of potential and the sudden release of them:
+
+- A technology used to be bad but keeps improving. Once it improves above a threshold, it suddenly becomes economically valuable and get deployed widely.
+- An undervalued asset's fundamental keeps improving. Once there is some public event showing it, its price may suddenly grow a lot. Vice versa for bubble assets.
+- A system cuts cost by reducing safety investments. The existing safety investments gradually decay. When it decays to a point, a random event can trigger a large incident.
+- ...
+
+There are emergent properties that only emerge if scale becomes big enough:
+
+- The market price comes from the decisions of many individuals (and quantitive trading programs).
+- Scaling up (model size, data, etc.) in deep learning lead to new behavior (e.g. in-context learning, pass Turing test).
+- Ant colony, bird flock behavior, etc.
+- ...
+
+Composition fallacy: composing things together may give surprising results. Two good things composed may be bad, and two bad things composed may be good.
+
+## Fractal properties
+
+The relation between cycle and trends is similar to fractal. There are small trends in cycles. There are also small cycles in trends. There are small cycles in cycles.
+
+Investing in index is long-term trend following, as the index selects the winning stocks. If the index has positon limitation for each individual stock, then it also incorporates contrarian investment.
+
+Heinrich's law: for every accident that causes a major injury, there are 29 accidents that cause minor injuries and 300 accidents that cause no injuries.
+
+## Nonlinear systems are hard to understand and predict
+
+Nonlinear systems are chaotic. Predicting them accurately is practically impossible.
+
+But people tend to think they understand and can predict, while they cannot (hindsight bias, confirmation bias, narrative fallacy, etc.).
+
+Pursue simpler predictions instead of fragile complex specific predictions. Many tightly-dependent predictions tend to fail together.
+
+Sometimes, just being less wrong than others can gain advantage.
+
+Nonliear systems are hard to understand. If something appears irrational but existed for a long time, it's likely that you don't understand it. What everyone believes may one day turn out to be false.
+
+There are great ideas that are hard to discover, but once discovered, become very obvious and very natural (hindsight bias).
+
+## Paradigm shifts
+
+Paradigm shift could be caused by radical technological innovations (e.g. invention of Internet), natural disasters (e.g. Covid-19), or a release of accumulated potential.
+
+For a long cycle that spans decades (e.g. macro debt cycle), entering the next stage of cycle is a paradigm shift.
+
+> History and societies do not crawl. They make jumps.
+> 
+> \- _The Black Swan_
+
+> There are decades where nothing happens; and there are weeks where decades happen.
+> 
+> \- Vladimir Ilyich Lenin
+
+Experiences may be obsolete or even harmful after a paradigm shift. Ideas, methods, cultures and systems may only work in specific paradigms.
+
 ## Unity of opposites
 
 - Abundance could lead to waste. Scarcity could lead to efficiency. 
@@ -476,25 +490,31 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - [Theory of the second best](https://en.wikipedia.org/wiki/Theory_of_the_second_best). If something is imperfect, adding more imperfection may be better overall.
 
-## 3 kinds of risks
+## About risk
+
+### 3 kinds of risks
 
 
-- The risk we know and prepared, 
-- The unknown unknown (Black Swan), 
+- The risk we know and prepared for.
+- The unknown unknown (Black Swan). 
 - The risk that we know but don't want to accept and act on (Grey Rhino, ostrich effect, elephant in the room).
 
-## Redundancy
+### Redundancy
 
 Redundancy tackles risk. Two kinds of redundancy:
 
 - Resource redundancy. Example: save more cash, hoard emergency food.
 - Functional redundancy. Example: be more versatile and can change profession, having a plan B when plan A fails.
 
-Diversification is also a way to handle risks. Note that diversification only works when correlation is low. But many financial assets are highly correlated under Black Swan event.
+Diversification is also a way to handle risks. Note that diversification only works when correlation is low. But many assets seems low-correlation but has high correlation under Black Swan event. Also, when two low-correlation assets are commonly diversified together, their correlation potentially increases.
+
+### Optionality
 
 Harvest optionality: being able to delay harvest when market price is low. For example, timberland can delay cutting tree when wood price is low, brewhouse can keep brewing when alcohol price is low.
 
-## Good side of incident
+Modern manufactoring is often very capital-intensive and fragile. Short-term over-production can be fatal. It can be overcomed by counter-cyclical subsidy but the subsidy can easily fall into sunk-cost trap. Unfortunately, the more advanced manufactoring is more capital-intensive and more fragile. However, even if the manufactoring company collapses, the the technology and equipments still remain.
+
+### Good side of incident
 
 - it reveals problems and gives pressure to improve
 - it makes people appreciate the good instead of taking things for granted
@@ -502,14 +522,15 @@ Harvest optionality: being able to delay harvest when market price is low. For e
 
 ## On positive black swans
 
-In theory, betting on positive black swan is good because it has large upsides and limited downsides. 
+It seems betting on positive black swan is good because it has large upsides and limited downsides. However, in real world, **positive Black Swan may come very late or never come**. So the "limited downside" has high probability of occuring for long time. 
 
-However, in real world, **positive Black Swan may come very late or never come**.
+It's actually very hard to do. It requires patience and reducing expectation. 
 
-- Avoid fatal risk. Don't all-in. Stop-loss is important.
-- Normal people don't suit winner-take-all profession (e.g. actor, social media influencer). Take a normal profession and do winner-take-all things in part time.
-- Doing more things can improve exposure to positive black swan.
-- Be patient and reduce expectation. 
+Normal people don't suit winner-take-all profession (e.g. actor, social media influencer). Take a normal profession and do winner-take-all things in part time.
+
+Keep staying in the game makes one exposed to positive Black Swan. Don't all-in. Stop-loss is important.
+
+Doing more things and make more connections can improve exposure to positive black swan.
 
 Embrace some randomness instead of paranoidly avoiding randomness.
 

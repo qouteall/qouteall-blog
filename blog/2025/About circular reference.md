@@ -496,6 +496,8 @@ Rust favors tree-shaped ownership. There is a hierarchy between owner and owned 
 
 Without mutability and lazy evaluation, reference cycle cannot be created. Because new values can only contain the existing values when creating it (order of evaluation prevents cycle). But with lazy evaluation, the not-yet-created values can be used so circular reference is possible.
 
+[Structured concurrency](https://en.wikipedia.org/wiki/Structured_concurrency) makes waiting relation tree-shaped. The tree shape forbids cycle so structured concurrency (alone) is free of deadlock.
+
 ## Grouping can create cycle
 
 ![](./circular/grouping_cycle.drawio.png)
