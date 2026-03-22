@@ -8,7 +8,7 @@ tags:
 
 <!-- truncate -->
 
-The 3 concepts: deadlock, circular reference and halting, are deeply connected.
+These concepts: deadlock, circular reference, memory leak and halting, are deeply connected.
 
 ## Deadlock
 
@@ -532,10 +532,14 @@ So Python adds locks to every container. But naively adding locking on every con
 
 Python solves that issue using [Python critical sections](https://peps.python.org/pep-0703/#python-critical-sections):
 
+- It uses some lock-free operations to reduce locking. But locking is still used.
 - One thread only holds one container lock at a time. If the thread locks container A then try to do something on container B, it firstly release lock on A.
-  - There are operations that involve two containers, like `list.extend(iterable)`. It can alternate between locking `list` and locking `iterable`, only locking one at once. This also means that the `list.extend(iterable)` operation won't be atomic.
-- The thread temporarily releases lock on suspend.
-- Some operations are lock-free.
+- When for looping on a container, it doesn't keep locking the container. It only brefly locks when accessing container.
+- When a thread is suspended, it temporarily releases lock.
+
+There are operations that involve two containers, like `list.extend(iterable)`. It can alternate between locking `list` and locking `iterable`, only locking one at once. This also means that the `list.extend(iterable)` operation won't be atomic. 
+
+That locking is only for protecting internal data structure validity. That locking is within Python interpreter, different to explicit locking (e.g. `threading.Lock()`).
 
 ## Lazy evaluation circular reference
 

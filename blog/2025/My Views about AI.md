@@ -327,7 +327,7 @@ Because there is the tradeoff between adaptiveness and conciseness:
   - If it uses the same interface for common usages and special usages, then common usages will require verbose boilerplate, because many defaults need to be explicitly written.
   - If it uses two different interfaces for common usages and special usages, then common usage can be concise (hardcode defaults). But it increases overall complexity because there are two sets of duplicated interfaces. What's more, using both may involve complex interactions that cause bugs.
 
-(There are cases where a library/framework doesn't support doing X but you need to do X, but forking it is tiresome so you do some "hack" around the library/framework. Some "hack" require copying library code then do minor changes. This kind of "hacking" will greatly increase boilerplate.)
+(There are cases where a library/framework doesn't support doing X but you need to do X, but forking it is not easy so you do some "hack" around the library/framework. Some "hack" require copying library code then do minor changes. This kind of "hacking" will greatly increase boilerplate.)
 
 **Abstraction has a cost**. An abstraction makes one thing easier but makes another thing harder.
 

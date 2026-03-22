@@ -139,7 +139,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: Promoting employees that did great job incentivizes employee, so it makes the company more efficient.
 
-  Second-order effect: [Peter principle](https://en.wikipedia.org/wiki/Peter_principle). The employee that perform bad in raised position is rarely demoted. But the promoted employee is not necessarily good in new work because the work changes. So "being good at work" is unstable state but "being bad at work" is stable state. Eventually it likely reaches stable state: most employees do the work they are bad at.
+  Second-order effect: [Peter principle](https://en.wikipedia.org/wiki/Peter_principle). The promoted employee is not necessarily good in new work because the work changes. But the employee that perform bad in raised position is rarely demoted.  So "being good at work" is unstable state but "being bad at work" is stable state. Eventually it likely reaches stable state: most employees do the work they are bad at.
 
 [^qianlima]: Related: [Qianlima](https://en.wikipedia.org/wiki/Qianlima) (千里马). The high-capacity horse require more food to show its capacity. But without showing its capacity it can never get enough food supply. 
 
@@ -159,6 +159,13 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: Lacking touch with pathogen may cause immune system issues, then may facilitate autoimmune disease.
 
+- First-order effect: Advance of medical techonology improve population health and reduce healthcare cost.
+
+  Second-order effect: 
+  
+  - Advance of medical techonology increases average age. As age increase, health problems are more likely to appear. The overall healthcare burden increases.
+  - Some previously fatal disease is now not fatal, but the technology is still not advanced enough to cure it. The patient survived but faces low life quality and high healthcare cost.
+
 - First-order effect: Medication cure diseases.
 
   Second-order effect: There are [iatrogenesis](https://en.wikipedia.org/wiki/Iatrogenesis), which means the harm caused by medical treatment. Iagrogenesis can be caused my many ways, such as:
@@ -169,6 +176,8 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   - Antibiotics disrupt the gut biome, thus interfere with immune system
   - (Also: Issues caused by financial hardship due to large medical bill)
   - ...
+
+- First-order effect: A new medicine that 
 
 ### In Psychology
 
@@ -232,7 +241,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: It cause one to be scared of practicing, thus gain less experience. Lacking of experience make them more likely to make mistakes.
 
-- First-order effect: Only reporting successful results and not reporting failed attempts could increase others' impression on you.
+- First-order effect: Only reporting successful results and not reporting failed attempts could improve others' impression on you.
 
   Second-order effect: If you haven't obtained successful results for some time, not reporting makes people question that you are not working.
 
@@ -311,6 +320,7 @@ Examples:
   - This especially applies to war. When both sides costed a lot in war, the war is hard to stop.
 - Banks only loan to companies with good financial status.
 - The worse health condition is, the more expensive health insurance is, the less likely one affords treatment.
+- Ponzi scheme. When one falls into a Ponzi scheme, one tend to spread the scheme to reduce own loss.
 - Avalanche.
 - Cascade failure.
 - ...
@@ -364,10 +374,9 @@ Examples:
   - Price grow create potential for selling and vice versa. Market momentum cannot continue forever (although it may be much longer than expected).
   - Profit reduces as trading size grows when it drains up liquidity.
   - If one financial trading strategy is effective and many people use it, then that strategy will cease to be effective. If everyone believe that one strategy is ineffective, then it may be actually effective. Market is [**anti-inductive**](https://www.lesswrong.com/posts/h24JGbmweNpWZfBkM/markets-are-anti-inductive).
-  - Low volatility induce higher leverage that potential increase volatility. High volatility provide potential profit for hedging that may lead to reduced volatility.
+  - Low volatility induce higher leverage that potentially increases volatility. High volatility provide potential profit for hedging that may lead to reduced volatility.
   - Two uncorrelated assets may be commonly diversified together that may potentially increase their correlation. 
 - The debt cycle. Economy growth parallels debt growth. Higher debt impose higher risk and more interest cost. Then debt collapses and inefficient companies bankrupt. The economy becomes more frugal and more efficient. The debt level becomes low again.
-- The cycle of money supply. The central bank keeps trying to balance between controlling inflation and providing enough money.
 - The Kondratiev cycle. New technology drives growth and investments. The application of new teconology matures and growth plateaus, creating excess investment, excess debts and inflation. Then recession comes. A new radical innovation drives a new cycle.
 - The demographic cycle. Ancient China suffers from [Malthusian trap](https://en.wikipedia.org/wiki/Malthusianism): Population grows, farmland per capita reduces, food supply cannot catch up population. When it's close to threshold, a natural disaster can cause famine (and war), reducing population.
 - Economies of scale eventually faces diminishing marginal return. And larger scale makes management harder.
@@ -377,7 +386,8 @@ Examples:
 - "Hard times create strong men. Strong men create good times. Good times create weak men. Weak men create hard times." ― G. Michael Hopf
 - Boredom with memes. Attention span on internet is short. No meme can keep dominating.
 - Elo-score-based matching in PvP games. If you lose, you will match with lower-skilled players and be more likely to win, and vice versa.
-- Cry wolf syndrome. False warning make people less and less sensitive.
+- Cry wolf syndrome. False warning make people less sensitive.
+- Cooperating and cheating. When no one cooperates, the group that cooperates gain advantage. But when everyone cooperates, the ones cheating gain advantage.
 
 Note that "negative feedback loop" means self-balancing feedback loop, but sometimes it is also (mis)used to describe "self-reinforcing feedback loop with negative effect" like financial crisis.
 
@@ -494,7 +504,6 @@ Experiences may be obsolete or even harmful after a paradigm shift. Ideas, metho
 
 ### 3 kinds of risks
 
-
 - The risk we know and prepared for.
 - The unknown unknown (Black Swan). 
 - The risk that we know but don't want to accept and act on (Grey Rhino, ostrich effect, elephant in the room).
@@ -516,11 +525,12 @@ Modern manufactoring is often very capital-intensive and fragile. Short-term ove
 
 ### Good side of incident
 
-- it reveals problems and gives pressure to improve
-- it makes people appreciate the good instead of taking things for granted
+- It reveals problems and gives pressure to improve.
+- It makes people appreciate the good instead of taking things for granted.
+- It sometimes destroies inefficient things and leave room for more efficient things.
 - ...
 
-## On positive black swans
+## On positive Black Swans
 
 It seems betting on positive black swan is good because it has large upsides and limited downsides. However, in real world, **positive Black Swan may come very late or never come**. So the "limited downside" has high probability of occuring for long time. 
 
@@ -546,6 +556,7 @@ Success usually requires a lot of trial and error. Be more forgiving to the many
 > 
 > \- Systemantics: How Systems Work and Especially How They Fail
 
+Innovation cannot be planned. Having diversity of ideas and constraints could help innovation.
 
 ## Contrarian strategy
 

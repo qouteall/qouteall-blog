@@ -1475,7 +1475,7 @@ What's more, social media may make people:
 
 Getting information from real practice is often better than keep browsing information from internet.
 
-Two different kinds of information digest: long-attention and short-attention:
+Two different kinds of information consumption: long-attention and short-attention:
 
 | Long-attention                                                             | Short-attention                                                          |
 | -------------------------------------------------------------------------- | ------------------------------------------------------------------------ |

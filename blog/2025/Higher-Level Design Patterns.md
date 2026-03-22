@@ -371,7 +371,7 @@ The major differences:
   - In reference counting, the coupling of course comes from runtime reference counting.
   - The foreign key constraint of ID is enforced by database.
 
-[^weak_generalized_reference_error_handling]: One kind of error handling is to just crash. Raw pointer is also a kind of weak generalized reference. In C/C++ its error handling strategy is to require developer to not make mistake and doesn't care what happens after error occurs.
+[^weak_generalized_reference_error_handling]: One kind of error handling is to just crash. Raw pointer is also a kind of weak generalized reference. In C/C++ the handling of "memory safety error" is none. It's undefined behavior. It may crash or corrupt data.
 
 If an abstraction that **decouples** object lifetime and how these objects are referenced, then it either:
 
@@ -394,7 +394,7 @@ About transitive rule: if X and Y both follow invariant, then result of "merging
 
 ### Invariant in algorithms
 
-- Merge sort. Create sorted sub-sequence in smallest scale (e.g. two elements). Then merge two sorted sub-sequences into a bigger one, and continue. The invariant of sorted-ness grows up to the whole sequence.
+- Merge sort. Create sorted sub-sequence in smallest scale (two elements). Then merge two sorted sub-sequences into a bigger one, and continue. The invariant of sorted-ness grows up to the whole sequence.
 - Quick sort. Select a pivot. Then partition the sequence into a part that's smaller than pivot and a part that's larger than pivot (and a part that equals pivot). By partitioning, it creates invariant $\text{LeftPartElements} < \text{Pivot} < \text{RightPartElements}$. By recursively creating such invariants until to the smallest scale (individual elements), the whole sequence is sorted.
 - Binary search tree. It creates invariant $\text{LeftSubtreeElements} \leq \text{ParentNode} \leq \text{RightSubtreeElements}$. When there is only one node, the invariant is produced at the smallest scale. Every insertion then follows that invariant and then grows and maintains that invariant.
 - Dijkstra algorithm. The visited nodes are the nodes whose shortest path from source node are known. By using the nodes that we know shortest path, it "expands" on graph, knowing new node's shortest path from source. The algorithm iteratively add new nodes into the invariant, until it expands to destination node.

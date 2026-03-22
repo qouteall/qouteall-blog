@@ -42,7 +42,7 @@ The linear memory doesn't hold these things:
 
 - Linear memory doesn't hold the main stack (but holds shadow stack). The main stack is managed by runtime and cannot be read/written by address.
 - The linear memory doesn't hold function references. Wasm function references cannot be converted to and from integers. This design can improve safety. Wasm function reference can be put in table (or in global or in main stack). Function pointer becomes integer index corresponding to a function reference in table.
-- The linear memory don't hold the globals. Globals don't have address. C/C++/Rust globals are placed in linear memory to have addresses.
+- The linear memory don't hold the globals. C/C++/Rust globals are placed in linear memory to have addresses.
 
 ## Stack is not in linear memory
 
@@ -61,7 +61,7 @@ It has benefits:
 
 But it also have downsides:
 
-- Some local variables need to be taken address to. They need to be in linar memory. For example:
+- Some local variables need to be taken address to. They need to be in linear memory. For example:
 
 ```c
 int localVariable = 0;
@@ -317,7 +317,7 @@ Passing a JS string to Wasm requires:
 
 Similarily passing a string in Wasm linear memory to JS is also not easy. 
 
-Passing strings between Wasm and JS can be a performance bottleneck. **If your application involve frequent Wasm-JS data passing, then replacing JS by Wasm may actually reduce performance**.
+Passing strings between Wasm and JS can be a performance bottleneck. **If your application involve frequent Wasm-JS data passing, then replacing JS by Wasm may actually reduce performance**. It can be fast when Wasm code works on byte buffer, then pass to JS then directly to web API. But passing data that JS code needs to use is slow.
 
 Modern Wasm/JS runtime (including V8) can JIT and inline the cross calling between Wasm and JS. But the copying cost still cannot be optimized out.
 
@@ -346,13 +346,11 @@ See also: [Is Memory64 actually worth using?](https://spidermonkey.dev/blog/2025
 
 ## Summarize Wasm performance constraints
 
-Possible reasons that Wasm performance being slower than native execution:
-
-- The cost of passing data between Wasm and JS. (This is often the biggest performance loss for web apps.)
+- The cost of passing data between Wasm and JS. (This is often the biggest performance loss factor for web apps.)
 - JIT (just-in-time compilation) cost. Native C/C++/Rust applications can be AOTed (ahead-of-time compiled). V8 firstly use a quick simple compiler to compile Wasm into machine code quickly to improve startup speed (but the generated machine code runs slower), then use a slower high-optimization compiler to generated optimized machine code for few hot Wasm code. [See also](https://v8.dev/docs/wasm-compilation-pipeline). That optimization is profile-guided (target on few hot code, use statistical result to guide optimization). Both profiling, optimization and code-switching costs performance.
 - The previously mentioned linear memory bounds check for memory64.
 - Shadow stack cost.
-- Multi-threading cannot use release-acquire memory ordering. Atomics use sequential-consistent ordering. [See also](https://webassembly.github.io/threads/core/exec/relaxed.html). This is addressed by [shared-everything-threads proposal](https://github.com/WebAssembly/shared-everything-threads/blob/main/proposals/shared-everything-threads/Overview.md#memory-model-considerations)
+- Multi-threading cannot use release-acquire memory ordering. Wasm atomics only support sequential-consistent ordering. [See also](https://webassembly.github.io/threads/core/exec/relaxed.html). This is addressed by [shared-everything-threads proposal](https://github.com/WebAssembly/shared-everything-threads/blob/main/proposals/shared-everything-threads/Overview.md#memory-model-considerations)
 - Limited access to hardware functionality, such as memory prefetching and some special SIMD instructions. Note that Wasm already support many common SIMD instructions.
 - Cannot access some OS functionalities, such as `mmap`.
 - Wasm forces structural control flow. See also: [WebAssembly Troubles part 2: Why Do We Need the Relooper Algorithm, Again?](http://troubles.md/why-do-we-need-the-relooper-algorithm-again/). This may reduce the performance of compiling and JIT optimization.
@@ -417,7 +415,7 @@ The `|0` is for converting value to 32-bit integer, helping JS runtime to optimi
   - One specific memory region in `probeTable` will be loaded into cache. Accessing that region will be faster.
   - CPU found that branch prediction is wrong and rolls back, but doesn't rollback side effect on cache.
 - The attacker measures memory read latency in `probeTable`. Which place access faster correspond to the value of secret.
-- To accurately measure memory access latency, `performance.now()` is not accurate enough. It need to use a multi-threaded counter timer: One thread (web worker) keeps increasing a shared counter in a loop. The attacking thread reads that counter to get "time". The cross-thread counter sharing requires `SharedArrayBuffer`. Although it cannot measure time in standard units (e.g. nanosecond), it's can distinguish latency difference between fast cache access and slow RAM access.
+- To accurately measure memory access latency, `performance.now()` is not accurate enough. It needs to use a multi-threaded counter timer: One thread (web worker) keeps increasing a shared counter in a loop. The attacking thread reads that counter to get "time". The cross-thread counter sharing requires `SharedArrayBuffer`. Although it cannot measure time in standard units (e.g. nanosecond), it's can distinguish latency difference between fast cache access and slow RAM access.
 
 The same thing can also be done via equivalent Wasm code using `SharedArrayBuffer`.
 
@@ -447,6 +445,10 @@ These things also have VMs:
 - Command line tools awk, sed and jq are Turing-complete.
 - Related: Modern CPUs often have a [microcode](https://en.wikipedia.org/wiki/Microcode) system. The microcode supports conditional jumping and can access things like register and memory bus. It's a "small CPU within CPU".
 
+Also, iOS disallows JIT execution. In iOS, the only thing can do JIT is WebKit [^ios_jit]. The iOS app can workaround JIT restriction by running JS/Wasm code in web view then pass data in/out of web view.
+
+[^ios_jit]: Another exception is that, in European Union, the non-Safari web browsers can do JIT.
+
 ### Within-website sub-sandboxing
 
 Figma has a plugin system that runs within browser. These plugins executes JS code. For security, Figma cannot allow plugins to call arbitrary web APIs.
@@ -461,7 +463,19 @@ See also: [How to build a plugin system on the web and also sleep well at night]
 
 ### The limits of JS runtime performance optimization
 
-There are many efforts put into optimizing JS performance. And JS do run faster. But it has a limit. No matter how much efforts are put into JS runtime optimization, it cannot be as fast as C.
+There are many efforts put into optimizing JS performance.
+
+There is really a lot of efforts put in optimizing JS. ARM specially adds an instruction for optimizing JavaScript:
+
+> **Improved Javascript data type conversion**
+> 
+> Javascript uses the double-precision floating-point format for all numbers. However, it needs to convert this common number format to 32-bit integers in order to perform bit-wise operations. Conversions from double-precision float to integer, as well as the need to check if the number converted really was an integer, are therefore relatively common occurrences.
+> 
+> Armv8.3-A adds instructions that convert a double-precision floating-point number to a signed 32-bit integer with round towards zero. Where the integer result is outside the range of a signed 32-bit integer (DP float supports integer precision up to 53 bits), the value stored as the result is the integer conversion modulo 232, taking the same sign as the input float.
+> 
+> \- [Armv8-A architecture: 2016 additions](https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/armv8-a-architecture-2016-additions)
+
+After these efforts, JS do run faster. But it has a limit. No matter how much efforts are put into JS runtime optimization, it cannot be as fast as C.
 
 Because the JS runtime optimization must keep compatibility of JS semantics. JS is dynamic and has a lot of flexibility. **Flexibility costs performance**. JS runtime often use runtime statistics to find unused flexibility and optimize accordingly. But statistics cannot be really sure, so JS runtime still have to "prepare" for flexibility. The runtime statistics and "prepare for flexibility" all costs performance, in a way that cannot be optimized without changing code format and execution model.
 
