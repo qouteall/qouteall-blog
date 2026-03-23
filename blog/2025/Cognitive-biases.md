@@ -78,9 +78,9 @@ But assuming every cue is malice is bad for mental health. There is a saying:
 
 > Never ascribe to malice that which is adequately explained by incompetence. ([See also](https://simple.wikipedia.org/wiki/Hanlon%27s_razor))
 
-It's common that: Most people focus on their own businesses. Most people don't remember about details of you. Most people don't pay attention to what you said just once.
+It's common that: Most people focus on their own businesses. Most people don't remember every detail about you.
 
-[Wet bias](https://en.wikipedia.org/wiki/Wet_bias): Overestimate probability of raining to improve the usefulness of forcast.
+[Wet bias](https://en.wikipedia.org/wiki/Wet_bias): Overestimate probability of raining to improve the usefulness of forecast.
 
 Believing a false conspiracy theory often can effectively reduce risk. Conspiracy theories have real utility according to the "better safe than sorry" principle. Similar applies to cynicism.
 
@@ -88,7 +88,7 @@ Bad news travels fast. Tragedy news can gain more attention than happy news:
 
 - Sharing happy news is often seen as bragging or advertisement, because the happy thing applies to other people. But sharing tragedy news signals care and empathy.
 - Tragedy news give more information about potential risk. When reading a tragedy, the reader tend to think "why the tragedy happen? what should I do to avoid it?"
-- Negaive emotion is more persistent due to loss aversion.
+- Negative emotion is more persistent due to loss aversion.
 - In a group, sharing bad news caused by group's common enemy can strengthen the social approval in group.
 
 Tragedy stories often feel more "true" than happy stories.

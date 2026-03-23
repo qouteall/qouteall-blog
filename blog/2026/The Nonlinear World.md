@@ -55,7 +55,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: Breeding cobra is easier than hunting wild cobra, so people started breeding it. When the policy is removed, the breeders released their cobra to the wild. This is called cobra effect and [perverse incentive](https://en.wikipedia.org/wiki/Perverse_incentive).
 
-- First-order effect: Using measured mumbers is an objective way of judging people performance.
+- First-order effect: Using measured numbers is an objective way of judging performance.
 
   Second-order effect: **Goodhart's law**. When a measure becomes target, it ceases to be a good measure. Examples:
 
@@ -64,13 +64,13 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   - When salesmen are judged by sale amount, salesmen tend to lie to custumers and hurt company reputation.
   - Training AI model to increase user satisfaction score will make the AI sycophant.
   - When promotion is judged by task difficulty, then people do useless hard things instead of important but easy things.
-  - AB test shows that adding annoying popups and manipulative texts increase conversion rate. However it drives away high-value costumers.
+  - AB test shows that adding annoying popups and manipulative texts increase conversion rate. However it drives away high-value customers.
   - When researchers are judged by paper reference count, there will be researcher groups referencing each other in group.
   - ...
 
 - First-order effect: After improving the steam engine, it requires less coal to do the same work, so the demand of coal will reduce.
 
-  Second-order effect: The reduced cost of using steam engine greatly increased the usage of steam engine, so the demand of coal greaty increased. This is [Jevons paradox](https://en.wikipedia.org/wiki/Jevons_paradox). This also happened in IT industry: the increased hardware performance are absorbed by higher demands.
+  Second-order effect: The reduced cost of using steam engine greatly increased the usage of steam engine, so the demand of coal greaty increased. This is [Jevons paradox](https://en.wikipedia.org/wiki/Jevons_paradox).
 
 - First-order effect: Improving a product can enhance its reputation.
 
@@ -133,13 +133,17 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: It inflates asset bubbles and cause more potential risk in the future. It also causes moral hazard and encourages careless risk-takers.
 
-- First-order effect: Increasing interest reduces inflation, because it reduces money supply.
+- First-order effect: Increasing interest rate curbs inflation, because it reduces money supply.
 
-  Second-order effect: Many inflations are caused by reduced supply, not increased demand. Increasing interest rate reduces productivity investment, thus curb supply increase, thus may boost inflation.
+  Second-order effect: Many inflations are caused by reduced supply of goods. Increasing interest rate reduces productivity investment, thus curb supply increase, thus may boost inflation.
 
 - First-order effect: Promoting employees that did great job incentivizes employee, so it makes the company more efficient.
 
   Second-order effect: [Peter principle](https://en.wikipedia.org/wiki/Peter_principle). The promoted employee is not necessarily good in new work because the work changes. But the employee that perform bad in raised position is rarely demoted.  So "being good at work" is unstable state but "being bad at work" is stable state. Eventually it likely reaches stable state: most employees do the work they are bad at.
+
+- First-order effect: When uncertainty increases, money moves from risky assets (e.g. stock) to gold, because gold is safer.
+
+  Second-order effect: When actual large risk occurs, assets price drop. Leverages may face forced liquidation (margin call). Gold is often sold first to get cash to prevent other leverage assets from going zero.
 
 [^qianlima]: Related: [Qianlima](https://en.wikipedia.org/wiki/Qianlima) (千里马). The high-capacity horse require more food to show its capacity. But without showing its capacity it can never get enough food supply. 
 
@@ -176,8 +180,6 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   - Antibiotics disrupt the gut biome, thus interfere with immune system
   - (Also: Issues caused by financial hardship due to large medical bill)
   - ...
-
-- First-order effect: A new medicine that 
 
 ### In Psychology
 

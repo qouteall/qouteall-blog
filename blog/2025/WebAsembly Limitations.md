@@ -463,8 +463,6 @@ See also: [How to build a plugin system on the web and also sleep well at night]
 
 ### The limits of JS runtime performance optimization
 
-There are many efforts put into optimizing JS performance.
-
 There is really a lot of efforts put in optimizing JS. ARM specially adds an instruction for optimizing JavaScript:
 
 > **Improved Javascript data type conversion**
@@ -475,7 +473,7 @@ There is really a lot of efforts put in optimizing JS. ARM specially adds an ins
 > 
 > \- [Armv8-A architecture: 2016 additions](https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/armv8-a-architecture-2016-additions)
 
-After these efforts, JS do run faster. But it has a limit. No matter how much efforts are put into JS runtime optimization, it cannot be as fast as C.
+The JS runtimes (like V8) do complex optimizations. After these efforts, JS do run faster. But it has a limit. No matter how much efforts are put into JS runtime optimization, it cannot be as fast as C.
 
 Because the JS runtime optimization must keep compatibility of JS semantics. JS is dynamic and has a lot of flexibility. **Flexibility costs performance**. JS runtime often use runtime statistics to find unused flexibility and optimize accordingly. But statistics cannot be really sure, so JS runtime still have to "prepare" for flexibility. The runtime statistics and "prepare for flexibility" all costs performance, in a way that cannot be optimized without changing code format and execution model.
 
