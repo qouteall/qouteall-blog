@@ -447,7 +447,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 
 - Rebasing and squashing rewrite history. If local already-pushed history is rewritten, normal push will give conflicts, need to use force push. If remote history is rewritten, normal pull will give conflicts, need to use `--rebase` pulling.
   - Force pushing with `--force-with-lease` can sometimes avoid overwriting other developers' commits. But if you fetch then don't pull, `--force-with-lease` cannot protect.
-- Sometimes rebasing requires you to solve the same conflict many times (because multiple commits touch the same conflict line). Squashing changes before rebasing can avoid it.
+- Sometimes rebasing requires solving the same conflict many times (because multiple commits touch the same conflict line). Squashing changes before rebasing can avoid it.
 - After commiting files, adding these files into `.gitignore` won't automatically exclude them from git. To exclude them, delete them.
   - You can also use `git rm --cached` to exclude them without deleting locally. However, after excluding and pushing, when another coworker pulls, these files will be deleted (not just excluded).
 - Reverting a merge doesn't fully cancel the side effect of the merge. If you merge B to A and then revert, merging B to A again has no effect. One solution is to revert the revert of merge.
@@ -518,4 +518,5 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Big endian and little endian in binary file and net packet.
 - The current working directory can be changed by system call (e.g. `chdir`).
 - The formats `.zip` and `.mp4` are container formats. They can hold many different kinds of formats inside.
+- Sorting number strings is different to sorting numbers. "10" is smaller than "9" in string comparision.
 

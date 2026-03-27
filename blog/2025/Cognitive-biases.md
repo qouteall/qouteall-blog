@@ -162,7 +162,7 @@ People tend to be **overconfident** about themselves:
 - **False uniqueness**: We tend to think that we have special talents and special virtues.
 - **Hindsight bias**: Overconfident in understanding history and the ability to predict.
 - **Bias blind spot**: People are hard to recognize their own biases.
-- An expert in one domain tend to think they are generally intelligent in all domains. (Some intellectual experts don't know they are susceptible to psychological manipulation.)
+- An expert in one domain tend to think they are generally intelligent in all domains.
 
 The overconfidence is sometimes useful:
 
@@ -506,7 +506,7 @@ When feedback comes early, its correlation with previous behavior is high, havin
 
 Reducing cost by removing safety measures usually does not cause any visible accidents in the short run, but the benefit of reduced costs are immediately visible. When the accident actually happened because of the removed safety measures, it may be years later.
 
-**People crave quick feedback**. Successful video games and gambling mechanisms utilize this by providing immediate responses to actions. 
+**People crave quick feedback**. Successful video games and gambling mechanisms utilize this by providing immediate responses to actions.
 
 What's more, for most people, **concrete visual and audio feedback is more appealing than abstract feedback** (feedback of working with words and math symbols).
 
@@ -610,6 +610,8 @@ We often underestimate the time and efforts required to do one thing (due to Dun
 - A: "We should increase investment for renewable energy." B: "You want to ban oil, gas, and coal, removing millions of jobs and crash the economy?"
 - A: "The history curriculum should include more perspectives to present a more objective and nuanced view of our nation." B: "So you want to rewrite history to make our children hate their own country?"
 - A: "We should implement stricter gun control." B: "It's useless, because no matter how strict it is, criminals will always find a way to get guns illegally." (perfect solution fallacy)
+
+Binary thinking effect also appears in manipulation. Preson A is firstly friendly to B, B likes A, then A manipulates person B, B starts disliking A, but then A becomes temporarily friendly to B, B still thinks A is good due to binary thinking (and many other factors), then A starts manipulating B again, then cycle repeats.
 
 ### Halo effect and horn effect
 

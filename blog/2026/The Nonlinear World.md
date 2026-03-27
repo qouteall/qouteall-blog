@@ -49,7 +49,11 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: [Braess paradox](https://en.wikipedia.org/wiki/Braess%27s_paradox). Adding more roads can make overall traffic slower.
 
-### In Economy and Finance
+- First-order effect: Allowing human to intervene an automation system improves control in emergency.
+
+  Second-order effect: When human's operation partially conflicts with automation system's operation, it faces new unpredictability. It's often less safe than pure human control or pure automation.
+
+### In Economy
 
 - First-order effect: The British government in colonial India provided bonus for dead cobra. The bonus could incentivize cobra hunting.
 
@@ -60,7 +64,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   Second-order effect: **Goodhart's law**. When a measure becomes target, it ceases to be a good measure. Examples:
 
   - When doctors are judged by patient satisfaction survey, doctors tend to do treatments that improve short-term comfort but sacrifice long-term health.
-  - When KPI judges success rate regardless of difficulty, then employee choose to do only easy tasks and avoid hard tasks. **The more non-trivial things one do, the more mistakes one will make**.
+  - When KPI judges success rate regardless of difficulty, then employee choose to do only easy tasks and avoid hard tasks. **The more non-trivial things one does, the more mistakes one will make**.
   - When salesmen are judged by sale amount, salesmen tend to lie to custumers and hurt company reputation.
   - Training AI model to increase user satisfaction score will make the AI sycophant.
   - When promotion is judged by task difficulty, then people do useless hard things instead of important but easy things.
@@ -83,14 +87,6 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 - First-order effect: Subsidizing buying house reduces housing cost.
 
   Second-order effect: Housing price increased because of increased purchase power. The surging housing price attracts more real estate investments, driving housing price up even more.
-  
-- First-order effect: The release of positive news about a stock causes its price to increase. 
-
-  Second-order effect: If the market had already anticipated it, and it falls short of expectations, the stock price may actually decline.
-
-- First-order effect: Price limit up in stock market restricts buying, which helps curb price increase.
-
-  Second-order effect: Price limit up avoids market from reaching equilbrium, obsecuring price growing potential, making stock holders reluctant to sell, which may further boost price. Similarily, price limit-down can make potential buyers reluctant to buy, which may boost downward momentum.
 
 - First-order effect: Antitrust is detrimental to monopoly companies.
   
@@ -108,26 +104,44 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   
   Second-order effect: Too much ads may annoy customers[^sleeper_effect]. A bad ad can hurt the brand. The ad that mentions competitor may actually help competitor.
 
-- First-order effect: Restricting foreign exchange helps maintaining foreign currency reserves.
-
-  Second-order effect: Restricting foreign exchange makes foreign investors panic, promoting capital outflows through unregulated ways.
-
 - First-order effect: Ruthless competition (social Darwinism) will select the best talents.
 
   Second-order effect: 
   
   - It may select out the people that are good at competition but bad at coorporating. 
-  - The talents tend to seek safe environments instead of ruthless unsafe environment. Even the top talents cannot ensure they don't make any mistake and always win.
+  - Even the top talents cannot ensure they don't make any mistake and always win. The talents tend to seek safer environments.
   - A lot of great talents require more resource investment to show ability, but they may lose the ruthless competition because they initially don't win and can never obtain enough resource. [^qianlima]
-  - Fitness is high-dimensional. High medical fee selects out healthy persons but filters out talents that occasionally get ill.
+  - Talent is high-dimensional. It filters out the talents whose ability is out of testing range. The currently seemingly useless ability may be important in the future.
 
 - First-order effect: Copyright law protects artists because it makes consumers pay artists.
 
-  Second-order effect: The publishers and distribution channels form monopoly naturally. There is no "free market" for artists. Artists have to commission copyright to publishers and distributors. Artists only get a small share of profits. Also, the publisher can restrict usage of the artwork so that it's harder to get popular.
+  Second-order effect: The publishers and distribution channels form monopoly naturally. There is no "free market" for artists. Artists have to commission copyright to publishers and distributors. Artists only get a small share of profits, and lose freedom of usage of the artwork.
 
 - First-order effect: Mineral resources make the country rich.
 
   Second-order effect: [Resource curse](https://en.wikipedia.org/wiki/Resource_curse). Profits in mineral export makes country's currency overvalued. Then importing becomes cheaper than country's own products. so the domestic argiculture and industries cannot develop. Having "easy money" also make people not work hard. When the international mineral price drops, economy collapses.
+
+- First-order effect: Promoting employees that did great job incentivizes employee. It makes the company more efficient.
+
+  Second-order effect: [Peter principle](https://en.wikipedia.org/wiki/Peter_principle). The promoted employee is not necessarily good in new job because the work changes. But the employee performing bad in raised position is rarely demoted. So "being good at work" is unstable state, but "being bad at work" is stable state. Eventually it likely reaches stable state: most employees do the work they are bad at.
+
+[^qianlima]: Related: [Qianlima](https://en.wikipedia.org/wiki/Qianlima) (千里马). The high-capacity horse require more food to show its capacity. But without showing its capacity it can never get enough food supply. 
+
+[^sleeper_effect]: There is a third-order effect. If consumer hates the ad, seeing more ads hate more, but the ads still leave "footprint" in memory. Due to [sleeper effect](https://en.wikipedia.org/wiki/Sleeper_effect) the customer may start liking the product after some time.
+
+### In Finance
+
+- First-order effect: The release of positive news about a stock causes its price to increase. 
+
+  Second-order effect: If the market had already anticipated it, and it falls short of high expectations, the price may decline.
+
+- First-order effect: Price limit up in stock market restricts buying, which helps curb price increase.
+
+  Second-order effect: Price limit up avoids market from reaching equilbrium, obsecuring price growing potential, making stock holders reluctant to sell, which may further boost price. Similarily, price limit-down can make potential buyers reluctant to buy, which may boost downward momentum.
+
+- First-order effect: Restricting foreign exchange helps maintaining foreign currency reserves.
+
+  Second-order effect: Restricting foreign exchange makes foreign investors panic, promoting capital outflows through unregulated ways.
 
 - First-order effect: Quantitive easing reduces financial risk because it increases money supply.
 
@@ -135,19 +149,15 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: Increasing interest rate curbs inflation, because it reduces money supply.
 
-  Second-order effect: Many inflations are caused by reduced supply of goods. Increasing interest rate reduces productivity investment, thus curb supply increase, thus may boost inflation.
-
-- First-order effect: Promoting employees that did great job incentivizes employee, so it makes the company more efficient.
-
-  Second-order effect: [Peter principle](https://en.wikipedia.org/wiki/Peter_principle). The promoted employee is not necessarily good in new work because the work changes. But the employee that perform bad in raised position is rarely demoted.  So "being good at work" is unstable state but "being bad at work" is stable state. Eventually it likely reaches stable state: most employees do the work they are bad at.
+  Second-order effect: Many inflations are caused by reduced supply of goods. Increasing interest rate reduces productivity investment, thus curbs supply increase, thus can boost inflation.
 
 - First-order effect: When uncertainty increases, money moves from risky assets (e.g. stock) to gold, because gold is safer.
 
-  Second-order effect: When actual large risk occurs, assets price drop. Leverages may face forced liquidation (margin call). Gold is often sold first to get cash to prevent other leverage assets from going zero.
+  Second-order effect: When actual large risk occurs, asset prices drop. Leverages face forced liquidation (margin call). High-liquidity gold is often sold first to get cash to prevent other leverage assets from going zero.
 
-[^qianlima]: Related: [Qianlima](https://en.wikipedia.org/wiki/Qianlima) (千里马). The high-capacity horse require more food to show its capacity. But without showing its capacity it can never get enough food supply. 
+- First-order effect: If a lot of money is shorting an asset, its price will drop.
 
-[^sleeper_effect]: There is a third-order effect. If consumer hates the ad, seeing more ads hate more, but the ads still leave "footprint" in memory. Due to [sleeper effect](https://en.wikipedia.org/wiki/Sleeper_effect) the customer may start liking the product after some time.
+  Second-order effect: If price grows to a threshold, short positions face forced liquidation, which creates big "buying pressure" and make price grow furthur. It's called short squeeze.
 
 ### In Health and Biology
 
@@ -168,7 +178,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   Second-order effect: 
   
   - Advance of medical techonology increases average age. As age increase, health problems are more likely to appear. The overall healthcare burden increases.
-  - Some previously fatal disease is now not fatal, but the technology is still not advanced enough to cure it. The patient survived but faces low life quality and high healthcare cost.
+  - Some previously fatal disease is now not fatal, but the technology is still not advanced enough to fully cure it. The patient survived but faces low life quality and high healthcare cost.
 
 - First-order effect: Medication cure diseases.
 
@@ -178,7 +188,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   - Side effect of medication
   - Infect at the hospital
   - Antibiotics disrupt the gut biome, thus interfere with immune system
-  - (Also: Issues caused by financial hardship due to large medical bill)
+  - Expensive medication costs money
   - ...
 
 ### In Psychology
@@ -235,9 +245,9 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   Second-order effect: 
   
   - Believing too much on a piece of knowledge makes one stuck in **confirmation bias** and stay furthur from truth. 
-  - Knowing more about possible risks make one hesitate in making decisions, losing agency.
+  - Knowing more about possible risks make one hesitate in making decisions, reducing agency.
   
-  Green lumber fallacy. Deep understanding is often not required for real-world success. The idiom "knowledge is power" is not always true. The knowledge also includes when to not use knowledge.
+  Green lumber fallacy. Deep understanding is often not required for real-world success. The idiom "knowledge is power" is not always true. **The true knowledge includes when to not use knowledge**.
 
 - First-order effect: Punishing mistakes will push people make fewer mistakes.
 
@@ -310,8 +320,11 @@ Examples:
 - Flywheel effect. Some operations are initially costly and inefficient. But keep doing it makes it easier and easier.
 - Economies of scale. Increase production can amortize research costs, marketing costs and other fixed costs. Financing is also easier on larger scale.
 - Virus spread. The more it infects, the more sperading sources.
-- Self-fulfilling prophecy. Confidence helps collaboration and gives motivation. Distrust can make things worse and confirm distrust (e.g. bank run).
-- Motivation and feedback. Good feedback increases motivation and increase the likelyhood of getting good results, vice versa.
+- Self-fulfilling prophecy. Some examples:
+  - Bank run. Some people not trusting bank make bank's financial status worse and less trustworthy.
+  - Teacher dislikes a student and give bad feedback, then student have less motivation to learn thus perform worse.
+  - A commodity originally has supply-demand balance. When someone buys a lot of it, price increases, people think it has a shortage then buy more eagerly, then shortage becomes true and price furthur increases.
+  - ...
 - Attitude can shape behavior. Behavior can shape attitude. Persuade self to justify decisions.
 - Social interaction. One being angry to another may make two both more angry. Also applys to friendliness and trust/distrust.
 - Herd mentality. Some people do something, more people follow.
@@ -319,7 +332,7 @@ Examples:
 - Debt can both accelerate growth and accelerate bankruptcy.
 - Spread of information and idea. The more popular a piece of information is, the more chance it spreads.
 - Sunk cost. The more resources put in, the higher sunk cost is, the harder to stop loss.
-  - This especially applies to war. When both sides costed a lot in war, the war is hard to stop.
+  - This also applies to war. When both sides costed a lot in war, the war is hard to stop.
 - Banks only loan to companies with good financial status.
 - The worse health condition is, the more expensive health insurance is, the less likely one affords treatment.
 - Ponzi scheme. When one falls into a Ponzi scheme, one tend to spread the scheme to reduce own loss.
@@ -337,7 +350,7 @@ Examples of concentration and 80/20 rule (Pareto principle):
   - Most profit often come from very few products.
   - For to-business products, most profit often come from few enterprise customers.
   - Most complains often come from very few users. 
-  - Most meaningful work is often done by very few employees.
+  - Most meaningful knowledge work is done by few employees. (On the contrary, the contribution of physical work is more even.)
 - On internet:
   - The most engagement come from very few posts.
   - The most voice on internet comes from a minority of users. The dominant narrative on internet may not represent most people's views.
@@ -414,7 +427,7 @@ Note that nonlinear systems are complex. They are more than just two kinds of fe
 
 ## More is different
 
-In nonlinear systems, there are often the accumulation of potential and the sudden release of them:
+Sometimes, when one thing reaches a threshold, things become very different. Sometimes it accumulates potential and suddenly release the potential one day.
 
 - A technology used to be bad but keeps improving. Once it improves above a threshold, it suddenly becomes economically valuable and get deployed widely.
 - An undervalued asset's fundamental keeps improving. Once there is some public event showing it, its price may suddenly grow a lot. Vice versa for bubble assets.
@@ -438,17 +451,19 @@ Investing in index is long-term trend following, as the index selects the winnin
 
 Heinrich's law: for every accident that causes a major injury, there are 29 accidents that cause minor injuries and 300 accidents that cause no injuries.
 
-## Nonlinear systems are hard to understand and predict
+## Cannot predict accurately
 
 Nonlinear systems are chaotic. Predicting them accurately is practically impossible.
 
-But people tend to think they understand and can predict, while they cannot (hindsight bias, confirmation bias, narrative fallacy, etc.).
+There are many conflicting factors. For example, if inflation increases, first-order effect tells gold price will grow, and second-order effects tells that increased inflation cause Fed to tighten money so gold price will drop. Due to **hindsight bias** it's always easy to explain history. If gold price grows, explain that first-order effect is stronger. If gold price drops, explain that second-order effect is stronger. But being able to explain history doesn't mean being able to predict future.
 
 Pursue simpler predictions instead of fragile complex specific predictions. Many tightly-dependent predictions tend to fail together.
 
 Sometimes, just being less wrong than others can gain advantage.
 
-Nonliear systems are hard to understand. If something appears irrational but existed for a long time, it's likely that you don't understand it. What everyone believes may one day turn out to be false.
+If something appears irrational but existed for a long time, it's likely that you don't understand it.
+
+What everyone believes may one day turn out to be false.
 
 There are great ideas that are hard to discover, but once discovered, become very obvious and very natural (hindsight bias).
 
@@ -523,7 +538,7 @@ Diversification is also a way to handle risks. Note that diversification only wo
 
 Harvest optionality: being able to delay harvest when market price is low. For example, timberland can delay cutting tree when wood price is low, brewhouse can keep brewing when alcohol price is low.
 
-Modern manufactoring is often very capital-intensive and fragile. Short-term over-production can be fatal. It can be overcomed by counter-cyclical subsidy but the subsidy can easily fall into sunk-cost trap. Unfortunately, the more advanced manufactoring is more capital-intensive and more fragile. However, even if the manufactoring company collapses, the the technology and equipments still remain.
+Modern manufactoring is often very capital-intensive and fragile. Short-term over-production can be fatal. It can be overcomed by counter-cyclical subsidy but the subsidy can easily fall into sunk-cost trap. Unfortunately, the more advanced manufactoring is more capital-intensive and more fragile. However, even if the manufactoring company collapses, the technology and equipments still remain.
 
 ### Good side of incident
 
@@ -532,17 +547,37 @@ Modern manufactoring is often very capital-intensive and fragile. Short-term ove
 - It sometimes destroies inefficient things and leave room for more efficient things.
 - ...
 
+### In software: untested error handling likely won't work
+
+> Another impactful incident for Actions occurred on March 5. Automated failover has been progressively rolling out across our Redis infrastructure, and on this day, a failover occurred for a Redis cluster used by Actions job orchestration. The failover performed as expected, but a latent configuration issue meant the failover left the cluster in a state with no writable primary. With writes failing and failover not available as a mitigation, we had to correct the state manually to mitigate. This was not an aggressive rollout or missing resiliency mechanism, but rather latent configuration that was only exposed by an event in production infrastructure.
+> 
+> \- [Addressing GitHub’s recent availability issues](https://github.blog/news-insights/company-news/addressing-githubs-recent-availability-issues-2/)
+
+### Diversity and "blind sopts"
+
+Everyone has some "blind sopts" in thinking. It may be path dependence: Someone tried X, succeeded, then think X is the final answer; tried Y, failed, then think Y will never work. Sometimes an idea requires doing a specific thing to inspire.
+
+Sometimes blind spot is caused by sunk cost fallacy.
+
+When there is diversity, different people can communicate different ideas and "fill" other peoples' "blind spots".
+
+### Efficiency often requires centralization
+
+Bitcoin can only process 3 to 7 on-chain transactions per second, and it on average takes about 5 minutes to get first transaction confirmation. But a centralized Bitcoin exchange center can process transactions much quicker.
+
+There are faster decentralized cryptocurrency protocol designs. But doing big upgrade to Bitcoin protocol is nearly impossible because it requires consensus of major players ([block size war](https://vitalik.eth.limo/general/2024/05/31/blocksize.html)), and there are interest conflicts. But banks and exchange centers can upgrade its software without most customer's aggrement.
+
 ## On positive Black Swans
 
-It seems betting on positive black swan is good because it has large upsides and limited downsides. However, in real world, **positive Black Swan may come very late or never come**. So the "limited downside" has high probability of occuring for long time. 
+It seems betting on positive Black Swan is good because it has large upsides and limited downsides. However, in real world, **positive Black Swan may come very late or never come**. But the "limited downside" will likely keep applying for long time. 
 
 It's actually very hard to do. It requires patience and reducing expectation. 
 
-Normal people don't suit winner-take-all profession (e.g. actor, social media influencer). Take a normal profession and do winner-take-all things in part time.
+Normal people don't suit winner-take-all profession (e.g. actor, social media influencer, founding startup).
 
 Keep staying in the game makes one exposed to positive Black Swan. Don't all-in. Stop-loss is important.
 
-Doing more things and make more connections can improve exposure to positive black swan.
+Doing more things and make more connections can improve exposure to positive Black Swan.
 
 Embrace some randomness instead of paranoidly avoiding randomness.
 
@@ -594,9 +629,15 @@ Advanced but expensive technology may defeat due to financial sustainability.
 
 In capitalism, technologies are usually developed for profit, not for human well-being (e.g. processed food, algorithmic recommendation, AI training data collection).
 
-When automation works, it's good. But automation may break. And when it breaks, no one has experience to fix it, because it rarely breaks.
-
 If a piece of software has a bug, then every copy of the same version of software has the same bug. This is a source of fragility. For example, if a self-driving algorithm has a bug, then many self-driving cars that deploy such algorithm has the same bug. If an AI model has a bias, then all usages to the same AI model suffers from the same bias.
+
+### Fragility of automation
+
+When automation works, it's good. But automation may break. And when it breaks, no one is familiar to it or has experience to fix it. The automation may be set up years ago and the person familiar with it may have left.
+
+> it was an **auto-renewal being bricked** due to some new subdomain additions, and the renewal failures didn't send notifications for whatever reason. And then it took some Bazel team members **who were very unfamiliar with this** whole area to scramble to read documentation and secure permissions... and the SSL certs taking ages to propagate as usual.
+> 
+> \- [Link](https://github.com/bazelbuild/bazel/issues/28101#issuecomment-3693346788)
 
 ## Short-termism and long-termism
 

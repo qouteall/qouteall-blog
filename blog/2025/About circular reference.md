@@ -731,9 +731,11 @@ Another factor: when service A's requests to service B hang for long time, A als
 
 Circuit breaker aims to solve that issue. It directly prevents request from being sent when target service is overloaded.
 
-About out-of-memory: For GC applications, when the free memory is not enough, it often stuck in long GC pause instead of directly crashing. This cause the TCP connections of it to not close and the callers of that service to continue waiting until timeout. This issue doesn't exist for non-GC applications, as they tend to directly crash when memory is not enough.
+About out-of-memory: For GC applications, when memory is not enough, it often stucks in long GC pause instead of directly crashing. This cause the TCP connections of it to not close and the callers of that service to continue waiting until timeout. This issue doesn't exist for non-GC applications, as they tend to directly crash when memory is not enough.
 
 About database and caching: in some systems, the database cannot handle all requests. The database can only handle requests if there is a cache (e.g. Redis) that handles 90% requests in front of database. After cache service restarts, the database overloads because too many requests hit database. Database can only run if cache fills, but cache cannot be filled because database overloads. Solution is to only allow a small set of requests in gateway and gradually increase the limitation. [Cache stampede](https://en.wikipedia.org/wiki/Cache_stampede).
+
+This can also happen after reducing cache TTL (time to live). After reducing cache TTL, the database load may keep increasing. [Example on GitHub](https://github.blog/news-insights/company-news/addressing-githubs-recent-availability-issues-2/).
 
 ## Break-my-tool outage
 

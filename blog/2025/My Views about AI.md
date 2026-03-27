@@ -97,6 +97,8 @@ It's a myth that LLM only "mimic patterns in training data". This is true for au
 
 But there is still no clear explanation of inner workings of LLM. We know what matrix multiplications it does. But how the numbers correspond to meaning and how compute correspond to decision-making is not yet fully understood.
 
+See also [Tracing the thoughts of a large language model](https://www.anthropic.com/research/tracing-thoughts-language-model)
+
 ## A "search engine" that understands context
 
 If you know one thing's name, you can easily search it via search engine. But there are many cases that you can describe one thing's traits but don't know the name of that thing. LLMs are good at this. They can tell you the name of that thing. 

@@ -1230,7 +1230,7 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
   - Normally a byte has 256 possible values. But in LLVM a byte has 258 possible values [^llvm_constraint]. The extra two are 1. uninitialized 2. poison (computed from other undefined behaviors). Like pointer provenance, the two extra values only exist in compile time.
 - `a = b` will drop the original object in place of `a`. If `a` is uninitialized, then it will drop an unitialized object, which is undefined behavior. Use `(&raw mut x).write(...)` [Related](https://lucumr.pocoo.org/2022/1/30/unsafe-rust/)
 - Handle panic unwinding. If unsafe code turn data into temporarily-invalid state, you need to make it valid again during unwinding. [See also](https://doc.rust-lang.org/nomicon/unwinding.html). [Related](https://smallcultfollowing.com/babysteps/blog/2024/05/02/unwind-considered-harmful/)
-  - In Rust, future can poison. This is different to lock poison. When an async function panics, the future goes into "poison state", then polling it again will panic. This needs to be considered when manually implementing `Future` trait.
+  - In Rust, future can poison. This is different to lock poison. When an async function panics, the future should go into "poison state", all internal data should be dropped, then polling it again should panic. This needs to be considered when manually implementing `Future` trait.
 - Reading/writing to mutable data that's shared between threads need to use atomic, or volatile access ([`read_volatile`](https://doc.rust-lang.org/std/ptr/fn.read_volatile.html), [`write_volatile`](https://doc.rust-lang.org/beta/std/ptr/fn.write_volatile.html)), or use other synchronization (like locking). If not, optimizer may wrongly merge and reorder reads/writes. Note that volatile access themself doesn't establish memory order (unlike Java/C# `volatile`).
 - If the binary data violates the type's constraint, it's undefined behavior. For example, `bool`'s binary data can only be 0 or 1. Making it 2 is undefined behavior. Creating a `str` whose binary data is not valid UTF-8 is also undefined behavior.
 - If you want to `mem::transmute`, it's recommended to use [zerocopy](https://docs.rs/zerocopy/latest/zerocopy/) which has compile-time checks to ensure memory layout are the same. For simple wrapper types, use `#[repr(transparent)]`.
@@ -1491,15 +1491,26 @@ The `as_deref` is not intuitive. It turns `Option<String>` into `Option<&str>`. 
 
 - Borrowing that cross function boundary is contagious. Just borrowing a wheel of car indirectly borrows the whole car.
 - Contagious borrow between branches. If the output of a branch indirect borrows matched value, then that borrow contaminates another branch.
-- Mutate-by-recreate is contagious. Recreating child require also recreating parent that holds the new child, and parent's parent, and so on.
 - Lifetime annotation is contagious. If a type has a lifetime parameter, then every type that holds it must also have lifetime parameter. Every function that use them also need lifetime parameter (except when lifetime elision works). Adding/removing lifetime parameter to a type may require changing many code.
-- `async` is contagious. `async` function can call normal function. Normal function cannot easily call `async` function (but it's possible to call by blocking). Many non-blocking functions tend to become async because they may call async function.
+- `async` is contagious. `async` function can call normal function. Normal function cannot easily call `async` function (it's possible to call by blocking, but faces async-sync-async sandwitch issue). Many non-blocking functions tend to become async because they may call async function.
 - Being not `Sync`/`Send` is contagious. A struct that indirectly owns a non-`Sync` data is not `Sync`. A struct that indirectly owns a non-`Send` data is not `Send`.
 - Error passing is contagious. If panic is not acceptable, then all functions that indirectly call a fallible function must return `Result`. 
   - Related: NaN is contagious in floating point computation.
-  - Related: To handle out-of-memory gracefully, all dependencies must be able to handle out-of-memory gracefully. Many community crates (e.g. `anyhow`) cannot be used. [One example](https://github.com/bytecodealliance/wasmtime/issues/12069). [^oom] 
+  - Related: To handle out-of-memory gracefully, all dependencies must be able to handle out-of-memory gracefully. Many community crates (e.g. `anyhow`) cannot be used. [One example](https://github.com/bytecodealliance/wasmtime/issues/12069). [^oom]
+- Mutate-by-recreate is contagious. Recreating child require also recreating parent that holds the new child, and parent's parent, and so on.
+- `mut` is contagious. A `mut` one can be treated temporarily immutable. But an immutable one cannot be treated mutable, unless using interior mutability. Sometimes it needs to have two functions one for immutable one for mutable.
 
 [^oom]: Also, in Linux it requires disabling OS overcommit. With overcommit, allocation can succeed even when not having enough free memory, then accessing memory can cause crash. macOS always overcommits and it cannot be disabled.
+
+### Contagious effects
+
+The "async", "mut", "Result" things can be generalized as "effects". These effects appears in types and is contagious. Why these effects are not contagious in other languages:
+
+- The "async" effect: In Golang goroutine and Java green thread, every function is "async" implicitly.
+- The "mut" effect: In mainstream GC languages there is no "object content immutability" notation in type. Things are mutable by default. (Java `final` is shallow immutability. `final` is modifier, not in type).
+- The "Result" effect: In the languages that have exceptions, almost every function can throw exception implicitly. (Java has checked exception, which is contagious in type, but it doesn't enforce to `RuntimeException`)
+
+See also: [effect generics proposal](https://github.com/rust-lang/effects-initiative/blob/master/updates/2024-02-09-extending-rusts-effect-system.md#why-effect-generics).
 
 ## Some arguments
 

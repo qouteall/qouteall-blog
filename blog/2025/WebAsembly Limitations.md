@@ -478,3 +478,5 @@ The JS runtimes (like V8) do complex optimizations. After these efforts, JS do r
 Because the JS runtime optimization must keep compatibility of JS semantics. JS is dynamic and has a lot of flexibility. **Flexibility costs performance**. JS runtime often use runtime statistics to find unused flexibility and optimize accordingly. But statistics cannot be really sure, so JS runtime still have to "prepare" for flexibility. The runtime statistics and "prepare for flexibility" all costs performance, in a way that cannot be optimized without changing code format and execution model.
 
 Also, JS has no share-memory parallelism. Moving a byte buffer between web worker involve no copy, but many other cross-worker communication require copy.
+
+When trying to optimize the performance of an existing JS (or TS) web app, don't directly refactor it to Wasm. Wasm-JS data passing cost may make it slower overall. Profile before optimization. It's often possible to optimize a lot to the existing JS app. Also, you can shift some client-side compute work to server-side.
