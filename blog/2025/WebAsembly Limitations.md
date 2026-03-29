@@ -332,6 +332,14 @@ There are two goals of Wasm. Both of them is only partially fulfilled now:
 
 See also: [Why is WebAssembly a second-class language on the web?](https://hacks.mozilla.org/2026/02/making-webassembly-a-first-class-language-on-the-web/)
 
+### Batching Wasm-JS call can improve performance
+
+[WebCC](https://github.com/io-eric/webcc/blob/main/docs/architecture.md#architecture) optimizes Wasm-to-JS call by batching. It serializes call infos into byte buffer, then the JS side decodes byte buffer and invoke the thing.
+
+Making JS read Wasm linear memory is faster than making Wasm read JS data. The linear memory is backed by `ArrayBuffer` (or `SharedArrayBuffer`). The JS side can directly read it via `DataView` (or `UInt8Array` etc.), without copying data. But Wasm cannot directly access JS data (except [JS string builtin](https://webassembly.github.io/spec/js-api/index.html#builtins-js-string)) so it requires JS side to encode data to bytes then copy to linear memory.
+
+The same idea of serializing call and do batching is also used in io_uring and modern graphics APIs (Vulkan, WebGPU, Metal).
+
 ## Memory64 performance
 
 The original version of Wasm only supports 32-bit address and up to 4GiB linear memory. 

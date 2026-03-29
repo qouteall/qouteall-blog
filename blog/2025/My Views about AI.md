@@ -686,7 +686,8 @@ Some "AI smells":
 - Em dash "—"
 - "It's not X. It's Y."
 - "The X? Y."
-- Emoji
+- Overuse of emoji
+- Weird analogy
 - ...
 
 There are AI detections tools. They can detect AI in some sense but the detection result can never be fully accurate (even if it shows "100% AI" it may actually be 80% probably of AI-written). Because it's not fully accurate, it shouldn't be used as sole source as discrediting a piece of writing.

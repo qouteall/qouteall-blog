@@ -53,6 +53,10 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: When human's operation partially conflicts with automation system's operation, it faces new unpredictability. It's often less safe than pure human control or pure automation.
 
+- First-order effect: When the user sends feedback, require user to write at least 10 words explaining details. This will improve the quality of feedback information.
+
+  Second-order effect: It creates friction. Some user wants to feedback but see the friction then decided to not feedback. Much fewer feedback can be collected.
+
 ### In Economy
 
 - First-order effect: The British government in colonial India provided bonus for dead cobra. The bonus could incentivize cobra hunting.
@@ -336,6 +340,7 @@ Examples:
 - Banks only loan to companies with good financial status.
 - The worse health condition is, the more expensive health insurance is, the less likely one affords treatment.
 - Ponzi scheme. When one falls into a Ponzi scheme, one tend to spread the scheme to reduce own loss.
+- Recognition of power. When one uses power and succeeded, the observers confirm the power. When a rule is broken once and there is no consequence, then more and more people will break the rule. 
 - Avalanche.
 - Cascade failure.
 - ...
@@ -517,6 +522,12 @@ Experiences may be obsolete or even harmful after a paradigm shift. Ideas, metho
 
 - [Theory of the second best](https://en.wikipedia.org/wiki/Theory_of_the_second_best). If something is imperfect, adding more imperfection may be better overall.
 
+## High-dimensionality
+
+About health: Some people treat health as a score. After eating unhealthy food or staying up late, the socre decreases. And the score can be earned back by taking supplements and exercising. This view is wrong. It simplifies high-dimensional health status into a one-dimensional score.
+
+About AI: Current AI can solve PhD-level exam problems that 99.9% people cannot solve. But AI doesn't actually achieve PhD-level intelligence. Intelligence is high-dimensional. Solving exam problems is just one dimension.
+
 ## About risk
 
 ### 3 kinds of risks
@@ -529,10 +540,10 @@ Experiences may be obsolete or even harmful after a paradigm shift. Ideas, metho
 
 Redundancy tackles risk. Two kinds of redundancy:
 
-- Resource redundancy. Example: save more cash, hoard emergency food.
-- Functional redundancy. Example: be more versatile and can change profession, having a plan B when plan A fails.
+- Resource redundancy. Example: save more cash; hoard emergency food.
+- Functional redundancy. Example: be more versatile and can change profession; have a plan B when plan A fails.
 
-Diversification is also a way to handle risks. Note that diversification only works when correlation is low. But many assets seems low-correlation but has high correlation under Black Swan event. Also, when two low-correlation assets are commonly diversified together, their correlation potentially increases.
+Diversification is also a way to handle risks. Note that diversification only works when correlation is low. Many assets seems low-correlation but has high correlation under Black Swan event. When two low-correlation assets are commonly diversified together, their correlation potentially increases.
 
 ### Optionality
 
@@ -549,21 +560,25 @@ Modern manufactoring is often very capital-intensive and fragile. Short-term ove
 
 ### In software: untested error handling likely won't work
 
-> Another impactful incident for Actions occurred on March 5. Automated failover has been progressively rolling out across our Redis infrastructure, and on this day, a failover occurred for a Redis cluster used by Actions job orchestration. The failover performed as expected, but a latent configuration issue meant the failover left the cluster in a state with no writable primary. With writes failing and failover not available as a mitigation, we had to correct the state manually to mitigate. This was not an aggressive rollout or missing resiliency mechanism, but rather latent configuration that was only exposed by an event in production infrastructure.
+Distributed system has **failover** functionality: when one node fails, another node takes the responsibility. However, if you haven't tested failover, it likely won't work as intended:
+
+> Another impactful incident for Actions occurred on March 5. Automated failover has been progressively rolling out across our Redis infrastructure, and on this day, a failover occurred for a Redis cluster used by Actions job orchestration. The failover performed as expected, but a **latent configuration issue** meant the failover left the cluster in a state with no writable primary. With writes failing and failover not available as a mitigation, we had to correct the state manually to mitigate. This was not an aggressive rollout or missing resiliency mechanism, but rather latent configuration that was only exposed by an event in production infrastructure.
 > 
 > \- [Addressing GitHub’s recent availability issues](https://github.blog/news-insights/company-news/addressing-githubs-recent-availability-issues-2/)
+
+It also applies to other kinds of error handling.
+
+But testing error handling hard. There are many kinds of different error cases.
 
 ### Diversity and "blind sopts"
 
 Everyone has some "blind sopts" in thinking. It may be path dependence: Someone tried X, succeeded, then think X is the final answer; tried Y, failed, then think Y will never work. Sometimes an idea requires doing a specific thing to inspire.
 
-Sometimes blind spot is caused by sunk cost fallacy.
-
 When there is diversity, different people can communicate different ideas and "fill" other peoples' "blind spots".
 
 ### Efficiency often requires centralization
 
-Bitcoin can only process 3 to 7 on-chain transactions per second, and it on average takes about 5 minutes to get first transaction confirmation. But a centralized Bitcoin exchange center can process transactions much quicker.
+Bitcoin can only process 3 to 7 on-chain transactions per second, and it takes about 5 minutes to get first confirmation for each transaction. But a centralized Bitcoin exchange center can process transactions much quicker.
 
 There are faster decentralized cryptocurrency protocol designs. But doing big upgrade to Bitcoin protocol is nearly impossible because it requires consensus of major players ([block size war](https://vitalik.eth.limo/general/2024/05/31/blocksize.html)), and there are interest conflicts. But banks and exchange centers can upgrade its software without most customer's aggrement.
 
@@ -646,6 +661,8 @@ Long-termism can usually gain advantage. However long-termism is often fragile b
 Also, reducing fragility requires safety investments that require long-termism. The short-termism cutting safety investment increases fragility.
 
 When the large environment is unstable and unsuitable for long-termism, it requires local small safe stable environments to make long-termism work.
+
+It's often that the process of doing improvement has risks. But the improvement can avoid bigger risk in the future. Under short-termism, it can only stuck in local minimum, avoiding risky improvement.
 
 ## Related
 

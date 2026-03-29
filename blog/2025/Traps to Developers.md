@@ -219,7 +219,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - `defer` executes when the function returns, not when the lexical scope exits.
 - `defer` capture mutable variable.
 - About `nil`:
-  - There are nil slice and empty slice (the two are different). But there is no nil string, only empty string. The nil map can be read like an empty map, but nil map cannot be modified.
+  - There are nil slice and empty slice (the two are different). There are also nil map and empty map. The nil map can be read like an empty map, but nil map cannot be modified. (There is no nil string, only empty string.)
   - Interface `nil` weird behavior. Interface pointer is a fat pointer containing type info and data pointer. If the data pointer is null but type info is not null, then it will not equal `nil`.
   - Receiving from or sending to `nil` channel blocks forever.
 - Before Go 1.22, [loop variable capture issue](https://go.dev/blog/loopvar-preview).
@@ -331,10 +331,10 @@ This article is mainly summarization. The main purpose is "know this trap exists
   - `volatile` can avoid wrong optimization related to reordering and merging memory reads/writes.
   - In C/C++, `volatile` doesn't establish memory order. But in Java and C# `volatile` establishes memory order. [^volatile_memory_order]
 - Time-of-check to time-of-use ([TOCTOU](https://en.wikipedia.org/wiki/Time-of-check_to_time-of-use)).
-- Data race (it's a large topic, not elaborate here).
+- Data race (it's a large topic, not elaborated here).
 - [Deadlock and lock-free deadlock](./About%20circular%20reference).
 - [MySQL (InnoDB) gap lock may deadlock](./About%20circular%20reference#mysql-gap-lock-deadlock).
-- PostgreSQL write skew. In repeatable read level, `select ... where ... for update` cannot prevent another transaction from inserting new rows that satisfy the query condition. It cannot enforce uniqueness. [^pg_write_skew]
+- PostgreSQL write skew. In repeatable read level, `select ... where ... for update` does NOT prevent another transaction from inserting new rows that satisfy the query condition, unlike in MySQL. It's called write skew. [^pg_write_skew]
 - Atomic reference counting (`Arc`, `shared_ptr`) can be slow when many threads frequently change the same counter. [See also](https://pkolaczk.github.io/server-slower-than-a-laptop/)
 - About read-write lock: trying to write lock when holding read lock will deadlock. The correct way is to firstly release the read lock, then acquire write lock, and the conditions that were checked in read lock need to be re-checked.
   - SQL allows a transaction that hold read lock to upgrade to write lock. This mechanism is prone to deadlock.
@@ -344,7 +344,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - [False sharing](https://en.wikipedia.org/wiki/False_sharing) of the same cache line costs performance.
 - Try to cancel some async operation, but the callback still runs.
 
-[^pg_write_skew]: It can be solved in serializable level. Without serializable level, it can also be solved by special constraints. For conditional uniqueness constraint, use partial unique index. For range uniqueness constraint, use range type and exclude constraint. For uniqueness across two tables, insert redundant data into another table with unique constraint. (Related: in MySQL repeatable read level, `select ... for update` will do gap lock on index which can prevent write skew, but gap lock may cause deadlock.)
+[^pg_write_skew]: It can be solved in serializable level. Without serializable level, it can also be solved by special constraints in schema. For conditional uniqueness constraint, use partial unique index. For range uniqueness constraint, use range type and exclude constraint. For uniqueness across two tables, insert redundant data into another table with unique constraint. (Related: in MySQL repeatable read level, `select ... for update` will do gap lock on index which can prevent write skew, but gap lock may cause deadlock.)
 
 [^volatile_memory_order]: In Java, `volatile` accesses have sequentially-consistent ordering (JVM will use memory barrier instruction if needed). In C#, writes to `volatile` have release ordering, reads to `volatile` have acquire ordering (CLR will use memory barrier instruction if needed). Note that "release" and "acquire" in memory order is different to locking (but related to locking).
 
@@ -355,9 +355,9 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - Unintended sharing of mutable data. For example in Python `[[0] * 10] * 10` does not create a proper 2D array.
 - For non-negative integer `(low + high) / 2` may overflow. A safer way is `low + (high - low) / 2`.
 - Short circuit. `a() || b()` will not run `b()` if `a()` returns true. `a() && b()` will not run `b()` when `a()` returns false.
-- Operator precedence. `a || b && c` is `a || (b && c)`.
+- Operator precedence. `a||b && c` is actually `a || (b && c)`.
 - Assertion should not be used for validating external data. Validating external data should use proper error handling. Assertion should check internal invariants.
-- Confusing default value with missing value. For example, if the balence field is primitive integer, 0 can represent both "balance value not initialized" or "balance is really 0".
+- Confusing default value with missing value. For example, if the balence field is primitive integer, 0 can represent both "balance value not initialized" or "balance is really 0". In C and Python, 0 is treated as false in `if`.
   - The same thing also applies to primitive values in protocolbuffer. To discriminate, field must be marked `optional` and app code must call generated `has*` method to check.
 - When using profiler: the profiler may by default only include CPU time which excludes waiting time. If your app spends 90% time waiting (e.g. wait on database), the flamegraph may not include that 90% which is misleading.
 - When getting files in a folder, the order is not deterministic (may depend on inode order). It may behave differently on different machines even with same files. It's recommended to sort by filename then process. 
@@ -369,7 +369,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
   - If program is force-killed (e.g. `kill -9`) some of its last log may not be written to log file because it's buffered.
   - In Linux, if `write()` and `close()` both don't return error code, the write may still fail, due to IO buffering. [See also](https://man7.org/linux/man-pages/man2/close.2.html)
 - Modulo of negative numbers. In Python,  `a % b` is `a - (floor(a / b) * b)`. But in C/C++/Java/C#/JS/Rust/Golang, `a % b` is `a - (roundTowardZero(a / b) * b)`. If `a` is negative then the behavior will be weird.
-- Retrying without limit or retrying without timeout leaks resources.
+- Retrying without limit or retrying without timeout can leak resources.
 
 
 ### Transitive dependency conflict
@@ -378,10 +378,10 @@ Indirectly use different versions of the same package (diamond dependency issue)
 
 - In Java, maven will only pick one version. If there is incompatibility, may result in errors like `NoSuchMethodError` at runtime.
   - Shading can make two versions of the same package co-exist by renaming.
-- In JS, node.js allows two versions of same package to co-exist. Their `let`, `const` global variables and classes will separately co-exist. But other global variables are shared.
+- In JS, mainstream package managers allow two versions of same package to co-exist. Their `let`, `const` global variables and classes will separately co-exist. But other global variables are shared.
   - If two versions of React are used together, it may give "invalid hook call" error.
   - If two versions of a React component library use together, it may have context-related issues.
-- Python doesn't allow two versions os same package to co-exist. (Sometimes this creates "dependency hell".)
+- Python doesn't allow two versions of same package to co-exist. (Sometimes this creates "dependency hell".)
 - In C/C++ it may give "duplicate symbol" error in static linking.
 - Rust allows two different major versions of same crate to co-exist. It de-duplicates according to semantic versioning ([See also](https://doc.rust-lang.org/cargo/reference/semver.html), [See also](https://effective-rust.com/dep-graph.html)). Their global variables also separately co-exist. [Having two major versions of Tokio causes problem](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/alan_creates_a_hanging_alarm.html#addendum-multiple-tokio-major-versions).
 
@@ -475,7 +475,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - When using SSL/TLS in private network unconnected to internet, the client may try to check certificate revocation status from internet, which will timeout.
 - Certificate expire. Examples: [Starlink incident](https://www.appviewx.com/blogs/expired-certificate-causes-high-profile-service-outage-proving-certificate-automation-is-critical/), [LinkedIn incident](https://www.appviewx.com/blogs/linkedin-certificate-expiry-fiasco-third-times-a-charm/), [Microsoft Teams incident](https://www.exoprise.com/2020/02/04/teams-outage-expired-certificate/)
   - Auto certificate renewal may silently stop working. [Example](https://github.com/bazelbuild/bazel/issues/28101#issuecomment-3693346788)
-
+ - DNS caching. Changings related to DNS can take long time to take effect.
 
 [^keepalive]: Note that [HTTP/1.0 Keep-Alive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Keep-Alive) is different to TCP keepalive.
 

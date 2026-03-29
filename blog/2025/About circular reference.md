@@ -14,13 +14,15 @@ These concepts: deadlock, circular reference, memory leak and halting, are deepl
 
 Deadlock can be understood via **resource allocation graph**. It has two kinds of nodes:
 
-- The unit of execution: Threads, processes, goroutines, async tasks, etc.
-- Synchronization primitives: Locks, channels, etc.
+- The unit of execution: Threads, processes, goroutines, async tasks, etc. They are drawn as round node.
+- Synchronization primitives: Locks, channels, etc. They are drawn as square nodes.
 
 Its edges represent **dependency**. A point to B means A depends on B. Specifically it has two kinds of edges:
 
-- Assignment edge. A lock points to a thread. It denotes that the thread already holds the lock. The lock's release depends on the thread's progress.
+- Assignment edge. A lock points to a thread[^thread_process]. It denotes that the thread already holds the lock. The lock's release depends on the thread's progress.
 - Request edge. A thread points to a lock. It denotes that the thread try to hold the lock. The thread's progress depends on acquiring the lock.
+
+[^thread_process]: In some places it's refered as "process". In some places the "process" can mean both threads and OS processes and SQL transactions.
 
 Deadlock occurs when that graph forms a **cycle**.
 
@@ -48,7 +50,9 @@ Resource allocation graph in deadlock state:
 
 ![](circular/deadlock_classical.drawio.png)
 
-Golang's locks are not reentrant. Deadlock can happen with only one lock and one thread:
+(Note that a resource allocation graph only shows one possible execution status. It's not some "static property" of code itself.)
+
+Golang's locks are not reentrant. Deadlock can happen with only one lock and one goroutine(thread):
 
 ```go
 type SomeObject struct {
@@ -72,7 +76,7 @@ func (o *SomeObject) DoSomeOtherThing() {
 
 ![](circular/deadlock_one.drawio.png)
 
-(Rust's locks are also non-reentrant. But Java `synchronized` and C# `lock` are reentrant. One thread can acquire same lock multiple times.)
+(Rust's locks are also non-reentrant. But Java `synchronized` and C# `lock` are reentrant: one thread can acquire same lock multiple times.)
 
 **These examples are simplified. The real-world deadlocks are less obvious and often only trigger in specific conditions.** Some deadlocks rarely trigger and are hard to reproduce.
 
@@ -80,9 +84,27 @@ Sometimes retrying can solve deadlock. Retrying may evade the specific condition
 
 ## Lock-free deadlock
 
-Deadlock can also happen when there is no explicit lock. I call it **lock-free deadlock**. (The naming is similar to "[serverless servers](https://vercel.com/blog/serverless-servers-node-js-with-in-function-concurrency)", "constant variables" and "[unnamed namespaces](https://en.cppreference.com/w/cpp/language/namespace.html#Unnamed_namespaces)".)
+Deadlock can also happen when there is no explicit lock. I call it **lock-free deadlock** [^lockfree_deadlock]. (The naming is similar to "[serverless servers](https://vercel.com/blog/serverless-servers-node-js-with-in-function-concurrency)", "constant variables" and "[unnamed namespaces](https://en.cppreference.com/w/cpp/language/namespace.html#Unnamed_namespaces)".)
 
-A simple Golang program showing lock-free deadlock:
+[^lockfree_deadlock]: The channels and other message passing methods may internally involve locking. Lock-free deadlock refers to the deadlock that happens without any explicit locking.
+
+The channels are also synchronization primitives like locks. They are also round nodes in resource allocation graph.
+
+There are two kinds of channel waiting: 
+
+- Consumer waits for producer. (Channel is not buffered, or buffer is empty)
+- Producer waits for consumer. (Channel is not buffered, or buffer is full) 
+
+The resource allocation graph can also be drawn for channels. The meaning of two kinds of edge is different in the two waiting cases:
+
+|                | Consumer wait for producer              | Producer wait for consumer                 |
+| -------------- | --------------------------------------- | ------------------------------------------ |
+| Assignmet edge | Produce **will** produce to the channel | Consumer **will** consume from the channel |
+| Request edge   | Consumer waits on the channel           | Producer waits on the channel              |
+
+Note the "will". It's what the thread(goroutine) will do in the future. It's not what the program has already done. In locking the "already holding lock" can be easily tracked. But in channel there is "will produce" or "will consume" depends on program semantic and cannot be easily tracked. This makes deadlock detection hard for channels.
+
+A simple Golang program showing lock-free deadlock: 
 
 ```go
 func goroutineA(aToB chan string, bToA chan string) {
@@ -237,7 +259,7 @@ Select also has traps in async Rust, but in a different mechanism (cancellation)
 
 ## Livelock
 
-Sometimes, replace locking with try-locking and add retrying mechanism can solve some deadlocks. Deadlock are often dependent on exact timing, so it may not deadlock in next retry. 
+Sometimes, replace locking with try-locking and adding retrying can solve some deadlocks. Deadlocks often depend on exact timing, so it may not deadlock in next retry. 
 
 But sometimes retrying cannot avoid deadlock. Then it will become livelock: keep retrying without successfully acquiring lock.
 
@@ -293,7 +315,7 @@ func goroutineB(lock1 *sync.Mutex, lock2 *sync.Mutex) (string, error) {
 
 In some real-time (or near-real-time) systems, important threads have higher priority than other thread. The thread scheduler tries to run higher-priority threads first. 
 
-Priority inversion problem can make high-priority threads keep stuck, effectively similar to deadlock (although it's not deadlock).
+Priority inversion problem can make high-priority threads keep stucking, effectively similar to deadlock (although it's not deadlock).
 
 The common priority inversion problem involves 3 threads, with low/medium/high priorities respectively:
 
@@ -384,7 +406,7 @@ In the previous two deadlocks, the common thing is that it directly upgrades rea
 
 When two transactions (threads) both acquire same read lock, then when they both want to upgrade read lock to write lock, it deadlocks. 
 
-Upgrading read lock to write lock is prone to deadlock. So most in-memory read-write-lock implementations (Golang `RWMutex`, Java `ReentrantReadWriteLock`, Rust `RwLock`, etc.) don't support directly upgrading read lock to write lock. Trying to write lock when holding read lock will directly deadlock.
+Upgrading read lock to write lock is prone to deadlock. So most in-memory read-write-lock implementations (Golang `RWMutex`, Java `ReentrantReadWriteLock`, Rust `RwLock`, etc.) don't support directly upgrading read lock to write lock. Trying to write lock when holding read lock will directly deadlock (determined deadlock, not conditional).
 
 The in-database deadlocks can be mostly solved by enabling deadlock detection and doing transaction retry.
 
@@ -490,11 +512,11 @@ Although cycle is a global property, **ordering is a local property that can tra
 
 If there is a globally uniform ordering of holding locks, then deadlock won't occur. For example, if there are two locks `lock1` and `lock2`, if I ensure that `lock1` must be already held when locking `lock2`, then there won't be the case that a thread acquired `lock2` is acquiring `lock1`. Then in resource allocation graph, the path from `lock2` to `lock1` cannot be formed. So deadlock can be prevented.
 
-Note that (outside of SQL) "lock order" isn't simply the order of `lock()` operations. If you only hold at most one lock at the same time, then locking in whatever order won't deadlock. Locking A before B means must already hold A when trying to lock B. (In SQL there is no way to release lock within transaction. Locks are automatically released after transaction ends. So in SQL "lock order" correspond to order of locking.)
+Note that (outside of SQL) "lock order" isn't simply the order of `lock()` operations. If you only hold at most one lock at the same time, then locking in whatever order won't deadlock. "Locking A before B" means must already hold A when trying to lock B. (In SQL there is no way to release lock within transaction. Locks are automatically released after transaction ends. So in SQL "lock order" correspond to order of locking.)
 
 Rust favors tree-shaped ownership. There is a hierarchy between owner and owned values. This creates an order that prevents cycle. If you use sharing (reference counting) but don't use mutability, then creating new value can only use already-created value, so circular reference is still not possible. Only by combination of sharing and mutability can circular reference be created.
 
-Without mutability and lazy evaluation, reference cycle cannot be created. Because new values can only contain the existing values when creating it (order of evaluation prevents cycle). But with lazy evaluation, the not-yet-created values can be used so circular reference is possible.
+Without mutability or lazy evaluation, reference cycle cannot be created. Because new values can only contain the existing values when creating it (order of evaluation prevents cycle). With lazy evaluation, the not-yet-created values can be used so circular reference is possible.
 
 [Structured concurrency](https://en.wikipedia.org/wiki/Structured_concurrency) makes waiting relation tree-shaped. The tree shape forbids cycle so structured concurrency (alone) is free of deadlock.
 
@@ -502,7 +524,11 @@ Without mutability and lazy evaluation, reference cycle cannot be created. Becau
 
 ![](./circular/grouping_cycle.drawio.png)
 
-Some deadlocks come from too-coarse-grained locking (lock more than what you need to lock). But some deadlocks can be prevented by making locking more coarse-grained.
+Some deadlocks come from too-coarse-grained locking (lock more than what you need to lock). 
+
+On contrary, some deadlocks can be prevented by making locking more coarse-grained (grouping):
+
+![](./circular/deadlock_coarse.drawio.png)
 
 ## Preventing deadlock in type system
 
@@ -522,7 +548,7 @@ SQL databases can reliably detect deadlock. In SQL, a transaction keeps acquirin
 
 In normal programs, detecting deadlocks caused by only locks is easy. Because it can track what threads holds a lock. Then it knows a lock's release depends on which thread's progress. It only needs to track program's current behavior, and don't need to predict program's future behavior.
 
-But for non-lock waiting, detecting deadlock is not that easy. If a thread waits on a channel to consume, you need to know which thread may produce to that channel. Sometimes a thread can reference a channel but won't produce to it. Knowing it accurately requires analyzing the program's behavior in the **future**. If the analysis is rough, it will give many false positives. Analyzing accurately will encounter limitation of Rice's theorem (explained below).
+But for non-lock waiting, detecting deadlock is not that easy. If a thread waits on a channel to consume, you need to know which thread may produce to that channel. Sometimes a thread can reference a channel but won't produce to it. Knowing it accurately requires analyzing the program's behavior **in the future**. If the analysis is rough, it will give many false positives. Analyzing accurately will encounter limitation of Rice's theorem (explained below).
 
 ## How free-threading Python handles container locking
 
@@ -684,7 +710,7 @@ But it doesn't mean nothing can be analyzed. It just means we cannot analyze arb
 
 If we apply some constraints, to make it not Turing complete but still expressive, then halting can be ensured, while being still useful enough, like in Lean.
 
-Rust has a lot of constraints to limit sets of programs to an analyzable subset, so it can analyze about memory safety and thread safety. [^rust_rice]
+Rust has a lot of constraints to limit sets of programs to an analyzable subset, so it can analyze about memory safety and thread safety. But Rust is still Turing-complete. [^rust_rice]
 
 [^rust_rice]: Rust can ensure memory safety (when not using unsafe) and is still Turing-complete. This doesn't contradict with Rice's theorem. Because under Rust's constraint memory safety is a "trivial property".
 
@@ -832,7 +858,7 @@ const factorial = Y((f: (a: number) => number) => (n) => n > 1 ? n * f(n - 1) : 
 console.log(factorial(4));
 ```
 
-Note that the type of Y combinator requires self-reference, although Y combinator's expression itself don't require self-reference.
+Note that the type of Y combinator requires self-reference, although Y combinator's expression itself doesn't require self-reference.
 
 Y combinator gives the fixed point of a lambda term. $Y f = f \ (Y f)$.
 
