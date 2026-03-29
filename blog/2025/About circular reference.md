@@ -88,7 +88,7 @@ Deadlock can also happen when there is no explicit lock. I call it **lock-free d
 
 [^lockfree_deadlock]: The channels and other message passing methods may internally involve locking. Lock-free deadlock refers to the deadlock that happens without any explicit locking.
 
-The channels are also synchronization primitives like locks. They are also round nodes in resource allocation graph.
+The channels are also synchronization primitives like locks. They are also square nodes in resource allocation graph.
 
 There are two kinds of channel waiting: 
 
