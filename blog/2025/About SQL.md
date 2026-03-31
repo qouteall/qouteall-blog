@@ -19,17 +19,19 @@ The second paradigm of moving compute into database is more complex. The applica
 
 - By making compute done in database, less networking IO is required between app and database.
 - Allows easily doing special queries (e.g. some statistics for business insight) just by interacting with database.
-- Expose more compute details to database so that database can optimize. It can optimize actual data structure and maintain acceleration structure (index).  
+- Expose more compute details to database so that database can optimize. It can optimize actual data structure and maintain acceleration structure (index).
 
 ## Why separate app and database
 
+- Allow multiple apps to share one database. (It's sometiems useful, But this makes abstraction leaky.)
 
 ## Data modelling
 
-- Relational (tables)
+- Relational (tables, arrays-of-structs)
 - Tree. [Hierarchical database model](https://en.wikipedia.org/wiki/Hierarchical_database_model)
-- Graph.
+- Graph. Allow built-in free reference shape.
 
+The relational model and tree model can simulate graph by treating id as reference.
 
 ## CRUD biolerplate
 
@@ -84,11 +86,17 @@ delete relevant data from cache
 
 that has risk of making stale cache exist for long time
 
+An important decision: whether to cache empty value.
+
+## Built-in search, avoid cross-DB data sync
+
+If you use SQL database to store data but also use Elasticsearch (or other search DB) for searching, then you have to sync data from SQL database to Elasticsearch. The sync needs to be done for all kinds of change in SQL DB. It's error-prone. You may do some change in SQL DB then forget to sync it to Elasticsearch or sync it wrongly.
+
+
+
 ## Lack built-in event queue
 
-If you need a transaction across SQL DB and Kafka, it will be hard. 
 
-However most just don't care about transaction and consistency.
 
 
 ## Repeatable read level trap
@@ -101,6 +109,10 @@ But repeatable-read level is complex and hard-to-understand:
 
 - It usually means snapshot isolation. But locking can break it.
 - It doesn't avoid write skew in PostgreSQL
+
+
+## Schema migration is risky
+
 
 
 ## Drawbacks of Non-SQL solutions

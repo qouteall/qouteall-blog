@@ -37,10 +37,10 @@ In Java/JS/C#, you launch a task then get a future/promise/task object that repr
 
 In Java/JS/C# when you discard the future/promise/task, the underlying task still runs. But in Rust, dropping future cancels it.
 
-|                                 | In Java/JS/C#                                 | In Rust async                               |
-| ------------------------------- | --------------------------------------------- | ------------------------------------------- |
-| Start running inner code        | The same time as creating future/promise/task | When the future is firstly polled (awaited) |
-| Discard the future/promise/task | Task keeps running                            | It's cancelled                              |
+|                                 | In Java/JS/C#                                 | In Rust async                                           |
+| ------------------------------- | --------------------------------------------- | ------------------------------------------------------- |
+| Start running inner code        | The same time as creating future/promise/task | When the future is firstly polled (awaited), or spawned |
+| Discard the future/promise/task | Task keeps running                            | It's cancelled (unless it's a handle to spawned task)   |
 
 Cancelling a future means the async function suddenly stops executing in an await point.
 
@@ -91,7 +91,7 @@ https://github.com/rust-lang/rust-project-goals/blob/main/src/2026/async-future-
 
 heap-allocating the future can avoid it. but rust currently has no in-place initialization. conceptually, it firstly creates future on stack then move to heap. in release mode it can be optimized to directly creating on heap. but in debug it still involves creating on stack first.
 
-## No parallelism by default
+## No parallelism without `spawn`
 
 Example
 
@@ -132,9 +132,9 @@ Testing port: 4 ThreadId(1)
 
 All of them execute on main thread. There is no parallelism. The parallelism can be enabled by using `tokio::spawn`. But without `tokio::spawn` it has no parallelism by default.
 
-This trap doesn't exist in Golang. In Golang, goroutines are parallel.
+This is different in Golang. In Golang, goroutines are parallel.
 
-## Lacking concurrency
+## Buffered stream issue
 
 https://tmandry.gitlab.io/blog/posts/for-await-buffered-streams/
 
@@ -148,17 +148,28 @@ However there is a case where an async function calls normal function, then the 
 
 Due to the problems of normal function calling async function, the most common way is to make an async function's caller also async. This makes async contagious.
 
-## Poison
-
-In Rust, if a panic unwinds out of an async function, the future is considered "poisoned". Note that it's different to the lock poison but it's a similar concept.
-
-Poinson is a specific state of future. If a future is poisoned, the next `poll` will panic.
-
-Normally the async runtime will handle it.
-
 ## Using multiple async runtimes together
 
 Using multiple async runtimes together is possible but is hard and error-prone. And there are many async-runtime-specific types. So async runtime naturally has exclusion. Then the most popular async runtime Tokio has monopoly.
+
+### Side note: Monopoly effects in Rust
+
+Using multiple async runtimes is hard. So developers tend to choose the most popular async runtime, which is Tokio. Then Tokio has monopoly.
+
+Rust currently doesn't have reflection. The "effect of reflection" can be achieved by procedural macro. Libraries like serde and bevy_reflect require using procedural macro to wrap the type definition. 
+
+You cannot add a new procedural macro to a library crate's type, without forking. This is also a factor that causes monopoly. If you want to use a serialization library other than serde, it's very hard to make library types support it, so serde has monopoly.
+
+There is [compile-time reflection](https://rust-lang.github.io/rust-project-goals/2025h2/reflection-and-comptime.html) aiming to address it.
+
+## Unbound concurrency
+
+This trap is not Rust-specific. When using thread pool, it often has thread count limit, which limits concurrency within thread pool. But in async, there is no concurrency limit by default. This is good for high-performance web server. But it has downsides:
+
+- For scraper, if concurrency is too high, it may use too much memory then OOM.
+- If it sends too many concurrent requests to a remote server, it may trigger rate limit then most requests fail.
+
+One solution is to add a semaphore to limit concurrency.
 
 ---
 

@@ -7,13 +7,9 @@ tags:
 
 <!-- truncate -->
 
-A summarization of some traps to developers. There traps are unintuitive things that are easily misunderstood and cause bugs.
 
-This article is mainly summarization. The main purpose is "know this trap exists". This article focuses on technical traps.
 
-## Summarization of traps
-
-### HTML and CSS
+## HTML and CSS
 
 - `min-width` is `auto` by default. Inside flexbox or grid, `min-width: auto` often makes min width determined by content. It overrides effects of `flex-shrink`, `width: 0` and `max-width: 100%`, etc. It's recommended to set `min-width: 0`. Same for `min-height`. [See also](https://developer.mozilla.org/en-US/docs/Web/CSS/min-width)
 - Horizontal and vertical are different in CSS:
@@ -109,7 +105,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 
 [^reflow_animation]: When adding a new element, initial transition animation won't work by default. But if you read its layout-related value (e.g. `offsetHeight`) between changing animated attribute, it will trigger a reflow and make initial transition work.
 
-### Unicode and text
+## Unicode and text
 
 - The concepts: code point, scalar value, grapheme cluster:
   - Grapheme cluster is the "unit of character" in GUI. An emoji is a grapheme cluster, but it may consist of many scalar values.
@@ -133,7 +129,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
   - ......
 - Normalization. For example é can be U+00E9 (one code point) or U+0065 U+0301 (two code points). String comparision works on binary data and don't consider normalization.
 - [Zero-width characters](https://ptiglobal.com/the-beauty-of-unicode-zero-width-characters/), [Invisible characters](https://invisible-characters.com/)
-  - For example, there are many spaces: Normal space U+0020, no-break space U+00A0, em space U+2003, ......
+  - For example, there are many spaces: Normal space U+0020, no-break space U+00A0, em space U+2003, etc. The normal space and no-break space looks the same.
 - Line break. Windows often use CRLF `\r\n` for line break. Linux and macOS often use LF `\n` for line break.
 - Locale ([elaborated below](#locale)).
 
@@ -141,7 +137,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 
 [^string_encoding]: The encoding in API is not necessarily the actual in-memory representation. For example, Java has an optimization that use Latin-1 encoding (1 byte per code point) for in-memory string if possible.
 
-### Floating point
+## Floating point
 
 - NaN. Floating point NaN is not equal to any number including itself. NaN == NaN is always false (even if the bits are same). NaN != NaN is always true. Computing on NaN usually gives NaN (it can "contaminate" computation). NaN corresponds to many different binary values.
 - There are +Inf and -Inf. They are not NaN.
@@ -174,7 +170,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 
 [^excel_money]: It's recommended to NOT use floating point to store money value. Note that Microsoft Excel uses floating point to represent number, and many financial data are processed in Excel. Excel has rounding so that 0.30000000000000004 is displayed as 0.3 . Only use Excel for finance if you don't require high precision. Doing rough financial analyzing in Excel is fine.
 
-### Time
+## Time
 
 - [Leap second](https://en.wikipedia.org/wiki/Leap_second). Unix timestamp is "transparent" to leap second. Converting between Unix timestamp and UTC time assumes leap second doesn't exist. It's used with leap smear: make the time "stretch" or "squeeze" near a leap second to "hide" existence of leap second.
 - Time zone. UTC and Unix timestamp is globally uniform. But human-readable time is time-zone-dependent. It's recommended to store timestamp in database and convert to human-readable time in UI, instead of storing human-readable time in database.
@@ -195,7 +191,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 
 [^sql_time_zone]: It's recommended to avoid using these timezone-related types and avoid changing session time zone. Use timezone-independent types (`datetime` in MySQL and `timestamp without time zone` in PostgreSQL, or`bigint` in both databases) in UTC in database, then convert to local time in UI.
 
-### Java
+## Java
 
 - `==` compares object reference. Should use `.equals` to compare object content. 
 - Forget to override `equals` and `hashcode`. It will use object identity equality by default in map key and set.
@@ -213,7 +209,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - `finalize()` running too slow blocks GC and cause memory leak. Exceptions out of `finalize()` are not logged. A dead object can resurrect itself in `finalize()`. It's recommended to use [`Cleaner`](https://docs.oracle.com/javase/9/docs/api/java/lang/ref/Cleaner.html) rather than overriding `finalize`.
 - `OmitStackTraceInFastThrow` optimization causes exception to have no stacktrace. [See also](https://stackoverflow.com/questions/58696093/when-does-jvm-start-to-omit-stack-traces). The first few exceptions have stacktrace, so the stacktrace may be in early logs.
 
-### Golang
+## Golang
 
 - `append()` reuses memory region if capacity allows. Appending to a subslice can overwrite parent if they share memory region.
 - `defer` executes when the function returns, not when the lexical scope exits.
@@ -230,7 +226,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - `sync.Mutex` should be passed by pointer not value. Same applies to `sync.WaitGroup` `sync.Cond` `net.Conn` etc. But slices, maps and channels can be passed by value.
 
 
-### C/C++
+## C/C++
 
 - Don't use `=` to compare equality.
 - Storing a pointer to an element in `std::vector` and then grow the vector, vector may re-allocate content, making element pointer invalid. Same applies to other containers.
@@ -258,7 +254,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
     - Use `const volatile T*` for read-only pointer to data changable by other threads or outer system.
   - If `bool`'s binary value is neither 0 or 1, using it is undefined behavior. Similarily if an enum's binary value is not valid, using it is undefined behavior.
 - Alignment.
-  - For example, 64-bit integer's address need to be disivible by 8. Unaligned memory access is undefined behavior. In ARM, accessing memory in unaligned way can cause crash.
+  - For example, 64-bit integer's address need to be disivible by 8. Unaligned memory access is undefined behavior. In ARM, unaligned memory access can cause crash.
   - Alignment can cause padding in struct that waste space.
   - Some SIMD instructions only work with aligned data.
 - Global variable initialization runs before `main`. [Static Initialization Order Fiasco](https://en.cppreference.com/w/cpp/language/siof.html).
@@ -266,6 +262,10 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - If destructor is implemented, then you should implement copy constructor or disable copy constructor. If not, it can implicitly copy then double free.
 - In signal handler, don't do any IO or locking, don't `printf` or `malloc`
 - Compare signed number with unsigned number. If `a` is signed -1, `b` is unsigned 0, then `a > b` is true, because it auto-converts `a` into unsigned number.
+- C++ [ODR (one definiton rule)](https://en.cppreference.com/w/cpp/language/definition.html) violation.
+  - If the same header file is included in two `.cpp` files, but macro differencies affect the content in `inline` thing or `template` thing or type definition, then it's ODR violation. The linker chooses one nondeterministically.
+  - If two `.cpp` files define two same-named types in same namespace, but the two types have different memory layouts, then it's ODR violation and can cause memory safety issue.
+  - Note that `inline` is very different between C and C++. 
 
 [^strict_aliasing]: Using pointer type to hold integer is fine as long as you don't use it to access memory. Also, [Linus is against strict aliasing rule](https://lkml.org/lkml/2018/6/5/769).The Linux kernel disables strict aliasing rule and makes integer overflow defined behavior.
 
@@ -273,7 +273,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 
 [^cpp_mutable]: In C++, changing `mutable` field of a `const` object is not undefined behavior. [See also](https://en.cppreference.com/w/cpp/language/cv.html).
 
-### Python
+## Python
 
 - Default argument is a stored value that will not be re-created on every call.
 - Be careful about indentation when copying and pasting Python code.
@@ -282,7 +282,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - `zipfile.ZipFile` doesn't do compression if `compression` argument is not set. (`.zip` format can contain files uncompressed.)
 - Pandas `read_csv` will guess type of each column based on samples, if you don't specify `dtype`. An outlier can change the type of column. (Similar thing applies to DuckDB)
 
-### SQL Databases
+## SQL Databases
 
 - Null is special:
   - `x = null` doesn't work. `x is null` works. Null does not equal itself, similar to NaN.
@@ -323,7 +323,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 [^about_ranges]: It's recommended to use spatial index in MySQL and GiST in PostgreSQL for ranges. For non-overlappable ranges, it's possible to efficiently query using just B-tree index: `select * from (select ... from ranges where start <= p order by start desc limit 1) where end >= p` (only require index of `start` column). 
 
 
-### Concurrency and Parallelism
+## Concurrency and Parallelism
 
 - `volatile`:
   - `volatile` itself cannot replace locks. `volatile` itself doesn't provide atomicity.
@@ -348,7 +348,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 
 [^volatile_memory_order]: In Java, `volatile` accesses have sequentially-consistent ordering (JVM will use memory barrier instruction if needed). In C#, writes to `volatile` have release ordering, reads to `volatile` have acquire ordering (CLR will use memory barrier instruction if needed). Note that "release" and "acquire" in memory order is different to locking (but related to locking).
 
-### Common in many languages
+## Common in many languages
 
 - Forget to check for null/None/nil.
 - When for looping on a container, inserting to or removing from it (iterator invalidation).
@@ -372,7 +372,7 @@ This article is mainly summarization. The main purpose is "know this trap exists
 - Retrying without limit or retrying without timeout can leak resources.
 
 
-### Transitive dependency conflict
+## Transitive dependency conflict
 
 Indirectly use different versions of the same package (diamond dependency issue).
 
@@ -385,7 +385,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - In C/C++ it may give "duplicate symbol" error in static linking.
 - Rust allows two different major versions of same crate to co-exist. It de-duplicates according to semantic versioning ([See also](https://doc.rust-lang.org/cargo/reference/semver.html), [See also](https://effective-rust.com/dep-graph.html)). Their global variables also separately co-exist. [Having two major versions of Tokio causes problem](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/alan_creates_a_hanging_alarm.html#addendum-multiple-tokio-major-versions).
 
-### Linux and bash
+## Linux and bash
 
 - If the current directory is moved, `pwd` still shows the original path. `pwd -P` shows the real path.
 - `cmd > file 2>&1` make both stdout and stderr go to file. But `cmd 2>&1 > file` only make stdout go to file but don't redirect stderr.
@@ -405,7 +405,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 
 [^container]: There is a "fix problem then create new problem then fix new problem" cycle in deployment. Firstly dynamic linking creates dependency hell, then solve it using containers. But container images are slow to rebuild. It slows down development iteration cycle. Then tools like [tilt](https://tilt.dev/) solve the problem by "hacking" container (replace binary in running container without rebuilding container image). There are other hacks such as putting binary in mounted folder outside of container. But the root problem (dynamic linking dependency hell) can be just fixed by static linking.
 
-### Backend-related
+## Backend-related
 
 - K8s `livenessProbe` used with debugger. Breakpoint debugger usually block the whole application, making it unable to respond health check request, thus killed by K8s.
 - Don't use `:latest` image. They can change at any time.
@@ -422,7 +422,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 
 [^es_reindex]: Removing mapping requires reindexing. Reindexing not only costs performance, but also has risks of losing new data during reindexing, because reindex works on the snapshot. Zero-downtime reindexing that doesn't lose new ingested data during reindexing is hard: 1. create new index 2. new document ingests to both old index and new index (dual-writing) 3. reindex 4. make queries go to new index 5. stop ingesting to old index and delete old index. It can be simple if you can accept a downtime. It can also be simple if you don't care about losing new data during reindexing. Also if you can accept duplicated query result during reindex, you can use an alias that includes both old and new index, then no dual-writing needed.
 
-### React
+## React
 
 - React compares equality using reference equality, not content equality.
   - The objects and arrays that are newly created in component rendering [^react_rendering] are treated as always-new. Use `useMemo` to fix [^js_string_primitive].
@@ -443,7 +443,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 [^react_rendering]: Word "render" has ambiguity. The React component rendering means calling the component function. It doesn't draw contents on web page. It's different to browser rendering, which draws contents on web page.
 
 
-### Git
+## Git
 
 - Rebasing and squashing rewrite history. If local already-pushed history is rewritten, normal push will give conflicts, need to use force push. If remote history is rewritten, normal pull will give conflicts, need to use `--rebase` pulling.
   - Force pushing with `--force-with-lease` can sometimes avoid overwriting other developers' commits. But if you fetch then don't pull, `--force-with-lease` cannot protect.
@@ -461,7 +461,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 
 [^git_clone_crlf]: Using `git clone --config core.autocrlf=false -c core.eol=lf ...` can make git clone as LF.
 
-### Networking
+## Networking
 
 - Some routers and firewall silently kill idle TCP connections without telling application. Some code (like HTTP client libraries, database clients) keep a pool of TCP connections for reuse, which can be silently invalidated (using these TCP connection will get RST). To solve it, configure system TCP keepalive. [See also](https://tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO/) [^keepalive]
 - The result of `traceroute` is not reliable. [See also](https://gekk.info/articles/traceroute.htm). Sometimes [tcptraceroute](https://linux.die.net/man/1/tcptraceroute) is useful.
@@ -479,7 +479,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 
 [^keepalive]: Note that [HTTP/1.0 Keep-Alive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Keep-Alive) is different to TCP keepalive.
 
-### Locale
+## Locale
 
 - The upper case and lower case can be different in other natural languages. In Turkish (tr-TR) lowercase of `I` is `ı` and upper case of `i` is `İ`. The `\w` (word char) in regular expression can be locale-dependent.
 - In German, the upper case of ß is SS (two characters, not one). But the lower case of SS is ss, not ß.
@@ -489,7 +489,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - CSV normally use `,` as spearator. But in Germany locale separator is `;`.
 - [Han unification](https://en.wikipedia.org/wiki/Han_unification). The same code point may appear differently in different locales. Usually a font will contain variants for different locales. Correct localization requires choosing the correct font variant. [HTML code](https://github.com/qouteall/qouteall-blog/blob/main/blog/2025/unicode-unification-example.html) ![](unicode_unification_example.png)
 
-### Regular expression
+## Regular expression
 
 - Regular expression cannot parse the syntax that allows infinite nesting (because it uses finite state machine. Infinite nesting require infinite states). HTML allows infinite nesting. But it's ok to use regex to parse HTML of a specific website.
 - Regular expression behavior can be locale-dependent (depending on which regular expression engine).
@@ -498,14 +498,14 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Email validation is not easy. [See also](https://stackoverflow.com/questions/201323/how-can-i-validate-an-email-address-using-a-regular-expression)
 - Backtracking performance issue. See also: [Cloudflare indicent 2019 July-2](https://blog.cloudflare.com/details-of-the-cloudflare-outage-on-july-2-2019/), [Stack Exchange incident 2016 July-20](https://stackstatus.tumblr.com/post/147710624694/outage-postmortem-july-20-2016)
 
-### Microsoft-related
+## Microsoft-related
 
 - When using Microsoft Excel to open a CSV file, Excel will do a lot of conversions, such as date conversion (e.g. turn `1/2` and `1-2` into `2-Jan`) and Excel won't show you the original string. [The gene SEPT1 was renamed due to this Excel issue](https://en.wikipedia.org/wiki/SEPTIN1). Excel will also make large numbers inaccurate (e.g. turn `12345678901234567890` into `12345678901234500000`) and won't show you the original accurate number, because Excel internally use floating point for number. Related: [2010 British intelligence phone number issue](https://blog.statwolf.com/when-common-excel-mistakes-have-gotten-people-into-trouble-and-how-you-can-avoid-them).
 - Windows limits command length to 32767 WTF-16 code units. [See also](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)
 - In Windows the default stack size of main thread is 1MB, but in Linux and macOS it's often 8MB. It's easier to stack overflow in Windows by default.
 - Windows limits path length to be 260 WTF-16 code units by default.
 
-### Other
+## Other
 
 - YAML:
   - YAML is space-sensitive, unlike JSON. `key:value` is wrong. `key: value` is correct.

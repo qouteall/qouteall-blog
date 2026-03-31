@@ -53,10 +53,6 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: When human's operation partially conflicts with automation system's operation, it faces new unpredictability. It's often less safe than pure human control or pure automation.
 
-- First-order effect: When the user sends feedback, require user to write at least 10 words explaining details. This will improve the quality of feedback information.
-
-  Second-order effect: It creates friction. Some user wants to feedback but see the friction then decided to not feedback. Much fewer feedback can be collected.
-
 ### In Economy
 
 - First-order effect: The British government in colonial India provided bonus for dead cobra. The bonus could incentivize cobra hunting.
@@ -128,6 +124,10 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 - First-order effect: Promoting employees that did great job incentivizes employee. It makes the company more efficient.
 
   Second-order effect: [Peter principle](https://en.wikipedia.org/wiki/Peter_principle). The promoted employee is not necessarily good in new job because the work changes. But the employee performing bad in raised position is rarely demoted. So "being good at work" is unstable state, but "being bad at work" is stable state. Eventually it likely reaches stable state: most employees do the work they are bad at.
+
+- First-order effect: Manager sets very high goals to employees. This pushes employees to work hard.
+
+  Second-order effect: If the manager sets high goals but don't have the ability to verify the result, it will be a disaster. Most employees cannot achieve the high goal. The honest employees gets low evaluation and tend to leave. The employees that fake results get rewarded and stay. 
 
 [^qianlima]: Related: [Qianlima](https://en.wikipedia.org/wiki/Qianlima) (千里马). The high-capacity horse require more food to show its capacity. But without showing its capacity it can never get enough food supply. 
 
@@ -261,6 +261,11 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: If you haven't obtained successful results for some time, not reporting makes people question that you are not working.
 
+- First-order effect: When the user sends feedback, require user to write at least 10 words explaining details. This will improve the quality of feedback information.
+
+  Second-order effect: It creates friction. Some user wants to feedback but see the friction then decided to not feedback. Much fewer feedback can be collected.
+
+
 ### In Cybersecurity
 
 - First-order effect: Forcing the user to login again after inactive for 2 minutes can improve security.
@@ -325,6 +330,7 @@ Examples:
 - Economies of scale. Increase production can amortize research costs, marketing costs and other fixed costs. Financing is also easier on larger scale.
 - Virus spread. The more it infects, the more sperading sources.
 - Self-fulfilling prophecy. Some examples:
+  - When people believe in a plan, people collaborate more and invest more, then it's more likely to succeed.
   - Bank run. Some people not trusting bank make bank's financial status worse and less trustworthy.
   - Teacher dislikes a student and give bad feedback, then student have less motivation to learn thus perform worse.
   - A commodity originally has supply-demand balance. When someone buys a lot of it, price increases, people think it has a shortage then buy more eagerly, then shortage becomes true and price furthur increases.
@@ -448,6 +454,8 @@ There are emergent properties that only emerge if scale becomes big enough:
 
 Composition fallacy: composing things together may give surprising results. Two good things composed may be bad, and two bad things composed may be good.
 
+The law of large number only works if the samples are independent.
+
 ## Fractal properties
 
 The relation between cycle and trends is similar to fractal. There are small trends in cycles. There are also small cycles in trends. There are small cycles in cycles.
@@ -491,7 +499,7 @@ Experiences may be obsolete or even harmful after a paradigm shift. Ideas, metho
 ## Unity of opposites
 
 - Abundance could lead to waste. Scarcity could lead to efficiency. 
-- Laziness could lead to innovation. Diligence faces diminishing marginal return and involution.
+- Laziness could lead to innovation. Diligence faces diminishing marginal return and involution. When the direction is wrong, dilligence compounds error.
 - Danger could lead to deterrence and unity. Safety could lead to ignorance and fragility.
 - Being advanced could lead to path dependence. Monopoly make competitors search for alternatives that may lead to disruptive innovation.
 - The most severe risk could come from the thing you trust the most.

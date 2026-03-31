@@ -529,6 +529,10 @@ The same also applies to AI. You can spawn hundreds of AI agents that work toget
 
 Software development is context-heavy (unless in small toy projects). Context communication is an important bottleneck.
 
+### LLM is a measure on API intuitiveness and document quality
+
+If you designed some API, wrote some doc, then let LLM write code using it. If LLM makes a mistake using it, then it likely means that either 1. API design is unintuitive 2. the API doc doesn't mention an important detail.
+
 ## Verification is less fun than generation?
 
 Work involves two parts: generation (e.g. draw things, write code), verification (e.g. evaluate whether drawing is good, test whether code works). Before AI, both parts are done by human. But after AI, human don't do generation and only do verification.

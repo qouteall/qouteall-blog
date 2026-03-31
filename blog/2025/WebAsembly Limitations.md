@@ -336,7 +336,7 @@ See also: [Why is WebAssembly a second-class language on the web?](https://hacks
 
 [WebCC](https://github.com/io-eric/webcc/blob/main/docs/architecture.md#architecture) optimizes Wasm-to-JS call by batching. It serializes call infos into byte buffer, then the JS side decodes byte buffer and invoke the thing.
 
-Making JS read Wasm linear memory is faster than making Wasm read JS data. The linear memory is backed by `ArrayBuffer` (or `SharedArrayBuffer`). The JS side can directly read it via `DataView` (or `UInt8Array` etc.), without copying data. But Wasm cannot directly access JS data (except [JS string builtin](https://webassembly.github.io/spec/js-api/index.html#builtins-js-string)) so it requires JS side to encode data to bytes then copy to linear memory.
+Making JS read Wasm linear memory is faster than making Wasm read JS data. The linear memory is backed by `ArrayBuffer` (or `SharedArrayBuffer`). The JS side can directly read it via `DataView` (or `Uint8Array` etc.), without copying data. But Wasm cannot directly access JS data (except [JS string builtin](https://webassembly.github.io/spec/js-api/index.html#builtins-js-string)) so it requires JS side to encode data to bytes then copy to linear memory.
 
 The same idea of serializing call and do batching is also used in io_uring and modern graphics APIs (Vulkan, WebGPU, Metal).
 
@@ -451,6 +451,7 @@ These things also have VMs:
 - MySQL supports JS stored procedure. [See also](https://blogs.oracle.com/mysql/post/introducing-javascript-support-in-mysql)
 - CMake is Turing-complete.
 - Command line tools awk, sed and jq are Turing-complete.
+- CSS is Turing-complete. [See also](https://lyra.horse/x86css/)
 - Related: Modern CPUs often have a [microcode](https://en.wikipedia.org/wiki/Microcode) system. The microcode supports conditional jumping and can access things like register and memory bus. It's a "small CPU within CPU".
 
 Also, iOS disallows JIT execution. In iOS, the only thing can do JIT is WebKit [^ios_jit]. The iOS app can workaround JIT restriction by running JS/Wasm code in web view then pass data in/out of web view.

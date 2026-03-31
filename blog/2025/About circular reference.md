@@ -558,10 +558,10 @@ So Python adds locks to every container. But naively adding locking on every con
 
 Python solves that issue using [Python critical sections](https://peps.python.org/pep-0703/#python-critical-sections):
 
-- It uses some lock-free operations to reduce locking. But locking is still used.
-- One thread only holds one container lock at a time. If the thread locks container A then try to do something on container B, it firstly release lock on A.
+- **One thread only holds one container lock at a time**. If the thread locks container A then try to do something on container B, it firstly release lock on A.
 - When for looping on a container, it doesn't keep locking the container. It only brefly locks when accessing container.
 - When a thread is suspended, it temporarily releases lock.
+- It uses some lock-free operations to reduce locking. But locking is still used.
 
 There are operations that involve two containers, like `list.extend(iterable)`. It can alternate between locking `list` and locking `iterable`, only locking one at once. This also means that the `list.extend(iterable)` operation won't be atomic. 
 
