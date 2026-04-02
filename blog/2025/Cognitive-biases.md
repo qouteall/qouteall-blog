@@ -67,9 +67,9 @@ It's much easier to increase expectation than to reduce expectation. The knowled
 
 Loss aversion doesn't contradict the fact that many people don't care about long-term health or cybersecurity. Because these potential risks are very abstract and unclear.
 
-#### "Better safe than sorry" assumption
+### "Better safe than sorry" assumption
 
-When seeing an unwanted behavior of others, people tend to assume it's malice, according to "better safe than sorry":
+It's an extension to loss aversion. When seeing an unwanted behavior of others, people tend to assume it's malice, according to "better safe than sorry":
 
 - If that unwanted behavior is indeed malice but one don't assume it's malice, then one is in danger.
 - If the unwanted behavior is not malice but one assumes it's malice, it may cause missing an opportunity. But it's safer.
@@ -91,11 +91,9 @@ Bad news travels fast. Tragedy news can gain more attention than happy news:
 - Negative emotion is more persistent due to loss aversion.
 - In a group, sharing bad news caused by group's common enemy can strengthen the social approval in group.
 
-Tragedy stories often feel more "true" than happy stories.
+Tragedy stories often feel more "true" than happy stories. Social media has more tragedy news. Browsing social media can make one stuck in negative emotions.
 
-Browsing social media can make one stuck in negative emotions.
-
-For fictions it's different. Popular non-literature fictions often contain the transition from tragedy to happy ending.
+Murphy's law: "Anything that can go wrong will go wrong". It feels true because "going wrong" is often absorption barrier. If it goes right it can go wrong. But if it goes wrong it's unlikely to go right. Murphy's law includes no time limit. In infinite time horizon its correct rate approaches 100%. Although that prediction is likely correct, it's useless for financial trading because it includes no time limit.
 
 ### Perception of risk
 

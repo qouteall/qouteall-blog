@@ -262,10 +262,7 @@ tags:
 - If destructor is implemented, then you should implement copy constructor or disable copy constructor. If not, it can implicitly copy then double free.
 - In signal handler, don't do any IO or locking, don't `printf` or `malloc`
 - Compare signed number with unsigned number. If `a` is signed -1, `b` is unsigned 0, then `a > b` is true, because it auto-converts `a` into unsigned number.
-- C++ [ODR (one definiton rule)](https://en.cppreference.com/w/cpp/language/definition.html) violation.
-  - If the same header file is included in two `.cpp` files, but macro differencies affect the content in `inline` thing or `template` thing or type definition, then it's ODR violation. The linker chooses one nondeterministically.
-  - If two `.cpp` files define two same-named types in same namespace, but the two types have different memory layouts, then it's ODR violation and can cause memory safety issue.
-  - Note that `inline` is very different between C and C++. 
+- If the same header file is included in two `.cpp` files with different macros, and the macro difference affect the content in `inline` thing or `template` thing or type definition, then it violates [ODR (one definiton rule)](https://en.cppreference.com/w/cpp/language/definition.html). There will be different compiled functions with the same symbol name, and linker nondeterministically chooses one.
 
 [^strict_aliasing]: Using pointer type to hold integer is fine as long as you don't use it to access memory. Also, [Linus is against strict aliasing rule](https://lkml.org/lkml/2018/6/5/769).The Linux kernel disables strict aliasing rule and makes integer overflow defined behavior.
 

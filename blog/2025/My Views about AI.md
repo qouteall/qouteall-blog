@@ -107,7 +107,7 @@ LLMs can hallucinate, but after knowing the name of the thing you can use search
 
 LLMs can also inform you about your **unknown unknown** (something useful that you don't know you don't know),
 
-## Hallucinations looks plausible
+## Hallucinations look plausible
 
 One important problem: When LLM makes a mistake (hallucinate), the mistake looks plausible. It uses related jargons in related domains. Non-experts cannot tell. 
 
@@ -142,19 +142,31 @@ There is an irony. The experts know more but are less confident in talking, beca
 
 Most people want to be recognized, praised and emphasized. People need emotional value. 
 
-But emotional value is often scarce in human-to-human interactions. Person A praising/emphasize person B gives emotional values to B. But if A don't sincerely do so but is forced to do so for other reasons, then A consumes their own emotional value.
-
 In human-to-human relationships, often only recriprocal relations can sustain. But AI can provide emotional value without you giving AI anything.
 
 How AI provides emotional value better than human:
 
 - AI has infinite patience. AI answers question no matter how "silly" the question is.
 - AI is almost always available.
-- You can tell your private matters to AI, and AI won't leak it. (Although the data is sent to cloud, the AI companies have no intention of telling your private info to people near you.)
+- You can tell your private matters to AI, and AI won't leak it. (Although the data is used for training, the AI companies have no intention of telling your private info to people near you.)
 - AI respects the user. AI itself don't need to gain emotional value by criticizing the user.
 - AI doesn't require user to provide reciprocal emotional value. The AI itself doesn't need to be recognized/respected like a person.
 
 If one person cannot get emotional value from real human interaction, they tend to gain emotional value from AI. Related: [Chatbot psychosis](https://en.wikipedia.org/wiki/Chatbot_psychosis)
+
+## Prompting and curse of knowledge
+
+**Curse of knowledge**: After knowing something, it's hard to imagine not knowing it. 
+
+There are many important contexts that AI doesn't know. Writing good prompt requires knowing what AI doesn't know then provide these contexts.
+
+If the AI user is too self-centric, when AI misunderstands their instruction, they think AI is stupid rather than considering whether insturction has ambiguity or there is missing context.
+
+Writing good prompt requires "putting oneself in AI's shoes", overcoming curse of knowledge, knowing what AI doesn't know, and providing relevant information.
+
+## Asking "stupid questions"
+
+When learning a new domain of knowledge, it's beneficial to ask "stupid questions". These "stupid questions" are actually fundamental questions, not stupid. But these fundamental questions are seen as stupid by experts. This is also curse of knowledge. One benefit of AI is that you can ask "stupid questions" without being humiliated by experts.
 
 ## About AI Coding
 
@@ -166,7 +178,7 @@ Sometimes AI tends to use complex solutions to solve a problem. Although the com
 
 Often the bug is partially caused by AI overcomplicating simple things. When human want to fix vibe-coded bug, the first thing to do is to simplify out unnecessary complexity. 
 
-Vibe-coded app may contain security issues. But if you ask AI to do security review it can find the issue. AI "knows" security but still write insecure code because it was trained to "focus" on finishing current task. The RL rewards are usually simple and don't consider things like security and future maintenance.
+Vibe-coded app may contain security issues. But if you ask AI to do security review it can find the issue. AI "knows" security but still write insecure code because it was trained to "focus" on finishing current task. The RL rewards are usually don't consider things like security and future maintenance.
 
 AI coding has a tendency of minimizing code changes. Sometimes AI will do an $O(n)$ search that wastes performance, instead of maintain new data structure to make lookup $O(1)$.
 
@@ -188,11 +200,11 @@ But AI's ability of using API is bad for rarely used tools/libraries/frameworks/
 
 ### AI refactoring
 
-Modern IDE already supports refactoring like renaming, extract function, inline function, etc. And they can work reliably. They can work with name collision because they uses semantic AST.
+Modern IDE already supports refactoring like renaming, extract function, inline function, etc. And they can work reliably. They can reliably dsicriminate same name in different contexts because they uses semantic AST.
 
-But the IDE refactoring is still based on rigid rules. They cannot do context-sensitive refactoring. For example, change code and config file accordingly, add same argument to many functions and pass, etc. This is a good use case of AI.
+But the IDE refactoring is still rigid. They cannot do context-sensitive refactoring. Many refactoring require making decision case-by-case with some reasoning. This is a good use case of AI.
 
-But AI is not very reliable, especially when there are same-named-but-different things. Things like renaming is still better done via IDE.
+But AI is not very reliable when there are same-named-but-different things. Things like renaming is still better done via IDE.
 
 ### AI capability is sensitive to complexity
 
@@ -264,7 +276,9 @@ Sometimes the name in code is misleading. Some examples:
 
 ### Comment implicit "links" in code
 
-In large codebase it's often that after changing A then B also need to be changed to make it keep working. When B and A are far away (in different folders) then AI may only change A and don't change B so it breaks. Sometimes type system can catch the issue. But when it involves config file, or cross-language things, or implicit invariants, then type system cannot catch it.
+In large codebase it's often that after changing A then B also need to be changed accordingly to make it keep working. When B and A are far away (in different folders) then AI may only change A and don't change B so it breaks. 
+
+Sometimes type system can catch the issue. But when it involves config file, or cross-language things, or implicit invariants, then type system cannot catch it.
 
 These implicit "links" should be commented on both sides so that AI will know it.
 
@@ -451,6 +465,8 @@ Examples of unknown unknown:
 
 If it's coded by human, the human have already payed a lot of efforts, so discarding code makes human developer upset. But if it's AI-coded, you can easily discard the code and rebuild, without upsetting anyone.
 
+When rebuilding it, it's recommended to write new spec and clear context to avoid context rot.
+
 ### Prompting/harness
 
 Both of the two views are correct:
@@ -533,23 +549,22 @@ Software development is context-heavy (unless in small toy projects). Context co
 
 If you designed some API, wrote some doc, then let LLM write code using it. If LLM makes a mistake using it, then it likely means that either 1. API design is unintuitive 2. the API doc doesn't mention an important detail.
 
+### Leave tech debt for future AI to solve?
+
+Some argue that AI is improving fast that future AI will be able to refactor out the tech debt caused by today's AI. Note that improving code quality requires refactoring, and refactoring is risky. In legacy codebase there are often cases where **two bugs "cancel" each other** (although it seems contrived, it's actually very common in legacy code). Fixing one bug can actually "break" things.
+
+<details>
+<summary>Two bugs "cancel" each other</summary>
+
+![](./two_bugs_cancel_meme.png)
+
+</details>
+
 ## Verification is less fun than generation?
 
 Work involves two parts: generation (e.g. draw things, write code), verification (e.g. evaluate whether drawing is good, test whether code works). Before AI, both parts are done by human. But after AI, human don't do generation and only do verification.
 
 In one aspect, verification is tiresome because you bear the responsibility of the result. In another aspect, you have the veto power on the AI.
-
-## Idea is still cheap, execution still matters
-
-A conception is that, AI makes execution easier (write code, draw images, etc.), then the idea and "what to work on" become more important.
-
-Ideas are even cheaper than before. You can ask LLMs to brainstorm many ideas that looks promising. 
-
-The important is to validate and execute the idea. Executing requires courage, overcoming laziness and withstand failure (these 3 are actually very hard).
-
-Also, the good "taste" can make one filter out bad ideas without wasting resource executing.
-
-Current AI makes prototyping and demoing much easier. But a working product requires many edge case handling (mentioned above). So finishing a working product is still hard (just relatively easier).
 
 ## Context rot issue
 
@@ -615,8 +630,6 @@ It's because reward is **proxy target**, not underlying real target.
 
 AI can conquer verifiable tasks. But most tasks not simply fully verificable or fully not verificable. **Most real tasks contain hard-to-verify parts**. These hard-to-verify parts are what automatic RL bad at.
 
-Programming is only verifiable to an extent. There are hard-to-verify parts in programming.
-
 The main value of human worker will move to unverifiable tasks.
 
 These hard-to-verify parts can be improved by letting human experts to supervise and specify reward. But this method is bottlenecked by human effort and not scalable. **The bitter lesson** says that if training AI requires human expert knowledge then it cannot go far. 
@@ -625,7 +638,7 @@ These hard-to-verify parts can be improved by letting human experts to supervise
 > 
 > \- [Link](https://spectrum.ieee.org/ai-coding-degrades)
 
-Current AI has some tendency of hiding error in coding, or write overly-defensive code. Hiding error only reduces superficial errors but make real bugs much harder to debug. Overly-defensive code increases maintenance burden.
+Current AI has some tendency of hiding error in coding, or write overly-defensive code. Hiding error only reduces superficial errors but makes real bugs much harder to debug. But hiding error do improve chance of getting RL reward in small scale, so AI does it.
 
 Also, the RL may make model have a tendency too strong that it ignores instruction. For example, the model insists to keep backward compatibility for a just-written functionality, and ignore instructions for not doing it.
 
@@ -683,9 +696,7 @@ Also, sometimes the benchmark is actually low-quality. Most people just see the 
 
 ## AI detection race
 
-Some people want AI output to be as similar to human output as possible. Some people want to detect whether content is written by human as accurate as possible. There is a constant race.
-
-Some "AI smells":
+Some people want to use AI to fake efforts. Then there is need to detect AI. There are some "AI smells":
 
 - Em dash "—"
 - "It's not X. It's Y."
@@ -694,7 +705,7 @@ Some "AI smells":
 - Weird analogy
 - ...
 
-There are AI detections tools. They can detect AI in some sense but the detection result can never be fully accurate (even if it shows "100% AI" it may actually be 80% probably of AI-written). Because it's not fully accurate, it shouldn't be used as sole source as discrediting a piece of writing.
+However there is no fully accurate AI detection. Normal human writing may use the "AI smell" then get wrongly treated as AI writing.
 
 ## The "AGI race"
 
@@ -731,8 +742,6 @@ For example, there is a specific task that experts can do 80 scores.
 Near the threshold, incremental improvements do big changes.
 
 As intelligence is high-dimensional, if AI capability is only good in one aspect it's still not enough to replace human jobs. See also: [AI isn't replacing radiologists](https://www.worksinprogress.news/p/why-ai-isnt-replacing-radiologists)
-
-The nonlinearity-near-threshold effect exists in other domains. Making a software 10% easier to use may double its userbase.
 
 ## Reducing cost also reduces bottom quality
 
