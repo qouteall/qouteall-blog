@@ -84,27 +84,25 @@ Sometimes retrying can solve deadlock. Retrying may evade the specific condition
 
 ## Lock-free deadlock
 
-Deadlock can also happen when there is no explicit lock. I call it **lock-free deadlock** [^lockfree_deadlock]. (The naming is similar to "[serverless servers](https://vercel.com/blog/serverless-servers-node-js-with-in-function-concurrency)", "constant variables" and "[unnamed namespaces](https://en.cppreference.com/w/cpp/language/namespace.html#Unnamed_namespaces)".)
+Deadlock can also happen when there is no explicit lock. I call it **lock-free deadlock** [^lockfree_deadlock]. (The naming is similar to "[serverless servers](https://vercel.com/blog/serverless-servers-node-js-with-in-function-concurrency)", "constant variables", "[unnamed namespaces](https://en.cppreference.com/w/cpp/language/namespace.html#Unnamed_namespaces)", and "[asynchronous synchronization](https://www.researchgate.net/figure/Asynchronous-synchronization-Top-line-after-the-synchronization-request-has-been-sent_fig2_371203452)".)
 
 [^lockfree_deadlock]: The channels and other message passing methods may internally involve locking. Lock-free deadlock refers to the deadlock that happens without any explicit locking.
-
-The channels are also synchronization primitives like locks. They are also square nodes in resource allocation graph.
 
 There are two kinds of channel waiting: 
 
 - Consumer waits for producer. (Channel is not buffered, or buffer is empty)
 - Producer waits for consumer. (Channel is not buffered, or buffer is full) 
 
-The resource allocation graph can also generalize for channels [^resource_allocation_graph_generalize]. The meaning of two kinds of edge is different in the two waiting cases:
+The resource allocation graph can also be generalized for channels [^resource_allocation_graph_generalize]. The channels are also square nodes. The meaning of two kinds of edge is different in the two waiting cases:
 
-[^resource_allocation_graph_generalize]: The resource allocation graph was designed for only locks. The "resource" means the thing protected by lock. The "assignment" means assinging resource to a thread(process). But after generalizing it to channels, the meaning of "resource" changes: for consumer, data in channel is resource. But for producer, empty slot in buffer or consumption is a "resource".
+[^resource_allocation_graph_generalize]: The resource allocation graph was originally designed for only locks. The "resource" means the thing protected by lock. The "assignment" means assinging resource to a thread(process). But after generalizing it to channels, the meaning of "resource" changes: for consumer, data in channel is resource. But for producer, empty slot in buffer or consumption is a "resource".
 
 |                | Consumer waits for producer             | Producer waits for consumer                |
 | -------------- | --------------------------------------- | ------------------------------------------ |
 | Assignmet edge | Produce **will** produce to the channel | Consumer **will** consume from the channel |
 | Request edge   | Consumer waits on the channel           | Producer waits on the channel              |
 
-Note the "will". It's what the program will do in the future, not what the program has already done. The "will produce" or "will consume" depends on program semantic and cannot be easily tracked. This makes deadlock detection hard for channels. (The locking can be easily tracked, so detecting deadlock of only locks is easy.)
+Note the "will". It's what the program will do in the future, not what the program has already done. The "will produce" or "will consume" depends on program semantic and cannot be easily tracked. (So it's hard to detect deadlocks that involve not only locks at runtime.)
 
 A simple Golang program showing lock-free deadlock: 
 
@@ -124,13 +122,13 @@ In Golang, channels are not buffered by default, then producer waits for consume
 
 ![](circular/lock_free_deadlock_1.drawio.png)
 
-If you put a thing into a channel that no one will consume, it will wait forever. But changing the channel to buffered channel `make(chan string, 1)` will make the producer to not wait for consumer as long as buffer is not full. That deadlock can be solved by making channels buffered.
+Producing into a channel that no one will consume, it will wait forever. But changing the channel to buffered channel `make(chan string, 1)` will make the producer to not wait for consumer as long as buffer is not full. That deadlock can be solved by making channels buffered.
 
 Note that Golang channel buffer must have a constant size limit. There are packages for unbounded channel ([chanx](https://github.com/smallnest/chanx)). Note that if big bursts happen it may out-of-memory.
 
 Different choices of channel buffer:
 
-- Use fixed-size buffer. When channel is full, producer blocks, this gives **back pressure**. It can avoid out-of-memory or disk full. It's often better for stability (only block some requests rather than letting whole system crash).
+- Use fixed-size buffer. When channel is full, producer blocks, this gives **back pressure**. It can avoid out-of-memory or disk full. It's often better for stability (only block producer rather than letting whole system crash).
 - Use unbounded buffer:
   - If buffer is in-memory, it can **out-of-memory if big burst occurs**.
   - Use disk-backed event queue, such as Kafka. Disk can hold more data than memory, but it's still finite. Kafka discards messages according to retention policy. If disk space is used up, there may be other issues (e.g. database may fail to write).
@@ -175,6 +173,7 @@ go func() {
     }
 }()
 wg.Wait()
+// consume from channel here
 ```
 
 ### Pipe buffer full deadlock
@@ -418,11 +417,19 @@ But the in-memory deadlocks cannot be simply solved by that. Programming languag
 
 ### Blocking executor thread
 
-[How to deadlock Tokio application in Rust with just a single mutex](https://turso.tech/blog/how-to-deadlock-tokio-application-in-rust-with-just-a-single-mutex)
+Using non-async mutex (and other non-async blocking) will block the async runtime's scheduler thread. Async runtime is cooperative, which cannot use the thread to run other async tasks. It make previously unrelated task contend on finite scheduler thread resources.
+
+See: [How to deadlock Tokio application in Rust with just a single mutex](https://turso.tech/blog/how-to-deadlock-tokio-application-in-rust-with-just-a-single-mutex)
 
 ### Futurelock
 
-[Futurelock](https://rfd.shared.oxide.computer/rfd/0609)
+It's caused by having a future that's holding lock, and the future is abandoned (will never be polled), but the future is not dropped. That future will never run and the lock will never release.
+
+It's different to normal cancellation, where the future is dropped when cancelled.
+
+Specifically, it's caused by a trap related to `tokio::select`. If a future borrow is passed to to `tokio::select`, the future will be firstly polled once. But then if the select goes into another branch, the future will be temporarily abandoned in scope (will not be polled but not dropped). Although the future will be dropped after exiting scope, the temporary abandon makes it temporarily not runnable, and exiting scope depends on another future to acquire lock, then it deadlocks.
+
+See: [Futurelock](https://rfd.shared.oxide.computer/rfd/0609)
 
 ## Circular reference counting leak
 
