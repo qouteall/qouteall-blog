@@ -14,15 +14,15 @@ These concepts: deadlock, circular reference, memory leak and halting, are deepl
 
 Deadlock can be understood via **resource allocation graph**. It has two kinds of nodes:
 
-- The unit of execution: Threads, processes, goroutines, async tasks, etc. They are drawn as round node.
+- The unit of execution: Threads, processes, green threads (goroutines), async tasks, etc. They are drawn as round node.
 - Synchronization primitives: Locks, channels, etc. They are drawn as square nodes.
 
 Its edges represent **dependency**. A point to B means A depends on B. Specifically it has two kinds of edges:
 
-- Assignment edge. A lock points to a thread[^thread_process]. It denotes that the thread already holds the lock. The lock's release depends on the thread's progress.
-- Request edge. A thread points to a lock. It denotes that the thread try to hold the lock. The thread's progress depends on acquiring the lock.
+- The thread[^thread_process] already holds the lock. **The lock's release depends on the thread's progress**. Edge points from lock to a thread. It denotes that the thread already holds the lock. It's called assignment edge.
+- A thread tries to acquire a lock. **The thread's progress depends on the release of lock**. Request edge. Edge points from thread to lock. It's called request edge.
 
-[^thread_process]: In some places it's refered as "process". In some places the "process" can mean both threads and OS processes and SQL transactions.
+[^thread_process]: In some OS books it's refered as "process". In this article, "thread" can generally mean all kinds of execution units, including: threads, OS processes, SQL transactions, green threads (goroutines), async tasks, etc.
 
 Deadlock occurs when that graph forms a **cycle**.
 
@@ -78,7 +78,7 @@ func (o *SomeObject) DoSomeOtherThing() {
 
 (Rust's locks are also non-reentrant. But Java `synchronized` and C# `lock` are reentrant: one thread can acquire same lock multiple times.)
 
-**These examples are simplified. The real-world deadlocks are less obvious and often only trigger in specific conditions.** Some deadlocks rarely trigger and are hard to reproduce.
+**These examples are simplified. The real-world deadlocks are less obvious (hidden behind abstractions) and often only trigger in specific conditions.** Some deadlocks rarely trigger and are hard to debug.
 
 Sometimes retrying can solve deadlock. Retrying may evade the specific condition that deadlock relies on. But retrying may cause livelock, explained below.
 
@@ -95,14 +95,16 @@ There are two kinds of channel waiting:
 - Consumer waits for producer. (Channel is not buffered, or buffer is empty)
 - Producer waits for consumer. (Channel is not buffered, or buffer is full) 
 
-The resource allocation graph can also be drawn for channels. The meaning of two kinds of edge is different in the two waiting cases:
+The resource allocation graph can also generalize for channels [^resource_allocation_graph_generalize]. The meaning of two kinds of edge is different in the two waiting cases:
 
-|                | Consumer wait for producer              | Producer wait for consumer                 |
+[^resource_allocation_graph_generalize]: The resource allocation graph was designed for only locks. The "resource" means the thing protected by lock. The "assignment" means assinging resource to a thread(process). But after generalizing it to channels, the meaning of "resource" changes: for consumer, data in channel is resource. But for producer, empty slot in buffer or consumption is a "resource".
+
+|                | Consumer waits for producer             | Producer waits for consumer                |
 | -------------- | --------------------------------------- | ------------------------------------------ |
 | Assignmet edge | Produce **will** produce to the channel | Consumer **will** consume from the channel |
 | Request edge   | Consumer waits on the channel           | Producer waits on the channel              |
 
-Note the "will". It's what the thread(goroutine) will do in the future. It's not what the program has already done. In locking the "already holding lock" can be easily tracked. But in channel there is "will produce" or "will consume" depends on program semantic and cannot be easily tracked. This makes deadlock detection hard for channels.
+Note the "will". It's what the program will do in the future, not what the program has already done. The "will produce" or "will consume" depends on program semantic and cannot be easily tracked. This makes deadlock detection hard for channels. (The locking can be easily tracked, so detecting deadlock of only locks is easy.)
 
 A simple Golang program showing lock-free deadlock: 
 

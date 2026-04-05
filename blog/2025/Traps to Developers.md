@@ -153,7 +153,7 @@ tags:
   
 - Floating-point is 2-based. It cannot accurately represent most decimals. 0.1+0.2 gets 0.30000000000000004 .[^excel_money]
 - Associativity law and distribution law doesn't strictly hold because of precision loss. See also: [Defeating Nondeterminism in LLM Inference](https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference/), [Taming Floating-Point Sums](https://orlp.net/blog/taming-float-sums/)
-- Division is much slower than multiplication (unless using approximation). Dividing many numbers with one number can be optimized by firstly computing reciprocal then multiply by reciprocal.
+- Division is much slower than multiplication (except when divisor is constant, compiler optimizes it into multiplying reciprocal). Multiplying reciprocal is much faster. This also applies to integers.
 - These things can make different hardware have different floating point computation results:
   - Hardware FMA (fused multiply-add) support. `fma(a, b, c) = a * b + c` (in some places `a + b * c`). Most modern hardware make intermediary result in FMA have higher precision. Some old hardware or embedded processors don't do that and treat it as normal multiply and add.
   - Floating point has a [Subnormal range](https://en.wikipedia.org/wiki/Subnormal_number) to make very-close-to-zero numbers more accurate. Most mondern hardware can handle them, but some old hardware and embedded processors treat subnormals as zero.
@@ -259,7 +259,7 @@ tags:
   - Some SIMD instructions only work with aligned data.
 - Global variable initialization runs before `main`. [Static Initialization Order Fiasco](https://en.cppreference.com/w/cpp/language/siof.html).
 - Start from C++ 11, destructors have `noexcept` by default. If exception is thrown out of a `noexcept` function, whole process will crash.
-- If destructor is implemented, then you should implement copy constructor or disable copy constructor. If not, it can implicitly copy then double free.
+- If destructor is implemented, then you should implement copy constructor or disable copy constructor. If not, it may implicitly copy then double free.
 - In signal handler, don't do any IO or locking, don't `printf` or `malloc`
 - Compare signed number with unsigned number. If `a` is signed -1, `b` is unsigned 0, then `a > b` is true, because it auto-converts `a` into unsigned number.
 - If the same header file is included in two `.cpp` files with different macros, and the macro difference affect the content in `inline` thing or `template` thing or type definition, then it violates [ODR (one definiton rule)](https://en.cppreference.com/w/cpp/language/definition.html). There will be different compiled functions with the same symbol name, and linker nondeterministically chooses one.
@@ -276,7 +276,6 @@ tags:
 - Be careful about indentation when copying and pasting Python code.
 - In conditons, these things are "falsy": 0, `None`, empty string, empty container. Be careful if 0 or empty container represents valid value. Also it can be controlled by implementing `__bool__` method.
 - GIL (global interpreter lock) doesn't protect again on-disk data race. Two concurrent threads reading and writing same file may cause data race in file. GIL releases during IO.
-- `zipfile.ZipFile` doesn't do compression if `compression` argument is not set. (`.zip` format can contain files uncompressed.)
 - Pandas `read_csv` will guess type of each column based on samples, if you don't specify `dtype`. An outlier can change the type of column. (Similar thing applies to DuckDB)
 
 ## SQL Databases
@@ -314,7 +313,7 @@ tags:
   - In PostgreSQL, `create unique index` or `alter table ... add foreign key` cause whole-table read-lock. To avoid that, use `create unique index concurrently` to add unique index. For foreign key, use `alter table ... add foreign key ... not valid;` then `alter table ... validate constraint ...`.
   - In MySQL (InnoDB) an `update` or `delete` that cannot use index may lock the whole table, not just targeted rows.
 - Querying which range a point is in by `select ... from ranges where p >= start and p <= end` is inefficient, even when having composite index of `(start, end)`. [^about_ranges]
-- In Microsoft SQL server, the tailing space(s) in string is ignored in comparision.
+- In Microsoft SQL server, the trailing space(s) in string is ignored in comparision.
 - Comparing two strings in different collations may cause error, or degrade performance because index cannot be used.
 
 [^about_ranges]: It's recommended to use spatial index in MySQL and GiST in PostgreSQL for ranges. For non-overlappable ranges, it's possible to efficiently query using just B-tree index: `select * from (select ... from ranges where start <= p order by start desc limit 1) where end >= p` (only require index of `start` column). 

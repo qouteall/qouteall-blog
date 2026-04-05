@@ -206,7 +206,7 @@ Another example: When one don't know an image is AI-generates it looks good. But
 
 People tend to **justify previous behavior**, even if these behaviors was made randomly, or made under external factors that does not exist now.
 
-Self justitication shows self-control and consistency, facilitating social collaboration.
+Self justitication shows self-control and consistency, making other people more likely to believe in.
 
 This is related to Stockholm Syndrome. After experiencing pain in the past, people tend to justify their previous pain.
 

@@ -487,7 +487,9 @@ The harness can workaround drawbacks of model. For example:
 
 Also, model itself has randomness, so some "prompting experience" may be just "fooled by randomness". 
 
-There are some old prompting techniques like "You are 200 IQ", "You are a super smart 100x coder", "If you do this correctly I will tip you \$200" are not needed for latest models. 
+There are some old prompting techniques like "You are 200 IQ", "You are a super smart 100x coder", "If you do this correctly I will tip you \$200" are not needed for latest models.
+
+And the persona prompt "You are an expert of X" can be even harmful in some cases, [see also](https://arxiv.org/abs/2603.18507).
 
 One extreme example of old prompting technique:
 

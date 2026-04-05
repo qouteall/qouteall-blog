@@ -201,10 +201,6 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   
   Second-order effect: This may make the emotion stronger and may unleash one day.
 
-- First-order effect: Defending an idea eagerly make people believe it more.
-  
-  Second-order effect: The eagerness in defending the idea may make people question the incentives.
-
 - First-order effect: Praisng a product improve people's impression of a product.
   
   Second-order effect: Praisng a product raises people's expectation, which may lead to disappointment if the actual usage experience doesn't meet the high expectation.
@@ -216,7 +212,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   - Being too eager may deplete patience when faced with failures. Yerkes-Dodson law. 
   - Desperate eagerness is a sign of low confidence. In dating, sales and interviewing, signs of low confidence reduce chance of success.
 
-- First-order effect: Suppressing the publication of some information stops it being spread.
+- First-order effect: Suppressing the publication of some information stops its spread.
 
   Second-order effect: Trying to suppressing information may make people gain more interest in that information. [Streisand effect](https://en.wikipedia.org/wiki/Streisand_effect).
 
@@ -255,16 +251,18 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: Punishing mistakes will push people make fewer mistakes.
 
-  Second-order effect: It cause one to be scared of practicing, thus gain less experience. Lacking of experience make them more likely to make mistakes.
+  Second-order effect: 
+  
+  - For personal punishment: It cause one to be scared of practicing, thus gain less experience. Lacking of experience make them more likely to make mistakes.
+  - For punishment to decision-makers in organizations: It's often not obvious whether the failure is caused by wrong decision or just insufficient investment. Then fear of punishing naturally leads continuing investment to wrong decision, falling into sunk cost trap.
 
 - First-order effect: Only reporting successful results and not reporting failed attempts could improve others' impression on you.
 
   Second-order effect: If you haven't obtained successful results for some time, not reporting makes people question that you are not working.
 
-- First-order effect: When the user sends feedback, require user to write at least 10 words explaining details. This will improve the quality of feedback information.
+- First-order effect: Making software react faster improves user exprience.
 
-  Second-order effect: It creates friction. Some user wants to feedback but see the friction then decided to not feedback. Much fewer feedback can be collected.
-
+  Second-order effect: If the softwrare reacts too fast, the user may suspect that "it doesn't do real work". If it's an AI application, the user tend to think fast AI is dumber than slow AI.
 
 ### In Cybersecurity
 
