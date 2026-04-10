@@ -31,7 +31,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: Email spam filters can reduce disturbance.
 
-  Second-order effect: A wrong filtering may make you miss an important email.
+  Second-order effect: It may wrongly filter an important email. If the user always worries about wrong filtering and frequently view garbage email section then it doesn't reduce disturbance.
 
 - First-order effect: Hiring a new UI designer can improve the UI of the product.
 
@@ -128,6 +128,10 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 - First-order effect: Manager sets very high goals to employees. This pushes employees to work hard.
 
   Second-order effect: If the manager sets high goals but don't have the ability to verify the result, it will be a disaster. Most employees cannot achieve the high goal. The honest employees gets low evaluation and tend to leave. The employees that fake results get rewarded and stay. 
+
+- First-order effect: First-mover advantage. The company creating a new product category has advantage. It develops brand recognition and network effect early. 
+
+  Second-order effect: Second-mover advantage. After the first-mover costly explores different techiques/strategies, the second-mover can directly learn. And the first-mover often cannot correct its mistake due to sunk cost. The second-mover can avoid first-mover's mistakes.
 
 [^qianlima]: Related: [Qianlima](https://en.wikipedia.org/wiki/Qianlima) (千里马). The high-capacity horse require more food to show its capacity. But without showing its capacity it can never get enough food supply. 
 

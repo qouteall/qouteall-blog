@@ -213,7 +213,7 @@ tags:
 
 - `append()` reuses memory region if capacity allows. Appending to a subslice can overwrite parent if they share memory region.
 - `defer` executes when the function returns, not when the lexical scope exits.
-- `defer` capture mutable variable.
+- `defer` capture mutable variable's latest value.
 - About `nil`:
   - There are nil slice and empty slice (the two are different). There are also nil map and empty map. The nil map can be read like an empty map, but nil map cannot be modified. (There is no nil string, only empty string.)
   - Interface `nil` weird behavior. Interface pointer is a fat pointer containing type info and data pointer. If the data pointer is null but type info is not null, then it will not equal `nil`.
@@ -224,6 +224,7 @@ tags:
 - Forgetting to cancel context cause `<-ctx.Done()` to deadlock.
 - For `WaitGroup`, `Add` must be called before `Wait`. Don't `Add` in a new goroutine (unless with proper synchronization).
 - `sync.Mutex` should be passed by pointer not value. Same applies to `sync.WaitGroup` `sync.Cond` `net.Conn` etc. But slices, maps and channels can be passed by value.
+- When using `go func() {...}`, should carefully avoid capturing outside `err` variable. Capturing outside `err` will cause data race. [See also](https://www.uber.com/us/en/blog/data-race-patterns-in-go/)
 
 
 ## C/C++
@@ -262,6 +263,7 @@ tags:
 - If destructor is implemented, then you should implement copy constructor or disable copy constructor. If not, it may implicitly copy then double free.
 - In signal handler, don't do any IO or locking, don't `printf` or `malloc`
 - Compare signed number with unsigned number. If `a` is signed -1, `b` is unsigned 0, then `a > b` is true, because it auto-converts `a` into unsigned number.
+  - Note that `char` may be signed or unsigned, depending on platform. It's recommended to always use `signed char` or `unsigned char`, not `char`. [Apple ARM `char` is signed](https://developer.apple.com/documentation/xcode/writing-arm64-code-for-apple-platforms#Handle-data-types-and-data-alignment-properly), [gcc `char` is unsigned in Android, but signed in other platforms](https://stackoverflow.com/questions/2054939/is-char-signed-or-unsigned-by-default).
 - If the same header file is included in two `.cpp` files with different macros, and the macro difference affect the content in `inline` thing or `template` thing or type definition, then it violates [ODR (one definiton rule)](https://en.cppreference.com/w/cpp/language/definition.html). There will be different compiled functions with the same symbol name, and linker nondeterministically chooses one.
 
 [^strict_aliasing]: Using pointer type to hold integer is fine as long as you don't use it to access memory. Also, [Linus is against strict aliasing rule](https://lkml.org/lkml/2018/6/5/769).The Linux kernel disables strict aliasing rule and makes integer overflow defined behavior.
@@ -515,4 +517,5 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - The current working directory can be changed by system call (e.g. `chdir`).
 - The formats `.zip` and `.mp4` are container formats. They can hold many different kinds of formats inside.
 - Sorting number strings is different to sorting numbers. "10" is smaller than "9" in string comparision.
+- In some old filesystems (e.g. FAT32), modification time is in second granulaity. Modifying may not affect modification time.
 

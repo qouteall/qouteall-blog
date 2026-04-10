@@ -6,6 +6,17 @@ unlisted: true
 
 <!-- truncate -->
 
+## The different "future"
+
+Java has `CompletableFuture`. Rust has `Future`. They both have "future" but they are very different things:
+
+- In Java, normally when you have a `CompletableFuture`, the task is already running[^java_future]. In Rust, future is just data. If the future is not awaited or spawned, it won't run.
+- In Java you can abandoned the `CompletableFuture`, then the task still keeps running. But in Rust, dropping a future cancels it. (In Rust the future can also be "abandoned", not being polled but not dropped, elaborated below).
+
+[^java_future]: In Java it's possible to create a raw `CompletableFuture` with no running task. But that use case is rare.
+
+The JS `Promise` is similar to Java `CompletableFuture` in these aspects.
+
 ## Blocking scheduler thread
 
 Async runtimes (like Tokio) has its own scheduler. It's similar to OS thread scheduling but different in many ways:

@@ -1466,7 +1466,7 @@ In GC languages, strings are simple. There is often one commonly-used immutable 
 
 - `str`, a variable-sized type. Its content should be valid UTF-8.
 - `&str`, an immutable borrow to `str`. It contains a pointer and a length.
-- `String`.It also has a pointer and a length (and a capacity number). It heap-allocates the binary data and owns binary data. `&str` borrows binary data from elsewhere.
+- `String`. It also has a pointer and a length (and a capacity number). It heap-allocates the binary data and owns binary data. `&str` borrows binary data from elsewhere.
 - `OsString` / `OsStr`. These exist because Rust string enforces UTF-8 encoding, but operating systems APIs can use non-UTF-8 string. In Linux, file name can be invalid UTF-8. In Windows APIs, strings use encoding similar to UTF-16 but allows invalid surrogates (technically called WTF-16).
 - `CString` / `CStr`. C-style null-terminated string. Used for interop with C library.
 
