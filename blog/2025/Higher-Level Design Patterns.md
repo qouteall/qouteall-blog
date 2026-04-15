@@ -514,7 +514,7 @@ Many optimizations are based on **assuming the high-probability case happens**:
 - Invariant production, grow and maintenance:
   - There is no GoF pattern that tightly corresponds to it.
 
-[^visitor]: In many cases, pattern matching can replace visitor pattern, and is more elegant than visitor pattern. But pattern matching doesn't make visitor pattern useless. In a tree structure, if you want to encapsulate the traversing strategy (depth-first/breadth-first/visit-child-before-parent etc.), visitor pattern is still useful. The visitor can not only traverse data but also transform the data. In functional programming context, visiting can be called "fold": `(visitor, element) -> new_visitor`, then visitor is called "folder".
+[^visitor]: In many cases, pattern matching can replace visitor pattern, and is more elegant than visitor pattern. But pattern matching doesn't make visitor pattern useless. In a tree structure, if you want to encapsulate the traversing strategy (depth-first/breadth-first/visit-child-before-parent etc.), visitor pattern is still useful. The visitor can not only traverse data but also transform the data.
 
 Other GoF design patterns briefly explained:
 

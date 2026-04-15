@@ -257,9 +257,9 @@ It's possible to simulate native threads using web workers. Send one message to 
 
 However, if you want to send JS things (like `OffscreenCanvas`) to the "thread", you cannot put the JS object into linear memory so it can only be sent via web worker message. There is another limitation: **web worker cannot receive new message before finishing current message callback**. But in native thread abstraction, it can only finish after thread exits. There is a mismatch. One workaround is to use JS Promise integration to pause Wasm "thread" execution.
 
-Even if passing JS to web worker "thread" can be solved, the callback from JS to Wasm will still be blocked. Many usages of web APIs require callbacks, such as `setTimeout` [`requestAnimationFrame`](https://developer.mozilla.org/en-US/docs/Web/API/DedicatedWorkerGlobalScope/requestAnimationFrame). If the "thread" keeps running, it occupies web worker event loop, then these callbacks cannot run. One way to workaround is to make the "thread" need to periodically "yield" itself using JS promise integration.
+Also, the callback from JS to Wasm will be blocked. Many usages of web APIs require callbacks, such as `setTimeout` [`requestAnimationFrame`](https://developer.mozilla.org/en-US/docs/Web/API/DedicatedWorkerGlobalScope/requestAnimationFrame). If the "thread" keeps running, it occupies web worker event loop, then these callbacks cannot run. One workaround is to make the "thread" periodically "yield" itself using JS promise integration.
 
-Also, after spawning a web worker (`new Worker(...)`), the new web worker only starts running after spawning code finishes its current event processing. So you cannot spawn a "thread" then immediately join[^thread_join] it. It will deadlock. One workaround is to let another web worker to indirectly create new web worker. [See also](https://emscripten.org/docs/porting/pthreads.html#special-considerations), [See also](https://pistonite.github.io/wasm-bindgen-spawn/)
+Also, after spawning a web worker (`new Worker(...)`), the new web worker only starts running after the spawning code finishes its current event processing. So you cannot spawn a "thread" then immediately join[^thread_join] it. It will deadlock. One workaround is to let another web worker to indirectly create new web worker. [See also](https://emscripten.org/docs/porting/pthreads.html#special-considerations), [See also](https://pistonite.github.io/wasm-bindgen-spawn/)
 
 [^thread_join]: Joining a thread means waiting the thread to finish.
 
@@ -328,7 +328,7 @@ There are [Wasm-JS string builtins](https://webassembly.github.io/spec/js-api/in
 There are two goals of Wasm. Both of them is only partially fulfilled now:
 
 - Increase performance of code running in the web. Exception: The Wasm itself is faster than JS, but Wasm-JS data passing is slow. Sometimes JS only is faster than JS+Wasm due to data passing cost.
-- Make other languages runnable in the web, ending the JS monolopy in the web. Exception: Loading Wasm and calling Web APIs still require JS glue. Although the core code can be in other languages, there is still burden of maintaining and deploying JS glue code.
+- Make other languages runnable in the web, ending the JS monopoly in the web. Exception: Loading Wasm and calling Web APIs still require JS glue. Although the core code can be in other languages, there is still burden of maintaining and deploying JS glue code.
 
 See also: [Why is WebAssembly a second-class language on the web?](https://hacks.mozilla.org/2026/02/making-webassembly-a-first-class-language-on-the-web/)
 
@@ -336,9 +336,9 @@ See also: [Why is WebAssembly a second-class language on the web?](https://hacks
 
 [WebCC](https://github.com/io-eric/webcc/blob/main/docs/architecture.md#architecture) optimizes Wasm-to-JS call by batching. It serializes call infos into byte buffer, then the JS side decodes byte buffer and invoke the thing.
 
-Making JS read Wasm linear memory is faster than making Wasm read JS data. The linear memory is backed by `ArrayBuffer` (or `SharedArrayBuffer`). The JS side can directly read it via `DataView` (or `Uint8Array` etc.), without copying data. But Wasm cannot directly access JS data (except [JS string builtin](https://webassembly.github.io/spec/js-api/index.html#builtins-js-string)) so it requires JS side to encode data to bytes then copy to linear memory.
+Making JS read Wasm linear memory is faster than making Wasm read JS data. The linear memory is backed by `ArrayBuffer` (or `SharedArrayBuffer`). The JS side can directly read it via `DataView` (or `Uint8Array` etc.), without copying data. But Wasm cannot directly access JS data (except [JS string builtin](https://webassembly.github.io/spec/js-api/index.html#builtins-js-string)) so it requires JS side encoding and copying.
 
-The same idea of serializing call and do batching is also used in io_uring and modern graphics APIs (Vulkan, WebGPU, Metal).
+The same idea of turning function calls into data and batching is also used in io_uring and modern graphics APIs (Vulkan, WebGPU, Metal).
 
 ## Memory64 performance
 
@@ -366,13 +366,11 @@ See also: [Is Memory64 actually worth using?](https://spidermonkey.dev/blog/2025
 
 ## About binary size
 
-The WebAssembly code format itself is deisgned with size optimization in mind (e.g. use variable-sized integer, function name is optional). But the common Wasm apps often have large binary size.
+The WebAssembly code format itself is deisgned with size optimization in mind (e.g. use variable-sized integer, function name is optional). But the common Wasm apps often have large binary size. This slows down page loading.
 
 The JS ecosystem cares about code size. Because improving page load speed requires reducing code size. The JS ecosystem has mature tooling about dead code elimination (tree shaking), JS minimization and JS lazy loading. Currently JS ecosystem has code size advantage.
 
-But the native ecosystem often doesn't care much about code size. Because native apps are separately installed before launching. Optimizing an app from 100MB to 30MB doesn't give much advantage.
-
-The Wasm toolchain are often based on native toolchains. It uses compilers/linkers of native languages, and uses libraries for native languages. The tooling for reducing code size and lazy loading is not yet mature.
+The average user can accept taking 2 minutes to install a native app, but cannot accept taking 20 seconds to load a web page. So the native ecosystem doesn't care much about code size or lazy loading. But the JS ecosystem cares about code size and lazy loading. The Wasm toolchain are often based on native toolchains. The tooling for reducing code size and lazy loading for Wasm is not yet mature.
 
 Also, C++ and Rust duplicatedly generate code for different generic instantiation (called monomorphization). `Vec<u32>` uses different Wasm code than `Vec<String>` and `Vec<MyType>`. This bloats binary size compared to JS. Modern linkers can do identical code folding (ICF) which can alleviate this issue.
 
@@ -472,7 +470,7 @@ See also: [How to build a plugin system on the web and also sleep well at night]
 
 ### The limits of JS runtime performance optimization
 
-There is really a lot of efforts put in optimizing JS. ARM specially adds an instruction for optimizing JavaScript:
+There is really a lot of efforts put in optimizing JS. ARM specially adds an instruction for optimizing JS:
 
 > **Improved Javascript data type conversion**
 > 

@@ -656,6 +656,10 @@ People may idealize the things that they are not familiar with:
 - "The grass is greener on the other side" (**Greener grass syndrome**).
 - Assuming that another career/lifestyle/country (that you are not familar with) is better than the current one.
 
+> Marriage is like a cage; one sees the birds outside desperate to get in, and those inside equally desperate to get out.
+> 
+> \- Michel de Montaigne
+
 People tend to idealize the distant past and forget the past misery. This helps people get out of trauma, and at the same time idealize the past things:
 
 - After a long time since bearing a child, women tend to forget the pain of bearing a child and may want another child.

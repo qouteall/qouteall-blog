@@ -357,16 +357,11 @@ Cloning data can avoid keeping borrowing the data. For immutable data, wrapping 
 The previous example rewritten by wrapping container in `Rc` then for-loop:
 
 ```rust
-pub struct Parent {  
-    total_score: u32,  
-    children: Rc<Vec<Child>>  
-}  
-pub struct Child {  
-    score: u32  
-}  
+pub struct Parent { total_score: u32,  children: Rc<Vec<Child>> }  
+pub struct Child { score: u32 }  
 impl Parent {  
     fn get_children(&self) -> Rc<Vec<Child>> {  
-        self.children.clone()  
+        self.children.clone()  // Note: clones
     }  
     fn add_score(&mut self, score: u32) {  
         self.total_score += score;  
@@ -391,6 +386,33 @@ For container contagious borrow, a solution is to firstly copy the keys to a new
 There is a misconception: "I already choosed Rust. So I must optimize performance to justify 'Rust cost'. I must not do unnecessary copy." The performance follows 80/20 rule. 80% of time is spent executing 20% code [^8020]. If some code is not bottleneck, optimizing it has neglegible effect. Only optimize after knowing bottleneck. Also performance is not the sole reason of using Rust (e.g. avoid data race Heisenbug).
 
 [^8020]: Exact numbers may be different. The idea is that the "performance cost contribution" of code is highly biased (fat-tail distribution).
+
+## Workaround by swapping container
+
+Another workaround is to temporarily swap the container to another place. Then it can loop on container without borrowing parent object. When it finishes, it swaps back.
+
+```rust
+pub struct Parent { total_score: u32, children: Vec<Child> }  
+pub struct Child { score: u32 }  
+impl Parent {  
+    fn get_children_mut(&mut self) -> &mut Vec<Child> { &mut self.children }  
+    fn add_score(&mut self, score: u32) { self.total_score += score; }  
+}  
+  
+fn main() {  
+    let mut parent = Parent{total_score: 0, children: vec![Child{score: 2}]};  
+    let mut temp_children: Vec<Child> = Vec::new();  
+    mem::swap(&mut temp_children, parent.get_children_mut());  
+    for child in &temp_children {  
+        parent.add_score(child.score);  
+    }  
+    mem::swap(&mut temp_children, parent.get_children_mut());  
+}
+```
+
+It swaps the continer's internal pointer. It doesn't copy container content, so its performance cost is small.
+
+But it's error-prone. It requires not forgetting to swap back. If some logic nests, the inner logic will see empty container. Generally not recommended.
 
 ## Contagious borrowing between branches
 
@@ -667,7 +689,7 @@ Although circular reference is convenient in GC languages, it still has memory l
 
 If the data structure inherently requires circular reference, solutions:
 
-- Use arena. Use ID/handle to replace borrow (elaborated later).
+- Use arena. Use ID/handle to replace borrow (elaborated later). This is the recommended solution.
 - Use reference counting and interior mutability (not recommended).
 - Use `unsafe` (only use if really necessary).
 
@@ -907,6 +929,8 @@ Rust's mutable borrow exclusiveness creates a lot of troubles in single-threaded
   - Without `noalias`, the optimizer must consider all possible reads/writes to the same value to do above transformation. In many cases, compiler don't have enough information, so much fewer optimizations can be done.
 
 Related: CPU internally optimizes by assuming two seprately-calculated addresses are different (assuming no alias), then rollback if assumption is wrong. [Memory disambiguation](https://en.wikipedia.org/wiki/Memory_disambiguation).
+
+Related: in C, the same optimization opportunity can be enabled by `restrict` keyword. Note that C++ standard doesn't have this feature.
 
 ### Interior mutability summary
 

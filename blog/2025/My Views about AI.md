@@ -198,6 +198,10 @@ But if I tell AI to "read this file" then AI knows how to use the API.
 
 But AI's ability of using API is bad for rarely used tools/libraries/frameworks/languages. It's correlated with how much related training data and how much related RL is done.
 
+### Less effortful understanding of codebase
+
+In a large unfamiliar codebase, it's often not obvious which piece of code to lookup for a specific logic. Asking AI to find it is less effortful than browsing code. However it's still prone to hallucination, so it still requires manually reading code after AI finds the relevant code positions.
+
 ### AI refactoring
 
 Modern IDE already supports refactoring like renaming, extract function, inline function, etc. And they can work reliably. They can reliably dsicriminate same name in different contexts because they uses semantic AST.
@@ -205,14 +209,6 @@ Modern IDE already supports refactoring like renaming, extract function, inline 
 But the IDE refactoring is still rigid. They cannot do context-sensitive refactoring. Many refactoring require making decision case-by-case with some reasoning. This is a good use case of AI.
 
 But AI is not very reliable when there are same-named-but-different things. Things like renaming is still better done via IDE.
-
-### AI capability is sensitive to complexity
-
-AI coding performs good in simple projects. The new projects are simple in the beginning. But AI coding doesn't perform so good in a large existing codebase. 
-
-The fact that AI perform very well on simple projects can make people overestimate AI capability. It may be also testing on training set (e.g. making AI to replicate flappy bird is testing on training set).
-
-The good architecture design that can isolate complexity makes coding easier for both human and AI. 
 
 ### A demo is different to production software
 
@@ -439,6 +435,8 @@ Some examples of "friction":
 - The data is not in the "good shape". Some simple information manipulation require hundreds of lines of code. This is a sign of data modelling issue.
 
 It's the **bad architecture "pushing back against" programmer**. In manual coding these pushback can be felt and then programmer tend to rethink architecture. But in AI coding, **AI can easily generate tons of code to workaround a bad architecture**. The vibe coder don't feel the pushback (or even satisfied by the increase of line count). Result is buggy and unmaintainable code.
+
+I recommend to not spend too much time writing spec before writing code. Because writing spec doesn't feel the "pushback". **Keeping writing detailed specifications under a wrong architecture is a waste of time**.
 
 ### Theory behind the code
 

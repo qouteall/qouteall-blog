@@ -715,13 +715,13 @@ For a Turing machine, if the states are nodes, then each iteration of running is
 
 Halting problem and Rice's theorem says that we cannot reliably analyze arbitrary Turing-complete programs. 
 
-But it doesn't mean nothing can be analyzed. It just means we cannot analyze arbitrary program. There are many analyzable programs. If the program is simple enough, it obviously can be analyzed. If a program use proper encapsulation, analyze can be simplified by only focusing on one part of program. 
+But it doesn't mean nothing can be analyzed. We can still do useful **conservative analysis**. There are many analyzable programs that we can prove that they definitely halts. There are some programs that we are not sure whether it halts, then conservative analysis treats them as non-halting. This is what Lean does.
 
-If we apply some constraints, to make it not Turing complete but still expressive, then halting can be ensured, while being still useful enough, like in Lean.
+It's similar to Bloom filter. If it doesn't hit bloom filter, the element is definitely missing. But if it hits, it may be present or missing.
 
 Rust has a lot of constraints to limit sets of programs to an analyzable subset, so it can analyze about memory safety and thread safety. But Rust is still Turing-complete. [^rust_rice]
 
-[^rust_rice]: Rust can ensure memory safety (when not using unsafe) and is still Turing-complete. This doesn't contradict with Rice's theorem. Because under Rust's constraint memory safety is a "trivial property".
+[^rust_rice]: Rust can ensure memory safety (when not using unsafe) and is still Turing-complete. This doesn't contradict with Rice's theorem. Because under Rust's constraint memory safety is a "trivial property". Memory safety property doesn't translate from or to halting property. 
 
 ## Non-Turing-Complete programming languages
 
