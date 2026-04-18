@@ -398,7 +398,6 @@ impl Parent {
     fn get_children_mut(&mut self) -> &mut Vec<Child> { &mut self.children }  
     fn add_score(&mut self, score: u32) { self.total_score += score; }  
 }  
-  
 fn main() {  
     let mut parent = Parent{total_score: 0, children: vec![Child{score: 2}]};  
     let mut temp_children: Vec<Child> = Vec::new();  
@@ -412,7 +411,7 @@ fn main() {
 
 It swaps the continer's internal pointer. It doesn't copy container content, so its performance cost is small.
 
-But it's error-prone. It requires not forgetting to swap back. If some logic nests, the inner logic will see empty container. Generally not recommended.
+But it's error-prone. It requires not forgetting to swap back. It also requires recovering druing panic unwind. Also if some logic nests, the inner logic will see wrong empty container. Generally not recommended.
 
 ## Contagious borrowing between branches
 
@@ -920,7 +919,7 @@ That's why mainstream languages has no mutable borrow exclusiveness, and still w
 Rust's mutable borrow exclusiveness creates a lot of troubles in single-threaded cases. But it also has **benefits** (even in signle-threaded cases):
 
 - Make the borrow more universal. In Rust, map key and value can be borrowed. But in Golang you cannot take interior pointer to map key or value. This makes abstractions that work with borrows more general.
-- Mutable borrow is exclusive, so Rust can emit `noalias` attribute to LLVM. `noalias` means the pointed data cannot be accessed by other code, which means:
+- Mutable borrow is exclusive, so Rust can emit LLVM `noalias` attribute (in release mode). `noalias` means the pointed data cannot be accessed by other code, which means:
   - It allows aggressively merging reads. Before next write to it, it can be temporarily treated as constant.
   - It allows aggressively merging writes. If there are two memory writes to it, compiler can remove the first write, only keep the last write.
   - It allows removing reads after write, using the previous write as read result.
@@ -1236,23 +1235,23 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
 
 - Don't violate mutable borrow exclusiveness. 
   - A `&mut` should not overlap with any other borrows and raw pointers. Including temporary borrows. Note that `obj.method()` can implicity create borrow to `obj`.
-  - Violating that rule cause undefined behavior and can cause wrong optimization. Rust adds `noalias` attribute for mutable borrows into LLVM IR. LLVM will heavily optimize based on `noalias`. [See also](https://doc.rust-lang.org/nomicon/aliasing.html)
+  - Violating that rule cause undefined behavior(UB) and can cause wrong optimization. Rust adds `noalias` attribute for mutable borrows into LLVM IR. LLVM will heavily optimize based on `noalias`. [See also](https://doc.rust-lang.org/nomicon/aliasing.html)
   - Multiple mutable raw pointers `*mut T` can point to same data. But raw pointer cannot coexist with mutable borrow to same data.
   - [Related1](https://chadaustin.me/2024/10/intrusive-linked-list-in-rust/), [Related2](https://web.archive.org/web/20230307172822/https://zackoverflow.dev/writing/unsafe-rust-vs-zig/)
   - Also, the type that has self-reference should be `!Unpin`. If `T` is `!Unpin` then `&mut T` has no `noalias`. (However, there is still [potential unsoundness related to self-reference](https://github.com/rust-lang/rust/issues/63818))
-- Converting a `&T` to `*mut T` then mutate pointed data is undefined behavior, unless using `UnsafeCell`. Normal `&T` has LLVM `readonly` attribute which can enable some optimizations, but if `T` contains `UnsafeCell` then compiler won't add `readonly`.
+- Converting a `&T` to `*mut T` then mutate pointed data is undefined behavior, unless within `UnsafeCell`. In release mode, `&T` has LLVM `readonly` attribute which can enable some optimizations, but if `T` contains `UnsafeCell` then compiler won't add `readonly`.
 - [Pointer provenance](https://doc.rust-lang.org/std/ptr/index.html#provenance).
   - For to-heap pointers, different allocations are different provenances. Different local variables and global variables are different provenances.
   - Two pointers created from two provenances are treated as never alias. If their address equals, accessing memory using them is undefined behavior.
   - Directly converting an integer to pointer gets a pointer with no provenance, using that pointer to access memory is undefined behavior, except when:
     - If the integer `i` is converted to pointer using `p.with_addr(i)` (`p` is another pointer that has provenance). The result has same provenance of `p`.
-    - For the memory that's not managed by Rust (including native C library memory, memory-mapped IO (MMIO) memory, file mmap memory, etc.), accessing them using [`read_volatile`](https://doc.rust-lang.org/core/ptr/fn.read_volatile.html) and [`write_volatile`](https://doc.rust-lang.org/core/ptr/fn.write_volatile.html) is fine and doesn't require pointer provenance.
+    - For the memory that's not managed by Rust (including native C library memory, memory-mapped IO (MMIO) memory, file mmap memory, etc.), they should be accessed using [`read_volatile`](https://doc.rust-lang.org/core/ptr/fn.read_volatile.html) and [`write_volatile`](https://doc.rust-lang.org/core/ptr/fn.write_volatile.html), and accessing them doesn't need to care about pointer provenance.
   - Adding a pointer with an integer doesn't change provenance.
   - The provenance is tracked by compiler in compile time. In actual execution, pointer is still integer address that doesn't attach provenance information [^miri_pointer_provenance].
   - The [XOR linked list](https://en.wikipedia.org/wiki/XOR_linked_list) breaks under pointer provenance. It's not recommended to use it.
 - Using uninitialized memory is undefined behavior. [`MaybeUninit`](https://doc.rust-lang.org/beta/std/mem/union.MaybeUninit.html)
   - Normally a byte has 256 possible values. But in LLVM a byte has 258 possible values [^llvm_constraint]. The extra two are 1. uninitialized 2. poison (computed from other undefined behaviors). Like pointer provenance, the two extra values only exist in compile time.
-- `a = b` will drop the original object in place of `a`. If `a` is uninitialized, then it will drop an unitialized object, which is undefined behavior. Use `(&raw mut x).write(...)` [Related](https://lucumr.pocoo.org/2022/1/30/unsafe-rust/)
+- `a = b` will drop the original object in place of `a` (unless when `a` was moved-out). If `a` is uninitialized, then it will drop an unitialized object, which is undefined behavior. Use `(&raw mut a).write(...)` [Related](https://lucumr.pocoo.org/2022/1/30/unsafe-rust/)
 - Handle panic unwinding. If unsafe code turn data into temporarily-invalid state, you need to make it valid again during unwinding. [See also](https://doc.rust-lang.org/nomicon/unwinding.html). [Related](https://smallcultfollowing.com/babysteps/blog/2024/05/02/unwind-considered-harmful/)
   - In Rust, future can poison. This is different to lock poison. When an async function panics, the future should go into "poison state", all internal data should be dropped, then polling it again should panic. This needs to be considered when manually implementing `Future` trait.
 - Reading/writing to mutable data that's shared between threads need to use atomic, or volatile access ([`read_volatile`](https://doc.rust-lang.org/std/ptr/fn.read_volatile.html), [`write_volatile`](https://doc.rust-lang.org/beta/std/ptr/fn.write_volatile.html)), or use other synchronization (like locking). If not, optimizer may wrongly merge and reorder reads/writes. Note that volatile access themself doesn't establish memory order (unlike Java/C# `volatile`).
@@ -1270,18 +1269,20 @@ Modern compilers tries to optimize as much as possible. **To optimize as much as
 Unfortunately Rust's syntax ergonomics on raw pointer is currently not good:
 
 - If `p` is a raw pointer, you cannot write `p->field` (like in C/C++), and can only write `(*p).field`. (This will be addressed in [field projections](https://github.com/rust-lang/rust-project-goals/blob/main/src/2026/field-projections.md))
-- Raw pointer cannot be method receiver (self).
-- There is no "raw pointer to slice". You need to manually `.add()` pointer and dereference. Bound checking is also manual.
+- Raw pointer cannot be method receiver (self). (This is addressed in unstable feature [arbitrary_self_types](https://doc.rust-lang.org/beta/unstable-book/language-features/arbitrary-self-types.html))
+- There is raw pointer to slice, but it doesn't support indexing syntax `s[i]`. You need to manually `.add()` pointer and dereference. Bound checking is also manual. (Converting raw pointer to slice borrow enables convenient indexing syntax, but it is prone to aliasing UB as mentioned previously)
 
-## Rust doesn't allow "temporary void"
+## Rust doesn't allow "temporary void" for borrowed data
 
-In safe Rust, the reachable data has to be always valid. Safe Rust cannot move some reachable data to elsewhere, creating a "temporary void" then fill the void.
+In safe Rust, the borrowed data has to be always valid. You cannot make borrowed data become "temporary void" then fill the void.
 
-You cannot implement `mem::swap` or `mem::replace` in safe Rust. Because Rust is procedural, so doing these have to temporarily make some in-memory data invalid. But Rust borrow checker ensures all data is always in valid state.
+You cannot implement `mem::swap` or `mem::replace` in safe Rust. Because Rust is procedural, so doing these have to make some borrowed data temporarily invalid.
 
 Implement a singly-linked-list require `mem::replace`, [see also](https://rust-unofficial.github.io/too-many-lists/first-push.html).
 
-This restriction is related to unwinding, [see also](https://smallcultfollowing.com/babysteps/blog/2024/05/02/unwind-considered-harmful/).
+This restriction is related to panic unwinding. Before the "temporary void" becomes valid again, panic unwinding can cause function to exit early and never fill the void. [See also](https://smallcultfollowing.com/babysteps/blog/2024/05/02/unwind-considered-harmful/).
+
+Note that the restriction only applies to borrowed data. A local variable that's not borrowed can be temporary moved-out then re-assigned.
 
 ## `Send` and `Sync`
 
@@ -1528,13 +1529,23 @@ The `as_deref` is not intuitive. It turns `Option<String>` into `Option<&str>`. 
 
 ### Contagious effects
 
-The "async", "mut", "Result" things can be generalized as "effects". These effects appears in types and is contagious. Why these effects are not contagious in other languages:
+The "async", "mut", "Result" things can be generalized as "effects". These effects appears in types and are contagious. Why these effects are not contagious in other languages:
 
 - The "async" effect: In Golang goroutine and Java green thread, every function is "async" implicitly.
 - The "mut" effect: In mainstream GC languages there is no "object content immutability" notation in type. Things are mutable by default. (Java `final` is shallow immutability. `final` is modifier, not in type).
-- The "Result" effect: In the languages that have exceptions, almost every function can throw exception implicitly. (Java has checked exception, which is contagious in type, but it doesn't enforce to `RuntimeException`)
+- The "Result" effect: In the languages that have exceptions, almost every function can throw exception implicitly. (Java has checked exception, which is contagious in type, but it doesn't enforce for `RuntimeException`s)
 
 See also: [effect generics proposal](https://github.com/rust-lang/effects-initiative/blob/master/updates/2024-02-09-extending-rusts-effect-system.md#why-effect-generics).
+
+All of the above contagious effect has "escape hatch" that's invisible in types:
+
+| Effect that's contagious in types | "Escape hatch" that's invisible in types |
+| --------------------------------- | ---------------------------------------- |
+| "async" effect                    | Block the thread                         |
+| "mut" effect                      | Interior mutability [^cell_invisible]    |
+| "Result" effect                   | Panic                                    |
+
+[^cell_invisible]: Although interior mutability has visible `Cell` things in types, the cell can be hidden in another type, then the interior mutability becomes invisible in types (Except using the unstable trait [`Freeze`](https://doc.rust-lang.org/std/marker/trait.Freeze.html)).
 
 ## Some arguments
 

@@ -180,7 +180,7 @@ tags:
 - There are two clocks: hardware clock and system clock. The hardware clock itself doesn't care about time zone. Linux treats it as UTC by default. Windows treats it as local time by default.
 - Verification of certificate uses time. If time is inaccurate, SSL/TLS may not work.
 - The "timestamp" may be in seconds, milliseconds or nanoseconds.
-- About `M` and `m` in date format: in Java `SimpleDateFormat`, `M` is month, `m` is minute. But in Python `datetime`, `m` is month, `M` is minute. 
+- About `M` and `m` in date format: in Java date format, `M` is month, `m` is minute. But in Python `datetime`, `m` is month, `M` is minute. 
 - In Java `Date` and JS `Date`, month number starts by 0, but day number starts by 1.
 - In DuckDB, when importing a CSV, it guesses date format based on samples by default. There is ambiguity between `DD-MM-YYYY` and `MM-DD-YYYY`. If all day numbers \<\= 12 DuckDB may guess wrong. [See also](https://duckdb.org/docs/stable/data/csv/auto_detection#dates-and-timestamps)
 - The result of MySQL `timestamp` value and PostgreSQL `timesamp with time zone` (`timestamptz`) depends on session time zone. Session time zone can be changed via SQL (`set time_zone = ...` in MySQL and `set time zone ...` in PostgreSQL). When using connection pooling, the effect of changing session time zone may interfere other places. [^sql_time_zone]
@@ -245,10 +245,10 @@ tags:
 - Undefined behaviors. The compiler optimization aim to keep defined behavior the same, but can freely change undefined behavior. Relying on undefined behavior can make program break under optimization. [See also](https://russellw.github.io/undefined-behavior)
   - Accessing uninitialized memory is undefined behavior.
     - Converting binary data pointer `char*` to struct pointer is treated as using uninitialized memory, even if the memory is initialized, because the object [lifetime](https://en.cppreference.com/w/cpp/language/lifetime.html) hasn't started.
-  - Accessing invalid memory (null pointer, dangling pointer) is undefined behavior.
+  - Accessing using null pointer or dangling pointer is undefined behavior.
   - Integer overflow/underflow is undefined behavior. Note that unsigned integer can underflow below 0. Don't use `x > x + 1` to check overflow as it will be optimized to `false`.
   - Aliasing.
-    - Strict aliasing rule: If there are two pointers with type `A*` and `B*`, then compiler assumes two pointer can never equal. If they equal, using it to access memory is undefined behavior. Except in two cases: 1. `A` and `B` has subtyping relation 2. converting object pointer to byte pointer (`char*`, `unsigned char*` or `std::byte*`) 3. after converting object pointer to byte pointer, convert back [^strict_aliasing]
+    - Strict aliasing rule: If there are two pointers with type `A*` and `B*`, then compiler assumes two pointer can never equal. If they equal, using it to access memory is undefined behavior. Except when: 1. `A` and `B` has subtyping relation 2. converting object pointer to byte pointer (`char*`, `unsigned char*` or `std::byte*`) 3. after converting object pointer to byte pointer, convert back [^strict_aliasing]
     - Pointer provenance. Two pointers from two different provenances are treated as never equal. If their address equals, it's undefined behavior. [See also](https://www.ralfj.de/blog/2020/12/14/provenance.html)
   - `const` can mean both read-only and immutable:
     - If the original declared object is not `const`, you can turn pointer to it as `const T*`, in this case `const` means read-only [^readonly]. You can change the object without triggering undefined behavior.
@@ -269,7 +269,7 @@ tags:
 
 [^strict_aliasing]: Using pointer type to hold integer is fine as long as you don't use it to access memory. Also, [Linus is against strict aliasing rule](https://lkml.org/lkml/2018/6/5/769).The Linux kernel disables strict aliasing rule and makes integer overflow defined behavior.
 
-[^readonly]: The read-only here means in-language constraint. It should not be confused with read-only memory which is actually immutable.
+[^readonly]: The read-only here is in-language constraint. It should not be confused with read-only memory which is actually immutable.
 
 [^cpp_mutable]: In C++, changing `mutable` field of a `const` object is not undefined behavior. [See also](https://en.cppreference.com/w/cpp/language/cv.html).
 
@@ -401,6 +401,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Path trailing slash:
   - If `/aaa/bbb` is a symbolic link to a folder, `rm /aaa/bbb` removes the symbolic link, but `rm /aaa/bbb/` may remove files in pointed folder.
   - For `mv x.txt /aaa/bbb`, if `/aaa/bbb` is a folder it will move file into the folder without changing name, but if `/aaa/bbb` doesn't exist it will rename file name to `bbb`.
+- PID can be reused after process exits.
 
 [^container]: There is a "fix problem then create new problem then fix new problem" cycle in deployment. Firstly dynamic linking creates dependency hell, then solve it using containers. But container images are slow to rebuild. It slows down development iteration cycle. Then tools like [tilt](https://tilt.dev/) solve the problem by "hacking" container (replace binary in running container without rebuilding container image). There are other hacks such as putting binary in mounted folder outside of container. But the root problem (dynamic linking dependency hell) can be just fixed by static linking.
 

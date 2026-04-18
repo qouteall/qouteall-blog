@@ -370,7 +370,7 @@ The WebAssembly code format itself is deisgned with size optimization in mind (e
 
 The JS ecosystem cares about code size. Because improving page load speed requires reducing code size. The JS ecosystem has mature tooling about dead code elimination (tree shaking), JS minimization and JS lazy loading. Currently JS ecosystem has code size advantage.
 
-The average user can accept taking 2 minutes to install a native app, but cannot accept taking 20 seconds to load a web page. So the native ecosystem doesn't care much about code size or lazy loading. But the JS ecosystem cares about code size and lazy loading. The Wasm toolchain are often based on native toolchains. The tooling for reducing code size and lazy loading for Wasm is not yet mature.
+The average user can accept taking 2 minutes to install a native app, but cannot accept taking 20 seconds to load a web page. So the native ecosystem doesn't care much about code size or lazy loading. The Wasm toolchain are often based on native toolchains. The tooling for reducing code size and lazy loading for Wasm is far less mature than JS.
 
 Also, C++ and Rust duplicatedly generate code for different generic instantiation (called monomorphization). `Vec<u32>` uses different Wasm code than `Vec<String>` and `Vec<MyType>`. This bloats binary size compared to JS. Modern linkers can do identical code folding (ICF) which can alleviate this issue.
 

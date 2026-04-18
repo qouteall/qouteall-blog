@@ -72,9 +72,9 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   - When researchers are judged by paper reference count, there will be researcher groups referencing each other in group.
   - ...
 
-- First-order effect: After improving the steam engine, it requires less coal to do the same work, so the demand of coal will reduce.
+- First-order effect: After the steam engine was improved, it required less coal to do the same work, so the demand of coal would reduce.
 
-  Second-order effect: The reduced cost of using steam engine greatly increased the usage of steam engine, so the demand of coal greaty increased. This is [Jevons paradox](https://en.wikipedia.org/wiki/Jevons_paradox).
+  Second-order effect: [Jevons paradox](https://en.wikipedia.org/wiki/Jevons_paradox).The reduced cost of using steam engine greatly increased the usage of steam engine, so the demand of coal greaty increased.
 
 - First-order effect: Improving a product can enhance its reputation.
 
@@ -92,11 +92,11 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   
   Second-order effect: Antitrust regulations may also increase compliance cost, making competing startups harder to grow, thus benefits monopoly companies. [Regulatory capture](https://en.wikipedia.org/wiki/Regulatory_capture).
 
-- First-order effect: Tariffs protect domestic companies.
+- First-order effect: Tariffs protect domestic companies, because it makes foreign competitors' products more expensive.
   
   Second-order effect: Tariff may reduce competition pressure, reducing domestic companies' drive to improve and eventually reducing their competitiveness. Domestic companies may rise price after tariff to increase profit.
   
-  What's more, the job loss caused by increasing price may be higher than the job created by tariff:
+  Also, the job loss caused by increasing price may be higher than the jobs created by tariff:
 
 ![](./steel-tariff.png)
 
@@ -120,6 +120,10 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 - First-order effect: Mineral resources make the country rich.
 
   Second-order effect: [Resource curse](https://en.wikipedia.org/wiki/Resource_curse). Profits in mineral export makes country's currency overvalued. Then importing becomes cheaper than country's own products. so the domestic argiculture and industries cannot develop. Having "easy money" also make people not work hard. When the international mineral price drops, economy collapses.
+
+- First-order effect: When a department has budget surplus. It shows that the department is over-funded. So reducing its budget saves money for the organization.
+
+  Second-order effect: Saving money is effectively punished by reducing budget. After learning this, the department will do excessive spending to avoid any surplus from reducing its budget. This greately increases money waste in the organization.
 
 - First-order effect: Promoting employees that did great job incentivizes employee. It makes the company more efficient.
 
@@ -161,7 +165,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: When uncertainty increases, money moves from risky assets (e.g. stock) to gold, because gold is safer.
 
-  Second-order effect: When actual large risk occurs, asset prices drop. Leverages face forced liquidation (margin call). High-liquidity gold is often sold first to get cash to prevent other leverage assets from going zero.
+  Second-order effect: When actual large risk occurs, asset prices drop. Leverages face forced liquidation (margin call). High-liquidity assets, including gold, are often sold first to get cash to prevent other leverage assets from going zero. This second-order effect is often temporary.
 
 - First-order effect: If a lot of money is shorting an asset, its price will drop.
 
@@ -175,17 +179,17 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: Just eating very few reduces caloric intake, helping weight loss.
   
-  Second-order effect: A large calorie deficit may cause higher level of cortiso, inhibiting fat burning, facilitating muscle breakdown, slowing down metabolism, hindering weight loss efforts. Weight loss requires scientific diet.
+  Second-order effect: A large calorie deficit may cause higher level of cortiso, inhibiting fat burning, facilitating muscle breakdown, slowing down metabolism, hindering weight loss efforts.
 
 - First-order effect: Raising children in clean environments make them healthy because they avoid most pathogen.
 
-  Second-order effect: Lacking touch with pathogen may cause immune system issues, then may facilitate autoimmune disease.
+  Second-order effect: Lacking touch with pathogens in young age may cause immune system development issues, then may facilitate autoimmune disease.
 
 - First-order effect: Advance of medical techonology improve population health and reduce healthcare cost.
 
   Second-order effect: 
   
-  - Advance of medical techonology increases average age. As age increase, health problems are more likely to appear. The overall healthcare burden increases.
+  - Advance of medical techonology increases average age. As age increases, health problems are more likely to appear. The overall healthcare burden increases.
   - Some previously fatal disease is now not fatal, but the technology is still not advanced enough to fully cure it. The patient survived but faces low life quality and high healthcare cost.
 
 - First-order effect: Medication cure diseases.
@@ -253,7 +257,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   
   Green lumber fallacy. Deep understanding is often not required for real-world success. The idiom "knowledge is power" is not always true. **The true knowledge includes when to not use knowledge**.
 
-- First-order effect: Punishing mistakes will push people make fewer mistakes.
+- First-order effect: Punishing mistakes will force people to make fewer mistakes.
 
   Second-order effect: 
   
