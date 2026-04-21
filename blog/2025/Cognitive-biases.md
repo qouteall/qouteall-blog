@@ -1536,7 +1536,11 @@ People wants attention from others. Having attention from others is useful: it i
 >
 > \- [Paying attention](https://karthikecon.github.io/karthiksrinivasan.org/paying_attention.pdf) by Karthik Srinivasan
 
-Some people try to gain attention by posting things on the internet. Having attention from internet is only useful when attention comes from the right kinds of persons. Some kinds of attention from internet are harmful.
+However, **popularity on internet has low correlation with efforts in posting**. You could pay a lot of efforts in making content that you think is good, but it's cold on internet. You could randomly post some silly thing then it goes popular unpredictably. This randomness may cause addition similar to gambling.
+
+As previously mentioned, the nuanced content is harder to understand so they are not popular on internet. 
+
+Having attention from internet is only useful when attention comes from the right kinds of persons. Some kinds of attention from internet are actually harmful.
 
 ### Randomized reward
 

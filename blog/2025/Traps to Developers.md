@@ -146,7 +146,7 @@ tags:
   - JS `JSON.stringify` turns NaN and Inf to null.
   - Python `json.dumps(...)` will directly write `NaN`, `Infinity` into result, which is not compliant to JSON standard. `json.dumps(..., allow_nan=False)` will raise `ValueError` if has NaN or Inf.
   - Golang `json.Marshal` will give error if has NaN or Inf.
-- Directly compare equality for floating point may fail due to precision loss. Compare equality by things like `abs(a - b) < 0.00001`
+- Directly compare equality for floating point may fail due to precision loss. Compare equality by things like `abs(a - b) < epsilon`. For double-precision floating point, `epsilon` can be $10^{-12}$. [^epsilon]
 - JS use floating point for all numbers. The max "safe" integer is $2^{53}-1$. Outside of the "safe" range, most integers cannot be accurately represented. For large integer it's recommended to use `BigInt`.
   
   If a JSON contains an integer larger than that, and JS deserializes it using `JSON.parse`, the number in result will be likely inaccurate. The workaround is to use other ways of deserializing JSON or use string for large integer. [^safe_int_timestamp]
@@ -169,6 +169,8 @@ tags:
 [^safe_int_timestamp]: Putting millisecond timestamp integer in JSON fine, as millisecond timestamp exceeds limit in year 287396. But nanosecond timestamp suffers from that issue.
 
 [^excel_money]: It's recommended to NOT use floating point to store money value. Note that Microsoft Excel uses floating point to represent number, and many financial data are processed in Excel. Excel has rounding so that 0.30000000000000004 is displayed as 0.3 . Only use Excel for finance if you don't require high precision. Doing rough financial analyzing in Excel is fine.
+
+[^epsilon]: That method is not good for large-magnitude numbers. For large numbers, the tolerance should be higher: `abs(a - b) <= max(relative_epsilon * max(abs(a), abs(b)), absolute_epsilon)`. Also note that equality-by-epsilon is not transitive. There can cases where A is close to B, B is close to C, but A is not close to C. Sometimes grid-based equality comparision is better. [Related](https://lisyarus.github.io/blog/posts/its-ok-to-compare-floating-points-for-equality.html).
 
 ## Time
 
@@ -289,7 +291,10 @@ tags:
   - `select distinct` treat nulls as the same in some databases. 
   - `count(x)` and `count(distinct x)` ignore rows where `x` is null.
 - Date implicit conversion can be timezone-dependent.
-- Complex join with disctinct may be slower than nested query. [See also](https://www.red-gate.com/simple-talk/databases/sql-server/t-sql-programming-sql-server/dont-use-distinct-as-a-join-fixer/)
+- About join:
+  - Using multiple joins may cause overcounting. [See also](https://kb.databasedesignbook.com/posts/sql-joins/#understanding-the-problem-of-overcounting).
+  - Using `distinct` to "fix" join often gives worse performance. [See also](https://www.red-gate.com/simple-talk/databases/sql-server/t-sql-programming-sql-server/dont-use-distinct-as-a-join-fixer/)
+  - I recommend using subquery instead of join if appropriate, because join is "global" but subquery is "local".
 - In MySQL (InnoDB), if string field doesn't have `character set utf8mb4` then it will error if you try to insert a text containing 4-byte UTF-8 code point.
 - MySQL (InnoDB) default to case-insensitive.
 - MySQL (InnoDB) can do implicit conversion by default. `select '123abc' + 1;` gives 124.

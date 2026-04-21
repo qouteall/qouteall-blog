@@ -15,7 +15,7 @@ In this complex world, there are second-order effects. Many things may "backfire
 
 Note: **"X may backfire" should not be simplified to "X is bad".**
 
-### Technology-related
+### In Technology
 
 - First-order effect: Internet makes knowledge more accessible, making learning easier.
   
@@ -51,7 +51,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: Allowing human to intervene an automation system improves control in emergency.
 
-  Second-order effect: When human's operation partially conflicts with automation system's operation, it faces new unpredictability. It's often less safe than pure human control or pure automation.
+  Second-order effect: When human intervenes some parts of the system, but other parts of the system is still controlled by automation, it creates new failure modes that doesn't exist in pure human control or pure automation.
 
 ### In Economy
 
@@ -64,8 +64,8 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   Second-order effect: **Goodhart's law**. When a measure becomes target, it ceases to be a good measure. Examples:
 
   - When doctors are judged by patient satisfaction survey, doctors tend to do treatments that improve short-term comfort but sacrifice long-term health.
-  - When KPI judges success rate regardless of difficulty, then employee choose to do only easy tasks and avoid hard tasks. **The more non-trivial things one does, the more mistakes one will make**.
-  - When salesmen are judged by sale amount, salesmen tend to lie to custumers and hurt company reputation.
+  - When KPI judges success rate regardless of difficulty, then employee chooses to do only easy tasks and avoid hard tasks. **The more non-trivial things one does, the more mistakes one will make**.
+  - When salesmen are judged by sale amount, salesmen tend to lie to customers and hurt company reputation.
   - Training AI model to increase user satisfaction score will make the AI sycophant.
   - When promotion is judged by task difficulty, then people do useless hard things instead of important but easy things.
   - AB test shows that adding annoying popups and manipulative texts increase conversion rate. However it drives away high-value customers.
@@ -121,9 +121,9 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: [Resource curse](https://en.wikipedia.org/wiki/Resource_curse). Profits in mineral export makes country's currency overvalued. Then importing becomes cheaper than country's own products. so the domestic argiculture and industries cannot develop. Having "easy money" also make people not work hard. When the international mineral price drops, economy collapses.
 
-- First-order effect: When a department has budget surplus. It shows that the department is over-funded. So reducing its budget saves money for the organization.
+- First-order effect: A department having budget surplus shows that the department is over-funded, so reducing its budget saves money for the organization.
 
-  Second-order effect: Saving money is effectively punished by reducing budget. After learning this, the department will do excessive spending to avoid any surplus from reducing its budget. This greately increases money waste in the organization.
+  Second-order effect: Saving money is effectively punished by reducing budget. After learning this, the department will do excessive spending to avoid any surplus that causes budget reduction. This greately increases money waste in the organization.
 
 - First-order effect: Promoting employees that did great job incentivizes employee. It makes the company more efficient.
 
@@ -261,7 +261,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: 
   
-  - For personal punishment: It cause one to be scared of practicing, thus gain less experience. Lacking of experience make them more likely to make mistakes.
+  - For personal punishment: It cause one to be scared of practicing, thus gain less experience. Lacking of experience makes one more likely to make mistakes.
   - For punishment to decision-makers in organizations: It's often not obvious whether the failure is caused by wrong decision or just insufficient investment. Then fear of punishing naturally leads continuing investment to wrong decision, falling into sunk cost trap.
 
 - First-order effect: Only reporting successful results and not reporting failed attempts could improve others' impression on you.

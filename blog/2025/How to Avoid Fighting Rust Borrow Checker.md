@@ -423,7 +423,7 @@ We want the borrow the value in cache to avoid cloning the value:
 fn get_cached_result(cache: &mut HashMap<i32, String>, key: i32) -> &String {  
     match cache.get(&key) {  
         None => {  
-            let computed_value = "assume this is result of computation".to_string();  
+            let computed_value = "result of computation".to_string();  
             cache.insert(key, computed_value);  
             cache.get(&key).unwrap() // value is moved into map so get again  
         }  
@@ -459,7 +459,7 @@ One workaround: firstly use `containes_key` to check whether should insert. Afte
 ```rust
 fn get_cached_result(cache: &mut HashMap<i32, String>, key: i32) -> &String {  
     if !cache.contains_key(&key) {  
-        let computed_value = "assume this is result of computation".to_string();  
+        let computed_value = "result of computation".to_string();  
         cache.insert(key, computed_value);  
     }  
   
@@ -476,7 +476,7 @@ A more elegant solution is to use [`entry` API](https://doc.rust-lang.org/std/co
 ```rust
 fn get_cached_result(cache: &mut HashMap<i32, String>, key: i32) -> &String {  
     cache.entry(key).or_insert_with(|| {  
-        "assume this is result of computation".to_string()  
+        "result of computation".to_string()  
     })  
 }
 ```
@@ -670,13 +670,9 @@ Grouping two things together can create circular reference:
 
 It's similar to contagious borrow issue. Putting two things into one struct can create new circular reference, which is unfriendly to borrow checker. No need to put one object's all data into one struct. One object's data can be scattered in many places.
 
-In OOP languages, it's a common pattern that parent references child, and child references parent. It's convenient because you can access parent data in child's method, without passing parent as argument. That creates circular reference.
+In OOP languages, it's a common pattern that parent references child, and child references parent. It's convenient because you can access parent data in child's method, without passing parent as argument. That creates circular reference. This just-for-convenience circular reference should be avoided. Note that due to previously mentioned contagious borrow issue, you cannot mutably borrow child and parent at the same time. One workaround is to do a split borrow on parent and pass the individual components of parent (pass more arguments, it's less convenient).
 
-However, Rust is unfriendly to circular reference, so the just-for-convenience circular reference should be avoided. It's recommended to **pass extra arguments instead of having circular reference**.
-
-Note that due to previously mentioned contagious borrow issue, you cannot mutably borrow child and parent at the same time. One workaround is to do a split borrow on parent and pass the individual components of parent (pass more arguments, it's less convenient).
-
-In a tree structure, letting child node to reference parent node can be convenient. If you get a reference to a node, it's easy to do things that use parent data. One workaround is to keep tracking the path from root node to current node (but that solution is unfriendly to mutation). A better solution is to use ID/handle to replace borrow.
+In a tree structure, letting child node to reference parent node can be convenient. If you get a reference to a node, it's easy to do things that use parent data. If there is some logic that requires upward traverse through tree, it's recommended to use arena, instead of making parent own child.
 
 In C++ there is the **unregister-from-parent-on-destruct pattern**: the parent keep a container of child object pointers; in child object's destructor, it removes itself from parent's container. This pattern also involves circular reference. This should be avoided in Rust. The child should be owned by parent, and destructing child should be done via parent.
 
@@ -717,9 +713,9 @@ Data-oriented design:
 - The different fields of the same object doesn't necessarily need to be together in memory. The one field of many objects can be put together (parallel array).
 - Manage memory based on **arenas**.
 
-Some may think that using handle/ID is "just a nasty workaround caused by borow checker". However, in GC languages, using ID to refer to object is also common, as reference cannot be saved to database or sent via network. [^id_ref_translation]
+Some may think that using handle/ID is "just a workaround caused by borow checker". However, in GC languages, using ID to refer to object is also common, as reference cannot be saved to database or sent via network. [^id_ref_translation]
 
-[^id_ref_translation]: Having both ID and object reference introduces friction: translating between ID and object reference. Some ORM will malfunction if there exists two objects with the same primary key.
+[^id_ref_translation]: Having both ID and object reference introduces friction of translating between ID and object reference. Some ORM will malfunction if there exists two objects with the same primary key.
 
 ### Arena
 
@@ -731,25 +727,27 @@ Each handle (key) has an index and a generation integer. It's `Copy`-able data t
 
 Although memory safe, it still has the equivalent of "use-after-free": using a handle of an already-removed object cannot get element from the slotmap [^slotmap_uniqueness]. Each get element operation may fail.
 
-Note that `SlotMap` is not efficient when there are many unused empty space between elements. slotmap crate offers two `HopSlotMap` and `DenseSlotMap` for better performance in sparce case.
+Note that `SlotMap` is not efficient when there are many unused empty space between elements. If there is large sparcity in IDs, using map is more appropriate.
 
 [^slotmap_uniqueness]: Each slotmap ensures key uniqueness, but if you mix keys of different slotmaps, the different keys of different slotmap may duplicate. Using the wrong key may successfully get an element but logically wrong. [id-arena](https://docs.rs/id-arena/2.2.1/id_arena/) avoids that by attaching arena id into key, but that makes key larger.
 
 Other kinds of arenas:
 
-- Other map structure, like `HashMap` or `TreeMap` can also be arenas. 
-- If no element can be removed from arena, then a `Vec` can also be an areana. [id-arena](https://docs.rs/id-arena/2.2.1/id_arena/) attaches extra arena id to key, so that keys of different arenas can never be confused.
+- The containers including `Vec`, `HashMap` and `TreeMap` can be treated as arenas. 
+- [append_only_vec](https://docs.rs/append-only-vec/latest/append_only_vec/index.html). Its insertion only requires immutable borrow, because insertion doesn't move other elements, unlike `Vec`. This feature can workaround contagious borrow issue. It uses [segmented array](https://danielchasehooper.com/posts/segment_array/) data structure. It doesn't allow removing element or directly mutating element.
 - [generational_box](https://docs.rs/generational-box/0.7.0/generational_box/)
 - [bevy_ecs](https://docs.rs/bevy_ecs/latest/bevy_ecs/)
 
 The important things about arena:
 
 - The borrow checker **no longer ensure the ID/handle points to a living object**. Each data access to arena may fail. There is equivalent of "use after free".
-- **Arenas still suffer from contagious borrow issue**. Borrowing one element in arena indirectly borrows whole arena. The previously mentioned solutions (deferred mutation, shallow clone, manual container loop, persistent data structure, etc.) may be needed.
+- **Arenas still suffer from contagious borrow issue**. Mutably borrowing one element in arena mutably borrows whole arena. The previously mentioned solutions (deferred mutation, shallow clone, manual container loop, persistent data structure, etc.) may be needed.
 
-Some may think "using arena cannot protect you from equivalent of 'use after free' so it doesn't solve problem". But arena can greatly improve determinism of bugs, making debugging much easier. A randomly-occuring memory safety [Heisenbug](https://en.wikipedia.org/wiki/Heisenbug) may no longer trigger when you enable sanitizer, as sanitizer can change memory layout.
+Some may think "using arena cannot protect you from equivalent of 'use after free' so it doesn't solve problem". But arena can greatly improve determinism of bugs, making debugging much easier. A randomly-occuring memory safety [Heisenbug](https://en.wikipedia.org/wiki/Heisenbug) may no longer trigger when you enable sanitizer, as sanitizer can change timing and memory layout.
 
-The Rust compiler commonly use arenas. And it uses simple array-based arena, not generational arena. The local variables in function are stored in the function's own arena. The local variable id is index. The map whose key is local variable id can be a simple array. The set of local variable ids can be a simple bitset. The id is 32-bit which is smaller than 64-bit pointer.
+Using simple array-based arena enables other optimizations: the map whose key is id can be implemented as an array; the set whose key is id can be implemented as a bitset.
+
+There is no need to put one object's data into one struct. One object's data can be separated into many arenas. This is one idea behind ECS (entity component system). The separation can also enable free composition that's not allowed by OOP inheritance.
 
 #### About linked list
 
@@ -761,13 +759,14 @@ Writing arena-based linked list in Rust is easy. And it can have better cache lo
 
 The pointer-based linked list can also be optimized by making one node hold many elements.
 
-### Entity component system
+### Handle `Debug`
 
-Entity component system (ECS) is a way of organizing data that's different to OOP. In OOP, an object's fields are laid together in memory. But in ECS, each object is separated into components. The same kind of components for different entities are managed together (often laid together in memory). It can improve cache-friendliness. (Note that performance is affected by many factors and depends on exact case.)
+There is an ergonomic issue when using arena. The object handle is just an ID. The handle's [`Debug::fmt`](https://doc.rust-lang.org/std/fmt/trait.Debug.html) by default just outputs the ID. But just the integer ID is not helpful for debugging. We want the handle debug string to also contain object info. 
 
-ECS also favors composition over inheritance. Inheritance tend to bind code with specific types that cannot easily compose.
+But it's not easy to access the arena in handle `Debug::fmt`. The handle is decoupled with arena. Possible solutions:
 
-For example, in an OOP game, `Player` extends `Entity`, `Enemy` extends `Entity`. There is a special enemy `Ghost` that ignores collision and also extends `Enemy`. But one day if you want to add a new player skill that temporarily ignores collision like `Ghost`, you cannot make `Player` extend `Ghost`. Then the logic of ignoring collision has to be lifted into superclass `Entity` (or duplicated in both `Ghost` and `Player`). After many of these, `Entity` will contain many mixed logic, which defeats abstraction. In ECS it can be solved by just changing collision component.
+- Create extra "handle with context" type for debug logging.
+- Put arena reference to thread local variable. The [scoped_tls](https://docs.rs/scoped-tls/latest/scoped_tls/) crate can help. This requires arena to have interior mutability. [This is used by Rust compiler](https://github.com/rust-lang/rust/blob/e22c616e4e87914135c1db261a03e0437255335e/compiler/rustc_interface/src/callbacks.rs#L76).
 
 
 ## Mutable borrow exclusiveness
@@ -939,7 +938,7 @@ Interior mutability allows you to mutate something from an immutable reference t
 
 Ways of interior mutability:
 
-- `Cell<T>`. It's suitable for simple copy-able types like integer.
+- `Cell<T>`. It's suitable for simple copy-able types like integer. [^cell_clone]
 - `RefCell<T>`, suitable for data structure that does incremental mutation, in single-threaded cases. It has internal counters tracking how many immutable borrow and mutable borrow currently exist. If it detects violation of mutable borrow exclusiveness, `.borrow()` or `.borrow_mut()` will panic.It can cause crash if there is nested borrow that involves mutation.
 - `Mutex<T>` `RwLock<T>`, for locking in multi-threaded case. Its functionality is similar to `RefCell`. Note that unnecessary locking can cost performance, and has risk of deadlock. It's not recommended to overuse `Arc<Mutex<T>>` just because it can satisfy the borrow checker.
 - [`QCell<T>`](https://docs.rs/qcell/latest/qcell/). Elaborated below.
@@ -947,6 +946,8 @@ Ways of interior mutability:
 - `UnsafeCell<T>`
 - Lazily-initialized `OnceCell<T>`
 - ......
+
+[^cell_clone]: One may intuitively think that clone is similar to copy, so `Cell<T>` should also be safe when `T` just satisfies `Clone`. However it's not safe when it creates self-reference then clear itself in `clone`. [See also](https://users.rust-lang.org/t/why-does-cell-require-copy-instead-of-clone/5769/9).
 
 They are usually used inside reference counting (`Arc<...>`, `Rc<...>`).
 
@@ -986,57 +987,53 @@ See also: [Dynamic borrow checking causes unexpected crashes after refactorings]
 
 Rust assumes that, if you have a mutable borrow `&mut T`, you can use it at any time. **But holding the reference is different to using reference**. There are use cases that I have two mutable references to the same object, but I only use one at a time. This is the use case that `RefCell` solves.
 
-Another problem: The borrow taken from `RefCell` cannot be directly returned.
+### Returning borrow inside `RefCell`
+
+The `RefCell` can cause other troubles. The borrow taken from `RefCell` cannot be directly returned. Example:
 
 ```rust
-pub struct Parent {  
-    entries: RefCell<HashMap<String, Entry>>,  
-    ...
-}  
-pub struct Entry {  score: u32  }  
-impl Parent {  
-    fn get_entries(&self) -> &HashMap<String, Entry> {  
-        self.entries.borrow()  
-    }  
-    ...
+pub struct Arena<T> {
+    items: RefCell<Vec<T>>,
+}
+
+impl<T> Arena<T> {
+    fn at(&self, i: usize) -> &T {
+        &self.items.borrow()[i]
+    }
 }
 ```
 
-Compile error:
+It will compile error "cannot return value referencing temporary value". Because the `.borrow()` doesn't return a normal borrow. It returns `Ref`. `Ref` implements `Deref` so it can be used similar to a normal borrow.
 
+The `Ref` does some extra thing on drop (decrement counter in `RefCell`), so the lifetime of `Ref` needs to be considered.
+
+One solution is to return`Ref` and use `Ref::map`:
+
+```rust
+pub struct Arena<T> {  
+    items: RefCell<Vec<T>>,  
+}  
+  
+impl<T> Arena<T> {  
+    fn at(&self, i: usize) -> Ref<T> {  
+        Ref::map(self.items.borrow(), |v| &v[i])  
+    }  
+}
 ```
-error[E0308]: mismatched types
-  --> src\main.rs:10:9
-   |
-9  |     fn get_entries(&self) -> &HashMap<String, Entry> {
-   |                              ----------------------- expected `&HashMap<String, Entry>` because of return type
-10 |         self.entries.borrow()
-   |         ^^^^^^^^^^^^^^^^^^^^^ expected `&HashMap<String, Entry>`, found `Ref<'_, HashMap<String, Entry>>`
-   |
-   = note: expected reference `&HashMap<_, _>`
-                 found struct `Ref<'_, HashMap<_, _>>`
-help: consider borrowing here
-   |
-10 |         &self.entries.borrow()
-   |         +
-```
 
-Because the borrow got from `RefCell` is not normal borrow, it's actually `Ref`. `Ref` implements `Deref` so it can be used similar to a normal borrow.
+This makes `Ref` appear in function signature. It makes encapsulation "leaky". And the `Ref::map` is not ergonomic.
 
-The "help: consider borrowing here" suggestion won't solve the compiler error. Don't blindly follow compiler's suggestions.
+Summarize the two downsides of `RefCell`:
 
-One solution is to return `&RefCell<HashMap<String, Entry>>`. Then `RefCell` "invades" the getter signature and make abstraction leaky. (Returning `Ref<HashMap<String, Entry>>` or `impl Deref<Target=HashMap<String, Entry>>` can also work but all not good.)
+- When contagious borrow occurs, it doesn't cause compile error but causes runtime panic.
+- Returning borrow inside `RefCell` forces changing of function signature, making encapsulation "leaky".
 
-### `Rc<RefCell<...>>` and `Arc<Mutex<...>>` are not panacea
+The similar applies to `Mutex`. And the problem of `Mutex` is even larger than `RefCell`:
 
-`Rc<RefCell<...>>` and `Arc<Mutex<...>>` allows freely copying reference and freely mutating things, just like in other languages. Finally "get rid of shackle of borrow checker". However, there are **traps**:
+- Borrow conflict in `RefCell` causes panic. But borrow conflict in `Mutex` causes deadlock. **Deadlock is harder to debug than panic**.
+- Performance issue. `Mutex` is slow when contended by multiple threads. While performance cost of `RefCell` is small.
 
-- **Contagious borrowing**. As previously mentioned, `RefCell` wrapping parent doesn't solve contagious borrowing. `Mutex` also won't. Violating mutable borrow exclusiveness in the same thread is panic (or error) in `RefCell` and **deadlock** in `Mutex`. Rust lock is not re-entrant, [explained below](#rust-lock-is-not-re-entrant).
-- Need to cut cycle using `Weak`, or it will memory leak.
-- **Performance**. `Rc` and `RefCell` has relatively small performance cost. But for `Arc<Mutex<...>>`, unnecessary locking can hurt performance. `Arc` also can have performance issue, [explained below](#arc-is-not-always-fast). It's still ok to use them when not in performance bottleneck.
-- Their syntax ergonomic is not good. The code will have a lot of "noise" like `.borrow().borrow_mut()`.
-
-This doesn't mean `Arc<Mutex<>>` shouldn't be used. It should be used when you want both sharing and locking. It should not be used for just evading borrow checker restriction.
+Only use `Mutex` when you want locking. Don't use `Arc<Mutex<>>` just for evading borrow check restriction.
 
 ### `QCell`
 
@@ -1048,7 +1045,7 @@ The borrowing to `QCellOwner` "centralizes" the borrowing of many `QCell`s assoc
 
 Its runtime cost is low. When borrowing, it just checks whether cell's id matches owner's id. It has memory cost of owner ID per cell.
 
-One advantage of `QCell` is that the duplicated borrow will be compile-time error instead of runtime panic, which helps catch error earlier. If I change the previous `RefCell` panic example into `QCell`:
+One advantage of `QCell` is that borrow conflict will be compile-time error instead of runtime panic, which helps catch error earlier. If I change the previous `RefCell` panic example into `QCell`:
 
 ```rust
 pub struct Parent { total_score: u32, children: Vec<Child> }
@@ -1215,17 +1212,19 @@ It takes immutable borrow of `Bump` (it has interior mutability). It moves `val`
 If you want to keep the borrow of allocated result for long time, then **lifetime annotation is often required**. In Rust, **lifetime annotation is also contagious**:
 
 - Every struct that holds bump-allocated borrow need to also have lifetime annotation of the bump allocator. 
-- Every function that use it also needs lifetime annotation. Rust has [lifetime elision](https://doc.rust-lang.org/nomicon/lifetime-elision.html), which allows you to omit lifetime in function signature in some cases. However you still need to write a lot of things like `<'_>`.
+- Every function that use it also needs lifetime annotation. Rust has [lifetime elision](https://doc.rust-lang.org/nomicon/lifetime-elision.html), which allows you to omit lifetime in function signature in some cases. However you still need to write a lot of lifetime annotations.
 
-Adding or removing lifetime for one thing may involve refactoring many code that use it, which can be huge work. (AI can help in these kinds of refactoring.)
+Adding or removing lifetime for one thing may involve refactoring many code that use it, which can be huge work. (AI can help with these kinds of refactoring.)
 
 [yoke](https://docs.rs/yoke/0.8.1/yoke/) allows getting rid of lifetime annotation by combining bump-allocated structure together with the bump allocator.
 
-`Bump` doesn't implement `Sync`, so `&Bump` is not `Send`. It cannot be shared across threads (even if it can share, there will be lifetime constraint that force you to use structured concurrency). It's recommended to have separated bump allocator in each thread, locally.
+It's recommended to have separated bump allocator in each thread locally. The `Bump` is not `Sync` and cannot be shared between threads.
 
 Putting a `Bump` with its allocated references together creates self-reference. It's more tricky (can use [yoke](https://docs.rs/yoke/0.8.1/yoke/)).
 
 Note that bumpalo by default don't run `drop` to improve performance. Use `bumpalo::boxed::Box<T>` for things that require invoking `drop`.
+
+The bump allocator is also a kind of arena. Note that "inserting" 
 
 ## Using unsafe
 

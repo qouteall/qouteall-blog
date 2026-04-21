@@ -271,7 +271,17 @@ Amortizing here means reducing latency per computation or latency per data.
 
 For database operations, batching operations can reduce the total amount of network requests. There are almost-fixed costs of each network request, such as latency and context switch. Batching can reduce amount of network requests, so the almost-fixed costs can be amortized.
 
-For the procedural code that does DB accesses, making insertions and updates batched is easy as the app usually don't use results of insertions and updates. However making queries batched is harder, as it need to firstly collect queries (without immediately getting query result), then do batched query, then analyze the result to find related things for each query.
+For the procedural code that does DB accesses, making insertions and updates batched is easy as the app usually don't use results of insertions and updates. However making queries batched is harder, as it need to firstly collect queries (without immediately getting query result), then do batched query.
+
+### Responsibility can be moved, but essential complexity conserves
+
+There are some necessary tasks (responsibility) that are required for software to function. But which exact thing does the thing can be moved. For example:
+
+- Move to previous stage of computation, or move to next stage.
+- Move to upper abstraction level or move to lower abstraction level.
+- Move from hardware to software, or move from software to hardware.
+- Move the responsibility to API user, or do the thing internally.
+- Make the logic specified by data, or hardcode it. Hardcode in software or in hardware.
 
 ## Generalized View
 

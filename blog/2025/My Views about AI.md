@@ -316,9 +316,9 @@ But AI coding is a **completely different paradigm** than existing abstraction l
 | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
 | Deterministic, using rigid rules.                                                    | Not deterministic, using black-box deep learning.                                                 |
 | Designed top-down by programmers.                                                    | Trained bottom-up by training data and RL.                                                        |
-| Code contains enough information for software module to run. [^enough_information]   | Vague prompt doesn't contain enough information. Require AI to make detail decisions.             |
+| Code contains enough information for software module to run. [^enough_information]   | Vague prompt doesn't contain enough information. Requires AI to make detail decisions.            |
 | Use hardcoded defaults to handle unspecified details. It's not flexible or adaptive. | Can use "common sense" and patterns learnt from training to fill the gaps of unspecified details. |
-| Reliably follow instructions.                                                        | Sometimes ignore some instructions, especially when having context rot.                           |
+| Follows instructions according to its rigid rules reliably.                          | Sometimes ignore some instructions, especially when having context rot.                           |
 
 [^enough_information]: Note that it focuses just one software module. The code can call external API, or dynamic link another program in system, or download plugin from internet, so one piece of code doesn't contain enough information for whole system to run, because it interacts with environment. But in conventional programming, the code provides enough information for one software module itself to run.
 
@@ -673,6 +673,10 @@ There are also many low-effort AI PR in open source projects. There is an **asym
 Similarily AI also makes security bounty program collapse. AI can generate many fake security issue reports. Generating is easy but verifying takes efforts.
 
 There are also some AI-generated open source libraries that doesn't work at all (or even contains malicious code).
+
+## Even the "AI slop" is better than most people's handwritten results
+
+AI output is treated as slop because it's cheap to produce. However even if it's treated as slop, it's still better than most people's handwritten results. The slop is definitely worse than top experts' handwritten results. But most people are not experts.
 
 ## Benchmark score is not representative
 
