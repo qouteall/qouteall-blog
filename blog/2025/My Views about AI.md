@@ -164,9 +164,11 @@ If the AI user is too self-centric, when AI misunderstands their instruction, th
 
 Writing good prompt requires "putting oneself in AI's shoes", overcoming curse of knowledge, knowing what AI doesn't know, and providing relevant information.
 
-## Asking "stupid questions"
+### Asking "stupid questions"
 
 When learning a new domain of knowledge, it's beneficial to ask "stupid questions". These "stupid questions" are actually fundamental questions, not stupid. But these fundamental questions are seen as stupid by experts. This is also curse of knowledge. One benefit of AI is that you can ask "stupid questions" without being humiliated by experts.
+
+But asking truly stupid questions tend to get "baby-sitting" low-level answers.
 
 ## About AI Coding
 

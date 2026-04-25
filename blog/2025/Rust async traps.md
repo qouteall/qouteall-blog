@@ -6,32 +6,29 @@ unlisted: true
 
 <!-- truncate -->
 
-## The different "future"
 
-Java has `CompletableFuture`. Rust has `Future`. They both have "future" but they are very different things:
 
-- In Java, normally when you have a `CompletableFuture`, the task is already running[^java_future]. In Rust, future is just data. If the future is not awaited or spawned, it won't run.
-- In Java you can abandoned the `CompletableFuture`, then the task still keeps running. But in Rust, dropping a future cancels it. (In Rust the future can also be "abandoned", not being polled but not dropped, elaborated below).
+## Rust future is just data by default
 
-[^java_future]: In Java it's possible to create a raw `CompletableFuture` with no running task. But that use case is rare.
+In Rust, if you call an async function, it returns a future. But the future is just data by default. If you don't await it or spawn a it, its async code won't run. 
 
-The JS `Promise` is similar to Java `CompletableFuture` in these aspects.
+The word "future" has very different meaning in Java. In Java, when obtaining a `CompletableFuture`, the task should be already running.
 
 ## Blocking scheduler thread
 
-Async runtimes (like Tokio) has its own scheduler. It's similar to OS thread scheduling but different in many ways:
+Async runtime schedules async tasks on threads. When an async task suspends, the thread can run other async tasks. 
 
-- It happens within Rust application. It uses Rust async to switch control flow. Scheduling doesn't use OS functionalties.
-- **It's coorporative. If the scheduled Rust code don't coorporatively pause, the scheduler won't forcefully suspend it, and the scheduler thread will be always occupied.**
-- It's more lightweight than OS thread scheduling. Creating a future is faster and require less memory than creating a OS thread. Switching between different Rust futures is faster than OS context switch.
+But it requires the async task to cooperatively suspend (`.await`). An async task can keep running without `.await` for long time, and the async runtime cannot force-suspend it. Then a scheduler thread will be kept occupied. This is called **blocking the scheduler thread**. 
 
-The normal sleep `std::thread::sleep` and normal locking `std::sync::Mutex` will **block thread using OS functionality**. Async runtime won't be notified when they block the current thread. It will occupy the async runtime's scheduling thread. This causes reduced concurrency and possible deadlocks.
+When a scheduler thread is blocked, it reduces overall concurrency and reduces overall performance. And it may cause deadlock.
 
-In Tokio, use `tokio::sync::Mutex` for mutex and `tokio::time::sleep` and sleep. They will coorporatively pause and avoid that issue.
+The normal sleep `std::thread::sleep` and normal locking `std::sync::Mutex` will block thread using OS functionality. When a thread is blocked by OS, async runtime don't know about it. In Tokio, use `tokio::sync::Mutex` for mutex and `tokio::time::sleep` and sleep. They will coorporatively pause and avoid that issue.
 
-That issue is not limited to only locking and sleep. It also involves networking and all kinds of IOs.
+That issue is not limited to only locking and sleep. It also involves networking and all kinds of IOs. So Tokio provides its own set of IO functionalities, and you have to use them when using Tokio for max performance.
 
-Tokio supports [`spawn_blocking`](https://dtantsur.github.io/rust-openstack/tokio/task/fn.spawn_blocking.html) which make it run in new scheduler thread. The code that does non-async blocking should be ran in `spawn_blocking`.
+Also, heavy computation work without `.await` point is also blocking. The async runtime cannot force-suspend the heavy computation if it doesn't cooperatively `.await`. 
+
+Tokio also supports an "escape hatch". The task spawned by [`spawn_blocking`](https://dtantsur.github.io/rust-openstack/tokio/task/fn.spawn_blocking.html) runs in another thread pool and won't block the normal scheduler thread. The code that does non-async blocking or heavy compute work should be ran in `spawn_blocking`.
 
 ### Deadlock caused by blocking scheduler thread
 
@@ -42,57 +39,61 @@ Tokio supports [`spawn_blocking`](https://dtantsur.github.io/rust-openstack/toki
 
 ## Cancellation safety
 
-Rust's future is very different to Java `CompletableFuture` and JS `Promise` and C# `Task`. 
+In Rust, a future can be cancelled. When it's cancelled, the async task stops executing in an await point. It's a **implicit exit** mechanism. The control flow of it is not obvious in code.
 
-In Java/JS/C#, you launch a task then get a future/promise/task object that represents the async task. The task will run regardless whether you discard the future. But in Rust, when you create a future, the task is not yet launched. It will be launched when the future is firstly polled (awaited).
+It's not the only implicit exit mechanism. Panic is another implicit exit mechanism. And in the languages that have exceptions (Java, JS, Python, etc.), exception is another implciit exit mechanism.
 
-In Java/JS/C# when you discard the future/promise/task, the underlying task still runs. But in Rust, dropping future cancels it.
+However, **exceptions and panics are often logged, but future cancel is often not logged**. Although panic is implicit code control flow, it's often explicit in logs. It's easy to debug because it's visible in log. But a future cancel by default logs nothing. Debugging future cancel issue is much harder than debugging panics.
 
-|                                 | In Java/JS/C#                                 | In Rust async                                           |
-| ------------------------------- | --------------------------------------------- | ------------------------------------------------------- |
-| Start running inner code        | The same time as creating future/promise/task | When the future is firstly polled (awaited), or spawned |
-| Discard the future/promise/task | Task keeps running                            | It's cancelled (unless it's a handle to spawned task)   |
+| Exception and panic                                | Rust future cancellation                                               |
+| -------------------------------------------------- | ---------------------------------------------------------------------- |
+| Implicit control flow of exiting function.         | Implicit control flow of exiting async function.                       |
+| Often logged. Easy to notice.                      | Not logged by default. Hard to notice.                                 |
+| Propagates from inside to outside. Can be catched. | Propagates from outside to inside. Can be "catched" by `tokio::spawn`. |
 
-Cancelling a future means the async function suddenly stops executing in an await point.
+The cancellation "catch": normally when the parent future cancels, the inner futures are also cancelled. It propagates from outside to inside. The `tokio::spawn` can stop that propagation. Although `JoinHandle` is `Future`, dropping it won't cancel the spawned task. So if you want to avoid cancellation, wrap it in `tokio::spawn` (and don't call `JoinHandle::abort`).
 
-In Java/JS/C# when there is an exception the remaining code also stops executing. But exceptions can be catched and exceptions are often logged. In Rust, cancelling a future before completion doesn't do any logging and cancelling cannot be "catched" (in Tokio, the "cancel chain" stops at `tokio::spawn`).
+Although it's called "cancellation", the already-done IO operations won't be cancelled. The written files won't be rolled back. The sent packets won't be magically withdrawn. The cancellation here just stops the async function from continuing in an await point.
 
-In Rust, futures are not background tasks. Futures only progress when polled. There are two kinds of async cancellation in Rust:
+In Golang, there is panic, but there is no implcit cancellation. All cancellation need to be explicit. However managing context cancellation in Golang still has traps, just different to async Rust.
 
-- The future won't be polled, but it's not yet dropped. (This is prone to deadlock.)
-- The future is dropped. It obviously won't be polled.
+Two examples of cancellation issues: [Alan tries to cache requests, which doesn't always happen - wg-async](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/alan_builds_a_cache.html), [Barbara gets burned by select](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/barbara_gets_burned_by_select.html)
 
-In either case, the async function will suddenly stop executing in an `await` point.
+See also: [Dealing with cancel safety in async Rust / RFD / Oxide](https://rfd.shared.oxide.computer/rfd/400), [Cancelling async Rust](https://sunshowers.io/posts/cancelling-async-rust/)
 
-This behavior of async Rust is very different to other languages. In Golang a goroutine can suddenly stop executing if it panics. In Java a thread can suddenly stop executing if there is an exception. It's easier to debug in Golang and Java because panics and exceptions are usually logged. But in Rust the dropping of future is not logged so it's harder to debug.
+### Common sources of cancellation in Tokio
 
-Although it's called "cancellation", the already-done IO operations won't be cancelled (written files won't be rolled back, sent packets won't be magically withdrawn). The cancellation here just stops the async function from continuing.
+- `tokio::select!`. When one branch is selected, the futures of other branches are cancelled.
+- `JoinHandle::abort`. Explcitly cancel a task.
+- `tokio::time::timeout`. When timeout is reached but the future hasn't finished, it's cancelled.
 
-In tokio, these are the main ways of cancellation:
+Tokio documentation about cancellation safety: [1](https://docs.rs/tokio/latest/tokio/macro.select.html#cancellation-safety), [2](https://tokio.rs/tokio/tutorial/select#cancellation)
 
-- `tokio::select!`
-- `JoinHandle::abort`
-- `tokio::time::timeout`
+### io_uring issue
 
-Once a parent future is cancelled, its children futures are also dropped.
+- In epoll, the OS notifies app that an IO can be done, then the app does another system call to do IO. It involves context switching from kernel to app then to kernel.
+  - The app can choose to not do the IO after receiving notification. This works well with Rust async cancellation.
+- In io_uring, the OS directly finish IO (write to buffer) then tell the app. It avoids that context switching from kernel to app then to kernel.
+  - The whole process is done by kernel. The app cannot choose to "receive notification but not do IO". When app receives notification, the IO has been done. This doesn't work well with Rust async cancellation.
 
-`tokio::select` the value of non-selected cases will be dropped. `tokio::select` very different to Golang select. In Golang select, the non-selected cases just don't consume data from channel.
+Nuance of "cancel": cancelling a Rust future just drops the future object (and un-tracked by async runtime). It doesn't cancel the IO operation.
 
-In `tokio::select`, for each case, you can:
+With epoll, the buffer can be directly put inside future, with no extra allocation. If the Rust future is dropped, it just don't do the IO after being notified.
 
-- Pass an owned future. If that case is not selected, the future will be dropped. This cause uncorporative cancellation.
-- Pass a pinned mutable borrow of future. If that case is not selected, `select` will proceed without further polling that future, but the future itself won't be dropped.
-- Pass a `JoinHandle`. If that case is not selected, the `JoinHandle` will be dropped but the task of `JoinHandle` won't be cancelled. This way can avoid cancellation.
+With io_uring, dropping the future doesn't cancel the io_uring's IO process. So putting buffer into future in io_uring is not memory-safe on cancellation (kernel will write into freed memory). Two solutions:
 
+- Make the future non-cancellable. Rust doesn't yet have linear type (must-move type) so this cannot be guaranteed by language.
+- Make the buffer heap-allocated. When future is dropped, the buffer can still exist, kernel can write to it without violating memory safety.
 
+See also: [Notes on io-uring](https://without.boats/blog/io-uring/)
 
+### Abandoned future and futurelock
 
-[Tokio document 1](https://tokio.rs/tokio/tutorial/select#cancellation), [Tokio document2](https://docs.rs/tokio/latest/tokio/macro.select.html#cancellation-safety)
+In `tokio::select!` you can pass ownership of a future, but you can also pass a future borrow. When a future borrow is passed, one dangerous case can happen. 
 
-See also: [Making Async Rust Reliable - Tyler Mandry](https://tmandry.gitlab.io/blog/posts/making-async-reliable/)  [400 - Dealing with cancel safety in async Rust / RFD / Oxide](https://rfd.shared.oxide.computer/rfd/400)   [609 - Futurelock / RFD / Oxide](https://rfd.shared.oxide.computer/rfd/0609)  [FuturesUnordered and the order of futures](https://without.boats/blog/futures-unordered/) [Alan tries to cache requests, which doesn't always happen - wg-async](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/alan_builds_a_cache.html) [Barbara gets burned by select](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/barbara_gets_burned_by_select.html) [Cancelling async Rust](https://sunshowers.io/posts/cancelling-async-rust/)
+If the select goes into one branch, the future of other branches are dropeed. If you pass a future borrow to it, the borrow itself is dropped, but the borrowed future is not dropped. However, the borrowed future will not be polled again before the `select!` finishes, even if you explicit await it after the `select!`.
 
-Future cancellation is also a major reason why Rust cannot provide safe zero-cost io_uring interface: https://without.boats/blog/io-uring/
-
+This creates a temporaily abandoned future. It's not polled but not dropped. This is dangerous when async lock is involved. After acquiring lock, the future holds lock. If the future holding lock is dropped, it released lock. But if the future holds lock but not dropped and not polled, it's likely to deadlock. This is the mechanism behind [futurelock](https://rfd.shared.oxide.computer/rfd/0609).
 
 ## Stack overflow caused by large future
 
@@ -151,40 +152,75 @@ https://tmandry.gitlab.io/blog/posts/for-await-buffered-streams/
 
 https://without.boats/blog/poll-progress/
 
-## Blocking on async
+## Converting between async and sync
 
-An async function can easily call async function and normal function. But for a normal function, calling async function is not easy. It requries blocking on it.
+- Making async code call sync code is easy, but has risk of blocking scheduler thread, as mentioned previously.
+- Making sync code call async is not easy. It requires using async runtime's API. But it's less risky.
 
-However there is a case where an async function calls normal function, then the normal function blocks on another async function call. This is async-sync-async sandwich problem. 
+Async-sync-async sandwitch: Async function call sync function that blocks on another async function. Its async-to-sync calling blocks scheduler thread. It's very prone to deadlock.
 
-Due to the problems of normal function calling async function, the most common way is to make an async function's caller also async. This makes async contagious.
+## Rust `Send` `Sync` limitations
 
-## Using multiple async runtimes together
+Tokio does multi-thread work-stealing scheduling. Its purpose is very similar to OS scheduling. And an async task's purpose is very similar to OS thread.
 
-Using multiple async runtimes together is possible but is hard and error-prone. And there are many async-runtime-specific types. So async runtime naturally has exclusion. Then the most popular async runtime Tokio has monopoly.
+The duality of the two:
 
-### Side note: Monopoly effects in Rust
+| OS thread scheduling                                          | Tokio async task scheduling                                                        |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Schedules threads on CPU cores                                | Schedules async tasks on threads                                                   |
+| Spawn a thread                                                | Spawn an async task                                                                |
+| Join on a thread                                              | Await on a `JoinHandle`                                                            |
+| Can do forced scheduling (using hardware interrupt)           | If the async function don't suspend cooperatively, the scheduler cannot suspend it |
+| As long as the data is owned by a thread, it's data-race free | As long as the data is owned by an async task, it's data-race free                 |
 
-Using multiple async runtimes is hard. So developers tend to choose the most popular async runtime, which is Tokio. Then Tokio has monopoly.
+As long as the data is owned by a thread, it's data-race free. The correspondence: as long as the data is owned by an async task, it's data-race free.
 
-Rust currently doesn't have reflection. The "effect of reflection" can be achieved by procedural macro. Libraries like serde and bevy_reflect require using procedural macro to wrap the type definition. 
+Tokio `spawn` requires the future to be `Send + Sync`. This can create some troubles. It requires `Send + Sync` because Tokio does work stealing. An async task in one thread could be then scheduled to another async task. However if async task is analogous to thread, then if we ensure that the data is owned by async task, it can also achieve data-race free, even if the data is not `Send + Sync`.
 
-You cannot add a new procedural macro to a library crate's type, without forking. This is also a factor that causes monopoly. If you want to use a serialization library other than serde, it's very hard to make library types support it, so serde has monopoly.
+However Rust doesn't check "async task boundary". An async task can pass data out. Then the data is no longer owned by async task. There is no language mechanism that ensures that the data is tied within async task. So you still have to satisfy `Send + Sync` even for the data that's only used with one async task.
 
-There is [compile-time reflection](https://rust-lang.github.io/rust-project-goals/2025h2/reflection-and-comptime.html) aiming to address it.
+The `Send + Sync` constraint can be avoided for thread-per-core async runtimes.
 
-## Unbound concurrency
+## Mixing multiple async runtimes is hard
 
-This trap is not Rust-specific. When using thread pool, it often has thread count limit, which limits concurrency within thread pool. But in async, there is no concurrency limit by default. This is good for high-performance web server. But it has downsides:
+Using multiple async runtimes together is possible but is hard and error-prone. And there are many async-runtime-specific types. So async runtime naturally has exclusion. That's why Tokio has monopoly.
+
+In Golang you can only use one official goroutine scheduler. In Rust, although Tokio has monopoly, you have choices of using other async runtimes.
+
+## Unbound concurrency use up resources
+
+This trap is not Rust-specific. When using thread pool, it often has thread count limit, which limits concurrency. But in async, there is no concurrency limit by default. This is good for high-performance web server. But it has downsides:
 
 - For scraper, if concurrency is too high, it may use too much memory then OOM.
 - If it sends too many concurrent requests to a remote server, it may trigger rate limit then most requests fail.
 
 One solution is to add a semaphore to limit concurrency.
 
----
+## About structural concurrency
 
-https://without.boats/blog/why-async-rust/
+Structural concurrency force all concurrent tasks to be scoped. Then the tasks form a tree-shaped structure.
 
-https://web.archive.org/web/20241120111341/https://trouble.mataroa.blog/blog/asyncawait-is-real-and-can-hurt-you/
+Structural concurrency can borrow data from parent. There is no need to make the future `'static`. There is no need to wrap things in `Arc`.
+
+The tree shape is free of cycles, so awaiting on child tasks alone cannot deadlock (but it can deadlock if other kinds of waits are involved).
+
+But there are cases that structural concurrency cannot handld. One is background tasks. For example, a web server provides a Restful API that launches a background task. The background task keeps running after the request that launch task finishes.
+
+
+## Duplicated APIs
+
+[The bane of my existence: Supporting both async and sync code in Rust](https://nullderef.com/blog/rust-async-sync/)
+
+## See also
+
+[Why async Rust?](https://without.boats/blog/why-async-rust/)
+
+https://emschwartz.me/async-rust-can-be-a-pleasure-to-work-with-without-send-sync-static/
+
+[Making Async Rust Reliable - Tyler Mandry](https://tmandry.gitlab.io/blog/posts/making-async-reliable/) 
+
+[FuturesUnordered and the order of futures](https://without.boats/blog/futures-unordered/) 
+
+
+
 

@@ -1363,6 +1363,8 @@ Not all temporary values need to be put into local variable. Sometimes `match`, 
 
 In other languages, if a local variable is only used once, it's often ok to inline it. But in Rust inlining a local variable that does borrowing can cause compile error.
 
+[Sometimes you need to introduce a new scope to avoid a non-`Send` thing to live across `.await` point](https://rust-lang.github.io/async-book/07_workarounds/03_send_approximation.html).
+
 ### Reborrow
 
 Normally mutable borrow `&mut T` can only be moved and cannot be copied. 
