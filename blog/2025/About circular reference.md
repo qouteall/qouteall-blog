@@ -52,7 +52,7 @@ Resource allocation graph in deadlock state:
 
 (Note that a resource allocation graph only shows one possible execution status. It's not some "static property" of code itself.)
 
-Golang's locks are not reentrant. Deadlock can happen with only one lock and one goroutine(thread):
+Golang's locks are not reentrant. Deadlock can happen with only one lock and one goroutine(thread). I call it self-deadlock:
 
 ```go
 type SomeObject struct {
@@ -82,7 +82,9 @@ func (o *SomeObject) DoSomeOtherThing() {
 
 Sometimes retrying can solve deadlock. Retrying may evade the specific condition that deadlock relies on. But retrying may cause livelock, explained below.
 
-## Fine-grained lock deadlock
+## Implicit self-deadlock
+
+Some containers does internal non-reentrant locking, which may cause self-deadlock.
 
 Rust's standard library doesn't have equivalent of Java `ConcurrentHashMap`. There is [`DashMap`](https://docs.rs/dashmap/latest/dashmap/struct.DashMap.html). The `DashMap` does sharded locking: the map content is sharded based on hash. Each shard has a lock.
 
@@ -103,9 +105,7 @@ let elem = map.get(&1).unwrap();
 map.remove(&1); // this deadlocks
 ```
 
-In this case, coarse-grained per-map locking can avoid this kind of deadlock.
-
-Golang locking is non-reentrant, like Rust. Golang standard library only provides `sync.Map` which does coarse-grained locking and avoids this kind of deadlock.
+The `elem` is an guard object that holds lock. It will release when `elem` is dropped. It will drop in the end of scope (it will not drop after last use because it impls `Drop`). To solve this specific case, `drop(elem)` before removing.
 
 ## Lock-free deadlock
 
