@@ -1242,9 +1242,9 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
 - [Pointer provenance](https://doc.rust-lang.org/std/ptr/index.html#provenance).
   - For to-heap pointers, different allocations are different provenances. Different local variables and global variables are different provenances.
   - Two pointers created from two provenances are treated as never alias. If their address equals, accessing memory using them is undefined behavior.
-  - Directly converting an integer to pointer gets a pointer with no provenance, using that pointer to access memory is undefined behavior, except when:
+  - Directly converting an integer to pointer likely gets a pointer with no provenance, using that pointer to access memory is likely undefined behavior, except when:
     - If the integer `i` is converted to pointer using `p.with_addr(i)` (`p` is another pointer that has provenance). The result has same provenance of `p`.
-    - For the memory that's not managed by Rust (including native C library memory, memory-mapped IO (MMIO) memory, file mmap memory, etc.), they should be accessed using [`read_volatile`](https://doc.rust-lang.org/core/ptr/fn.read_volatile.html) and [`write_volatile`](https://doc.rust-lang.org/core/ptr/fn.write_volatile.html), and accessing them doesn't need to care about pointer provenance.
+    - For the memory that's not managed by Rust (memory managed by native C library memory, file mmap memory, memory-mapped IO (MMIO) memory, etc.), they are considered having [exposed provenance](https://doc.rust-lang.org/std/ptr/index.html#exposed-provenance)[^exposed_provenance]. Converting integer to pointer of them is fine.
   - Adding a pointer with an integer doesn't change provenance.
   - The provenance is tracked by compiler in compile time. In actual execution, pointer is still integer address that doesn't attach provenance information [^miri_pointer_provenance].
   - The [XOR linked list](https://en.wikipedia.org/wiki/XOR_linked_list) breaks under pointer provenance. It's not recommended to use it.
@@ -1262,6 +1262,8 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
 [^llvm_constraint]: When there is some other constraint, a byte can have less than 258 possible values in LLVM.
 
 [^miri_pointer_provenance]: When running in tools like [Miri](https://github.com/rust-lang/miri), the pointer provenance will be tracked at runtime.
+
+[^exposed_provenance]: The exposed provenance may be a new provenance or an existing provenance. The LLVM optimizer doesn't always know. When it doesn't know, the provenance-based optimizations will not be done.
 
 Modern compilers tries to optimize as much as possible. **To optimize as much as possible, the compiler makes assumptions as much as possible. Breaking any of these assumption can lead to wrong optimization.** That's why it's so complex. See also: [C Is Not a Low-level Language](https://queue.acm.org/detail.cfm?id=3212479)
 

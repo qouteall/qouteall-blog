@@ -82,6 +82,31 @@ func (o *SomeObject) DoSomeOtherThing() {
 
 Sometimes retrying can solve deadlock. Retrying may evade the specific condition that deadlock relies on. But retrying may cause livelock, explained below.
 
+## Fine-grained lock deadlock
+
+Rust's standard library doesn't have equivalent of Java `ConcurrentHashMap`. There is [`DashMap`](https://docs.rs/dashmap/latest/dashmap/struct.DashMap.html). The `DashMap` does sharded locking: the map content is sharded based on hash. Each shard has a lock.
+
+Java `ConcurrentHashMap` uses per-bucked locking, which is similar to sharded locking. But there is an important differences:
+
+- Java locking is re-entrant by default. One thread can acquire the same lock twice. Rust locking is non-rentrant. One thread trying to acquire the same lock twice will deadlock.
+- In `ConcurrentHashMap`, just reading is lock-free. But in `DashMap`, borrowing element holds lock.
+
+In `DashMap`, removing an element when borrowing it causes deadlock:
+
+```rust
+let map: DashMap<u32, u32> = DashMap::new();
+map.insert(1, 2);
+
+...
+
+let elem = map.get(&1).unwrap();
+map.remove(&1); // this deadlocks
+```
+
+In this case, coarse-grained per-map locking can avoid this kind of deadlock.
+
+Golang locking is non-reentrant, like Rust. Golang standard library only provides `sync.Map` which does coarse-grained locking and avoids this kind of deadlock.
+
 ## Lock-free deadlock
 
 Deadlock can also happen when there is no explicit lock. I call it **lock-free deadlock** [^lockfree_deadlock]. (The naming is similar to "[serverless servers](https://vercel.com/blog/serverless-servers-node-js-with-in-function-concurrency)", "constant variables", "[unnamed namespaces](https://en.cppreference.com/w/cpp/language/namespace.html#Unnamed_namespaces)", and "[asynchronous synchronization](https://www.researchgate.net/figure/Asynchronous-synchronization-Top-line-after-the-synchronization-request-has-been-sent_fig2_371203452)".)

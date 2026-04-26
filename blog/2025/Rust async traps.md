@@ -165,13 +165,15 @@ Tokio does multi-thread work-stealing scheduling. Its purpose is very similar to
 
 The duality of the two:
 
-| OS thread scheduling                                          | Tokio async task scheduling                                                        |
-| ------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Schedules threads on CPU cores                                | Schedules async tasks on threads                                                   |
-| Spawn a thread                                                | Spawn an async task                                                                |
-| Join on a thread                                              | Await on a `JoinHandle`                                                            |
-| Can do forced scheduling (using hardware interrupt)           | If the async function don't suspend cooperatively, the scheduler cannot suspend it |
-| As long as the data is owned by a thread, it's data-race free | As long as the data is owned by an async task, it's data-race free                 |
+| OS thread scheduling                                                | Tokio async task scheduling                                                          |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Schedules threads on CPU cores                                      | Schedules async tasks on threads                                                     |
+| Spawn a thread                                                      | Spawn an async task                                                                  |
+| Join on a thread                                                    | Await on a `JoinHandle`                                                              |
+| Can do forced scheduling (using hardware interrupt)                 | If the async function don't suspend cooperatively, the scheduler cannot suspend it   |
+| As long as the data is fully owned by a thread, it's data-race free | As long as the data is fully owned[^fully_own] by an async task, it's data-race free |
+
+[^fully_own]: The "fully owned" here means not just ownership in Rust semantics. The `Rc` has internal data structures. The "fully owned" applies to these internal data structures. One async task fully own the `Rc` means the internal data structure (that contains reference count) is only accessible from one async task.
 
 As long as the data is owned by a thread, it's data-race free. The correspondence: as long as the data is owned by an async task, it's data-race free.
 
