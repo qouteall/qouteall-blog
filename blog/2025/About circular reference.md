@@ -105,7 +105,33 @@ let elem = map.get(&1).unwrap();
 map.remove(&1); // this deadlocks
 ```
 
-The `elem` is an guard object that holds lock. It will release when `elem` is dropped. It will drop in the end of scope (it will not drop after last use because it impls `Drop`). To solve this specific case, `drop(elem)` before removing.
+The `elem` is an guard object that holds lock. It will release when `elem` is dropped. It will drop in the end of scope[^rust_nll]. To solve this specific case, `drop(elem)` before removing.
+
+[^rust_nll]: Rust has NLL(non-lexical lifetime). When NLL is triggered, a local variable will drop after last use, earlier than the end of scope. But any type that explicitly implements `Drop` will not trigger NLL. The dashmap element guard type `dashmap::mapref::one::Ref` implements `Drop` (because it needs to do unlocking) so it doesn't trigger NLL.
+
+Apart from removing, inserting could also deadlock in `DashMap`. The [crossbeam_skiplist](https://docs.rs/crossbeam-skiplist/latest/crossbeam_skiplist/) provides lock-free map which doesn't deadlock in that case. Example:
+
+```rust
+fn this_deadlocks() {
+    let map: DashMap<u32, u32> = DashMap::new();
+    map.insert(1, 2);
+    let elem = map.get(&1).unwrap();
+
+    for i in 2..1000 {
+        map.insert(i, 0);
+    }
+}
+
+fn this_does_not_deadlock() {
+    let map: SkipMap<u32, u32> = SkipMap::new();
+    map.insert(1, 2);
+    let elem = map.get(&1).unwrap();
+
+    for i in 2..1000 {
+        map.insert(i, 0);
+    }
+}
+```
 
 ## Lock-free deadlock
 
@@ -386,7 +412,7 @@ Then there are two concurrent transctions. Each transaction inserts a child then
 |                                                                                | `update parent set update_time = now() where id = 2333;`                                 |
 |                                                                                | Write-locks parent row. Because it's read-locked by transaction A, wait for A. Deadlock. |
 
-That deadlock is caused by **locking more than what it needs to lock**. To ensure the foreign key validity, it only need to ensure parent row don't get deleted (or change primary key). It doesn't need to lock whole parent row.
+That deadlock is caused by **locking more than what it needs to lock** (locking is too coarse-grained). To ensure the foreign key validity, it only need to ensure parent row don't get deleted (or change primary key). It doesn't need to lock whole parent row.
 
 That deadlock can be prevented by changing timestamp before inserting child. It avoids upgrading read lock to write lock.
 
@@ -402,7 +428,9 @@ Normally, a row that does not yet exist cannot be locked. But MySQL can "lock a 
 
 Gap lock can cause deadlock.
 
-For example, I have a table of users. The users with `status=1` cannot duplicate name. But users with other statuses can duplicate name. This "conditional unique" cannot be enforced by a simple unique index. So the application enforces it in backend code.
+For example, I have a table of users. The users with `status=1` cannot duplicate name. But users with other statuses can duplicate name. This conditional uniqueness cannot be enforced by a simple unique index in MySQL[^unique_index]. So the application enforces it in backend code.
+
+[^unique_index]: Actually the conditional uniqueness can be enforced in MySQL using unique index, by adding a new user id field that's only not null when status is 1. MySQL unique index allows duplicating null. But the enforce-uniqueness-by-backend-code pattern is still commonly used.
 
 ```sql
 create table users (
@@ -558,10 +586,11 @@ Without mutability or lazy evaluation, reference cycle cannot be created. Becaus
 
 ![](./circular/grouping_cycle.drawio.png)
 
-Some deadlocks come from too-coarse-grained locking (lock more than what you need to lock). 
 
-On contrary, some deadlocks can be prevented by making locking more coarse-grained (grouping):
 
+Grouping two locks into one lock can introduce new deadlock. It locks more than what you need to lock. One example is the MySQL foreign key deadlock.
+
+But splitting lock can also introduce new deadlock.
 ![](./circular/deadlock_coarse.drawio.png)
 
 ## Preventing deadlock in type system
@@ -633,7 +662,7 @@ Although the conceptual list is infinitely large, due to lazy evaluation, only t
 
 In normal state monad, the new state is computed on old state. But in reverse state monad, the state flows backwards. Old state can be computed on new state. You can change the old state that's used in previous computation. This "magic" relies on lazy evaluation.
 
-Definition of reverse state monad.
+Definition of reverse state monad:
 
 ```haskell
 newtype RState s a = RState { runRState :: s -> (a, s) }
@@ -702,7 +731,7 @@ It will output
 ("Before: 4666, After: 2333",4666)
 ```
 
-Note that reverse state monad is still in a normal Haskell program. It cannot magically "make time flow backwards". It also cannot magically solve equations to compute old state based on new state. If new state relies on old state it will just deadloop.
+Note that reverse state monad is still in a normal Haskell program. It cannot magically "make time flow backwards". It also cannot magically solve equations to compute old state based on new state. If new state relies on old state it will just dead recursion.
 
 ### Limitations of Haskell lazy evaluation
 
