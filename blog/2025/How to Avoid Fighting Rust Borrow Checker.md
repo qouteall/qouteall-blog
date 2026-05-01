@@ -169,7 +169,7 @@ Summarize solutions (workarounds) of contagious borrow issue (elaborated below):
 
 There are proposed language design solutions to contagious borrow issue: [^solving_container_contagious_borrow]
 
-- Encode field-level borrow information in type. [Vew type](https://smallcultfollowing.com/babysteps/blog/2025/02/25/view-types-redux/). It doen't work well with encapsulation (internal field info is leaked into type). And handling private fields while keeping API compatibility is hard.
+- Encode field-level borrow information in type. [Vew type](https://smallcultfollowing.com/babysteps/blog/2025/02/25/view-types-redux/). It doen't work well with encapsulation (internal field info is leaked into type). And handling private fields while keeping API compatibility is hard. [Tracking issue](https://github.com/rust-lang/rust/issues/155938).
 - Do implicit field-level borrow analysis in private functions. Avoid exposing partial borrow in public API. It avoids API compatibility issue. It makes borrow checking inter-function (not just check function signature). [Automatic partial borrows for private methods](https://dioxus.notion.site/Dioxus-Labs-High-level-Rust-5fe1f1c9c8334815ad488410d948f05e).
 
 [^solving_container_contagious_borrow]: These two solutions address struct field contagious borrow. But contagious borrow can also happen to containers. To encode the information of borrowing `i`-th element of a `Vec` into type, it requires dependent type, depending on runtime value of `i`. Adding dependent type into language is much more complex.
@@ -387,7 +387,7 @@ There is a misconception: "I already choosed Rust. So I must optimize performanc
 
 [^8020]: Exact numbers may be different. The idea is that the "performance cost contribution" of code is highly biased (fat-tail distribution).
 
-## Workaround by swapping container
+## Workaround by swapping container (not recommended)
 
 Another workaround is to temporarily swap the container to another place. Then it can loop on container without borrowing parent object. When it finishes, it swaps back.
 
@@ -487,45 +487,11 @@ This will be fixed by [Polonius](https://rust-lang.github.io/polonius/current_st
 
 That issue can also be workarounded by cloning value in map.
 
-### Clarifications about branch contagious borrow
-
-The actual mechanism of that issue not simple. Some clarifications: 
-
-This issue only occurs when one branch's output indirectly borrows matched value. If the matched value (condition of `if`) don't indirectly borrow, then two branches don't interfere. Two branches can both borrow `cache` without interference:
-
-If the output don't indirectly borrow from matched value it can compile:
-
-```rust
-fn get_cached_result(cache: &mut HashMap<i32, String>, key: i32) -> &String {  
-    match cache.get(&key) {  
-        None => {  
-            let computed_value = "assume this is result of computation".to_string();  
-            cache.insert(key, computed_value);  
-            cache.get(&key).unwrap()  
-        }  
-        Some(v) => {  
-            // v is not used, can workaround the issue  
-            cache.get(&key).unwrap()  
-        }  
-    }  
-}
-```
-
-Rust has "indirect borrow". If `a` contains a borrow into `b` then `a` indirectly borrows `b`. To avoid use-after-free, Rust will ensure `b` lives when `a` lives. 
-
-In that case the `cache.get(&key)` indirectly borrows `cache`. The `Some(v)` indirectly borrows `cache.get(&key)`. `v` also indirectly borrow `cache.get(&key)` which indirectly borrows `cache`.
-
-If `v` may be output of `match` expression, then whole `match` expression indirectly borrow `cache`. But if `v` cannot be output of `match` expression, then that issue doesn't apply. Triggering that issue requires a "chain" of indirect borrows.
-
-The issue applies not only to `match`. The issue also applies to `if let`, which is also pattern match. 
-
-The issue doesn't apply to normal `if`, because normal `if` can only test on `bool` which cannot indirectly borrow anything.
-
 ## Callbacks
 
 Callbacks are commonly used in GUIs, games and other dynamic reactive systems. If parent want to be notified when some event happens on child, the parent register callback to child, and child calls callback when event happens.
 
-However, the callback function object often have to reference the parent (because it need to use parent's data). Then it creates **circular reference**: parent references child, child references callback, callback references parent. This creates trouble as **Rust is unfriendly to circular reference**.
+However, the callback function object often have to reference the parent (because it need to use parent's data). Then it creates **circular reference: parent references child, child references callback, callback references parent**. This creates trouble as Rust is unfriendly to circular reference.
 
 Summarize solutions to circular reference callbacks:
 
@@ -763,17 +729,18 @@ The pointer-based linked list can also be optimized by making one node hold many
 
 There is an ergonomic issue when using arena. The object handle is just an ID. The handle's [`Debug::fmt`](https://doc.rust-lang.org/std/fmt/trait.Debug.html) by default just outputs the ID. But just the integer ID is not helpful for debugging. We want the handle debug string to also contain object info. 
 
-But it's not easy to access the arena in handle `Debug::fmt`. The handle is decoupled with arena. Possible solutions:
+But it's not easy to access the arena in handle `Debug::fmt`. You cannot access the arena from just handle. Possible solutions:
 
 - Create extra "handle with context" type for debug logging.
-- Put arena reference to thread local variable. The [scoped_tls](https://docs.rs/scoped-tls/latest/scoped_tls/) crate can help. This requires arena to have interior mutability. [This is used by Rust compiler](https://github.com/rust-lang/rust/blob/e22c616e4e87914135c1db261a03e0437255335e/compiler/rustc_interface/src/callbacks.rs#L76).
+- Put arena reference to thread local variable. The [scoped_tls](https://docs.rs/scoped-tls/latest/scoped_tls/) crate can help. This requires arena to have interior mutability. This solution is recommended for only append-only arenas. [^arena_tls_debug]
 
+[^arena_tls_debug]: The solution of putting arena into TLS then read TLS in `Debug::fmt` is [used by Rust compiler](https://github.com/rust-lang/rust/blob/e22c616e4e87914135c1db261a03e0437255335e/compiler/rustc_interface/src/callbacks.rs#L76). Note that Rust compiler's most arenas are append-only (similar to [bumpalo](https://docs.rs/bumpalo/latest/bumpalo/) and [append_only_vec](https://docs.rs/append-only-vec/latest/append_only_vec/index.html)). The interior mutability of append-only arena is safe (free of `RefCell` borrow conflict). But `RefCell`-based interior mutability is much more risky. For them, if `Debug::fmt` borrows arena, then doing debug logging when mutably borrowing arena will cause `RefCell` borrow error. So that solution is only suitable for append-only arenas.
 
 ## Mutable borrow exclusiveness
 
 As previously mentioned, Rust has **mutable borrow exclusiveness**:
 
-- A mutable borrow to one object cannot co-exist with any other borrow to the same object. Two mutable borrows cannot co-exist. One mutable and one immutable also cannot co-exist.
+- A mutable borrow to one object cannot co-exist with any other borrow to the same object. (Two mutable borrows cannot co-exist. One mutable and one immutable also cannot co-exist.)
 - Multiple immutable borrows for one object can co-exist.
 
 That is also called "mutation xor sharing", as mutation and sharing cannot co-exist.
@@ -786,13 +753,13 @@ But in single-threaded case, this restriction is not natural at all. No mainstre
 > 
 > \- [The borrow checker within](https://smallcultfollowing.com/babysteps/blog/2024/06/02/the-borrow-checker-within/)
 
-Mutable borrow exclusiveness is still important for safety of interior pointer, even in single thread:
+Mutable borrow exclusiveness is still important for safety of **interior pointer**, even in single thread:
 
 ### Interior pointer
 
 Rust has **interior pointer**. Interior pointer are the pointers that point into some data inside another object. A **mutation can invalidate the memory layout that interior pointer points to**. 
 
-For example, you can take pointer of an element in `Vec`. If the `Vec` grows, it may allocate new memory and copy existing data to new memory, thus the interior pointer to it can become invalid (break the memory layout that interior pointer points to). Mutable borrow exclusiveness can prevent this issue from happening:
+For example, you can take pointer of an element in `Vec`. If the `Vec` grows, it may allocate new memory and copy existing data to new memory, thus the interior pointer to it can become invalid. **Mutation breaks the memory layout that interior pointer points to**. Mutable borrow exclusiveness can prevent this issue from happening:
 
 ```rust
 fn main() {  
@@ -845,7 +812,7 @@ Compile error:
    |                    ----------------- borrow later used here
 ```
 
-Note that sometimes mutating can keep validity of interior pointer. For example, changing an element in `Vec<u32>` doesn't invalidate interior pointer to elements, because there is no memory layout change. But Rust by default prevents all mutation when interior pointer exists (unless using interior mutability).
+Note that mutation doesn't always break the memory layout that interior pointer points to. For example, changing an element in `Vec<u32>` doesn't invalidate interior pointer to elements, because there is no memory layout change. But Rust by default prevents all mutation when interior pointer exists (unless using interior mutability).
 
 ### Interior pointer in other languages
 
@@ -899,11 +866,9 @@ public class Main {
 }
 ```
 
-That will get `java.util.ConcurrentModificationException`. Java's `ArrayList` has an internal version counter that's incremented every time it changes. The iterator code checks concurrent modification using version counter. 
+That will get `java.util.ConcurrentModificationException`. Java's `ArrayList` has an internal version counter that's incremented every time it changes. The iterator code checks concurrent modification using version counter.  (Even without the version check, it will still be memory-safe because array access is range-checked.)
 
-Even without the version check, it will still be memory-safe because array access is range-checked.
-
-Note that the container for loop in java internally use iterator (except for raw array). Inserting or removing to the container while for looping can also cause iterator invalidation.
+Note that the container `for` loop in java internally uses iterator (except for raw array). Inserting or removing to the container while for looping can also cause iterator invalidation.
 
 Note that **iteration invalidation is logic error**, no matter whether it's memory-safe or not.
 
@@ -918,7 +883,7 @@ That's why mainstream languages has no mutable borrow exclusiveness, and still w
 Rust's mutable borrow exclusiveness creates a lot of troubles in single-threaded cases. But it also has **benefits** (even in signle-threaded cases):
 
 - Make the borrow more universal. In Rust, map key and value can be borrowed. But in Golang you cannot take interior pointer to map key or value. This makes abstractions that work with borrows more general.
-- Mutable borrow is exclusive, so Rust can emit LLVM `noalias` attribute (in release mode). `noalias` means the pointed data cannot be accessed by other code, which means:
+- Mutable borrow is exclusive, so Rust can emit LLVM `noalias` attribute (in release mode). `noalias` means the pointed data cannot be accessed by other code, which helps optimizations:
   - It allows aggressively merging reads. Before next write to it, it can be temporarily treated as constant.
   - It allows aggressively merging writes. If there are two memory writes to it, compiler can remove the first write, only keep the last write.
   - It allows removing reads after write, using the previous write as read result.
@@ -926,9 +891,9 @@ Rust's mutable borrow exclusiveness creates a lot of troubles in single-threaded
   - The above give compiler a lot of freedom of transforming code, which enables many other optimizations.
   - Without `noalias`, the optimizer must consider all possible reads/writes to the same value to do above transformation. In many cases, compiler don't have enough information, so much fewer optimizations can be done.
 
-Related: CPU internally optimizes by assuming two seprately-calculated addresses are different (assuming no alias), then rollback if assumption is wrong. [Memory disambiguation](https://en.wikipedia.org/wiki/Memory_disambiguation).
+Related: CPU internally optimizes by assuming two seprately-calculated addresses are different (assuming no alias), then rollback if assumption is wrong. This is called [Memory disambiguation](https://en.wikipedia.org/wiki/Memory_disambiguation).
 
-Related: in C, the same optimization opportunity can be enabled by `restrict` keyword. Note that C++ standard doesn't have this feature.
+Related: in C, the same optimization opportunity can be enabled by `restrict` keyword, which corresponds to LLVM `noalias`. Note that C++ standard doesn't have this feature.
 
 ### Interior mutability summary
 

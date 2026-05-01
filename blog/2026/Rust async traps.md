@@ -1,5 +1,8 @@
 ---
-unlisted: true
+unlisted: false
+date: 2026-05-01
+tags:
+  - Programming
 ---
 
 # Rust Async Traps
@@ -16,7 +19,7 @@ The word "future" has very different meaning in Java. In Java, when obtaining a 
 
 ## Blocking scheduler thread
 
-Async runtime schedules async tasks on threads. When an async task suspends, the thread can run other async tasks. 
+Async runtime schedules async tasks on threads. When an async task suspends, the thread can run other async tasks.
 
 But it requires the async task to cooperatively suspend (`.await`). An async task can keep running without `.await` for long time, and the async runtime cannot force-suspend it. Then a scheduler thread will be kept occupied. This is called **blocking the scheduler thread**. 
 
@@ -39,27 +42,29 @@ Tokio also supports an "escape hatch". The task spawned by [`spawn_blocking`](ht
 
 ## Cancellation safety
 
-In Rust, a future can be cancelled. When it's cancelled, the async task stops executing in an await point. It's a **implicit exit** mechanism. The control flow of it is not obvious in code.
+In Rust, a future can be dropped. When it's dropped, its async code stops executing in an await point. This is called cancellation. It's a **implicit exit** mechanism. The control flow of it is not obvious in code.
 
-It's not the only implicit exit mechanism. Panic is another implicit exit mechanism. And in the languages that have exceptions (Java, JS, Python, etc.), exception is another implciit exit mechanism.
+Note it cancels the future, not the IO. Cancelling a future just prevents the async code from running. The already-done IO operations won't be cancelled. (The written files won't be magically rolled back. The sent packets won't be magically withdrawn.)
+
+Cancellation not the only implicit exit mechanism. Panic is another implicit exit mechanism. And in the languages that have exceptions (Java, JS, Python, etc.), exception is another implciit exit mechanism.
 
 However, **exceptions and panics are often logged, but future cancel is often not logged**. Although panic is implicit code control flow, it's often explicit in logs. It's easy to debug because it's visible in log. But a future cancel by default logs nothing. Debugging future cancel issue is much harder than debugging panics.
 
 | Exception and panic                                | Rust future cancellation                                               |
 | -------------------------------------------------- | ---------------------------------------------------------------------- |
-| Implicit control flow of exiting function.         | Implicit control flow of exiting async function.                       |
+| Implicit control flow of exiting function.         | Implicit control flow of exiting async code.                           |
 | Often logged. Easy to notice.                      | Not logged by default. Hard to notice.                                 |
 | Propagates from inside to outside. Can be catched. | Propagates from outside to inside. Can be "catched" by `tokio::spawn`. |
 
 The cancellation "catch": normally when the parent future cancels, the inner futures are also cancelled. It propagates from outside to inside. The `tokio::spawn` can stop that propagation. Although `JoinHandle` is `Future`, dropping it won't cancel the spawned task. So if you want to avoid cancellation, wrap it in `tokio::spawn` (and don't call `JoinHandle::abort`).
 
-Although it's called "cancellation", the already-done IO operations won't be cancelled. The written files won't be rolled back. The sent packets won't be magically withdrawn. The cancellation here just stops the async function from continuing in an await point.
+In Golang, there is panic, but there is no implcit cancellation. All cancellation need to be explicit. (However managing context cancellation in Golang still has traps, just different to async Rust.)
 
-In Golang, there is panic, but there is no implcit cancellation. All cancellation need to be explicit. However managing context cancellation in Golang still has traps, just different to async Rust.
+Two examples of cancellation issues: [Alan tries to cache requests, which doesn't always happen](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/alan_builds_a_cache.html), [Barbara gets burned by select](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/barbara_gets_burned_by_select.html)
 
-Two examples of cancellation issues: [Alan tries to cache requests, which doesn't always happen - wg-async](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/alan_builds_a_cache.html), [Barbara gets burned by select](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/barbara_gets_burned_by_select.html)
+See also: [Dealing with cancel safety in async Rust](https://rfd.shared.oxide.computer/rfd/400), [Cancelling async Rust](https://sunshowers.io/posts/cancelling-async-rust/)
 
-See also: [Dealing with cancel safety in async Rust / RFD / Oxide](https://rfd.shared.oxide.computer/rfd/400), [Cancelling async Rust](https://sunshowers.io/posts/cancelling-async-rust/)
+There is another kind of "cancel": doesn't drop the future but does not `poll` the future. This is also dangerous. Elaborated below.
 
 ### Common sources of cancellation in Tokio
 
@@ -71,23 +76,29 @@ Tokio documentation about cancellation safety: [1](https://docs.rs/tokio/latest/
 
 ### io_uring issue
 
-- In epoll, the OS notifies app that an IO can be done, then the app does another system call to do IO. It involves context switching from kernel to app then to kernel.
-  - The app can choose to not do the IO after receiving notification. This works well with Rust async cancellation.
-- In io_uring, the OS directly finish IO (write to buffer) then tell the app. It avoids that context switching from kernel to app then to kernel.
-  - The whole process is done by kernel. The app cannot choose to "receive notification but not do IO". When app receives notification, the IO has been done. This doesn't work well with Rust async cancellation.
+- In epoll, the OS notifies app that an IO can be done, then the app does another system call to do IO. It involves context switching from kernel to app (receive notification), then to kernel (do the IO syscall) then to app (finishing IO).
+  - The app can choose to not do the IO after receiving notification. This works well with Rust future cancellation.
+- In io_uring, the OS directly finish IO (write to buffer) then tell the app. It's just a context switch from kernel to app (it's faster than epoll's kernel-to-app-to-kernel-to-app).
+  - The IO is fully done by kernel. The app cannot choose to "receive notification but not do IO". When app receives notification, the IO has already been done. This doesn't work well with Rust async cancellation.
 
-Nuance of "cancel": cancelling a Rust future just drops the future object (and un-tracked by async runtime). It doesn't cancel the IO operation.
+Note again that "cancel" just drops Rust future (and un-track it in async runtime). It doesn't cancel the IO operation.
 
 With epoll, the buffer can be directly put inside future, with no extra allocation. If the Rust future is dropped, it just don't do the IO after being notified.
 
-With io_uring, dropping the future doesn't cancel the io_uring's IO process. So putting buffer into future in io_uring is not memory-safe on cancellation (kernel will write into freed memory). Two solutions:
+With io_uring, dropping the future doesn't cancel the kernel's IO process. So putting buffer into future in io_uring is not memory-safe on cancellation (kernel will write into freed memory). Two solutions:
 
 - Make the future non-cancellable. Rust doesn't yet have linear type (must-move type) so this cannot be guaranteed by language.
 - Make the buffer heap-allocated. When future is dropped, the buffer can still exist, kernel can write to it without violating memory safety.
 
 See also: [Notes on io-uring](https://without.boats/blog/io-uring/)
 
-### Abandoned future and futurelock
+## Un-`poll`-ed futures
+
+As previously mentioned, dropping a future cancels it. There is another kind of "cancellation": just not `poll` the future, without dropping it.
+
+It's also dangerous. It may cause deadlock or weird delaying.
+
+### Futurelock
 
 In `tokio::select!` you can pass ownership of a future, but you can also pass a future borrow. When a future borrow is passed, one dangerous case can happen. 
 
@@ -95,13 +106,29 @@ If the select goes into one branch, the future of other branches are dropeed. If
 
 This creates a temporaily abandoned future. It's not polled but not dropped. This is dangerous when async lock is involved. After acquiring lock, the future holds lock. If the future holding lock is dropped, it released lock. But if the future holds lock but not dropped and not polled, it's likely to deadlock. This is the mechanism behind [futurelock](https://rfd.shared.oxide.computer/rfd/0609).
 
+### Buffered stream issue
+
+When using buffered stream, some futures in buffer may be temporarily un-`poll`-ed. This can cause weird delaying or deadlock.
+
+https://tmandry.gitlab.io/blog/posts/for-await-buffered-streams/
+
+https://without.boats/blog/poll-progress/
+
 ## Stack overflow caused by large future
 
-TODO
+Rust currently have no in-place initialization. Heap-allocating one thing requires firstly creating it on stack then move it to heap. In release mode, it can be optimized to directly initializing on heap. But in debug mode it still involves creating on stack.
 
-https://github.com/rust-lang/rust-project-goals/blob/main/src/2026/async-future-memory-optimisation.md
+Some futures may be very large. Creating a large future on stack can cause stack overflow.
 
-heap-allocating the future can avoid it. but rust currently has no in-place initialization. conceptually, it firstly creates future on stack then move to heap. in release mode it can be optimized to directly creating on heap. but in debug it still involves creating on stack first.
+Sometimes it stack overflows in debug mode but not release mode, because in release mode it directly writes to heap.
+
+In Windows the default stack size is smaller so it's more likely to stackoverflow.
+
+There is currently some inefficiency in future size. See [Async Future Memory Optimisation](https://github.com/rust-lang/rust-project-goals/blob/main/src/2026/async-future-memory-optimisation.md)
+How to reduce future size:
+
+- Avoid creating an in-place buffer like `let buf: [u8; 1024]`. The buffer will directly be in the future.
+- When calling another async function, firstly box that future then await on it. If not boxed, the sub-future will be directly put inside parent future.
 
 ## No parallelism without `spawn`
 
@@ -145,12 +172,6 @@ Testing port: 4 ThreadId(1)
 All of them execute on main thread. There is no parallelism. The parallelism can be enabled by using `tokio::spawn`. But without `tokio::spawn` it has no parallelism by default.
 
 This is different in Golang. In Golang, goroutines are parallel.
-
-## Buffered stream issue
-
-https://tmandry.gitlab.io/blog/posts/for-await-buffered-streams/
-
-https://without.boats/blog/poll-progress/
 
 ## Converting between async and sync
 
@@ -217,7 +238,7 @@ But there are cases that structural concurrency cannot handld. One is background
 
 [Why async Rust?](https://without.boats/blog/why-async-rust/)
 
-https://emschwartz.me/async-rust-can-be-a-pleasure-to-work-with-without-send-sync-static/
+[Async Rust can be a pleasure to work with (without `Send + Sync + 'static`)](https://emschwartz.me/async-rust-can-be-a-pleasure-to-work-with-without-send-sync-static/)
 
 [Making Async Rust Reliable - Tyler Mandry](https://tmandry.gitlab.io/blog/posts/making-async-reliable/) 
 

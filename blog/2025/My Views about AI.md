@@ -557,6 +557,14 @@ Some argue that AI is improving fast that future AI will be able to refactor out
 
 </details>
 
+Solving tech debt is much harder than creating tech debt. 
+
+### Some documents/comments are negative-value
+
+AI-written document/comment may be technically right, but stress the unimportant things and omit important things. It may be worse, AI-written document may confuse different things with similar wording. When AI changed code, it may "forget" to update comments, then the comments become wrong.
+
+Having no document is better than having wrong documents.
+
 ## Verification is less fun than generation?
 
 Work involves two parts: generation (e.g. draw things, write code), verification (e.g. evaluate whether drawing is good, test whether code works). Before AI, both parts are done by human. But after AI, human don't do generation and only do verification.
@@ -793,9 +801,9 @@ Learning skill takes efforts. But using AI allow doing work without the efforts,
 
 As previously mentioned, if human don't know work details, then human cannot supervise AI effectively. Detecting reward hacking requires skill.
 
-This creates an irony: The more AI use, the less human skill developed, the less effective supervision.
+This creates an irony: The more AI use, the less human skill developed, the less effective human supervision is.
 
-I think reward hacking will be a very important AI risk. If in the future everyone vibe-codes, then no one will keep the ability of understanding the code, then no one will be sure whether AI writes working code or AI-written code just show fake data on screen.
+As previously mentioned, reward hacking is an important problem. But it requires human skill to supervise reward hacking. AI may write software that shows fake data on screen. If no human keep the ability to read code then that reward hacking won't be noticed.
 
 ## When machine is preferred over human
 

@@ -129,9 +129,13 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: [Peter principle](https://en.wikipedia.org/wiki/Peter_principle). The promoted employee is not necessarily good in new job because the work changes. But the employee performing bad in raised position is rarely demoted. So "being good at work" is unstable state, but "being bad at work" is stable state. Eventually it likely reaches stable state: most employees do the work they are bad at.
 
-- First-order effect: Manager sets very high goals to employees. This pushes employees to work hard.
+- First-order effect: Upper management sets very high goals to subordinates. This pushes subordinates to work hard.
 
-  Second-order effect: If the manager sets high goals but don't have the ability to verify the result, it will be a disaster. Most employees cannot achieve the high goal. The honest employees gets low evaluation and tend to leave. The employees that fake results get rewarded and stay. 
+  Second-order effect: If the management sets high goals but don't have the ability to verify the result, it will be a disaster. Most employees cannot achieve the high goal. The honest employees gets low evaluation and leaves. The employees that fake results get rewarded and stay. See also: [Great Leap Forward](https://en.wikipedia.org/wiki/Great_Leap_Forward).
+
+- First-order effect: Having clear team separation in a corporation makes management more efficient.
+
+  Second-order effect: When team splits, their goals won't align. It's often that team A depends on team B's results. But team B has its own KPI and that KPI doesn't match team A's need. The separation cause team B to not be responsible for team A's results. This greatly reduces efficiency.
 
 - First-order effect: First-mover advantage. The company creating a new product category has advantage. It develops brand recognition and network effect early. 
 
@@ -636,6 +640,7 @@ Many good ideas initially look bad:
 > \- Nobel Prize-winning economist, Paul Krugman, in 1998
 
 Note that competitiveness is relative to the market size. A quickly-growing market is not competitive even if it seems so.
+
 
 ## The flip side of advanced technologies
 
