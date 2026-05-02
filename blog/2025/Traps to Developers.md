@@ -211,6 +211,7 @@ tags:
 - `finalize()` running too slow blocks GC and cause memory leak. Exceptions out of `finalize()` are not logged. A dead object can resurrect itself in `finalize()`. It's recommended to use [`Cleaner`](https://docs.oracle.com/javase/9/docs/api/java/lang/ref/Cleaner.html) rather than overriding `finalize`.
 - `SimpleDateFormat` is not thread-safe.
 - `OmitStackTraceInFastThrow` optimization causes exception to have no stacktrace. [See also](https://stackoverflow.com/questions/58696093/when-does-jvm-start-to-omit-stack-traces). The first few exceptions have stacktrace, so the stacktrace may be in early logs.
+- JVM has its own DNS cache in memory. It's independent to the operating system's DNS cache.
 
 ## Golang
 
@@ -480,7 +481,6 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Certificate expire. Examples: [Starlink incident](https://www.appviewx.com/blogs/expired-certificate-causes-high-profile-service-outage-proving-certificate-automation-is-critical/), [LinkedIn incident](https://www.appviewx.com/blogs/linkedin-certificate-expiry-fiasco-third-times-a-charm/), [Microsoft Teams incident](https://www.exoprise.com/2020/02/04/teams-outage-expired-certificate/)
   - Auto certificate renewal may silently stop working. [Example](https://github.com/bazelbuild/bazel/issues/28101#issuecomment-3693346788)
  - DNS caching. Changings related to DNS can take long time to take effect.
-   - JVM has its own DNS cache in memory. It's independent to the operating system's DNS cache.
 
 [^keepalive]: Note that [HTTP/1.0 Keep-Alive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Keep-Alive) is different to TCP keepalive.
 
@@ -524,5 +524,5 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - The current working directory can be changed by system call (e.g. `chdir`).
 - The formats `.zip` and `.mp4` are container formats. They can hold many different kinds of formats inside.
 - Sorting number strings is different to sorting numbers. "10" is smaller than "9" in string comparision.
-- In some old filesystems (e.g. FAT32), modification time is in second granulaity. Modifying may not affect modification time.
+- Some old devices still use FAT32 filesystem. Its modification time is 2-second unit. Modifying may not affect modification time.
 

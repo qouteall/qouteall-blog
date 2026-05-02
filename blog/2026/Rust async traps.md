@@ -44,7 +44,7 @@ Tokio also supports an "escape hatch". The task spawned by [`spawn_blocking`](ht
 
 In Rust, a future can be dropped. When it's dropped, its async code stops executing in an await point. This is called cancellation. It's a **implicit exit** mechanism. The control flow of it is not obvious in code.
 
-Note it cancels the future, not the IO. Cancelling a future just prevents the async code from running. The already-done IO operations won't be cancelled. (The written files won't be magically rolled back. The sent packets won't be magically withdrawn.)
+Note it cancels the future, not the IO. Cancelling a future just stops the async code from running (and drop related data). The already-done IO operations won't be cancelled. (The written files won't be magically rolled back. The sent packets won't be magically withdrawn.)
 
 Cancellation not the only implicit exit mechanism. Panic is another implicit exit mechanism. And in the languages that have exceptions (Java, JS, Python, etc.), exception is another implciit exit mechanism.
 
@@ -94,7 +94,7 @@ See also: [Notes on io-uring](https://without.boats/blog/io-uring/)
 
 ## Un-`poll`-ed futures
 
-As previously mentioned, dropping a future cancels it. There is another kind of "cancellation": just not `poll` the future, without dropping it.
+As previously mentioned, dropping a future cancels it. There is another kind of "cancellation": just not `poll` the future, without dropping the future.
 
 It's also dangerous. It may cause deadlock or weird delaying.
 
@@ -102,9 +102,9 @@ It's also dangerous. It may cause deadlock or weird delaying.
 
 In `tokio::select!` you can pass ownership of a future, but you can also pass a future borrow. When a future borrow is passed, one dangerous case can happen. 
 
-If the select goes into one branch, the future of other branches are dropeed. If you pass a future borrow to it, the borrow itself is dropped, but the borrowed future is not dropped. However, the borrowed future will not be polled again before the `select!` finishes, even if you explicit await it after the `select!`.
+If the select goes into one branch, the future of other branches are dropeed. If you pass a future borrow to it, the borrow itself is dropped, but the borrowed future is not dropped. However, the borrowed future will not be polled again (you can explicit await it after the `select!`, but it doesn't `poll` before `select!` finishing).
 
-This creates a temporaily abandoned future. It's not polled but not dropped. This is dangerous when async lock is involved. After acquiring lock, the future holds lock. If the future holding lock is dropped, it released lock. But if the future holds lock but not dropped and not polled, it's likely to deadlock. This is the mechanism behind [futurelock](https://rfd.shared.oxide.computer/rfd/0609).
+This creates a temporaily un-`poll`-ed future. This is dangerous when async lock is involved. After acquiring lock, the returned future holds lock. If the future holding lock is dropped, it released lock. But if the future holds lock but not dropped and not polled, it's likely to deadlock. This is the mechanism behind [futurelock](https://rfd.shared.oxide.computer/rfd/0609).
 
 ### Buffered stream issue
 

@@ -64,7 +64,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   Second-order effect: **Goodhart's law**. When a measure becomes target, it ceases to be a good measure. Examples:
 
   - When doctors are judged by patient satisfaction survey, doctors tend to do treatments that improve short-term comfort but sacrifice long-term health.
-  - When KPI judges success rate regardless of difficulty, then employee chooses to do only easy tasks and avoid hard tasks. **The more non-trivial things one does, the more mistakes one will make**.
+  - When KPI punishes based on failure count, then KPI effectively punishes the employee that does more non-trivial work. **The more non-trivial things one does, the more mistakes one will make**.
   - When salesmen are judged by sale amount, salesmen tend to lie to customers and hurt company reputation.
   - Training AI model to increase user satisfaction score will make the AI sycophant.
   - When promotion is judged by task difficulty, then people do useless hard things instead of important but easy things.
@@ -131,7 +131,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: Upper management sets very high goals to subordinates. This pushes subordinates to work hard.
 
-  Second-order effect: If the management sets high goals but don't have the ability to verify the result, it will be a disaster. Most employees cannot achieve the high goal. The honest employees gets low evaluation and leaves. The employees that fake results get rewarded and stay. See also: [Great Leap Forward](https://en.wikipedia.org/wiki/Great_Leap_Forward).
+  Second-order effect: If the management sets high goals but don't have the ability to verify the result, it will be a disaster. Most employees cannot achieve the high goal. The honest employees gets low evaluation and leaves. The employees that fake results get rewarded and stay.
 
 - First-order effect: Having clear team separation in a corporation makes management more efficient.
 
@@ -274,7 +274,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: Making software react faster improves user exprience.
 
-  Second-order effect: If the softwrare reacts too fast, the user may suspect that "it doesn't do real work". If it's an AI application, the user tend to think fast AI is dumber than slow AI.
+  Second-order effect: If it's an AI application, the user tend to think fast AI is dumber than slow AI.
 
 ### In Cybersecurity
 
@@ -354,7 +354,7 @@ Examples:
 - Sunk cost. The more resources put in, the higher sunk cost is, the harder to stop loss.
   - This also applies to war. When both sides costed a lot in war, the war is hard to stop.
 - Banks only loan to companies with good financial status.
-- The worse health condition is, the more expensive health insurance is, the less likely one affords treatment.
+- The worse health condition is, the more expensive health insurance is (in America), the less likely one affords treatment.
 - Ponzi scheme. When one falls into a Ponzi scheme, one tend to spread the scheme to reduce own loss.
 - Recognition of power. When one uses power and succeeded, the observers confirm the power. When a rule is broken once and there is no consequence, then more and more people will break the rule. 
 - Avalanche.
@@ -567,7 +567,7 @@ Diversification is also a way to handle risks. Note that diversification only wo
 
 Harvest optionality: being able to delay harvest when market price is low. For example, timberland can delay cutting tree when wood price is low, brewhouse can keep brewing when alcohol price is low.
 
-Modern manufactoring is often very capital-intensive and fragile. Short-term over-production can be fatal. It can be overcomed by counter-cyclical subsidy but the subsidy can easily fall into sunk-cost trap. Unfortunately, the more advanced manufactoring is more capital-intensive and more fragile. However, even if the manufactoring company collapses, the technology and equipments still remain.
+Modern manufactoring is often very capital-intensive and fragile. Short-term over-production can be fatal. It can be overcomed by counter-cyclical subsidy but the subsidy can easily fall into sunk-cost trap. Unfortunately, the more advanced manufactoring is more capital-intensive and more fragile.
 
 ### Good side of incident
 
@@ -672,6 +672,21 @@ When automation works, it's good. But automation may break. And when it breaks, 
 > it was an **auto-renewal being bricked** due to some new subdomain additions, and the renewal failures didn't send notifications for whatever reason. And then it took some Bazel team members **who were very unfamiliar with this** whole area to scramble to read documentation and secure permissions... and the SSL certs taking ages to propagate as usual.
 > 
 > \- [Link](https://github.com/bazelbuild/bazel/issues/28101#issuecomment-3693346788)
+
+## Many works are inherently temporary
+
+One example is infrastructure building. During building, it requires a lot of work and creates a lot of jobs. But once it's finishes, it only left much fewer maintenance work. When most projects finish, most related jobs eventually vanish. Construction jobs are inherently temporary. (Although there will be construction job decades later, the time delay is too large.)
+
+Many other examples:
+
+- When the war ends, the war industry manufactoring demand plummets.
+- After baby boom, education demand plummets.
+
+With the invention of computers and internet, there exists more **scalable** work. One person can do much more work, and the same work is deployed in many different places for many different people. Its efficiency is high but it also means fewer job requirements.
+
+The "temporary" work can still exist for many years. This can confuse people into beliving that these jobs are permanent.
+
+Obviously, even more jobs will become temporary due to AI's development. On the other hand, there are already many [bullshit jobs](https://en.wikipedia.org/wiki/Bullshit_Jobs). Most big corporations are extremely inefficient and full of bullshit jobs. Also most governments all over the world are extremely inefficient ("The world is just held together with duct tape and prayers").
 
 ## Short-termism and long-termism
 

@@ -51,6 +51,8 @@ Expectation management is important. If the outcome is good but doesn't meet the
 
 Procrastination is also related to protective pessimism. If you believe that the outcome will be bad, then reducing cost (time and efforts put into it) is "beneficial".
 
+When one's investment drops, framing bias can be a way for defensing: "my investment drops fewer than \[another asset\] so it relatively outperforms that asset."
+
 ### Loss aversion and risk aversion
 
 In real life, some risks are hard to reverse or are irreversible, so avoiding risk is more important than gaining. In investment, losing 10% requires gaining 11.1% to recover, and losing 50% requires gaining 100% to recover. 
@@ -66,6 +68,8 @@ Unfortunately, loss aversion make being unhappy easier and make being happy hard
 It's much easier to increase expectation than to reduce expectation. The knowledge of "better things exist" can be "info hazard", as it makes one harder to accept the things that one gets used to.
 
 Loss aversion doesn't contradict the fact that many people don't care about long-term health or cybersecurity. Because these potential risks are very abstract and unclear.
+
+When one already have nothing, the expectation is low and loss aversion is low, then one is more likely to take risks.
 
 ### "Better safe than sorry" assumption
 
@@ -642,7 +646,11 @@ This is related to **narrative fallacy**: people like to make up reasons explain
 
 People dislike uncertain future and keep predicting the future, while ignoring their terrible past prediction record.
 
-People like to wrongly apply a theory to real world, because applying the theory can give results. Example: assuming that an unknown distribution is gaussian even when it's not.
+People like to wrongly apply a theory to real world, because applying the theory can give results.
+
+- Still make decision based on statistics number even when knowing the number is largely inaccurate.
+- Assuming an unknown distribution is gaussian, because only this assumption can give analysis results.
+- Still use exam score as recruitment condition, even when knowing exam score is not representative of actual work ability.
 
 **Zeigarnik effect**: People focus on uncompleted things more than completed things. When some desire is not fulfilled (gambling not winning, PvP game not winning, browsing social media not seeing wanted content, etc.), the desire becomes more significant. This effect can cause one not wanting to sleep.
 
