@@ -868,7 +868,24 @@ Self-fulfilling scrollbar: it's possible that scrollbar is needed when scrollbar
 
 If the layout changes based on whether width reach a threshold, scrollbar may cause infinite flicker. For example, if its available width is larger than 900px then it's treated as desktop and shows large detailed info. But if its available width is smaller than 900px, it's treated as mobile and shows small summarized info. Near the threshold, it's possible that 1. in desktop view, content is too high, scrollbar appears and taks space 2. available width become lower than threshold due to scrollbar 3. become mobile view, content is not high enough and scrollbar disappears 4. available width above threshold, become desktop view 5. repeat. [One similar example](https://github.com/jbaysolutions/vue-grid-layout/issues/715).
 
+### CSS layouting circular dependency
 
+When there is no flexbox, grid or table, CSS uses "width flows top-down, height flows bottom-up"[^css_wdith_height] principle:
+
+- Child `height: 50%` doesn't work if parent height depends on child height.
+- The `padding-top: 20%` uses 20% of parent width, not parent height.
+
+[^css_wdith_height]: When writing axis flips (e.g. `writing-mode: vertical-rl`) the principle changes to "height flows top-down, width flows bottom up".
+
+When flexbox, grid and tables are involved, things become more complex. The browser may need to iterate on layout for many times to compute the layout.
+
+## Multi-stage handling of cycle
+
+There are cases that, then the data structure contains cycle, eager computation will stuck in dead recursion. In many cases, they can be solved by two-stage processing.
+
+For example, to deep-clone a data structure that contains cycles, direct recursion copy will cause dead recursion. Solution is to make it two-stage: first stage copies the nodes, without eagerly copying edges and pointed noted; second stage copies the edges and fixes the node references.
+
+In C, writing two mutually-recursive functions requires separately declare the two functions eariler. Because C is designed that compiler can compile in one pass. Modern languages doesn't require separate declaration because modern compilers are multiple-stage (there is a stage for collecting all definitions, before name resolution).
 
 ## Circular reference in math
 

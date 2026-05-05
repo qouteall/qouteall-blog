@@ -397,6 +397,8 @@ For them, the mean and variance may be misleading. Median is more representative
 
 If some work seems huge, if it follows 80/20, doing just 20% of it can get 80% of effects. However note that not all work can be 80-20-ed.
 
+Also, most jobs are concentrated in time. One example is infrastructure building. Infrastructure building are often concentrated in time (due to e.g. economic cycle, policies, interest rates). After the wave ends, most infrastructure-related jobs vanish. Another example is that when war ends, war industry manufactoring demand plummets. The "temporary jobs" can keep being ample for many years. This can confuse people into beliving that these jobs are permanent. **Most jobs are inherently temporary**.
+
 ### Self-balancing feedback loops and cycles
 
 Examples:
@@ -673,20 +675,7 @@ When automation works, it's good. But automation may break. And when it breaks, 
 > 
 > \- [Link](https://github.com/bazelbuild/bazel/issues/28101#issuecomment-3693346788)
 
-## Many works are inherently temporary
 
-One example is infrastructure building. During building, it requires a lot of work and creates a lot of jobs. But once it's finishes, it only left much fewer maintenance work. When most projects finish, most related jobs eventually vanish. Construction jobs are inherently temporary. (Although there will be construction job decades later, the time delay is too large.)
-
-Many other examples:
-
-- When the war ends, the war industry manufactoring demand plummets.
-- After baby boom, education demand plummets.
-
-With the invention of computers and internet, there exists more **scalable** work. One person can do much more work, and the same work is deployed in many different places for many different people. Its efficiency is high but it also means fewer job requirements.
-
-The "temporary" work can still exist for many years. This can confuse people into beliving that these jobs are permanent.
-
-Obviously, even more jobs will become temporary due to AI's development. On the other hand, there are already many [bullshit jobs](https://en.wikipedia.org/wiki/Bullshit_Jobs). Most big corporations are extremely inefficient and full of bullshit jobs. Also most governments all over the world are extremely inefficient ("The world is just held together with duct tape and prayers").
 
 ## Short-termism and long-termism
 

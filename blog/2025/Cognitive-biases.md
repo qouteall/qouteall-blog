@@ -53,6 +53,17 @@ Procrastination is also related to protective pessimism. If you believe that the
 
 When one's investment drops, framing bias can be a way for defensing: "my investment drops fewer than \[another asset\] so it relatively outperforms that asset."
 
+### Intermittent reinforcement
+
+It's unintuitive that intermittent reward gives stronger effect than reliable reward. Examples:
+
+- When the partner sometimes love you but sometimes be "cold", the relationship attachment is stronger than when the partner consistently love you.
+- The gambling that gives random reward creates more additction than the thing that gives consistent reward.
+
+It's related to "near miss". If one attempt failed but is "close to success" then the brain recognize it as "near miss", then give more motivation to retry despite failure.
+
+It's also related to expactation. A consistently good thing increases expectation, then it becomes "boring". When one thing is not consistently good, success gives high dopamine hit.
+
 ### Loss aversion and risk aversion
 
 In real life, some risks are hard to reverse or are irreversible, so avoiding risk is more important than gaining. In investment, losing 10% requires gaining 11.1% to recover, and losing 50% requires gaining 100% to recover. 
@@ -1559,7 +1570,6 @@ Examples:
 - Gambling
 - PvP gaming (every round has randomly different opponents and outcome)
 - Browsing social media (random posts)
-- Gacha game (pulling is random)
 
 This is related to information addiction. **Randomized things give more information than deterministic things.**
 

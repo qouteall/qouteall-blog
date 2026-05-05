@@ -16,7 +16,7 @@ tags:
   - Normally `width: auto` tries fill available space in parent. But `height: auto` normally tries to just expand to fit content.
   - For inline elements, inline-block elements and float elements, `width: auto` does not try to expand.
   - `margin: 0 auto` centers horizontally. But `margin: auto 0` normally become `margin: 0 0` which does not center vertically. But in a flexbox with `flex-direction: column`, `margin: auto 0` can center vertically. [^css_expand]
-  - Percentage `margin-top` `margin-bottom` `padding-top` `padding-bottom` use parent width as base value, not height.
+  - Percentage `margin-top` `margin-bottom` `padding-top` `padding-bottom` use parent width as base value, not height. [^use_parent_width]
   - Margin collapse happens vertically but not horizontally.
   - Some of the above behave differently when layout axis flips (e.g. `writing-mode: vertical-rl`). [See also](https://drafts.csswg.org/css-writing-modes-4/#abstract-box)
 - Margin collapse.
@@ -104,6 +104,8 @@ tags:
 [^animate_height_auto]: Also, there is another solution for transition `height: auto`: transitioning `max-height` from 0 to a large value, but I don't recommend it as it will mess up animation timing.
 
 [^reflow_animation]: When adding a new element, initial transition animation won't work by default. But if you read its layout-related value (e.g. `offsetHeight`) between changing animated attribute, it will trigger a reflow and make initial transition work.
+
+[^use_parent_width]: This design aim to avoid circular dependency. If parent height depends on child height, then child padding determining on parent height creates circular dependency. When that rule was originally designed, CSS mostly follows the "width flows top-down, height flows bottom-up" pricinple (that principle is broken with later-added flexbox and grid etc,). Note that when writing axis flips (e.g. `writing-mode: vertical-rl`) the percentage is based on height, and the principle changes to "height flows top-down, width flows bottom up".
 
 ## Unicode and text
 
@@ -283,6 +285,10 @@ tags:
 - In conditons, these things are "falsy": 0, `None`, empty string, empty container. Be careful if 0 or empty container represents valid value. Also it can be controlled by implementing `__bool__` method.
 - GIL (global interpreter lock) doesn't protect again on-disk data race. Two concurrent threads reading and writing same file may cause data race in file. GIL releases during IO.
 - Pandas `read_csv` will guess type of each column based on samples, if you don't specify `dtype`. An outlier can change the type of column. (Similar thing applies to DuckDB)
+
+## Rust
+
+- [Rust async traps](../2026/Rust%20async%20traps)
 
 ## SQL Databases
 

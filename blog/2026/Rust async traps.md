@@ -74,6 +74,81 @@ There is another kind of "cancel": doesn't drop the future but does not `poll` t
 
 Tokio documentation about cancellation safety: [1](https://docs.rs/tokio/latest/tokio/macro.select.html#cancellation-safety), [2](https://tokio.rs/tokio/tutorial/select#cancellation)
 
+### Debugging cancellation
+
+Cancelling does not log by default. You can use a future wrapper to make it log if it cancels before completion. Example:
+
+```rust
+use std::backtrace::Backtrace;
+use std::time::Duration;
+
+use pin_project::pin_project;
+use std::future::Future;
+use std::pin::Pin;
+use std::task::{Context, Poll};
+
+/// A Future wrapper for debugging async cancellation.
+#[pin_project(PinnedDrop)]
+pub struct CancelDebug<F> {
+    #[pin]
+    inner: F,
+    completed: bool,
+    name: String,
+    created_at: Backtrace,
+}
+
+impl<F: Future> CancelDebug<F> {
+    pub fn new(name: impl Into<String>, inner: F) -> Self {
+        Self {
+            inner,
+            completed: false,
+            name: name.into(),
+            created_at: Backtrace::force_capture(),
+        }
+    }
+}
+
+impl<F: Future> Future for CancelDebug<F> {
+    type Output = F::Output;
+
+    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+        let this = self.project();
+        match this.inner.poll(cx) {
+            Poll::Ready(v) => {
+                *this.completed = true;
+                Poll::Ready(v)
+            }
+            Poll::Pending => Poll::Pending,
+        }
+    }
+}
+
+#[pin_project::pinned_drop]
+impl<F> PinnedDrop for CancelDebug<F> {
+    fn drop(self: Pin<&mut Self>) {
+        if !self.completed {
+            let dropped_at = Backtrace::force_capture();
+            eprintln!(
+                "Future '{}' was cancelled!\nCreated at:\n{}\nDropped at:\n{}",
+                self.name, self.created_at, dropped_at
+            );
+        }
+    }
+}
+
+async fn some_work() {
+    println!("Begin");
+    tokio::time::sleep(Duration::from_secs(2)).await;
+    println!("End");
+}
+
+#[tokio::main]
+async fn main() {
+    let f = CancelDebug::new("some work", some_work());
+    tokio::time::timeout(Duration::from_secs(1), f).await;
+}
+```
+
 ### io_uring issue
 
 - In epoll, the OS notifies app that an IO can be done, then the app does another system call to do IO. It involves context switching from kernel to app (receive notification), then to kernel (do the IO syscall) then to app (finishing IO).
