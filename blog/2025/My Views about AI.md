@@ -548,7 +548,9 @@ If you designed some API, wrote some doc, then let LLM write code using it. If L
 
 ### Leave tech debt for future AI to solve?
 
-Some argue that AI is improving fast that future AI will be able to refactor out the tech debt caused by today's AI. Note that improving code quality requires refactoring, and refactoring is risky. In legacy codebase there are often cases where **two bugs "cancel" each other** (although it seems contrived, it's actually very common in legacy code). Fixing one bug can actually "break" things.
+Some argue that AI is improving fast that future AI will be able to refactor out the tech debt caused by today's AI. However, solving tech debt is much harder than creating tech debt. 
+
+In low-quality codebase there are often cases where **two bugs "cancel" each other**. Fixing one bug can actually "break" things. 
 
 <details>
 <summary>Two bugs "cancel" each other</summary>
@@ -557,7 +559,11 @@ Some argue that AI is improving fast that future AI will be able to refactor out
 
 </details>
 
-Solving tech debt is much harder than creating tech debt. 
+The "two bugs cancel each other" looks like rare coincidence, but most of them are naturally produced by lazy "bugfixing", not coincidence. **Finding the root cause is hard, but adding "correction code" is easy**. The "correction" itself is wrong, but after some "trial-and-error" adjustments, it can mostly make the bug's effect disappear. 
+
+For example, if some code confuses a number in mile as kilometer, then output is 1.6 times of real value, then a lazy way of fixing bug is to divide 1.6 in the result, which creates two bugs that cancel each other.
+
+AI reward hacking makes AI have the tendency to use lazy ways to fix the bug, which produces that.
 
 ### Some documents/comments are negative-value
 

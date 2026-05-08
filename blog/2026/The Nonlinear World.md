@@ -57,24 +57,32 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: The British government in colonial India provided bonus for dead cobra. The bonus could incentivize cobra hunting.
 
-  Second-order effect: Breeding cobra is easier than hunting wild cobra, so people started breeding it. When the policy is removed, the breeders released their cobra to the wild. This is called cobra effect and [perverse incentive](https://en.wikipedia.org/wiki/Perverse_incentive).
+  Second-order effect: [Perverse incentive](https://en.wikipedia.org/wiki/Perverse_incentive). Breeding cobra is easier than hunting wild cobra, so people started breeding it. When the policy is removed, the breeders released their cobra to the wild.
 
 - First-order effect: Using measured numbers is an objective way of judging performance.
 
-  Second-order effect: **Goodhart's law**. When a measure becomes target, it ceases to be a good measure. Examples:
+  Second-order effect: [**Goodhart's law**](https://en.wikipedia.org/wiki/Goodhart%27s_law). When a measure becomes target, it ceases to be a good measure. Examples:
 
   - When doctors are judged by patient satisfaction survey, doctors tend to do treatments that improve short-term comfort but sacrifice long-term health.
   - When KPI punishes based on failure count, then KPI effectively punishes the employee that does more non-trivial work. **The more non-trivial things one does, the more mistakes one will make**.
   - When salesmen are judged by sale amount, salesmen tend to lie to customers and hurt company reputation.
-  - Training AI model to increase user satisfaction score will make the AI sycophant.
+  - Training AI model based on user thumbs-up/thumbs-down makes the AI [sycophant](https://openai.com/index/sycophancy-in-gpt-4o/).
   - When promotion is judged by task difficulty, then people do useless hard things instead of important but easy things.
   - AB test shows that adding annoying popups and manipulative texts increase conversion rate. However it drives away high-value customers.
   - When researchers are judged by paper reference count, there will be researcher groups referencing each other in group.
-  - ...
+  - ......
 
 - First-order effect: After the steam engine was improved, it required less coal to do the same work, so the demand of coal would reduce.
 
   Second-order effect: [Jevons paradox](https://en.wikipedia.org/wiki/Jevons_paradox).The reduced cost of using steam engine greatly increased the usage of steam engine, so the demand of coal greaty increased.
+
+  Due to Jevons paradox, increasing efficiency may increase resource waste overall.
+
+  Other examples of Jevons paradox:
+  
+  - Increasing computer hardware performance increases hardware demand.
+  - Making programming easier increases demand of software development.
+  - ......
 
 - First-order effect: Improving a product can enhance its reputation.
 
@@ -276,6 +284,14 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: If it's an AI application, the user tend to think fast AI is dumber than slow AI.
 
+- First-order effect: Rationality allows making optimal decision, gaining advantage.
+
+  Second-order effect: Rational decision-making also means that opponent can accurately predict the behavior, which causes disadvantage.
+
+- First-order effect: A centralized organization/movement can be defeated.
+
+  Second-order effect: After breaking the organization, if the idea behind it is still popular, then it becomes decentralized and more resilient. Its activitiy becomes more sparse so it's harder to defense. And there will be no one to negotiate with.
+
 ### In Cybersecurity
 
 - First-order effect: Forcing the user to login again after inactive for 2 minutes can improve security.
@@ -319,13 +335,13 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 > 
 > \- [A conjecture on why reliable systems fail](https://surfingcomplexity.blog/2017/06/24/a-conjecture-on-why-reliable-systems-fail/)
 
-- First-order effect: Static analysis tools are good for improving security.
+- First-order effect: When code analysis tool finds a problem, fixing it could improve the codebase.
 
-  Second-order effect: The process of fixing an analyzer false-positive may introduce a new security bug:
+  Second-order effect: The code analysis tool may give false positive. Also, in large legacy codebases, there are often the mechanisms of "two bugs cancel each other". When code analysis tool points out a problem, fixing it may "activate" another bug.
 
-> The bug is due to a heap-based buffer overflow weakness accidentally introduced in glibc 2.37 in August 2022 and later backported to glibc 2.36 when addressing a less severe vulnerability tracked as CVE-2022-39046.
-> 
-> \- [New Linux glibc flaw lets attackers get root on major distros](https://www.bleepingcomputer.com/news/security/new-linux-glibc-flaw-lets-attackers-get-root-on-major-distros/)
+- First-order effect: Enforcing high unit test coverage could improve software quality.
+
+  Second-order effect: Developers tend to write low-quality test to increase test coverage (Goodhart's law). The low-quality tests are worse than useless because their failures are likely false-positive.
 
 
 ## Feedback loops

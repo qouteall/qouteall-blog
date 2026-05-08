@@ -781,6 +781,8 @@ Compile error:
   |                  ----------------- immutable borrow later used here
 ```
 
+(Related: [append_only_vec](https://docs.rs/append-only-vec/latest/append_only_vec/index.html) doesn't move element on insertion. Interior pointers are kept valid after insertion. So its insertion doesn't require mutable borrow.)
+
 Another example is about `enum`: interior pointer pointing inside `enum` can also be invalidated, because different enum variants has different memory layout. In one layout the first 8 bytes is integer, in another layout the first 8 bytes may be a pointer. Treating an arbitrary integer as a pointer is definitely not memory-safe.
 
 ```rust
