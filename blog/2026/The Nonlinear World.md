@@ -236,6 +236,8 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: Trying to suppressing information may make people gain more interest in that information. [Streisand effect](https://en.wikipedia.org/wiki/Streisand_effect).
 
+  On the contrary, when information is not being suppressed, people tend to stay inside the information coccon that they are comfortable with.
+
 - First-order effect: Disallowing kid to play videogames makes kid not play videogames.
 
   Second-order effect: [Reverse psychology](https://en.wikipedia.org/wiki/Reverse_psychology). The kid being not allowed to play videogames may become more eager to play them.
@@ -335,9 +337,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 > 
 > \- [A conjecture on why reliable systems fail](https://surfingcomplexity.blog/2017/06/24/a-conjecture-on-why-reliable-systems-fail/)
 
-- First-order effect: When code analysis tool finds a problem, fixing it could improve the codebase.
-
-  Second-order effect: The code analysis tool may give false positive. Also, in large legacy codebases, there are often the mechanisms of "two bugs cancel each other". When code analysis tool points out a problem, fixing it may "activate" another bug.
+  Any mechanisms that aim to improve reliability may backfire in edge cases. For example, auto-retry may overload other services. 
 
 - First-order effect: Enforcing high unit test coverage could improve software quality.
 
@@ -365,6 +365,7 @@ Examples:
 - Social interaction. One being angry to another may make two both more angry. Also applys to friendliness and trust/distrust.
 - Herd mentality. Some people do something, more people follow.
 - Financial market momentum.
+- Financial system often "give umbrella on sunny day, take back on rainy day".
 - Debt can both accelerate growth and accelerate bankruptcy.
 - Spread of information and idea. The more popular a piece of information is, the more chance it spreads.
 - Sunk cost. The more resources put in, the higher sunk cost is, the harder to stop loss.
@@ -375,6 +376,7 @@ Examples:
 - Recognition of power. When one uses power and succeeded, the observers confirm the power. When a rule is broken once and there is no consequence, then more and more people will break the rule. 
 - Avalanche.
 - Cascade failure.
+- When using AI output to train AI model, a feature could reinforce itself, [see also](https://openai.com/index/where-the-goblins-came-from/).
 - ...
 
 ### Concentration
@@ -562,7 +564,7 @@ Experiences may be obsolete or even harmful after a paradigm shift. Ideas, metho
 
 About health: Some people treat health as a score. After eating unhealthy food or staying up late, the socre decreases. And the score can be earned back by taking supplements and exercising. This view is wrong. It simplifies high-dimensional health status into a one-dimensional score.
 
-About AI: Current AI can solve PhD-level exam problems that 99.9% people cannot solve. But AI doesn't actually achieve PhD-level intelligence. Intelligence is high-dimensional. Solving exam problems is just one dimension.
+About AI: Current AI can solve PhD-level exam problems that 99.999% people cannot solve. But AI doesn't actually achieve PhD-level intelligence. Intelligence is high-dimensional. Solving exam problems is just one dimension.
 
 ## About risk
 
@@ -610,7 +612,9 @@ But testing error handling hard. There are many kinds of different error cases.
 
 Everyone has some "blind sopts" in thinking. It may be path dependence: Someone tried X, succeeded, then think X is the final answer; tried Y, failed, then think Y will never work. Sometimes an idea requires doing a specific thing to inspire.
 
-When there is diversity, different people can communicate different ideas and "fill" other peoples' "blind spots".
+Fixation: sometimes one person overly focus on one aspect of problem or one possible hypothesis, then "fall in love with the idea" and reject other ideas. Both human and AI can suffer from fixation.
+
+When there is diversity, different people can communicate different ideas and try different ideas. This increases of the overall "search space" and improve chance of overall success.
 
 ### Efficiency often requires centralization
 
@@ -681,11 +685,11 @@ Advanced but expensive technology may defeat due to financial sustainability.
 
 In capitalism, technologies are usually developed for profit, not for human well-being (e.g. processed food, algorithmic recommendation, AI training data collection).
 
-If a piece of software has a bug, then every copy of the same version of software has the same bug. This is a source of fragility. For example, if a self-driving algorithm has a bug, then many self-driving cars that deploy such algorithm has the same bug. If an AI model has a bias, then all usages to the same AI model suffers from the same bias.
+If a piece of software has a bug, then every copy of the same version of software has the same bug. This is a source of fragility. For example, if a self-driving algorithm has a bug, then all self-driving cars that deploy such algorithm has the same bug. On the contrary, it's unlikely that all drivers in world has the same hidden blind spot.
 
 ### Fragility of automation
 
-When automation works, it's good. But automation may break. And when it breaks, no one is familiar to it or has experience to fix it. The automation may be set up years ago and the person familiar with it may have left.
+When automation works, it's good. But automation may break. When it breaks, no one is familiar to it or has experience to fix it. The automation may be set up years ago and the person familiar with it may have left.
 
 > it was an **auto-renewal being bricked** due to some new subdomain additions, and the renewal failures didn't send notifications for whatever reason. And then it took some Bazel team members **who were very unfamiliar with this** whole area to scramble to read documentation and secure permissions... and the SSL certs taking ages to propagate as usual.
 > 
@@ -702,6 +706,11 @@ Also, reducing fragility requires safety investments that require long-termism. 
 When the large environment is unstable and unsuitable for long-termism, it requires local small safe stable environments to make long-termism work.
 
 It's often that the process of doing improvement has risks. But the improvement can avoid bigger risk in the future. Under short-termism, it can only stuck in local minimum, avoiding risky improvement.
+
+Stock market pricing is often short-termism, which often cause comany decision-making to also become shor-termism: 
+
+- Sometimes the investors care too much about short-term shareholder return and don't understand value of long-term investment (e.g. research). 
+- Sometimes the investors care too much about short-term price trend. When there is a bubble, company tend to do irrational investment to prop the bubble. The story behind bubble only pays off after long time, but it's not rational long-termism.
 
 ## Related
 

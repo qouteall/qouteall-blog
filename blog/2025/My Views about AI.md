@@ -385,6 +385,8 @@ Some important questions to consider when writing spec:
 
 ### Architecture design is still important
 
+Note: In some places "architecture" refers to very high-level overview (e.g. most architecture diagrams). Here "architecture" includes the actual abstraction design, including some details.
+
 Vibe coding is easy but vibe debugging is hard. Designing good architecture is important in reducing bugs and making debugging easier.
 
 > for each desired change, make the change easy (warning: this may be hard), then make the easy change
@@ -559,7 +561,7 @@ In low-quality codebase there are often cases where **two bugs "cancel" each oth
 
 </details>
 
-The "two bugs cancel each other" looks like rare coincidence, but most of them are naturally produced by lazy "bugfixing", not coincidence. **Finding the root cause is hard, but adding "correction code" is easy**. The "correction" itself is wrong, but after some "trial-and-error" adjustments, it can mostly make the bug's effect disappear. 
+The "two bugs cancel each other" looks like rare coincidence, but many of them are naturally produced by lazy "bugfixing", not coincidence. **Finding the root cause is hard, but adding "correction code" is easy**. The "correction" itself is wrong, but after some "trial-and-error" adjustments, it can mostly make the bug's effect disappear. 
 
 For example, if some code confuses a number in mile as kilometer, then output is 1.6 times of real value, then a lazy way of fixing bug is to divide 1.6 in the result, which creates two bugs that cancel each other.
 
@@ -822,3 +824,20 @@ For introverts, machine is preferred over human.
 
 Also, in business, many risks come from unpredicatabilty of human. So **capitalism always tries to optimize out human unpredictability**. Capitalism often prefers predictable machines over unpredictable human even when machines produce lower-quality results.
 
+## One AI model itself is not diverse enough
+
+Sometimes there is path dependence. The human or AI overly focues on one aspect and ignore other aspects. This may cause problem solving to stuck on a dead path. Solution is diversity. Let different people with different ideas to work on the same problem.
+
+One AI model itself is not diverse enough. The decoding itself has randomness. And the AI model's "belief" can be different given different prompts. But it's often that each AI model has some "attractor": using different ways to ask the same question, the results are roughly same. The limited diversity of one AI model itself may cause it to not be able to solve open-ended questions.
+
+The true superintelligence should be very "open-minded", not stuck in path dependence, and be very diverse in ideas.
+
+Sometimes the model lose diversity because diversity reduces RL reward. This is also a problem of RL.
+
+## Synthetic data feedback loop
+
+In OpenAI's [Where the goblins came from](https://openai.com/index/where-the-goblins-came-from/), it mentiones that the model-generated data is used in training (specifically, SFT). If some feature (e.g. goblin) becomes more likely to be outputted from model, then it become more frequent in training data, then the newly-trained model outputs it more frequently. This is self-reinforcing feedback loop. This adds bias and reduces diversity.
+
+If there are employees manually throughly inspecting the synthetic data, they can possibly find the problem before the problem reaches consumers. However the synthetic data amount is so large, so it's likely that only a small portion is inspected by human. Also the human inspecting training data are likely outsourced low-salary workers.
+
+The effect of poisonous training data is not limited by the specific prompt. (Only training goblin with nerdy personality prompt doesn't limit its effect to only appear with that prompt.)

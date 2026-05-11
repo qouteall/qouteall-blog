@@ -23,7 +23,7 @@ tags:
   - Two vertically touching siblings can overlap vertial margin. Child vertical margin can "leak" outside of parent.
   - Margin collapse doesn't happen when `border` or `padding` spcified. Don't try to debug margin collapse by coloring border. Debug it using browser's devtools.
   - Margin collapse can be avoided by block formatting context (BFC). `display: flow-root` creates a BFC. (There are other ways to create BFC, like `overflow: hidden`, `overflow: auto`, `overflow: scroll`, `display:table`, but with side effects)
-  - Related: margin can be negative. Negative margin can make elements overlap and make child leak outside of parent. BFC doesn't prevent this feature of negative margin.
+  - Related: margin can be negative. Negative margin can make elements overlap and make child leak outside of parent. BFC doesn't prevent negative margin from working.
 - If a parent only contains floating children, the parent's height will collapse to 0, and the floating children will leak. Can be fixed by BFC.
 - If the parent's `display` is `flex` or `grid`, then the child's `float` has no effect
 - [Stacking context](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_positioned_layout/Stacking_context):
@@ -39,9 +39,9 @@ tags:
   
    Stacking context can cause these behaviors: [^stacking_context_impl]
   
-  - `z-index` doesn't work across stacking contexts. It only works within a stacking context.
+  - `z-index` only works within one stacking context.
   - Stacking context can affect the coordinate of `position: absolute` or `fixed`. (The underlying logic is complex, [see also](https://developer.mozilla.org/en-US/docs/Web/CSS/position))
-  - `position: sticky` doesn't work across stacking contexts.
+  - `position: sticky` only works within one stacking context.
   - `overflow: visible` will still be clipped by stacking context.
   - `background-attachment: fixed` will position based on stacking context.
   - `opacity` is "relative" to parent. Child `opacity:1` in transparent parent won't make it more opaque than parent.
@@ -86,7 +86,7 @@ tags:
 - [Cumulative Layout Shift](https://web.dev/articles/cls). 
   - It's recommended to specify `width` and `height` attribute in `<img>` to avoid layout shift due to image loading delay.
 - JS-in-HTML may interfere with HTML parsing. For example `<script>console.log('</script>')</script>` makes browser treat the first `</script>` as ending tag. [See also](https://sirre.al/2025/08/06/safe-json-in-script-tags-how-not-to-break-a-site/)
-- Virtual scrolling breaks Ctrl-F (Cmd-F) search.
+- Virtual scrolling breaks browser's text search functionality.
 - Trailing slash in URL. If current URL is `https://xxx.com/aaa/bbb`, then `<img src="image.png">` use image `https://xxx.com/aaa/image.png`. But if current URL is `https://xxx.com/aaa/bbb/` (with trailing slash), then image path is `https://xxx.com/aaa/bbb/image.png`
 
 [^macos_scrollbar_space]: In macOS it can be configured to make scrollbar take space like in Windows.
@@ -284,7 +284,6 @@ tags:
 - Be careful about indentation when copying and pasting Python code.
 - In conditons, these things are "falsy": 0, `None`, empty string, empty container. Be careful if 0 or empty container represents valid value. Also it can be controlled by implementing `__bool__` method.
 - GIL (global interpreter lock) doesn't protect again on-disk data race. Two concurrent threads reading and writing same file may cause data race in file. GIL releases during IO.
-- Pandas `read_csv` will guess type of each column based on samples, if you don't specify `dtype`. An outlier can change the type of column. (Similar thing applies to DuckDB)
 
 ## Rust
 
@@ -302,7 +301,7 @@ tags:
   - Using multiple joins may cause overcounting. [See also](https://kb.databasedesignbook.com/posts/sql-joins/#understanding-the-problem-of-overcounting).
   - Using `distinct` to "fix" join often gives worse performance. [See also](https://www.red-gate.com/simple-talk/databases/sql-server/t-sql-programming-sql-server/dont-use-distinct-as-a-join-fixer/)
   - I recommend using subquery instead of join if appropriate, because join is "global" but subquery is "local".
-- In MySQL (InnoDB), if string field doesn't have `character set utf8mb4` then it will error if you try to insert a text containing 4-byte UTF-8 code point.
+- In MySQL (InnoDB), the `utf8` charset doesn't allow 4-byte UTF-8 code point. Use `character set utf8mb4`.
 - MySQL (InnoDB) default to case-insensitive.
 - MySQL (InnoDB) can do implicit conversion by default. `select '123abc' + 1;` gives 124.
 - [MySQL (InnoDB) gap lock may cause deadlock](./About%20circular%20reference#mysql-gap-lock-deadlock).
@@ -312,18 +311,17 @@ tags:
 - SQLite by default does not do vacuum. The file size only increases and won't shrink. To make it shrink you need to either manually `vacuum;` or enable `auto_vacuum`.
 - In SQLite if you don't set `busy_timeout`, operations will fail directly if database is locked, without auto retry.
 - [Foreign key implicit locking may cause deadlock](./About%20circular%20reference#mysql-foreign-key-deadlock).
-- When using foreign key, when loading database backup, if the child table is loaded before parent, it will fail to load due to foreign key violation.
+- When loading database backup, if there is foreign key, child table cannot be loaded before parent table.
 - Locking may break repeatable read isolation (it's database-specific).
 - Distributed SQL database may doesn't support locking or have weird locking behaviors. It's database-specific.
 - If the backend has N+1 query issue, the slowness may won't be shown in slow query log, because the backend does many small queries serially and each individual query is fast.
 - Long-running transaction can cause problems (e.g. locking). It's recommended to make all transactions finish quickly.
 - If a string column is used in index or primary key, it will have length limit. MySQL applies the limitation when changing table schema. PostgreSQL applies the limitation by erroring when inserting or updating data.
 - PostgreSQL `notify` involves global locking if used within transaction, [see also](https://www.recall.ai/blog/postgres-listen-notify-does-not-scale). Also, `listen` malfunctions when used with connection pooling. It also has message size limit.
-- In PostgreSQL, incrementally updating a large `jsonb` is slow, as it internally recreates whole `jsonb` data. It's recommended to separate it if you do incremental update.
-- Storing UUID as string in database wasts performance. It's recommended to use database's built-in UUID type.
+- In PostgreSQL, incrementally updating a large `jsonb` is slow, as it internally recreates whole `jsonb` data.
+- Storing UUID as string in database wastes performance. It's recommended to use database's built-in UUID type.
   - Also, in some places UUID text doesn't have hyphen (e.g. `6cdd4753e57047259dd7024cb27b4c4f` instead of `6cdd4753-e570-4725-9dd7-024cb27b4c4f`). Need to consider it when parsing and comparing UUID.
 - Whole-table locks that can make the service temporarily unusable:
-  - In MySQL (InnoDB) 8.0+, adding unique index or foreign key is mostly concurrent (only briefly lock) and won't block operations. But in older versions it may do whole-table lock.
   - `mysqldump` used without `--single-transaction` cause whole-table read lock.
   - In PostgreSQL, `create unique index` or `alter table ... add foreign key` cause whole-table read-lock. To avoid that, use `create unique index concurrently` to add unique index. For foreign key, use `alter table ... add foreign key ... not valid;` then `alter table ... validate constraint ...`.
   - In MySQL (InnoDB) an `update` or `delete` that cannot use index may lock the whole table, not just targeted rows.
@@ -425,7 +423,6 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Kafka's message size limit is 1MB by default.
 - In Kafka, across partitions, consume order may be different to produce order. If key is null then message's partition is not deterministic.
 - In Kafka, if a consumer processes too slow (no acknowledge within `max.poll.interval.ms`, default 5 min), the consumer will be treated as failed, then a rebalance occurs. That timeout is per-batch. If a batch contains too many messages it may reach that timeout even if individual message processing is not slow. Can fix by reducing batch size `max.poll.records`.
-- If Nginx config doesn't include connection reuse, internal ports may be used up under high concurrency, then connection between Nginx and backend may fail.
 - Nginx `proxy_buffering` delays SSE.
 - If the backend behind Nginx initiates closing the TCP connection, Nginx passive health check treat it as backend failure and temporarly stop reverse proxying. [See also](https://nginx.org/en/docs/http/ngx_http_upstream_module.html)
 - Nginx configuration URL trailing slash. [See also](https://dev.to/danielkun/nginx-everything-about-proxypass-2ona)
@@ -487,6 +484,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Certificate expire. Examples: [Starlink incident](https://www.appviewx.com/blogs/expired-certificate-causes-high-profile-service-outage-proving-certificate-automation-is-critical/), [LinkedIn incident](https://www.appviewx.com/blogs/linkedin-certificate-expiry-fiasco-third-times-a-charm/), [Microsoft Teams incident](https://www.exoprise.com/2020/02/04/teams-outage-expired-certificate/)
   - Auto certificate renewal may silently stop working. [Example](https://github.com/bazelbuild/bazel/issues/28101#issuecomment-3693346788)
  - DNS caching. Changings related to DNS can take long time to take effect.
+ - When there are many TCP connections to the same dst port in same machine, src port space can be used up. Example: [Bluesky incident](https://pckt.blog/b/jcalabro/april-2026-outage-post-mortem-219ebg2)
 
 [^keepalive]: Note that [HTTP/1.0 Keep-Alive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Keep-Alive) is different to TCP keepalive.
 
