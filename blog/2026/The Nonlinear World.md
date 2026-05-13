@@ -74,7 +74,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: After the steam engine was improved, it required less coal to do the same work, so the demand of coal would reduce.
 
-  Second-order effect: [Jevons paradox](https://en.wikipedia.org/wiki/Jevons_paradox).The reduced cost of using steam engine greatly increased the usage of steam engine, so the demand of coal greaty increased.
+  Second-order effect: [Jevons paradox](https://en.wikipedia.org/wiki/Jevons_paradox).The reduced cost of using steam engine greatly increased the usage of steam engine, so the demand of coal greatly increased.
 
   Due to Jevons paradox, increasing efficiency may increase resource waste overall.
 
@@ -127,7 +127,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: Mineral resources make the country rich.
 
-  Second-order effect: [Resource curse](https://en.wikipedia.org/wiki/Resource_curse). Profits in mineral export makes country's currency overvalued. Then importing becomes cheaper than country's own products. so the domestic argiculture and industries cannot develop. Having "easy money" also make people not work hard. When the international mineral price drops, economy collapses.
+  Second-order effect: [Resource curse](https://en.wikipedia.org/wiki/Resource_curse). Profits in mineral export makes country's currency overvalued. Then importing becomes cheaper than country's own products. so the domestic agriculture and industries cannot develop. Having "easy money" also make people not work hard. When the international mineral price drops, economy collapses.
 
 - First-order effect: A department having budget surplus shows that the department is over-funded, so reducing its budget saves money for the organization.
 
@@ -147,7 +147,11 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: First-mover advantage. The company creating a new product category has advantage. It develops brand recognition and network effect early. 
 
-  Second-order effect: Second-mover advantage. After the first-mover costly explores different techiques/strategies, the second-mover can directly learn. And the first-mover often cannot correct its mistake due to sunk cost. The second-mover can avoid first-mover's mistakes.
+  Second-order effect: Second-mover advantage. After the first-mover costly explores different techniques/strategies, the second-mover can directly learn. And the first-mover often cannot correct its mistake due to sunk cost. The second-mover can avoid first-mover's mistakes.
+
+- First-order effect: When the big companies are in financial hardship, letting them collapse will hurt employment. Subsidying them keeps employment.
+
+  Second-order effect: They become too-big-to-fall. They become inefficient while occupying a lot of resources. They indirectly kill new startups. It reduces overall employment.
 
 [^qianlima]: Related: [Qianlima](https://en.wikipedia.org/wiki/Qianlima) (千里马). The high-capacity horse require more food to show its capacity. But without showing its capacity it can never get enough food supply. 
 
@@ -177,11 +181,15 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: When uncertainty increases, money moves from risky assets (e.g. stock) to gold, because gold is safer.
 
-  Second-order effect: When actual large risk occurs, asset prices drop. Leverages face forced liquidation (margin call). High-liquidity assets, including gold, are often sold first to get cash to prevent other leverage assets from going zero. This second-order effect is often temporary.
+  Second-order effect: When actual large risk occurs, asset prices drop. Leverages face forced liquidation. High-liquidity assets, including gold, are often sold first to get cash to prevent other leverage assets from going zero. This second-order effect is often temporary.
 
 - First-order effect: If a lot of money is shorting an asset, its price will drop.
 
   Second-order effect: If price grows to a threshold, short positions face forced liquidation, which creates big "buying pressure" and make price grow furthur. It's called short squeeze.
+
+- First-order effect: Predicting things early helps investments.
+
+  Second-order effect: Being too early is not good. The market may take longer time than expected to price in the new status.
 
 ### In Health and Biology
 
@@ -267,7 +275,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   Second-order effect: 
   
   - Believing too much on a piece of knowledge makes one stuck in **confirmation bias** and stay furthur from truth. 
-  - Knowing more about possible risks make one hesitate in making decisions, reducing agency.
+  - Knowing more about possible risks make one hesitate in making decisions, reducing agency. Often the innovation can only be done by the people not knowing the risks.
   
   Green lumber fallacy. Deep understanding is often not required for real-world success. The idiom "knowledge is power" is not always true. **The true knowledge includes when to not use knowledge**.
 
@@ -288,7 +296,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: Rationality allows making optimal decision, gaining advantage.
 
-  Second-order effect: Rational decision-making also means that opponent can accurately predict the behavior, which causes disadvantage.
+  Second-order effect: Rational decision-making also means that opponent can often accurately predict the behavior, which causes disadvantage.
 
 - First-order effect: A centralized organization/movement can be defeated.
 

@@ -376,6 +376,8 @@ Also, C++ and Rust duplicatedly generate code for different generic instantiatio
 
 In debug mode, debugging info also takes a lot of space in Wasm binary.
 
+If the web page shows a progress bar during loading, the user can become more patient, then the problem is partially solved.
+
 ## Debugging Wasm running in Chrome
 
 Firstly, the `.wasm` file need to have [DWARF](https://dwarfstd.org/) debug information in custom section.

@@ -309,60 +309,6 @@ Many memory leaks in Golang are caused by goroutine leak. Goroutine leak will al
 
 Select also has traps in async Rust, but in a different mechanism (cancellation).
 
-## Livelock
-
-Sometimes, replace locking with try-locking and adding retrying can solve some deadlocks. Deadlocks often depend on exact timing, so it may not deadlock in next retry. 
-
-But sometimes retrying cannot avoid deadlock. Then it will become livelock: keep retrying without successfully acquiring lock.
-
-```go
-func WithRetry[T any](attempts int, operation func() (T, error)) (T, error) {
-	i := 0
-	for {
-		result, err := operation()
-		if err == nil {
-			return result, nil
-		}
-		i++
-		if i >= attempts {
-			return result, err
-		}
-	}
-}
-
-func goroutineA(lock1 *sync.Mutex, lock2 *sync.Mutex) (string, error) {
-	return WithRetry(10, func() (string, error) {
-		lock1.Lock()
-		defer lock1.Unlock()
-		// do some work
-
-		if lock2.TryLock() { // this may keep failing
-			defer lock2.Unlock()
-			// do some other work
-			return "success", nil
-		} else {
-			return "", fmt.Errorf("failed to acquire lock2")
-		}
-	})
-}
-
-func goroutineB(lock1 *sync.Mutex, lock2 *sync.Mutex) (string, error) {
-	return WithRetry(10, func() (string, error) {
-		lock2.Lock()
-		defer lock2.Unlock()
-		// do some work
-		
-		if lock1.TryLock() { // this may keep failing
-			defer lock1.Unlock()
-			// do some other work
-			return "success", nil
-		} else {
-			return "", fmt.Errorf("failed to acquire lock1")
-		}
-	})
-}
-```
-
 ## Priority inversion
 
 In some real-time (or near-real-time) systems, important threads have higher priority than other thread. The thread scheduler tries to run higher-priority threads first. 
@@ -465,6 +411,12 @@ Upgrading read lock to write lock is prone to deadlock. So most in-memory read-w
 The in-database deadlocks can be mostly solved by enabling deadlock detection and doing transaction retry.
 
 But the in-memory deadlocks cannot be simply solved by that. Programming languages doesn't do rollback for you. Deadlock detection has limitations (Golang deadlock detection only trigger if all goroutines block). In-memory deadlocks need to be carefully prevented.
+
+## Retrying can create Livelock
+
+One solution to deadlock is to retry the transaction after detecting the deadlock. This is fine in low concurrency. But under high concurrency, there may be cases that two transactions deadlock each other, then both retry, then deadlock each other again. 
+
+This is called **livelock**. They don't all stuck like deadlock, but they keeps retrying without making progress, which is similar to deadlock.
 
 ## Rust async deadlock
 

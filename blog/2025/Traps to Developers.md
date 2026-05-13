@@ -245,7 +245,7 @@ tags:
 - Literal number starting with 0 will be treated as octal number. (`0123` is 83)
 - Destructing a deep tree structure can stack overflow. Solution is to replace recursion with loop in destructor.
 - `std::shared_ptr` itself is not atomic (although its reference count is atomic). Mutating a `shared_ptr` itself is not thread-safe. `std::atomic<std::shared_ptr<...>>` is atomic.
-- For `std::map` and `std::unordered_map`, `map[key]` alone will mutate the map if the corresponding entry doesn't exist. [See also](https://en.cppreference.com/w/cpp/container/map/operator_at.html)
+- For `std::map` and `std::unordered_map`, `map[key]` alone will auto-insert default value if the corresponding entry doesn't exist. [See also](https://en.cppreference.com/w/cpp/container/map/operator_at.html)
 - For `std::vector<bool>`, result of `operator[]` is a proxy object, not `bool&`.
 - Undefined behaviors. The compiler optimization aim to keep defined behavior the same, but can freely change undefined behavior. Relying on undefined behavior can make program break under optimization. [See also](https://russellw.github.io/undefined-behavior)
   - Accessing uninitialized memory is undefined behavior.
@@ -258,7 +258,7 @@ tags:
   - `const` can mean both read-only and immutable:
     - If the original declared object is not `const`, you can turn pointer to it as `const T*`, in this case `const` means read-only [^readonly]. You can change the object without triggering undefined behavior.
     - If the original declared object is `const`, then it's deemed immutable. If you use `const_cast` to turn its pointer to `T*` then change content, it's undefined behavior. [^cpp_mutable]
-    - Use `const volatile T*` for read-only pointer to data changable by other threads or outer system.
+    - `std::move` used on const object cannot avoid deep copying.
   - If `bool`'s binary value is neither 0 or 1, using it is undefined behavior. Similarily if an enum's binary value is not valid, using it is undefined behavior.
 - Alignment.
   - For example, 64-bit integer's address need to be disivible by 8. Unaligned memory access is undefined behavior. In ARM, unaligned memory access can cause crash.
@@ -366,7 +366,7 @@ tags:
 - Short circuit. `a() || b()` will not run `b()` if `a()` returns true. `a() && b()` will not run `b()` when `a()` returns false.
 - Operator precedence. `a||b && c` is actually `a || (b && c)`.
 - Assertion should not be used for validating external data. Validating external data should use proper error handling. Assertion should check internal invariants.
-- Confusing default value with missing value. For example, if the balence field is primitive integer, 0 can represent both "balance value not initialized" or "balance is really 0". In C and Python, 0 is treated as false in `if`.
+- Confusing default value with missing value. For example, if the balence field is primitive integer, 0 can represent both "balance value not initialized" or "balance is really 0". In C and Python, 0 is treated as false in `if`. Also empty string and null string.
   - The same thing also applies to primitive values in protocolbuffer. To discriminate, field must be marked `optional` and app code must call generated `has*` method to check.
 - When using profiler: the profiler may by default only include CPU time which excludes waiting time. If your app spends 90% time waiting (e.g. wait on database), the flamegraph may not include that 90% which is misleading.
 - When getting files in a folder, the order is not deterministic (may depend on inode order). It may behave differently on different machines even with same files. It's recommended to sort by filename then process. 
@@ -407,13 +407,11 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - File name can contain `\n` `\r` `'` `"`. File name can be invalid UTF-8.
 - Symbolic link can point to parent, forming cycle.
 - In Linux file names are case-sensitive, different to Windows and macOS.
-- glibc compatibility issue. A program that's build in a new Linux distribution dynamically links with a new version of glibc, then it may be incompatible with old versions of glibc in old systems. Can be fixed by static linking glibc or using containers [^container].
+- glibc compatibility issue. A program that's build in a new Linux distribution dynamically links with a new version of glibc, then it may be incompatible with old versions of glibc in old systems. Can be workarounded by using containers.
 - Path trailing slash:
   - If `/aaa/bbb` is a symbolic link to a folder, `rm /aaa/bbb` removes the symbolic link, but `rm /aaa/bbb/` may remove files in pointed folder.
   - For `mv x.txt /aaa/bbb`, if `/aaa/bbb` is a folder it will move file into the folder without changing name, but if `/aaa/bbb` doesn't exist it will rename file name to `bbb`.
 - PID can be reused after process exits.
-
-[^container]: There is a "fix problem then create new problem then fix new problem" cycle in deployment. Firstly dynamic linking creates dependency hell, then solve it using containers. But container images are slow to rebuild. It slows down development iteration cycle. Then tools like [tilt](https://tilt.dev/) solve the problem by "hacking" container (replace binary in running container without rebuilding container image). There are other hacks such as putting binary in mounted folder outside of container. But the root problem (dynamic linking dependency hell) can be just fixed by static linking.
 
 ## Backend-related
 

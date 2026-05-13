@@ -418,9 +418,8 @@ Some important architectural decisions:
   - How is change of source of truth notify to change derived data? How is the cache invalidated? How is the lookup acceleration structure maintained to be consistent with source of truth?
   - What data should we expose to client side? What data shouldn't?
 - Separate of responsibility (concern) and encapsulation:
-  - What module is responsible for updating this data?
-  - Should this data be encapsulated or let other modules access?
-  - Which module is responsible for keeping that constraint? Which module is responsible for keeping that derived data be consistent with source of truth?
+  - Should this module care or not care about this information? How to make that only one module only cares about this concern?
+  - Which module is responsible for keeping that constraint/invariant?
   - What's the boundary of validation and authorization?
 - Tradeoffs:
   - What tradeoff do we make to simplify it? Is that constraint really necessary?
@@ -834,7 +833,7 @@ The true superintelligence should be very "open-minded", not stuck in path depen
 
 Sometimes the model lose diversity because diversity reduces RL reward. This is also a problem of RL.
 
-## Synthetic data feedback loop
+## Synthetic data out of control
 
 In OpenAI's [Where the goblins came from](https://openai.com/index/where-the-goblins-came-from/), it mentiones that the model-generated data is used in training (specifically, SFT). If some feature (e.g. goblin) becomes more likely to be outputted from model, then it become more frequent in training data, then the newly-trained model outputs it more frequently. This is self-reinforcing feedback loop. This adds bias and reduces diversity.
 

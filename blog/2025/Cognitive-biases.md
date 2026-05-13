@@ -618,13 +618,12 @@ Between two opposing groups, proposing middle ground will often be seen as enemy
 
 We often underestimate the time and efforts required to do one thing (due to Dunning-Kruger effect etc.). When that thing cannot be done in estimated time and efforts, binary thinking may make us overestimate the difficulty and give up.
 
+In politics, it's often that the optimal solution is to make a tradeoff, but making tradeoff between two sides will be seen as enemy by both sides.
+
 **Strawman argument** is a technique in debating: refute a changed version of opponent's idea. It often utilizes binary thinking: **refute a more extreme version of opponent's idea** (also: slippery slope fallacy). Examples:
 
-- A: "We should increase investment for renewable energy." B: "You want to ban oil, gas, and coal, removing millions of jobs and crash the economy?"
-- A: "The history curriculum should include more perspectives to present a more objective and nuanced view of our nation." B: "So you want to rewrite history to make our children hate their own country?"
+- A: "We should increase investment for renewable energy." B: "You want to ban oil, gas, and coal?"
 - A: "We should implement stricter gun control." B: "It's useless, because no matter how strict it is, criminals will always find a way to get guns illegally." (perfect solution fallacy)
-
-Binary thinking effect also appears in manipulation. Preson A is firstly friendly to B, B likes A, then A manipulates person B, B starts disliking A, but then A becomes temporarily friendly to B, B still thinks A is good due to binary thinking (and many other factors), then A starts manipulating B again, then cycle repeats.
 
 ### Halo effect and horn effect
 
