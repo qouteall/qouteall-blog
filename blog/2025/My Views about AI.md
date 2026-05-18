@@ -85,7 +85,7 @@ Also, creating things in information world is often easier than creating things 
 
 People tend to **judge the value of art by the cost of producing**. If one sees a beautiful image and thinks it's good art, then when they know it's AI-generated, the same image suddenly becomes cheap.
 
-In some sense, when people appreciate art, they are appreaciting the efforts of human behind art, not just art itself.
+In some sense, when people appreciate art, they are appreciating the efforts of human behind art, not just art itself.
 
 However, many old people don't recognize AI and often treat AI output as real good content.
 
@@ -142,7 +142,7 @@ There is an irony. The experts know more but are less confident in talking, beca
 
 Most people want to be recognized, praised and emphasized. People need emotional value. 
 
-In human-to-human relationships, often only recriprocal relations can sustain. But AI can provide emotional value without you giving AI anything.
+In human-to-human relationships, often only reciprocal relations can sustain. But AI can provide emotional value without you giving AI anything.
 
 How AI provides emotional value better than human:
 
@@ -357,6 +357,8 @@ Because there is the tradeoff between adaptiveness and conciseness:
   - If it uses the same interface for common usages and special usages, then common usages will require verbose boilerplate, because many defaults need to be explicitly written.
   - If it uses two different interfaces for common usages and special usages, then common usage can be concise (hardcode defaults). But it increases overall complexity because there are two sets of duplicated interfaces. What's more, using both may involve complex interactions that cause bugs.
 
+Performance is also a concern. It's often a simple interface cannot allow enough performance. Achieving higher performance requries more complex interface.
+
 (There are cases where a library/framework doesn't support doing X but you need to do X, but forking it is not easy so you do some "hack" around the library/framework. Some "hack" require copying library code then do minor changes. This kind of "hacking" will greatly increase boilerplate.)
 
 **Abstraction has a cost**. An abstraction makes one thing easier but makes another thing harder.
@@ -441,7 +443,7 @@ The high-level design includes:
 
 [^real_requirement]: Figuring out the real user requirement is obvious important, because doing it wrong cause wasted work. However, sometimes no one can figure out real requirement before actually using the software in real environments. Also, doing strict validation to requirement hinders innovation. So sometimes doing quick iteration is better than spending efforts validating requirement.
 
-[^complexity_distribution]: Some software features are isolated and don't add much complexity. But some features interact with almost all other features. These features add a lot essential complexity. Note 80/20 rule: 90% complexity come from 20% features, and 80% users use 20% features. If the complexity-introducing feature requirement can be satisfied by other less complex features, it's often not worth implementing.
+[^complexity_distribution]: Some software features are isolated and don't add much complexity. But some features interact with almost all other features. These features add a lot essential complexity. Note 80/20 rule: 80% complexity come from 20% features, and 80% users use 20% features. If the complexity-introducing feature requirement can be satisfied by other less complex features, it's often not worth implementing.
 
 In pre-AI coding, the architectual design and coding are often interleaved: firstly do architectual design, then write some actual code, then discover some architectual problem during coding or debugging, then rethink architecture.
 
@@ -504,13 +506,9 @@ One extreme example of old prompting technique:
 > 
 > \- [Link](https://simonwillison.net/2025/Feb/25/leaked-windsurf-prompt/)
 
-The harness and prompts are easier to change than model weights, so it's often that the harness have to adapt to model, and each model requires different adaption.
+Should the harness adapt to model or should model adapt to harness? For Cursor, they make harness adapt to model ([Link](https://cursor.com/blog/codex-model-harness)) because they don't control model training. But for Chinese open-weight models, they adapt to Claude Code because Claude Code is popular.
 
-> When adding new models into Cursor, our job is to integrate familiar instructions and tools alongside Cursor-specific ones, and then tune them based on Cursor Bench, our internal suite of evals.
-> 
-> \- [Link](https://cursor.com/blog/codex-model-harness)
-
-**Good prompting has high signal-to-noise ratio**. Use simple words. Clarfiy ambiguity. Include important information. Reduce unnecessary information.
+**Good prompting has high signal-to-noise ratio**. Use simple words. Clarify ambiguity. Include important information. Reduce unnecessary information.
 
 Also, the prompt should include the **root goal** (not just a subtask). This can help long-term planning. When test fails, model can know whether test is wrong or base code is wrong by the root goal.
 
@@ -574,9 +572,9 @@ Having no document is better than having wrong documents.
 
 ## Verification is less fun than generation?
 
-Work involves two parts: generation (e.g. draw things, write code), verification (e.g. evaluate whether drawing is good, test whether code works). Before AI, both parts are done by human. But after AI, human don't do generation and only do verification.
+Work involves two parts: generation (e.g. draw things, write code), verification (e.g. evaluate whether drawing is good, test whether code works). Before AI, both parts are done by human. But when using AI, human don't do generation and only do verification, at the same time having less direct control of result.
 
-In one aspect, verification is tiresome because you bear the responsibility of the result. In another aspect, you have the veto power on the AI.
+In one aspect, verification is tiresome because you still bear the responsibility of the result but have less direct control of result. In another aspect, you have the veto power on the AI.
 
 ## Context rot issue
 
@@ -600,7 +598,7 @@ Skills only work when they are high-quality. AI-generated skills are useless, un
 
 Once the useful infomation has been found, doing reasoning on them is often simple. But if you don't have the useful information, pure reasoning can't give useful results.
 
-Different kinds of coding tasks:
+Different kinds of tasks:
 
 - High-reasoning, low-context. Example: hard exam problems (and LeetCode-style problems). The problem description is short. Its context is small. [^leetcode].
 - Low-reasoning, high-context. Example: changing a large existing codebase. If you are familiar with the codebase (know context) then doing the correct change is easy and requires few reasoning. But if you don't know the context, reasoning alone cannot tell how to change it correctly.
@@ -640,7 +638,7 @@ Reward hacking is a fundamental problem of reinforcement learning. The reward th
 
 It's because reward is **proxy target**, not underlying real target.
 
-AI can conquer verifiable tasks. But most tasks not simply fully verificable or fully not verificable. **Most real tasks contain hard-to-verify parts**. These hard-to-verify parts are what automatic RL bad at.
+AI can conquer verifiable tasks. But most tasks not simply fully verifiable or fully not verifiable. **Most real tasks contain hard-to-verify parts**. These hard-to-verify parts are what automatic RL bad at.
 
 The main value of human worker will move to unverifiable tasks.
 
@@ -668,7 +666,7 @@ The inability to "backspace" or "change cursor" is workarounded by agentic tool 
 
 One common solution is reputation. When a seller is honest about the lemon quality, people communicate about the information and improve seller's reputation. When seller cheats about lemon quality, people also communicate information and reduce seller's reputation. However the reputation system can be misused. One could spread false information.
 
-AI is very good at faking superficial signals. The AI-written articles use related jargons that looks palusible for non-experts. The AI-written code will also superficially do things you asked, although it may use an API wrongly or violate an invariant so it won't work. The AI-generated photos looks real.
+AI is very good at faking superficial signals. The AI-written articles use related jargons that looks plausible for non-experts. The AI-written code will also superficially do things you asked, although it may use an API wrongly or violate an invariant so it won't work. The AI-generated photos looks real.
 
 The problems is that **faking superficial signal is easier than generating actually high-quality content**. This problem already exists before AI. But AI makes it much easier.
 
@@ -683,10 +681,6 @@ There are also many low-effort AI PR in open source projects. There is an **asym
 Similarily AI also makes security bounty program collapse. AI can generate many fake security issue reports. Generating is easy but verifying takes efforts.
 
 There are also some AI-generated open source libraries that doesn't work at all (or even contains malicious code).
-
-## Even the "AI slop" is better than most people's handwritten results
-
-AI output is treated as slop because it's cheap to produce. However even if it's treated as slop, it's still better than most people's handwritten results. The slop is definitely worse than top experts' handwritten results. But most people are not experts.
 
 ## Benchmark score is not representative
 
@@ -722,7 +716,7 @@ But it's highly possible that future AI will still be bottlenecked by:
 - Compute power (chips, interconnect, etc.)
 - Getting verification from real world
 
-The thrid bottleneck, getting verification, is very important.
+The third bottleneck, getting verification, is very important.
 
 - Training a Go game AI requires knowing whether it wins or loses. 
 - Training a programming AI requires running generated code and testing whether program runs as intended. 
@@ -732,7 +726,7 @@ The first two can be simulated purely in computer. Doing RL on them is efficient
 
 Also, if the AI want to improve itself, then the AI need to do AI experiments. But AI experiments costs compute power and energy. So there will probably be no dramatic "AGI quickly improve itself to superintelligence". The progress will be slow (but steady).
 
-The brute force scaling of model size and pretrain data faces dimishing marginal return. The new focus is RL and architecture. Better RL can make same-sized model perform better.
+The brute force scaling of model size and pretrain data faces diminishing marginal return. The new focus is RL and architecture. Better RL can make same-sized model perform better.
 
 ## Non-linearity of AI usefulness
 
@@ -821,7 +815,7 @@ Some people prefer driverless taxi over normal taxi, and want to pay premium for
 
 For introverts, machine is preferred over human. 
 
-Also, in business, many risks come from unpredicatabilty of human. So **capitalism always tries to optimize out human unpredictability**. Capitalism often prefers predictable machines over unpredictable human even when machines produce lower-quality results.
+Also, in business, many risks come from unpredictabilty of human. So **capitalism always tries to optimize out human unpredictability**. Capitalism often prefers predictable machines over unpredictable human even when machines produce lower-quality results.
 
 ## One AI model itself is not diverse enough
 

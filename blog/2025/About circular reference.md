@@ -778,6 +778,14 @@ About database and caching: in some systems, the database cannot handle all requ
 
 This can also happen after reducing cache TTL (time to live). After reducing cache TTL, the database load may keep increasing. [Example on GitHub](https://github.blog/news-insights/company-news/addressing-githubs-recent-availability-issues-2/).
 
+## Service circular dependency
+
+There are cases where service A calls service B, then service B calls another API of service A. 
+
+This service circular dependency is not good design. It's often that there is originally no circular dependency, but after adding a feature the circular dependency implicitly forms. When two microservices are developed by two separate teams, it's more likely to happen.
+
+The two serice's initialization has no dependency, so restarting works well. But it's problematic when circuit breaker is involved. When one service triggers its circuit breaker, this circular dependency will cause livelock. Both services keep retrying without succeeding.
+
 ## Break-my-tool outage
 
 An outage can break your tool for solving the outage:

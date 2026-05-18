@@ -60,6 +60,8 @@ The cancellation "catch": normally when the parent future cancels, the inner fut
 
 In Golang, there is panic, but there is no implcit cancellation. All cancellation need to be explicit. (However managing context cancellation in Golang still has traps, just different to async Rust.)
 
+Cancellation is indeed useful in some cases. But there are also many cases that cancellation is harmful. The problem is that async Rust made cancellation implicit. There is no type-level annotation ensuring an async function cannot cancel. This creates traps.
+
 Two examples of cancellation issues: [Alan tries to cache requests, which doesn't always happen](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/alan_builds_a_cache.html), [Barbara gets burned by select](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/barbara_gets_burned_by_select.html)
 
 See also: [Dealing with cancel safety in async Rust](https://rfd.shared.oxide.computer/rfd/400), [Cancelling async Rust](https://sunshowers.io/posts/cancelling-async-rust/)
@@ -163,9 +165,9 @@ With epoll, the buffer can be directly put inside future, with no extra allocati
 With io_uring, dropping the future doesn't cancel the kernel's IO process. So putting buffer into future in io_uring is not memory-safe on cancellation (kernel will write into freed memory). Two solutions:
 
 - Make the future non-cancellable. Rust doesn't yet have linear type (must-move type) so this cannot be guaranteed by language.
-- Make the buffer heap-allocated. When future is dropped, the buffer can still exist, kernel can write to it without violating memory safety.
+- Make the buffer separately allocated (heap allocation, buffer pool, etc.). When the future is dropped, the buffer can still exist, and kernel can write to it buffer without violating memory safety.
 
-See also: [Notes on io-uring](https://without.boats/blog/io-uring/)
+See also: [Notes on io-uring](https://without.boats/blog/io-uring/), [related comment](https://github.com/rust-lang/rust/issues/62149#issuecomment-506351174)
 
 ## Un-`poll`-ed futures
 
@@ -185,9 +187,11 @@ This creates a temporaily un-`poll`-ed future. This is dangerous when async lock
 
 When using buffered stream, some futures in buffer may be temporarily un-`poll`-ed. This can cause weird delaying or deadlock.
 
-https://tmandry.gitlab.io/blog/posts/for-await-buffered-streams/
+See also:
 
-https://without.boats/blog/poll-progress/
+- [Barbara battles buffered streams](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/barbara_battles_buffered_streams.html)
+- [`for await` and the battle of buffered streams](https://tmandry.gitlab.io/blog/posts/for-await-buffered-streams/)
+- [poll_progress](https://without.boats/blog/poll-progress/)
 
 ## Stack overflow caused by large future
 
@@ -255,6 +259,8 @@ This is different in Golang. In Golang, goroutines are parallel.
 
 Async-sync-async sandwitch: Async function call sync function that blocks on another async function. Its async-to-sync calling blocks scheduler thread. It's very prone to deadlock.
 
+[The bane of my existence: Supporting both async and sync code in Rust](https://nullderef.com/blog/rust-async-sync/)
+
 ## Rust `Send` `Sync` limitations
 
 Tokio does multi-thread work-stealing scheduling. Its purpose is very similar to OS scheduling. And an async task's purpose is very similar to OS thread.
@@ -304,10 +310,6 @@ The tree shape is free of cycles, so awaiting on child tasks alone cannot deadlo
 
 But there are cases that structural concurrency cannot handld. One is background tasks. For example, a web server provides a Restful API that launches a background task. The background task keeps running after the request that launch task finishes.
 
-
-## Duplicated APIs
-
-[The bane of my existence: Supporting both async and sync code in Rust](https://nullderef.com/blog/rust-async-sync/)
 
 ## See also
 

@@ -290,7 +290,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: If you haven't obtained successful results for some time, not reporting makes people question that you are not working.
 
-- First-order effect: Making software react faster improves user exprience.
+- First-order effect: Making software react faster improves user experience.
 
   Second-order effect: If it's an AI application, the user tend to think fast AI is dumber than slow AI.
 
@@ -316,7 +316,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   
   Second-order effect: The user may reduce the memory pressure by using regular passwords (like AAABBB111, CCCDDD222), to avoid the trouble of reseting password every time.
 
-### In Software Development
+### In Software
 
 - First-order effect: Better hardware makes software run faster.
 
@@ -345,7 +345,16 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 > 
 > \- [A conjecture on why reliable systems fail](https://surfingcomplexity.blog/2017/06/24/a-conjecture-on-why-reliable-systems-fail/)
 
-  Any mechanisms that aim to improve reliability may backfire in edge cases. For example, auto-retry may overload other services. 
+- First-order effect: Auto-retry mechanism improves reliability when having temporary network issues or temporary service restart.
+
+  Second-order effect: When a service is nearly-overloaded, auto-retrying can increase load and fully overload the service. 
+  
+  Third-order effect: That issue can be solved by circuit breaker combined with exponential backoff and jitter. 
+
+  Fourth-order effect: Circuit breaker introduces other risks:
+
+  - When circuit breaker is used with load balancer, one node overload can overload other nodes.
+  - Hidden circular dependency between two services that can run fine normally, but when one fails, trapped in livelock.
 
 - First-order effect: Enforcing high unit test coverage could improve software quality.
 
@@ -374,12 +383,11 @@ Examples:
 - Herd mentality. Some people do something, more people follow.
 - Financial market momentum.
 - Financial system often "give umbrella on sunny day, take back on rainy day".
-- Debt can both accelerate growth and accelerate bankruptcy.
+  - Debt can both accelerate growth and accelerate bankruptcy. Banks only loan to companies with good financial status.
+  - The worse health condition is, the more expensive health insurance is (in America), the less likely one affords treatment.
 - Spread of information and idea. The more popular a piece of information is, the more chance it spreads.
 - Sunk cost. The more resources put in, the higher sunk cost is, the harder to stop loss.
   - This also applies to war. When both sides costed a lot in war, the war is hard to stop.
-- Banks only loan to companies with good financial status.
-- The worse health condition is, the more expensive health insurance is (in America), the less likely one affords treatment.
 - Ponzi scheme. When one falls into a Ponzi scheme, one tend to spread the scheme to reduce own loss.
 - Recognition of power. When one uses power and succeeded, the observers confirm the power. When a rule is broken once and there is no consequence, then more and more people will break the rule. 
 - Avalanche.
@@ -459,18 +467,18 @@ The force behind a self-balancing feedback loop may drive self-reinforcing feedb
 
 The **"competition"** between self-reinforcing feedback loops and self-balancing feedback loops:
 
-|                             | Self-reinforcing                                                                            | Self-balancing                                                                     |
-| --------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Population growth           | Exponential growth                                                                          | Limited food supply, living resources and jobs; Higher competition                 |
-| Asset price grow            | Trend following investments; Fear of missing out; Overconfidence; Leverage                  | Long force depletes; Short potential accumulates                                   |
-| Asset price drop            | Panic; Margin call                                                                          | Short force depletes; Long potential accumulates                                   |
-| Debt growth and inflation   | Economy growth; Higher confidence                                                           | Cost of excess invstment and debt; Monetary tightening for keeping currency credit |
-| Debt collapse and deflation | Cadcade credit collapse during financial crisis; Lose of confidence                         | Countermeasures for crisis; Fiscal and monetary stimulus                           |
-| Monopoly                    | Matthew effect; Economies of scale; Brand recognition                                       | Antitrust; Safety concerns; Innovator's dillema; Bureaucracy within large company  |
-| Scaling of production       | Amortize cost                                                                               | Harder to manage; Diminishing marginal return; Higher risk                         |
-| Virus spread                | The more it infects, the quicker it spreads                                                 | Immunity; Societal countermeasures; Medication; Natural selection                  |
-| Spread of information       | The more people know it, the quicker it spreads; Fad following; Algorithmic recommendataion | Saturation of acceptors; Lose of interest                                          |
-| Scaling in AI               | Scaling gives better performance                                                            | Higher cost in training and inference; Dinimishing marginal utility                |
+|                             | Self-reinforcing                                                                           | Self-balancing                                                                     |
+| --------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| Population growth           | Exponential growth                                                                         | Limited food supply, living resources and jobs; Higher competition                 |
+| Asset price grow            | Trend following investments; Fear of missing out; Overconfidence; Leverage                 | Long force depletes; Short potential accumulates                                   |
+| Asset price drop            | Panic; Margin call                                                                         | Short force depletes; Long potential accumulates                                   |
+| Debt growth and inflation   | Economy growth; Higher confidence                                                          | Cost of excess invstment and debt; Monetary tightening for keeping currency credit |
+| Debt collapse and deflation | Cadcade credit collapse during financial crisis; Lose of confidence                        | Countermeasures for crisis; Fiscal and monetary stimulus                           |
+| Monopoly                    | Matthew effect; Economies of scale; Brand recognition                                      | Antitrust; Safety concerns; Innovator's dillema; Bureaucracy within large company  |
+| Scaling of production       | Amortize cost                                                                              | Harder to manage; Diminishing marginal return; Higher risk                         |
+| Virus spread                | The more it infects, the quicker it spreads                                                | Immunity; Societal countermeasures; Medication; Natural selection                  |
+| Spread of information       | The more people know it, the quicker it spreads; Fad following; Algorithmic recommendation | Saturation of acceptors; Lose of interest                                          |
+| Scaling in AI               | Scaling gives better performance                                                           | Higher cost in training and inference; Dinimishing marginal utility                |
 
 Note that nonlinear systems are complex. They are more than just two kinds of feedback loops.
 
@@ -498,7 +506,7 @@ The law of large number only works if the samples are independent.
 
 The relation between cycle and trends is similar to fractal. There are small trends in cycles. There are also small cycles in trends. There are small cycles in cycles.
 
-Investing in index is long-term trend following, as the index selects the winning stocks. If the index has positon limitation for each individual stock, then it also incorporates contrarian investment.
+Investing in index is long-term trend following, as the index selects the winning stocks. If the index has positon limitation for each individual stock, then it also incorporates contrarian investment. (Note that market is anti-inductive. The more money investing in index, the more index front-running is profitable.)
 
 Heinrich's law: for every accident that causes a major injury, there are 29 accidents that cause minor injuries and 300 accidents that cause no injuries.
 
@@ -562,7 +570,7 @@ Experiences may be obsolete or even harmful after a paradigm shift. Ideas, metho
 
 - Optimize for the root goal instead of sub-goals. A sub-goal may originally serve for the root goal but now conflict with the root goal. Be ware of **means-end inversion**.
 
-  Question the constraints of the optimization. Some constraints are actually unnecessary for the root goal. There are also cases where a constraint leads to innovation.
+  Question the constraints of the optimization. Some constraints are caused by historical reasons and is unnecessary now. There are also cases where a constraint leads to innovation.
 
 - Right decision can fail and bad decision can succeed due to randomness. Results may be misleading.
 
@@ -693,7 +701,7 @@ Advanced but expensive technology may defeat due to financial sustainability.
 
 In capitalism, technologies are usually developed for profit, not for human well-being (e.g. processed food, algorithmic recommendation, AI training data collection).
 
-If a piece of software has a bug, then every copy of the same version of software has the same bug. This is a source of fragility. For example, if a self-driving algorithm has a bug, then all self-driving cars that deploy such algorithm has the same bug. On the contrary, it's unlikely that all drivers in world has the same hidden blind spot.
+If a piece of software has a bug, then every copy of the same version of software has the same bug. This is a source of fragility. For example, if a self-driving program has a bug, then all self-driving cars that deploy such program has the same bug. On the contrary, it's unlikely that all drivers in world has the same hidden blind spot.
 
 ### Fragility of automation
 
