@@ -300,7 +300,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: A centralized organization/movement can be defeated.
 
-  Second-order effect: After breaking the organization, if the idea behind it is still popular, then it becomes decentralized and more resilient. Its activitiy becomes more sparse so it's harder to defense. And there will be no one to negotiate with.
+  Second-order effect: After breaking the organization, if the idea behind it is still popular, then it becomes decentralized and more resilient. Its activities become more sparse so it's harder to defense. And there will be no one to negotiate with.
 
 ### In Cybersecurity
 
@@ -377,6 +377,7 @@ Examples:
   - Bank run. Some people not trusting bank make bank's financial status worse and less trustworthy.
   - Teacher dislikes a student and give bad feedback, then student have less motivation to learn thus perform worse.
   - A commodity originally has supply-demand balance. When someone buys a lot of it, price increases, people think it has a shortage then buy more eagerly, then shortage becomes true and price furthur increases.
+  - Bad emotion causes one to ruminate, then cannot pay attention to current task, then makes mistake, then emotion becomes worse.
   - ...
 - Attitude can shape behavior. Behavior can shape attitude. Persuade self to justify decisions.
 - Social interaction. One being angry to another may make two both more angry. Also applys to friendliness and trust/distrust.
@@ -506,7 +507,7 @@ The law of large number only works if the samples are independent.
 
 The relation between cycle and trends is similar to fractal. There are small trends in cycles. There are also small cycles in trends. There are small cycles in cycles.
 
-Investing in index is long-term trend following, as the index selects the winning stocks. If the index has positon limitation for each individual stock, then it also incorporates contrarian investment. (Note that market is anti-inductive. The more money investing in index, the more index front-running is profitable.)
+Investing in index is long-term trend following, as the index selects the winning stocks. If the index has position limitation for each individual stock, then it also incorporates contrarian investment. (Note that market is anti-inductive. The more money investing in index, the more index front-running is profitable.)
 
 Heinrich's law: for every accident that causes a major injury, there are 29 accidents that cause minor injuries and 300 accidents that cause no injuries.
 
@@ -554,21 +555,19 @@ Experiences may be obsolete or even harmful after a paradigm shift. Ideas, metho
 
 ## About optimizations
 
-- Almost all **optimizations are tradeoffs**. Some tradeoffs are hidden. Optimizations may make the system more fragile and unadaptive to paradigm shifts.
+- Almost all **optimizations are tradeoffs**. Some tradeoffs are hidden. **Optimization may backfire** (perverse incentive, iatrogenesis, etc.). 
+  - Sometimes not optimizing is better. Sometimes winning just requires doing nothing special and let opponent make mistakes.
 
-- Different cases suit different tradeoffs. No one-size-fits-all.
+- 80/20 rule. Sometimes optimizing just one important part can have big impacts. Note that this doesn't apply to everything.
 
-- Optimization may backfire (perverse incentive, iatrogenesis, etc.). Sometimes not optimizing is better.
+- Diminishing marginal return. Overly optimize one aspect is usually a bad tradeoff. Pursuing perfection is often unrealistic.
 
-- 80/20 rule. Optimize the important part first. Also note that not everything can be 80/20-ed.
-
-- Optimization has diminishing marginal return. Overly optimize one aspect is usually a bad tradeoff. Pursuing perfection is often unrealistic.
-
-- Yerkes-Dodson law: Medium motivation or stress works the best. Too much or too few motivation or stress don't work well.
+- "Everything in moderation, including moderation". Keeping things in the middle is often fine.
+  - Related: Yerkes-Dodson law: Medium motivation or stress works the best. Too much or too few motivation or stress don't work well.
 
 - It's often that long-term benefit requires short-term cost. Getting out of a local minima often requires temporarily increasing loss.
 
-- Optimize for the root goal instead of sub-goals. A sub-goal may originally serve for the root goal but now conflict with the root goal. Be ware of **means-end inversion**.
+- Optimize for the root goal instead of sub-goals. A sub-goal may originally serve for the root goal but now conflict with the root goal. Be ware of **means-end inversion** (goal displacement).
 
   Question the constraints of the optimization. Some constraints are caused by historical reasons and is unnecessary now. There are also cases where a constraint leads to innovation.
 
@@ -578,7 +577,7 @@ Experiences may be obsolete or even harmful after a paradigm shift. Ideas, metho
 
 ## High-dimensionality
 
-About health: Some people treat health as a score. After eating unhealthy food or staying up late, the socre decreases. And the score can be earned back by taking supplements and exercising. This view is wrong. It simplifies high-dimensional health status into a one-dimensional score.
+About health: Some people treat health as a score. After eating unhealthy food or staying up late, the score decreases. And the score can be earned back by taking supplements and exercising. This view is wrong. It simplifies high-dimensional health status into a one-dimensional score.
 
 About AI: Current AI can solve PhD-level exam problems that 99.999% people cannot solve. But AI doesn't actually achieve PhD-level intelligence. Intelligence is high-dimensional. Solving exam problems is just one dimension.
 
@@ -599,30 +598,23 @@ Redundancy tackles risk. Two kinds of redundancy:
 
 Diversification is also a way to handle risks. Note that diversification only works when correlation is low. Many assets seems low-correlation but has high correlation under Black Swan event. When two low-correlation assets are commonly diversified together, their correlation potentially increases.
 
-### Optionality
-
-Harvest optionality: being able to delay harvest when market price is low. For example, timberland can delay cutting tree when wood price is low, brewhouse can keep brewing when alcohol price is low.
-
-Modern manufactoring is often very capital-intensive and fragile. Short-term over-production can be fatal. It can be overcomed by counter-cyclical subsidy but the subsidy can easily fall into sunk-cost trap. Unfortunately, the more advanced manufactoring is more capital-intensive and more fragile.
-
 ### Good side of incident
 
 - It reveals problems and gives pressure to improve.
 - It makes people appreciate the good instead of taking things for granted.
-- It sometimes destroies inefficient things and leave room for more efficient things.
+- It justifies the cost of security investments. Without incident happening, most people don't see the value of security investments.
+- It can destroy inefficient entities that occupy resources. It frees resources for more efficient entities.
 - ...
 
 ### In software: untested error handling likely won't work
 
 Distributed system has **failover** functionality: when one node fails, another node takes the responsibility. However, if you haven't tested failover, it likely won't work as intended:
 
-> Another impactful incident for Actions occurred on March 5. Automated failover has been progressively rolling out across our Redis infrastructure, and on this day, a failover occurred for a Redis cluster used by Actions job orchestration. The failover performed as expected, but a **latent configuration issue** meant the failover left the cluster in a state with no writable primary. With writes failing and failover not available as a mitigation, we had to correct the state manually to mitigate. This was not an aggressive rollout or missing resiliency mechanism, but rather latent configuration that was only exposed by an event in production infrastructure.
+> Another impactful incident for Actions occurred on March 5. Automated failover has been progressively rolling out across our Redis infrastructure, and on this day, a failover occurred for a Redis cluster used by Actions job orchestration. The failover performed as expected, but a **latent configuration issue** meant the failover left the cluster in a state with no writable primary. With writes failing and failover not available as a mitigation, we had to correct the state manually to mitigate.
 > 
 > \- [Addressing GitHub’s recent availability issues](https://github.blog/news-insights/company-news/addressing-githubs-recent-availability-issues-2/)
 
 It also applies to other kinds of error handling.
-
-But testing error handling hard. There are many kinds of different error cases.
 
 ### Diversity and "blind sopts"
 
@@ -637,22 +629,6 @@ When there is diversity, different people can communicate different ideas and tr
 Bitcoin can only process 3 to 7 on-chain transactions per second, and it takes about 5 minutes to get first confirmation for each transaction. But a centralized Bitcoin exchange center can process transactions much quicker.
 
 There are faster decentralized cryptocurrency protocol designs. But doing big upgrade to Bitcoin protocol is nearly impossible because it requires consensus of major players ([block size war](https://vitalik.eth.limo/general/2024/05/31/blocksize.html)), and there are interest conflicts. But banks and exchange centers can upgrade its software without most customer's aggrement.
-
-## On positive Black Swans
-
-It seems betting on positive Black Swan is good because it has large upsides and limited downsides. However, in real world, **positive Black Swan may come very late or never come**. But the "limited downside" will likely keep applying for long time. 
-
-It's actually very hard to do. It requires patience and reducing expectation. 
-
-Normal people don't suit winner-take-all profession (e.g. actor, social media influencer, founding startup).
-
-Keep staying in the game makes one exposed to positive Black Swan. Don't all-in. Stop-loss is important.
-
-Doing more things and make more connections can improve exposure to positive Black Swan.
-
-Embrace some randomness instead of paranoidly avoiding randomness.
-
-Barbell strategy: 10-15% high-risk high-payoff diverse investments and 85-90% safe liquid investments. (Don't trust seemingly middle-risk investments.) Short but intense activitity can be better than continuous mild activitity.
 
 ## On planning
 
@@ -682,16 +658,7 @@ Note that competitiveness is relative to the market size. A quickly-growing mark
 
 ## The flip side of advanced technologies
 
-Technology advancement usually involves **scaling**: 
-
-- scaling size
-- scaling energy
-- scaling speed
-- scaling precision
-- scaling density
-- scaling connection
-- scaling computation
-- ...
+Technology advancement usually involves **scaling**: scaling size, scaling energy, scaling velocity, scaling precision, scaling density, scaling connection, scaling computation, ...
 
 Scaling often involves higher fragility and higher cost (e.g. advanced chip manufacturing), and eventually facing diminishing marginal return. Scaling of connection also boost concentration and Matthew effect.
 
@@ -702,6 +669,8 @@ Advanced but expensive technology may defeat due to financial sustainability.
 In capitalism, technologies are usually developed for profit, not for human well-being (e.g. processed food, algorithmic recommendation, AI training data collection).
 
 If a piece of software has a bug, then every copy of the same version of software has the same bug. This is a source of fragility. For example, if a self-driving program has a bug, then all self-driving cars that deploy such program has the same bug. On the contrary, it's unlikely that all drivers in world has the same hidden blind spot.
+
+Modern advanced manufactoring is often very capital-intensive and fragile. It can be overcomed by counter-cyclical subsidy, but the subsidy can easily fall into sunk-cost trap and crate "zombie" enterprises. Unfortunately, the more advanced manufactoring is more capital-intensive and more fragile.
 
 ### Fragility of automation
 
@@ -723,7 +692,7 @@ When the large environment is unstable and unsuitable for long-termism, it requi
 
 It's often that the process of doing improvement has risks. But the improvement can avoid bigger risk in the future. Under short-termism, it can only stuck in local minimum, avoiding risky improvement.
 
-Stock market pricing is often short-termism, which often cause comany decision-making to also become shor-termism: 
+Stock market pricing is often short-termism, which often cause company decision-making to also become short-termism: 
 
 - Sometimes the investors care too much about short-term shareholder return and don't understand value of long-term investment (e.g. research). 
 - Sometimes the investors care too much about short-term price trend. When there is a bubble, company tend to do irrational investment to prop the bubble. The story behind bubble only pays off after long time, but it's not rational long-termism.

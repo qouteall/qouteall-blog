@@ -1248,19 +1248,18 @@ This restriction is related to panic unwinding. Before the "temporary void" beco
 
 Note that the restriction only applies to borrowed data. A local variable that's not borrowed can be temporary moved-out then re-assigned.
 
-## `Send` and `Sync`
+## Unintuitive `Send` and `Sync`
 
-Rust favors tree-shaped ownership. Each object is owned by exactly one place. If you send tree-shaped data to another thread, only one thread can access it, so it's thread-safe. No data race.
+The `Send` and `Sync` are not intuitive. Someone learning Rust may ask "`String` has no internal synchronization, so it's definitely not thread-safe, why does it satisfy `Send` and `Sync`?" Because `Send` and `Sync` actually tests on interior mutability. The underlying logic is not simple:
 
-Sending an immutable borrow to another thread is also fine as long as the shared data is actually immutable.
+- If the data structure is fully tree-shaped, no sharing is possible. Each object is owned by exactly one thread. So it's thread-safe. But this brekas when `Rc` makes data not tree-shaped. Two `Rc` structs can internally reference one object, but from the "outside" one `Rc` is just one struct that fits in tree-shaped ownership.
+- Even if there is sharing, only immutable borrow can be shared. If the shared data is actually immutable, then it's thread-safe. But this breaks with interior mutability. With interior mutability, it can be mutated via immutable borrow.
 
-But there are exceptions. One exception is interior mutability. Because of interior mutability, the data pointed by immutable borrow `&T` may no longer actually be immutable. So Rust prevents sharing `&Cell<T>` and `&RefCell<T>` by making `Cell<T>` and `RefCell<T>` not `Sync`. If `X` is not `Sync` then `&X` is not `Send`. This prevents `Cell` and `RefCell` from being shared across threads.
+The `String` has no interior mutability. So the tree-shaped ownership and mutable borrow exclusiveness already prevents data race of it.
 
-`Rc` also has internal shared mutable reference counter. It's not atomic, so `Rc` cannot be passed between threads. It's neither `Send` or `Sync`.
+If there is no interior mutability (`Rc` uses interior mutability), then all data are thread safe, `Send` and `Sync` is not needed. The `Send` and `Sync` is used for checking the exceptions caused by interior mutability.
 
-But `&Mutex<T>` can be shared because lock protects them. Also immutable reference to atomic cells like `&AtomicU32` can be shared because of atomicity. `Mutex<T>` and `AtomicU32` are `Sync` so `&Mutex<T>` and `&AtomicU32` are `Send`.
-
-There are things that are `Sync` but not `Send`, like `MutexGuard`. If something is already locked, sharing its reference to other threads temporarily is fine. But moving a `MutexGuard` to another thread is not fine because locking is tied to thread.
+Then why there are two traits `Send` and `Sync`, rather than only one trait? Because transfering ownership betwene threads is differnet to sharing between different threads. `RefCell` owns the data and can be transferred to another thread, but multiple threads sharing one `RefCell` is unsafe because `RefCell` doesn't do synchronization, so `RefCell` is `Send` but not `Sync`.
 
 ## `Send + 'static`
 

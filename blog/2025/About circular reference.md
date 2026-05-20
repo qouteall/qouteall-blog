@@ -109,7 +109,7 @@ The `elem` is an guard object that holds lock. It will release when `elem` is dr
 
 [^rust_nll]: Rust has NLL(non-lexical lifetime). When NLL is triggered, a local variable will drop after last use, earlier than the end of scope. But any type that explicitly implements `Drop` will not trigger NLL. The dashmap element guard type `dashmap::mapref::one::Ref` implements `Drop` (because it needs to do unlocking) so it doesn't trigger NLL.
 
-Apart from removing, inserting could also deadlock in `DashMap`. The [crossbeam_skiplist](https://docs.rs/crossbeam-skiplist/latest/crossbeam_skiplist/) provides lock-free map which doesn't deadlock in that case. Example:
+Apart from removing, inserting could also deadlock in `DashMap`. The [crossbeam_skiplist](https://docs.rs/crossbeam-skiplist/latest/crossbeam_skiplist/) provides lock-free map which doesn't deadlock in that case [^crossbeam_skiplist]. Example:
 
 ```rust
 fn this_deadlocks() {
@@ -132,6 +132,8 @@ fn this_does_not_deadlock() {
     }
 }
 ```
+
+[^crossbeam_skiplist]: Although crossbeam `SkipMap` doesn't deadlock when keeping element borrow, holding element borrow for too long time causes memory leak. Because it uses epoch-based memory reclamation, one thread holding any reference will prevent that thread from increasing epoch, then global epoch cannot increase and it cannot free any of its data.
 
 ## Lock-free deadlock
 
