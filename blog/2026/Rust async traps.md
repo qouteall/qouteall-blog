@@ -76,6 +76,8 @@ There is another kind of "cancel": doesn't drop the future but does not `poll` t
 
 Tokio documentation about cancellation safety: [1](https://docs.rs/tokio/latest/tokio/macro.select.html#cancellation-safety), [2](https://tokio.rs/tokio/tutorial/select#cancellation)
 
+Using `tokio::spawn(future).await` rather than `future.await` prevents propagation of both cancellation and panic.
+
 ### Debugging cancellation
 
 Cancelling does not log by default. You can use a future wrapper to make it log if it cancels before completion. Example:
@@ -151,23 +153,47 @@ async fn main() {
 }
 ```
 
-### io_uring issue
+### How cancellation interacts with io_uring
+
+Cancellation also causes problems with io_uring.
 
 - In epoll, the OS notifies app that an IO can be done, then the app does another system call to do IO. It involves context switching from kernel to app (receive notification), then to kernel (do the IO syscall) then to app (finishing IO).
   - The app can choose to not do the IO after receiving notification. This works well with Rust future cancellation.
 - In io_uring, the OS directly finish IO (write to buffer) then tell the app. It's just a context switch from kernel to app (it's faster than epoll's kernel-to-app-to-kernel-to-app).
-  - The IO is fully done by kernel. The app cannot choose to "receive notification but not do IO". When app receives notification, the IO has already been done. This doesn't work well with Rust async cancellation.
+  - The app cannot choose to "receive notification but not do IO". When app receives notification, the IO has already been done by kernel.
 
-Note again that "cancel" just drops Rust future (and un-track it in async runtime). It doesn't cancel the IO operation.
+The [`futures::io::AsyncRead`](https://docs.rs/futures/latest/futures/io/trait.AsyncRead.html) works on read operations that write into caller-owned buffer:
 
-With epoll, the buffer can be directly put inside future, with no extra allocation. If the Rust future is dropped, it just don't do the IO after being notified.
+```rust
+pub trait AsyncRead {
+    fn poll_read(
+        self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        buf: &mut [u8], // Note: caller passes mutable borrow of buffer
+    ) -> Poll<Result<usize, Error>>;
+    ...
+}
+```
 
-With io_uring, dropping the future doesn't cancel the kernel's IO process. So putting buffer into future in io_uring is not memory-safe on cancellation (kernel will write into freed memory). Two solutions:
+When the buffer is owned by caller, the buffer will be dropped when caller future cancels. Cancelling Rust future doesn't cancel io_uring operation, so the kernel may write into the freed buffer. This is not memory-safe. 
 
-- Make the future non-cancellable. Rust doesn't yet have linear type (must-move type) so this cannot be guaranteed by language.
-- Make the buffer separately allocated (heap allocation, buffer pool, etc.). When the future is dropped, the buffer can still exist, and kernel can write to it buffer without violating memory safety.
+One workaround is to allocate an extra internal buffer for io_uring, then copy that buffer to caller's buffer after IO completes, but this workaround costs performance. With io_uring, the `AsyncRead` cannot be used without performance cost.
 
-See also: [Notes on io-uring](https://without.boats/blog/io-uring/), [related comment](https://github.com/rust-lang/rust/issues/62149#issuecomment-506351174)
+In [`monoio::io::AsyncReadRent`](https://docs.rs/monoio/0.2.4/monoio/io/trait.AsyncReadRent.html), the caller transfer ownership of buffer to it. When IO finishes, it transfers buffer ownership back:
+
+```rust
+pub trait AsyncReadRent {
+    fn read<T: IoBufMut>(
+        &mut self,
+        buf: T, // Note: caller transfers buffer ownership
+    ) -> impl Future<Output = BufResult<usize, T>>;
+    ...
+}
+```
+
+Having to pass buffer ownership doesn't mean each small buffer have to be separately allocated. It can allocate a large buffer then split it into many small buffers, and use reference counting internally.
+
+See also: [Notes on io-uring](https://without.boats/blog/io-uring/)
 
 ## Un-`poll`-ed futures
 
@@ -261,35 +287,17 @@ Async-sync-async sandwitch: Async function call sync function that blocks on ano
 
 [The bane of my existence: Supporting both async and sync code in Rust](https://nullderef.com/blog/rust-async-sync/)
 
-## Rust `Send` `Sync` limitations
-
-Tokio does multi-thread work-stealing scheduling. Its purpose is very similar to OS scheduling. And an async task's purpose is very similar to OS thread.
-
-The duality of the two:
-
-| OS thread scheduling                                                | Tokio async task scheduling                                                          |
-| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| Schedules threads on CPU cores                                      | Schedules async tasks on threads                                                     |
-| Spawn a thread                                                      | Spawn an async task                                                                  |
-| Join on a thread                                                    | Await on a `JoinHandle`                                                              |
-| Can do forced scheduling (using hardware interrupt)                 | If the async function don't suspend cooperatively, the scheduler cannot suspend it   |
-| As long as the data is fully owned by a thread, it's data-race free | As long as the data is fully owned[^fully_own] by an async task, it's data-race free |
-
-[^fully_own]: The "fully owned" here means not just ownership in Rust semantics. The `Rc` has internal data structures. The "fully owned" applies to these internal data structures. One async task fully own the `Rc` means the internal data structure (that contains reference count) is only accessible from one async task.
-
-As long as the data is owned by a thread, it's data-race free. The correspondence: as long as the data is owned by an async task, it's data-race free.
-
-Tokio `spawn` requires the future to be `Send + Sync`. This can create some troubles. It requires `Send + Sync` because Tokio does work stealing. An async task in one thread could be then scheduled to another async task. However if async task is analogous to thread, then if we ensure that the data is owned by async task, it can also achieve data-race free, even if the data is not `Send + Sync`.
-
-However Rust doesn't check "async task boundary". An async task can pass data out. Then the data is no longer owned by async task. There is no language mechanism that ensures that the data is tied within async task. So you still have to satisfy `Send + Sync` even for the data that's only used with one async task.
-
-The `Send + Sync` constraint can be avoided for thread-per-core async runtimes.
-
 ## Mixing multiple async runtimes is hard
 
 Using multiple async runtimes together is possible but is hard and error-prone. And there are many async-runtime-specific types. So async runtime naturally has exclusion. That's why Tokio has monopoly.
 
-In Golang you can only use one official goroutine scheduler. In Rust, although Tokio has monopoly, you have choices of using other async runtimes.
+In Golang you can only use one official goroutine scheduler. In Rust, although Tokio has monopoly, you have choices of using other async runtimes, including thread-per-core async runtimes:
+
+## Thread-per-core async runtimes
+
+Tokio uses work stealing. One async task submitted in one thread can run in another thread, so `tokio::spawn` requires future to be `Send`. There are thread-per-core async runtimes (e.g. [monoio](https://github.com/bytedance/monoio), [glommio](https://github.com/DataDog/glommio)). Thread-per-core async runtimes don't require `Send`. 
+
+Thread-per-core runtimes often relies on the kernel to distribute work between threads evenly. Linux has a mechanism of distributing networking work by hash of local ip+local port+remote ip+remote port, [see also](https://lwn.net/Articles/542629/). If there are many different clients and all requests are processed quickly, then work can be distributed to threads evenly, and thread-per-core can be more efficient than work stealing. But if a small amount of remote ip+remote port combinations have request that requires fat-tailed large processing work, then work distribution will not be even and thread-per-core will be not efficient. Work stealing is more adaptive in that fail-tail workloads.
 
 ## Unbound concurrency use up resources
 
