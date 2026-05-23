@@ -1329,6 +1329,8 @@ In other languages, if a local variable is only used once, it's often ok to inli
 
 [Sometimes you need to introduce a new scope to avoid a non-`Send` thing to live across `.await` point](https://rust-lang.github.io/async-book/07_workarounds/03_send_approximation.html).
 
+Also note that if the local variable name is `_`, then it doesn't prolong lifetime.
+
 ### Reborrow
 
 Normally mutable borrow `&mut T` can only be moved and cannot be copied. 

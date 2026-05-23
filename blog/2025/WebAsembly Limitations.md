@@ -108,8 +108,8 @@ For GC langauges (e.g. Java/C#/Python/Golang), they need to make GC work in Wasm
 
 The first solution, manually implementing GC encounters difficulties:
 
-- GC requires scanning GC roots (pointers). Some GC roots are on stack. But the Wasm main stack is not in linear memory and cannot be read by address. One solution is to "spill" the pointers to the shadow stack in linear memory. Having the shadow stack increases binary size and costs runtime performance.
-- Multi-threaded GC often need to pause the execution to scan the stack correctly. In native applications, it's often done using safepoint mechanism [^safepoint_mechanism]. It also increases binary size and costs runtime performance.
+- GC requires scanning GC roots (pointers). Some GC roots are on stack. But the Wasm main stack is not in linear memory and cannot be read by address. One solution is to "spill" the pointers to the shadow stack in linear memory. It costs runtime performance.
+- Multi-threaded GC often need to pause the execution to scan the stack correctly. In native applications, it's often done using safepoint mechanism [^safepoint_mechanism]. It means that it code will contain many safepoint polling branches. It increases binary size and costs performance.
 - Multi-threaded GC often use store barrier or load barrier to ensure scanning correctness. It also increases binary size and costs runtime performance.
 - Cannot collect a cycle where a JS object and an in-Wasm object references each other.
 
@@ -121,7 +121,9 @@ The benefit of using Wasm built-in GC:
 - Wasm GC references can be passed to JS. (But currently JS code cannot directly access fields of Wasm GC object. The primary usage is to pass them back to Wasm code.)
 - Can collect a cycle between Wasm GC object and JS object.
 
-But using Wasm GC **requires mapping the language's data structure to Wasm GC data structure**. Wasm's GC data structure allows Java-like class (with object header), Java-like prefix subtyping, and Java-like arrays. But it's **still not expressive enough**.
+But using Wasm GC **requires mapping the language's data structure to Wasm GC data structure**. Wasm's GC data structure allows Java-like class [^wasm_struct] (with object header), Java-like prefix subtyping, and Java-like arrays. But it's **still not expressive enough**.
+
+[^wasm_struct]: In Wasm, the "struct" actually means heap-allocated object, which is similar to Java `class`, not C `struct`.
 
 The important memory management features that Wasm GC doesn't support:
 
@@ -132,10 +134,12 @@ The important memory management features that Wasm GC doesn't support:
 
 It doesn't support some memory layout optimizations:
 
-- No array of struct type.
+- The array has to either hold primitve value or hold references (this is similar to Java). Cannot make array directly hold custom structs in compact memory layout.
 - Cannot use fat pointer to avoid object header. (Golang does it)
 - Cannot add custom fields at the head of an array object. (C# supports it)
 - Doesn't allow compact sum type memory layout.
+
+Wasm GC data modelling is very similar to Java's data modelling (Java doesn't support value type or interior pointer), but is very different to C#'s and Golang's (no value type, no interior pointer).
 
 See also: [C# Wasm GC issue](https://github.com/dotnet/runtime/issues/94420), [Golang Wasm GC issue](https://github.com/golang/go/issues/63904)
 
@@ -301,6 +305,8 @@ The modern JS/Wasm runtimes can do inlining between JS and Wasm, so the cost of 
 
 Currently Wasm cannot be run in browser without JS code that bootstraps Wasm.
 
+(Related: the similar things also exist in Android and iOS. In Android some system APIs have to be called from Java/Kotlin. In iOS some system APIs have to be called from Swift.)
+
 ### Wasm-JS passing
 
 Because that Wasm cannot directly call web APIs, it requires interacting with JS and passing value between Wasm and JS.
@@ -309,7 +315,7 @@ Numbers (`i32`, `i64`, `f32`, `f64`) can be directly passed between JS and Wasm 
 
 Passing a JS string to Wasm requires:
 
-- transcode (e.g. passing to Rust need to convert WTF-16 to UTF-8),
+- transcode (e.g. passing to Rust needs to convert WTF-16 to UTF-8),
 - allocate memory in Wasm linear memory,
 - copy transcoded string into Wasm linear memory,
 - pass address and length into Wasm code,
@@ -317,7 +323,7 @@ Passing a JS string to Wasm requires:
 
 Similarily passing a string in Wasm linear memory to JS is also not easy. 
 
-Passing strings between Wasm and JS can be a performance bottleneck. **If your application involve frequent Wasm-JS data passing, then replacing JS by Wasm may actually reduce performance**. It can be fast when Wasm code works on byte buffer, then pass to JS then directly to web API. But passing data that JS code needs to use is slow.
+Passing strings between Wasm and JS can be a performance bottleneck. **If your application involve frequent Wasm-JS data passing, then replacing JS by Wasm may actually reduce performance**. It can be fast when Wasm code works on byte buffer, then pass to JS then directly to web API. But passing data into JS objects is slow.
 
 Modern Wasm/JS runtime (including V8) can JIT and inline the cross calling between Wasm and JS. But the copying cost still cannot be optimized out.
 
@@ -346,7 +352,7 @@ The original version of Wasm only supports 32-bit address and up to 4GiB linear 
 
 In Wasm, a linear memory has a finite size. Accessing an address out of size need to trigger a [trap](https://webassembly.github.io/spec/core/intro/overview.html) that aborts execution. Normally, to implement that range checking, the runtime need to insert branches for each linear memory access (like `if (address >= memorySize) {trap();}`). 
 
-But Wasm runtimes have an optimization: reserve 4GB (and more) space virtual memory address space. The out-of-range pages are not allocated from OS, so accessing them cause error from OS. Wasm runtime can use signal handling to handle these error. No range checking branch needed. It uses hardware and OS functionality for range checking.
+But Wasm runtimes have an optimization: reserve 4GB (and more) of virtual memory address space. The out-of-range pages are not allocated from OS, so accessing them cause error from OS. Wasm runtime can use signal handling to handle these error. No range checking branch needed. It uses hardware and OS functionality for range checking.
 
 That optimization doesn't work when supporting 64-bit address. The virtual address space for 64-bit linear memory is as large as host process virtual address space. So the branches of range checking still need to be inserted for (almost) every linear memory access. This costs performance.
 
@@ -454,7 +460,7 @@ These things also have VMs:
 - CSS is Turing-complete. [See also](https://lyra.horse/x86css/)
 - Related: Modern CPUs often have a [microcode](https://en.wikipedia.org/wiki/Microcode) system. The microcode supports conditional jumping and can access things like register and memory bus. It's a "small CPU within CPU".
 
-Also, iOS disallows JIT execution. In iOS, the only thing can do JIT is WebKit [^ios_jit]. The iOS app can workaround JIT restriction by running JS/Wasm code in web view then pass data in/out of web view.
+Also, iOS disallows JIT execution. In iOS, the only thing that can do JIT is WebKit [^ios_jit]. The iOS app can workaround JIT restriction by running JS/Wasm code in web view then pass data in/out of web view.
 
 [^ios_jit]: Another exception is that, in European Union, the non-Safari web browsers can do JIT.
 

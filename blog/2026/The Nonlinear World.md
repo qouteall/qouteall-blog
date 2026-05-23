@@ -59,6 +59,8 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: [Perverse incentive](https://en.wikipedia.org/wiki/Perverse_incentive). Breeding cobra is easier than hunting wild cobra, so people started breeding it. When the policy is removed, the breeders released their cobra to the wild.
 
+  Another example: The more severe homelessness issue is, the more budget is put into solving homelessness. Then that department responsible for the issue has incentive to make issue worse.
+
 - First-order effect: Using measured numbers is an objective way of judging performance.
 
   Second-order effect: [**Goodhart's law**](https://en.wikipedia.org/wiki/Goodhart%27s_law). When a measure becomes target, it ceases to be a good measure. Examples:
@@ -250,6 +252,12 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: [Reverse psychology](https://en.wikipedia.org/wiki/Reverse_psychology). The kid being not allowed to play videogames may become more eager to play them.
 
+- First-order effect: Providing money reward incentivizes people.
+
+  Second-order effect: [Overjustification effect](https://en.wikipedia.org/wiki/Overjustification_effect). Providing external reward can reduce internal motivation.
+
+  On contrary, not providing money reward can filter out the money-seekers and attract the people having internal motivation and taking pride in the work, [see also](https://en.wikipedia.org/wiki/Principal%E2%80%93agent_problem#Non-financial_compensation).
+
 - First-order effect: Having choices is good as there is more freedom.
 
   Second-order effect: May waste more time considering which choice is better.
@@ -301,6 +309,12 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 - First-order effect: A centralized organization/movement can be defeated.
 
   Second-order effect: After breaking the organization, if the idea behind it is still popular, then it becomes decentralized and more resilient. Its activities become more sparse so it's harder to defense. And there will be no one to negotiate with.
+
+- First-order effect: A politician makes policies that reward their loyal supporters.
+
+  Second-order effect: The loyal supporters are loyal, so increasing or decreasing rewarding to them doesn't change their stance. On contrary, rewarding swing voters has larger utility for the politician. So the politician may reward the swing voters in expense of loyal supporters. This is unsistainable in the long run, but effective in the short run.
+
+  The minority swing voters may have big impact on policies.
 
 ### In Cybersecurity
 

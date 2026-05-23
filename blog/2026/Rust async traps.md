@@ -25,13 +25,13 @@ But it requires the async task to cooperatively suspend (`.await`). An async tas
 
 When a scheduler thread is blocked, it reduces overall concurrency and reduces overall performance. And it may cause deadlock.
 
-The normal sleep `std::thread::sleep` and normal locking `std::sync::Mutex` will block thread using OS functionality. When a thread is blocked by OS, async runtime don't know about it. In Tokio, use `tokio::sync::Mutex` for mutex and `tokio::time::sleep` and sleep. They will coorporatively pause and avoid that issue.
+The normal sleep `std::thread::sleep` and normal locking `std::sync::Mutex` will block thread using OS functionality. When a thread is blocked by OS, async runtime don't know about it. In Tokio, use `tokio::sync::Mutex` for mutex and `tokio::time::sleep` and sleep. They will cooperatively pause and avoid that issue.
 
 That issue is not limited to only locking and sleep. It also involves networking and all kinds of IOs. So Tokio provides its own set of IO functionalities, and you have to use them when using Tokio for max performance.
 
 Also, heavy computation work without `.await` point is also blocking. The async runtime cannot force-suspend the heavy computation if it doesn't cooperatively `.await`. 
 
-Tokio also supports an "escape hatch". The task spawned by [`spawn_blocking`](https://dtantsur.github.io/rust-openstack/tokio/task/fn.spawn_blocking.html) runs in another thread pool and won't block the normal scheduler thread. The code that does non-async blocking or heavy compute work should be ran in `spawn_blocking`.
+Tokio also supports an "escape hatch". The task spawned by [`spawn_blocking`](https://dtantsur.github.io/rust-openstack/tokio/task/fn.spawn_blocking.html) runs in another thread pool and won't block the normal scheduler thread. The code that does non-async blocking or heavy compute work should be run in `spawn_blocking`.
 
 ### Deadlock caused by blocking scheduler thread
 
@@ -46,7 +46,7 @@ In Rust, a future can be dropped. When it's dropped, its async code stops execut
 
 Note it cancels the future, not the IO. Cancelling a future just stops the async code from running (and drop related data). The already-done IO operations won't be cancelled. (The written files won't be magically rolled back. The sent packets won't be magically withdrawn.)
 
-Cancellation not the only implicit exit mechanism. Panic is another implicit exit mechanism. And in the languages that have exceptions (Java, JS, Python, etc.), exception is another implciit exit mechanism.
+Cancellation is not the only implicit exit mechanism. Panic is another implicit exit mechanism. And in the languages that have exceptions (Java, JS, Python, etc.), exception is another implicit exit mechanism.
 
 However, **exceptions and panics are often logged, but future cancel is often not logged**. Although panic is implicit code control flow, it's often explicit in logs. It's easy to debug because it's visible in log. But a future cancel by default logs nothing. Debugging future cancel issue is much harder than debugging panics.
 
@@ -58,8 +58,6 @@ However, **exceptions and panics are often logged, but future cancel is often no
 
 The cancellation "catch": normally when the parent future cancels, the inner futures are also cancelled. It propagates from outside to inside. The `tokio::spawn` can stop that propagation. Although `JoinHandle` is `Future`, dropping it won't cancel the spawned task. So if you want to avoid cancellation, wrap it in `tokio::spawn` (and don't call `JoinHandle::abort`).
 
-In Golang, there is panic, but there is no implcit cancellation. All cancellation need to be explicit. (However managing context cancellation in Golang still has traps, just different to async Rust.)
-
 Cancellation is indeed useful in some cases. But there are also many cases that cancellation is harmful. The problem is that async Rust made cancellation implicit. There is no type-level annotation ensuring an async function cannot cancel. This creates traps.
 
 Two examples of cancellation issues: [Alan tries to cache requests, which doesn't always happen](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/alan_builds_a_cache.html), [Barbara gets burned by select](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/barbara_gets_burned_by_select.html)
@@ -70,8 +68,8 @@ There is another kind of "cancel": doesn't drop the future but does not `poll` t
 
 ### Common sources of cancellation in Tokio
 
-- `tokio::select!`. When one branch is selected, the futures of other branches are cancelled.
-- `JoinHandle::abort`. Explcitly cancel a task.
+- `tokio::select!`. When one branch is selected, the futures of other branches are dropped.
+- `JoinHandle::abort`. Explicitly cancel a task.
 - `tokio::time::timeout`. When timeout is reached but the future hasn't finished, it's cancelled.
 
 Tokio documentation about cancellation safety: [1](https://docs.rs/tokio/latest/tokio/macro.select.html#cancellation-safety), [2](https://tokio.rs/tokio/tutorial/select#cancellation)
@@ -191,7 +189,7 @@ pub trait AsyncReadRent {
 }
 ```
 
-Having to pass buffer ownership doesn't mean each small buffer have to be separately allocated. It can allocate a large buffer then split it into many small buffers, and use reference counting internally.
+Having to pass buffer ownership doesn't mean each small buffer have to be separately allocated. It can allocate a large buffer then split it into many small buffers that have separate ownerships, and use reference counting internally.
 
 See also: [Notes on io-uring](https://without.boats/blog/io-uring/)
 
@@ -203,11 +201,80 @@ It's also dangerous. It may cause deadlock or weird delaying.
 
 ### Futurelock
 
-In `tokio::select!` you can pass ownership of a future, but you can also pass a future borrow. When a future borrow is passed, one dangerous case can happen. 
+In `tokio::select!` you can pass ownership of a future, but you can also pass a future borrow. When a future borrow is passed, the future could become un-`poll`-ed future. When the un-`poll`-ed future holds lock it will deadlock. This is called [futurelock](https://rfd.shared.oxide.computer/rfd/0609).
 
-If the select goes into one branch, the future of other branches are dropeed. If you pass a future borrow to it, the borrow itself is dropped, but the borrowed future is not dropped. However, the borrowed future will not be polled again (you can explicit await it after the `select!`, but it doesn't `poll` before `select!` finishing).
+Here is a simpler example of futurelock:
 
-This creates a temporaily un-`poll`-ed future. This is dangerous when async lock is involved. After acquiring lock, the returned future holds lock. If the future holding lock is dropped, it released lock. But if the future holds lock but not dropped and not polled, it's likely to deadlock. This is the mechanism behind [futurelock](https://rfd.shared.oxide.computer/rfd/0609).
+```rust
+use std::sync::Arc;
+use std::time::Duration;
+use tokio::sync::Mutex;
+use tokio::time::sleep;
+use futures::FutureExt;
+
+#[tokio::main]
+async fn main() {
+    let lock = Arc::new(Mutex::new(()));
+
+    tokio::spawn(simulate_contention(lock.clone()));
+
+    // let `simulate_contention` take lock
+    sleep(Duration::from_millis(100)).await;
+
+    let mut xxx_future = do_xxx(lock.clone()).boxed();
+
+    tokio::select! {
+        _ = &mut xxx_future => { // Note: it passes future borrow to select
+            println!("first branch has been run");
+        }
+        _ = sleep(Duration::from_millis(500)) => {
+            println!("second branch has been run");
+            do_yyy(lock.clone()).await;
+        }
+    };
+}
+
+async fn do_xxx(lock: Arc<Mutex<()>>) {
+    println!("xxx started");
+    let _guard = lock.lock().await;
+    // ...
+    println!("xxx done");
+}
+
+async fn do_yyy(lock: Arc<Mutex<()>>) {
+    println!("yyy started");
+    let _guard = lock.lock().await;
+    // ...
+    println!("yyy done");
+}
+
+async fn simulate_contention(lock: Arc<Mutex<()>>) {
+    let _guard = lock.lock().await;
+    sleep(Duration::from_secs(5)).await;
+    println!("simulate contention done");
+}
+```
+
+It outputs this then deadlock
+
+```
+xxx started
+second branch has been run
+yyy started
+simulate contention done
+```
+
+In [`tokio::select!`](https://docs.rs/tokio/latest/tokio/macro.select.html), for each branch, you can pass a future ownership, you can also pass a borrowed future. 
+
+`tokio::select!` will keep `poll`-ing the futures of each branch, until one future finishes [^select_else]. When finishing, `tokio::select!` will drop (cancel) the futures of all branches, as mentioned previously. However, if you pass a future borrow, it will only drop the borrow, but the borrowed future will not be dropped when `tokio::select!` finishes. The borrowed future then becomes alive but un-`poll`-ed.
+
+Note that `tokio::select!` can run the futures of all branches concurrently, but only one branch's result will be selected.
+
+[^select_else]: If there is an `else` branch, then the `else` branch will be taken if all other futures are not ready, then `tokio::select!` finishes.
+
+In that example, the un-`poll`-ed future holds lock. Its held lock will only release if that async function progresses. But that future is not `poll`-ed so it will never progress, thus deadlock.
+
+It's not recommended to use `tokio::select!` just for timeout. `tokio::timeout` is easier to use. If you don't want cancellation, wrap inner future within `tokio::spawn`.
 
 ### Buffered stream issue
 
@@ -275,8 +342,6 @@ Testing port: 4 ThreadId(1)
 ```
 
 All of them execute on main thread. There is no parallelism. The parallelism can be enabled by using `tokio::spawn`. But without `tokio::spawn` it has no parallelism by default.
-
-This is different in Golang. In Golang, goroutines are parallel.
 
 ## Converting between async and sync
 
