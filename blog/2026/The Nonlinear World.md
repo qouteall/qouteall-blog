@@ -21,10 +21,6 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   
   Second-order effect: Misinformation and low-quality contents are also more accessible. Discerning true and useful information is the new problem. Addictive contents are also more accessible, distracting learning.
 
-- First-order effect: Productivity software (like Word, Excel, PowerPoint, remote meeting tools) increase work efficiency.
-
-  Second-order effect: The convenience also induce more unnecessary documents, spreadsheets, presentations, meetings, and communications, leading to productivity waste.
-
 - First-order effect: Online shopping is often cheaper and more convenient, saving money.
 
   Second-order effect: The convenience of online shopping can lead to impulse purchases of unnecessary things, causing larger overall spending.
@@ -59,7 +55,11 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: [Perverse incentive](https://en.wikipedia.org/wiki/Perverse_incentive). Breeding cobra is easier than hunting wild cobra, so people started breeding it. When the policy is removed, the breeders released their cobra to the wild.
 
-  Another example: The more severe homelessness issue is, the more budget is put into solving homelessness. Then that department responsible for the issue has incentive to make issue worse.
+  Other examples of perverse incentive: 
+  
+  - The more severe homelessness issue is, the more budget is put into the department for solving homelessness. Then the department has incentive to make the issue worse.
+  - When repairer's income is tied to repair times, the repairer that only superficially fix and make it break later has higher income.
+  - When doctor's income is tied to treatment times, the doctor that don't cure fully has higher income.
 
 - First-order effect: Using measured numbers is an objective way of judging performance.
 
@@ -78,13 +78,15 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: [Jevons paradox](https://en.wikipedia.org/wiki/Jevons_paradox).The reduced cost of using steam engine greatly increased the usage of steam engine, so the demand of coal greatly increased.
 
-  Due to Jevons paradox, increasing efficiency may increase resource waste overall.
+  Due to Jevons paradox, **increasing efficiency may increase resource waste overall**.
 
   Other examples of Jevons paradox:
   
   - Increasing computer hardware performance increases hardware demand.
   - Making programming easier increases demand of software development.
+  - Producticity software redcues working cost but creates more unnecessary work. Convenience of digital document creates more document work. Convenience of digital spreadsheet creates more unnecessary analysis. Convenience of remote meeting creates more unnecessary meetings.
   - ......
+
 
 - First-order effect: Improving a product can enhance its reputation.
 
@@ -119,7 +121,8 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   Second-order effect: 
   
   - It may select out the people that are good at competition but bad at coorporating. 
-  - Even the top talents cannot ensure they don't make any mistake and always win. The talents tend to seek safer environments.
+  - True innovation is risky. But in high-competition enviornments, temporary failure is fatal, so no true innovation can be done.
+  - The previous winners cannot ensure they keep winning, so they tend to find ways to protect them from competition failure, then the selection will become "inaccurate".
   - A lot of great talents require more resource investment to show ability, but they may lose the ruthless competition because they initially don't win and can never obtain enough resource. [^qianlima]
   - Talent is high-dimensional. It filters out the talents whose ability is out of testing range. The currently seemingly useless ability may be important in the future.
 
@@ -145,7 +148,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: Having clear team separation in a corporation makes management more efficient.
 
-  Second-order effect: When team splits, their goals won't align. It's often that team A depends on team B's results. But team B has its own KPI and that KPI doesn't match team A's need. The separation cause team B to not be responsible for team A's results. This greatly reduces efficiency.
+  Second-order effect: When team splits, their goals are less likely to align. It's often that team A depends on team B's results. But team B has its own KPI and that KPI doesn't match team A's need. Team B to not be responsible for team A's results. This greatly reduces efficiency.
 
 - First-order effect: First-mover advantage. The company creating a new product category has advantage. It develops brand recognition and network effect early. 
 
@@ -154,6 +157,10 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 - First-order effect: When the big companies are in financial hardship, letting them collapse will hurt employment. Subsidying them keeps employment.
 
   Second-order effect: They become too-big-to-fall. They become inefficient while occupying a lot of resources. They indirectly kill new startups. It reduces overall employment.
+
+- First-order effect: Outsourcing reduces labor cost. Only the team for judging work quality needs to be kept.
+
+  Second-order effect: The outsourced labor can save cost and cause defects in hidden places. These hidden defects are hard to find when just judging the final result. The result is worse product quality.
 
 [^qianlima]: Related: [Qianlima](https://en.wikipedia.org/wiki/Qianlima) (千里马). The high-capacity horse require more food to show its capacity. But without showing its capacity it can never get enough food supply. 
 
@@ -569,8 +576,10 @@ Experiences may be obsolete or even harmful after a paradigm shift. Ideas, metho
 
 ## About optimizations
 
-- Almost all **optimizations are tradeoffs**. Some tradeoffs are hidden. **Optimization may backfire** (perverse incentive, iatrogenesis, etc.). 
-  - Sometimes not optimizing is better. Sometimes winning just requires doing nothing special and let opponent make mistakes.
+- Almost all **optimizations are tradeoffs**. Some tradeoffs are hidden. 
+
+- **Optimization may backfire** (the previously mentioned second-order effects). Sometimes not optimizing is better. 
+  - Sometimes winning just requires doing nothing special and let opponent make mistakes.
 
 - 80/20 rule. Sometimes optimizing just one important part can have big impacts. Note that this doesn't apply to everything.
 
@@ -617,7 +626,7 @@ Diversification is also a way to handle risks. Note that diversification only wo
 - It reveals problems and gives pressure to improve.
 - It makes people appreciate the good instead of taking things for granted.
 - It justifies the cost of security investments. Without incident happening, most people don't see the value of security investments.
-- It can destroy inefficient entities that occupy resources. It frees resources for more efficient entities.
+- In many cases, you cannot correct a system's mistake in normal ways, because the system is trapped in a local optimum. Trying to correct mistake in normal state only makes it worse. But **when an incident comes, it gives enough pressure to move it out of local optimum** and then have chance of improvement.
 - ...
 
 ### In software: untested error handling likely won't work
@@ -698,17 +707,13 @@ When automation works, it's good. But automation may break. When it breaks, no o
 
 ## Short-termism and long-termism
 
-Long-termism can usually gain advantage. However long-termism is often fragile because it involves more investments. Investments can break. Long-termism only works in stable and safe environments.
-
-Also, reducing fragility requires safety investments that require long-termism. The short-termism cutting safety investment increases fragility.
-
-When the large environment is unstable and unsuitable for long-termism, it requires local small safe stable environments to make long-termism work.
+Long-termism can usually gain advantage. However **long-termism is often fragile** because it involves more investments. The fruits of investments may be taken by others. An unknown incident may break the investment. Long-termism only works in safe and stable environments.
 
 It's often that the process of doing improvement has risks. But the improvement can avoid bigger risk in the future. Under short-termism, it can only stuck in local minimum, avoiding risky improvement.
 
 Stock market pricing is often short-termism, which often cause company decision-making to also become short-termism: 
 
-- Sometimes the investors care too much about short-term shareholder return and don't understand value of long-term investment (e.g. research). 
+- Sometimes the investors care too much about short-term shareholder return and don't understand value of long-term investment (e.g. product quality, company reputation, research).
 - Sometimes the investors care too much about short-term price trend. When there is a bubble, company tend to do irrational investment to prop the bubble. The story behind bubble only pays off after long time, but it's not rational long-termism.
 
 ## Related

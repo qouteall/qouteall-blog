@@ -495,3 +495,5 @@ Because the JS runtime optimization must keep compatibility of JS semantics. JS 
 Also, JS has no share-memory parallelism. Moving a byte buffer between web worker involve no copy, but many other cross-worker communication require copy.
 
 When trying to optimize the performance of an existing JS (or TS) web app, don't directly refactor it to Wasm. Wasm-JS data passing cost may make it slower overall. Profile before optimization. It's often possible to optimize a lot to the existing JS app. Also, you can shift some client-side compute work to server-side.
+
+Related: There is V8 bytecode. V8 bytecode is a compact binary representation of JS code. V8 bytecode is dynamically-typed (typing information still requires runtime statistics). and the format is not stable across V8 versions.

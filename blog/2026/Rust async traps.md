@@ -11,12 +11,6 @@ tags:
 
 
 
-## Rust future is just data by default
-
-In Rust, if you call an async function, it returns a future. But the future is just data by default. If you don't await it or spawn a it, its async code won't run. 
-
-The word "future" has very different meaning in Java. In Java, when obtaining a `CompletableFuture`, the task should be already running.
-
 ## Blocking scheduler thread
 
 Async runtime schedules async tasks on threads. When an async task suspends, the thread can run other async tasks.
@@ -65,6 +59,12 @@ Two examples of cancellation issues: [Alan tries to cache requests, which doesn'
 See also: [Dealing with cancel safety in async Rust](https://rfd.shared.oxide.computer/rfd/400), [Cancelling async Rust](https://sunshowers.io/posts/cancelling-async-rust/)
 
 There is another kind of "cancel": doesn't drop the future but does not `poll` the future. This is also dangerous. Elaborated below.
+
+### Rust future is just data by default
+
+If you calls an async function, but don't do anything to the future (don't `.await`, don't `spawn` etc.), it's also cancellation. In Rust, futures are just data.
+
+The word "future" has very different meaning in Java. In Java, when obtaining a `CompletableFuture`, the task should be already running.
 
 ### Common sources of cancellation in Tokio
 
@@ -266,15 +266,15 @@ simulate contention done
 
 In [`tokio::select!`](https://docs.rs/tokio/latest/tokio/macro.select.html), for each branch, you can pass a future ownership, you can also pass a borrowed future. 
 
-`tokio::select!` will keep `poll`-ing the futures of each branch, until one future finishes [^select_else]. When finishing, `tokio::select!` will drop (cancel) the futures of all branches, as mentioned previously. However, if you pass a future borrow, it will only drop the borrow, but the borrowed future will not be dropped when `tokio::select!` finishes. The borrowed future then becomes alive but un-`poll`-ed.
+`tokio::select!` will keep `poll`-ing the futures of each branch, until one future finishes [^select_else]. When finishing, `tokio::select!` will drop (cancel) the futures of all branches, as mentioned previously. However, if you pass a future borrow, it will only drop the borrow, but the borrowed future will not be dropped when `tokio::select!` finishes. The borrowed future `xxx_future` then becomes alive but un-`poll`-ed.
 
 Note that `tokio::select!` can run the futures of all branches concurrently, but only one branch's result will be selected.
 
 [^select_else]: If there is an `else` branch, then the `else` branch will be taken if all other futures are not ready, then `tokio::select!` finishes.
 
-In that example, the un-`poll`-ed future holds lock. Its held lock will only release if that async function progresses. But that future is not `poll`-ed so it will never progress, thus deadlock.
+In that example, the un-`poll`-ed future (`xxx_future`) holds lock. Its held lock will only release if that async function progresses. But that future is not `poll`-ed so it will never progress, thus deadlock.
 
-It's not recommended to use `tokio::select!` just for timeout. `tokio::timeout` is easier to use. If you don't want cancellation, wrap inner future within `tokio::spawn`.
+**It's hard to use `select!` correctly**. For timeouts, it's recommended to just use  `tokio::timeout` (if you don't want cancellation, wrap inner future within `tokio::spawn`).
 
 ### Buffered stream issue
 
@@ -285,6 +285,7 @@ See also:
 - [Barbara battles buffered streams](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/barbara_battles_buffered_streams.html)
 - [`for await` and the battle of buffered streams](https://tmandry.gitlab.io/blog/posts/for-await-buffered-streams/)
 - [poll_progress](https://without.boats/blog/poll-progress/)
+- [Never snooze a future](https://jacko.io/snooze.html)
 
 ## Stack overflow caused by large future
 

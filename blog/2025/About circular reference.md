@@ -109,31 +109,9 @@ The `elem` is an guard object that holds lock. It will release when `elem` is dr
 
 [^rust_nll]: Rust has NLL(non-lexical lifetime). When NLL is triggered, a local variable will drop after last use, earlier than the end of scope. But any type that explicitly implements `Drop` will not trigger NLL. The dashmap element guard type `dashmap::mapref::one::Ref` implements `Drop` (because it needs to do unlocking) so it doesn't trigger NLL.
 
-Apart from removing, inserting could also deadlock in `DashMap`. The [crossbeam_skiplist](https://docs.rs/crossbeam-skiplist/latest/crossbeam_skiplist/) provides lock-free map which doesn't deadlock in that case [^crossbeam_skiplist]. Example:
+Apart from removing, inserting could also deadlock in `DashMap` if the corresponding bucket is locked. 
 
-```rust
-fn this_deadlocks() {
-    let map: DashMap<u32, u32> = DashMap::new();
-    map.insert(1, 2);
-    let elem = map.get(&1).unwrap();
-
-    for i in 2..1000 {
-        map.insert(i, 0);
-    }
-}
-
-fn this_does_not_deadlock() {
-    let map: SkipMap<u32, u32> = SkipMap::new();
-    map.insert(1, 2);
-    let elem = map.get(&1).unwrap();
-
-    for i in 2..1000 {
-        map.insert(i, 0);
-    }
-}
-```
-
-[^crossbeam_skiplist]: Although crossbeam `SkipMap` doesn't deadlock when keeping element borrow, holding element borrow for too long time causes memory leak. Because it uses epoch-based memory reclamation, one thread holding any reference will prevent that thread from increasing epoch, then global epoch cannot increase and it cannot free any of its data.
+There are some alternative concurrent maps that don't deadlock: [crossbeam_skiplist](https://docs.rs/crossbeam-skiplist/latest/crossbeam_skiplist/) (lock-free ordered map), [papaya](https://docs.rs/papaya/latest/papaya/) (uses lock, but doesn't deadlock), [leapfrog](https://docs.rs/leapfrog/latest/leapfrog/) (lock-free if key and value types are atomic) ...
 
 ## Lock-free deadlock
 

@@ -49,6 +49,8 @@ The distinction between computation and execution state is blurry. A closure can
 
 **Algebraic effect**: An effect handler executes some code in a scope. Some code is executed under an effect handler. When it performs an effect, the control flow jumps to the effect handler, and the execution state (**delimited continuation**) up to the effect handler's scope is also saved. The effect handler can then resume using the execution state. [A simple introduction to Algebraic effects](https://overreacted.io/algebraic-effects-for-the-rest-of-us/)
 
+In functional programming, free monad can turn any functor into monad. The free monad records the computation but doesn't acutally compute it. The compute can be actually performed by an external interpreter (during interpretation, the outside free monad "reveals" inner free monad). It's theoretically correlated to algebraic effects, where perfoming an effect becomes a recorded computation, and the external interpreter handles the effect.
+
 **Delimited continuation** is the execution state turned into data. It's delimited because the execution state only include the stackframes within effect handling scope.
 
 The continuation (without "delimited") contains the whole execution state of the whole program (assume program is single-threaded). Delimited continuation is "local". Continuation is "global". The "local" one is more fine-grained and useful.

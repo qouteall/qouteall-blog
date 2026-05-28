@@ -30,26 +30,25 @@ tags:
   
   In these cases, it will start a new stacking context:
   
-  - The attributes that give special rendering effects (`transform`, `filter`, `perspective`, `mask`, `opacity` etc.), and `will-change` of them
+  - The attributes that give special rendering effects (`transform`, `filter`, `perspective`, `mask`, `opacity` etc.)
   - `position: fixed` or `position: sticky`
   - Specifies `z-index` and `position` is `absolute` or `relative`
   - Specifies `z-index` and the element is inside flexbox or grid
-  - `isolation: isolate`
-  - ...
+  - ......
   
    Stacking context can cause these behaviors: [^stacking_context_impl]
   
   - `z-index` only works within one stacking context.
-  - Stacking context can affect the coordinate of `position: absolute` or `fixed`. (The underlying logic is complex, [see also](https://developer.mozilla.org/en-US/docs/Web/CSS/position))
   - `position: sticky` only works within one stacking context.
   - `overflow: visible` will still be clipped by stacking context.
   - `background-attachment: fixed` will position based on stacking context.
   - `opacity` is "relative" to parent. Child `opacity:1` in transparent parent won't make it more opaque than parent.
+  - Stacking context can affect the coordinate of `position: absolute` or `fixed`.
 
 - On mobile browsers, the top address bar and bottom navigation bar can go out of screen when scrolling down. `100vh` correspond to the height when the two bars gets out of screen, which is larger than the height when the two bars are on screen. The modern solution is `100dvh`.
 - About scrollbar:
   - In Windows, scrollbar takes space. But in macOS or mobile it doesn't take space [^macos_scrollbar_space].
-  - The space occupied by vertical scrollbar is included in width. Scrollbar "steals" space from inner contents. [^css_box_model_scrollbar]
+  - The space occupied by vertical scrollbar is included in `width`. Scrollbar "steals" space from inner contents. [^css_box_model_scrollbar]
   - A top-level element with `width: 100vw` overflows horizontally if viewport has scrollbar that takes space. `width: 100%` can workaround that issue.
   - About scrollbar styling: the [standard scroll bar styling](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Scrollbars_styling) supports color and width but doesn't support many other features (e.g. round corner scrollbar). The [`-webkit-scrollbar`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/::-webkit-scrollbar) non-standard pseudo-elements supports these features but FireFox doesn't support them. In modern browser, if standard scrollbar styling is used, then the  `-webkit-scrollbar` has no effect.
 - `position: absolute` is not based on its parent. It's based on its nearest positioned ancestor (the nearest ancestor that has `position` be `relative`, `absolute` or creates stacking context).
@@ -84,7 +83,7 @@ tags:
   - `display: none` removes element from layout. This doesn't apply to `visibility: hidden` or `opacity: 0`.
 - The `<!DOCTYPE html>` in the beginning of html is important. Without it, browsers will use "quirks mode" which make many behaviors different. [See also](https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Quirks_mode_and_standards_mode)
 - [Cumulative Layout Shift](https://web.dev/articles/cls). 
-  - It's recommended to specify `width` and `height` attribute in `<img>` to avoid layout shift due to image loading delay.
+  - It's recommended to specify `width` and `height` attribute in `<img>` tag to avoid layout shift due to image loading delay.
 - JS-in-HTML may interfere with HTML parsing. For example `<script>console.log('</script>')</script>` makes browser treat the first `</script>` as ending tag. [See also](https://sirre.al/2025/08/06/safe-json-in-script-tags-how-not-to-break-a-site/)
 - Virtual scrolling breaks browser's text search functionality.
 - Trailing slash in URL. If current URL is `https://xxx.com/aaa/bbb`, then `<img src="image.png">` use image `https://xxx.com/aaa/image.png`. But if current URL is `https://xxx.com/aaa/bbb/` (with trailing slash), then image path is `https://xxx.com/aaa/bbb/image.png`
@@ -253,8 +252,8 @@ tags:
   - Accessing using null pointer or dangling pointer is undefined behavior.
   - Integer overflow/underflow is undefined behavior. Note that unsigned integer can underflow below 0. Don't use `x > x + 1` to check overflow as it will be optimized to `false`.
   - Aliasing.
-    - Strict aliasing rule: If there are two pointers with type `A*` and `B*`, then compiler assumes two pointer can never equal. If they equal, using it to access memory is undefined behavior. Except when: 1. `A` and `B` has subtyping relation 2. converting object pointer to byte pointer (`char*`, `unsigned char*` or `std::byte*`) 3. after converting object pointer to byte pointer, convert back [^strict_aliasing]
-    - Pointer provenance. Two pointers from two different provenances are treated as never equal. If their address equals, it's undefined behavior. [See also](https://www.ralfj.de/blog/2020/12/14/provenance.html)
+    - Strict aliasing rule. If there are two pointers with type `A*` and `B*`, then compiler assumes two pointer can never equal. If they equal, using it to access memory is undefined behavior. Except when: 1. `A` and `B` has subtyping relation 2. converting object pointer to byte pointer (`char*`, `unsigned char*` or `std::byte*`) 3. after converting object pointer to byte pointer, convert back [^strict_aliasing]
+    - Pointer provenance. Two pointers from two different provenances are treated as never equal. If their address equals, it's undefined behavior. [See also](https://www.ralfj.de/blog/2020/12/14/provenance.html). The [XOR linked list](https://en.wikipedia.org/wiki/XOR_linked_list) doesn't work with pointer provenance. Don't subtract two pointers then add offset to pointer, unless two pointers are in the same allocation.
   - `const` can mean both read-only and immutable:
     - If the original declared object is not `const`, you can turn pointer to it as `const T*`, in this case `const` means read-only [^readonly]. You can change the object without triggering undefined behavior.
     - If the original declared object is `const`, then it's deemed immutable. If you use `const_cast` to turn its pointer to `T*` then change content, it's undefined behavior. [^cpp_mutable]
@@ -267,7 +266,7 @@ tags:
 - Global variable initialization runs before `main`. [Static Initialization Order Fiasco](https://en.cppreference.com/w/cpp/language/siof.html).
 - Start from C++ 11, destructors have `noexcept` by default. If exception is thrown out of a `noexcept` function, whole process will crash.
 - If destructor is implemented, then you should implement copy constructor or disable copy constructor. If not, it may implicitly copy then double free.
-- In signal handler, don't do any IO or locking, don't `printf` or `malloc`
+- In signal handler, don't do any IO or locking, don't `printf` or `malloc`.
 - Compare signed number with unsigned number. If `a` is signed -1, `b` is unsigned 0, then `a > b` is true, because it auto-converts `a` into unsigned number.
   - Note that `char` may be signed or unsigned, depending on platform. It's recommended to always use `signed char` or `unsigned char`, not `char`. [Apple ARM `char` is signed](https://developer.apple.com/documentation/xcode/writing-arm64-code-for-apple-platforms#Handle-data-types-and-data-alignment-properly), [gcc `char` is unsigned in Android, but signed in other platforms](https://stackoverflow.com/questions/2054939/is-char-signed-or-unsigned-by-default).
 - If the same header file is included in two `.cpp` files with different macros, and the macro difference affect the content in `inline` thing or `template` thing or type definition, then it violates [ODR (one definiton rule)](https://en.cppreference.com/w/cpp/language/definition.html). There will be different compiled functions with the same symbol name, and linker nondeterministically chooses one.
@@ -307,7 +306,7 @@ tags:
 - [MySQL (InnoDB) gap lock may cause deadlock](./About%20circular%20reference#mysql-gap-lock-deadlock).
 - In MySQL, you can select a field and group by another field. It gives nondeterministic result. (this is disabled start from MySQL 5.7.5, [see also](https://dev.mysql.com/doc/refman/8.4/en/sql-mode.html#sqlmode_only_full_group_by)) 
 - Multi-column index `(x, y)` cannot be used when only filtering on `y`. (Except when there are very few different `x` values, database can do a skip scan that uses the index.) Similarily `like 'abc%'` can use index but `like '%abc'` cannot.
-- In SQLite, when table is not `strict`, values are dynamically-typed, but it has "type affinity" that does implicit conversion. The type `floating point` has integer affinity and will auto-convert real number 1.0 to integer 1. The type `string` has numeric affinity and will auto-convert string "01234" to number 1234. It's recommended to always use `strict` table.
+- In SQLite, when table is not `strict`, values are dynamically-typed, but it has "type affinity" that does implicit conversion [^sqlite_implicit_conversion] It's recommended to always use `strict` table.
 - SQLite by default does not do vacuum. The file size only increases and won't shrink. To make it shrink you need to either manually `vacuum;` or enable `auto_vacuum`.
 - In SQLite if you don't set `busy_timeout`, operations will fail directly if database is locked, without auto retry.
 - [Foreign key implicit locking may cause deadlock](./About%20circular%20reference#mysql-foreign-key-deadlock).
@@ -331,6 +330,7 @@ tags:
 
 [^about_ranges]: It's recommended to use spatial index in MySQL and GiST in PostgreSQL for ranges. For non-overlappable ranges, it's possible to efficiently query using just B-tree index: `select * from (select ... from ranges where start <= p order by start desc limit 1) where end >= p` (only require index of `start` column). 
 
+[^sqlite_implicit_conversion]: Some fun facts about Sqlite type affinity: The type `floating point` has integer affinity (because it includes `int`), and will auto-convert real number 1.0 to integer 1. The type `string` has numeric affinity and will auto-convert string "01234" to number 1234.
 
 ## Concurrency and Parallelism
 
@@ -464,7 +464,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - GitHub by default allows deleting a release tag, and adding a new tag with same name, pointing to another commit. It's not recommended to do that. It breaks build system caching. It can be disabled in rulesets configuration. For external dependencies, hardcoding release tag may be not enough to prevent supply chain risk.
 - In Windows, Git often auto-convert cloned text files to be CRLF line ending. But in WSL many software (e.g. bash) doesn't work with CRLF.
 - macOS auto adds `.DS_Store` files into every folder. It's recommended to add `**/.DS_Store` into `.gitignore`.
-- In Windows and macOS, file name is case-insensitive. Renaming file that only change letter case won't be tracked by git (renaming using `git mv` works normally).
+- Renaming file that only changes letter case won't be tracked by git in Windows and macOS (because file name is case-insensitive). Renaming using `git mv` works normally.
 - Git merge is not commutative or associative. Different merging order may give different results.
 
 ## Networking
@@ -481,8 +481,8 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - When using SSL/TLS in private network unconnected to internet, the client may try to check certificate revocation status from internet, which will timeout.
 - Certificate expire. Examples: [Starlink incident](https://www.appviewx.com/blogs/expired-certificate-causes-high-profile-service-outage-proving-certificate-automation-is-critical/), [LinkedIn incident](https://www.appviewx.com/blogs/linkedin-certificate-expiry-fiasco-third-times-a-charm/), [Microsoft Teams incident](https://www.exoprise.com/2020/02/04/teams-outage-expired-certificate/)
   - Auto certificate renewal may silently stop working. [Example](https://github.com/bazelbuild/bazel/issues/28101#issuecomment-3693346788)
- - DNS caching. Changings related to DNS can take long time to take effect.
- - When there are many TCP connections to the same dst port in same machine, src port space can be used up. Example: [Bluesky incident](https://pckt.blog/b/jcalabro/april-2026-outage-post-mortem-219ebg2)
+- DNS caching. Changings related to DNS can take long time to take effect.
+- When there are many TCP connections to the same dst port in same machine, src port space can be used up. Example: [Bluesky incident](https://pckt.blog/b/jcalabro/april-2026-outage-post-mortem-219ebg2)
 
 [^keepalive]: Note that [HTTP/1.0 Keep-Alive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Keep-Alive) is different to TCP keepalive.
 
@@ -526,5 +526,4 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - The current working directory can be changed by system call (e.g. `chdir`).
 - The formats `.zip` and `.mp4` are container formats. They can hold many different kinds of formats inside.
 - Sorting number strings is different to sorting numbers. "10" is smaller than "9" in string comparision.
-- Some old devices still use FAT32 filesystem. Its modification time is 2-second unit. Modifying may not affect modification time.
 
