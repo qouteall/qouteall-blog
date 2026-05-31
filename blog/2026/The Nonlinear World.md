@@ -121,7 +121,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   Second-order effect: 
   
   - It may select out the people that are good at competition but bad at coorporating. 
-  - True innovation is risky. But in high-competition enviornments, temporary failure is fatal, so no true innovation can be done.
+  - True innovation is risky and takes time. But in high-competition enviornments, temporary failure is fatal. This causes short-termism.
   - The previous winners cannot ensure they keep winning, so they tend to find ways to protect them from competition failure, then the selection will become "inaccurate".
   - A lot of great talents require more resource investment to show ability, but they may lose the ruthless competition because they initially don't win and can never obtain enough resource. [^qianlima]
   - Talent is high-dimensional. It filters out the talents whose ability is out of testing range. The currently seemingly useless ability may be important in the future.
@@ -160,7 +160,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: Outsourcing reduces labor cost. Only the team for judging work quality needs to be kept.
 
-  Second-order effect: The outsourced labor can save cost and cause defects in hidden places. These hidden defects are hard to find when just judging the final result. The result is worse product quality.
+  Second-order effect: When the actual work is done by only outsourced workers, the formal employees lose control of actual execution detail. The outsourced labor can save cost and cause defects in places that's hard to notice. The outsourced labor may even gain reverse control of the decision-making. Eventually the overall cost greatly increases.
 
 [^qianlima]: Related: [Qianlima](https://en.wikipedia.org/wiki/Qianlima) (千里马). The high-capacity horse require more food to show its capacity. But without showing its capacity it can never get enough food supply. 
 

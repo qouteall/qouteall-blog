@@ -695,7 +695,9 @@ Pure thinking is usually vague and incomplete, but people overestimate the ratio
 >
 > \- Paul Graham, [Link](https://www.paulgraham.com/words.html)
 
-Even so, writing the idea down may be still not enough, because **natural language is vague**, and **vagueness can hide practical details**. The issues hidden by the vagueness in language will be revealed in real practice.
+Some times, there is "lazy evaluation of ideas". If you don't write down an idea then the idea stays vague. Writing triggers "evaluating" of the idea, then one will notice the "holes" in idea and start thinking about them.
+
+Even so, writing the idea down may be still not enough, because an idea can be written down vaguely, and **vagueness can hide practical details**. The issues hidden by the vagueness in language will be revealed in real practice.
 
 Having ideas is easy and cheap. If you search the internet carefully you are likely to find ideas similar to yours. The important is to validate and execute the idea.
 

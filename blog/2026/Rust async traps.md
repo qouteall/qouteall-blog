@@ -60,6 +60,8 @@ See also: [Dealing with cancel safety in async Rust](https://rfd.shared.oxide.co
 
 There is another kind of "cancel": doesn't drop the future but does not `poll` the future. This is also dangerous. Elaborated below.
 
+Related: [cancel_safe_futures](https://docs.rs/cancel-safe-futures/latest/cancel_safe_futures/) crate
+
 ### Rust future is just data by default
 
 If you calls an async function, but don't do anything to the future (don't `.await`, don't `spawn` etc.), it's also cancellation. In Rust, futures are just data.
@@ -70,7 +72,7 @@ The word "future" has very different meaning in Java. In Java, when obtaining a 
 
 - `tokio::select!`. When one branch is selected, the futures of other branches are dropped.
 - `JoinHandle::abort`. Explicitly cancel a task.
-- `tokio::time::timeout`. When timeout is reached but the future hasn't finished, it's cancelled.
+- `tokio::time::timeout`. When timeout is reached and the future awaits, it's cancelled.
 
 Tokio documentation about cancellation safety: [1](https://docs.rs/tokio/latest/tokio/macro.select.html#cancellation-safety), [2](https://tokio.rs/tokio/tutorial/select#cancellation)
 
@@ -173,7 +175,7 @@ pub trait AsyncRead {
 }
 ```
 
-When the buffer is owned by caller, the buffer will be dropped when caller future cancels. Cancelling Rust future doesn't cancel io_uring operation, so the kernel may write into the freed buffer. This is not memory-safe. 
+When the buffer is owned by caller, the buffer will be dropped when caller future cancels. Cancelling Rust future doesn't necessarily cancel io_uring operation, so the kernel may write into the freed buffer. This is not memory-safe. 
 
 One workaround is to allocate an extra internal buffer for io_uring, then copy that buffer to caller's buffer after IO completes, but this workaround costs performance. With io_uring, the `AsyncRead` cannot be used without performance cost.
 
@@ -192,6 +194,14 @@ pub trait AsyncReadRent {
 Having to pass buffer ownership doesn't mean each small buffer have to be separately allocated. It can allocate a large buffer then split it into many small buffers that have separate ownerships, and use reference counting internally.
 
 See also: [Notes on io-uring](https://without.boats/blog/io-uring/)
+
+### Holding mutex across await point
+
+Holding `std::sync::Mutex` across await point will not compile when using Tokio. Tokio require future to be `Send`, but `std::sync::MutexGuard` is not `Send`.
+
+In Tokio, `tokio::sync::Mutex` can be held across await point. And it doesn't block scheduler, unlike std mutex. But the future can be cancelled in await point when lock is being held. Then the invariants that the lock aim to protect may break, and there is no related logging by default.
+
+The `tokio::sync::Mutex` doesn't have poisoning mechanism. Poisoning mechanism cannot fix broken invariant, but it makes broken invariant more salient, helping debugging. The cancel_safe_futures provides [`RobustMutex`](https://docs.rs/cancel-safe-futures/latest/cancel_safe_futures/sync/struct.RobustMutex.html) which has poisoning mechanism.
 
 ## Un-`poll`-ed futures
 
@@ -272,9 +282,9 @@ Note that `tokio::select!` can run the futures of all branches concurrently, but
 
 [^select_else]: If there is an `else` branch, then the `else` branch will be taken if all other futures are not ready, then `tokio::select!` finishes.
 
-In that example, the un-`poll`-ed future (`xxx_future`) holds lock. Its held lock will only release if that async function progresses. But that future is not `poll`-ed so it will never progress, thus deadlock.
+In that example, the un-`poll`-ed future (`xxx_future`) holds lock. Its held lock will only release in two cases: 1. the future is polled and progresses, 2. the future is dropped. But that future is not `poll`-ed and also not dropped, thus lock cannot release.
 
-**It's hard to use `select!` correctly**. For timeouts, it's recommended to just use  `tokio::timeout` (if you don't want cancellation, wrap inner future within `tokio::spawn`).
+Using `select!` correctly is not easy. For timeouts, it's recommended to just use  `tokio::timeout` (if you don't want cancellation, wrap inner future within `tokio::spawn`).
 
 ### Buffered stream issue
 
@@ -344,14 +354,6 @@ Testing port: 4 ThreadId(1)
 
 All of them execute on main thread. There is no parallelism. The parallelism can be enabled by using `tokio::spawn`. But without `tokio::spawn` it has no parallelism by default.
 
-## Converting between async and sync
-
-- Making async code call sync code is easy, but has risk of blocking scheduler thread, as mentioned previously.
-- Making sync code call async is not easy. It requires using async runtime's API. But it's less risky.
-
-Async-sync-async sandwitch: Async function call sync function that blocks on another async function. Its async-to-sync calling blocks scheduler thread. It's very prone to deadlock.
-
-[The bane of my existence: Supporting both async and sync code in Rust](https://nullderef.com/blog/rust-async-sync/)
 
 ## Mixing multiple async runtimes is hard
 
@@ -374,16 +376,6 @@ This trap is not Rust-specific. When using thread pool, it often has thread coun
 
 One solution is to add a semaphore to limit concurrency.
 
-## About structural concurrency
-
-Structural concurrency force all concurrent tasks to be scoped. Then the tasks form a tree-shaped structure.
-
-Structural concurrency can borrow data from parent. There is no need to make the future `'static`. There is no need to wrap things in `Arc`.
-
-The tree shape is free of cycles, so awaiting on child tasks alone cannot deadlock (but it can deadlock if other kinds of waits are involved).
-
-But there are cases that structural concurrency cannot handld. One is background tasks. For example, a web server provides a Restful API that launches a background task. The background task keeps running after the request that launch task finishes.
-
 
 ## See also
 
@@ -395,6 +387,6 @@ But there are cases that structural concurrency cannot handld. One is background
 
 [FuturesUnordered and the order of futures](https://without.boats/blog/futures-unordered/) 
 
-
+[The bane of my existence: Supporting both async and sync code in Rust](https://nullderef.com/blog/rust-async-sync/)
 
 

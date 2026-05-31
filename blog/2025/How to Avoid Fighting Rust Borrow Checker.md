@@ -885,13 +885,9 @@ That's why mainstream languages has no mutable borrow exclusiveness, and still w
 Rust's mutable borrow exclusiveness creates a lot of troubles in single-threaded cases. But it also has **benefits** (even in signle-threaded cases):
 
 - Make the borrow more universal. In Rust, map key and value can be borrowed. But in Golang you cannot take interior pointer to map key or value. This makes abstractions that work with borrows more general.
-- Mutable borrow is exclusive, so Rust can emit LLVM `noalias` attribute (in release mode). `noalias` means the pointed data cannot be accessed by other code, which helps optimizations:
-  - It allows aggressively merging reads. Before next write to it, it can be temporarily treated as constant.
-  - It allows aggressively merging writes. If there are two memory writes to it, compiler can remove the first write, only keep the last write.
-  - It allows removing reads after write, using the previous write as read result.
-  - It allows aggressively reordering reads/writes to it between other computation and other memory accesses.
-  - The above give compiler a lot of freedom of transforming code, which enables many other optimizations.
-  - Without `noalias`, the optimizer must consider all possible reads/writes to the same value to do above transformation. In many cases, compiler don't have enough information, so much fewer optimizations can be done.
+- Mutable borrow is exclusive, so Rust can emit LLVM `noalias` attribute (in release mode). `noalias` means the pointed data cannot be accessed by other code, which helps optimizations. When optimizer knows no other pointer can equal to that pointer, then reads can be merged, writes can be merged, and its read/write can be reordered between other computations. Then there will be more optimization opportunities. [^noalias_optimization]
+
+[^noalias_optimization]: The `noalias` helps optimization but its practical effect is still limited. Also the LLVM `noalias` is an attribute to function argument and return value. It cannot be added to local variables. The actual aliasing analysis mostly depends on pointer provenance analysis.
 
 Related: CPU internally optimizes by assuming two seprately-calculated addresses are different (assuming no alias), then rollback if assumption is wrong. This is called [Memory disambiguation](https://en.wikipedia.org/wiki/Memory_disambiguation).
 

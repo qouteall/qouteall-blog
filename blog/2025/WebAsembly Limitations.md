@@ -441,11 +441,13 @@ WebAssembly provides sandboxed execution. This can be useful for things like plu
 
 There are other sandboxed execution solutions:
 
-- [eBPF](https://en.wikipedia.org/wiki/EBPF). It's intended to run code in kernel in a sandboxed way. It has JIT compile.
+- [eBPF](https://en.wikipedia.org/wiki/EBPF). [^ebpf]
 - [gVisor](https://gvisor.dev/).
 - [MicroVM](https://firecracker-microvm.github.io/).
 - [LUA](https://www.lua.org/). It's designed to be easily embedded into other applications. LUA is dynamically-typed. Although it has JIT, its performance may not match statically-typed languages.
 - ... [^java]
+
+[^ebpf]: eBPF also does sandboxing, but it's design philosophy is very different to WebAssembly. eBPF relies heavily on static analysis. eBPF aim to ensure it halts so loops are highly constrainted. Also the memory access and memory allocation are also highly constrainted. On contrary, WebAssembly has much larger freedom.
 
 [^java]: Java allows loading new class at runtime. It can be used for making a plugin system. But it's not sandboxed. The newly-loaded classes runs in the same JVM, having the same permission of accessing files and networking like host process. It's possible to launch a new JVM but much less convenient.
 

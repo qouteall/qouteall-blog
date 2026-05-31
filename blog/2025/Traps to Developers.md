@@ -249,20 +249,19 @@ tags:
 - Undefined behaviors. The compiler optimization aim to keep defined behavior the same, but can freely change undefined behavior. Relying on undefined behavior can make program break under optimization. [See also](https://russellw.github.io/undefined-behavior)
   - Accessing uninitialized memory is undefined behavior.
     - Converting binary data pointer `char*` to struct pointer is treated as using uninitialized memory, even if the memory is initialized, because the object [lifetime](https://en.cppreference.com/w/cpp/language/lifetime.html) hasn't started.
+    - Using a local variable before initializing it is also accessing uninitialized memory.
   - Accessing using null pointer or dangling pointer is undefined behavior.
   - Integer overflow/underflow is undefined behavior. Note that unsigned integer can underflow below 0. Don't use `x > x + 1` to check overflow as it will be optimized to `false`.
+  - Integer dividing by 0 is undefined behavior.
   - Aliasing.
     - Strict aliasing rule. If there are two pointers with type `A*` and `B*`, then compiler assumes two pointer can never equal. If they equal, using it to access memory is undefined behavior. Except when: 1. `A` and `B` has subtyping relation 2. converting object pointer to byte pointer (`char*`, `unsigned char*` or `std::byte*`) 3. after converting object pointer to byte pointer, convert back [^strict_aliasing]
     - Pointer provenance. Two pointers from two different provenances are treated as never equal. If their address equals, it's undefined behavior. [See also](https://www.ralfj.de/blog/2020/12/14/provenance.html). The [XOR linked list](https://en.wikipedia.org/wiki/XOR_linked_list) doesn't work with pointer provenance. Don't subtract two pointers then add offset to pointer, unless two pointers are in the same allocation.
   - `const` can mean both read-only and immutable:
     - If the original declared object is not `const`, you can turn pointer to it as `const T*`, in this case `const` means read-only [^readonly]. You can change the object without triggering undefined behavior.
     - If the original declared object is `const`, then it's deemed immutable. If you use `const_cast` to turn its pointer to `T*` then change content, it's undefined behavior. [^cpp_mutable]
-    - `std::move` used on const object cannot avoid deep copying.
+    - `std::move` used on const object cannot avoid deep copying. [^cpp_move]
   - If `bool`'s binary value is neither 0 or 1, using it is undefined behavior. Similarily if an enum's binary value is not valid, using it is undefined behavior.
-- Alignment.
-  - For example, 64-bit integer's address need to be disivible by 8. Unaligned memory access is undefined behavior. In ARM, unaligned memory access can cause crash.
-  - Alignment can cause padding in struct that waste space.
-  - Some SIMD instructions only work with aligned data.
+  - Unaligned memory access is undefined behavior. (Also, alignment can cause padding in struct that wastes space.)
 - Global variable initialization runs before `main`. [Static Initialization Order Fiasco](https://en.cppreference.com/w/cpp/language/siof.html).
 - Start from C++ 11, destructors have `noexcept` by default. If exception is thrown out of a `noexcept` function, whole process will crash.
 - If destructor is implemented, then you should implement copy constructor or disable copy constructor. If not, it may implicitly copy then double free.
@@ -275,7 +274,9 @@ tags:
 
 [^readonly]: The read-only here is in-language constraint. It should not be confused with read-only memory which is actually immutable.
 
-[^cpp_mutable]: In C++, changing `mutable` field of a `const` object is not undefined behavior. [See also](https://en.cppreference.com/w/cpp/language/cv.html).
+[^cpp_mutable]: Exception: In C++, changing `mutable` field of a `const` object is not undefined behavior. [See also](https://en.cppreference.com/w/cpp/language/cv.html).
+
+[^cpp_move]: The `std::move` itself doesn't move. The `std::move` just converts reference to rvalue reference. When passed a `const T&` it gives `const T&&`. However, the move constructor takes `T&&`, not `const T&&`, so it cannot invoke the move constructor, instead it will invoke copy constructor which takes `const T&`(`const T&&` can convert to `const T&`). In C++, the "moved out" object is still alive and will be destructed. The "move" requires mutating the original object to make it "hollow". So moving cannot work with const object.
 
 ## Python
 
