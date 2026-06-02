@@ -158,9 +158,13 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: They become too-big-to-fall. They become inefficient while occupying a lot of resources. They indirectly kill new startups. It reduces overall employment.
 
-- First-order effect: Outsourcing reduces labor cost. Only the team for judging work quality needs to be kept.
+- First-order effect: Outsourcing reduces labor cost.
 
-  Second-order effect: When the actual work is done by only outsourced workers, the formal employees lose control of actual execution detail. The outsourced labor can save cost and cause defects in places that's hard to notice. The outsourced labor may even gain reverse control of the decision-making. Eventually the overall cost greatly increases.
+  Second-order effect: When the actual work is done by only outsourced workers, the formal employees lose control of actual execution detail. The outsourced labors can save cost and cause defects in places that's hard to notice.
+  
+  The outsourced labors may even gain reverse control of the decision-making because they are the only executors. In the long run, the overall cost is higher because of product defects and higher management cost.
+
+  Using AI can also be seen as a kind of outsourcing.
 
 [^qianlima]: Related: [Qianlima](https://en.wikipedia.org/wiki/Qianlima) (千里马). The high-capacity horse require more food to show its capacity. But without showing its capacity it can never get enough food supply. 
 
@@ -353,7 +357,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: Observability and telemetry systems help the reliability of the service.
 
-  Second-order effect: Observability and telemetry may accidentally break the system.
+  Second-order effect: When the system becomes stable enough, observability and telemetry may accidentally break the system.
 
 > In short, the root cause was a new telemetry service configuration that unexpectedly generated massive Kubernetes API load across large clusters, overwhelming the control plane and breaking DNS-based service discovery.
 > 
@@ -365,17 +369,6 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 > - Unexpected behavior of a subsystem _whose primary purpose was to improve reliability_
 > 
 > \- [A conjecture on why reliable systems fail](https://surfingcomplexity.blog/2017/06/24/a-conjecture-on-why-reliable-systems-fail/)
-
-- First-order effect: Auto-retry mechanism improves reliability when having temporary network issues or temporary service restart.
-
-  Second-order effect: When a service is nearly-overloaded, auto-retrying can increase load and fully overload the service. 
-  
-  Third-order effect: That issue can be solved by circuit breaker combined with exponential backoff and jitter. 
-
-  Fourth-order effect: Circuit breaker introduces other risks:
-
-  - When circuit breaker is used with load balancer, one node overload can overload other nodes.
-  - Hidden circular dependency between two services that can run fine normally, but when one fails, trapped in livelock.
 
 - First-order effect: Enforcing high unit test coverage could improve software quality.
 

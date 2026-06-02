@@ -483,7 +483,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Certificate expire. Examples: [Starlink incident](https://www.appviewx.com/blogs/expired-certificate-causes-high-profile-service-outage-proving-certificate-automation-is-critical/), [LinkedIn incident](https://www.appviewx.com/blogs/linkedin-certificate-expiry-fiasco-third-times-a-charm/), [Microsoft Teams incident](https://www.exoprise.com/2020/02/04/teams-outage-expired-certificate/)
   - Auto certificate renewal may silently stop working. [Example](https://github.com/bazelbuild/bazel/issues/28101#issuecomment-3693346788)
 - DNS caching. Changings related to DNS can take long time to take effect.
-- When there are many TCP connections to the same dst port in same machine, src port space can be used up. Example: [Bluesky incident](https://pckt.blog/b/jcalabro/april-2026-outage-post-mortem-219ebg2)
+- Many TCP connetions in TIME_WAIT state can use up ephemeral port space, then new TCP connection cannot start. See also: [Bluesky incident](https://pckt.blog/b/jcalabro/april-2026-outage-post-mortem-219ebg2), [Thoughts on the Bluesky public incident write-up](https://surfingcomplexity.blog/2026/04/12/thoughts-on-the-bluesky-public-incident-write-up/)
 
 [^keepalive]: Note that [HTTP/1.0 Keep-Alive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Keep-Alive) is different to TCP keepalive.
 

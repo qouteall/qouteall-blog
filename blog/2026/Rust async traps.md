@@ -376,6 +376,19 @@ This trap is not Rust-specific. When using thread pool, it often has thread coun
 
 One solution is to add a semaphore to limit concurrency.
 
+Related: in Golang, too high concurrency in logging can also cause OOM:
+
+> 1. The ephemeral port exhaustion led to error messages when attempting to call memcached.
+> 2. Every memcached error resulted in a log line being written synchronously to disk.
+> 3. A large number of goroutines blocked in synchronous system calls led to the Go runtime spawning many OS-level threads (I learned that OS-level threads are [called _M_ in Go parlance](https://go.dev/src/runtime/HACKING)).
+> 4. This large number of OS-level threads put memory pressure on the app.
+> 5. As a result, the data plane experienced stop-the-world GC pauses as well as OOM kills.
+> 
+> \- [Thoughts on the Bluesky public incident write-up](https://surfingcomplexity.blog/2026/04/12/thoughts-on-the-bluesky-public-incident-write-up/)
+
+Normally goroutine scheduler thread count matches CPU core count. However the previously mentioned issue of blocking scheduler thread also applies in goroutine. Go runtime solves this issue by scanning periodically and spawn new OS thread if necessacy. In that extreme case, it spawns too many OS threads. An OS thread uses much more memory than a goroutine. Goroutine scheduler's OS thread count limit 10000 by defaul ([see also](https://pkg.go.dev/runtime/debug#SetMaxThreads)), which it's too high.
+
+In Tokio, the async file IOs internally use `spawn_blocking` (it doesn't use truly async system API to read/write file). Tokio's thread pool backing `spawn_blocking` limits 512 OS threads by default ([see also](https://docs.rs/tokio/latest/tokio/runtime/struct.Builder.html#method.max_blocking_threads)). It's low enough so it won't cause OOM in that case. 
 
 ## See also
 
