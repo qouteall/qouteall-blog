@@ -60,6 +60,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   - The more severe homelessness issue is, the more budget is put into the department for solving homelessness. Then the department has incentive to make the issue worse.
   - When repairer's income is tied to repair times, the repairer that only superficially fix and make it break later has higher income.
   - When doctor's income is tied to treatment times, the doctor that don't cure fully has higher income.
+  - Centralized drug procurement selects the bidder with lowest price. This incentivies medicine companies to reduce cost by sacrificing drug quality.
 
 - First-order effect: Using measured numbers is an objective way of judging performance.
 
@@ -573,6 +574,8 @@ Experiences may be obsolete or even harmful after a paradigm shift. Ideas, metho
 
 - **Optimization may backfire** (the previously mentioned second-order effects). Sometimes not optimizing is better. 
   - Sometimes winning just requires doing nothing special and let opponent make mistakes.
+
+- The more important things (e.g. internal quality) are often hard to measure. Optimizing on easy-to-measure thing ultimately backfires.
 
 - 80/20 rule. Sometimes optimizing just one important part can have big impacts. Note that this doesn't apply to everything.
 

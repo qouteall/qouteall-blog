@@ -386,9 +386,9 @@ Related: in Golang, too high concurrency in logging can also cause OOM:
 > 
 > \- [Thoughts on the Bluesky public incident write-up](https://surfingcomplexity.blog/2026/04/12/thoughts-on-the-bluesky-public-incident-write-up/)
 
-Normally goroutine scheduler thread count matches CPU core count. However the previously mentioned issue of blocking scheduler thread also applies in goroutine. Go runtime solves this issue by scanning periodically and spawn new OS thread if necessacy. In that extreme case, it spawns too many OS threads. An OS thread uses much more memory than a goroutine. Goroutine scheduler's OS thread count limit 10000 by defaul ([see also](https://pkg.go.dev/runtime/debug#SetMaxThreads)), which it's too high.
+Normally goroutine scheduler thread count matches CPU core count. However the previously mentioned issue of blocking scheduler thread also applies in goroutine. Go runtime solves this issue by scanning periodically and spawn new OS thread if necessacy. In that extreme case, it spawns too many OS threads. An OS thread uses much more memory than a goroutine. Goroutine scheduler's OS thread count limit is 10000 by defaul ([see also](https://pkg.go.dev/runtime/debug#SetMaxThreads)), which is too high. (Too many OS threads is not the sole reason of OOM, but it exacerbates the problem.)
 
-In Tokio, the async file IOs internally use `spawn_blocking` (it doesn't use truly async system API to read/write file). Tokio's thread pool backing `spawn_blocking` limits 512 OS threads by default ([see also](https://docs.rs/tokio/latest/tokio/runtime/struct.Builder.html#method.max_blocking_threads)). It's low enough so it won't cause OOM in that case. 
+In Tokio, the async file IOs internally use `spawn_blocking` (it doesn't use truly async system API to read/write file). Tokio's thread pool backing `spawn_blocking` limits 512 OS threads by default ([see also](https://docs.rs/tokio/latest/tokio/runtime/struct.Builder.html#method.max_blocking_threads)). This reduces memory usage caused by OS thread, but async tasks still use memory. To avoid OOM, there should be a concurrency limit, and when limit is reached it should quickly return failure rather than waiting.
 
 ## See also
 

@@ -78,7 +78,7 @@ Unfortunately, loss aversion make being unhappy easier and make being happy hard
 
 It's much easier to increase expectation than to reduce expectation. The knowledge of "better things exist" can be "info hazard", as it makes one harder to accept the things that one gets used to.
 
-Loss aversion doesn't contradict the fact that many people don't care about long-term health or cybersecurity. Because these potential risks are very abstract and unclear.
+Loss aversion doesn't contradict the fact that many people don't care about long-term health or cybersecurity. Because these potential risks are very unclear compared to immediate utility.
 
 When one already have nothing, the expectation is low and loss aversion is low, then one is more likely to take risks.
 
@@ -442,20 +442,13 @@ Related: most people cannot actually behave randomly even if they try to be rand
 
 #### Frequency matching
 
-If there are two lights, the first flashes in 70% probability and the second flashes in 30% probability. When asked to predict which light flashes next, people tend to try to find patterns even if the light flash is purely random, having correct rate about 58%. 
+If there are two lights, the first flashes in 70% probability and the second flashes in 30% probability. When asked to predict which light flashes next, people tend to try to find patterns even if the light flash is purely random, having correct rate about 58% (frequency matching, the predictions also contain 70% first light and 30% second light).
 
-People tend to do **frequency matching**, the predictions also contain 70% first light and 30% second light.
-
-But in that lab experiment enviornment, the light flash is purely random and the probability stays the same, so the optimal strategy is to not try to predict and always choose the first which has larger probability, having correct rate 70%.
+But in that lab experiment setting, the light flash is purely random and the probability stays the same, so the optimal strategy is to not try to predict and always choose the first which has larger probability, having correct rate 70%.
 
 Reference: [The Left Hemisphere’s Role in Hypothesis Formation](https://www.jneurosci.org/content/jneuro/20/6/RC64.full.pdf)
 
-Although the strategy of always choosing the highest-probability choice is optimal in that lab experiment environment, it's not a good strategy in the complex changing real world:
-
-- Making different choices can increase exploration and help discovering new things. Only making one decision reduces exploration.
-- In real world, the distribution may change and the highest-probability choice may change. Always choosing the same choice can be risky, especially when the opponent can learn your behavior.
-- In real world, many things have patterns, so pattern-seeking may be useful.
-- In real world, the "good" is often multi-dimensional. Overly optimizing for one aspect often hurt other aspects. Not choosing the seemingly optimal choice may have hidden benefits.
+In real world there are things that have patterns, but there are also things that are just random. Doing pattern-seeking on purely random things is often wrong.
 
 ### Confusing correlation as causation
 
@@ -584,16 +577,15 @@ Examples of binary thinking:
 
 - "That person is a good person." / "That person is a bad person."
 - "You're either with us or against us.", "Anything less than absolute loyalty is absolute disloyalty."
-- "Bitcoin is the future." / "Bitcoin is a scam".
 - "This asset is completely safe." / "This bubble is going to collapse tomorrow."
 - FOMO (fear of missing out) / risk averse.
 - "No one understands it better than me." / "I don't understand even a tiny bit of it."
-- "It's very easy to do" / "It's impossible."
 - The idol maintains a perfect image. / Image collapse, true nature exposes.
 - "We will win quickly." / "We will lose quickly."
 - "I can do it perfectly." / "I cannot do it perfectly so I will fail."
 - "\[X\] is the best thing and everyone should use it." / "\[X\] has this drawback so it's not only useless but also harmful."
 - "Market is always fully effective." / "Market is never effective."
+- "It's a fundamental innovation that changes everything." / "It's just a wrapper of an existing technology."
 - Doesn't admit **tradeoffs** exist.
 
 People's evaluations are anchored on the expectation, and **not meeting an expectation could make people's belief turn to another extreme**.
@@ -606,15 +598,13 @@ People's evaluations are anchored on the expectation, and **not meeting an expec
 > 
 > \- Nobel Prize-winning economist, Paul Krugman, in 1998
 
-Internet has indeed changed the world. But the dot com bubble burst. It's just that the power of Internet required time to unleash, and people placed too much expectation in it too early.
+Internet has indeed changed the world. But the dot com bubble burst. It's just that people placed high expectations in it too early.
 
 **Neglect of probability**: either neglect a risk entirely or overreact to the risk. 
 
 > The absolute hardest thing to convince people of is that the optimal amount of fraud in a system is not zero. Obviously it would be ideal if there were no fraud, but at some point the cost of catching it outweighs the benefits.
 > 
 > \- Megan McArdle, [Link](https://x.com/asymmetricinfo/status/1923112215193714760)
-
-Between two opposing groups, proposing middle ground will often be seen as enemy by both sides.
 
 We often underestimate the time and efforts required to do one thing (due to Dunning-Kruger effect etc.). When that thing cannot be done in estimated time and efforts, binary thinking may make us overestimate the difficulty and give up.
 
@@ -724,7 +714,7 @@ Free energy = Surprise + Change of Belief
 
 The ways of reducing free energy:
 
-- Passive: Change the belief (understanding of the world).
+- Passive: Change the belief (change understanding of the world).
 - Active: Use action (change environment, move to another environment, etc.) to make the perception better match prediction. [^third_way_of_reducing_free_energy]
 
 [^third_way_of_reducing_free_energy]: I think there is a third way of reducing free energy: hallucination. Confirmation bias can be seen as a mild version of hallucination. Hallucination make the brain "filter" some sensory signal and "fill the gap" with prediction.

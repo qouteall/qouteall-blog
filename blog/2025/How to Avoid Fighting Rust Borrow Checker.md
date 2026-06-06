@@ -323,11 +323,11 @@ fn main() {
 
 It calls `.get_children()` many times. Each time, the result borrow is kept for only a short time. After copying the `score` field of element, it stops borrowing the element, which then indirectly stops borrowing the parent.
 
-Note that **it requires stop borrowing the element before doing mutation**. That example copies `score` integer so it can stop borrowing the child. For other large data structures, you also need copying/cloning to stop borrowing element (reference counting and persistent data structure can reduce cost of cloning).
+Note that **it requires stop borrowing the element before doing mutation**. That example copies `score` integer so it can stop borrowing the child. For non-`Copy`-able data, you need cloning to stop borrowing element (reference counting and persistent data structure can avoid deep cloning).
 
 (Rust doesn't have C-style for loop `for (int i = 0; i < len; i++)`.)
 
-The similar thing can be done in `BTreeMap`. We can get the minimum key, then iteratively get next key. This allows looping on `BTreeMap` without keep borrowing it.
+The similar thing can be done in `BTreeMap`. We can get the minimum key, then iteratively get next key. This allows looping on `BTreeMap` without keeping borrowing it.
 
 Example of mutating a `BTreeMap` when looping on it.
 
@@ -383,7 +383,7 @@ If the data is small, deep cloning is usually fine. If it's not in hot code, dee
 
 For container contagious borrow, a solution is to firstly copy the keys to a new container then use keys to access the container.
 
-There is a misconception: "I already choosed Rust. So I must optimize performance to justify 'Rust cost'. I must not do unnecessary copy." The performance follows 80/20 rule. 80% of time is spent executing 20% code [^8020]. If some code is not bottleneck, optimizing it has neglegible effect. Only optimize after knowing bottleneck. Also performance is not the sole reason of using Rust (e.g. avoid data race Heisenbug).
+There is a misconception: "I already choosed Rust. So I must optimize performance to justify 'Rust cost'. I must not do any unnecessary copy." The performance follows 80/20 rule. 80% of time is spent executing 20% code [^8020]. If some code is not bottleneck, optimizing it has neglegible effect. Only optimize after knowing bottleneck.
 
 [^8020]: Exact numbers may be different. The idea is that the "performance cost contribution" of code is highly biased (fat-tail distribution).
 
@@ -412,6 +412,8 @@ fn main() {
 It swaps the continer's internal pointer. It doesn't copy container content, so its performance cost is small.
 
 But it's error-prone. It requires not forgetting to swap back. It also requires recovering druing panic unwind. Also if some logic nests, the inner logic will see wrong empty container. Generally not recommended.
+
+Related: sometimes you want to avoid deep copying content, but you cannot take ownership, then one solution is to `mem::replace` it with an empty container. This is a normal pattern, different to the temporary swap.
 
 ## Contagious borrowing between branches
 
@@ -495,7 +497,7 @@ However, the callback function object often have to reference the parent (becaus
 
 Summarize solutions to circular reference callbacks:
 
-- Pass mutable data in argument. Don't make the callback capture mutable data. This can break the circular reference.
+- Replace capturing with argument.. Don't make the callback capture parent borrow. Pass parent borrow in argument. This can break the circular reference.
 - Turn events into data. Use ID/handle to refer to objects. Don't use callback. Just create events and process events.
 - (Not recommended) Use reference counting and interior mutability, like `Rc<RefCell<>>`.
 
@@ -634,11 +636,13 @@ Grouping two things together can create circular reference:
 
 ![](./circular/grouping_cycle.drawio.png)
 
-It's similar to contagious borrow issue. Putting two things into one struct can create new circular reference, which is unfriendly to borrow checker. No need to put one object's all data into one struct. One object's data can be scattered in many places.
+Putting two things into one struct can create new circular reference, which is unfriendly to borrow checker. No need to put one object's all data into one struct. One object's data can be scattered in many places.
 
-In OOP languages, it's a common pattern that parent references child, and child references parent. It's convenient because you can access parent data in child's method, without passing parent as argument. That creates circular reference. This just-for-convenience circular reference should be avoided. Note that due to previously mentioned contagious borrow issue, you cannot mutably borrow child and parent at the same time. One workaround is to do a split borrow on parent and pass the individual components of parent (pass more arguments, it's less convenient).
+In OOP languages, it's a common pattern that parent references child, and child references parent. It's convenient because you can access parent data in child's method, without passing parent as argument. That creates circular reference. This just-for-convenience circular reference should be avoided. The parent borrow should be passed as argument.
 
-In a tree structure, letting child node to reference parent node can be convenient. If you get a reference to a node, it's easy to do things that use parent data. If there is some logic that requires upward traverse through tree, it's recommended to use arena, instead of making parent own child.
+However passing parent borrow can encounter contaigous borrow issue mentioned earier. If parent owns child, you cannot mutably borrow parent and child at the same time. One workaround is to not mutably borrow the whole parent, only mutably borrow parent's fields individually (it's less convenient).
+
+In a tree structure, if there is some logic that requires upward traverse through tree, letting child node to reference parent node is natural in non-Rust languages. It's recommended to use arena in that case.
 
 In C++ there is the **unregister-from-parent-on-destruct pattern**: the parent keep a container of child object pointers; in child object's destructor, it removes itself from parent's container. This pattern also involves circular reference. This should be avoided in Rust. The child should be owned by parent, and destructing child should be done via parent.
 
@@ -734,7 +738,7 @@ But it's not easy to access the arena in handle `Debug::fmt`. You cannot access 
 - Create extra "handle with context" type for debug logging.
 - Put arena reference to thread local variable. The [scoped_tls](https://docs.rs/scoped-tls/latest/scoped_tls/) crate can help. This requires arena to have interior mutability. This solution is recommended for only append-only arenas. [^arena_tls_debug]
 
-[^arena_tls_debug]: The solution of putting arena into TLS then read TLS in `Debug::fmt` is [used by Rust compiler](https://github.com/rust-lang/rust/blob/e22c616e4e87914135c1db261a03e0437255335e/compiler/rustc_interface/src/callbacks.rs#L76). Note that Rust compiler's most arenas are append-only (similar to [bumpalo](https://docs.rs/bumpalo/latest/bumpalo/) and [append_only_vec](https://docs.rs/append-only-vec/latest/append_only_vec/index.html)). The interior mutability of append-only arena is safe (free of `RefCell` borrow conflict). But `RefCell`-based interior mutability is much more risky. For them, if `Debug::fmt` borrows arena, then doing debug logging when mutably borrowing arena will cause `RefCell` borrow error. So that solution is only suitable for append-only arenas.
+[^arena_tls_debug]: The solution of putting arena into TLS then read TLS in `Debug::fmt` is [used by Rust compiler](https://github.com/rust-lang/rust/blob/e22c616e4e87914135c1db261a03e0437255335e/compiler/rustc_interface/src/callbacks.rs#L76). Note that Rust compiler's most arenas are append-only (similar to [bumpalo](https://docs.rs/bumpalo/latest/bumpalo/) and [append_only_vec](https://docs.rs/append-only-vec/latest/append_only_vec/index.html)). The interior mutability of append-only arena is safe (free of `RefCell` borrow conflict). But `RefCell`-based interior mutability is much more risky. For them, if `Debug::fmt` borrows arena, then doing debug logging when mutably borrowing arena will cause `RefCell` borrow error.
 
 ## Mutable borrow exclusiveness
 
@@ -942,13 +946,11 @@ It will panic with `RefCell already borrowed` error.
 
 `RefCell` still follows mutable borrow exclusiveness rule, just checked at runtime, not compile time. Borrowing one field inside `RefCell` still borrows the whole `RefCell`.
 
-**Contagious borrow can cause `RefCell` borrow error, even if actual borrows don't conflict**.
+**Wrapping parent in `RefCell` cannot fix contagious borrow**, but putting individual children into `RefCell` can work, as it makes borrow more fine-grained.
 
-**Wrapping parent in `RefCell` cannot fix contagious borrow, but putting individual children into `RefCell` can work, as it makes borrow more fine-grained**.
+Related: [Dynamic borrow checking causes unexpected crashes after refactorings](https://loglog.games/blog/leaving-rust-gamedev/#dynamic-borrow-checking-causes-unexpected-crashes-after-refactorings)
 
-See also: [Dynamic borrow checking causes unexpected crashes after refactorings](https://loglog.games/blog/leaving-rust-gamedev/#dynamic-borrow-checking-causes-unexpected-crashes-after-refactorings)
-
-Rust assumes that, if you have a mutable borrow `&mut T`, you can use it at any time. **But holding the reference is different to using reference**. There are use cases that I have two mutable references to the same object, but I only use one at a time. This is the use case that `RefCell` solves.
+Rust assumes that, if you have a mutable borrow `&mut T`, you can use it at any time. **But holding the reference is different to using reference**. There are use cases that I want to have two mutable borrows to the same object, but I only use one at a time. This is the use case that `RefCell` solves.
 
 ### Returning borrow inside `RefCell`
 
@@ -1115,7 +1117,7 @@ Atomic reference counting is still fast if not contended (when mostly only one t
 Solutions:
 
 - Avoid sharing the same reference count. Copying data is sometimes better.
-- [trc](https://docs.rs/trc/1.2.4/trc/) and [hybrid_rc](https://docs.rs/hybrid-rc/latest/hybrid_rc/). They use per-thread non-atomic counter, and another shared atomic counter for how many threads use it. This can make atomic operations be less frequent, getting higher performance.
+- [trc](https://docs.rs/trc/1.2.4/trc/) and [hybrid_rc](https://docs.rs/hybrid-rc/latest/hybrid_rc/). They use per-thread non-atomic counter, and another shared atomic counter for how many threads use it. This can make atomic operations less frequent.
 - For scenario of frequent short-term reads:
   - [arc_swap](https://docs.rs/arc-swap/latest/arc_swap/). It uses [hazard pointer](https://en.wikipedia.org/wiki/Hazard_pointer) and other mechanics to improve performance.
   - [crossbeam_epoch](https://docs.rs/crossbeam-epoch/latest/crossbeam_epoch/). It uses [epoch-based memory reclamation](https://aturon.github.io/blog/2015/08/27/epoch/#epoch-based-reclamation).
@@ -1123,9 +1125,9 @@ Solutions:
 
  These deferred memory reclamation techniques (hazard pointer, epoch) are also used in lock-free data structures. If one thread can read an element while another thread removes and frees the same element in parallel, it will not be memory-safe (this issue doesn't exist in GC languages).
 
-Note that using `Arc` doesn't mean every access uses atomic operation. Only cloning and dropping it requires atomic operation. `.borrow()` it doesn't involve atomic operation. Passing `&Arc<T>` instead of `Arc<T>` can improve performance.
+Note that using `Arc` doesn't mean every access uses atomic operation. Only cloning and dropping it requires atomic operation. `.borrow()` it doesn't involve atomic operation. Passing `&Arc<T>` instead of `Arc<T>` can avoid atomic operation.
 
-This does NOT mean we should avoid using `Arc`. Only optimize after knowing the bottleneck.
+This should not be simplified to "`Arc` is slow". It requires profiling case-by-case.
 
 ## Reference counting vs tracing GC
 
@@ -1183,11 +1185,7 @@ Adding or removing lifetime for one thing may involve refactoring many code that
 
 It's recommended to have separated bump allocator in each thread locally. The `Bump` is not `Sync` and cannot be shared between threads.
 
-Putting a `Bump` with its allocated references together creates self-reference. It's more tricky (can use [yoke](https://docs.rs/yoke/0.8.1/yoke/)).
-
 Note that bumpalo by default don't run `drop` to improve performance. Use `bumpalo::boxed::Box<T>` for things that require invoking `drop`.
-
-The bump allocator is also a kind of arena. Note that "inserting" 
 
 ## Using unsafe
 

@@ -68,6 +68,12 @@ There is a spctrum between memorization and real intelligence. LLM is between pu
 
 It's not easy to distinguish between memorization and intelligence. Because LLM contains the knowledge of tons of internet content and books content. The common questions are probably already in training set. Asking them to LLM is testing on training set.
 
+## Training data is biased
+
+Photography bias: not all things will be taken photo. The most representative and mundane things are often not worth taken photo. Even they are taken photo, the incentive of sharing them on internet is low. This crates a bias in the distribution of images in internet.
+
+Similar principle also applies to text. For example, most papers publish the successful result. If one research attempt fails, then it will likely be missing in paper dataset.
+
 ## Moravec's paradox
 
 [Moravec's paradox](https://en.wikipedia.org/wiki/Moravec%27s_paradox): AI is good at doing information work. But the robots that do physical tasks are still immature.
@@ -223,7 +229,7 @@ In a large unfamiliar codebase, it's often not obvious which piece of code to lo
 ### AI refactoring
 
 - IDE refactoring is reliable. It parses code. It won't confuse between two same-name-but-different things in two scopes. It won't forget to update a distant reference.
-- AI refactoring is less reliable. It may confuse two same-named-but-different things. It may forget to update some usages. But AI can do many flexible content-dependent refactoring that IDE cannot do (e.g. add a new argument to a long call chain).
+- AI refactoring is less reliable. It may confuse two same-named-but-different things. It may forget to update some usages. But AI can do many flexible content-dependent refactoring that IDE cannot do (e.g. replace a large switch with map lookup).
 
 When AI-generated code has inappropriate naming, renaming them using IDE is faster and more reliable than asking AI to rename.
 
