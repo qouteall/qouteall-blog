@@ -313,7 +313,7 @@ In MySQL (InnoDB), it implicitly locks foreign-key-referenced row to ensure fore
 ```sql
 create table parent (
     id int primary key,
-    update_time timestamp
+    update_time datetime(3)
 ) engine=innodb;
 
 create table child (
@@ -333,9 +333,9 @@ Then there are two concurrent transctions. Each transaction inserts a child then
 | Implicitly read-lock parent row                                                |                                                                                          |
 |                                                                                | `insert into child(id, parent_id) values (2, 2333);`                                     |
 |                                                                                | Implicitly read-lock parent row                                                          |
-| `update parent set update_time = now() where id = 2333;`                       |                                                                                          |
+| `update parent set update_time = now(3) where id = 2333;`                      |                                                                                          |
 | Write-locks parent row. Because it's read-locked by transaction B, wait for B. |                                                                                          |
-|                                                                                | `update parent set update_time = now() where id = 2333;`                                 |
+|                                                                                | `update parent set update_time = now(3) where id = 2333;`                                |
 |                                                                                | Write-locks parent row. Because it's read-locked by transaction A, wait for A. Deadlock. |
 
 That deadlock is caused by **locking more than what it needs to lock** (locking is too coarse-grained). To ensure the foreign key validity, it only need to ensure parent row don't get deleted (or change primary key). It doesn't need to lock whole parent row.
@@ -362,7 +362,7 @@ For example, I have a table of users. The users with `status=1` cannot duplicate
 create table users (
     id int auto_increment primary key,
     name varchar(50),
-    status int,
+    status int, -- users with status 1 cannot duplicate in name
     index name_index (name)
 ) engine=innodb character set utf8mb4 collate utf8mb4_bin;
 ```

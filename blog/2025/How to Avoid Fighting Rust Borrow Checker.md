@@ -1174,12 +1174,11 @@ impl Bump {
 
 It takes immutable borrow of `Bump` (it has interior mutability). It moves `val` into the bump-allocated memory region. It outputs a mutable borrow, having the same lifetime as bump allocator. That lifetime ensures memory safety (cannot make the borrow of allocated value outlive bump allocator).
 
-If you want to keep the borrow of allocated result for long time, then **lifetime annotation is often required**. In Rust, **lifetime annotation is also contagious**:
+If you want to keep the borrow of allocated result for long time, then **lifetime annotation is often required**. 
 
-- Every struct that holds bump-allocated borrow need to also have lifetime annotation of the bump allocator. 
-- Every function that use it also needs lifetime annotation. Rust has [lifetime elision](https://doc.rust-lang.org/nomicon/lifetime-elision.html), which allows you to omit lifetime in function signature in some cases. However you still need to write a lot of lifetime annotations.
+In Rust, lifetime annotation is also contagious. Every struct that holds bump-allocated borrow need to also have lifetime annotation of the bump allocator. Every function that use it also needs lifetime annotation. [Lifetime elision](https://doc.rust-lang.org/nomicon/lifetime-elision.html) can help in some cases but it doesn't cover non-trivial cases.
 
-Adding or removing lifetime for one thing may involve refactoring many code that use it, which can be huge work. (AI can help with these kinds of refactoring.)
+Adding or removing lifetime for one thing may involve editing tons of related code. It can be huge work before AI. But with AI, adding/removing lifetime annotation to many places is easy.
 
 [yoke](https://docs.rs/yoke/0.8.1/yoke/) allows getting rid of lifetime annotation by combining bump-allocated structure together with the bump allocator.
 
@@ -1213,7 +1212,6 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
 - Reading/writing to mutable data that's shared between threads need to use atomic, or volatile access ([`read_volatile`](https://doc.rust-lang.org/std/ptr/fn.read_volatile.html), [`write_volatile`](https://doc.rust-lang.org/beta/std/ptr/fn.write_volatile.html)), or use other synchronization (like locking). If not, optimizer may wrongly merge and reorder reads/writes. In MMIO (memory-mapped IO), all memory accesses should use volatile access. Note that volatile accesses themselves don't establish memory order (unlike Java/C# `volatile`).
 - If the binary data violates the type's constraint, it's undefined behavior. For example, `bool`'s binary data can only be 0 or 1. Making it 2 is undefined behavior. Creating a `str` whose binary data is not valid UTF-8 is also undefined behavior.
 - If you want to `mem::transmute`, it's recommended to use [zerocopy](https://docs.rs/zerocopy/latest/zerocopy/) which has compile-time checks to ensure memory layout are the same.
-- The Rust crate exposed as C dynamic library (crate type `cdylib`) may embed its own allocator. One allocation from one allocator should not be freed in another allocator.
 - ......
 
 [^llvm_constraint]: When there is some other constraint, a byte can have less than 258 possible values in LLVM.
@@ -1477,16 +1475,15 @@ The `as_deref` is not intuitive. It turns `Option<String>` into `Option<&str>`. 
 
 - Borrowing that cross function boundary is contagious. Just borrowing a wheel of car indirectly borrows the whole car.
 - Contagious borrow between branches. If the output of a branch indirect borrows matched value, then that borrow contaminates another branch.
-- Lifetime annotation is contagious. If a type has a lifetime parameter, then every type that holds it must also have lifetime parameter. Every function that use them also need lifetime parameter (except when lifetime elision works). Adding/removing lifetime parameter to a type may require changing many code.
+- Lifetime annotation is contagious. If a type has a lifetime parameter, then every type that holds it must also have lifetime parameter. Every function that use them also need lifetime parameter (except when lifetime elision works). Adding/removing lifetime parameter to a type may require big refactoring. (AI can help with this kind of refactoring.)
 - `async` is contagious. `async` function can call normal function. Normal function cannot easily call `async` function (it's possible to call by blocking, but faces async-sync-async sandwitch issue). Many non-blocking functions tend to become async because they may call async function.
-- Being not `Sync`/`Send` is contagious. A struct that indirectly owns a non-`Sync` data is not `Sync`. A struct that indirectly owns a non-`Send` data is not `Send`.
+- Being not `Sync`/`Send` is contagious. A struct that indirectly owns a non-`Sync` data is not `Sync`. A struct that indirectly owns a non-`Send` data is not `Send`. A reference to non-`Sync` data is not `Send`.
 - Error passing is contagious. If panic is not acceptable, then all functions that indirectly call a fallible function must return `Result`. 
   - Related: NaN is contagious in floating point computation.
-  - Related: To handle out-of-memory gracefully, all dependencies must be able to handle out-of-memory gracefully. Many community crates (e.g. `anyhow`) cannot be used. [One example](https://github.com/bytecodealliance/wasmtime/issues/12069). [^oom]
+  - Related: To handle out-of-memory gracefully, all dependencies must be able to handle out-of-memory gracefully. Many community crates (e.g. `anyhow`) cannot be used. [One example](https://github.com/bytecodealliance/wasmtime/issues/12069).
 - Mutate-by-recreate is contagious. Recreating child require also recreating parent that holds the new child, and parent's parent, and so on.
 - `mut` is contagious. A `mut` one can be treated temporarily immutable. But an immutable one cannot be treated mutable, unless using interior mutability. Sometimes it needs to have two functions one for immutable one for mutable.
 
-[^oom]: Also, in Linux it requires disabling OS overcommit. With overcommit, allocation can succeed even when not having enough free memory, then accessing memory can cause crash. macOS always overcommits and it cannot be disabled.
 
 ### Contagious effects
 
@@ -1528,10 +1525,6 @@ All of the above contagious effect has "escape hatch" that's invisible in types:
 - "Memory safety can only be achieved by Rust." No. Most GC languages are memory-safe. [^gc_memory_safety] Memory safety of existing C/C++ applications can be achieved via [Fil-C](https://github.com/pizlonator/fil-c).
 - "Manual memory management is always faster than tracing GC." No. Moving GCs [^go_gc] have better throughput in allocation and deallocation [^gc_throughput] [^fragmentation]. In manual memory management, freeing a large structure may cause big lag. Using `Arc` involves atomic operations which may become bottleneck when contended. 
 - "The old C/C++ codebases are already battle-tested, so there is no value in rewriting them in Rust." No. If they won't ever add any new feature and don't do any large refactoring, only accepting small bug fixes, then they would indeed become more stable and safe over time. However, if they adds new feature or do large refactoring, then new memory/thread safety issues could emerge.
-- "`.unwrap()` should never be used because [Cloudflare outage Nov 18, 2025](https://blog.cloudflare.com/18-november-2025-outage/#memory-preallocation) is caused by `.unwrap()`." No. Although `.unwrap()` is one cause of that Cloudflare outage, there are many other causes, including: no thorough testing in test environment before deploying to production, rolling out change too quick, rollback not early enough, etc. `unwrap()` is sometimes useful for cases that compiler cannot prove impossible. Note that it's still recommended to reduce usages of `unwrap()` in production code (can use `anyhow` crate which allows convenient `?` on most errors [^anyhow]).
-
-
-[^anyhow]: `anyhow` cannot auto-wrap `Mutex` poison error. Because `anyhow` can only wrap errors that are standalone (`'static`, doesn't borrow non-global thing). Mutex poison error is not standalone. If you don't want to mutex poison to affect web server availability, can use [`parking_lot`](https://docs.rs/parking_lot/latest/parking_lot/) locks.
 
 [^unsafe]: A wrong `unsafe` code in Rust can make memory/thread safety issue trigger in safe code. The impact of `unsafe` code is not limited to `unsafe` code.
 

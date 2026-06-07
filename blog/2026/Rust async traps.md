@@ -369,12 +369,9 @@ Thread-per-core runtimes often relies on the kernel to distribute work between t
 
 ## Unbound concurrency use up resources
 
-This trap is not Rust-specific. When using thread pool, it often has thread count limit, which limits concurrency. But in async, there is no concurrency limit by default. This is good for high-performance web server. But it has downsides:
+This trap is not Rust-specific. When using thread pool, it often has thread count limit, which limits concurrency. But in async, there is no concurrency limit by default. This is good for high-performance web server. But too high concurrency can cause OOM.
 
-- For scraper, if concurrency is too high, it may use too much memory then OOM.
-- If it sends too many concurrent requests to a remote server, it may trigger rate limit then most requests fail.
-
-One solution is to add a semaphore to limit concurrency.
+Solution is to add a concurrency limit. For web server, requests above limit should directly return failure, then the async task finishes and stop occupying memory. For graph-traversing programs like scraper, it should use things like semapphore to limit concurrency. 
 
 Related: in Golang, too high concurrency in logging can also cause OOM:
 
@@ -386,9 +383,9 @@ Related: in Golang, too high concurrency in logging can also cause OOM:
 > 
 > \- [Thoughts on the Bluesky public incident write-up](https://surfingcomplexity.blog/2026/04/12/thoughts-on-the-bluesky-public-incident-write-up/)
 
-Normally goroutine scheduler thread count matches CPU core count. However the previously mentioned issue of blocking scheduler thread also applies in goroutine. Go runtime solves this issue by scanning periodically and spawn new OS thread if necessacy. In that extreme case, it spawns too many OS threads. An OS thread uses much more memory than a goroutine. Goroutine scheduler's OS thread count limit is 10000 by defaul ([see also](https://pkg.go.dev/runtime/debug#SetMaxThreads)), which is too high. (Too many OS threads is not the sole reason of OOM, but it exacerbates the problem.)
+Normally goroutine scheduler thread count matches CPU core count. However the previously mentioned issue of blocking scheduler thread also applies in goroutine. Go runtime solves this issue by scanning periodically and spawn new OS thread if necessacy. In that extreme case, it spawns too many OS threads. An OS thread uses much more memory than a goroutine. Goroutine scheduler's OS thread count limit is 10000 by defaul ([see also](https://pkg.go.dev/runtime/debug#SetMaxThreads)). (Too many OS threads is not the sole reason of OOM, but it exacerbates the problem.)
 
-In Tokio, the async file IOs internally use `spawn_blocking` (it doesn't use truly async system API to read/write file). Tokio's thread pool backing `spawn_blocking` limits 512 OS threads by default ([see also](https://docs.rs/tokio/latest/tokio/runtime/struct.Builder.html#method.max_blocking_threads)). This reduces memory usage caused by OS thread, but async tasks still use memory. To avoid OOM, there should be a concurrency limit, and when limit is reached it should quickly return failure rather than waiting.
+In Tokio, the async file IOs internally use `spawn_blocking` (it doesn't use truly async system API to read/write file). Tokio's thread pool backing `spawn_blocking` limits 512 OS threads by default ([see also](https://docs.rs/tokio/latest/tokio/runtime/struct.Builder.html#method.max_blocking_threads)). This reduces memory usage caused by OS thread, but async tasks still use memory. To avoid OOM, there should be a rate limiter or similar things.
 
 ## See also
 

@@ -239,12 +239,12 @@ tags:
 - If a function accepts `std::string&`, and literal string (e.g. `"x"`) is passed as argument, the `std::string` object will be short-lived.
 - C++ does implicit copy in many places. Implicit copy can hurt performance.
 - [Iterator invalidation](https://learnmoderncpp.com/2024/09/04/understanding-iterator-invalidation/). Modifying a container when looping on it.
-- `std::views::filter` malfunctions when element is mutated that predicate result changes in multi-pass iteration. [See also](https://github.com/CppCon/CppCon2024/blob/main/Presentations/Taming_the_Cpp_Filter_View.pdf). `std::views::as_rvalue` with `std::ranges::to` mutates the element which can trigger that issue. [See also](https://github.com/philsquared/cpponsea2025-slides/blob/main/Presentations/Faster_Safer_Better_Ranges.pdf)
+- `std::views::filter` malfunctions when element is mutated that predicate result changes in multi-pass iteration. [See also](https://github.com/CppCon/CppCon2024/blob/main/Presentations/Taming_the_Cpp_Filter_View.pdf), [See also](https://github.com/philsquared/cpponsea2025-slides/blob/main/Presentations/Faster_Safer_Better_Ranges.pdf)
 - `std::remove` doesn't remove but just rearrange elements. `erase` actually removes.
 - Literal number starting with 0 will be treated as octal number. (`0123` is 83)
 - Destructing a deep tree structure can stack overflow. Solution is to replace recursion with loop in destructor.
 - `std::shared_ptr` itself is not atomic (although its reference count is atomic). Mutating a `shared_ptr` itself is not thread-safe. `std::atomic<std::shared_ptr<...>>` is atomic.
-- For `std::map` and `std::unordered_map`, `map[key]` alone will auto-insert default value if the corresponding entry doesn't exist. [See also](https://en.cppreference.com/w/cpp/container/map/operator_at.html)
+- For std maps, `map[key]` is not a read-only operation. It will auto-insert default value if the corresponding entry doesn't exist. [See also](https://en.cppreference.com/w/cpp/container/map/operator_at.html)
 - For `std::vector<bool>`, result of `operator[]` is a proxy object, not `bool&`.
 - Undefined behaviors. The compiler optimization aim to keep defined behavior the same, but can freely change undefined behavior. Relying on undefined behavior can make program break under optimization. [See also](https://russellw.github.io/undefined-behavior)
   - Accessing uninitialized memory is undefined behavior.
@@ -254,7 +254,7 @@ tags:
   - Integer overflow/underflow is undefined behavior. Note that unsigned integer can underflow below 0. Don't use `x > x + 1` to check overflow as it will be optimized to `false`.
   - Integer dividing by 0 is undefined behavior.
   - Aliasing.
-    - Strict aliasing rule. If there are two pointers with type `A*` and `B*`, then compiler assumes two pointer can never equal. If they equal, using it to access memory is undefined behavior. Except when: 1. `A` and `B` has subtyping relation 2. converting object pointer to byte pointer (`char*`, `unsigned char*` or `std::byte*`) 3. after converting object pointer to byte pointer, convert back [^strict_aliasing]
+    - Strict aliasing rule. If there are two pointers with type `A*` and `B*`, then compiler assumes two pointer can never equal. If they equal, using it to access memory is undefined behavior. Except when: 1. `A` and `B` has subtyping relation 2. converting object pointer to byte pointer (`char*` etc.) 3. after converting object pointer to byte pointer, convert back [^strict_aliasing]
     - Pointer provenance. Two pointers from two different provenances are treated as never equal. If their address equals, it's undefined behavior. [See also](https://www.ralfj.de/blog/2020/12/14/provenance.html). The [XOR linked list](https://en.wikipedia.org/wiki/XOR_linked_list) doesn't work with pointer provenance. Don't subtract two pointers then add offset to pointer, unless two pointers are in the same allocation.
   - `const` can mean both read-only and immutable:
     - If the original declared object is not `const`, you can turn pointer to it as `const T*`, in this case `const` means read-only [^readonly]. You can change the object without triggering undefined behavior.
@@ -269,6 +269,7 @@ tags:
 - Compare signed number with unsigned number. If `a` is signed -1, `b` is unsigned 0, then `a > b` is true, because it auto-converts `a` into unsigned number.
   - Note that `char` may be signed or unsigned, depending on platform. It's recommended to always use `signed char` or `unsigned char`, not `char`. [Apple ARM `char` is signed](https://developer.apple.com/documentation/xcode/writing-arm64-code-for-apple-platforms#Handle-data-types-and-data-alignment-properly), [gcc `char` is unsigned in Android, but signed in other platforms](https://stackoverflow.com/questions/2054939/is-char-signed-or-unsigned-by-default).
 - If the same header file is included in two `.cpp` files with different macros, and the macro difference affect the content in `inline` thing or `template` thing or type definition, then it violates [ODR (one definiton rule)](https://en.cppreference.com/w/cpp/language/definition.html). There will be different compiled functions with the same symbol name, and linker nondeterministically chooses one.
+- The dynamic library may have its own allocator. One allocator's allocation should not be freed in another allocator.
 
 [^strict_aliasing]: Using pointer type to hold integer is fine as long as you don't use it to access memory. Also, [Linus is against strict aliasing rule](https://lkml.org/lkml/2018/6/5/769).The Linux kernel disables strict aliasing rule and makes integer overflow defined behavior.
 
@@ -404,7 +405,6 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Bash has caching between command name and file path of command. If you move one file in `$PATH` then invoking it in command gives ENOENT. Refresh cache using `hash -r`
 - Using a variable unquoted will make spaces separate it into different arguments. Also it will make its line breaks treated as space.
 - `set -e` can make the script exit immediately when a sub-command fails, but it doesn't work inside function whose result is condition-checked (e.g. the left side of `||`, `&&`, condition of `if`). [See also](https://stratus3d.com/blog/2019/11/29/bash-errexit-inconsistency/)
-- `fork()` creates a new process that has only one thread. If another thread holds lock during forking, that lock will never release. `fork()` also has potential of security issues.
 - File name can contain `\n` `\r` `'` `"`. File name can be invalid UTF-8.
 - Symbolic link can point to parent, forming cycle.
 - In Linux file names are case-sensitive, different to Windows and macOS.
@@ -412,7 +412,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Path trailing slash:
   - If `/aaa/bbb` is a symbolic link to a folder, `rm /aaa/bbb` removes the symbolic link, but `rm /aaa/bbb/` may remove files in pointed folder.
   - For `mv x.txt /aaa/bbb`, if `/aaa/bbb` is a folder it will move file into the folder without changing name, but if `/aaa/bbb` doesn't exist it will rename file name to `bbb`.
-- PID can be reused after process exits.
+-  After a process exits, the same PID can be used by another process.
 
 ## Backend-related
 
@@ -425,10 +425,8 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Nginx `proxy_buffering` delays SSE.
 - If the backend behind Nginx initiates closing the TCP connection, Nginx passive health check treat it as backend failure and temporarly stop reverse proxying. [See also](https://nginx.org/en/docs/http/ngx_http_upstream_module.html)
 - Nginx configuration URL trailing slash. [See also](https://dev.to/danielkun/nginx-everything-about-proxypass-2ona)
-- Elasticsearch doesn't allow removing mapping in an index. Dynamic mapping can auto-add mappings that you cannot remove, and it's enabled by default. [^es_reindex]
+- Elasticsearch doesn't allow removing mapping in an index. Dynamic mapping can auto-add mappings that you cannot remove, and it's enabled by default. 
 - Elasticsearch terms aggregation result is inaccurate on large datasets. Increasing `shard_size` can alleviate but increase resource usage. Composite aggregation is more accurate.
-
-[^es_reindex]: Removing mapping requires reindexing. Reindexing not only costs performance, but also has risks of losing new data during reindexing, because reindex works on the snapshot. Zero-downtime reindexing that doesn't lose new ingested data during reindexing is hard: 1. create new index 2. new document ingests to both old index and new index (dual-writing) 3. reindex 4. make queries go to new index 5. stop ingesting to old index and delete old index. It can be simple if you can accept a downtime. It can also be simple if you don't care about losing new data during reindexing. Also if you can accept duplicated query result during reindex, you can use an alias that includes both old and new index, then no dual-writing needed.
 
 ## React
 
@@ -467,6 +465,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - macOS auto adds `.DS_Store` files into every folder. It's recommended to add `**/.DS_Store` into `.gitignore`.
 - Renaming file that only changes letter case won't be tracked by git in Windows and macOS (because file name is case-insensitive). Renaming using `git mv` works normally.
 - Git merge is not commutative or associative. Different merging order may give different results.
+- When switching branch, Git doesn't auto update submodules by default. 
 
 ## Networking
 

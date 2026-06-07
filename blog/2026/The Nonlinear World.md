@@ -121,7 +121,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: 
   
-  - It may select out the people that are good at competition but bad at coorporating. 
+  - It may select out the people that are good at competition but bad at cooperating. 
   - True innovation is risky and takes time. But in high-competition enviornments, temporary failure is fatal. This causes short-termism.
   - The previous winners cannot ensure they keep winning, so they tend to find ways to protect them from competition failure, then the selection will become "inaccurate".
   - A lot of great talents require more resource investment to show ability, but they may lose the ruthless competition because they initially don't win and can never obtain enough resource. [^qianlima]
@@ -166,6 +166,10 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   The outsourced labors may even gain reverse control of the decision-making because they are the only executors. In the long run, the overall cost is higher because of product defects and higher management cost.
 
   Using AI can also be seen as a kind of outsourcing.
+
+- First-order effect: A well-estabilished confidentality system helps keeping internal secrets.
+
+  Second-order effect: In bureaucratic organizations, responsibility evasion is common. Not approving document access bears fewer responsibility. Then the ones actually needing information may cannot access. See also [Institutional memory and reverse smuggling](https://landley.net/history/mirror/institutional_memory.html).
 
 [^qianlima]: Related: [Qianlima](https://en.wikipedia.org/wiki/Qianlima) (千里马). The high-capacity horse require more food to show its capacity. But without showing its capacity it can never get enough food supply. 
 
