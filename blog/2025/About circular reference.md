@@ -827,6 +827,20 @@ For example, to deep-clone a data structure that contains cycles, direct recursi
 
 In C, writing two mutually-recursive functions requires separately declare the two functions eariler. Because C is designed that compiler can compile in one pass. Modern languages doesn't require separate declaration because modern compilers are multiple-stage (there is a stage for collecting all definitions, before name resolution).
 
+Note that when there is non-local information propagation in graph, then a finite amount of stages will be not enough. It requires a variable amount of stages to iteratively propagate the information across graph.
+
+## Rust auto trait inference cycle
+
+In Rust, whether a struct type satisfies `Send` trait depends on whether all fields of it satisfy `Send` trait. Then it can crate circular dependency. Classical example:
+
+```rust
+struct List<T> { data: T, next: Option<Box<List<T>>> }
+```
+
+Whether `Box<T>` and `Option<T>` is `Send` is same as whether `T` is `Send`. So it can be simplified to: `List<T>` is `Send` if and only if `T` is `Send` and `List<T>` is `Send`. If `T` is not `Send` then the result is definite: `List<T>` is not `Send`. However, if `T` is `Send` then there is circular dependency.
+
+Rust compiler solves it by [Coinduction](https://rustc-dev-guide.rust-lang.org/solve/coinduction.html). In simple terms, coinduction means "assume it's true until proven otherwise". (On the contrary, "induction" means "assume it's false until proven otherwise".) So when `T` is `Send`, assume `List<T>` is also `Send`.
+
 ## Circular reference in math
 
 ### Circular proof

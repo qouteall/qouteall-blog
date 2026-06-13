@@ -176,6 +176,17 @@ There are proposed language design solutions to contagious borrow issue: [^solvi
 
 [^borrow_crate]: The [borrow](https://docs.rs/borrow/latest/borrow/) crate creates many new types for different combinations of field borrows. One downside is that the remaining un-borrowed parts need to be manually passed. It also faces the same issue as view type: doesn't work well with encapsulation, because internal field info is leaked into type. But the borrow crate is more reliable than `RefCell`: no need to worry runtime panic as long as it compiles.
 
+Inlining can allow split borrow. But inling can cause code to become messy. A workaround is to use closures. Closures in local scope can work with split borrow:
+
+```rust
+let mut parent = Parent{total_score: 0, children: vec![Child{score: 2}]};
+let get_children = || parent.children;
+let mut add_score = |score: u32| parent.total_score += score;
+for child in get_children() {
+    add_score(child.score);
+}
+```
+
 ## Defer mutation. Mutation-as-data
 
 Another solution is to **treat mutation as data**. To mutate something, **append a mutation command into command queue**. Then execute the mutation commands at once. (Note that command should not indirectly borrow base data.)
@@ -292,7 +303,7 @@ Contagious borrow can also happen in containers. If you borrow one element of a 
 
 ## Avoid iterator. Manually manage index (key) in loop
 
-For looping on container is very common. Rust provides concise container for-loop syntax `for x in &container {...}`. However, it has **an implicit iterator that keeps borrowing the whole container**.
+For looping on container is very common. However, the common container for loop (e.g. `for x in &container {...}`) has **an implicit iterator that keeps borrowing the whole container**.
 
 One solution is to manually manage index (key) in loop, without using iterator. For `Vec` or slice, you can make index a mutable local variable, then use while loop to traverse the array.
 
@@ -1125,9 +1136,9 @@ Solutions:
 
  These deferred memory reclamation techniques (hazard pointer, epoch) are also used in lock-free data structures. If one thread can read an element while another thread removes and frees the same element in parallel, it will not be memory-safe (this issue doesn't exist in GC languages).
 
-Note that using `Arc` doesn't mean every access uses atomic operation. Only cloning and dropping it requires atomic operation. `.borrow()` it doesn't involve atomic operation. Passing `&Arc<T>` instead of `Arc<T>` can avoid atomic operation.
+Note that using `Arc` doesn't mean every access uses atomic operation. Only cloning and dropping it requires atomic operation. `.borrow()` it doesn't involve atomic operation. Passing `&Arc<T>` can avoid cloning and avoid atomic operation.
 
-This should not be simplified to "`Arc` is slow". It requires profiling case-by-case.
+This should not be simplified to "`Arc` is slow". It requires profiling case-by-case. (Swift uses atomic reference counting almost everywhere and it's mostly fine.)
 
 ## Reference counting vs tracing GC
 
@@ -1228,13 +1239,98 @@ Unfortunately Rust's syntax ergonomics on raw pointer is currently not good:
 - Raw pointer cannot be method receiver (self). (This is addressed in unstable feature [arbitrary_self_types](https://doc.rust-lang.org/beta/unstable-book/language-features/arbitrary-self-types.html))
 - There is raw pointer to slice, but it doesn't support indexing syntax `s[i]`. You need to manually `.add()` pointer and dereference. Bound checking is also manual. (Converting raw pointer to slice borrow enables convenient indexing syntax, but it is prone to aliasing UB as mentioned previously)
 
-## Rust doesn't allow "temporary void" for borrowed data
+## No "temporary void" of borrowed data
 
 In safe Rust, the borrowed data has to be always valid. You cannot make borrowed data become "temporary void" then fill the void.
 
-You cannot implement `mem::swap` or `mem::replace` in safe Rust. Because Rust is procedural, so doing these have to make some borrowed data temporarily invalid.
+Example:
 
-Implement a singly-linked-list require `mem::replace`, [see also](https://rust-unofficial.github.io/too-many-lists/first-push.html).
+```rust
+enum SomeState {
+    State1(Vec<u8>),
+    State2(Vec<u8>),
+}
+
+fn do_some_state_transfer(state: &mut SomeState) {
+    // State1 transfer to State2, State2 stays the same
+    match state {
+        SomeState::State1(data) => {
+            *state = SomeState::State2(*data);
+        }
+        SomeState::State2(_) => {}
+    }
+}
+```
+
+Compile error
+
+```
+error[E0507]: cannot move out of `*data` which is behind a mutable reference
+  --> src\main.rs:22:40
+   |
+22 |             *state = SomeState::State2(*data);
+   |                                        ^^^^^ move occurs because `*data` has type `Vec<u8>`, which does not implement the `Copy` trait
+   |
+help: consider cloning the value if the performance cost is acceptable
+   |
+22 -             *state = SomeState::State2(*data);
+22 +             *state = SomeState::State2(data.clone());
+   |
+```
+
+We often don't want to clone the `data` because it costs performance.
+
+One workaround is to use functional style. Instead of doing mutation, it takes ownership of old state then return new state:
+
+```rust
+// this compiles
+fn do_some_state_transfer(state: SomeState) -> SomeState {  
+    // State1 transfer to State2, State2 stays the same  
+    match state {  
+        SomeState::State1(data) => SomeState::State2(data),  
+        x @ SomeState::State2(_) => x,
+    }  
+}
+```
+
+But this involves the previously mentioned contagious-recreate-parent problem. The outer structure that contains it also needs to be re-created. In many cases, it cannot be done or it is very inconvenient.
+
+Another workaround is to use `Arc` to hold the data. Then cloning is cheap. But then mutating inner data is a problem (if you ensure the reference count is always 1 when mutating, then [`get_mut`](https://doc.rust-lang.org/std/sync/struct.Arc.html#method.get_mut) can be used).
+
+Another workaround is to swap it with a default value using `mem::take`:
+
+```rust
+match state {  
+    SomeState::State1(data) => {  
+        *state = SomeState::State2(mem::take(data));  
+    }  
+    SomeState::State2(_) => {}  
+}
+```
+
+The `mem::take` internally uses `mem::replace` to replace it with default value:
+
+```rust
+pub const fn take<T: [const] Default>(dest: &mut T) -> T {
+    replace(dest, T::default())
+}
+```
+
+And `mem::replace` internally uses `unsafe`:
+
+```rust
+pub const fn replace<T>(dest: &mut T, src: T) -> T {
+    unsafe {
+        let result = crate::intrinsics::read_via_copy(dest);
+        crate::intrinsics::write_via_move(dest, src);
+        result
+    }
+}
+```
+
+`mem::swap` or `mem::replace` cannot be implemented in safe Rust because it involves creating borrowed "temporary void".
+
+There is a "make illegal state unrepresentable" principle: prevent the invalid data from being created in memory, thus reduce chance of bugs. But workarounding that problem by `mem::replace` force you to add a special state that does not represent valid data, which conflicts with "make illegal state unrepresentable". [Related closed RFC](https://github.com/rust-lang/rfcs/pull/1736).
 
 This restriction is related to panic unwinding. Before the "temporary void" becomes valid again, panic unwinding can cause function to exit early and never fill the void. [See also](https://smallcultfollowing.com/babysteps/blog/2024/05/02/unwind-considered-harmful/).
 
