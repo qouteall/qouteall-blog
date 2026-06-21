@@ -195,7 +195,9 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: Increasing interest rate curbs inflation, because it reduces money supply.
 
-  Second-order effect: Many inflations are caused by reduced supply of goods. Increasing interest rate reduces productivity investment, thus curbs supply increase, thus can boost inflation.
+  Second-order effect: Many inflations are caused by reduced supply of goods. Higher interest rate may cause high-debt companies may collapse, reducing productivity in the short term. In the long term, increasing interest rate reduces productivity investment. These can boost inflation. 
+  
+  For USD, as USD is global currency, expectation of increasing interest can cause foreign investments to be liquidated back to America.
 
 - First-order effect: When uncertainty increases, money moves from risky assets (e.g. stock) to gold, because gold is safer.
 
@@ -578,8 +580,9 @@ Experiences may be obsolete or even harmful after a paradigm shift. Ideas, metho
 
 - **Optimization may backfire** (the previously mentioned second-order effects). Sometimes not optimizing is better. 
   - Sometimes winning just requires doing nothing special and let opponent make mistakes.
+  - The "good people" with "good intention" can cause more damage than "bad guys", because optimization backfires.
 
-- The more important things (e.g. internal quality) are often hard to measure. Optimizing on easy-to-measure thing ultimately backfires.
+- **The more important things (e.g. internal quality) are often hard to measure. Optimizing on easy-to-measure thing ultimately backfires.**
 
 - 80/20 rule. Sometimes optimizing just one important part can have big impacts. Note that this doesn't apply to everything.
 
@@ -621,7 +624,7 @@ Redundancy tackles risk. Two kinds of redundancy:
 
 Diversification is also a way to handle risks. Note that diversification only works when correlation is low. Many assets seems low-correlation but has high correlation under Black Swan event. When two low-correlation assets are commonly diversified together, their correlation potentially increases.
 
-### Good side of incident
+### Good sides of incident
 
 - It reveals problems and gives pressure to improve.
 - It makes people appreciate the good instead of taking things for granted.

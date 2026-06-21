@@ -412,7 +412,8 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Path trailing slash:
   - If `/aaa/bbb` is a symbolic link to a folder, `rm /aaa/bbb` removes the symbolic link, but `rm /aaa/bbb/` may remove files in pointed folder.
   - For `mv x.txt /aaa/bbb`, if `/aaa/bbb` is a folder it will move file into the folder without changing name, but if `/aaa/bbb` doesn't exist it will rename file name to `bbb`.
--  After a process exits, the same PID can be used by another process.
+- After a process exits, the same PID can be used by another process.
+
 
 ## Backend-related
 

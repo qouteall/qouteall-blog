@@ -378,7 +378,7 @@ The JS ecosystem cares about code size. Because improving page load speed requir
 
 The average user can accept taking 2 minutes to install a native app, but cannot accept taking 20 seconds to load a web page. So the native ecosystem doesn't care much about code size or lazy loading. The Wasm toolchain are often based on native toolchains. The tooling for reducing code size and lazy loading for Wasm is far less mature than JS.
 
-Also, C++ and Rust duplicatedly generate code for different generic instantiation (called monomorphization). `Vec<u32>` uses different Wasm code than `Vec<String>` and `Vec<MyType>`. This bloats binary size compared to JS. Modern linkers can do identical code folding (ICF) which can alleviate this issue.
+Also, C++ and Rust duplicatedly generate code for different generic instantiation (called monomorphization). `Vec<u32>` uses different Wasm code than `Vec<String>` and `Vec<MyType>`. (In Rust, the commonly used `serde`  can take a lot of binary size, [see also](https://nickb.dev/blog/the-dark-side-of-inlining-and-monomorphization/)) This bloats binary size compared to JS. Modern linkers can do identical code folding (ICF) which can alleviate this issue.
 
 In debug mode, debugging info also takes a lot of space in Wasm binary.
 

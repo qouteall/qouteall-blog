@@ -1378,6 +1378,18 @@ In Rust `'static` just mean its lifetime is not limited to a specific scope. It 
 
 [^about_bottom_type]: Some may intuitively think `'static` is top type (like `any` in TypeScript and `Object` in Java) because it's the most "general". However, in Rust, lifetime is constraint, so the most general one is no constraint, and the most specific one is the hardest constraint. The relation is inverted. In Rust narrowing lifetime is safe but expanding lifetime is not safe, similar to java converting any type to `Object` is safe but converting `Object` to another type doesn't necessarily work.
 
+## "Lifetime" is not "lifetime"
+
+The "lifetime" in Rust has nuanced distinction between the real "lifetime" of data:
+
+- The lifetime is just a constraint. It can be shortened. The shortened lifetime is a stricter constraint. But expanding lifetime is unsafe because it lossens the constraint.
+- The lifetime constraints when the data dies, but doesn't constraint when the data is crated. You can leak some data and get a `'static` reference to it. The `'static` means the whole program's lifetime, but the data is not created right after program launches. 
+  
+  Similarily, all data from one bump allocator have the same "lifetime", even though some of them is created earlier than others.
+- Lifetime is not tied to "time". It's tied to a "scope" (not necessarily explicit scope marked by `{}`, it can be like "from line 5 to line 7").
+
+The actual meaning of Rust "lifetime" is that: if I get access to that data, it constraints that the data stays valid in the scope.
+
 ## Side effect of extracting and inlining variable
 
 In C and GC languages:
@@ -1536,7 +1548,7 @@ Examples:
   - `&[u8]` is slice ref, containing a pointer and a length.
   - `mut &[u8]` is mutable slice ref. The pointer and length is mutable, but binary data in slice is immutable.
   - `x` is a pointer to that mutable slice ref.  `x` itself is immutable.
-- Git release tag is mutable-ref-to-immutable-obj. The Git commit with specific hash is immutable. But Git allows removing a release tag and create a new same-named release tag to another commit. This can be disabled.
+- Git release tag is mutable-ref-to-immutable-obj. The Git commit with specific hash is immutable. But Git allows removing a release tag and create a new same-named release tag to another commit (this can be disabled).
 
 [^immutable]: It's actually "treated as immutable". It can be actually mutable when interior mutability is involved.
 
@@ -1576,7 +1588,7 @@ The `as_deref` is not intuitive. It turns `Option<String>` into `Option<&str>`. 
 - Being not `Sync`/`Send` is contagious. A struct that indirectly owns a non-`Sync` data is not `Sync`. A struct that indirectly owns a non-`Send` data is not `Send`. A reference to non-`Sync` data is not `Send`.
 - Error passing is contagious. If panic is not acceptable, then all functions that indirectly call a fallible function must return `Result`. 
   - Related: NaN is contagious in floating point computation.
-  - Related: To handle out-of-memory gracefully, all dependencies must be able to handle out-of-memory gracefully. Many community crates (e.g. `anyhow`) cannot be used. [One example](https://github.com/bytecodealliance/wasmtime/issues/12069).
+  - Related: To handle out-of-memory gracefully in embedded system, panic unwind cannot be used, then all dependencies must be able to handle out-of-memory using `Result`, [see also](https://github.com/bytecodealliance/wasmtime/issues/12069).
 - Mutate-by-recreate is contagious. Recreating child require also recreating parent that holds the new child, and parent's parent, and so on.
 - `mut` is contagious. A `mut` one can be treated temporarily immutable. But an immutable one cannot be treated mutable, unless using interior mutability. Sometimes it needs to have two functions one for immutable one for mutable.
 
