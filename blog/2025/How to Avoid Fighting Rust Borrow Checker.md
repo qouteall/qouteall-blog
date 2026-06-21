@@ -1382,8 +1382,8 @@ In Rust `'static` just mean its lifetime is not limited to a specific scope. It 
 
 The "lifetime" in Rust has nuanced distinction between the real "lifetime" of data:
 
-- The lifetime is just a constraint. It can be shortened. The shortened lifetime is a stricter constraint. But expanding lifetime is unsafe because it lossens the constraint.
-- The lifetime constraints when the data dies, but doesn't constraint when the data is crated. You can leak some data and get a `'static` reference to it. The `'static` means the whole program's lifetime, but the data is not created right after program launches. 
+- The lifetime is just a constraint. Lifetime of a borrow can be shortened. Shortening lifetime makes constraint looser. Expanding lifetime is makes constraint stricter.
+- The lifetime constraints when the data dies, but doesn't constraint when the data is crated. You can leak some data and get a `'static` borrow to it. The `'static` means the whole program's lifetime, but the data is not created right after program launches. 
   
   Similarily, all data from one bump allocator have the same "lifetime", even though some of them is created earlier than others.
 - Lifetime is not tied to "time". It's tied to a "scope" (not necessarily explicit scope marked by `{}`, it can be like "from line 5 to line 7").
