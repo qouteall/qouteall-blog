@@ -891,9 +891,14 @@ Note that **iteration invalidation is logic error**, no matter whether it's memo
 
 In Java, you can remove element via the iterator, then the iterator will update together with container, and no longer invalidate. Or use `removeIf` that avoids managing iterator.
 
-Mutable borrow exclusiveness is still important in single-threaded case, because of interior pointer. **But if we don't use any interior pointer, then mutable borrow exclusiveness is not necessary for memory safety in single-thread case**.
+To summarize, **mutable borrow exclusiveness is overly strict in single-threaded case**:
+
+- If we don't use any interior pointer, then mutation cannot cause memory safety issue. (Example: Java has no interior pointer)
+- Even when we use interior pointer, as long as mutation doesn't change memory layout, it's still memory-safe. (Example: Golang interior pointer)
 
 That's why mainstream languages has no mutable borrow exclusiveness, and still works fine in single-threaded case. Java, JS and Python has no interior pointer. Golang and C# have interior pointer, they have GC and restrict interior pointer, so memory safe is still kept without mutable borrow exclusiveness.
+
+There are design ideas of separting the mutation that change memory layout and the mutation that doesn't change memory layout. See also: [An alternative model for "lifetimes" in Mojo](https://gist.github.com/nmsmith/cdaa94aa74e8e0611221e65db8e41f7b), [Ante: A New Way to Blend Borrow Checking and Reference Counting](https://verdagon.dev/blog/ante-blending-borrowing-rc)
 
 ### Benefits of mutable borrow exclusiveness
 
@@ -1115,7 +1120,10 @@ Cloning and dropping `Arc` involves atomic operations of changing reference coun
 
 Modern CPUs use cache coherency protocol (e.g. [MOESI](https://en.wikipedia.org/wiki/MOESI_protocol)). **Atomic operations often require the CPU core to hold "exclusive ownership" to cache line** (this may vary between different hardware). Many threads frequently doing so cause cache contention, similar to locking, but on hardware.
 
-[Example 1](https://web.archive.org/web/20250708051211/https://www.conviva.com/platform/the-concurrency-trap-how-an-atomic-counter-stalled-a-pipeline/), [Example 2](https://pkolaczk.github.io/server-slower-than-a-laptop/)
+Examples:
+
+- [The Concurrency Trap: How An Atomic Counter Stalled A Pipeline](https://www.conviva.ai/resource/the-concurrency-trap-how-an-atomic-counter-stalled-a-pipeline/)
+- [How a Single Line of Code Made a 24-core Server Slower Than a Laptop](https://pkolaczk.github.io/server-slower-than-a-laptop/)
 
 Using `Arc` wrongly may result in slower performance than using GC languages. In GC languages, reading an on-heap reference often only involve a simple memory read [^gc_load_barrier], without atomic read-modify-write operation.
 
@@ -1125,20 +1133,18 @@ Atomic reference counting is still fast if not contended (when mostly only one t
 
 [^apple_silicon_reference_counting]: [See also](https://blog.metaobject.com/2020/11/m1-memory-and-performance.html). That was in 2020. Unsure whether it changed now. One possible reason is that ARM allows weaker memory order than X86. Also, Apple's languages Swift and Objective-C use reference counting almost everywhere, so possibly Apple payed more efforts in optimizing atomic reference counting in hardware.
 
-Solutions:
+But don't worry too much about `Arc`. In most normal applications, `Arc` itself likely won't be the bottleneck[^tokio_arc]. Swift uses atomic reference counting almost everywhere and it's mostly fine. Profile before doing optimization.
 
-- Avoid sharing the same reference count. Copying data is sometimes better.
-- [trc](https://docs.rs/trc/1.2.4/trc/) and [hybrid_rc](https://docs.rs/hybrid-rc/latest/hybrid_rc/). They use per-thread non-atomic counter, and another shared atomic counter for how many threads use it. This can make atomic operations less frequent.
-- For scenario of frequent short-term reads:
-  - [arc_swap](https://docs.rs/arc-swap/latest/arc_swap/). It uses [hazard pointer](https://en.wikipedia.org/wiki/Hazard_pointer) and other mechanics to improve performance.
-  - [crossbeam_epoch](https://docs.rs/crossbeam-epoch/latest/crossbeam_epoch/). It uses [epoch-based memory reclamation](https://aturon.github.io/blog/2015/08/27/epoch/#epoch-based-reclamation).
-  - [aarc](https://docs.rs/aarc/latest/aarc/)
+[^tokio_arc]: Tokio commonly uses `Arc` internally. In Tokio every time a sleep future or IO future is created, it calls `scheduler::Handle::current()` which clones an `Arc` (and the `Arc` drops when future drops). That `Arc`'s pointee is per-runtime. So every time a sleep/IO future is created/dropped, it contends the per-Tokio-runtime atomic counter. The `Arc` is needed because you can run multiple instances of Tokio runtime in a Rust program and dynamically create/drop Tokio runtimes. It cannot use thread local to access runtime because the future can be sent to a non-Tokio thread and be block-waited by `futures::executor::block_on`, and the future has to stay memory-safe even after the Tokio runtime exits. In Golang there is no such atomic counter because one process has only one goroutine scheduler, and it won't exit until process exits. Apart from the per-runtime atomic counter, Tokio has some per-runtime mutexes that also cause contention. On contrary, in thread-per-core runtimes like monoio, the future cannot be sent across threads to it uses thread-local and `Rc` to reference runtime data, which doesn't cause cache contention. That said, in most real-world web servers the per-runtime atomic counter won't be bottleneck because the real bottleneck is likely waiting on database.
 
- These deferred memory reclamation techniques (hazard pointer, epoch) are also used in lock-free data structures. If one thread can read an element while another thread removes and frees the same element in parallel, it will not be memory-safe (this issue doesn't exist in GC languages).
+If `Arc` clone/dropping do become bottleneck, possible solutions:
 
-Note that using `Arc` doesn't mean every access uses atomic operation. Only cloning and dropping it requires atomic operation. `.borrow()` it doesn't involve atomic operation. Passing `&Arc<T>` can avoid cloning and avoid atomic operation.
-
-This should not be simplified to "`Arc` is slow". It requires profiling case-by-case. (Swift uses atomic reference counting almost everywhere and it's mostly fine.)
+- For frequent short-term reads to mutable data, use [arc_swap](https://docs.rs/arc-swap/latest/arc_swap/). It follows read-copy-update (RCU) or copy-on-write (COW) paradigm. In RCU(or COW), mutation requires recreating the whole data structure, and atomically change the root pointer, with delayed dropping mechanism (arc_swap uses hazard pointer).
+  - Other solutions of delayed dropping that avoids overhead of atomic reference counting: [sdd](https://crates.io/crates/sdd), [crossbeam_epoch](https://docs.rs/crossbeam-epoch/latest/crossbeam_epoch/)
+- Deep cloning data instead of sharing `Arc`.
+- If the data is global sigleton, can just put it to global `static` (use `OnceLock` for delayed initialization).
+- [trc](https://docs.rs/trc/1.2.4/trc/) and [hybrid_rc](https://docs.rs/hybrid-rc/latest/hybrid_rc/). Use per-thread non-atomic counter together with atomic counter.
+- Shard the counter. Given an `Arc<T>`, clone many instances then wrap each in `Arc<CachePadded<Arc<T>>>` ([`CachePadded`](https://docs.rs/crossbeam/latest/crossbeam/utils/struct.CachePadded.html) is from crossbeam). Different threads clone the differnt two-layer-arcs based on thread id hash. Memory access goes through extra indirection. There will be much fewer contention as different CPU cores likely touch different atomic counters.
 
 ## Reference counting vs tracing GC
 

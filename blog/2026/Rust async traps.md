@@ -27,6 +27,8 @@ Also, heavy computation work without `.await` point is also blocking. The async 
 
 Tokio also supports an "escape hatch". The task spawned by [`spawn_blocking`](https://dtantsur.github.io/rust-openstack/tokio/task/fn.spawn_blocking.html) runs in another thread pool and won't block the normal scheduler thread. The code that does non-async blocking or heavy compute work should be run in `spawn_blocking`.
 
+The [`futures::executor::block_on`](https://docs.rs/futures/latest/futures/executor/fn.block_on.html) should not directly be called in async task.
+
 ### Deadlock caused by blocking scheduler thread
 
 [How to deadlock Tokio application in Rust with just a single mutex](https://turso.tech/blog/how-to-deadlock-tokio-application-in-rust-with-just-a-single-mutex)
@@ -52,7 +54,10 @@ However, **exceptions and panics are often logged, but future cancel is often no
 
 The cancellation "catch": normally when the parent future cancels, the inner futures are also cancelled. It propagates from outside to inside. The `tokio::spawn` can stop that propagation. Although `JoinHandle` is `Future`, dropping it won't cancel the spawned task. So if you want to avoid cancellation, wrap it in `tokio::spawn` (and don't call `JoinHandle::abort`).
 
-Cancellation is indeed useful in some cases. But there are also many cases that cancellation is harmful. The problem is that async Rust made cancellation implicit. There is no type-level annotation ensuring an async function cannot cancel. This creates traps.
+Rust makes async cancellation implicit. Upside and downside:
+
+- When you do want cancellation, then the implicit cancellation is convenient. No need to manually select on cancellation all over the places. Every `.await` point can cancel.
+- When you don't want cancellation, then the implicit cancellation is a trap. It causes bugs and leave no log by default.
 
 Two examples of cancellation issues: [Alan tries to cache requests, which doesn't always happen](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/alan_builds_a_cache.html), [Barbara gets burned by select](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/barbara_gets_burned_by_select.html)
 
@@ -354,7 +359,6 @@ Testing port: 4 ThreadId(1)
 
 All of them execute on main thread. There is no parallelism. The parallelism can be enabled by using `tokio::spawn`. But without `tokio::spawn` it has no parallelism by default.
 
-
 ## Mixing multiple async runtimes is hard
 
 Using multiple async runtimes together is possible but is hard and error-prone. And there are many async-runtime-specific types. So async runtime naturally has exclusion. That's why Tokio has monopoly.
@@ -397,6 +401,5 @@ In Tokio, the async file IOs internally use `spawn_blocking` (it doesn't use tru
 
 [FuturesUnordered and the order of futures](https://without.boats/blog/futures-unordered/) 
 
-[The bane of my existence: Supporting both async and sync code in Rust](https://nullderef.com/blog/rust-async-sync/)
 
 

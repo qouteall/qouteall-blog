@@ -381,6 +381,7 @@ tags:
   - In Linux, if `write()` and `close()` both don't return error code, the write may still fail, due to IO buffering. [See also](https://man7.org/linux/man-pages/man2/close.2.html)
 - Modulo of negative numbers. In Python,  `a % b` is `a - (floor(a / b) * b)`. But in C/C++/Java/C#/JS/Rust/Golang, `a % b` is `a - (roundTowardZero(a / b) * b)`. If `a` is negative then the behavior will be weird.
 - Retrying without limit or retrying without timeout can leak resources.
+- Creating file doesn't auto create parent folder. It will fail if parent folder doesn't exist. You need to manually create parent folder.
 
 
 ## Transitive dependency conflict
