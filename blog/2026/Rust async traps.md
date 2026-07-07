@@ -206,7 +206,11 @@ Holding `std::sync::Mutex` across await point will not compile when using Tokio.
 
 In Tokio, `tokio::sync::Mutex` can be held across await point. And it doesn't block scheduler, unlike std mutex. But the future can be cancelled in await point when lock is being held. Then the invariants that the lock aim to protect may break, and there is no related logging by default.
 
-The `tokio::sync::Mutex` doesn't have poisoning mechanism. Poisoning mechanism cannot fix broken invariant, but it makes broken invariant more salient, helping debugging. The cancel_safe_futures provides [`RobustMutex`](https://docs.rs/cancel-safe-futures/latest/cancel_safe_futures/sync/struct.RobustMutex.html) which has poisoning mechanism.
+Note that using blocking mutex in async function is ok if locking is brief (just used for protecting mutable data from data race). Blocking mutex is actually faster than async mutex for protecting data structure.
+
+The `tokio::sync::Mutex` doesn't have poisoning mechanism. Poisoning mechanism cannot fix broken invariant, but it makes broken invariant more salient, helping debugging. The `cancel_safe_futures` provides [`RobustMutex`](https://docs.rs/cancel-safe-futures/latest/cancel_safe_futures/sync/struct.RobustMutex.html) which has poisoning mechanism.
+
+If you find out that you need to `.await` while borrowing data in mutex, it's recommended to firstly consider whether the `.await` point can be moved out of locking scope, before changing mutex to async mutex. Using async mutex carelessly may cause unnecessary waiting or deadlock.
 
 ## Un-`poll`-ed futures
 

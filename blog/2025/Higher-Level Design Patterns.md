@@ -232,12 +232,11 @@ Deferred (async) compuation vs immediate compuation:
 - Pytorch's most matrix operations are async. GPU computes in background. The tensor object's content may be yet unknown (and CPU will wait for GPU when you try to read its content).
 - PostgreSQL and SQLite require deferred "vacuum" that rearranges storage space.
 - Mobile GPUs often do [tiled rendering](https://en.wikipedia.org/wiki/Tiled_rendering). After vertex shader running, the triangles are not immediately rasterized, but dispatched to tiles (one triangle can go to multiple tiles). Each tile then rasterize and run pixel shader separately. It can reduce memory bandwidth requirement and power consumption.
-- For machine learning inference, collect requests then execute them in batch is deferred computation.
 
 Adding a "middle-stage" can simplify computation, improve generalization and improve compatibility. For example, compiler generate cross-platform IR then translate IR to machine code:
 
 - The LLVM IR makes supporting a new architecture easier. 
-- In CUDA, old GPU can run newly-added feature after driver and compiler update. (On the contrary, if CPU adds new SIMD instruction, old device cannot run it and software need to adapt, and QA need to test on old devices.)
+- In CUDA, old GPU can run (some) newly-added CUDA feature after driver and compiler update. (On the contrary, if CPU adds new SIMD instruction, old device cannot run it and softwares need to adapt.)
 
 ### Program lifecycle
 
@@ -277,13 +276,14 @@ For the procedural code that does DB accesses, making insertions and updates bat
 
 ### Responsibility can be moved, but essential complexity conserves
 
-There are some necessary tasks (responsibility) that are required for software to function. But which exact thing does the thing can be moved. For example:
+There are some necessary tasks (responsibility) that are required for software to function. But which exact thing does the task can be moved. For example:
 
 - Move to previous stage of computation, or move to next stage.
+- Move from one software module to another. (Use existing library vs reinvent wheel.)
 - Move to upper abstraction level or move to lower abstraction level.
 - Move from hardware to software, or move from software to hardware.
 - Move the responsibility to API user, or do the thing internally.
-- Make the logic specified by data, or hardcode it. Hardcode in software or in hardware.
+- Hardcode behavior in hardware, or hardcode in software, or make behavior be interpreted from runtime data.
 
 ## Generalized View
 
@@ -324,7 +324,7 @@ Examples of the generalized view concept:
 
 **Information is bits+context**. The view is the context. It maps between binary data and information. **Type contains viewing from binary data to information**.
 
-Abstraction involves **viewing different things as the same thing**.
+**Abstraction involves viewing different things as the same thing**.
 
 A view can be backed by computation, or by storage, or by a combination of computation and storage. This connects with computation-data duality.
 
@@ -342,9 +342,9 @@ The "shape" here means 1. what data are valid 2. the mapping between information
 
 For example, in Python, if a function accepts an array of string, but you pass it one string, then it treats each character as a string, which is wrong. In JS, passing an object to wrong places often get "\[object Object\]".
 
-Dynamic typing allows typing fewer and gives more freedom and avoids the shackle of an unexpressive type system. However dynamic typing doesn't auto convert data "shape" for you [^dynamic_language_conversion]. Developer still need to consider the "shape" when programming in dynamic languages. Dynamic languages are embracing data annotations now (TS, Python type annotation).
+Dynamic typing allows typing fewer and gives more freedom, makes code shorter and avoids the shackle of an unexpressive type system. However dynamic typing doesn't auto convert data "shape" for you [^dynamic_language_conversion]. Developer still need to consider the "shape" when programming in dynamic languages. Dynamic languages are embracing type annotations now (TS, Python type annotation). Related: [No, dynamic type systems are not inherently more open](https://lexi-lambda.github.io/blog/2020/01/19/no-dynamic-type-systems-are-not-inherently-more-open/)
 
-[^dynamic_language_conversion]: Dynamic languages may sometimes do auto data conversion, but it's limited to simple conversions. It cannot do advanced conversion that "understands intention". Sometimes the auto conversion is "dumb" and not what developer want (e.g. JS auto convert object to "\[object Object\]").
+[^dynamic_language_conversion]: Dynamic languages may sometimes do auto data conversion, but it's limited to predefined rules. It cannot do advanced conversion that "understands intention". Sometimes the auto conversion is "dumb" and not what developer want (e.g. JS auto convert object to "\[object Object\]").
 
 ### Generalized reference
 
@@ -356,10 +356,13 @@ Generalized reference carries the information of "which thing it refers to". The
 - ID. All kinds of ID, like string id, integer id, UUID, handles, etc. can be seen as a reference to an object. The ID may still exist after referenced object is removed, then ID become "dangling ID".
   - For array arenas, an index can be ID.
   - A special kind of ID is path. For example, file path points to a file, URL points to a web resource, permission path points to a permission, etc. They are the "pointers" into a node in a hierarchical (tree-like) structure.
+    - [Lens](https://hackage.haskell.org/package/lens) is an abstraction that represents a path. It's useful in pure functional programming, making cascade-recreate-parent convenient[^cascade_recreate_parent].
   - Content-addressable ID. Using the hash of object as the ID of object. This is used in Git, Blockchain, [IPFS](https://en.wikipedia.org/wiki/InterPlanetary_File_System) and languages like [Unison](https://www.unison-lang.org/docs/the-big-idea/).
+  - There can be "alias ID". For example, in filesystem, symbolic link is a kind of "alias".
 - Iterator. An Iterator can be seen as a pointer pointing to an element in container.
 - Zipper. A zipper contains two things: 1. a container with a hole 2. element at the position of the hole. Unlike iterator, a zipper contains the information of whole container. It's often used in pure functional languages.
-- [Lens](https://hackage.haskell.org/package/lens). It represents a path to sub-data.
+
+[^cascade_recreate_parent]: The cascade-recreate-parent problem: in pure functional programming, you cannot directly mutate data. To simulate mutation you have to recreate new versions of data. But recreating a new version of child needs to recreate new versions of parent that holds the child, and parent's parent, and so on, until the "mutable root" (e.g. the state in state monad). A lens represents a path to data. Lens encapsulate the "cascade recreate parent" logic, then mutate-by-recreate becomes more convenient.
 
 #### Strong/weak generalized reference
 
@@ -368,6 +371,7 @@ Two kinds of generalized references: strong and weak:
 - Strong generalized reference: The system **ensures it always points to a living object**. 
   
   It contains: normal references in GC languages (when not null), Rust borrow and ownership, strong reference counting (`Rc`, `Arc`, `shared_ptr` when not null), and ID in database with foreign key constraint.
+
 - Weak generalized reference: The system **does NOT ensure it points to a living object**.
   
   It contains: ID (no foreign key constraint), handles, weak reference in GC languages, weak reference counting (`Weak`, `weak_ptr`), raw pointer in (in C, C++, unsafe Rust, etc. it doesn't ensure raw pointer points to living object).
@@ -377,18 +381,18 @@ The major differences:
 - For weak generalized references:
   - Accessing data via reference may fail. It requires **error handling** [^weak_generalized_reference_error_handling].
   - The lifetime of object is **decoupled** from referces to it.
-- For strong generalized reference, the lifetime of referenced object is **tightly coupled** with the existence of reference:
-  - In GC langauges, the coupling comes from GC. The existence of a strong reference keeps the object alive.
+- For strong generalized reference, the lifetime of referenced object is coupled with the existence of reference:
+  - In GC langauges, the coupling comes from GC at runtime. The existence of a strong reference keeps the object alive.
   - In Rust, the coupling comes from borrow checker. The borrow is limited by lifetime and other constraints.
   - In reference counting, the coupling of course comes from runtime reference counting.
   - The foreign key constraint of ID is enforced by database.
 
-[^weak_generalized_reference_error_handling]: One kind of error handling is to just crash. Raw pointer is also a kind of weak generalized reference. In C/C++ the handling of "memory safety error" is none. It's undefined behavior. It may crash or corrupt data.
+[^weak_generalized_reference_error_handling]: One kind of error handling is to just crash. Raw pointer is also a kind of weak generalized reference. In C/C++ the handling of "memory safety error" is undefined behavior. It may crash or corrupt data.
 
 If an abstraction that **decouples** object lifetime and how these objects are referenced, then it either:
 
 - Use weak generalized reference, such as ID and handle. The object can be freed without having to consider how its IDs are held.
-- Use strong generalized reference, but **add a new usability state that's decoupled with object lifetime**. This is common in GC languages. For example, JS `ArrayBuffer` detaches with binary content after sent to another web worker, java IO-related objects (e.g. `FileInputStream`) can no longer be used after closing.
+- Use strong generalized reference, but **add a new usability state that's decoupled with object lifetime**. This is common in GC languages. For example, JS `ArrayBuffer` detaches with binary content after sent to another web worker, Java IO-related objects (e.g. `FileInputStream`) can no longer be used after closing.
  
 #### To-object vs interior
 
@@ -456,7 +460,7 @@ The timing of maintaining invariant:
 
 The responsibility of maintaining invariant:
 
-- The database/framework/OS/language etc. is responsible of maintaining invariant. For example, database maintains the validity of index and materialized view. If they don't have bugs, the invariant won't be violated.
+- The database/framework/OS/language etc. is responsible of maintaining invariant. For example, database maintains the validity of index, foreign key (and materialized view etc.). If they don't have bugs, the invariant won't be violated.
 - The application code is responsible for maintaining the invariant. This is more **error-prone**.
 
 In the second case (application code maintains invariant), to make it less error prone, we can **encapsulate the data and the invariant-maintaining code**, and ensuring that **any usage of encapsulated API won't violate the invariant**. If some usages of API can break the invariant and developer can only know it by considering implementation, then it's a leaky abstraction.
@@ -486,7 +490,7 @@ Concentration and fat-tail distribution (80/20) are common in software world:
 - Most developers use few languages, libraries and frameworks. (Matthew effect of ecosystem)
 - Most code and development efforts are for fixing edge cases. Few code and development efforts are spent on main case handling.
 - Most bugs that users see are caused by few easy-to-trigger bugs.
-- Only a small portion of transisters in hardware are used in most times. Many transistors are rarely used. (Many transistors are for rarely-used instructions. Hardware defects related to them have higher probability to evade the test. See also: [Silent Data Corruptions at Scale](https://arxiv.org/pdf/2102.11245), [Cores that don’t count](https://sigops.org/s/conferences/hotos/2021/papers/hotos21-s01-hochschild.pdf))
+- Only a small portion of transisters in hardware are used in most times. Many transistors are rarely used. (Many transistors are for rarely-used instructions. Hardware defects related to them have higher probability of evading the test. See also: [Silent Data Corruptions at Scale](https://arxiv.org/pdf/2102.11245), [Cores that don’t count](https://sigops.org/s/conferences/hotos/2021/papers/hotos21-s01-hochschild.pdf))
 
 Many optimizations are based on **assuming the high-probability case happens**:
 
@@ -532,6 +536,6 @@ Other GoF design patterns briefly explained:
 
 - State pattern. Make state a polymorphic object.
 - Memento pattern. Backup the state to allow rollback. It exists mainly because in OOP data is tied to behavior. The separate memento is just data, decoupled with behavior (except for the behavior of rollback/redo). It's mainly backuping data not mutation-data duality.
-- Singleton pattern. It's similar to global variable, but can be late-initialized, can be ploymorphic, etc.
+- Singleton pattern. It's similar to global variable, but can be late-initialized, can be polymorphic, etc.
 - Mediator pattern. One abstraction to centrally manage other abstractions.
 

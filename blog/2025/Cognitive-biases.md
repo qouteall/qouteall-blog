@@ -1141,7 +1141,9 @@ In software product design, the default options in software plays a big role in 
 
 - If a software functionality require manually enabling it, much fewer users will know and use that functionality.
 - Just 1 second longer page load time may reduce user conversion by 30%. [Source](https://www.cloudflare.com/learning/performance/more/website-performance-conversion-rates/)
-- Each setup procedure will frustrate a portion of users, making them give up. A good product requires minimal configuration to start working.
+- Each setup procedure will frustrate a portion of users, making them give up. A good product requires minimal configuration to start working.[^configuration]
+
+[^configuration]: For a product that wants to be popular, it has to start working with minimal configuration. However, for a professional product that doesn't fit normal peoples, adding non-trivial configuration requirement can help filter out the customers that don't fit the product, and increase reputation of the product. 
 
 Sometimes, if doing something is 10% more difficult, then 50% fewer people will do it, vice versa. It's non-linear.
 
@@ -1211,7 +1213,7 @@ Examples:
 - Staying in comfort zone. Only learn/practice the familiar things and avoid touching unfamiliar things. Avoiding the unpleasant information when learning.
 - Only care about the visible numbers (KPI, OKR), and ignore the important things behind the numbers, like perverse incentives caused by the KPI, statistical bias, and the non-measurable things.
 - Streetlight effect: Only search in the places that's easy to search, not the places that the target is in.
-- Hiding the signal of error instead of diagnosing and solving the error.
+- Hiding the signal of error instead of diagnosing and solving the error. (AI loves doing this in coding)
 
 This is related to **means-end inversion**. To achieve the root goal (end) we work on a sub-goal (means) that helps root goal. But focusing on an easy but unimportant sub-goal may hurt the root goal, by taking resources from hard but important sub-goals.
 
@@ -1367,7 +1369,7 @@ But in the modern world, there are non-physical threats and modern risks (e.g. e
 
 From evolutionary perspective, cortisol system makes one more likely to survive under physical threats (e.g. a tiger) at the expense of other aspects. These physical threats are usually quick and short (e.g. either die or flee from tiger). But the modern risks are usually long and chronic (e.g. worry about exam several months before exam, worry about paying mortgage every day), so that cortisol system is not adaptive.
 
-Also, after seeing a post on social media that cause anger, the cortisol increases and enters nervious mode. Then even after blocking the author and hiding the post, one is still in nervous mode. The nervousness will keep one thinking about the post and/or keep gathering information which is to continue browsing social media.
+Also, after seeing a post on social media that cause anger, the cortisol increases and enters nervous mode. Then even after blocking the author and hiding the post, one is still in nervous mode. The nervousness will keep one thinking about the post and/or keep gathering information which is to continue browsing social media.
 
 ## Willpower and mental energy
 
@@ -1404,7 +1406,7 @@ In the process of self-justification, people's memory may be distorted. **Human 
 
 People tend to **simplify their memory and fill the gaps using their own beliefs**. This is also an **information compression** process, at the same time producing wrong memory and biases. 
 
-Memorizing is lossy compression. Recall is lossy decompression, where details can be made up in a congruent way. **Each recall can reshape the memory** according to the existing beliefs. (This is similar to quantum effects: if you observe something, you change it.) 
+Memorizing is lossy compression. Recall is lossy decompression, where details can be made up in a congruent way. **Each recall can reshape the memory** according to the existing beliefs. (This is similar to quantum effects: if you observe something, you change it.)
 
 > I have a pet theory that when people introspect about themselves, their brain sometimes just scrambles to generate relevant content. So they feel like they're gaining insight into deeper parts of themselves when they're actually just inventing it on the fly.
 > 

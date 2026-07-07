@@ -272,7 +272,7 @@ Not doing in-place mutation can reduce chance of bugs. In OOP languages it's eas
 
 Mutate-by-recreate can be useful for cases like:
 
-- Safely sharing data in multithreading (read-copy-update (RCU), copy-on-write (COW)). Only make one "root reference" be mutable atomically. Mutating is recreating whole object. (It usually requires deferred desctuction, [arc_swap](https://docs.rs/arc-swap/latest/arc_swap/))
+- Safely sharing data in multithreading (read-copy-update (RCU), copy-on-write (COW)). Only make one "root reference" be mutable atomically. Mutating is recreating whole object. (It's often used with [arc_swap](https://docs.rs/arc-swap/latest/arc_swap/))
 - Take snapshot and rollback efficiently
 
 **Persistent data structure**: they share unchanged sub-structure (structural sharing) to make mutate-by-recreate faster. Some crates of persistent data structures: [rpds](https://docs.rs/rpds/latest/rpds/index.html), [im](https://docs.rs/im/latest/im/), [pvec](https://docs.rs/pvec/latest/pvec/index.html).
@@ -291,7 +291,7 @@ for (k, v) in &map.clone() {
 
 ## Split borrow
 
-**Split borrow of fields in struct**: As previously mentioned, if you separately borrow two fields of a struct within one scope (e.g. a function), Rust will do a split borrow. This can solve contagious borrow issue. Getter and setter functions break split borrow, because borrowing information become coarse-grained in function signature.
+As previously mentioned, if you separately borrow two fields of a struct within one scope (e.g. a function), Rust will do a split borrow. This can solve contagious borrow issue. Getter and setter functions break split borrow, because borrowing information become coarse-grained in function signature.
 
 Contagious borrow can also happen in containers. If you borrow one element of a container, then another element cannot be mutably borrowed. How to split borrow a container:
 
@@ -495,6 +495,8 @@ fn get_cached_result(cache: &mut HashMap<i32, String>, key: i32) -> &String {
 ```
 
 (The `entry` API was specifically designed to workaround this borrow checker limitation.)
+
+Another workaround is to wrap map value in `Arc` (or `Rc`) then clone the `Arc` when accessing.
 
 This will be fixed by [Polonius](https://rust-lang.github.io/polonius/current_status.html) borrow checker. Currently (2025 Aug) it's available in nightly Rust and can be enabled by an option. [See also](https://blog.rust-lang.org/inside-rust/2023/10/06/polonius-update/)
 
@@ -899,6 +901,11 @@ To summarize, **mutable borrow exclusiveness is overly strict in single-threaded
 That's why mainstream languages has no mutable borrow exclusiveness, and still works fine in single-threaded case. Java, JS and Python has no interior pointer. Golang and C# have interior pointer, they have GC and restrict interior pointer, so memory safe is still kept without mutable borrow exclusiveness.
 
 There are design ideas of separting the mutation that change memory layout and the mutation that doesn't change memory layout. See also: [An alternative model for "lifetimes" in Mojo](https://gist.github.com/nmsmith/cdaa94aa74e8e0611221e65db8e41f7b), [Ante: A New Way to Blend Borrow Checking and Reference Counting](https://verdagon.dev/blog/ante-blending-borrowing-rc)
+### Having the borrow vs using the borrow
+
+When you **have** two mutable borrows to same object and you **use** both, it can be unsafe (invalidate interior pointer, data race, etc.). However, if you have two mutable borrows but only use one at once, then it's safe. The reborrow (mentioned below) does that.
+
+Rust "confuses" having borrow and using borrow (except in reborrow). Tracking that in type system needs to encode information that "this borrow exists but it is temporarily unusable in a specific lifetime", which would introduce complexity. Rust design chooses to simplify it by assuming all borrows may be used.
 
 ### Benefits of mutable borrow exclusiveness
 
@@ -1135,16 +1142,18 @@ Atomic reference counting is still fast if not contended (when mostly only one t
 
 But don't worry too much about `Arc`. In most normal applications, `Arc` itself likely won't be the bottleneck[^tokio_arc]. Swift uses atomic reference counting almost everywhere and it's mostly fine. Profile before doing optimization.
 
-[^tokio_arc]: Tokio commonly uses `Arc` internally. In Tokio every time a sleep future or IO future is created, it calls `scheduler::Handle::current()` which clones an `Arc` (and the `Arc` drops when future drops). That `Arc`'s pointee is per-runtime. So every time a sleep/IO future is created/dropped, it contends the per-Tokio-runtime atomic counter. The `Arc` is needed because you can run multiple instances of Tokio runtime in a Rust program and dynamically create/close Tokio runtimes. It cannot use thread local to access runtime because the future can be sent to a non-Tokio thread and be block-waited by `futures::executor::block_on`, and the future has to stay memory-safe even after the Tokio runtime exits. In Golang there is no such atomic counter because one process has only one goroutine scheduler, and it won't exit until process exits. Apart from the per-runtime atomic counter, Tokio has some per-runtime mutexes that also cause contention. On contrary, in thread-per-core runtimes like monoio, the future cannot be sent across threads to it uses thread-local and `Rc` to reference runtime data, which doesn't cause cache contention. That said, in most real-world web servers the per-runtime atomic counter won't be bottleneck because the real bottleneck is likely waiting on database.
+[^tokio_arc]: Tokio commonly uses `Arc` internally. In Tokio every time a sleep future or IO future is created, it calls `scheduler::Handle::current()` which clones an `Arc` (and the `Arc` drops when future drops). That `Arc`'s pointee is per-runtime. So every time a sleep/IO future is created/dropped, it contends the per-Tokio-runtime atomic counter. The `Arc` is needed because you can run multiple instances of Tokio runtime in a Rust program and dynamically create/close Tokio runtimes. It cannot use thread local to access runtime because the future can be sent to a non-Tokio thread and be block-waited by `futures::executor::block_on`, and the future has to stay memory-safe even after the Tokio runtime exits. In Golang there is no such atomic counter because one process has only one goroutine scheduler, and it won't exit until process exits. Apart from the per-runtime atomic counter, Tokio has some per-runtime mutexes that also cause contention. On contrary, in thread-per-core runtimes like monoio, the future cannot be sent across threads so it uses thread-local and `Rc` to reference runtime data, which don't cause cache contention. That said, in most real-world web servers the per-runtime atomic counter won't be bottleneck because the real bottleneck is likely waiting on database.
 
 If `Arc` clone/dropping do become bottleneck, possible solutions:
 
 - For frequent short-term reads to mutable data, use [arc_swap](https://docs.rs/arc-swap/latest/arc_swap/). It follows read-copy-update (RCU) or copy-on-write (COW) paradigm. In RCU(or COW), mutation requires recreating the whole data structure, and atomically change the root pointer, with delayed dropping mechanism (arc_swap uses hazard pointer).
   - Other solutions of delayed dropping that avoids overhead of atomic reference counting: [sdd](https://crates.io/crates/sdd), [crossbeam_epoch](https://docs.rs/crossbeam-epoch/latest/crossbeam_epoch/)
 - Deep cloning data instead of sharing `Arc`.
-- If the data is global sigleton, can just put it to global `static` (use `OnceLock` for delayed initialization).
+- If the data is global sigleton, can just put it to global `static` (use `OnceLock` for delayed initialization). For short-running programs like CLI, leaking it is fine.
 - [trc](https://docs.rs/trc/1.2.4/trc/) and [hybrid_rc](https://docs.rs/hybrid-rc/latest/hybrid_rc/). Use per-thread non-atomic counter together with atomic counter.
-- Shard the counter. Given an `Arc<T>`, clone many instances then wrap each in `Arc<CachePadded<Arc<T>>>` ([`CachePadded`](https://docs.rs/crossbeam/latest/crossbeam/utils/struct.CachePadded.html) is from crossbeam). Different threads clone the differnt two-layer-arcs based on thread id hash. Memory access goes through extra indirection. There will be much fewer contention as different CPU cores likely touch different atomic counters.
+- Shard the counter. Given an `Arc<T>`, clone many instances then wrap each as `Arc<CachePadded<Arc<T>>>` [^shard_counter]. Send differnt two-layer-arcs to different threads. There will be fewer contention as different CPU cores likely touch different atomic counters.
+
+[^shard_counter]: [`CachePadded`](https://docs.rs/crossbeam/latest/crossbeam/utils/struct.CachePadded.html) is from crossbeam. The `CachePadded` is actually for padding two counters in `ArcInner`, not for padding the `Arc<T>`. It avoids different two-layer-arcs' counters be in same cache line.
 
 ## Reference counting vs tracing GC
 
@@ -1478,6 +1487,8 @@ fn mutate_twice(i: &mut u32) -> &mut u32 {
 10 |     mutate(j)
    |     --------- returning this value requires that `*i` is borrowed for `'1`
 ```
+
+Reborrow shows that you actually can have two mutable borrows to same object at the same time, but at most one can be "active" at a time. The others have to be "temporarily inactive".
 
 ### Move cloned data into closure
 
