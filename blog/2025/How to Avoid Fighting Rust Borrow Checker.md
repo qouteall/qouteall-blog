@@ -1560,11 +1560,12 @@ Examples:
 - Rust `let x: T` makes `x` fully immutable[^immutable]. Immutability applies to whole ownership tree. If a `Vec` is immutable, its elements are also immutable.
 - Rust `let mut x: &T` makes `x` a mutable-ref-to-immutable-obj.
 - Rust `let x: &mut T` makes `x` an immutable-ref-to-mutable-obj.
-- Rust `let x: &mut &[u8]` makes `x` an immutable-ref-to-mutable-slice-ref-to-immutable-binary-data (this is sometimes used in binary data parsing):
+- Rust `let x: &mut &[u8]` makes `x` an immutable-ref-to-mutable-slice-ref-to-immutable-binary-data:
   - `[u8]` is slice of binary data. It's a variable-sized type.
   - `&[u8]` is slice ref, containing a pointer and a length.
   - `mut &[u8]` is mutable slice ref. The pointer and length is mutable, but binary data in slice is immutable.
   - `x` is a pointer to that mutable slice ref.  `x` itself is immutable.
+  - The unintuitive point is that in `&mut &` it looks like "mut" is close to the left `&`, furthur to the right `&`, but the `mut` actually applies to the right `&`.
 - Git release tag is mutable-ref-to-immutable-obj. The Git commit with specific hash is immutable. But Git allows removing a release tag and create a new same-named release tag to another commit (this can be disabled).
 
 [^immutable]: It's actually "treated as immutable". It can be actually mutable when interior mutability is involved.
@@ -1633,7 +1634,8 @@ All of the above contagious effect has "escape hatch" that's invisible in types:
 ## Some arguments
 
 - "Rust doesn't ensure safety of `unsafe` code. There are real vulnerabilities in Rust code: [first Linux vulnerability in Rust code](https://social.kernel.org/notice/B1JLrtkxEBazCPQHDM). So using Rust provides no value.". No. This is [perfect solution fallacy](https://en.wikipedia.org/wiki/Nirvana_fallacy). One solution being imperfect doesn't mean it's useless. If you keep the amount of `unsafe` small, you only need to inspect these small amount of `unsafe` code. In C/C++ you need to inspect all related code.
-- "There are sanitizers in C/C++ that help me catch memory safety bugs and thread safety bugs, so Rust has no value." No. Some memory safety and thread safety bugs only trigger in production environments and in client's computers, but don't reproduce in test environment. There are [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug) that can evade sanitizers. Elaborated below.
+- "There are sanitizers in C/C++ that help me catch memory safety bugs and thread safety bugs, so Rust has no value." No. Some memory safety and thread safety bugs only trigger in production environments and in client's computers, but don't reproduce in test environment. Also there are [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug) that can evade sanitizers. Elaborated below.
+  - Related: [the Zig bun had many memory safety bugs in error case that Address Sanitizer didn't catch](https://bun.com/blog/bun-in-rust). There are many memory-safety bugs that only trigger in some specific error case. Large software has so many error cases, and tests can only trigger a tiny portion of them.
 - "Using arena still face the equivalent of 'use after free', so arena doesn't solve the problem". No. Arenas can make these bugs much more deterministic than raw use-after-free bugs, preventing them from becoming Heisenbugs, making debugging much easier.
 - "Rust borrow checker rejects your code because your code is wrong." No. Rust can reject valid safe code.
 - "Circular reference is bad and should be avoided." No. Circular reference can be useful in many cases. Linux kernel has doubly linked lists. But circular reference do come with risks.
@@ -1674,7 +1676,7 @@ The Heisenbugs are non-deterministic. When you try to debug it, it may stop trig
 - Enabling logging and enabling sanitizers makes program run slower, which may make Heisenbug no longer trigger (or become much harder to trigger).
 - Breakpoint debugger also changes timing when debugging, which may make Heisenbug no longer trigger.
 - Some Heisenbugs only trigger in release build, not debug build. Sometimes it's due to timing. Sometimes it's caused by optimizations related to undefined behaviors.
-- Some Heisenbugs only trigger in production environment. Some Heisenbugs only happen in client's computer that developer cannot touch.
+- Some Heisenbugs only trigger in production environment. Some Heisenbugs only trigger in client's computer that developer cannot touch.
 
 Heisenbugs are hard to debug, especially in large codebases.
 
@@ -1684,11 +1686,9 @@ Note that there are still Heisenbugs that Rust cannot catch, including:
 
 - Data race outside of memory (data race in disk, database, distributed system, etc.).
 - Conditional deadlocks. Conditional `RefCell` borrow conflict.
-- Async cancellation issues.
+- Unwanted async cancellations.
 - Heisenbugs related to `unsafe` and FFI (foreign function interface).
 
 Also note that not all memory/thread safety bugs are Heisenbugs. Many are still easy to trigger and debug.
-
-Rust is also a filter to AI. Rust constraints can catch some kinds of bugs. (Although Rust takes more tokens, because AI often need to edit multiple times to make code compile. Reducing bugs is more important than reducing token usage so it's worth it.)
 
 

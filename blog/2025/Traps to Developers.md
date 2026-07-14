@@ -265,11 +265,14 @@ tags:
 - Global variable initialization runs before `main`. [Static Initialization Order Fiasco](https://en.cppreference.com/w/cpp/language/siof.html).
 - Start from C++ 11, destructors have `noexcept` by default. If exception is thrown out of a `noexcept` function, whole process will crash.
 - If destructor is implemented, then you should implement copy constructor or disable copy constructor. If not, it may implicitly copy then double free.
+- If polymorphism is involved, base class destructor should be `virtual`. Otherwise freeing base-class-typed pointer won't free subclass data.
 - In signal handler, don't do any IO or locking, don't `printf` or `malloc`.
 - Compare signed number with unsigned number. If `a` is signed -1, `b` is unsigned 0, then `a > b` is true, because it auto-converts `a` into unsigned number.
   - Note that `char` may be signed or unsigned, depending on platform. It's recommended to always use `signed char` or `unsigned char`, not `char`. [Apple ARM `char` is signed](https://developer.apple.com/documentation/xcode/writing-arm64-code-for-apple-platforms#Handle-data-types-and-data-alignment-properly), [gcc `char` is unsigned in Android, but signed in other platforms](https://stackoverflow.com/questions/2054939/is-char-signed-or-unsigned-by-default).
 - If the same header file is included in two `.cpp` files with different macros, and the macro difference affect the content in `inline` thing or `template` thing or type definition, then it violates [ODR (one definiton rule)](https://en.cppreference.com/w/cpp/language/definition.html). There will be different compiled functions with the same symbol name, and linker nondeterministically chooses one.
-- The dynamic library may have its own allocator. One allocator's allocation should not be freed in another allocator.
+- Multiple allocators[^cpp_allocator] can co-exist. One allocator's allocation should not be freed in another allocator.
+
+[^cpp_allocator]: The "allocator" here doesn't mean std allocator type. It means the allocator backing `malloc` and `free`.
 
 [^strict_aliasing]: Using pointer type to hold integer is fine as long as you don't use it to access memory. Also, [Linus is against strict aliasing rule](https://lkml.org/lkml/2018/6/5/769).The Linux kernel disables strict aliasing rule and makes integer overflow defined behavior.
 
@@ -284,7 +287,8 @@ tags:
 - Default argument is a stored value that will not be re-created on every call.
 - Be careful about indentation when copying and pasting Python code.
 - In conditons, these things are "falsy": 0, `None`, empty string, empty container. Be careful if 0 or empty container represents valid value. Also it can be controlled by implementing `__bool__` method.
-- GIL (global interpreter lock) doesn't protect again on-disk data race. Two concurrent threads reading and writing same file may cause data race in file. GIL releases during IO.
+- GIL (global interpreter lock) doesn't protect against on-disk data race. Two concurrent threads reading and writing same file may cause data race in file. GIL releases during IO.
+- ABI incompatibility. Python version doesn't follow semantic versioning. The native library that works with Python 3.13.x is likely incompatible with Python 3.14.x. Also, the debug version has different ABI to non-debug version. The free-threaded version has different ABI to non-free-threaded version.
 
 ## Rust
 
@@ -458,11 +462,11 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Sometimes rebasing requires solving the same conflict many times (because multiple commits touch the same conflict line). Squashing changes before rebasing can avoid it.
 - After commiting files, adding these files into `.gitignore` won't automatically exclude them from git. To exclude them, delete them.
   - You can also use `git rm --cached` to exclude them without deleting locally. However, after excluding and pushing, when another coworker pulls, these files will be deleted (not just excluded).
-- Reverting a merge doesn't fully cancel the side effect of the merge. If you merge B to A and then revert, merging B to A again has no effect. One solution is to revert the revert of merge.
+- Reverting a merge doesn't fully cancel the side effect of the merge. If you merge B to A and then revert, then merging B to A again has no effect. One solution is to revert the revert of merge.
   - A cleaner way to cancel a merge, instead of reverting merge, is to 1. backup the branch, 2. hard reset to commit before merge, 3. cherry pick commits after merge, 4. force push.
 - In GitHub, if you accidentally commited secret (e.g. API key) and pushed to public, even if you override it using force push, GitHub will still keep that secret public. [See also](https://trufflesecurity.com/blog/guest-post-how-i-scanned-all-of-github-s-oops-commits-for-leaked-secrets), [Example activity tab](https://github.com/SharonBrizinov/test-oops-commit/compare/e6533c7bd729957b2eb31e88065c5158d1317c5e...9eedfa00983b7269a75d76ec5e008565c2eff2ef)
 - In GitHub, if there is a private repo A and you forked it as B (also private), then when A becomes public, the private repo B's content is also publicly accessible, even after deleting B. [See also](https://trufflesecurity.com/blog/anyone-can-access-deleted-and-private-repo-data-github).
-- GitHub by default allows deleting a release tag, and adding a new tag with same name, pointing to another commit. It's not recommended to do that. It breaks build system caching. It can be disabled in rulesets configuration. For external dependencies, hardcoding release tag may be not enough to prevent supply chain risk.
+- GitHub by default allows deleting a release tag, and adding a new tag with same name, pointing to another commit. It's not recommended to do that. It breaks build system caching. It can be disabled in rulesets configuration.
 - In Windows, Git often auto-convert cloned text files to be CRLF line ending. But in WSL many software (e.g. bash) doesn't work with CRLF.
 - macOS auto adds `.DS_Store` files into every folder. It's recommended to add `**/.DS_Store` into `.gitignore`.
 - Renaming file that only changes letter case won't be tracked by git in Windows and macOS (because file name is case-insensitive). Renaming using `git mv` works normally.
@@ -476,6 +480,8 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - TCP slow start can increase latency. Can be fixed by disabling `tcp_slow_start_after_idle`. [See also](https://ably.com/blog/optimizing-global-message-transit-latency-a-journey-through-tcp-configuration)
 - TCP sticky packet. Nagle's algorithm delays packet sending. It will increase latency. Can be fixed by enabling `TCP_NODELAY`. [See also](https://brooker.co.za/blog/2024/05/09/nagle.html) 
 - The HTTP protocol does not explicitly forbit GET and DELETE requests to have body. Some places do use body in GET and DELETE requests. But many libraries and HTTP servers does not support them.
+- HTTP header doesn't support UTF-8. If a header may contain non-ASCII character, it should be encoded to ASCII (using urlencode etc.)
+- HTTP GET request is cached by default (unless specified by `Cache-Control` header). Also, some frontend frameworks do prefetching, which sends GET request before user clicks it.
 - One IP can host multiple websites, distinguished by domain name. The HTTP header `Host` and SNI in TLS handshake carries domain name, which are important. Some websites cannot be accessed via IP address.
 - CORS (cross-origin resource sharing). For requests to another website (origin), the browser will prevent JS from getting response, unless the server's response contains header `Access-Control-Allow-Origin` and it matches client website. This requires configuring the backend. Passing cookie to another website involves more configuration. If your frontend and backend are in the same website then there is no CORS issue.
 - [Reverse path filtering](https://en.wikipedia.org/wiki/Reverse-path_forwarding). When routing is asymmetric, packets from A to B use different interface than packets from B to A, then reverse path filtering rejects valid packets.

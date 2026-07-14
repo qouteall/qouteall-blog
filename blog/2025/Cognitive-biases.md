@@ -82,6 +82,8 @@ Loss aversion doesn't contradict the fact that many people don't care about long
 
 When one already have nothing, the expectation is low and loss aversion is low, then one is more likely to take risks.
 
+Donating for long time then stop will likely get hatred, because previous donations raised expectation, and loss of stopped donation has larger mental impact than satisfaction of receiving donation.
+
 ### "Better safe than sorry" assumption
 
 It's an extension to loss aversion. When seeing an unwanted behavior of others, people tend to assume it's malice, according to "better safe than sorry":
@@ -1389,6 +1391,7 @@ These factors affect mental energy:
 - Body conditions (like blood sugar level [^blood_sugar_level]) affects mental energy.
 - Exercising self-control can strengthen mental energy, similar to muscular strength.
 - Lingering emotion (e.g. **keep ruminating past mistakes**) costs mental energy.
+- "Context switch" costs mental energy. One example is to do work while listening in a metting. The brain has to frequently switching between doing work and understanding content in meeting. It costs mental energy.
 
 [^blood_sugar_level]: Related: Using GLP-1 may cause one harder to focus and pay attention due to reduced blood sugar level and other factors. However, GLP-1 can improve brain fog related to inflammation. The overall effect is complex.
 
