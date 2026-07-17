@@ -900,7 +900,8 @@ To summarize, **mutable borrow exclusiveness is overly strict in single-threaded
 
 That's why mainstream languages has no mutable borrow exclusiveness, and still works fine in single-threaded case. Java, JS and Python has no interior pointer. Golang and C# have interior pointer, they have GC and restrict interior pointer, so memory safe is still kept without mutable borrow exclusiveness.
 
-There are design ideas of separting the mutation that change memory layout and the mutation that doesn't change memory layout. See also: [An alternative model for "lifetimes" in Mojo](https://gist.github.com/nmsmith/cdaa94aa74e8e0611221e65db8e41f7b), [Ante: A New Way to Blend Borrow Checking and Reference Counting](https://verdagon.dev/blog/ante-blending-borrowing-rc)
+There are design ideas of separting the mutation that change memory layout and the mutation that doesn't change memory layout. See also: [An alternative model for "lifetimes" in Mojo](https://gist.github.com/nmsmith/cdaa94aa74e8e0611221e65db8e41f7b), [Ante: A New Way to Blend Borrow Checking and Reference Counting](https://verdagon.dev/blog/ante-blending-borrowing-rc), [Carbon memory safety](https://chandlerc.blog/slides/2026-memory-safety-deep-3/#/11/1/5)
+
 ### Having the borrow vs using the borrow
 
 When you **have** two mutable borrows to same object and you **use** both, it can be unsafe (invalidate interior pointer, data race, etc.). However, if you have two mutable borrows but only use one at once, then it's safe. The reborrow (mentioned below) does that.

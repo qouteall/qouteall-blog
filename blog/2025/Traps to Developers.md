@@ -262,6 +262,7 @@ tags:
     - `std::move` used on const object cannot avoid deep copying. [^cpp_move]
   - If `bool`'s binary value is neither 0 or 1, using it is undefined behavior. Similarily if an enum's binary value is not valid, using it is undefined behavior.
   - Unaligned memory access is undefined behavior. (Also, alignment can cause padding in struct that wastes space.)
+  - Undefined behavior can "travel back in time". For `if (a) { b(); }`, if `b()` unconditionally triggers undefined behavior, then compiler can assume `a` is always false.
 - Global variable initialization runs before `main`. [Static Initialization Order Fiasco](https://en.cppreference.com/w/cpp/language/siof.html).
 - Start from C++ 11, destructors have `noexcept` by default. If exception is thrown out of a `noexcept` function, whole process will crash.
 - If destructor is implemented, then you should implement copy constructor or disable copy constructor. If not, it may implicitly copy then double free.

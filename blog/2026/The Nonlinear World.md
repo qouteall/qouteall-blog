@@ -139,12 +139,6 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: Saving money is effectively punished by reducing budget. After learning this, the department will do excessive spending to avoid any surplus that causes budget reduction. This greately increases money waste in the organization.
 
-- First-order effect: When an employee's efficiency is high, assigning more work to them increases overall efficiency.
-
-  Second-order effect: Employee discovered that higher efficiency leads to higher workload, but not higher compensation (increasing salary needs to go through a slow process), so it's not worth working hard.
-
-  Related: it's natural that high-capability employees get assigned hard tasks. However, hard tasks is less likely to be solved, so the KPI numbers of high-capability may turn out to be lower than other employees.
-
 - First-order effect: Promoting employees that did great job incentivizes employee. It makes the company more efficient.
 
   Second-order effect: [Peter principle](https://en.wikipedia.org/wiki/Peter_principle). The promoted employee is not necessarily good in new job because the work changes. But the employee performing bad in raised position is rarely demoted. So "being good at work" is unstable state, but "being bad at work" is stable state. Eventually it likely reaches stable state: most employees do the work they are bad at.
