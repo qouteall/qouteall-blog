@@ -149,7 +149,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: Having clear team separation in a corporation makes management more efficient.
 
-  Second-order effect: When team splits, their goals are less likely to align. It's often that team A depends on team B's results. But team B has its own KPI and that KPI doesn't match team A's need. Team B to not be responsible for team A's results. This greatly reduces efficiency.
+  Second-order effect: When team splits, their goals are less likely to align. It's often that team A depends on team B's results. But team B has its own KPI and that KPI doesn't match team A's need. Team B is not responsible for team A's results. This greatly reduces efficiency.
 
 - First-order effect: First-mover advantage. The company creating a new product category has advantage. It develops brand recognition and network effect early. 
 
@@ -157,7 +157,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: When the big companies are in financial hardship, letting them collapse will hurt employment. Subsidying them keeps employment.
 
-  Second-order effect: They become too-big-to-fall. They become inefficient while occupying a lot of resources. They indirectly kill new startups. It reduces overall employment.
+  Second-order effect: They become too-big-to-fall. They become inefficient while occupying a lot of resources. They indirectly kill new startups. It reduces overall employment in the long run.
 
 - First-order effect: Outsourcing reduces labor cost.
 
@@ -170,6 +170,10 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 - First-order effect: A well-estabilished confidentality system helps keeping internal secrets.
 
   Second-order effect: In bureaucratic organizations, responsibility evasion is common. Not approving document access bears fewer responsibility. Then the ones actually needing information may cannot access. See also [Institutional memory and reverse smuggling](https://landley.net/history/mirror/institutional_memory.html).
+
+- First-order effect: To reduce excess inventory, the price should drop to increase sale.
+
+  Second-order effect: For things that have investment properties (Veblen good), increasing price could help reducing inventory.
 
 [^qianlima]: Related: [Qianlima](https://en.wikipedia.org/wiki/Qianlima) (千里马). The high-capacity horse require more food to show its capacity. But without showing its capacity it can never get enough food supply. 
 
@@ -334,6 +338,14 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   The minority swing voters may have big impact on policies.
 
+- First-order effect: Solving problems make problem fewer.
+
+  Second-order effect: When solving problem, the first thing is to reveal problems. However revealing problem will make things worse temporarily. And people tend to associate problem with who reveals the problem.
+
+- First-order effect: Trying to achieve perfection will make one do better.
+
+  Second-order effect: Perfection can be the enemy of good. (e.g. trying to buy at the lowest point makes one not buy in the bottom range)
+
 ### In Cybersecurity
 
 - First-order effect: Forcing the user to login again after inactive for 2 minutes can improve security.
@@ -347,6 +359,15 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 - First-order effect: Enforcing password rolling can improve security.
   
   Second-order effect: The user may reduce the memory pressure by using regular passwords (like AAABBB111, CCCDDD222), to avoid the trouble of reseting password every time.
+
+- First-order effect: Security guardrails of AI model makes it more secure.
+
+  Second-order effect: The security guardrails being too sensitive makes model unable to help with user's security problem.
+
+> When we started the log analysis, we first used frontier models behind commercial APIs. This did not work: the analysis requires submitting large volumes of real attack commands, exploit payloads, and C2 artifacts, and these requests were blocked by the providers' safety guardrails, which cannot distinguish an incident responder from an attacker. We ran the forensic analysis instead on GLM 5.2, an open-weight model, on our own infrastructure. This had a second benefit: no attacker data, and none of the credentials it referenced, left our environment.
+> 
+> \- [Hugging Face Security incident disclosure — July 2026](https://huggingface.co/blog/security-incident-july-2026)
+
 
 ### In Software
 

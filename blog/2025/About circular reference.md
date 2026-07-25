@@ -344,7 +344,7 @@ That deadlock can be prevented by changing timestamp before inserting child. It 
 
 In PostgreSQL, when touching child row, it does fine-grained `for key share` locking to parent row. `for key share` doesn't prevent changing parent field other than referenced key. That deadlock case won't happen in PostgreSQL.
 
-But in PostgreSQL foreign key can still deadlock with `for update`. `for update` is exclusive to `for key share`. Two transactions can firstly `for key share` lock the same parent row then `for update` the parent row then deadlock.
+But in PostgreSQL foreign key can still deadlock with `for update`. `for update` is exclusive to `for key share`. Two transactions can firstly `for key share` lock the same parent row then `for update` the parent row then deadlock. It can be solved by replacing `for update` with `for no key update` which doesn't overlap with parent fields used by foreign key.
 
 ### MySQL gap lock deadlock
 
@@ -392,11 +392,16 @@ The in-database deadlocks can be mostly solved by enabling deadlock detection an
 
 But the in-memory deadlocks cannot be simply solved by that. Programming languages doesn't do rollback for you. Deadlock detection has limitations (Golang deadlock detection only trigger if all goroutines block). In-memory deadlocks need to be carefully prevented.
 
-## Retrying can create Livelock
+## Livelock
 
-One solution to deadlock is to retry the transaction after detecting the deadlock. This is fine in low concurrency. But under high concurrency, there may be cases that two transactions deadlock each other, then both retry, then deadlock each other again. 
+Livelock means keep retrying but keeps failing. One kind of livelock can be triggered by circuit breaker and inter-service circular dependency.
 
-This is called **livelock**. They don't all stuck like deadlock, but they keeps retrying without making progress, which is similar to deadlock.
+Circuit breaker: when a service starts failing requests, the circuit breaker thinks the service is overloaded, then all new requests are intercepted and fail. Then after some time it allows some requests to pass through. If these requests succeeded, circuit breaker thinks the service recovers then stops intercepting requests, returning to normal.
+
+There are cases where two services depend on each other (service A calls service B, then service B calls another API of service A). Their initialization has no circular dependency so the circular dependency can form without problem, until circuit breaker is triggered. When A's circuit breaker intercepts requests, B's requests to A will fail, then B's requests fail, B's circuit breaker starts intercepting requests to B.
+
+When circuit breaker tries to recover by allow a portion of requests, the allowed requests still likely fail because there is circular dependency and both services are shielded in circuit breaker. This creates livelock. Both services keep retrying without succeed.
+
 
 ## Rust async deadlock
 
@@ -750,21 +755,13 @@ One service A calls another service B. If B is nearly overloaded and process req
 
 Another factor: when service A's requests to service B hang for long time, A also accumulates waiting threads/coroutines. A will use more resources (memory, threads, coroutines, etc.) and may also overload or down.
 
-Circuit breaker aims to solve that issue. It directly prevents request from being sent when target service is overloaded.
+Circuit breaker aims to solve that issue. It directly prevents request from being sent when target service is overloaded. (But circuit breaker can cause livelock when two services call each other.)
 
 About out-of-memory: For GC applications, when memory is not enough, it often stucks in long GC pause instead of directly crashing. This cause the TCP connections of it to not close and the callers of that service to continue waiting until timeout. This issue doesn't exist for non-GC applications, as they tend to directly crash when memory is not enough.
 
 About database and caching: in some systems, the database cannot handle all requests. The database can only handle requests if there is a cache (e.g. Redis) that handles 90% requests in front of database. After cache service restarts, the database overloads because too many requests hit database. Database can only run if cache fills, but cache cannot be filled because database overloads. Solution is to only allow a small set of requests in gateway and gradually increase the limitation. [Cache stampede](https://en.wikipedia.org/wiki/Cache_stampede).
 
 This can also happen after reducing cache TTL (time to live). After reducing cache TTL, the database load may keep increasing. [Example on GitHub](https://github.blog/news-insights/company-news/addressing-githubs-recent-availability-issues-2/).
-
-## Service circular dependency
-
-There are cases where service A calls service B, then service B calls another API of service A. 
-
-This service circular dependency is not good design. It's often that there is originally no circular dependency, but after adding a feature the circular dependency implicitly forms. When two microservices are developed by two separate teams, it's more likely to happen.
-
-The two serice's initialization has no dependency, so restarting works well. But it's problematic when circuit breaker is involved. When one service triggers its circuit breaker, this circular dependency will cause livelock. Both services keep retrying without succeeding.
 
 ## Break-my-tool outage
 
@@ -823,7 +820,7 @@ When flexbox, grid and tables are involved, things become more complex. The brow
 
 There are cases that, then the data structure contains cycle, eager computation will stuck in dead recursion. In many cases, they can be solved by two-stage processing.
 
-For example, to deep-clone a data structure that contains cycles, direct recursion copy will cause dead recursion. Solution is to make it two-stage: first stage copies the nodes, without eagerly copying edges and pointed noted; second stage copies the edges and fixes the node references.
+For example, to deep-clone a data structure that contains cycles, direct recursion copy will cause dead recursion. Solution is to make it two-stage: first stage copies the nodes, without eagerly copying edges and pointed nodes; second stage copies the edges and fixes the node references.
 
 In C, writing two mutually-recursive functions requires separately declare the two functions eariler. Because C is designed that compiler can compile in one pass. Modern languages doesn't require separate declaration because modern compilers are multiple-stage (there is a stage for collecting all definitions, before name resolution).
 

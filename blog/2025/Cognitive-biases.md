@@ -1054,6 +1054,7 @@ Examples:
 - In the COVID-19 pandemic, a developed country have higher overall fatality rate than a developing country. But in each age group, the developed country's fatality rate is lower. The developed country has a larger portion of old population.
 - After improving a product, the overall customer satisfaction score may decrease, because the product gets popular and attracted the customers that don't fit the product, even though the original customers' satisfaction score increases.
 - You post on internet something that 90% people like and 1% people hate. The people liking the post usually don't direct-message you. But the people hating it often have strong motivation to direct-message you. So your direct message may contain more haters than likers, even though most people like your post.
+- In a company, a senior employee has lower KPI than a junior employee. Because the KPI only meansure task count but doesn't measure about task difficulty. The senior employee works on hard tasks and junior employee works on easy tasks.
 
 **Base rate fallacy**: there are more vaccinated COVID-19 patients than un-vaccinated COVID-19 patients in hospital, but that doesn't mean vaccine is bad:
 

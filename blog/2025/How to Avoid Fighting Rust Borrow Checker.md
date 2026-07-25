@@ -1120,7 +1120,7 @@ It prints `going to do second-layer lock` then deadlocks.
 
 In Rust, it's important to **be clear about which scope holds lock**. Golang lock is also not re-entrant.
 
-Another important thing is that Rust only unlocks at the end of scope by default. `mutex.lock().unwrap()` gives a `MutexGuard<T>`. `MutexGuard` implements `Drop`, so it will drop at the end of scope. It's different to the local variables whose type doesn't implement `Drop`, they are dropped after their last use (unless borrowed). This is called NLL (non-lexical lifetime).
+Another important thing is that Rust only unlocks at the end of scope by default. `mutex.lock().unwrap()` gives a `MutexGuard<T>`. `MutexGuard` explicitly implements `Drop`, so it will drop at the end of scope. It's different to the local variables whose type doesn't implement `Drop`, they are dropped after their last use (unless borrowed). This is called NLL (non-lexical lifetime).
 
 ## `Arc` is not always fast
 
@@ -1220,9 +1220,10 @@ By using unsafe you can freely manipulate pointers and are not restricted by bor
 Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
 
 - Don't violate mutable borrow exclusiveness. 
-  - A `&mut` should not overlap with any other borrows and raw pointers. Including temporary borrows. Note that `obj.method()` can implicity create borrow to `obj`.
+  - A `&mut` should not overlap with any other borrows. Including temporary borrows. Note that `obj.method()` can implicity create borrow to `obj`.
+  - An exception is interior mutability. Immutable borrow to `UnsafeCell` can overlap with mutable borrow within `UnsafeCell`. However, for content within `UnsafeCell` the previous rule still holds.
   - Violating that rule cause undefined behavior(UB) and can cause wrong optimization. Rust adds `noalias` attribute for mutable borrows into LLVM IR. LLVM will heavily optimize based on `noalias`. [See also](https://doc.rust-lang.org/nomicon/aliasing.html)
-  - Multiple mutable raw pointers `*mut T` can point to same data. But raw pointer cannot coexist with mutable borrow to same data.
+  - Raw pointer `*mut T` `*const T` has no such restriction.
   - [Related1](https://chadaustin.me/2024/10/intrusive-linked-list-in-rust/), [Related2](https://web.archive.org/web/20230307172822/https://zackoverflow.dev/writing/unsafe-rust-vs-zig/)
   - Also, the type that has self-reference should be `!Unpin`. If `T` is `!Unpin` then `&mut T` has no `noalias`. (However, there is still [potential unsoundness related to self-reference](https://github.com/rust-lang/rust/issues/63818))
 - Converting a `&T` to `*mut T` then mutate pointed data is undefined behavior, unless within `UnsafeCell`. In release mode, `&T` has LLVM `readonly` attribute which can enable some optimizations, but if `T` contains `UnsafeCell` then compiler won't add `readonly`.
