@@ -141,10 +141,10 @@ tags:
 ## Floating point
 
 - NaN. Floating point NaN is not equal to any number including itself. NaN == NaN is always false (even if the bits are same). NaN != NaN is always true. Computing on NaN usually gives NaN (it can "contaminate" computation). NaN corresponds to many different binary values.
-- There are +Inf and -Inf. They are not NaN.
+- There are +Infinity and -Infinity. They are not NaN.
 - There is a negative zero -0.0 which is different to normal zero. The negative zero equals zero when using floating point comparision. Normal zero is treated as "positive zero". The two zeros behave differently in some computations (e.g. `1.0 / 0.0 == Inf`, `1.0 / -0.0 == -Inf`, `log(0.0) == -Inf`, `log(-0.0)` is NaN)
-- JSON standard doesn't allow NaN or Inf:
-  - JS `JSON.stringify` turns NaN and Inf to null.
+- JSON standard doesn't allow NaN or Infinity:
+  - JS `JSON.stringify` turns NaN and Infinity to null.
   - Python `json.dumps(...)` will directly write `NaN`, `Infinity` into result, which is not compliant to JSON standard. `json.dumps(..., allow_nan=False)` will raise `ValueError` if has NaN or Inf.
   - Golang `json.Marshal` will give error if has NaN or Inf.
 - Directly compare equality for floating point may fail due to precision loss. Compare equality by things like `abs(a - b) < epsilon`. For double-precision floating point, `epsilon` can be $10^{-12}$. [^epsilon]
@@ -171,7 +171,7 @@ tags:
 
 [^excel_money]: It's recommended to NOT use floating point to store money value. Note that Microsoft Excel uses floating point to represent number, and many financial data are processed in Excel. Excel has rounding so that 0.30000000000000004 is displayed as 0.3 . Only use Excel for finance if you don't require high precision. Doing rough financial analyzing in Excel is fine.
 
-[^epsilon]: That method is not good for large-magnitude numbers. For large numbers, the tolerance should be higher: `abs(a - b) <= max(relative_epsilon * max(abs(a), abs(b)), absolute_epsilon)`. Also note that equality-by-epsilon is not transitive. There can cases where A is close to B, B is close to C, but A is not close to C. Sometimes grid-based equality comparision is better. [Related](https://lisyarus.github.io/blog/posts/its-ok-to-compare-floating-points-for-equality.html).
+[^epsilon]: That method is not good for large-magnitude numbers. For large numbers, the tolerance should be higher: `abs(a - b) <= max(relative_epsilon * max(abs(a), abs(b)), absolute_epsilon)`. Also note that equality-by-epsilon is not transitive. There are cases where A is close to B, B is close to C, but A is not close to C. Grid-based equality comparision is transitive. [Related](https://lisyarus.github.io/blog/posts/its-ok-to-compare-floating-points-for-equality.html).
 
 ## Time
 
@@ -185,7 +185,7 @@ tags:
 - The "timestamp" may be in seconds, milliseconds or nanoseconds.
 - About `M` and `m` in date format: in Java date format, `M` is month, `m` is minute. But in Python `datetime`, `m` is month, `M` is minute. 
 - In Java `Date` and JS `Date`, month number starts by 0, but day number starts by 1.
-- In DuckDB, when importing a CSV, it guesses date format based on samples by default. There is ambiguity between `DD-MM-YYYY` and `MM-DD-YYYY`. If all day numbers \<\= 12 DuckDB may guess wrong. [See also](https://duckdb.org/docs/stable/data/csv/auto_detection#dates-and-timestamps)
+- In DuckDB, when importing a CSV, it guesses date format based on samples by default. There is ambiguity between `DD-MM-YYYY` and `MM-DD-YYYY`. If all day numbers \<\= 12, DuckDB may guess wrong. [See also](https://duckdb.org/docs/stable/data/csv/auto_detection#dates-and-timestamps)
 - The result of MySQL `timestamp` value and PostgreSQL `timesamp with time zone` (`timestamptz`) depends on session time zone. Session time zone can be changed via SQL (`set time_zone = ...` in MySQL and `set time zone ...` in PostgreSQL). When using connection pooling, the effect of changing session time zone may interfere other places. [^sql_time_zone]
 - MySQL `timestamp` is 32-bit. It cannot represent time after 2038-01-19 03:14:07.
 
@@ -255,7 +255,7 @@ tags:
   - Integer overflow/underflow is undefined behavior. Note that unsigned integer can underflow below 0. Don't use `x > x + 1` to check overflow as it will be optimized to `false`.
   - Integer dividing by 0 is undefined behavior.
   - Aliasing.
-    - Strict aliasing rule. If there are two pointers with type `A*` and `B*`, then compiler assumes two pointer can never equal. If they equal, using it to access memory is undefined behavior. Except when: 1. `A` and `B` has subtyping relation 2. converting object pointer to byte pointer (`char*` etc.) 3. after converting object pointer to byte pointer, convert back [^strict_aliasing]
+    - Strict aliasing rule. If there are two pointers with type `A*` and `B*`, and there is no subtyping relation between `A` and `B`, then compiler assumes two pointer can never equal. If they equal, using it to access memory is undefined behavior. One exception is byte pointer. [^strict_aliasing]
     - Pointer provenance. Two pointers from two different provenances are treated as never equal. If their address equals, it's undefined behavior. [See also](https://www.ralfj.de/blog/2020/12/14/provenance.html). The [XOR linked list](https://en.wikipedia.org/wiki/XOR_linked_list) doesn't work with pointer provenance. Don't subtract two pointers then add offset to pointer, unless two pointers are in the same allocation.
   - `const` can mean both read-only and immutable:
     - If the original declared object is not `const`, you can turn pointer to it as `const T*`, in this case `const` means read-only [^readonly]. You can change the object without triggering undefined behavior.
@@ -263,7 +263,7 @@ tags:
     - `std::move` used on const object cannot avoid deep copying. [^cpp_move]
   - If `bool`'s binary value is neither 0 or 1, using it is undefined behavior. Similarily if an enum's binary value is not valid, using it is undefined behavior.
   - Unaligned memory access is undefined behavior. (Also, alignment can cause padding in struct that wastes space.)
-  - Undefined behavior can "travel back in time". For `if (a) { b(); }`, if `b()` unconditionally triggers undefined behavior, then compiler can assume `a` is always false.
+  - Undefined behavior can "travel back in time". For `if (a) { b(); }`, if `b()` unconditionally triggers undefined behavior, then compiler can assume `a` is always false. If `a` is true then it triggers undefined behavior before executing `b()`. The deduction can go earlier: the inputs that cause `a` to be true can trigger undefined behavior before computing `a`.
 - Global variable initialization runs before `main`. [Static Initialization Order Fiasco](https://en.cppreference.com/w/cpp/language/siof.html).
 - Start from C++ 11, destructors have `noexcept` by default. If exception is thrown out of a `noexcept` function, whole process will crash.
 - If destructor is implemented, then you should implement copy constructor or disable copy constructor. If not, it may implicitly copy then double free.
@@ -276,7 +276,7 @@ tags:
 
 [^cpp_allocator]: The "allocator" here doesn't mean std allocator type. It means the allocator backing `malloc` and `free`.
 
-[^strict_aliasing]: Using pointer type to hold integer is fine as long as you don't use it to access memory. Also, [Linus is against strict aliasing rule](https://lkml.org/lkml/2018/6/5/769).The Linux kernel disables strict aliasing rule and makes integer overflow defined behavior.
+[^strict_aliasing]: Using pointer type to hold integer is fine as long as you don't use it to access memory. Also, [Linus is against strict aliasing rule](https://lkml.org/lkml/2018/6/5/769). The Linux kernel disables strict aliasing rule and makes integer overflow defined behavior.
 
 [^readonly]: The read-only here is in-language constraint. It should not be confused with read-only memory which is actually immutable.
 
@@ -386,7 +386,7 @@ tags:
   - If program is force-killed (e.g. `kill -9`) some of its last log may not be written to log file because it's buffered.
   - In Linux, if `write()` and `close()` both don't return error code, the write may still fail, due to IO buffering. [See also](https://man7.org/linux/man-pages/man2/close.2.html)
 - Modulo of negative numbers. In Python,  `a % b` is `a - (floor(a / b) * b)`. But in C/C++/Java/C#/JS/Rust/Golang, `a % b` is `a - (roundTowardZero(a / b) * b)`. If `a` is negative then the behavior will be weird.
-- Retrying without limit or retrying without timeout can leak resources.
+- Retrying without limit or requesting without timeout can leak resources.
 - Creating file doesn't auto create parent folder. It will fail if parent folder doesn't exist. You need to manually create parent folder.
 
 

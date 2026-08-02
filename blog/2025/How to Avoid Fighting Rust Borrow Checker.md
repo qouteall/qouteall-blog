@@ -1152,9 +1152,9 @@ If `Arc` clone/dropping do become bottleneck, possible solutions:
 - Deep cloning data instead of sharing `Arc`.
 - If the data is global sigleton, can just put it to global `static` (use `OnceLock` for delayed initialization). For short-running programs like CLI, leaking it is fine.
 - [trc](https://docs.rs/trc/1.2.4/trc/) and [hybrid_rc](https://docs.rs/hybrid-rc/latest/hybrid_rc/). Use per-thread non-atomic counter together with atomic counter.
-- Shard the counter. Given an `Arc<T>`, clone many instances then wrap each as `Arc<CachePadded<Arc<T>>>` [^shard_counter]. Send differnt two-layer-arcs to different threads. There will be fewer contention as different CPU cores likely touch different atomic counters.
+- Shard the counter. I wrote a library [sdarc](https://docs.rs/sdarc/latest/sdarc/) [^shard_counter_another_way]
 
-[^shard_counter]: [`CachePadded`](https://docs.rs/crossbeam/latest/crossbeam/utils/struct.CachePadded.html) is from crossbeam. The `CachePadded` is actually for padding two counters in `ArcInner`, not for padding the `Arc<T>`. It avoids different two-layer-arcs' counters be in same cache line.
+[^shard_counter_another_way]: Another way of sharding counter in `Arc` is: given an `Arc<T>`, clone many instances then wrap each as `Arc<CachePadded<Arc<T>>>`. Then send differnt two-layer-arcs to different threads. [`CachePadded`](https://docs.rs/crossbeam/latest/crossbeam/utils/struct.CachePadded.html) is from crossbeam. The `CachePadded` is actually for padding two counters in `ArcInner`, not for padding the `Arc<T>`. It avoids different two-layer-arcs' counters be in same cache line. That solution requires having a special owner that holds the two-layer-arcs.
 
 ## Reference counting vs tracing GC
 
@@ -1223,7 +1223,7 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
   - A `&mut` should not overlap with any other borrows. Including temporary borrows. Note that `obj.method()` can implicity create borrow to `obj`.
   - An exception is interior mutability. Immutable borrow to `UnsafeCell` can overlap with mutable borrow within `UnsafeCell`. However, for content within `UnsafeCell` the previous rule still holds.
   - Violating that rule cause undefined behavior(UB) and can cause wrong optimization. Rust adds `noalias` attribute for mutable borrows into LLVM IR. LLVM will heavily optimize based on `noalias`. [See also](https://doc.rust-lang.org/nomicon/aliasing.html)
-  - Raw pointer `*mut T` `*const T` has no such restriction.
+  - Raw pointer `*mut T` `*const T` has no such restriction. But using raw pointer to read/write memory when an overalapping mutable borrow exists is undefined behavior.
   - [Related1](https://chadaustin.me/2024/10/intrusive-linked-list-in-rust/), [Related2](https://web.archive.org/web/20230307172822/https://zackoverflow.dev/writing/unsafe-rust-vs-zig/)
   - Also, the type that has self-reference should be `!Unpin`. If `T` is `!Unpin` then `&mut T` has no `noalias`. (However, there is still [potential unsoundness related to self-reference](https://github.com/rust-lang/rust/issues/63818))
 - Converting a `&T` to `*mut T` then mutate pointed data is undefined behavior, unless within `UnsafeCell`. In release mode, `&T` has LLVM `readonly` attribute which can enable some optimizations, but if `T` contains `UnsafeCell` then compiler won't add `readonly`.

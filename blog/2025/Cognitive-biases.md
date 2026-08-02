@@ -1220,6 +1220,8 @@ Examples:
 
 This is related to **means-end inversion**. To achieve the root goal (end) we work on a sub-goal (means) that helps root goal. But focusing on an easy but unimportant sub-goal may hurt the root goal, by taking resources from hard but important sub-goals.
 
+Sometimes it's used as a way of responsibility evasion. Do easy but costly things to show that one "already tries hard" to avoid responsibility of failure.
+
 A similar phenomenon occurs commonly in medicine: treatments usually mainly suppress superficial symptoms (e.g. painkiller) instead of curing the root cause of illness. This is usually due many other factors.
 
 Pepole tend to spend much time making decision on small things but spend very few time making decisions on big things (e.g. buy house with mortgage, big investment):

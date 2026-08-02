@@ -63,6 +63,8 @@ Two examples of cancellation issues: [Alan tries to cache requests, which doesn'
 
 See also: [Dealing with cancel safety in async Rust](https://rfd.shared.oxide.computer/rfd/400), [Cancelling async Rust](https://sunshowers.io/posts/cancelling-async-rust/)
 
+Doing cleanup in async code must use drop (can use `scopeguard` crate). If cleanup is in normal control flow, then cleanup may not run if cancelled. The async drop is not yet stabilized so the cleanup has to be non-async.
+
 There is another kind of "cancel": doesn't drop the future but does not `poll` the future. This is also dangerous. Elaborated below.
 
 Related: [cancel_safe_futures](https://docs.rs/cancel-safe-futures/latest/cancel_safe_futures/) crate
@@ -211,6 +213,12 @@ Note that using blocking mutex in async function is ok if locking is brief (just
 The `tokio::sync::Mutex` doesn't have poisoning mechanism. Poisoning mechanism cannot fix broken invariant, but it makes broken invariant more salient, helping debugging. The `cancel_safe_futures` provides [`RobustMutex`](https://docs.rs/cancel-safe-futures/latest/cancel_safe_futures/sync/struct.RobustMutex.html) which has poisoning mechanism.
 
 If you find out that you need to `.await` while borrowing data in mutex, it's recommended to firstly consider whether the `.await` point can be moved out of locking scope, before changing mutex to async mutex. Using async mutex carelessly may cause unnecessary waiting or deadlock.
+
+### Cancellation race conditions
+
+As previously mentioned, if you do want cancellation, then Rust async cancellation is convenient. Every await point can cancel. No need to manually select on cancel signal everywhere.
+
+However, cancellation is still full of race conditions. The task may finish right after you want to cancel it. Or right after calling `JoinHandle::abort`, the async task finishes despite being cancelled. Cancellation is complex.
 
 ## Un-`poll`-ed futures
 
