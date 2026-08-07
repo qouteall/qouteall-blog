@@ -371,10 +371,9 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: If some operation is dangerous, requiring human approve can improve safety.
 
-  Second-order effect: There are two cases:
+  Second-order effect: Approval fatigue. It's common that most requests are benign. But some very rare requests are very dangerous (danger distribution is fail-tailed). The approver is tired of approving the most benign requests and loses patience. Then approver tend to quickly approve without careful checking.  
   
-  - If the approver is in another department that's responsible for safety but not responsible for your results, then the approver tend to not approve to reduce responsibility. Thus the work tend to be blocked.
-  - If the approver is responsible in same department, then the approver tend to quickly approve without careful checking, to avoid the responsibility of blocking the work of the department. 
+  Also, if the approver is in another department that's responsible for safety but not responsible for your results, then the approver tend to not approve to reduce responsibility. Thus the work tend to be blocked.
 
 ### In Software
 
