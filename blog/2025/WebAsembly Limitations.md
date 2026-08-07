@@ -239,7 +239,7 @@ The **Wasm globals are thread-local** (not actually global). Mutate a mutable Wa
 
 Another important limitation: **The Wasm tables cannot be shared**.
 
-That creates trouble when **loading new Wasm code during running** (dynamic linking). To make existing code call new function, you need indirect call via function reference in table. However, tables cannot be shared across Wasm instances in different web workers.
+That creates trouble in **dynamic linking** (loading new Wasm code during running). To make existing code call new function, you need indirect call via function reference in table. However, tables cannot be shared across Wasm instances in different web workers.
 
 The current workaround is to notify the web workers to make them proactively load the new code and put new function references to table. One simple way is to send a message to web worker. But that doesn't work when web worker's Wasm code is still running. For that case, some other mechanisms (that costs performance) need to be used.
 
@@ -396,7 +396,7 @@ Wasm debugging in Chrome cannot reuse native debugging tools. It must rely on Ch
 
 ## Appendix
 
-### Spectre vulnerability explanation
+### Spectre (v1) vulnerability explanation
 
 Background:
 

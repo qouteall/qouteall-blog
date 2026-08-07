@@ -369,6 +369,13 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 > \- [Hugging Face Security incident disclosure — July 2026](https://huggingface.co/blog/security-incident-july-2026)
 
 
+- First-order effect: If some operation is dangerous, requiring human approve can improve safety.
+
+  Second-order effect: There are two cases:
+  
+  - If the approver is in another department that's responsible for safety but not responsible for your results, then the approver tend to not approve to reduce responsibility. Thus the work tend to be blocked.
+  - If the approver is responsible in same department, then the approver tend to quickly approve without careful checking, to avoid the responsibility of blocking the work of the department. 
+
 ### In Software
 
 - First-order effect: Better hardware makes software run faster.
@@ -378,6 +385,10 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 - First-order effect: Adding developers to a software project can accelerate it.
 
   Second-order effect: It may increase communication cost and cause more chaos. Man-month myth.
+
+- First-order effect: Adding more features make the software more useful.
+
+  Second-order effect: Adding features also may cause regression bugs. The new features can slow down the software even when the user doesn't use it. The new feature increases long-term maintenance cost. The new feature's interactions with old features may also cause confusion to the user.
 
 - First-order effect: Abstraction helps understanding and maintaining code.
 
@@ -475,6 +486,12 @@ For them, the mean and variance may be misleading. Median is more representative
 If some work seems huge, if it follows 80/20, doing just 20% of it can get 80% of effects. However note that not all work can be 80-20-ed.
 
 Also, most jobs are concentrated in time. One example is infrastructure building. Infrastructure building are often concentrated in time (due to e.g. economic cycle, policies, interest rates). After the wave ends, most infrastructure-related jobs vanish. Another example is that when war ends, war industry manufactoring demand plummets. The "temporary jobs" can keep being ample for many years. This can confuse people into beliving that these jobs are permanent. **Most jobs are inherently temporary**.
+
+### "Circular proof"
+
+In math, circular proof is wrong. You cannot prove by "if A then B. if B then A. So A and B are true". However, the self-reinforcing feedback loop can crate "circular proof". It's common in finance: one asset's price is growing, so people invest in it, so asset price grows. But these kind of "circular proof" are not permanent. [^circular_proof]
+
+[^circular_proof]: There is a "circular proof" in physics, called Participatory Anthropic Principle: the universe crates observer, and observer makes universe exist.
 
 ### Self-balancing feedback loops and cycles
 

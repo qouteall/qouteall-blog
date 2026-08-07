@@ -1589,6 +1589,15 @@ It also involves the tradeoff between short-term reward and long-term reward. Lo
 
 When friends and partners complain to you, they often just want emotional support instead of solutions. They often already know the solution but cannot apply it for some reasons.
 
+## Responsibilty evasion
+
+Many previously mentioned cognitive biases has implicit purpose of responsibility evasion;
+
+- Self handicapping. When one fails, one can blame to self handicapping.
+- Herd mentality. When one follows the group, then the group fails, the responsibility is diluted to the whole group.
+- Prioritizing easy and superficial. Do easy but costly things to show that one has already "tried hard" in one thing. When one fails, it's not due to not "trying hard".
+- Default effect. Avoid actively making decision to avoid responsibility.
+
 ## Knowing the biases may be not enough
 
 Unfortunately, just knowing the cognitive biases is not enough to avoid and overcome them. A lot of cognitive biases originate from the biological basis of human's cognitive function, which cannot change from just knowledge.

@@ -218,7 +218,7 @@ If you find out that you need to `.await` while borrowing data in mutex, it's re
 
 As previously mentioned, if you do want cancellation, then Rust async cancellation is convenient. Every await point can cancel. No need to manually select on cancel signal everywhere.
 
-However, cancellation is still full of race conditions. The task may finish right after you want to cancel it. Or right after calling `JoinHandle::abort`, the async task finishes despite being cancelled. Cancellation is complex.
+However, cancellation is still full of race conditions. The task may finish right after "deciding" to cancel it but before calling `JoinHandle::abort`. Or right after calling `JoinHandle::abort`, the async task finishes despite being cancelled.
 
 ## Un-`poll`-ed futures
 
