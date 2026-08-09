@@ -915,7 +915,7 @@ Rust's mutable borrow exclusiveness creates a lot of troubles in single-threaded
 - Make the borrow more universal. In Rust, map key and value can be borrowed. But in Golang you cannot take interior pointer to map key or value. This makes abstractions that work with borrows more general.
 - Mutable borrow is exclusive, so Rust can emit LLVM `noalias` attribute (in release mode). `noalias` means the pointed data cannot be accessed by other code, which helps optimizations. When optimizer knows no other pointer can equal to that pointer, then reads can be merged, writes can be merged, and its read/write can be reordered between other computations. Then there will be more optimization opportunities. [^noalias_optimization]
 
-[^noalias_optimization]: The `noalias` helps optimization but its practical effect is still limited. Also the LLVM `noalias` is an attribute to function argument and return value. It cannot be added to local variables. The actual aliasing analysis mostly depends on pointer provenance analysis.
+[^noalias_optimization]: The `noalias` helps optimization but its practical effect is still limited. Also the LLVM `noalias` is an attribute to function argument and return value. It cannot be added to local variables. The actual aliasing analysis mostly depends on pointer provenance analysis. LLVM supports another kind of noalias annotation to local variables, but [Rust haven't started using it](https://github.com/rust-lang/rust/issues/16515).
 
 Related: CPU internally optimizes by assuming two seprately-calculated addresses are different (assuming no alias), then rollback if assumption is wrong. This is called [Memory disambiguation](https://en.wikipedia.org/wiki/Memory_disambiguation).
 
@@ -1657,15 +1657,15 @@ All of the above contagious effect has "escape hatch" that's invisible in types:
 
 [^unsafe]: A wrong `unsafe` code in Rust can make memory/thread safety issue trigger in safe code. The impact of `unsafe` code is not limited to `unsafe` code.
 
-[^about_arm_memory_tagging]: [ARM memory tagging](https://developer.arm.com/documentation/108035/0100/Introduction-to-the-Memory-Tagging-Extension) is a low-cost way of checking memory safety issue at runtime, similar to address sanitizer, useful for debugging and security alerting. But ARM memory tagging is not a sound security defense, because it has 1/16 chance of missing memory-unsafe access. If the process auto-restarts after crashing, attacker can retry the attack, eventually hitting the 1/16 probability. [Fil-C](https://github.com/pizlonator/fil-c) can catch memory safety issue in 100% chance, so it's a better security defense.
+[^about_arm_memory_tagging]: [ARM memory tagging](https://developer.arm.com/documentation/108035/0100/Introduction-to-the-Memory-Tagging-Extension) is a low-cost way of checking memory safety issue at runtime, similar to address sanitizer, useful for debugging and security alerting. But ARM memory tagging is not a sound security defense, because it has 1/16 chance of missing memory-unsafe access. If the process auto-restarts after crashing, attacker can retry the attack, eventually hitting the 1/16 probability. [Fil-C](https://github.com/pizlonator/fil-c) can catch memory safety issue in 100% chance, so it's a better security defense. Also [Apple Memory Integrity Enforcement](https://security.apple.com/blog/memory-integrity-enforcement/).
 
 [^gc_memory_safety]: Golang is not memory-safe under data race. Golang strings, fat pointers and slices has tearing issue. Golang map is not thread-safe. 
 
-[^go_gc]: Golang GC is non-moving. Most other mainstream GC (e.g. Hotsopt JVM, CLR) are moving.
+[^go_gc]: Golang GC is non-moving. Most other mainstream GC (e.g. Hotsopt JVM's, CLR's) are moving.
 
 [^fragmentation]: It's commonly told that moving GC has another benefit: handling memory fragmentation. When not using moving GC, fragmentation can still be alleviated by better allocation strategy (similar size-class allocate together). Fragmentation is also alleviated by virtual memory (memory fragmentation in page level don't waste physical memory). Also, RAM is cheaper now, so fragmentation cost is more affordable. **Fragmentation is not a problem now** (except for some rare cases). Moving GC can theoretically improve cache locality by avoiding fragmentation, but manual memory management can improve cache locality by reusing just-freed memory region. Fragmentation wastes memory but moving GC require larger free memory to achieve high thoughput.
 
-[^gc_throughput]: In Rust, bump allocator can also achieve high throughput of allocation and deallocation. But using bump allocator requires extra work (contagious lifetime annotations). The conventional "malloc/free" allocators often has lower throughput than an optimized moving GC because they need to do more bookkeeping. Note that moving GC require much more free memory to achieve high throughput. Without enough free memory, moving GC will cause big lag.
+[^gc_throughput]: In Rust, bump allocator can also achieve high throughput of allocation and deallocation. But using bump allocator requires extra work (contagious lifetime annotations). The conventional "malloc/free" allocators often has lower throughput than an optimized moving GC because they need to do more bookkeeping per malloc/free. Note that moving GC require much more free memory to achieve high throughput. Without enough free memory, moving GC will cause big lag.
 
 ## The yields of paying "Rust cost"
 

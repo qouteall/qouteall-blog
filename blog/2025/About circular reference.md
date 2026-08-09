@@ -530,17 +530,27 @@ Grouping two locks into one lock can introduce new deadlock. It locks more than 
 But splitting lock can also introduce new deadlock.
 ![](./circular/deadlock_coarse.drawio.png)
 
-## Preventing deadlock in type system
+## Preventing deadlock at compile time
 
-Some deadlocks only trigger in specific cases with specific timing. These deadlocks are hard to reproduce and debug. Is it possible to prevent deadlock from type system in compile time? Yes but at the expense of reduced expressiveness.
+### Ensuring locking order
+
+Prevent deadlock of only locks can be done by ensuring locking order.
 
 One way is to encode the locking status into type. For example, if you have 3 locks, A, B, C. You want to enforce consistent locking order. Then there will be these "token" types: `CanLockABC`, `CanLockBC`, `CanLockC`, `CanLockNothing`. The token type is linear. It cannot be cloned. Locking consumes a token and gives another token. Unlocking also consumes token and gives back token. Locking B requires token of type `CanLockABC` or `CanLockBC`, then gives `CanLockC`. This design enforces consistent locking order. But it requires many token passing. These token passing will interfere with app logic. If some locking logic is conditional to runtime data, then dependent type will probably be needed. It will get very hard to write.
 
 Another way is to simply doesn't allow a thread to hold another lock when holding lock. If a thread wants to hold two locks, it needs to hold two locks together in one time.
 
-The previous solutions doesn't consider non-lock waiting. Non-lock waiting means waiting for a channel/future/waitgroup/condvar/event/etc. Handling non-lock waiting requires more complex solutions.
-
 [Related](https://medium.com/@adetaylor/can-the-rust-type-system-prevent-deadlocks-9ae6e4123037), [Related](https://www.botahamec.dev/blog/how-happylock-works.html)
+
+### Choreographic programming
+
+[Choreographic programming](https://en.wikipedia.org/wiki/Choreographic_programming) is a programming paradigm, where one piece of code describes the logic of whole distributed system. It can prevent deadlock in message passing.
+
+In procedural programming, the code receiving from channel and code sending to channel are two separate pieces of code. And the code can freely do receiving or sending in any condition, which can cause channel deadlock. 
+
+But in choreographic programming, there is a unified control flow between different parties (e.g. client and server), and there is no explicit channel object. Message passing between two sides is one atomic operation in the unified control flow (unlike in procedural programming, it's two operations, one in sender, one in receiver). 
+
+There is a unified control flow (state machine) between both sides. The unified control flow ensures when one side is receiving, the other side must be sending, vice versa. So it's impossible to have two processes waiting each other.
 
 ## Runtime deadlock detection
 
@@ -823,6 +833,8 @@ There are cases that, then the data structure contains cycle, eager computation 
 For example, to deep-clone a data structure that contains cycles, direct recursion copy will cause dead recursion. Solution is to make it two-stage: first stage copies the nodes, without eagerly copying edges and pointed nodes; second stage copies the edges and fixes the node references.
 
 In C, writing two mutually-recursive functions requires separately declare the two functions eariler. Because C is designed that compiler can compile in one pass. Modern languages doesn't require separate declaration because modern compilers are multiple-stage (there is a stage for collecting all definitions, before name resolution).
+
+Zig comptime evaluation is lazy. Two generic types can use each other without making compiler stuck in dead recursion. Just using a generic type doesn't necessarily trigger evaluation of type definition (unless the type's size/layout/other information is needed).
 
 Note that when there is non-local information propagation in graph, then a finite amount of stages will be not enough. It requires a variable amount of stages to iteratively propagate the information across graph.
 

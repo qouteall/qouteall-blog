@@ -166,7 +166,7 @@ If one person cannot get emotional value from real human interaction, they tend 
 
 There are many important contexts that AI doesn't know. Writing good prompt requires knowing what AI doesn't know then provide these contexts.
 
-If the AI user is too self-centric, when AI misunderstands their instruction, they think AI is stupid rather than considering whether insturction has ambiguity or there is missing context.
+**If the AI user is too self-centric, when AI misunderstands their instruction, they think AI is stupid rather than considering whether insturction has ambiguity or there is missing context.**
 
 Writing good prompt requires "putting oneself in AI's shoes", overcoming curse of knowledge, knowing what AI doesn't know, and providing relevant information.
 
@@ -186,9 +186,9 @@ One example:
 > 
 > [Link](https://x.com/kishimisu/status/1804490224946344379): I found a copy of my work labelled as « impressive AI generation » and without any attribution… I created this animation for my shader coding tutorial a year ago: https://youtu.be/f4s1h2YETNY
 
-You ask someone a question, they secretly lookup answer on internet, then answer you without mentioning the sources, they will look smart. The same applies to LLM. LLM looks smarter than it actually is because it doesn't do attribution.
+You ask someone a question, they secretly lookup answer on internet, then answer you without mentioning the sources, they will look smart. The same applies to LLM. **LLM looks smarter than it actually is because it doesn't do attribution**.
 
-The UX of AI chat is very different to Google search. In Google search, it gives you website links. The website may contain the answer that you want or it may not. Even if it contains the answer, it may be in the middle of page. You have to browse a lot of content and filter for the answer. It takes efforts. (But the efforts put in filtering website informaiton can train information collection skills.) In AI chat, the AI directly gives you the answer. AI chat is definitely more convenient and requires less mental efforts. 
+The UX of AI chat is very different to Google search. In Google search, it gives you website links. The website may contain the answer that you want or it may not. Even if it contains the answer, it may be in the middle of page. You have to browse a lot of content and filter for the answer. It takes efforts. (But the efforts put in filtering website informaiton can train information collection skills.) But it's clear to user that answer comes from website, not Google itself. In AI chat, the AI directly gives you the answer. AI chat is definitely more convenient and requires less mental efforts. AI hides the fact that its knowledge come from elsewhere. 
 
 The search-integrating AI can give reference links. However often the reference link is put wrongly. The reference link doesn't correspond to the AI's answer. AI actually answers using knowledge in weights to answer but inserts a link pretending it comes from search.
 
@@ -580,7 +580,7 @@ Having no document is better than having wrong documents.
 
 Work involves two parts: generation (e.g. draw things, write code), verification (e.g. evaluate whether drawing is good, test whether code works). Before AI, both parts are done by human. But when using AI, human don't do generation and only do verification, at the same time having less direct control of result.
 
-In one aspect, verification is tiresome because you still bear the responsibility of the result but have less direct control of result. In another aspect, you have the veto power on the AI.
+In one aspect, verification is tiresome because you still bear the responsibility of the result but have less direct control of result.
 
 ## Context rot issue
 
@@ -762,6 +762,8 @@ The LLM doesn't clearly distinguish instructions and information. Some text on w
 The same problem of confusing instruction and information had existed decades ago. Many security issues, like SQL injection, XSS, command injection, etc. are caused by treating user data as "instructions".
 
 The solution would be to fully separate instructions and non-instruction text, and train the model to separately process them.
+
+It's interesting that many years have passed since ChatGPT appeared, but prompt injection still hasn't been fully solved.
 
 ### Deleting data
 

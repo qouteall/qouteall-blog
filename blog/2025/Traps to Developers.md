@@ -43,7 +43,7 @@ tags:
   - `overflow: visible` will still be clipped by stacking context.
   - `background-attachment: fixed` will position based on stacking context.
   - `opacity` is "relative" to parent. Child `opacity:1` in transparent parent won't make it more opaque than parent.
-  - Stacking context can affect the coordinate of `position: absolute` or `fixed`.
+  - Stacking context can affect the coordinate system of `position: absolute` or `fixed`.
 
 - On mobile browsers, the top address bar and bottom navigation bar can go out of screen when scrolling down. `100vh` correspond to the height when the two bars gets out of screen, which is larger than the height when the two bars are on screen. The modern solution is `100dvh`.
 - About scrollbar:
@@ -98,13 +98,13 @@ tags:
 
 [^percent_width_height]: It avoids circular dependency where parent height is determined by content height, but content height is determined by parent height.
 
-[^calc_size]: In Nov 2025 `calc-size` is not yet supported by FireFox and Safari. 
+[^calc_size]: In Aug 2026 `calc-size` is not yet supported by FireFox and Safari. 
 
 [^animate_height_auto]: Also, there is another solution for transition `height: auto`: transitioning `max-height` from 0 to a large value, but I don't recommend it as it will mess up animation timing.
 
 [^reflow_animation]: When adding a new element, initial transition animation won't work by default. But if you read its layout-related value (e.g. `offsetHeight`) between changing animated attribute, it will trigger a reflow and make initial transition work.
 
-[^use_parent_width]: This design aim to avoid circular dependency. If parent height depends on child height, then child padding determining on parent height creates circular dependency. When that rule was originally designed, CSS mostly follows the "width flows top-down, height flows bottom-up" pricinple (that principle is broken with later-added flexbox and grid etc,). Note that when writing axis flips (e.g. `writing-mode: vertical-rl`) the percentage is based on height, and the principle changes to "height flows top-down, width flows bottom up".
+[^use_parent_width]: This design aim to avoid circular dependency. If parent height depends on child height, then child padding determining on parent height creates circular dependency. When that rule was originally designed, CSS mostly follows the "width flows top-down, height flows bottom-up" pricinple (that principle is broken with later-added flexbox and grid etc.) (the "top-down" is in DOM tree, not in web page). Note that when writing axis flips (e.g. `writing-mode: vertical-rl`) the percentage is based on height, and the principle changes to "height flows top-down, width flows bottom up".
 
 ## Unicode and text
 
@@ -272,9 +272,9 @@ tags:
 - Compare signed number with unsigned number. If `a` is signed -1, `b` is unsigned 0, then `a > b` is true, because it auto-converts `a` into unsigned number.
   - Note that `char` may be signed or unsigned, depending on platform. It's recommended to always use `signed char` or `unsigned char`, not `char`. [Apple ARM `char` is signed](https://developer.apple.com/documentation/xcode/writing-arm64-code-for-apple-platforms#Handle-data-types-and-data-alignment-properly), [gcc `char` is unsigned in Android, but signed in other platforms](https://stackoverflow.com/questions/2054939/is-char-signed-or-unsigned-by-default).
 - If the same header file is included in two `.cpp` files with different macros, and the macro difference affect the content in `inline` thing or `template` thing or type definition, then it violates [ODR (one definiton rule)](https://en.cppreference.com/w/cpp/language/definition.html). There will be different compiled functions with the same symbol name, and linker nondeterministically chooses one.
-- Multiple allocators[^cpp_allocator] can co-exist. One allocator's allocation should not be freed in another allocator.
+- The dynamic library can bundle its own allocator[^cpp_allocator]. One allocator's allocation should not be freed in another allocator. Passing container (e.g. `vector`) is only safe when allocator matches. When passing `unique_ptr` across dynamic libraries, it's recommended to use custom deleter.
 
-[^cpp_allocator]: The "allocator" here doesn't mean std allocator type. It means the allocator backing `malloc` and `free`.
+[^cpp_allocator]: The "allocator" here doesn't mean std allocator type. It means the allocator backing `malloc` and `free`, managing its own heap. For example, a dynamic library can static link a piece of jemalloc. And two such different jemalloc can co-exist in a process, and also co-exist with glibc allocator. Each allocator has its own machine code and static data.
 
 [^strict_aliasing]: Using pointer type to hold integer is fine as long as you don't use it to access memory. Also, [Linus is against strict aliasing rule](https://lkml.org/lkml/2018/6/5/769). The Linux kernel disables strict aliasing rule and makes integer overflow defined behavior.
 
@@ -294,7 +294,9 @@ tags:
 
 ## Rust
 
-- [Rust async traps](../2026/Rust%20async%20traps)
+- [Rust async traps](../2026/Rust%20async%20traps). Summarize:
+  - Don't block scheduler thread. Don't use std mutex or any blocking IO in async code, unless it only blocks for very short time.
+  - Async code can exit at any await point. Async cleanup should use drop (e.g. [scopeguard](https://docs.rs/scopeguard/latest/scopeguard/)). Spawning prevents cancellation propagation.
 
 ## SQL Databases
 
