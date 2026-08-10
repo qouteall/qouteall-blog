@@ -21,14 +21,6 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   
   Second-order effect: Misinformation and low-quality contents are also more accessible. Discerning true and useful information is the new problem. Addictive contents are also more accessible, distracting learning.
 
-- First-order effect: Online shopping is often cheaper and more convenient, saving money.
-
-  Second-order effect: The convenience of online shopping can lead to impulse purchases of unnecessary things, causing larger overall spending.
-
-- First-order effect: Email spam filters can reduce disturbance.
-
-  Second-order effect: It may wrongly filter an important email. If the user always worries about wrong filtering and frequently view garbage email section then it doesn't reduce disturbance.
-
 - First-order effect: Hiring a new UI designer can improve the UI of the product.
 
   Second-order effect: The new UI designer may redesign the UI to justify their value. The users that get used to old UI may be frustrated by the new unfamiliar UI. The new UI may sacrifice usability for aesthetics.
@@ -147,6 +139,8 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: If the management sets high goals but don't have the ability to verify the result, it will be a disaster. Most employees cannot achieve the high goal. The honest employees gets low evaluation and leaves. The employees that fake results get rewarded and stay.
 
+  Also, the subordinate can choose to **over-execute** as a passive-aggressive way to fight back. The subordiante can execute in an extreme way that **maximizes the downside of the policy, giving pressure back to higher authority**.
+
 - First-order effect: Having clear team separation in a corporation makes management more efficient.
 
   Second-order effect: When team splits, their goals are less likely to align. It's often that team A depends on team B's results. But team B has its own KPI and that KPI doesn't match team A's need. Team B is not responsible for team A's results. This greatly reduces efficiency.
@@ -155,7 +149,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: Second-mover advantage. After the first-mover costly explores different techniques/strategies, the second-mover can directly learn. And the first-mover often cannot correct its mistake due to sunk cost. The second-mover can avoid first-mover's mistakes.
 
-- First-order effect: When the big companies are in financial hardship, letting them collapse will hurt employment. Subsidying them keeps employment.
+- First-order effect: When the big companies are in financial hardship, letting them collapse will hurt employment. Subsidizing them keeps employment.
 
   Second-order effect: They become too-big-to-fall. They become inefficient while occupying a lot of resources. They indirectly kill new startups. It reduces overall employment in the long run.
 

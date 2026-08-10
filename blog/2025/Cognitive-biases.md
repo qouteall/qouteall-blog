@@ -186,7 +186,7 @@ The overconfidence is sometimes useful:
 
 If there is a risky innovation that has only 1% success rate, and if everyone is rational and is not overconfident, then no one will do it. Overconfidence is sometimes beneficial for society.
 
-People are often overconfident in their health condition. After the doctor tell people to exercise more, reduce screen time and reduce eating sugar, they tend to not follow after some time, partially because they are overconfident in their health condition.
+People are often overconfident in their health condition. After the doctor tells people to exercise more, reduce screen time and reduce sugar intake, they tend to stop following after some time, partially because they are overconfident in their health condition.
 
 ### Hindsight bias
 
@@ -210,7 +210,7 @@ People make execuses about their prediction failure, such as:
 - Blame prediction failure to outside factors, e.g. the statistical data is being manipulated, conspiracy theories.
 - Blame that they are just unlucky as the Black Swan event is low-probability. (Black Swan events are rare, but you are still likely to encounter multiple Black Swan events in life.)
 
-Another example: When one don't know an image is AI-generates it looks good. But if one already know it's AI-generated, then many details are seen as "evidence of AI" even if they didn't notice before knowing it's AI.
+Another example: When one don't know an image is AI-generated it looks good. But if one already know it's AI-generated, then many details are seen as "evidence of AI" even if they didn't notice before knowing it's AI.
 
 ### Fundamental attribution error
 
@@ -229,7 +229,7 @@ This is related to Stockholm Syndrome. After experiencing pain in the past, peop
 
 **Ben Franklin effect**: People like someone more after doing a favor for them.
 
-**Endowment effect**: We value more on the things that we own (including ideas). Investors tend to be biased to positive information of the stock they own. Disaggreing an idea tend to be treated as insult.
+**Endowment effect**: We value more on the things that we own (including ideas). Investors tend to be biased to positive information of the stock they own. Disagreeing an idea tend to be treated as insult.
 
 **Foot-in-the-door effect**: One agreed on a small request tend to subsequently agree on a larger request.
 
@@ -588,6 +588,7 @@ Examples of binary thinking:
 - "\[X\] is the best thing and everyone should use it." / "\[X\] has this drawback so it's not only useless but also harmful."
 - "Market is always fully effective." / "Market is never effective."
 - "It's a fundamental innovation that changes everything." / "It's just a wrapper of an existing technology."
+- "It's only effective temporarily so it's useless." / "It works now so it has no problem."
 - Doesn't admit **tradeoffs** exist.
 
 People's evaluations are anchored on the expectation, and **not meeting an expectation could make people's belief turn to another extreme**.

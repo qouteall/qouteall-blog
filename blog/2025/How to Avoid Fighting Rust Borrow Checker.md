@@ -1168,7 +1168,7 @@ No matter what the definition of "GC" is, reference counting is different from t
 | Freeing a whole large structure may cause large lag [^ref_counting_lag]                                | [Require more memory to achieve high performance](https://people.cs.umass.edu/~emery/pubs/gcvsmalloc.pdf), otherwise GC lag will be large. |
 | [Finds greatest fixed point](https://www.cs.cornell.edu/courses/cs6120/2019fa/blog/unified-theory-gc/) | [Finds least fixed point](https://www.cs.cornell.edu/courses/cs6120/2019fa/blog/unified-theory-gc/)                                        |
 | Propagates "death". (freeing one object may cause its children to be freed)                            | Propagates "live". (a living object cause its children to live, except for weak reference)                                                 |
-| Cloning and dropping a reference involves atomic operation (except single-threaded `Rc`)               | Reading/writing an on-heap reference may involve read/write barrier (often a branch, no atomic memory access)                              |
+| Cloning and dropping a reference involves atomic operation (except single-threaded `Rc`)               | Reading/writing an on-heap reference may involve read/write barrier (often a branch, no atomic operation)                                  |
 | Cannot automatically handle cycles. Need to use weak reference to cut cycle                            | Can handle cycles automatically                                                                                                            |
 | Cost is roughly O(reference count changing frequency) [^reference_counting_cost]                       | Cost is roughly O(count of living objects \* GC frequency) [^gc_cost]                                                                      |
 
@@ -1618,7 +1618,7 @@ The `as_deref` is not intuitive. It turns `Option<String>` into `Option<&str>`. 
 The "async", "mut", "Result" things can be generalized as "effects". These effects appears in types and are contagious. Why these effects are not contagious in other languages:
 
 - The "async" effect: In Golang goroutine and Java green thread, every function is "async" implicitly.
-- The "mut" effect: In mainstream GC languages there is no "object content immutability" notation in type. Things are mutable by default. (Java `final` is shallow immutability. `final` is modifier, not in type).
+- The "mut" effect: In mainstream GC languages there is no "object content immutability" notation in type. Things are mutable by default. (Java `final` is shallow immutability. `final` is modifier, not in type). Achieving immutability requires encapsulation and copying.
 - The "Result" effect: In the languages that have exceptions, almost every function can throw exception implicitly. (Java has checked exception, which is contagious in type, but it doesn't enforce for `RuntimeException`s)
 
 See also: [effect generics proposal](https://github.com/rust-lang/effects-initiative/blob/master/updates/2024-02-09-extending-rusts-effect-system.md#why-effect-generics).

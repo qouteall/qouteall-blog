@@ -235,10 +235,9 @@ tags:
 
 ## C/C++
 
-- Don't use `=` to compare equality.
 - Storing a pointer to an element in `std::vector` and then grow the vector, vector may re-allocate content, making element pointer invalid. Same applies to other containers.
 - If a function accepts `std::string&`, and literal string (e.g. `"x"`) is passed as argument, the `std::string` object will be short-lived.
-- C++ does implicit copy in many places. Implicit copy can hurt performance.
+- Directly pass-by-value can do implicit copy that hurts performance.
 - [Iterator invalidation](https://learnmoderncpp.com/2024/09/04/understanding-iterator-invalidation/). Modifying a container when looping on it.
 - `std::views::filter` malfunctions when element is mutated that predicate result changes in multi-pass iteration. [See also](https://github.com/CppCon/CppCon2024/blob/main/Presentations/Taming_the_Cpp_Filter_View.pdf), [See also](https://github.com/philsquared/cpponsea2025-slides/blob/main/Presentations/Faster_Safer_Better_Ranges.pdf)
 - `std::remove` doesn't remove but just rearrange elements. `erase` actually removes.
@@ -273,6 +272,8 @@ tags:
   - Note that `char` may be signed or unsigned, depending on platform. It's recommended to always use `signed char` or `unsigned char`, not `char`. [Apple ARM `char` is signed](https://developer.apple.com/documentation/xcode/writing-arm64-code-for-apple-platforms#Handle-data-types-and-data-alignment-properly), [gcc `char` is unsigned in Android, but signed in other platforms](https://stackoverflow.com/questions/2054939/is-char-signed-or-unsigned-by-default).
 - If the same header file is included in two `.cpp` files with different macros, and the macro difference affect the content in `inline` thing or `template` thing or type definition, then it violates [ODR (one definiton rule)](https://en.cppreference.com/w/cpp/language/definition.html). There will be different compiled functions with the same symbol name, and linker nondeterministically chooses one.
 - The dynamic library can bundle its own allocator[^cpp_allocator]. One allocator's allocation should not be freed in another allocator. Passing container (e.g. `vector`) is only safe when allocator matches. When passing `unique_ptr` across dynamic libraries, it's recommended to use custom deleter.
+- Don't use `=` to compare equality.
+- Don't forget `break` in switch.
 
 [^cpp_allocator]: The "allocator" here doesn't mean std allocator type. It means the allocator backing `malloc` and `free`, managing its own heap. For example, a dynamic library can static link a piece of jemalloc. And two such different jemalloc can co-exist in a process, and also co-exist with glibc allocator. Each allocator has its own machine code and static data.
 
@@ -536,8 +537,9 @@ Indirectly use different versions of the same package (diamond dependency issue)
   - Two different extensions of YAML file: `.yml` and `.yaml`. Some places only accept one of them.
   - See also: [The yaml document from hell](https://ruudvanasseldonk.com/2023/01/11/the-yaml-document-from-hell)
 - It's recommended to configure billing limit when using cloud services, especially serverless. See also: [ServerlessHorrors](https://serverlesshorrors.com/)
-- Big endian and little endian in binary file and net packet.
+- [Big endian and little endian](https://en.wikipedia.org/wiki/Endianness) in binary file and net packet.
 - The current working directory can be changed by system call (e.g. `chdir`).
 - The formats `.zip` and `.mp4` are container formats. They can hold many different kinds of formats inside.
 - Sorting number strings is different to sorting numbers. "10" is smaller than "9" in string comparision.
+- Configuration override. Many frameworks have configuration override mechanisms. Sometimes one configuration is correct but it still malfunctions, because another higher-priority configuraiton overrides it. An env var, a command-line argument or some config file in a faraway folder can override your config (it's framework-specific).
 
