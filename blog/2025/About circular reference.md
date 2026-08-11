@@ -546,11 +546,9 @@ Another way is to simply doesn't allow a thread to hold another lock when holdin
 
 [Choreographic programming](https://en.wikipedia.org/wiki/Choreographic_programming) is a programming paradigm, where one piece of code describes the logic of whole distributed system. It can prevent deadlock in message passing.
 
-In procedural programming, the code receiving from channel and code sending to channel are two separate pieces of code. And the code can freely do receiving or sending in any condition, which can cause channel deadlock. 
+In procedural programming, the code receiving from channel and code sending to channel are two separate pieces of code. Different threads(processes) have independent control flow that can freely choose to receive or send in any condition, which can cause channel deadlock. 
 
-But in choreographic programming, there is a unified control flow between different parties (e.g. client and server), and there is no explicit channel object. Message passing between two sides is one atomic operation in the unified control flow (unlike in procedural programming, it's two operations, one in sender, one in receiver). 
-
-There is a unified control flow (state machine) between both sides. The unified control flow ensures when one side is receiving, the other side must be sending, vice versa. So it's impossible to have two processes waiting each other.
+But in choreographic programming, there is a unified control flow between different parties (e.g. client and server). Message passing between two sides is one atomic operation in the unified control flow (unlike in procedural programming, it's two operations, one in sender, one in receiver). The unified control flow ensures when one side is receiving, the other side must be sending, vice versa. So it's impossible to have deadlock.
 
 ## Runtime deadlock detection
 

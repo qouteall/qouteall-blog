@@ -151,7 +151,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: When the big companies are in financial hardship, letting them collapse will hurt employment. Subsidizing them keeps employment.
 
-  Second-order effect: They become too-big-to-fall. They become inefficient while occupying a lot of resources. They indirectly kill new startups. It reduces overall employment in the long run.
+  Second-order effect: They become too-big-to-fail. They become inefficient while occupying a lot of resources. They indirectly kill new startups. It reduces overall employment in the long run.
 
 - First-order effect: Outsourcing reduces labor cost.
 
@@ -308,7 +308,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   Second-order effect: 
   
   - For personal punishment: It cause one to be scared of practicing, thus gain less experience. Lacking of experience makes one more likely to make mistakes.
-  - For punishment to decision-makers in organizations: It's often not obvious whether the failure is caused by wrong decision or just insufficient investment. Then fear of punishing naturally leads continuing investment to wrong decision, falling into sunk cost trap.
+  - For punishment to decision-makers in organizations: After executing a decision, if the result is not good, the decision-maker tend to put tons of resources to make the bad decision look good, which is inefficient and harmful. According to sunk cost fallacy, the more resources put into the wrong decision, the less likely decision is reverted. Also, one way to evade punishment is to expand the scheme and make more decision-makers to make the same mistake.
 
 - First-order effect: Only reporting successful results and not reporting failed attempts could improve others' impression on you.
 

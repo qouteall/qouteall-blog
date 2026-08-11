@@ -22,8 +22,9 @@ tags:
 - Margin collapse.
   - Two vertically touching siblings can overlap vertial margin. Child vertical margin can "leak" outside of parent.
   - Margin collapse doesn't happen when `border` or `padding` spcified. Don't try to debug margin collapse by coloring border. Debug it using browser's devtools.
-  - Margin collapse can be avoided by block formatting context (BFC). `display: flow-root` creates a BFC. (There are other ways to create BFC, like `overflow: hidden`, `overflow: auto`, `overflow: scroll`, `display:table`, but with side effects)
+  - Margin collapse can be avoided by block formatting context (BFC). `display: flow-root` creates a BFC. (There are other ways to create BFC, like `overflow: hidden`, `overflow: auto`, `overflow: scroll`, `display: table`, but with side effects)
   - Related: margin can be negative. Negative margin can make elements overlap and make child leak outside of parent. BFC doesn't prevent negative margin from working.
+  - Related: if you accidentally have BFC (e.g. caused by `overflow: hidden`) but still want margin collapse, use [owl selector](https://alistapart.com/article/axiomatic-css-and-lobotomized-owls/) on parent to simulate margin collapse: `.container > *+* { margin-top: 1rem; }` (the `*+*` applies all children except the first)
 - If a parent only contains floating children, the parent's height will collapse to 0, and the floating children will leak. Can be fixed by BFC.
 - If the parent's `display` is `flex` or `grid`, then the child's `float` has no effect
 - [Stacking context](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_positioned_layout/Stacking_context):
@@ -59,8 +60,11 @@ tags:
   - Use JS to set CSS height to `scrollHeight`. 
   - Put it in grid and transition from `grid-template-rows: 0fr` to `1fr`. 
   - Use `calc-size()`, [see also](https://developer.chrome.com/docs/css-ui/animate-to-height-auto) [^calc_size]. [^animate_height_auto]
-- In JS, reading size-related value (e.g. `offsetHeight`) cause browser to re-compute layout which may hurt performance. It can also affect transition animation [^reflow_animation].
+  - Use [`interpolate-size`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/interpolate-size) [^interpolate_size]
+- In JS, reading size-related value (e.g. `offsetHeight`) cause browser to reflow (re-compute layout) which may hurt performance (and it interferes with transition).
+- CSS transition doesn't work right when element is added. Modern solution is [`@starting-style`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@starting-style). Old solution is to cause reflow in initial state then set to animation finish state.
 - `display: inline` ignores `width` `height` and `margin-top` `margin-bottom`
+- The `<img>`, `<svg>`, `<video>` and `<canvas>` have `display: inline` by default, which makes them behave like icon in text (e.g. interfere with line height). In most cases they should have `display: block`. Also it's recommended to add `max-width: 100%` to avoid large image overflowing. (See also [A Modern CSS Reset](https://www.joshwcomeau.com/css/custom-css-reset/))
 - Whitespace collapse. [See also](https://blog.dwac.dev/posts/html-whitespace/)
   - By default, newlines in html are treated as spaces. Multiple spaces together collapse into one. 
   - `<pre>` doesn't collapse whitespace. But HTML parser removes a line break in the beginning and end of `<pre>` content.
@@ -81,6 +85,7 @@ tags:
   - Parent `visibility: hidden` doesn't enforce all children to be hidden. If child has `visibility: visible` it will still be shown. This don't apply to `opacity: 0` or `display: none`.
   - An element with `opacity: 0` can still be interacted (e.g. click button). This doesn't apply to `display: none` or `visibility: hidden`.
   - `display: none` removes element from layout. This doesn't apply to `visibility: hidden` or `opacity: 0`.
+- Font size and line height. See [Deep dive CSS: font metrics, line-height and vertical-align](https://iamvdo.me/en/blog/css-font-metrics-line-height-and-vertical-align)
 - The `<!DOCTYPE html>` in the beginning of html is important. Without it, browsers will use "quirks mode" which make many behaviors different. [See also](https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Quirks_mode_and_standards_mode)
 - [Cumulative Layout Shift](https://web.dev/articles/cls). 
   - It's recommended to specify `width` and `height` attribute in `<img>` tag to avoid layout shift due to image loading delay.
@@ -98,11 +103,11 @@ tags:
 
 [^percent_width_height]: It avoids circular dependency where parent height is determined by content height, but content height is determined by parent height.
 
-[^calc_size]: In Aug 2026 `calc-size` is not yet supported by FireFox and Safari. 
+[^calc_size]: In Aug 2026 `calc-size` is not yet supported by FireFox or Safari. 
+
+[^interpolate_size]: In Aug 2026 `interpolate-size` is not yet supported by FireFox or Safari, same as `calc-size`.
 
 [^animate_height_auto]: Also, there is another solution for transition `height: auto`: transitioning `max-height` from 0 to a large value, but I don't recommend it as it will mess up animation timing.
-
-[^reflow_animation]: When adding a new element, initial transition animation won't work by default. But if you read its layout-related value (e.g. `offsetHeight`) between changing animated attribute, it will trigger a reflow and make initial transition work.
 
 [^use_parent_width]: This design aim to avoid circular dependency. If parent height depends on child height, then child padding determining on parent height creates circular dependency. When that rule was originally designed, CSS mostly follows the "width flows top-down, height flows bottom-up" pricinple (that principle is broken with later-added flexbox and grid etc.) (the "top-down" is in DOM tree, not in web page). Note that when writing axis flips (e.g. `writing-mode: vertical-rl`) the percentage is based on height, and the principle changes to "height flows top-down, width flows bottom up".
 
@@ -434,12 +439,15 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Kafka's message size limit is 1MB by default.
 - In Kafka, across partitions, consume order may be different to produce order. If key is null then message's partition is not deterministic.
 - In Kafka, if a consumer processes too slow (no acknowledge within `max.poll.interval.ms`, default 5 min), the consumer will be treated as failed, then a rebalance occurs. That timeout is per-batch. If a batch contains too many messages it may reach that timeout even if individual message processing is not slow. Can fix by reducing batch size `max.poll.records`.
+- In Kafka, the `auto.offset.reset` is `latest` by default. Then a new consumer may miss messages that are sent after new consumer's first poll. [^kafka_latest_miss]
 - Sending message to Kafka before committing transation, then consumer can read stale data from database.
 - Nginx `proxy_buffering` delays SSE.
 - If the backend behind Nginx initiates closing the TCP connection, Nginx passive health check treat it as backend failure and temporarly stop reverse proxying. [See also](https://nginx.org/en/docs/http/ngx_http_upstream_module.html)
 - Nginx configuration URL trailing slash. [See also](https://dev.to/danielkun/nginx-everything-about-proxypass-2ona)
 - Elasticsearch doesn't allow removing mapping in an index. Dynamic mapping can auto-add mappings that you cannot remove, and it's enabled by default. 
 - Elasticsearch terms aggregation result is inaccurate on large datasets. Increasing `shard_size` can alleviate but increase resource usage. Composite aggregation is more accurate.
+
+[^kafka_latest_miss] When `auto.offset.reset` is `latest`, a new consumer's offset will be initialized on first poll. However, the initialization has delay, so when there is new message after first poll, the offset may be initialized after that message, then the new consumer misses the new message. There is a pattern of doing broadcast in kafka: use random consumer group id in a process. That broadcast is prone to the issue. The messages sent after new consumer's first poll may be missed. In that case, to avoid missing message, should make `auto.offset.reset` be `earliest` (or use other ways to control offset), then filter out stale messages in application code.
 
 ## React
 
