@@ -743,12 +743,16 @@ When automation works, it's good. But automation may break. When it breaks, no o
 
 Long-termism can usually gain advantage. However **long-termism is often fragile** because it involves more investments. The fruits of investments may be taken by others. An unknown incident may break the investment. Long-termism only works in safe and stable environments.
 
+Sometimes the distinction between sunk-cost fallacy and long-termism is blurry. 
+
 It's often that the process of doing improvement has risks. But the improvement can avoid bigger risk in the future. Under short-termism, it can only stuck in local minimum, avoiding risky improvement.
 
 Stock market pricing is often short-termism, which often cause company decision-making to also become short-termism: 
 
 - Sometimes the investors care too much about short-term shareholder return and don't understand value of long-term investment (e.g. product quality, company reputation, research).
 - Sometimes the investors care too much about short-term price trend. When there is a bubble, company tend to do irrational investment to prop the bubble. The story behind bubble only pays off after long time, but it's not rational long-termism.
+
+
 
 ## Related
 

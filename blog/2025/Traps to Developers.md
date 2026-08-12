@@ -439,7 +439,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Kafka's message size limit is 1MB by default.
 - In Kafka, across partitions, consume order may be different to produce order. If key is null then message's partition is not deterministic.
 - In Kafka, if a consumer processes too slow (no acknowledge within `max.poll.interval.ms`, default 5 min), the consumer will be treated as failed, then a rebalance occurs. That timeout is per-batch. If a batch contains too many messages it may reach that timeout even if individual message processing is not slow. Can fix by reducing batch size `max.poll.records`.
-- In Kafka, the `auto.offset.reset` is `latest` by default. Then a new consumer may miss messages that are sent after new consumer's first poll. [^kafka_latest_miss]
+- In Kafka, the `auto.offset.reset` is `latest` by default. Then a new consumer may miss messages that are sent after new consumer starts first poll. [^kafka_latest_miss]
 - Sending message to Kafka before committing transation, then consumer can read stale data from database.
 - Nginx `proxy_buffering` delays SSE.
 - If the backend behind Nginx initiates closing the TCP connection, Nginx passive health check treat it as backend failure and temporarly stop reverse proxying. [See also](https://nginx.org/en/docs/http/ngx_http_upstream_module.html)
@@ -447,7 +447,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Elasticsearch doesn't allow removing mapping in an index. Dynamic mapping can auto-add mappings that you cannot remove, and it's enabled by default. 
 - Elasticsearch terms aggregation result is inaccurate on large datasets. Increasing `shard_size` can alleviate but increase resource usage. Composite aggregation is more accurate.
 
-[^kafka_latest_miss] When `auto.offset.reset` is `latest`, a new consumer's offset will be initialized on first poll. However, the initialization has delay, so when there is new message after first poll, the offset may be initialized after that message, then the new consumer misses the new message. There is a pattern of doing broadcast in kafka: use random consumer group id in a process. That broadcast is prone to the issue. The messages sent after new consumer's first poll may be missed. In that case, to avoid missing message, should make `auto.offset.reset` be `earliest` (or use other ways to control offset), then filter out stale messages in application code.
+[^kafka_latest_miss]: When `auto.offset.reset` is `latest`, a new consumer's offset will be initialized on first poll. However, the initialization has delay, so when there is a new message after starting first poll, the offset may be initialized after that message, then the new consumer misses the new message. There is a pattern of doing broadcast in kafka: use random consumer group id in a process. That broadcast is prone to the issue. The messages sent after new consumer's first poll may be missed. In that case, to avoid missing message, should make `auto.offset.reset` be `earliest` (or use other ways to control offset), then filter out stale messages in application code.
 
 ## React
 
