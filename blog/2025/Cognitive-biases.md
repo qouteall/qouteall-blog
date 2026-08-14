@@ -1109,6 +1109,12 @@ Slot machines have a mechanism: losses disguised as wins (LDWs). When gambler wi
 
 Flattering subconsciously increase favorability, even when knowing it's flattering (this even applies to sycophant AI). Saying harsh criticism subconsciously reduce favorability, even when knowing the criticism is beneficial. Placebo still works even when knowing it's placebo.
 
+### Agent detection
+
+[Agent detection](https://en.wikipedia.org/wiki/Agent_detection). Thinking that things are intentionally caused by human or some "agent".
+
+For example, two pieces of software are incompatible. A person may think "the two software don't work together because there is a malicious person intentionally made them not working together". But actually it's due to two softwares using different "protocol" / "interface", not an intentional result.
+
 ## Efficient decision making
 
 When making decisions, human tend to **follow intuitions, which is quick and energy-efficient**, but also less accurate.

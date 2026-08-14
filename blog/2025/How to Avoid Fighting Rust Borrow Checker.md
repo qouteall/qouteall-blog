@@ -732,6 +732,8 @@ Using simple array-based arena enables other optimizations: the map whose key is
 
 There is no need to put one object's data into one struct. One object's data can be separated into many arenas. This is one idea behind ECS (entity component system). The separation can also enable free composition that's not allowed by OOP inheritance.
 
+For tree structure, if the tree is managed by pointer, then dropping a deep tree will cause stack overflow. Using arena to hold the tree can avoid the dropping stackoverflow.
+
 #### About linked list
 
 In Rust, writing a pointer-based linked list is hard. Writing zero-cost pointer-based doubly-linked list in safe Rust is impossible.

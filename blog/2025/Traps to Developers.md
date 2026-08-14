@@ -367,7 +367,9 @@ tags:
   - Reentrant means one thread can lock twice (and unlock twice) without deadlocking. Java `synchronized` and C# `lock` are reentrant.
   - Non-reentrant means if one thread lock twice, it will deadlock. Rust `Mutex` and Golang `sync.Mutex` are not reentrant.
 - [False sharing](https://en.wikipedia.org/wiki/False_sharing) of the same cache line costs performance.
-- Try to cancel some async operation, but the callback still runs.
+- Race conditions related to cancelling. It's possible that the task finishes right after cancelling or right before cancelling.
+- Race conditions related to cache. Right after querying from database and right before inserting cache, the data could become stale.
+- Race conditions related to update message broadcast. If it starts listenening broadcast after initializing, it may initialize as stale state then miss an update message.
 
 [^pg_write_skew]: It can be solved in serializable level. Without serializable level, it can also be solved by special constraints in schema. For conditional uniqueness constraint, use partial unique index. For range uniqueness constraint, use range type and exclude constraint. For uniqueness across two tables, insert redundant data into another table with unique constraint. (Related: in MySQL repeatable read level, `select ... for update` will do gap lock on index which can prevent write skew, but gap lock may cause deadlock.)
 
@@ -417,7 +419,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - `cmd > file 2>&1` make both stdout and stderr go to file. But `cmd 2>&1 > file` only make stdout go to file but don't redirect stderr.
 - There is a capability system for executables, apart from file permission sytem. Use `getcap` to see capability.
 - Unset variables. If `DIR` is unset, `rm -rf "$DIR/"` becomes `rm -rf "/"`. Using `set -u` can make bash error when encountering unset variable. 
-- Bash has caching between command name and file path of command. If you move one file in `$PATH` then invoking it in command gives ENOENT. Refresh cache using `hash -r`
+- Bash has caching between command name and file path of executable. If you move one file in `$PATH` then invoking it in command gives ENOENT. Refresh cache using `hash -r`
 - Using a variable unquoted will make spaces separate it into different arguments. Also it will make its line breaks treated as space.
 - `set -e` can make the script exit immediately when a sub-command fails, but it doesn't work inside function whose result is condition-checked (e.g. the left side of `||`, `&&`, condition of `if`). [See also](https://stratus3d.com/blog/2019/11/29/bash-errexit-inconsistency/)
 - File name can contain `\n` `\r` `'` `"`. File name can be invalid UTF-8.
@@ -439,7 +441,6 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Kafka's message size limit is 1MB by default.
 - In Kafka, across partitions, consume order may be different to produce order. If key is null then message's partition is not deterministic.
 - In Kafka, if a consumer processes too slow (no acknowledge within `max.poll.interval.ms`, default 5 min), the consumer will be treated as failed, then a rebalance occurs. That timeout is per-batch. If a batch contains too many messages it may reach that timeout even if individual message processing is not slow. Can fix by reducing batch size `max.poll.records`.
-- In Kafka, the `auto.offset.reset` is `latest` by default. Then a new consumer may miss messages that are sent after new consumer starts first poll. [^kafka_latest_miss]
 - Sending message to Kafka before committing transation, then consumer can read stale data from database.
 - Nginx `proxy_buffering` delays SSE.
 - If the backend behind Nginx initiates closing the TCP connection, Nginx passive health check treat it as backend failure and temporarly stop reverse proxying. [See also](https://nginx.org/en/docs/http/ngx_http_upstream_module.html)
@@ -447,27 +448,25 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Elasticsearch doesn't allow removing mapping in an index. Dynamic mapping can auto-add mappings that you cannot remove, and it's enabled by default. 
 - Elasticsearch terms aggregation result is inaccurate on large datasets. Increasing `shard_size` can alleviate but increase resource usage. Composite aggregation is more accurate.
 
-[^kafka_latest_miss]: When `auto.offset.reset` is `latest`, a new consumer's offset will be initialized on first poll. However, the initialization has delay, so when there is a new message after starting first poll, the offset may be initialized after that message, then the new consumer misses the new message. There is a pattern of doing broadcast in kafka: use random consumer group id in a process. That broadcast is prone to the issue. The messages sent after new consumer's first poll may be missed. In that case, to avoid missing message, should make `auto.offset.reset` be `earliest` (or use other ways to control offset), then filter out stale messages in application code.
-
 ## React
 
 - React compares equality using reference equality, not content equality.
-  - The objects and arrays that are newly created in component rendering [^react_rendering] are treated as always-new. Use `useMemo` to fix [^js_string_primitive].
-  - The closure functions that are created in component rendering are also always-new. Use `useCallback` to fix.
+  - The objects and arrays that are newly created directly in component function call are treated as always-new. Use `useMemo` to fix [^js_string_primitive].
+  - The closure functions that are created directly in component function are also always-new. Use `useCallback` to fix.
   - If an always-new thing is put into `useEffect` dependency array, the effect will run on every component function call. See also [Cloudflare indicent 2025 Sept-12](https://blog.cloudflare.com/deep-dive-into-cloudflares-sept-12-dashboard-and-api-outage/). 
   - Don't forget to include dependencies in the dependency array. And the dependencies also need to be memoed.
 - About state:
   - State objects themselves should be immutable. Don't directly set fields of state objects. Always recreate whole object.
-  - Don't set state directly in component rendering. State can only be set in callbacks.
-- `useEffect` without dependency array runs on every component render. But `useEffect` with empty dependency array `[]` runs only on component mounting.
+  - Don't set state directly in component function. State can only be set in callbacks.
+- `useEffect` without dependency array runs on every component function call. But `useEffect` with empty dependency array `[]` runs only on component mounting.
 - Forget clean up in `useEffect`.
 - Closure trap (stale closure). Closure can capture a state. If the state changes, the closure still captures the old state. The modern solution is [`useEffectEvent`](https://react.dev/reference/react/useEffectEvent). The old workaround is `useRef`.
   - Note: simply adding state to dependency array may cause unwanted effect cleanup (for `setTimeout`, it can mess up timing, because change of dependency clears and re-adds timeout).
-- `useEffect` firstly runs in next iteration of event loop, after browser renders the web page. Doing initialization in `useEffect` is not early enough and may cause visual flicker. Use `useLayoutEffect` for early initialization.
+- `useEffect` firstly runs in next iteration of event loop, after browser renders[^react_rendering] the web page. Doing initialization in `useEffect` is not early enough and may cause visual flicker. Use `useLayoutEffect` for early initialization.
 
 [^js_string_primitive]: In JS, `string` is primitive type, not object type. In JS you don't need to worry about two strings with same content but different reference like in Java. However the `String` in JS is object and use refernce equality.
 
-[^react_rendering]: Word "render" has ambiguity. The React component rendering means calling the component function. It doesn't draw contents on web page. It's different to browser rendering, which draws contents on web page.
+[^react_rendering]: Word "render" has ambiguity. The render here means drawing contents on web page. The React component rendering means calling the component function.
 
 
 ## Git
