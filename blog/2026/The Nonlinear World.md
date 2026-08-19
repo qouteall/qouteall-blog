@@ -80,7 +80,6 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   - Producticity software redcues working cost but creates more unnecessary work. Convenience of digital document creates more document work. Convenience of digital spreadsheet creates more unnecessary analysis. Convenience of remote meeting creates more unnecessary meetings.
   - ......
 
-
 - First-order effect: Improving a product can enhance its reputation.
 
   Second-order effect: Improving a product may make it more popular and attract more customers that doesn't fit the product, which may hurt the reputation.
@@ -127,24 +126,6 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: [Resource curse](https://en.wikipedia.org/wiki/Resource_curse). Profits in mineral export makes country's currency overvalued. Then importing becomes cheaper than country's own products. so the domestic agriculture and industries cannot develop. Having "easy money" also make people not work hard. When the international mineral price drops, economy collapses.
 
-- First-order effect: A department having budget surplus shows that the department is over-funded, so reducing its budget saves money for the organization.
-
-  Second-order effect: Saving money is effectively punished by reducing budget. After learning this, the department will do excessive spending to avoid any surplus that causes budget reduction. This greately increases money waste in the organization.
-
-- First-order effect: Promoting employees that did great job incentivizes employee. It makes the company more efficient.
-
-  Second-order effect: [Peter principle](https://en.wikipedia.org/wiki/Peter_principle). The promoted employee is not necessarily good in new job because the work changes. But the employee performing bad in raised position is rarely demoted. So "being good at work" is unstable state, but "being bad at work" is stable state. Eventually it likely reaches stable state: most employees do the work they are bad at.
-
-- First-order effect: Upper management sets very high goals to subordinates. This pushes subordinates to work hard.
-
-  Second-order effect: If the management sets high goals but don't have the ability to verify the result, it will be a disaster. Most employees cannot achieve the high goal. The honest employees gets low evaluation and leaves. The employees that fake results get rewarded and stay.
-
-  Also, the subordinate can choose to **over-execute** as a passive-aggressive way to fight back. The subordiante can execute in an extreme way that **maximizes the downside of the policy, giving pressure back to higher authority**.
-
-- First-order effect: Having clear team separation in a corporation makes management more efficient.
-
-  Second-order effect: When team splits, their goals are less likely to align. It's often that team A depends on team B's results. But team B has its own KPI and that KPI doesn't match team A's need. Team B is not responsible for team A's results. This greatly reduces efficiency.
-
 - First-order effect: First-mover advantage. The company creating a new product category has advantage. It develops brand recognition and network effect early. 
 
   Second-order effect: Second-mover advantage. After the first-mover costly explores different techniques/strategies, the second-mover can directly learn. And the first-mover often cannot correct its mistake due to sunk cost. The second-mover can avoid first-mover's mistakes.
@@ -160,10 +141,6 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   The outsourced labors may even gain reverse control of the decision-making because they are the only executors. In the long run, the overall cost is higher because of product defects and higher management cost.
 
   Using AI can also be seen as a kind of outsourcing.
-
-- First-order effect: A well-estabilished confidentality system helps keeping internal secrets.
-
-  Second-order effect: In bureaucratic organizations, responsibility evasion is common. Not approving document access bears fewer responsibility. Then the ones actually needing information may cannot access. See also [Institutional memory and reverse smuggling](https://landley.net/history/mirror/institutional_memory.html).
 
 - First-order effect: To reduce excess inventory, the price should drop to increase sale.
 
@@ -241,6 +218,41 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   - Expensive medication costs money
   - ...
 
+### In Organization
+
+- First-order effect: Upper management sets very high goals to subordinates. This pushes subordinates to work hard.
+
+  Second-order effect: If the management sets high goals but don't have the ability to verify the result, it will be a disaster. Most employees cannot achieve the high goal. The honest employees gets low evaluation and leaves. The employees that fake results get rewarded and stay.
+
+  Also, the subordinate can choose to **over-execute** as a passive-aggressive way to fight back. The subordiante can execute in an extreme way that maximizes the downside of the policy, giving pressure back to higher authority.
+
+- First-order effect: Having clear team separation in a corporation makes management more efficient.
+
+  Second-order effect: When team splits, their goals are less likely to align. It's often that team A depends on team B's results. But team B has its own KPI and that KPI doesn't match team A's need. Team B is not responsible for team A's results. This greatly reduces efficiency.
+
+- First-order effect: A department having budget surplus shows that the department is over-funded, so reducing its budget saves money for the organization.
+
+  Second-order effect: Saving money is effectively punished by reducing budget. After learning this, the department will do excessive spending to avoid any surplus that causes budget reduction. This greately increases money waste in the organization.
+
+- First-order effect: Promoting employees that did great job incentivizes employee. It makes the company more efficient.
+
+  Second-order effect: [Peter principle](https://en.wikipedia.org/wiki/Peter_principle). The promoted employee is not necessarily good in new job because the work changes. But the employee performing bad in raised position is rarely demoted. So "being good at work" is unstable state, but "being bad at work" is stable state. Eventually it likely reaches stable state: most employees do the work they are bad at.
+
+- First-order effect: A well-estabilished confidentality system helps keeping internal secrets.
+
+  Second-order effect: In bureaucratic organizations, responsibility evasion is common. Not approving document access bears fewer responsibility. Then the ones actually needing information may cannot access. See also [Institutional memory and reverse smuggling](https://landley.net/history/mirror/institutional_memory.html).
+
+- First-order effect: Solving problems make problem fewer.
+
+  Second-order effect: When solving problem, the first thing is to reveal problems. However revealing problem will make things look worse temporarily. And people tend to associate problem with who reveals the problem.
+
+- First-order effect: A politician should reward their loyal supporters.
+
+  Second-order effect: The loyal supporters are loyal, so increasing or decreasing rewarding to them doesn't change their stance. On contrary, rewarding swing voters has larger utility for the politician. So the politician may reward the swing voters in expense of loyal supporters. This is unsistainable in the long run, but effective in the short run.
+
+  The minority swing voters may have big impact on policies.
+
+
 ### In Psychology
 
 - First-order effect: Suppressing own emotion helps overcoming that emotion.
@@ -310,10 +322,6 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   - For personal punishment: It cause one to be scared of practicing, thus gain less experience. Lacking of experience makes one more likely to make mistakes.
   - For punishment to decision-makers in organizations: After executing a decision, if the result is not good, the decision-maker tend to put tons of resources to make the bad decision look good, which is inefficient and harmful. According to sunk cost fallacy, the more resources put into the wrong decision, the less likely decision is reverted. Also, one way to evade punishment is to expand the scheme and make more decision-makers to make the same mistake.
 
-- First-order effect: Only reporting successful results and not reporting failed attempts could improve others' impression on you.
-
-  Second-order effect: If you haven't obtained successful results for some time, not reporting makes people question that you are not working.
-
 - First-order effect: Making software react faster improves user experience.
 
   Second-order effect: If it's an AI application, the user tend to think fast AI is dumber than slow AI.
@@ -325,16 +333,6 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 - First-order effect: A centralized organization/movement can be defeated.
 
   Second-order effect: After breaking the organization, if the idea behind it is still popular, then it becomes decentralized and more resilient. Its activities become more sparse so it's harder to defense. And there will be no one to negotiate with.
-
-- First-order effect: A politician makes policies that reward their loyal supporters.
-
-  Second-order effect: The loyal supporters are loyal, so increasing or decreasing rewarding to them doesn't change their stance. On contrary, rewarding swing voters has larger utility for the politician. So the politician may reward the swing voters in expense of loyal supporters. This is unsistainable in the long run, but effective in the short run.
-
-  The minority swing voters may have big impact on policies.
-
-- First-order effect: Solving problems make problem fewer.
-
-  Second-order effect: When solving problem, the first thing is to reveal problems. However revealing problem will make things worse temporarily. And people tend to associate problem with who reveals the problem.
 
 - First-order effect: Trying to achieve perfection will make one do better.
 

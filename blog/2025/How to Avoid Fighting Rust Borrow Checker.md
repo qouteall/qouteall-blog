@@ -41,13 +41,13 @@ The most fighting with borrow checker happens in the **borrow-check-unfriendly c
 
 The solutions in borrow-checker-unfriendly cases (will elaborate below):
 
-- **Data-oriented design**. (less OOP)
+- **Data-oriented design. Un-learn OOP.**
   - Avoid unnecessary getter and setter.
-  - **Use ID/handle to replace borrow**. Use arena to hold data.
+  - Use ID/handle to replace reference. Use arena to hold data.
   - No need to put one object's all data into one struct. Can separate to different places.
 - Do split borrow in outer scope, and pass related fields separately.
 - **Defer mutation**. Turn mutation as commands and execute later.
-- **Avoid in-place mutation**. Mutate-by-recreate. Use `Arc` to share immutable data. Use **persistent data structure**.
+- **Avoid in-place mutation**. Mutate-by-recreate. Use `Arc` to share immutable data. Use persistent data structure.
 - For circular reference:
   - For graph data structure, use ID/handle and arena.
   - For callbacks, replace capturing with arguments, or use event handling to replace callback.
@@ -428,6 +428,8 @@ Related: sometimes you want to avoid deep copying content, but you cannot take o
 
 ## Contagious borrowing between branches
 
+Update: this will be fixed by Polonius borrow checker which is now [enabled by default in nightly](https://blog.rust-lang.org/2026/08/04/enabling-polonius-alpha-on-nightly/).
+
 It's a common pattern that we cache some things using a map. If the element is not in cache, we compute it and put into map.
 
 We want the borrow the value in cache to avoid cloning the value:
@@ -497,8 +499,6 @@ fn get_cached_result(cache: &mut HashMap<i32, String>, key: i32) -> &String {
 (The `entry` API was specifically designed to workaround this borrow checker limitation.)
 
 Another workaround is to wrap map value in `Arc` (or `Rc`) then clone the `Arc` when accessing.
-
-This will be fixed by [Polonius](https://rust-lang.github.io/polonius/current_status.html) borrow checker. Currently (2025 Aug) it's available in nightly Rust and can be enabled by an option. [See also](https://blog.rust-lang.org/inside-rust/2023/10/06/polonius-update/)
 
 That issue can also be workarounded by cloning value in map.
 
@@ -716,7 +716,8 @@ Note that `SlotMap` is not efficient when there are many unused empty space betw
 
 Other kinds of arenas:
 
-- The containers including `Vec`, `HashMap` and `TreeMap` can be treated as arenas. 
+- The containers including `Vec`, `HashMap` and `TreeMap` can be treated as arenas.
+- [slab](https://docs.rs/slab/0.4.12/slab/) array-based arena without generation integer.
 - [append_only_vec](https://docs.rs/append-only-vec/latest/append_only_vec/index.html). Its insertion only requires immutable borrow, because insertion doesn't move other elements, unlike `Vec`. This feature can workaround contagious borrow issue. It uses [segmented array](https://danielchasehooper.com/posts/segment_array/) data structure. It doesn't allow removing element or directly mutating element.
 - [generational_box](https://docs.rs/generational-box/0.7.0/generational_box/)
 - [bevy_ecs](https://docs.rs/bevy_ecs/latest/bevy_ecs/)
@@ -1355,14 +1356,16 @@ This restriction is related to panic unwinding. Before the "temporary void" beco
 
 Note that the restriction only applies to borrowed data. A local variable that's not borrowed can be temporary moved-out then re-assigned.
 
-## Unintuitive `Send` and `Sync`
+## `Send` and `Sync`
 
-The `Send` and `Sync` are not intuitive. Someone learning Rust may ask "`String` has no internal synchronization, so it's definitely not thread-safe, why does it satisfy `Send` and `Sync`?" Because `Send` and `Sync` actually tests on interior mutability. The underlying logic is not simple:
+To understand `Send` and `Sync` you need to un-learn the concepts in OOP languages (e.g. Java). For example, in Java, `HashMap` is not thread-safe. `ConcurrentHashMap` is thread-safe. So it's not safe to share `HashMap` across threads and mutate. But in Rust, `HashMap` is `Sync` if key and value types are `Sync`. The Rust `Send` and `Sync` concept is different to thread-safety concept in OOP languages.
+
+`Send` and `Sync` actually test on interior mutability. The underlying logic is not simple:
 
 - If the data structure is fully tree-shaped, no sharing is possible. Each object is owned by exactly one thread. So it's thread-safe. But this brekas when `Rc` makes data not tree-shaped. Two `Rc` structs can internally reference one object, but from the "outside" one `Rc` is just one struct that fits in tree-shaped ownership.
 - Even if there is sharing, only immutable borrow can be shared. If the shared data is actually immutable, then it's thread-safe. But this breaks with interior mutability. With interior mutability, it can be mutated via immutable borrow.
 
-The `String` has no interior mutability. So the tree-shaped ownership and mutable borrow exclusiveness already prevents data race of it.
+The `HashMap` has no interior mutability by itself. So the tree-shaped ownership and mutable borrow exclusiveness already prevents data race of it.
 
 If there is no interior mutability (`Rc` uses interior mutability), then all data are thread safe, `Send` and `Sync` is not needed. The `Send` and `Sync` is used for checking the exceptions caused by interior mutability.
 
@@ -1589,7 +1592,9 @@ In C++ and Golang, strings are just binary data with no encoding constraint. Rus
 Rust's enforcing of UTF-8 may improve security but may also reduce security:
 
 - [CVE-2024-56732](https://www.sentinelone.com/vulnerability-database/cve-2024-56732/) is triggered when non-UTF-8 string data. It's in C++. This can be avoided if the outer string source validates UTF-8. This is the case where Rust's design can improve security.
-- Rust `str` enforces UTF-8 so Rust code trust `str` to be UTF-8 and don't do internal validation. In Rust, using unsafe to **create a `str` containing invalid UTF-8 is undefined behavior and can cause security risk**. [CVE-2026-0810](https://www.sentinelone.com/vulnerability-database/cve-2026-0810/) is caused by it.
+- Rust `str` enforces UTF-8 so Rust code trust `str` to be UTF-8 and don't do internal validation. In Rust, using unsafe to **create a `str` containing invalid UTF-8 is undefined behavior and can cause security risk**. [CVE-2026-0810](https://rustsec.org/advisories/RUSTSEC-2025-0140.html) is caused by it. [^rust_cve]
+
+[^rust_cve]: In Rust, the bar of a CVE is lower, because a potentia way ofl misusing a library that cause safety issue is a CVE, even if there is no software that actually misuse it. But in C/C++, a potential way to misuse a lirbary is not CVE, only a real security vulnerability is CVE. [See also](https://www.reddit.com/r/rust/comments/1u6km19/comment/ory2fey/).
 
 Note that Rust only care about UTF-8 code point validity, not grapheme cluster validity.
 
@@ -1599,7 +1604,7 @@ About nullable string comparision: In Java you can directly `Objects.equals`. In
 - Comparing a `Option<&str>` with `String`:  `a == Some(b.as_str())`
 - Comparing a `Option<String>` with `Option<&str>`: `a.as_deref() == b`
 
-The `as_deref` is not intuitive. It turns `Option<String>` into `Option<&str>`. The `as_str` turns `String` into `&str`. Rust has deref auto conversion that can auto convert `&String` to `&str`, but that auto conversion sometimes doesn't work with generics, so some `as_deref` `as_str` is required.
+The `as_deref` turns `Option<String>` into `Option<&str>`. The `as_str` turns `String` into `&str`. Rust has deref auto conversion that can auto convert `&String` to `&str`, but that auto conversion sometimes doesn't work with generics, so some `as_deref` `as_str` is required.
 
 ## Summarize the contagious things
 

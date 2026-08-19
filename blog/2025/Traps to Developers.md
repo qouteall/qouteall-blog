@@ -47,11 +47,8 @@ tags:
   - Stacking context can affect the coordinate system of `position: absolute` or `fixed`.
 
 - On mobile browsers, the top address bar and bottom navigation bar can go out of screen when scrolling down. `100vh` correspond to the height when the two bars gets out of screen, which is larger than the height when the two bars are on screen. The modern solution is `100dvh`.
-- About scrollbar:
-  - In Windows, scrollbar takes space. But in macOS or mobile it doesn't take space [^macos_scrollbar_space].
-  - The space occupied by vertical scrollbar is included in `width`. Scrollbar "steals" space from inner contents. [^css_box_model_scrollbar]
-  - A top-level element with `width: 100vw` overflows horizontally if viewport has scrollbar that takes space. `width: 100%` can workaround that issue.
-  - About scrollbar styling: the [standard scroll bar styling](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Scrollbars_styling) supports color and width but doesn't support many other features (e.g. round corner scrollbar). The [`-webkit-scrollbar`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/::-webkit-scrollbar) non-standard pseudo-elements supports these features but FireFox doesn't support them. In modern browser, if standard scrollbar styling is used, then the  `-webkit-scrollbar` has no effect.
+- In Windows, scrollbar takes space. But in macOS or mobile it doesn't take space [^macos_scrollbar_space]. The space occupied by vertical scrollbar is included in `width`. Scrollbar "steals" space from inner contents. [^css_box_model_scrollbar]
+- About scrollbar styling: the [standard scroll bar styling](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Scrollbars_styling) supports color and width but doesn't support many other features (e.g. round corner scrollbar). The [`-webkit-scrollbar`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/::-webkit-scrollbar) non-standard pseudo-elements supports these features but FireFox doesn't support them. In modern browser, if standard scrollbar styling is used, then the  `-webkit-scrollbar` has no effect.
 - `position: absolute` is not based on its parent. It's based on its nearest positioned ancestor (the nearest ancestor that has `position` be `relative`, `absolute` or creates stacking context).
 - `position: sticky` doesn't work if parent (or indirect parent) has `overflow: hidden`.
 - [`backdrop-filter: blur` does not consider ambient things](https://www.joshwcomeau.com/css/backdrop-filter/#the-issue).
@@ -64,7 +61,7 @@ tags:
 - In JS, reading size-related value (e.g. `offsetHeight`) cause browser to reflow (re-compute layout) which may hurt performance (and it interferes with transition).
 - CSS transition doesn't work right when element is added. Modern solution is [`@starting-style`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@starting-style). Old solution is to cause reflow in initial state then set to animation finish state.
 - `display: inline` ignores `width` `height` and `margin-top` `margin-bottom`
-- The `<img>`, `<svg>`, `<video>` and `<canvas>` have `display: inline` by default, which makes them behave like icon in text (e.g. interfere with line height). In most cases they should have `display: block`. Also it's recommended to add `max-width: 100%` to avoid large image overflowing. (See also [A Modern CSS Reset](https://www.joshwcomeau.com/css/custom-css-reset/))
+- The `<img>`, `<svg>`, `<video>` and `<canvas>` have `display: inline` by default, which layouts them with text (can interfere with line height). In most cases they should have `display: block`. Also it's recommended to add `max-width: 100%` to avoid large image overflowing. (See also [A Modern CSS Reset](https://www.joshwcomeau.com/css/custom-css-reset/))
 - Whitespace collapse. [See also](https://blog.dwac.dev/posts/html-whitespace/)
   - By default, newlines in html are treated as spaces. Multiple spaces together collapse into one. 
   - `<pre>` doesn't collapse whitespace. But HTML parser removes a line break in the beginning and end of `<pre>` content.
@@ -76,6 +73,7 @@ tags:
 - The `<html>` and `<body>` and viewport are 3 different things.
   - Making web page height fill viewport requires both `html` and `body` to be `height: 100%`. (Another solution is `height: 100dvh`)
   - Viewport propagation. For background-related styles and `overflow`, applying to either `body` or `html` will all make them apply to viewport. But if both `html` and `body` specifies background, `<body>`'s background won't propagate to viewport and only cover `<body>` area. If both `html` and `body` have `overflow: scroll` then there will be two scrollbars.
+  - The body with `width: 100vw` overflows horizontally if viewport has scrollbar that takes space. `width: 100%` can workaround that issue.
 - About override:
   - CSS import order matters. The latter-imported ones can override the earlier ones.
   - The styles directly written in HTML are inline styles, which can be set by JS. Inline styles can override attributes in `.css` files (when both are not `!important`). `!important` attribute in `.css` files can override non `!important` inline style.
@@ -95,7 +93,7 @@ tags:
 
 [^macos_scrollbar_space]: In macOS it can be configured to make scrollbar take space like in Windows.
 
-[^css_box_model_scrollbar]: The CSS box model includes content box, padding, border and margin, but doesn't mention scrollbar. Scrollbar is visually between border and padding. Scrollbar is conceptually in padding box. But if the inner content is not intrinsically-sized,  scrollbar occupies space from content box ("steal" space across padding). [See also](https://www.w3.org/TR/css-overflow-3/#scrollbar-sizing). One may ask "if width includes scrollbar, then why `width: 100vw` cause horizontal overflow"? Because `width: 100vw` applies to an element inside viewport, not viewport itself. Viewport width includes viewport's scrollbar. 
+[^css_box_model_scrollbar]: The CSS box model includes content box, padding, border and margin, but doesn't mention scrollbar. Scrollbar is visually between border and padding. Scrollbar is conceptually in padding box. But if the inner content is not intrinsically-sized, scrollbar occupies space from content box ("steal" space across padding). [See also](https://www.w3.org/TR/css-overflow-3/#scrollbar-sizing).
 
 [^css_expand]: CSS only try to expand if the available space is finite. In may cases it has infinite vertical space by default.
 
@@ -201,17 +199,17 @@ tags:
 
 ## Java
 
-- `==` compares object reference. Should use `.equals` to compare object content. 
-- Forget to override `equals` and `hashcode`. It will use object identity equality by default in map key and set.
+- `==` compares object reference. Should use `.equals` to compare object content (Use `Objects.equals` to handle null). 
+- Forget to override `equals` and `hashcode` for data class. It will use object identity equality by default in map key and set.
 - Mutate the content of map key object (or set element object) makes the container malfunciton (unless the mutation doesn't affect `equals` and `hashcode`).
 - Not all `List<T>` are mutable. `Collection.emptyList()` gives immutable list. `Arrays.asList()` gives list that cannot add element.
 - A method that returns `Optional<T>` may return `null`.
 - Null is ambiguous. If `get()` on a map returns null, it may be either value is missing or value exists but it's null (can distinguish by `containsKey`). Null field and missing field in JSON are all mapped to null in Java object. [See also](https://committing-crimes.com/articles/2025-09-16-null-and-absence/). Similarily, privimtive value 0 can also be ambiguous.
 - Implicitly converting `Integer` to `int` can cause `NullPointerException`, same for `Float`, `Long`, etc.
 - Return in `finally` block swallows any exception thrown in the `try` or `catch` block. The method will return the value from `finally`.
-- Interrupt. Some libraries ignore interrupt. If a thread is interrupted and then load a class, and class initialization has IO, then class may fail to load.
+- Some libraries do blocking IO but ignores interrupt.
+- If a class's static initializer throws an exception, the class fails to load (using it gives `NoClassDefFoundError`) and it won't retry loading. Can only recover by restarting process. It's not recommended to do IO in class static initializer, except for reading resources in jar.
 - Thread pool does not log exception of tasks sent by `.submit()` by default. You can only get exception from the future returned by `.submit()`. Don't discard the future. And `scheduleAtFixedRate` task silently stop if exception is thrown.
-- Literal number starting with 0 will be treated as octal number. (`0123` is 83)
 - When debugging, debugger will call `.toString()` to local variables. Some class' `.toString()` has side effect, which cause the code to run differently under debugger. This can be disabled in IDE.
 - Before [Java24](https://openjdk.org/jeps/491) virtual thread can be "pinned" when blocking on `synchronized` lock, which may cause deadlock. It's recommended to upgrade to Java 24 if you use virtual thread.
 - `finalize()` running too slow blocks GC and cause memory leak. Exceptions out of `finalize()` are not logged. A dead object can resurrect itself in `finalize()`. It's recommended to use [`Cleaner`](https://docs.oracle.com/javase/9/docs/api/java/lang/ref/Cleaner.html) rather than overriding `finalize`.
@@ -246,9 +244,8 @@ tags:
 - [Iterator invalidation](https://learnmoderncpp.com/2024/09/04/understanding-iterator-invalidation/). Modifying a container when looping on it.
 - `std::views::filter` malfunctions when element is mutated that predicate result changes in multi-pass iteration. [See also](https://github.com/CppCon/CppCon2024/blob/main/Presentations/Taming_the_Cpp_Filter_View.pdf), [See also](https://github.com/philsquared/cpponsea2025-slides/blob/main/Presentations/Faster_Safer_Better_Ranges.pdf)
 - `std::remove` doesn't remove but just rearrange elements. `erase` actually removes.
-- Literal number starting with 0 will be treated as octal number. (`0123` is 83)
 - Destructing a deep tree structure can stack overflow. Solution is to replace recursion with loop in destructor.
-- `std::shared_ptr` itself is not atomic (although its reference count is atomic). Mutating a `shared_ptr` itself is not thread-safe. `std::atomic<std::shared_ptr<...>>` is atomic.
+- `std::shared_ptr` itself is not atomic (although its reference count is atomic). Mutating a `shared_ptr` itself is not thread-safe. `std::atomic<std::shared_ptr<...>>` is atomic but uses locking.
 - For std maps, `map[key]` is not a read-only operation. It will auto-insert default value if the corresponding entry doesn't exist. [See also](https://en.cppreference.com/w/cpp/container/map/operator_at.html)
 - For `std::vector<bool>`, result of `operator[]` is a proxy object, not `bool&`.
 - Undefined behaviors. The compiler optimization aim to keep defined behavior the same, but can freely change undefined behavior. Relying on undefined behavior can make program break under optimization. [See also](https://russellw.github.io/undefined-behavior)
@@ -271,12 +268,12 @@ tags:
 - Global variable initialization runs before `main`. [Static Initialization Order Fiasco](https://en.cppreference.com/w/cpp/language/siof.html).
 - Start from C++ 11, destructors have `noexcept` by default. If exception is thrown out of a `noexcept` function, whole process will crash.
 - If destructor is implemented, then you should implement copy constructor or disable copy constructor. If not, it may implicitly copy then double free.
-- If polymorphism is involved, base class destructor should be `virtual`. Otherwise freeing base-class-typed pointer won't free subclass data.
+- If polymorphism is involved, base class destructor should be `virtual`. Otherwise freeing base-class-typed pointer won't run subclass fields' destructor.
 - In signal handler, don't do any IO or locking, don't `printf` or `malloc`.
-- Compare signed number with unsigned number. If `a` is signed -1, `b` is unsigned 0, then `a > b` is true, because it auto-converts `a` into unsigned number.
+- Compare signed integer with unsigned integer. If `a` is signed -1, `b` is unsigned 0, then `a > b` is true, because it auto-converts `a` into unsigned integer.
   - Note that `char` may be signed or unsigned, depending on platform. It's recommended to always use `signed char` or `unsigned char`, not `char`. [Apple ARM `char` is signed](https://developer.apple.com/documentation/xcode/writing-arm64-code-for-apple-platforms#Handle-data-types-and-data-alignment-properly), [gcc `char` is unsigned in Android, but signed in other platforms](https://stackoverflow.com/questions/2054939/is-char-signed-or-unsigned-by-default).
 - If the same header file is included in two `.cpp` files with different macros, and the macro difference affect the content in `inline` thing or `template` thing or type definition, then it violates [ODR (one definiton rule)](https://en.cppreference.com/w/cpp/language/definition.html). There will be different compiled functions with the same symbol name, and linker nondeterministically chooses one.
-- The dynamic library can bundle its own allocator[^cpp_allocator]. One allocator's allocation should not be freed in another allocator. Passing container (e.g. `vector`) is only safe when allocator matches. When passing `unique_ptr` across dynamic libraries, it's recommended to use custom deleter.
+- The dynamic library can bundle its own allocator[^cpp_allocator]. One allocator's allocation should not be freed in another allocator. Passing container (e.g. `vector`) is only safe when allocator matches (and ABI matches). When passing `unique_ptr` across dynamic libraries, it's recommended to use custom deleter.
 - Don't use `=` to compare equality.
 - Don't forget `break` in switch.
 
@@ -343,6 +340,7 @@ tags:
 - Querying which range a point is in by `select ... from ranges where p >= start and p <= end` is inefficient, even when having composite index of `(start, end)`. [^about_ranges]
 - In Microsoft SQL server, the trailing space(s) in string is ignored in comparision.
 - Comparing two strings in different collations may cause error, or degrade performance because index cannot be used.
+- Whether schema migration succeeds is data-dependent. For example, making a nullable column `not null` will fail if one null exists and field has no default value.
 
 [^about_ranges]: It's recommended to use spatial index in MySQL and GiST in PostgreSQL for ranges. For non-overlappable ranges, it's possible to efficiently query using just B-tree index: `select * from (select ... from ranges where start <= p order by start desc limit 1) where end >= p` (only require index of `start` column). 
 
@@ -350,30 +348,24 @@ tags:
 
 ## Concurrency and Parallelism
 
-- `volatile`:
-  - `volatile` itself cannot replace locks. `volatile` itself doesn't provide atomicity.
-  - You don't need `volatile` for data protected by lock. Locking can already establish memory order and prevent some wrong optimizations.
-  - `volatile` can avoid wrong optimization related to reordering and merging memory reads/writes.
-  - In C/C++, `volatile` doesn't establish memory order. But in Java and C# `volatile` establishes memory order. [^volatile_memory_order]
+- Race conditions related to cancelling. It's possible that the task finishes right after cancelling or right before cancelling.
+- Race conditions related to cache. Right after querying from database and right before inserting cache, the data could become stale.
+- Race conditions related to update message broadcast. If it starts listenening broadcast after initializing, it may initialize as stale state then miss an update message.
+- Execution order may be different to spawn order. If you firstly spawn task A then spawn task B, B may run before A.
 - Time-of-check to time-of-use ([TOCTOU](https://en.wikipedia.org/wiki/Time-of-check_to_time-of-use)).
-- Data race (it's a large topic, not elaborated here).
+- Data race. One common example is mutating a shared container.
 - [Deadlock and lock-free deadlock](./About%20circular%20reference).
 - [MySQL (InnoDB) gap lock may deadlock](./About%20circular%20reference#mysql-gap-lock-deadlock).
-- PostgreSQL write skew. In repeatable read level, `select ... where ... for update` does NOT prevent another transaction from inserting new rows that satisfy the query condition, unlike in MySQL. It's called write skew. [^pg_write_skew]
-- Atomic reference counting (`Arc`, `shared_ptr`) can be slow when many threads frequently change the same counter. [See also](https://pkolaczk.github.io/server-slower-than-a-laptop/)
+- PostgreSQL write skew. In repeatable read level, `select ... where ... for update` does NOT prevent another transaction from inserting new rows that satisfy the query condition, unlike in MySQL. [^pg_write_skew]
 - About read-write lock: trying to write lock when holding read lock will deadlock. The correct way is to firstly release the read lock, then acquire write lock, and the conditions that were checked in read lock need to be re-checked.
   - SQL allows a transaction that hold read lock to upgrade to write lock. This mechanism is prone to deadlock.
 - Reentrant lock:
   - Reentrant means one thread can lock twice (and unlock twice) without deadlocking. Java `synchronized` and C# `lock` are reentrant.
   - Non-reentrant means if one thread lock twice, it will deadlock. Rust `Mutex` and Golang `sync.Mutex` are not reentrant.
 - [False sharing](https://en.wikipedia.org/wiki/False_sharing) of the same cache line costs performance.
-- Race conditions related to cancelling. It's possible that the task finishes right after cancelling or right before cancelling.
-- Race conditions related to cache. Right after querying from database and right before inserting cache, the data could become stale.
-- Race conditions related to update message broadcast. If it starts listenening broadcast after initializing, it may initialize as stale state then miss an update message.
+- The meaning of `volatile` is different across languages. In Java it has sequential-consistent ordering, in C# it has release-acquire ordering, but in C/C++ it establishes no memory ordering, only preventing some compiler optimizations.
 
 [^pg_write_skew]: It can be solved in serializable level. Without serializable level, it can also be solved by special constraints in schema. For conditional uniqueness constraint, use partial unique index. For range uniqueness constraint, use range type and exclude constraint. For uniqueness across two tables, insert redundant data into another table with unique constraint. (Related: in MySQL repeatable read level, `select ... for update` will do gap lock on index which can prevent write skew, but gap lock may cause deadlock.)
-
-[^volatile_memory_order]: In Java, `volatile` accesses have sequentially-consistent ordering (JVM will use memory barrier instruction if needed). In C#, writes to `volatile` have release ordering, reads to `volatile` have acquire ordering (CLR will use memory barrier instruction if needed). Note that "release" and "acquire" in memory order is different to locking (but related to locking).
 
 ## Common in many languages
 
@@ -398,6 +390,8 @@ tags:
 - Modulo of negative numbers. In Python,  `a % b` is `a - (floor(a / b) * b)`. But in C/C++/Java/C#/JS/Rust/Golang, `a % b` is `a - (roundTowardZero(a / b) * b)`. If `a` is negative then the behavior will be weird.
 - Retrying without limit or requesting without timeout can leak resources.
 - Creating file doesn't auto create parent folder. It will fail if parent folder doesn't exist. You need to manually create parent folder.
+- In C/C++ and Java, literal number starting with 0 will be treated as octal number. (`0123` is 83)
+- In Java and Python, there are two kinds of threads: daemon and non-daemon. When main function exits, the program will still be running when a non-daemon thread is running. The thread pool threads are non-daemon by default.
 
 
 ## Transitive dependency conflict
@@ -511,7 +505,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 ## Locale
 
 - The upper case and lower case can be different in other natural languages. In Turkish (tr-TR) lowercase of `I` is `ı` and upper case of `i` is `İ`. The `\w` (word char) in regular expression can be locale-dependent.
-- In German, the upper case of ß is SS (two characters, not one). But the lower case of SS is ss, not ß.
+- The upper case of German letter ß is SS (two characters, not one). But the lower case of SS is ss, not ß. 
 - Letter ordering is different in some other natural languages. Regular expression `[a-z]` may malfunction in other locale. 
 - PostgreSQL linguistic sorting (collation) depends on glibc by default. Upgrading glibc may cause index corruption due to changing of linguistic order. [See also](https://wiki.postgresql.org/wiki/Locale_data_changes). Related: [Docker Postgres Image issue](https://x.com/gwenshap/status/1990942970682749183)
 - Text notation of floating-point number is locale-dependent. `1,234.56` in US correspond to `1.234,56` in Germany.
@@ -543,6 +537,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
   - [Git commit hash may become number if unquoted](https://tmendez.dev/posts/rng-git-hash-bug/).
   - Two different extensions of YAML file: `.yml` and `.yaml`. Some places only accept one of them.
   - See also: [The yaml document from hell](https://ruudvanasseldonk.com/2023/01/11/the-yaml-document-from-hell)
+  - YAML template command injection, [see also](https://www.wiz.io/blog/red-agent-snowflake-copilot-cicd-bug).
 - It's recommended to configure billing limit when using cloud services, especially serverless. See also: [ServerlessHorrors](https://serverlesshorrors.com/)
 - [Big endian and little endian](https://en.wikipedia.org/wiki/Endianness) in binary file and net packet.
 - The current working directory can be changed by system call (e.g. `chdir`).
