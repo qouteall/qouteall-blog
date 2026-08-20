@@ -47,7 +47,7 @@ tags:
   - Stacking context can affect the coordinate system of `position: absolute` or `fixed`.
 
 - On mobile browsers, the top address bar and bottom navigation bar can go out of screen when scrolling down. `100vh` correspond to the height when the two bars gets out of screen, which is larger than the height when the two bars are on screen. The modern solution is `100dvh`.
-- In Windows/Linux, scrollbar takes space. (But in macOS or mobile it doesn't take space. [^macos_scrollbar_space]) Scrollbar can steal space from inner content. The `width: 200px` means content width plus scrollbar width is 200px (even with `box-sizing: content-box`). [^scrollbar_box_model]
+- In Windows/Linux, scrollbar takes space. (But in macOS or mobile it doesn't take space. [^macos_scrollbar_space]) Scrollbar can steal space from inner content. The `width: 200px` means content width plus scrollbar width is 200px, so scrollbar makes inner content's width is smaller than 200px (the same applies even with `box-sizing: content-box`). [^scrollbar_box_model]
 - Scrollbar may appear/vanish if content height changes, which can cause layout shift. Use `scrollbar-gutter: stable` to avoid layout shift.
 - About scrollbar styling: the [standard scroll bar styling](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Scrollbars_styling) supports color and width but doesn't support many other features (e.g. round corner scrollbar). The [`-webkit-scrollbar`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/::-webkit-scrollbar) non-standard pseudo-elements supports these features but FireFox doesn't support them. In modern browser, if standard scrollbar styling is used, then the  `-webkit-scrollbar` has no effect.
 - `position: absolute` is not based on its parent. It's based on its nearest positioned ancestor (the nearest ancestor that has `position` be `relative`, `absolute` or creates stacking context).
@@ -70,7 +70,7 @@ tags:
   - Any space or line break between two `display: inline-block` elements will be rendered as spacing. This doesn't happen in flexbox or grid.
 - `text-align` aligns text and inline things, but doesn't align block elements (e.g. normal divs).
 - `text-align: center` will not center when content is too wide. It will align left in that case. [See also](https://stackoverflow.com/questions/6618648/can-overflow-text-be-centered)
-- By default `width` and `height` doesn't include padding and border. `width: 100%` with `padding: 10px` can still overflow the parent. `box-sizing: border-box` make the width/height include border and padding. Note that `width` includes scrollbar regardless of `box-sizing` (unless the container is intrinsically-sized).
+- By default `width` and `height` doesn't include padding and border. `width: 100%` with `padding: 10px` can still overflow the parent. `box-sizing: border-box` make the width/height include border and padding.
 - The `<html>` and `<body>` and viewport are 3 different things.
   - Making web page height fill viewport requires both `html` and `body` to be `height: 100%`. (Another solution is `height: 100dvh`)
   - Viewport propagation. For background-related styles and `overflow`, applying to either `body` or `html` will all make them apply to viewport. But if both `html` and `body` specifies background, `<body>`'s background won't propagate to viewport and only cover `<body>` area. If both `html` and `body` have `overflow: scroll` then there will be two scrollbars.
@@ -91,6 +91,7 @@ tags:
 - JS-in-HTML may interfere with HTML parsing. For example `<script>console.log('</script>')</script>` makes browser treat the first `</script>` as ending tag. [See also](https://sirre.al/2025/08/06/safe-json-in-script-tags-how-not-to-break-a-site/)
 - Virtual scrolling breaks browser's text search functionality.
 - Trailing slash in URL. If current URL is `https://xxx.com/aaa/bbb`, then `<img src="image.png">` use image `https://xxx.com/aaa/image.png`. But if current URL is `https://xxx.com/aaa/bbb/` (with trailing slash), then image path is `https://xxx.com/aaa/bbb/image.png`
+- Shadow dom does some isolation, but some things are not isolated. CSS variables are shared with shadow dom. The size of `1rem` is always based on `font-size` of `<html>` even in shadow dom.
 
 [^macos_scrollbar_space]: In macOS it can be configured to make scrollbar take space like in Windows.
 
@@ -221,9 +222,10 @@ tags:
 - JVM has its own DNS cache in memory. It's independent to the operating system's DNS cache.
 - Spring AOP doesn't work when directly invoking methods from `this`.
 - Java built-in serialization has many issues (security vulnerability, cannot auto adapt adding fields, bypasses constructor, `transient final` is broken, etc.). It's not recommended to use it. Note that Flink still uses Java serialization for job graph[^java_serialize_lambda].
-- A `final` field may be uninitialized in constructor. If constructor panics and `this` escapes (e.g. by putting `this` to a static field), the `final` will be permanently uninitialized. A `static final` field may be uninitialized in class static initializer.
+- A `final` field may be read before initialization, which reads the default value (0 for primitive type, null for ref type). Same applies to `static final` fields.
+  - The default value of `final` field can be observed outside of constructor, if constructor throws exception and `this` escapes (e.g. by putting `this` to a static field). An object can be partially-initialzied.
 
-[^java_serialize_lambda]: Despite the drawbacks of Java serialization, Flink still uses Java serialization for job graph because it's the only general way to serialize lambdas. In Java, there is no other way to serialize lambdas without requiring user code biolerplate.
+[^java_serialize_lambda]: Java serialization can serialize lambdas without requiring extra user biolerplate code. So Flink still uses Java serialization for job graph despite the drawbacks.
 
 ## Golang
 
