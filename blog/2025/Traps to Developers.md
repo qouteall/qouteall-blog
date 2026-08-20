@@ -47,7 +47,8 @@ tags:
   - Stacking context can affect the coordinate system of `position: absolute` or `fixed`.
 
 - On mobile browsers, the top address bar and bottom navigation bar can go out of screen when scrolling down. `100vh` correspond to the height when the two bars gets out of screen, which is larger than the height when the two bars are on screen. The modern solution is `100dvh`.
-- In Windows, scrollbar takes space. But in macOS or mobile it doesn't take space [^macos_scrollbar_space]. The space occupied by vertical scrollbar is included in `width`. Scrollbar "steals" space from inner contents. [^css_box_model_scrollbar]
+- In Windows/Linux, scrollbar takes space. (But in macOS or mobile it doesn't take space. [^macos_scrollbar_space]) Scrollbar can steal space from inner content. The `width: 200px` means content width plus scrollbar width is 200px (even with `box-sizing: content-box`). [^scrollbar_box_model]
+- Scrollbar may appear/vanish if content height changes, which can cause layout shift. Use `scrollbar-gutter: stable` to avoid layout shift.
 - About scrollbar styling: the [standard scroll bar styling](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Scrollbars_styling) supports color and width but doesn't support many other features (e.g. round corner scrollbar). The [`-webkit-scrollbar`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/::-webkit-scrollbar) non-standard pseudo-elements supports these features but FireFox doesn't support them. In modern browser, if standard scrollbar styling is used, then the  `-webkit-scrollbar` has no effect.
 - `position: absolute` is not based on its parent. It's based on its nearest positioned ancestor (the nearest ancestor that has `position` be `relative`, `absolute` or creates stacking context).
 - `position: sticky` doesn't work if parent (or indirect parent) has `overflow: hidden`.
@@ -60,7 +61,7 @@ tags:
   - Use [`interpolate-size`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/interpolate-size) [^interpolate_size]
 - In JS, reading size-related value (e.g. `offsetHeight`) cause browser to reflow (re-compute layout) which may hurt performance (and it interferes with transition).
 - CSS transition doesn't work right when element is added. Modern solution is [`@starting-style`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@starting-style). Old solution is to cause reflow in initial state then set to animation finish state.
-- `display: inline` ignores `width` `height` and `margin-top` `margin-bottom`
+- `display: inline` ignores `width` `height` and `margin-top` `margin-bottom` [^img_inline]
 - The `<img>`, `<svg>`, `<video>` and `<canvas>` have `display: inline` by default, which layouts them with text (can interfere with line height). In most cases they should have `display: block`. Also it's recommended to add `max-width: 100%` to avoid large image overflowing. (See also [A Modern CSS Reset](https://www.joshwcomeau.com/css/custom-css-reset/))
 - Whitespace collapse. [See also](https://blog.dwac.dev/posts/html-whitespace/)
   - By default, newlines in html are treated as spaces. Multiple spaces together collapse into one. 
@@ -69,7 +70,7 @@ tags:
   - Any space or line break between two `display: inline-block` elements will be rendered as spacing. This doesn't happen in flexbox or grid.
 - `text-align` aligns text and inline things, but doesn't align block elements (e.g. normal divs).
 - `text-align: center` will not center when content is too wide. It will align left in that case. [See also](https://stackoverflow.com/questions/6618648/can-overflow-text-be-centered)
-- By default `width` and `height` doesn't include padding and border. `width: 100%` with `padding: 10px` can still overflow the parent. `box-sizing: border-box` make the width/height include border and padding. Note that `width` includes scrollbar regardless of `box-sizing`.
+- By default `width` and `height` doesn't include padding and border. `width: 100%` with `padding: 10px` can still overflow the parent. `box-sizing: border-box` make the width/height include border and padding. Note that `width` includes scrollbar regardless of `box-sizing` (unless the container is intrinsically-sized).
 - The `<html>` and `<body>` and viewport are 3 different things.
   - Making web page height fill viewport requires both `html` and `body` to be `height: 100%`. (Another solution is `height: 100dvh`)
   - Viewport propagation. For background-related styles and `overflow`, applying to either `body` or `html` will all make them apply to viewport. But if both `html` and `body` specifies background, `<body>`'s background won't propagate to viewport and only cover `<body>` area. If both `html` and `body` have `overflow: scroll` then there will be two scrollbars.
@@ -93,7 +94,7 @@ tags:
 
 [^macos_scrollbar_space]: In macOS it can be configured to make scrollbar take space like in Windows.
 
-[^css_box_model_scrollbar]: The CSS box model includes content box, padding, border and margin, but doesn't mention scrollbar. Scrollbar is visually between border and padding. Scrollbar is conceptually in padding box. But if the inner content is not intrinsically-sized, scrollbar occupies space from content box ("steal" space across padding). [See also](https://www.w3.org/TR/css-overflow-3/#scrollbar-sizing).
+[^scrollbar_box_model]: The CSS box model includes content box, padding, border and margin, but doesn't mention scrollbar. Scrollbar is visually between border and padding. Scrollbar is conceptually in padding box. If the inner content is not intrinsically-sized, scrollbar occupies space from content box (there is padding between scrollbar and inner content, but scrollbar can steal space from inner content across padding). [See also](https://www.w3.org/TR/css-overflow-3/#scrollbar-sizing). When container is `width: 200px` it's not intrinsically-sized. The 200px width includes scrollbar. But with `width: min-content`, it is intrinsically-sized so scrollbar occupies space from outside.
 
 [^css_expand]: CSS only try to expand if the available space is finite. In may cases it has infinite vertical space by default.
 
@@ -108,6 +109,8 @@ tags:
 [^animate_height_auto]: Also, there is another solution for transition `height: auto`: transitioning `max-height` from 0 to a large value, but I don't recommend it as it will mess up animation timing.
 
 [^use_parent_width]: This design aim to avoid circular dependency. If parent height depends on child height, then child padding determining on parent height creates circular dependency. When that rule was originally designed, CSS mostly follows the "width flows top-down, height flows bottom-up" pricinple (that principle is broken with later-added flexbox and grid etc.) (the "top-down" is in DOM tree, not in web page). Note that when writing axis flips (e.g. `writing-mode: vertical-rl`) the percentage is based on height, and the principle changes to "height flows top-down, width flows bottom up".
+
+[^img_inline]: The `<img>` has `display: inline` by default. Normally setting `width` or `height` to `display: inline` element has no effect. But there is a special case: [replaced elements](https://developer.mozilla.org/en-US/docs/Glossary/Replaced_elements). So `<img>` works similar to `display: inline-block` by default.
 
 ## Unicode and text
 
@@ -217,6 +220,10 @@ tags:
 - `OmitStackTraceInFastThrow` optimization causes exception to have no stacktrace. [See also](https://stackoverflow.com/questions/58696093/when-does-jvm-start-to-omit-stack-traces). The first few exceptions have stacktrace, so the stacktrace may be in early logs.
 - JVM has its own DNS cache in memory. It's independent to the operating system's DNS cache.
 - Spring AOP doesn't work when directly invoking methods from `this`.
+- Java built-in serialization has many issues (security vulnerability, cannot auto adapt adding fields, bypasses constructor, `transient final` is broken, etc.). It's not recommended to use it. Note that Flink still uses Java serialization for job graph[^java_serialize_lambda].
+- A `final` field may be uninitialized in constructor. If constructor panics and `this` escapes (e.g. by putting `this` to a static field), the `final` will be permanently uninitialized. A `static final` field may be uninitialized in class static initializer.
+
+[^java_serialize_lambda]: Despite the drawbacks of Java serialization, Flink still uses Java serialization for job graph because it's the only general way to serialize lambdas. In Java, there is no other way to serialize lambdas without requiring user code biolerplate.
 
 ## Golang
 
@@ -250,7 +257,7 @@ tags:
 - For `std::vector<bool>`, result of `operator[]` is a proxy object, not `bool&`.
 - Undefined behaviors. The compiler optimization aim to keep defined behavior the same, but can freely change undefined behavior. Relying on undefined behavior can make program break under optimization. [See also](https://russellw.github.io/undefined-behavior)
   - Accessing uninitialized memory is undefined behavior.
-    - Converting binary data pointer `char*` to struct pointer is treated as using uninitialized memory, even if the memory is initialized, because the object [lifetime](https://en.cppreference.com/w/cpp/language/lifetime.html) hasn't started.
+    - After converting binary data pointer `char*` to struct pointer, using it is treated as using uninitialized memory, even if the memory is initialized, because the object [lifetime](https://en.cppreference.com/w/cpp/language/lifetime.html) hasn't started.
     - Using a local variable before initializing it is also accessing uninitialized memory.
   - Accessing using null pointer or dangling pointer is undefined behavior.
   - Integer overflow/underflow is undefined behavior. Note that unsigned integer can underflow below 0. Don't use `x > x + 1` to check overflow as it will be optimized to `false`.
