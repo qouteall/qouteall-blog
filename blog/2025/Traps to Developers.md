@@ -139,6 +139,7 @@ tags:
 - [Zero-width characters](https://ptiglobal.com/the-beauty-of-unicode-zero-width-characters/), [Invisible characters](https://invisible-characters.com/)
   - For example, there are many spaces: Normal space U+0020, no-break space U+00A0, em space U+2003, etc. The normal space and no-break space looks the same.
 - Line break. Windows often use CRLF `\r\n` for line break. Linux and macOS often use LF `\n` for line break.
+- U+0000 is a valid code point. C++ `std::string` and Rust `str` can hold it. But C libraries often treat it as string terminator. [Null byte injection](https://cwe.mitre.org/data/definitions/158.html).
 - Locale ([elaborated below](#locale)).
 
 [^scalar_value]: The U+XXXX notation (XXXX is a hex value) represents a code point. In UTF-8, code point and scalar value are the same thing. But in UTF-16, it's not simple. You can understand scalar value as "real code point" that has semantic meaning. The "fake code point" is surrogate code point (U+D800 to U+DFFF). One surrogate code point itself has no semantic meaning. Two surrogate code units form a 4-byte scalar value, called surrogate pair. Note that a surrogate pair can both be seen as one code point or two code points. Because that UTF-8 is widely used, it's often that "code point" means scalar value ("real code point").

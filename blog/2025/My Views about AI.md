@@ -9,6 +9,12 @@ unlisted: false
 
 <!-- truncate -->
 
+## AI is very unlike human
+
+It's obvious that AI is very unlike human, but there is a tendency to treat AI as human. 
+
+AI's capability and failure modes are very different to human. AI is superhuman at in-training-distribution tasks but bad at simple out-of-training-distribution tasks.
+
 ## Intelligence is high-dimensional
 
 Many people tend to simplify intelligence to a one-dimensional IQ value. **Intelligence is high-dimensional**. 
@@ -835,10 +841,10 @@ The true superintelligence should be very "open-minded", not stuck in path depen
 
 Sometimes the model lose diversity because diversity reduces RL reward. This is also a problem of RL.
 
-## Synthetic data out of control
+## Large amount of data is effectively black box
 
-In OpenAI's [Where the goblins came from](https://openai.com/index/where-the-goblins-came-from/), it mentiones that the model-generated data is used in training (specifically, SFT). If some feature (e.g. goblin) becomes more likely to be outputted from model, then it become more frequent in training data, then the newly-trained model outputs it more frequently. This is self-reinforcing feedback loop. This adds bias and reduces diversity.
+In OpenAI's [Where the goblins came from](https://openai.com/index/where-the-goblins-came-from/), it mentiones that the model-generated data is used in training. If some feature (e.g. goblin) becomes more likely to be outputted from model, then it become more frequent in training data, then the newly-trained model outputs it more frequently. This is self-reinforcing feedback loop. This adds bias and reduces diversity.
 
-If there are employees manually throughly inspecting the synthetic data, they can possibly find the problem before the problem reaches consumers. However the synthetic data amount is so large, so it's likely that only a small portion is inspected by human. Also the human inspecting training data are likely outsourced low-salary workers.
+If someone manually throughly inspects the data, they can possibly find the problem before the problem reaches consumers. However the synthetic data amount is so large, so it's likely that only a small portion is inspected by human. (Also the human inspecting training data are likely outsourced low-salary workers. )
 
-The effect of poisonous training data is not limited by the specific prompt. (Only training goblin with nerdy personality prompt doesn't limit its effect to only appear with that prompt.)
+Large amount of data is effectively black box. It's not actual black box because you can inspect it, but no one will carefully inspect all of large data, so it's in practice black box.

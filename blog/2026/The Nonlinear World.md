@@ -41,6 +41,11 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: When human intervenes some parts of the system, but other parts of the system is still controlled by automation, it creates new failure modes that doesn't exist in pure human control or pure automation.
 
+- First-oder effect: After an incident, we should find the root cause and focus on fixing the root cause.
+
+  Second-order effect: [Component substitution fallacy](https://surfingcomplexity.blog/2023/04/15/missing-the-forest-for-the-trees-the-component-substitution-fallacy/). The reason why other mechanisms doesn't prevent or mitigate the incident is as important as the root cause. Just focusing on the root cause may miss the larger problem.
+
+
 ### In Economy
 
 - First-order effect: The British government in colonial India provided bonus for dead cobra. The bonus could incentivize cobra hunting.
@@ -200,7 +205,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: Lacking touch with pathogens in young age may cause immune system development issues, then may facilitate autoimmune disease.
 
-- First-order effect: Advance of medical techonology improve population health and reduce healthcare cost.
+- First-order effect: Advance of medical techonology improves population health and reduce healthcare cost.
 
   Second-order effect: 
   
@@ -214,9 +219,13 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   - Wrong diagnosis and wrong medication
   - Side effect of medication
   - Infect at the hospital
-  - Antibiotics disrupt the gut biome, thus interfere with immune system
+  - Antibiotics disrupt the gut microbiome, thus interfere with immune system
   - Expensive medication costs money
   - ...
+
+- First-order effect: Sugar-free drinks are healthy because they have zero calories.
+
+  Second-order effect: The artificial sweeteners can disrupt the gut microbiome, which can cause inflammation and other issues. Also, there is Brain-Calorie disconnect. The brain anticipates consuming calories but there is no actual calorie, so one may become more hungry and eats more real calories later.
 
 ### In Organization
 
