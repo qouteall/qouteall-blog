@@ -994,6 +994,8 @@ Analogies also utilize framing bias. For example: "National deficit is like a cr
 
 Some media often do **quoting out of context** (断章取义). Natural language is often vague and the meaning highly depends on context. Removing context can easily cause misleading understanding. This also utilizes framing bias.
 
+[XY problem](https://en.wikipedia.org/wiki/XY_problem). The actual requirement is Y. But one's instinct tells it should be solved by X, so asks about X, without mentioning root requirement Y. ("If I had asked people what they wanted, they would have said faster horses".)
+
 #### Two talking styles
 
 Two different talking styles: the charismatic leader one and the intellectual expert type:
@@ -1114,6 +1116,7 @@ Flattering subconsciously increase favorability, even when knowing it's flatteri
 [Agent detection](https://en.wikipedia.org/wiki/Agent_detection). Thinking that things are intentionally caused by human or some "agent".
 
 For example, two pieces of software are incompatible. A person may think "the two software don't work together because there is a malicious person intentionally made them not working together". But actually it's due to two softwares using different "protocol" / "interface", not an intentional result.
+
 
 ## Efficient decision making
 

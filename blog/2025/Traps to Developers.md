@@ -92,6 +92,7 @@ tags:
 - Virtual scrolling breaks browser's text search functionality.
 - Trailing slash in URL. If current URL is `https://xxx.com/aaa/bbb`, then `<img src="image.png">` use image `https://xxx.com/aaa/image.png`. But if current URL is `https://xxx.com/aaa/bbb/` (with trailing slash), then image path is `https://xxx.com/aaa/bbb/image.png`
 - Shadow dom does some isolation, but some things are not isolated. CSS variables are shared with shadow dom. The size of `1rem` is always based on `font-size` of `<html>` even in shadow dom.
+- [XSS](https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/XSS) of `javascript:` URL. For `href` property, when it starts with `javascript:` followed by JS code, clicking it executes JS code. This needs to be sanitized when URL comes from user data.
 
 [^macos_scrollbar_space]: In macOS it can be configured to make scrollbar take space like in Windows.
 
@@ -351,6 +352,7 @@ tags:
 - In Microsoft SQL server, the trailing space(s) in string is ignored in comparision.
 - Comparing two strings in different collations may cause error, or degrade performance because index cannot be used.
 - Whether schema migration succeeds is data-dependent. For example, making a nullable column `not null` will fail if one null exists and field has no default value.
+- SQL injection. Don't concat user data into SQL. Use parameter (`?`) for user data.
 
 [^about_ranges]: It's recommended to use spatial index in MySQL and GiST in PostgreSQL for ranges. For non-overlappable ranges, it's possible to efficiently query using just B-tree index: `select * from (select ... from ranges where start <= p order by start desc limit 1) where end >= p` (only require index of `start` column). 
 
@@ -360,7 +362,6 @@ tags:
 
 - Race conditions related to cancelling. It's possible that the task finishes right after cancelling or right before cancelling.
 - Race conditions related to cache. Right after querying from database and right before inserting cache, the data could become stale.
-- Race conditions related to update message broadcast. If it starts listenening broadcast after initializing, it may initialize as stale state then miss an update message.
 - Execution order may be different to spawn order. If you firstly spawn task A then spawn task B, B may run before A.
 - Time-of-check to time-of-use ([TOCTOU](https://en.wikipedia.org/wiki/Time-of-check_to_time-of-use)).
 - Data race. One common example is mutating a shared container.
@@ -392,6 +393,8 @@ tags:
 - When getting files in a folder, the order is not deterministic (may depend on inode order). It may behave differently on different machines even with same files. It's recommended to sort by filename then process. 
   - Note that `ls` by default sorts results. Use `ls -f` to see raw file order.
 - The order in hash map is also non-deterministic (unless using linked hash map).
+- The `..` in file path could allow [directory traversal attack](https://en.wikipedia.org/wiki/Directory_traversal_attack).
+  - For upload API, it's recommended to make server generate file name (e.g. use uuid as filename), instead of letting client pass filename.
 - IO buffering. 
   - If you don't flush, it may delay actual write. 
     - A CLI program that don't flush stdout works fine when directly running in terminal, but it delays output when used with pipe `|`.
@@ -451,6 +454,13 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Nginx configuration URL trailing slash. [See also](https://dev.to/danielkun/nginx-everything-about-proxypass-2ona)
 - Elasticsearch doesn't allow removing mapping in an index. Dynamic mapping can auto-add mappings that you cannot remove, and it's enabled by default. 
 - Elasticsearch terms aggregation result is inaccurate on large datasets. Increasing `shard_size` can alleviate but increase resource usage. Composite aggregation is more accurate.
+- When building HTML, use an template engine that escapes text to avoid [XSS attack](https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/XSS).
+- When using broadcast to update in-memory state:
+  - The Redis pub/sub may lose message if listener temporarily disconnects. Use Redis streams to avoid losing message. Initialize in-memory state before start listenening.
+  - If you use Kafka for broadcasting (using randomly-generated consumer group id), there is a race condition that the new consumer group's initial offset initializes late, so it may miss an initial update message. (New consumer offset initializes on first poll asynchroniously by default. Note that `seekToEnd` is also asynchronous). Solution is to synchronously get end offsets (watermark offsets) then manually seek to the offset, then initialize in-memory state.
+
+[^kafka_broadcast]: Using Kafka for message broadcast can avoid losing message in temporarily disconnect. Note that the recommended way of Kafka broadcasting is to use standalone consumer, manually manage offset, without using consumer group. A simple way of Kafka broadcasting is to randomly generate consumer group id, but it faces one race condition. The new consumer group's offset is initialized in its first poll asynchronously, not when subscribing. So there is a race condition where the initial offset is initialized too late so it misses one initial message. 
+
 
 ## React
 
@@ -467,6 +477,9 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Closure trap (stale closure). Closure can capture a state. If the state changes, the closure still captures the old state. The modern solution is [`useEffectEvent`](https://react.dev/reference/react/useEffectEvent). The old workaround is `useRef`.
   - Note: simply adding state to dependency array may cause unwanted effect cleanup (for `setTimeout`, it can mess up timing, because change of dependency clears and re-adds timeout).
 - `useEffect` firstly runs in next iteration of event loop, after browser renders[^react_rendering] the web page. Doing initialization in `useEffect` is not early enough and may cause visual flicker. Use `useLayoutEffect` for early initialization.
+- React server component security traps:
+  - The server actions are public Restful API. Should do input validation. Don't trust passed user id. Don't make return value contain secrets.
+  - Don't pass secret to client component. Note that the secret may be captured in closure (Next.js does encryption for closure capture, so this is mitigated. But the return value of server action is not encrypted.)
 
 [^js_string_primitive]: In JS, `string` is primitive type, not object type. In JS you don't need to worry about two strings with same content but different reference like in Java. However the `String` in JS is object and use refernce equality.
 
