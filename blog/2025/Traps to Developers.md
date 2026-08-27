@@ -209,12 +209,14 @@ tags:
 - Forget to override `equals` and `hashcode` for data class. It will use object identity equality by default in map key and set.
 - Mutate the content of map key object (or set element object) makes the container malfunciton (unless the mutation doesn't affect `equals` and `hashcode`).
 - Not all `List<T>` are mutable. `Collection.emptyList()` gives immutable list. `Arrays.asList()` gives list that cannot add element.
+- Map `get` accepts `Object`, passing a wrong type won't cause compile error.
 - A method that returns `Optional<T>` may return `null`.
 - Null is ambiguous. If `get()` on a map returns null, it may be either value is missing or value exists but it's null (can distinguish by `containsKey`). Null field and missing field in JSON are all mapped to null in Java object. [See also](https://committing-crimes.com/articles/2025-09-16-null-and-absence/). Similarily, privimtive value 0 can also be ambiguous.
 - Implicitly converting `Integer` to `int` can cause `NullPointerException`, same for `Float`, `Long`, etc.
 - Return in `finally` block swallows any exception thrown in the `try` or `catch` block. The method will return the value from `finally`.
-- Some libraries do blocking IO but ignores interrupt.
-- If a class's static initializer throws an exception, the class fails to load (using it gives `NoClassDefFoundError`) and it won't retry loading. Can only recover by restarting process. It's not recommended to do IO in class static initializer, except for reading resources in jar.
+- About interrupt: Some libraries do blocking IO but ignores interrupt. Some libraries wrap `InterruptedException` into other exceptions. 
+- If a class's static initializer throws an exception, the class fails to load (using it gives `NoClassDefFoundError`) and it won't retry loading. Can only recover by restarting process. 
+  - It's not recommended to do IO in class static initializer, except for reading resources in jar. The initialization that does IO should be retryable.
 - Thread pool does not log exception of tasks sent by `.submit()` by default. You can only get exception from the future returned by `.submit()`. Don't discard the future. And `scheduleAtFixedRate` task silently stop if exception is thrown.
 - When debugging, debugger will call `.toString()` to local variables. Some class' `.toString()` has side effect, which cause the code to run differently under debugger. This can be disabled in IDE.
 - Before [Java24](https://openjdk.org/jeps/491) virtual thread can be "pinned" when blocking on `synchronized` lock, which may cause deadlock. It's recommended to upgrade to Java 24 if you use virtual thread.
@@ -268,7 +270,9 @@ tags:
   - Integer dividing by 0 is undefined behavior.
   - Aliasing.
     - Strict aliasing rule. If there are two pointers with type `A*` and `B*`, and there is no subtyping relation between `A` and `B`, then compiler assumes two pointer can never equal. If they equal, using it to access memory is undefined behavior. One exception is byte pointer. [^strict_aliasing]
-    - Pointer provenance. Two pointers from two different provenances are treated as never equal. If their address equals, it's undefined behavior. [See also](https://www.ralfj.de/blog/2020/12/14/provenance.html). The [XOR linked list](https://en.wikipedia.org/wiki/XOR_linked_list) doesn't work with pointer provenance. Don't subtract two pointers then add offset to pointer, unless two pointers are in the same allocation.
+    - Pointer provenance. Each heap allocation or local variable or global variable is a provenance. If two pointers from two different provenances equals, accessing memory using both is undefined behavior. [See also](https://www.ralfj.de/blog/2020/12/14/provenance.html). 
+      - The [XOR linked list](https://en.wikipedia.org/wiki/XOR_linked_list) doesn't work with pointer provenance. 
+      - Adding offset to pointer only works within one provenance.
   - `const` can mean both read-only and immutable:
     - If the original declared object is not `const`, you can turn pointer to it as `const T*`, in this case `const` means read-only [^readonly]. You can change the object without triggering undefined behavior.
     - If the original declared object is `const`, then it's deemed immutable. If you use `const_cast` to turn its pointer to `T*` then change content, it's undefined behavior. [^cpp_mutable]
@@ -277,9 +281,10 @@ tags:
   - Unaligned memory access is undefined behavior. (Also, alignment can cause padding in struct that wastes space.)
   - Undefined behavior can "travel back in time". For `if (a) { b(); }`, if `b()` unconditionally triggers undefined behavior, then compiler can assume `a` is always false. If `a` is true then it triggers undefined behavior before executing `b()`. The deduction can go earlier: the inputs that cause `a` to be true can trigger undefined behavior before computing `a`.
 - Global variable initialization runs before `main`. [Static Initialization Order Fiasco](https://en.cppreference.com/w/cpp/language/siof.html).
-- Start from C++ 11, destructors have `noexcept` by default. If exception is thrown out of a `noexcept` function, whole process will crash.
+- Destructors have `noexcept` by default. If exception is thrown out of a `noexcept` function, whole process will crash.
 - If destructor is implemented, then you should implement copy constructor or disable copy constructor. If not, it may implicitly copy then double free.
 - If polymorphism is involved, base class destructor should be `virtual`. Otherwise freeing base-class-typed pointer won't run subclass fields' destructor.
+- When using raw pointer instead of smart pointer, exception may cause delete to not run which causes memory leak.
 - In signal handler, don't do any IO or locking, don't `printf` or `malloc`.
 - Compare signed integer with unsigned integer. If `a` is signed -1, `b` is unsigned 0, then `a > b` is true, because it auto-converts `a` into unsigned integer.
   - Note that `char` may be signed or unsigned, depending on platform. It's recommended to always use `signed char` or `unsigned char`, not `char`. [Apple ARM `char` is signed](https://developer.apple.com/documentation/xcode/writing-arm64-code-for-apple-platforms#Handle-data-types-and-data-alignment-properly), [gcc `char` is unsigned in Android, but signed in other platforms](https://stackoverflow.com/questions/2054939/is-char-signed-or-unsigned-by-default).
@@ -362,7 +367,8 @@ tags:
 
 - Race conditions related to cancelling. It's possible that the task finishes right after cancelling or right before cancelling.
 - Race conditions related to cache. Right after querying from database and right before inserting cache, the data could become stale.
-- Execution order may be different to spawn order. If you firstly spawn task A then spawn task B, B may run before A.
+- Execution order may be different to spawn order. If you firstly spawn task A then spawn task B, B may start runnning before A.
+  - It also applies to networking requests. If you firstly send request A then B, server may start processing B before A. Or server processes A before B, but B's response comes before A.
 - Time-of-check to time-of-use ([TOCTOU](https://en.wikipedia.org/wiki/Time-of-check_to_time-of-use)).
 - Data race. One common example is mutating a shared container.
 - [Deadlock and lock-free deadlock](./About%20circular%20reference).
@@ -478,13 +484,14 @@ Indirectly use different versions of the same package (diamond dependency issue)
   - Note: simply adding state to dependency array may cause unwanted effect cleanup (for `setTimeout`, it can mess up timing, because change of dependency clears and re-adds timeout).
 - `useEffect` firstly runs in next iteration of event loop, after browser renders[^react_rendering] the web page. Doing initialization in `useEffect` is not early enough and may cause visual flicker. Use `useLayoutEffect` for early initialization.
 - React server component security traps:
-  - The server actions are public Restful API. Should do input validation. Don't trust passed user id. Don't make return value contain secrets.
-  - Don't pass secret to client component. Note that the secret may be captured in closure (Next.js does encryption for closure capture, so this is mitigated. But the return value of server action is not encrypted.)
+  - The server functions are public Restful APIs. Should do input validation. Don't trust passed user id. Don't make return value contain secrets.
+  - Don't pass secret to client component. Note that the secret may be captured in server function closure [^server_action_closure_capture].
 
 [^js_string_primitive]: In JS, `string` is primitive type, not object type. In JS you don't need to worry about two strings with same content but different reference like in Java. However the `String` in JS is object and use refernce equality.
 
 [^react_rendering]: Word "render" has ambiguity. The render here means drawing contents on web page. The React component rendering means calling the component function.
 
+[^server_action_closure_capture]: Next.js encrypts captured values in server function closure, so this is mitigated. But the return value of server function is not encrypted. And the client component props are not encrypted.
 
 ## Git
 

@@ -57,12 +57,12 @@ When one's investment drops, framing bias can be a way for defensing: "my invest
 
 It's unintuitive that intermittent reward gives stronger effect than reliable reward. Examples:
 
-- When the partner sometimes love you but sometimes be "cold", the relationship attachment is stronger than when the partner consistently love you.
+- When the partner sometimes love you but sometimes be "cold", the relationship attachment may ironically be stronger than when the partner consistently love you.
 - The gambling that gives random reward creates more additction than the thing that gives consistent reward.
 
-It's related to "near miss". If one attempt failed but is "close to success" then the brain recognize it as "near miss", then give more motivation to retry despite failure.
+If one attempt failed but is "close to success" then the brain recognize it as "near miss", then give more motivation to retry despite failure.
 
-It's also related to expactation. A consistently good thing increases expectation, then it becomes "boring". When one thing is not consistently good, success gives high dopamine hit.
+A consistently good thing increases expectation, then it becomes "boring". When one thing is not consistently good, success gives high dopamine hit.
 
 ### Loss aversion and risk aversion
 
@@ -150,8 +150,6 @@ Reference: [Time perception - Wikipedia](https://en.wikipedia.org/wiki/Time_perc
 > Do not spoil what you have by desiring what you have not; remember that what you now have was once among the things you only hoped for.
 > 
 > ― Epicurus
-
-If happiness can be predicted, some happiness moves earlier. For example, one is originally happy when eating delicious chocolate. Then one become happy just after buying chocolate before eating it, and the happiness of actually eating chocolate reduces. In future the happiness can move earlier into deciding to buy chocolate. This effect is also called **second-order conditioning**.
 
 Material consumption can give short-term satisfaction, but cannot give long-term well-being (paradox of materialism). Long-term well being can better be achieved by sustainable consumption with temperance.
 
