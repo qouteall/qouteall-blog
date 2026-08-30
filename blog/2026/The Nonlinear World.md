@@ -645,6 +645,8 @@ About health: Some people treat health as a score. After eating unhealthy food o
 
 About AI: Current AI can solve PhD-level exam problems that 99.999% people cannot solve. But AI doesn't actually achieve PhD-level intelligence. Intelligence is high-dimensional. Solving exam problems is just one dimension.
 
+Simplifying a high-dimensionality reality into a one-dimension number is often wrong.
+
 ## About risk
 
 ### 3 kinds of risks
@@ -694,18 +696,6 @@ Bitcoin can only process 3 to 7 on-chain transactions per second, and it takes a
 
 There are faster decentralized cryptocurrency protocol designs. But doing big upgrade to Bitcoin protocol is nearly impossible because it requires consensus of major players ([block size war](https://vitalik.eth.limo/general/2024/05/31/blocksize.html)), and there are interest conflicts. But banks and exchange centers can upgrade its software without most customer's aggrement.
 
-## On planning
-
-In many cases, the real-world feedback invalidates assumptions in the plan. Then it's important to correct the plan. Beware of sunk cost fallacy.
-
-Success usually requires a lot of trial and error. Be more forgiving to the many failures in the process of trial and error. (It's also hard to do.)
-
-> A complex system that works is invariably found to have evolved from a simple system that worked. A complex system designed from scratch never works and cannot be patched up to make it work. You have to start over with a working simple system.
-> 
-> \- Systemantics: How Systems Work and Especially How They Fail
-
-Innovation cannot be planned. Having diversity of ideas and constraints could help innovation.
-
 ## Contrarian strategy
 
 - The seemingly good opportunities are often highly-competitive and not worth joining. Being the upstream or downstream of a highly-competitive field could be better ("Picks and Shovels" strategy).
@@ -719,6 +709,31 @@ Many good ideas initially look bad:
 
 Note that competitiveness is relative to the market size. A quickly-growing market is not competitive even if it seems so.
 
+## On planning
+
+In many cases, the real-world feedback invalidates assumptions in the plan. Then it's important to correct the plan. Beware of sunk cost fallacy.
+
+Success usually requires a lot of trial and error. Be more forgiving to the many failures in the process of trial and error. (It's also hard to do.)
+
+> A complex system that works is invariably found to have evolved from a simple system that worked. A complex system designed from scratch never works and cannot be patched up to make it work. You have to start over with a working simple system.
+> 
+> \- Systemantics: How Systems Work and Especially How They Fail
+
+Innovation cannot be planned. Having diversity of ideas and constraints could help innovation.
+
+## Top-down control doesn't work well
+
+[Law of requisite variety](https://en.wikipedia.org/wiki/Variety_(cybernetics)#Law_of_requisite_variety) tells that the controller must be more "flexible" and "versatile" than the target being controlled, otherwise controlling fails.
+
+The book [_Seeing like a state_](https://en.wikipedia.org/wiki/Seeing_Like_a_State) describes that governments want to make things legible to manage, thus reducing complex reality to numbers and symbols. However, the illegible things (cannot be simply tracked by numbers) are also important. Goodhart law is caused by the legible number being different to the actual objective. 
+
+However, governments (and large coorporations) still highly focus on legible information because they also want to maintain authority and want to control things. The illegible things are percepted and controlled by actual executors that the upper authority doesn't fully trust. 
+
+## Breaking the rigid rule is inevitable
+
+In reality there are often rules being broken, and it's tacitly permitted. Because rigid rules cannot adapt to complex changing reality requirements. The actually executed unspoken rule is uncertain but flexible.
+
+Software is also a kind of "rule". Software itself is rigid, but the actual user requirement is often changing, so a working software often face endless new requirements (but many requirements are fake).
 
 ## The flip side of advanced technologies
 
@@ -744,7 +759,15 @@ When automation works, it's good. But automation may break. When it breaks, no o
 > 
 > \- [Link](https://github.com/bazelbuild/bazel/issues/28101#issuecomment-3693346788)
 
+### AI reward hacking
 
+To train and control AI, human specify rewards to AI. Sometimes reward is specified by human manually, sometimes reward is computed by a program. The reinforcement learning makes AI do things that get high rewards.
+
+However, the reward value is a proxy to the actual objective that human wants AI to do. Just like Goodhart's law, the measured number is a proxy of actual objective. AI can use the easiest way to achieve high reward, without doing what human actually want AI to do. This is reward hacking.
+
+It's fundamental that it can only be alleviated but cannot be fully prevented. Also, scaling may make the problem worse (smarter AI is more smart in reward hacking). Reward hacking may be a core reason that AI cannot replace some human jobs.
+
+There is a [paperclip maximizer](https://en.wikipedia.org/wiki/Instrumental_convergence#Paperclip_maximizer) story where AI focuses on producing paperclips as much as it can so it harms humanity. But I think in that story the AI is more likely to hack the "paperclip counter", which is the easiest way to maximize its reward.
 
 ## Short-termism and long-termism
 

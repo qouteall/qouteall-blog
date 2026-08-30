@@ -290,8 +290,11 @@ tags:
   - Note that `char` may be signed or unsigned, depending on platform. It's recommended to always use `signed char` or `unsigned char`, not `char`. [Apple ARM `char` is signed](https://developer.apple.com/documentation/xcode/writing-arm64-code-for-apple-platforms#Handle-data-types-and-data-alignment-properly), [gcc `char` is unsigned in Android, but signed in other platforms](https://stackoverflow.com/questions/2054939/is-char-signed-or-unsigned-by-default).
 - If the same header file is included in two `.cpp` files with different macros, and the macro difference affect the content in `inline` thing or `template` thing or type definition, then it violates [ODR (one definiton rule)](https://en.cppreference.com/w/cpp/language/definition.html). There will be different compiled functions with the same symbol name, and linker nondeterministically chooses one.
 - The dynamic library can bundle its own allocator[^cpp_allocator]. One allocator's allocation should not be freed in another allocator. Passing container (e.g. `vector`) is only safe when allocator matches (and ABI matches). When passing `unique_ptr` across dynamic libraries, it's recommended to use custom deleter.
+- `malloc` may return null. When there is no OS overcommit, checking for null can gracefully handle out-of-memory. When overcommit is enabled (often enabled by default), `malloc` can succeed despite out-of-memory, then process get killed when accessing allocated memory. But it's still recommended to check for null (can abort on null), because it may still return null under overcommit[^malloc_return_null], and using null pointer is undefined behavior.
+  - In C++, the equivalence of `malloc` returning null in `new` is `std::bad_alloc` exception. When exception is disabled, use `new (std::nothrow) TheType`, which may give null.
+- C++ namespace pollution. It's not recommended to use `using namespace std;`. Including a header or `using` a namespace may change function overloading behavior.
 - Don't use `=` to compare equality.
-- Don't forget `break` in switch.
+- Don't forget `break` in switch, unless you want fallthrough.
 
 [^cpp_allocator]: The "allocator" here doesn't mean std allocator type. It means the allocator backing `malloc` and `free`, managing its own heap. For example, a dynamic library can static link a piece of jemalloc. And two such different jemalloc can co-exist in a process, and also co-exist with glibc allocator. Each allocator has its own machine code and static data.
 
@@ -299,9 +302,11 @@ tags:
 
 [^readonly]: The read-only here is in-language constraint. It should not be confused with read-only memory which is actually immutable.
 
-[^cpp_mutable]: Exception: In C++, changing `mutable` field of a `const` object is not undefined behavior. [See also](https://en.cppreference.com/w/cpp/language/cv.html).
+[^cpp_mutable]: Exception: C++ has interior mutability. Changing `mutable` field of a `const` object is not undefined behavior. [See also](https://en.cppreference.com/w/cpp/language/cv.html).
 
 [^cpp_move]: The `std::move` itself doesn't move. The `std::move` just converts reference to rvalue reference. When passed a `const T&` it gives `const T&&`. However, the move constructor takes `T&&`, not `const T&&`, so it cannot invoke the move constructor, instead it will invoke copy constructor which takes `const T&`(`const T&&` can convert to `const T&`). In C++, the "moved out" object is still alive and will be destructed. The "move" requires mutating the original object to make it "hollow". So moving cannot work with const object.
+
+[^malloc_return_null]: When overcommit is enabled, `malloc` may still return null. For example, when size argument is too large. Also, when virtual address space size is limited ([RLIMIT_AS](https://man7.org/linux/man-pages/man2/getrlimit.2.html)), `malloc` will return null when the process' virtual address space is used up. However, the cgroup `memory.max` (this is how containers limit memory usage) doesn't make `malloc` fail when OOM, and will make process be OOM-killed when accessing allocated memory.
 
 ## Python
 
@@ -333,7 +338,7 @@ tags:
 - MySQL (InnoDB) default to case-insensitive.
 - MySQL (InnoDB) can do implicit conversion by default. `select '123abc' + 1;` gives 124.
 - [MySQL (InnoDB) gap lock may cause deadlock](./About%20circular%20reference#mysql-gap-lock-deadlock).
-- In MySQL, you can select a field and group by another field. It gives nondeterministic result. (this is disabled start from MySQL 5.7.5, [see also](https://dev.mysql.com/doc/refman/8.4/en/sql-mode.html#sqlmode_only_full_group_by)) 
+- In MySQL, you can select a column and group by another column. It gives nondeterministic result. (this is disabled start from MySQL 5.7.5, [see also](https://dev.mysql.com/doc/refman/8.4/en/sql-mode.html#sqlmode_only_full_group_by)) 
 - Multi-column index `(x, y)` cannot be used when only filtering on `y`. (Except when there are very few different `x` values, database can do a skip scan that uses the index.) Similarily `like 'abc%'` can use index but `like '%abc'` cannot.
 - In SQLite, when table is not `strict`, values are dynamically-typed, but it has "type affinity" that does implicit conversion [^sqlite_implicit_conversion] It's recommended to always use `strict` table.
 - SQLite by default does not do vacuum. The file size only increases and won't shrink. To make it shrink you need to either manually `vacuum;` or enable `auto_vacuum`.
@@ -356,7 +361,7 @@ tags:
 - Querying which range a point is in by `select ... from ranges where p >= start and p <= end` is inefficient, even when having composite index of `(start, end)`. [^about_ranges]
 - In Microsoft SQL server, the trailing space(s) in string is ignored in comparision.
 - Comparing two strings in different collations may cause error, or degrade performance because index cannot be used.
-- Whether schema migration succeeds is data-dependent. For example, making a nullable column `not null` will fail if one null exists and field has no default value.
+- Whether schema migration succeeds is data-dependent. For example, making a nullable column `not null` will fail if one null exists and column has no default value.
 - SQL injection. Don't concat user data into SQL. Use parameter (`?`) for user data.
 
 [^about_ranges]: It's recommended to use spatial index in MySQL and GiST in PostgreSQL for ranges. For non-overlappable ranges, it's possible to efficiently query using just B-tree index: `select * from (select ... from ranges where start <= p order by start desc limit 1) where end >= p` (only require index of `start` column). 
@@ -368,7 +373,7 @@ tags:
 - Race conditions related to cancelling. It's possible that the task finishes right after cancelling or right before cancelling.
 - Race conditions related to cache. Right after querying from database and right before inserting cache, the data could become stale.
 - Execution order may be different to spawn order. If you firstly spawn task A then spawn task B, B may start runnning before A.
-  - It also applies to networking requests. If you firstly send request A then B, server may start processing B before A. Or server processes A before B, but B's response comes before A.
+  - It also applies to networking requests. If you firstly send request A then B (without waiting for A to finish), server may start processing B before A. Even if server processes A before B, B's response may come before A.
 - Time-of-check to time-of-use ([TOCTOU](https://en.wikipedia.org/wiki/Time-of-check_to_time-of-use)).
 - Data race. One common example is mutating a shared container.
 - [Deadlock and lock-free deadlock](./About%20circular%20reference).
@@ -380,6 +385,7 @@ tags:
   - Reentrant means one thread can lock twice (and unlock twice) without deadlocking. Java `synchronized` and C# `lock` are reentrant.
   - Non-reentrant means if one thread lock twice, it will deadlock. Rust `Mutex` and Golang `sync.Mutex` are not reentrant.
 - [False sharing](https://en.wikipedia.org/wiki/False_sharing) of the same cache line costs performance.
+- [Memory order](https://en.wikipedia.org/wiki/Memory_ordering). (If you already use locks, channels, or other existing lock-free data structures, no need to care much about memory order. Memory order matters when building lock-free data structure or raw synchronization etc.)
 - The meaning of `volatile` is different across languages. In Java it has sequential-consistent ordering, in C# it has release-acquire ordering, but in C/C++ it establishes no memory ordering, only preventing some compiler optimizations.
 
 [^pg_write_skew]: It can be solved in serializable level. Without serializable level, it can also be solved by special constraints in schema. For conditional uniqueness constraint, use partial unique index. For range uniqueness constraint, use range type and exclude constraint. For uniqueness across two tables, insert redundant data into another table with unique constraint. (Related: in MySQL repeatable read level, `select ... for update` will do gap lock on index which can prevent write skew, but gap lock may cause deadlock.)
@@ -405,7 +411,7 @@ tags:
   - If you don't flush, it may delay actual write. 
     - A CLI program that don't flush stdout works fine when directly running in terminal, but it delays output when used with pipe `|`.
   - If program is force-killed (e.g. `kill -9`) some of its last log may not be written to log file because it's buffered.
-  - In Linux, if `write()` and `close()` both don't return error code, the write may still fail, due to IO buffering. [See also](https://man7.org/linux/man-pages/man2/close.2.html)
+  - Successfully writing file doesn't necessarily mean actually writing to disk. If there is power loss, write may be lost. [See also](https://man7.org/linux/man-pages/man2/close.2.html)
 - Modulo of negative numbers. In Python,  `a % b` is `a - (floor(a / b) * b)`. But in C/C++/Java/C#/JS/Rust/Golang, `a % b` is `a - (roundTowardZero(a / b) * b)`. If `a` is negative then the behavior will be weird.
 - Retrying without limit or requesting without timeout can leak resources.
 - Creating file doesn't auto create parent folder. It will fail if parent folder doesn't exist. You need to manually create parent folder.
@@ -574,4 +580,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - The formats `.zip` and `.mp4` are container formats. They can hold many different kinds of formats inside.
 - Sorting number strings is different to sorting numbers. "10" is smaller than "9" in string comparision.
 - Configuration override. Many frameworks have configuration override mechanisms. Sometimes one configuration is correct but it still malfunctions, because another higher-priority configuraiton overrides it. An env var, a command-line argument or some config file in a faraway folder can override your config (it's framework-specific).
+- Duplicated configuration. When one place changes, another place must change accordingly. Forgeting changing one causes problem. It's recommended to make configurations have single-source-of-truth.
+
+
 

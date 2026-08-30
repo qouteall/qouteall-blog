@@ -99,8 +99,6 @@ It's common that: Most people focus on their own businesses. Most people don't r
 
 [Wet bias](https://en.wikipedia.org/wiki/Wet_bias): Overestimate probability of raining to improve the usefulness of forecast.
 
-Believing a false conspiracy theory often can effectively reduce risk. Conspiracy theories have real utility according to the "better safe than sorry" principle. Similar applies to cynicism.
-
 Bad news travels fast. Tragedy news can gain more attention than happy news:
 
 - Sharing happy news is often seen as bragging or advertisement, because the happy thing applies to other people. But sharing tragedy news signals care and empathy.
@@ -111,6 +109,10 @@ Bad news travels fast. Tragedy news can gain more attention than happy news:
 Tragedy stories often feel more "true" than happy stories. Social media has more tragedy news. Browsing social media can make one stuck in negative emotions.
 
 Murphy's law: "Anything that can go wrong will go wrong". It feels true because "going wrong" is often absorption barrier. If it goes right it can go wrong. But if it goes wrong it's unlikely to go right. Murphy's law includes no time limit. In infinite time horizon its correct rate approaches 100%. Although that prediction is likely correct, it's useless for financial trading because it includes no time limit.
+
+Believing a false conspiracy theory often can effectively reduce risk. Conspiracy theories have real utility according to the "better safe than sorry" principle. A little cynicism can help reducing risks.
+
+Cynicism has many other "utilities": criticizing governance gives feeling of "fighting the injustice", signals emphathy, signals "courage", stengthens social tie, evades responsibility of self failure, relieves pressure by verbal attacking, etc. Also, there is greener grass syndrome (thinking another country is better than current country) that creates hope. Sometimes cynicism is addictive when browsing social media. **A little cynicism is protective but addictive cynicism is harmful**.
 
 ### Perception of risk
 
