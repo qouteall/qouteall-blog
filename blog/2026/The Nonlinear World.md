@@ -761,7 +761,7 @@ When automation works, it's good. But automation may break. When it breaks, no o
 
 ### AI reward hacking
 
-To train and control AI, human specify rewards to AI. Sometimes reward is specified by human manually, sometimes reward is computed by a program. The reinforcement learning makes AI do things that get high rewards.
+To train and control AI, human specify rewards to AI. Sometimes reward is specified by human manually, sometimes reward is computed by a program, sometimes reward value also comes from AI. The reinforcement learning makes AI do things that get high rewards.
 
 However, the reward value is a proxy to the actual objective that human wants AI to do. Just like Goodhart's law, the measured number is a proxy of actual objective. AI can use the easiest way to achieve high reward, without doing what human actually want AI to do. This is reward hacking.
 

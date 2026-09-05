@@ -272,8 +272,10 @@ Not doing in-place mutation can reduce chance of bugs. In OOP languages it's eas
 
 Mutate-by-recreate can be useful for cases like:
 
-- Safely sharing data in multithreading (read-copy-update (RCU), copy-on-write (COW)). Only make one "root reference" be mutable atomically. Mutating is recreating whole object. (It's often used with [arc_swap](https://docs.rs/arc-swap/latest/arc_swap/))
+- Safely sharing data in multithreading. Only make one "root reference" be mutable atomically. Mutating is recreating whole object. (It's often used with [arc_swap](https://docs.rs/arc-swap/latest/arc_swap/)) (RCU (read-copy-update) does this.[^rcu])
 - Take snapshot and rollback efficiently
+
+[^rcu]: RCU (read-copy-update) allows having a mutable-pointer-to-immutable-data-structure. One problem is delayed reclamation. After changing the pointer, you cannot free the old data structure immediately because other threads may be still reading it (RCU reading is lock-free). In Linux kernel, it waits until all CPU cores have been preempted once to free the data structure (being preempted means kernel code exits once, so it must have finished reading all stale data structure). But in userspace programs it's not that simple (unless you manually make all reader threads peroidically enter "quiescent state" where it finishes reading all data structure in RCU, this cannot be automatically done by a library function). arc_swap uses hazard pointer to do delayed reclamation, which achieves similar effect, but has more costs (reading is lock-free but uses SeqCst atomic operations).
 
 **Persistent data structure**: they share unchanged sub-structure (structural sharing) to make mutate-by-recreate faster. Some crates of persistent data structures: [rpds](https://docs.rs/rpds/latest/rpds/index.html), [im](https://docs.rs/im/latest/im/), [pvec](https://docs.rs/pvec/latest/pvec/index.html).
 
@@ -649,27 +651,17 @@ Grouping two things together can create circular reference:
 
 ![](./circular/grouping_cycle.drawio.png)
 
-Putting two things into one struct can create new circular reference, which is unfriendly to borrow checker. No need to put one object's all data into one struct. One object's data can be scattered in many places.
+Putting two things into one struct can create new circular reference, which is unfriendly to borrow checker. No need to put one object's all data into one struct. Unlearn OOP. One conceptual object no need to correspond to one struct. One object's data can be scattered in many arenas.
 
-In OOP languages, it's a common pattern that parent references child, and child references parent. It's convenient because you can access parent data in child's method, without passing parent as argument. That creates circular reference. This just-for-convenience circular reference should be avoided. The parent borrow should be passed as argument.
+In OOP languages, it's a common pattern that parent references child, and child references parent. It's convenient because you can access parent data in child's method, without passing parent as argument. In Rust that should either be replaced by arena, or refactor to avoid child referencing parent.
 
-However passing parent borrow can encounter contaigous borrow issue mentioned earier. If parent owns child, you cannot mutably borrow parent and child at the same time. One workaround is to not mutably borrow the whole parent, only mutably borrow parent's fields individually (it's less convenient).
-
-In a tree structure, if there is some logic that requires upward traverse through tree, letting child node to reference parent node is natural in non-Rust languages. It's recommended to use arena in that case.
-
-In C++ there is the **unregister-from-parent-on-destruct pattern**: the parent keep a container of child object pointers; in child object's destructor, it removes itself from parent's container. This pattern also involves circular reference. This should be avoided in Rust. The child should be owned by parent, and destructing child should be done via parent.
+In C++ there is the unregister-from-parent-on-destruct pattern: the parent keep a container of child object pointers; in child object's destructor, it removes itself from parent's container. This pattern also involves circular reference. This should be avoided in Rust. The child should be owned by parent, and destructing child should be done via parent.
 
 Although circular reference is convenient in GC languages, it still has memory leak risk: when every child references parent, keeping a reference to one node of whole structure will prevent the whole structure from being GCed. In GC languages, the capturing of closure (lambda expression) are one common source of memory leaks, as the capturing is not obvious [^visualize_capturing].
 
 [^visualize_capturing]: JetBrains IDEs semantic coloring can be configured so that captured values are in another color. This can make capturing more obvious.
 
-## The circular reference that's inherent in data structure
-
-If the data structure inherently requires circular reference, solutions:
-
-- Use arena. Use ID/handle to replace borrow (elaborated later). This is the recommended solution.
-- Use reference counting and interior mutability (not recommended).
-- Use `unsafe` (only use if really necessary).
+If there are circular references that's inherent in data structure, the recommended solution is still arena. 
 
 ## Self-reference
 
@@ -718,7 +710,7 @@ Other kinds of arenas:
 
 - The containers including `Vec`, `HashMap` and `TreeMap` can be treated as arenas.
 - [slab](https://docs.rs/slab/0.4.12/slab/) array-based arena without generation integer.
-- [append_only_vec](https://docs.rs/append-only-vec/latest/append_only_vec/index.html). Its insertion only requires immutable borrow, because insertion doesn't move other elements, unlike `Vec`. This feature can workaround contagious borrow issue. It uses [segmented array](https://danielchasehooper.com/posts/segment_array/) data structure. It doesn't allow removing element or directly mutating element.
+- [append_only_vec](https://docs.rs/append-only-vec/latest/append_only_vec/index.html). Its insertion only requires immutable borrow, because insertion doesn't move other elements, unlike `Vec`. This feature can workaround contagious borrow issue. It uses [segmented array](https://danielchasehooper.com/posts/segment_array/) data structure. It doesn't allow removing element or directly mutating element. (a similar one is [boxcar](https://docs.rs/boxcar/latest/boxcar/index.html))
 - [generational_box](https://docs.rs/generational-box/0.7.0/generational_box/)
 - [bevy_ecs](https://docs.rs/bevy_ecs/latest/bevy_ecs/)
 
@@ -1150,7 +1142,7 @@ But don't worry too much about `Arc`. In most normal applications, `Arc` itself 
 
 If `Arc` clone/dropping do become bottleneck, possible solutions:
 
-- For frequent short-term reads to mutable data, use [arc_swap](https://docs.rs/arc-swap/latest/arc_swap/). It follows read-copy-update (RCU) or copy-on-write (COW) paradigm. In RCU(or COW), mutation requires recreating the whole data structure, and atomically change the root pointer, with delayed dropping mechanism (arc_swap uses hazard pointer).
+- For frequent short-term reads to mutable data, use [arc_swap](https://docs.rs/arc-swap/latest/arc_swap/). Mutation requires recreating the whole data structure, and atomically change the root pointer, with delayed dropping mechanism (arc_swap uses hazard pointer).
   - Other solutions of delayed dropping that avoids overhead of atomic reference counting: [sdd](https://crates.io/crates/sdd), [crossbeam_epoch](https://docs.rs/crossbeam-epoch/latest/crossbeam_epoch/)
 - Deep cloning data instead of sharing `Arc`.
 - If the data is global sigleton, can just put it to global `static` (use `OnceLock` for delayed initialization). For short-running programs like CLI, leaking it is fine.
@@ -1563,7 +1555,7 @@ Examples:
 
 - Java `final` reference ensures reference itself is immutable. If pointed object is mutable then its's immutable-ref-to-mutable-obj.
 - Java `Collections.unmodifiableList()` gives read-only view.
-- Copy-on-write (COW) and read-copy-write (RCU) are mutable-ref-to-immutable-obj.
+- Read-copy-write (RCU) is mutable-ref-to-immutable-obj.
 - Rust `let x: T` makes `x` fully immutable[^immutable]. Immutability applies to whole ownership tree. If a `Vec` is immutable, its elements are also immutable.
 - Rust `let mut x: &T` makes `x` a mutable-ref-to-immutable-obj.
 - Rust `let x: &mut T` makes `x` an immutable-ref-to-mutable-obj.

@@ -329,6 +329,9 @@ How to reduce future size:
 
 - Avoid creating an in-place buffer like `let buf: [u8; 1024]`. The buffer will directly be in the future.
 - When calling another async function, firstly box that future then await on it. If not boxed, the sub-future will be directly put inside parent future.
+- Avoid having large arguments to async functions. If an async function accepts a future, try to make it accept boxed future argument.
+
+See also [Async fn doubles argument size](https://github.com/rust-lang/rust/issues/62958)
 
 ## No parallelism without `spawn`
 

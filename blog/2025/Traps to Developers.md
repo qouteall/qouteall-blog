@@ -50,6 +50,7 @@ tags:
 - In Windows/Linux, scrollbar takes space. (But in macOS or mobile it doesn't take space. [^macos_scrollbar_space]) Scrollbar can steal space from inner content. The `width: 200px` means content width plus scrollbar width is 200px, so scrollbar makes inner content's width is smaller than 200px (the same applies even with `box-sizing: content-box`). [^scrollbar_box_model]
 - Scrollbar may appear/vanish if content height changes, which can cause layout shift. Use `scrollbar-gutter: stable` to avoid layout shift.
 - About scrollbar styling: the [standard scroll bar styling](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Scrollbars_styling) supports color and width but doesn't support many other features (e.g. round corner scrollbar). The [`-webkit-scrollbar`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/::-webkit-scrollbar) non-standard pseudo-elements supports these features but FireFox doesn't support them. In modern browser, if standard scrollbar styling is used, then the  `-webkit-scrollbar` has no effect.
+- `overflow-x` and `overflow-y` are not independent. If one is `scroll`, the other is `visible`, then `visible` becomes `auto`. [see also](https://www.brunildo.org/test/Overflowxy2.html).
 - `position: absolute` is not based on its parent. It's based on its nearest positioned ancestor (the nearest ancestor that has `position` be `relative`, `absolute` or creates stacking context).
 - `position: sticky` doesn't work if parent (or indirect parent) has `overflow: hidden`.
 - [`backdrop-filter: blur` does not consider ambient things](https://www.joshwcomeau.com/css/backdrop-filter/#the-issue).
@@ -59,7 +60,7 @@ tags:
   - Put it in grid and transition from `grid-template-rows: 0fr` to `1fr`. 
   - Use `calc-size()`, [see also](https://developer.chrome.com/docs/css-ui/animate-to-height-auto) [^calc_size]. [^animate_height_auto]
   - Use [`interpolate-size`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/interpolate-size) [^interpolate_size]
-- In JS, reading size-related value (e.g. `offsetHeight`) cause browser to reflow (re-compute layout) which may hurt performance (and it interferes with transition).
+- In JS, reading size-related value (e.g. `offsetHeight`) cause browser to reflow (re-compute layout) which may hurt performance (and it interferes with transition). [See also](https://gist.github.com/paulirish/5d52fb081b3570c81e3a#file-what-forces-layout-md).
 - CSS transition doesn't work right when element is added. Modern solution is [`@starting-style`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@starting-style). Old solution is to cause reflow in initial state then set to animation finish state.
 - `display: inline` ignores `width` `height` and `margin-top` `margin-bottom` [^img_inline]
 - The `<img>`, `<svg>`, `<video>` and `<canvas>` have `display: inline` by default, which layouts them with text (can interfere with line height). In most cases they should have `display: block`. Also it's recommended to add `max-width: 100%` to avoid large image overflowing. (See also [A Modern CSS Reset](https://www.joshwcomeau.com/css/custom-css-reset/))
@@ -93,6 +94,7 @@ tags:
 - Trailing slash in URL. If current URL is `https://xxx.com/aaa/bbb`, then `<img src="image.png">` use image `https://xxx.com/aaa/image.png`. But if current URL is `https://xxx.com/aaa/bbb/` (with trailing slash), then image path is `https://xxx.com/aaa/bbb/image.png`
 - Shadow dom does some isolation, but some things are not isolated. CSS variables are shared with shadow dom. The size of `1rem` is always based on `font-size` of `<html>` even in shadow dom.
 - [XSS](https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/XSS) of `javascript:` URL. For `href` property, when it starts with `javascript:` followed by JS code, clicking it executes JS code. This needs to be sanitized when URL comes from user data.
+- Update rendering on every message wastes performance. Should update in `requestAnimationFrame`, [see also](https://kciter.so/posts/the-expensive-main-thread/en/#batching).
 
 [^macos_scrollbar_space]: In macOS it can be configured to make scrollbar take space like in Windows.
 
@@ -478,26 +480,30 @@ Indirectly use different versions of the same package (diamond dependency issue)
 
 - React compares equality using reference equality, not content equality.
   - The objects and arrays that are newly created directly in component function call are treated as always-new. Use `useMemo` to fix [^js_string_primitive].
-  - The closure functions that are created directly in component function are also always-new. Use `useCallback` to fix.
+  - The closure functions that are created directly in component function are also always-new. Use `useCallback` to fix. [^variable_amount_of_callbacks]
   - If an always-new thing is put into `useEffect` dependency array, the effect will run on every component function call. See also [Cloudflare indicent 2025 Sept-12](https://blog.cloudflare.com/deep-dive-into-cloudflares-sept-12-dashboard-and-api-outage/). 
   - Don't forget to include dependencies in the dependency array. And the dependencies also need to be memoed.
+  - (If you are using [React compiler](https://react.dev/learn/react-compiler/introduction), no need to consider the above in most cases.)
 - About state:
   - State objects themselves should be immutable. Don't directly set fields of state objects. Always recreate whole object.
-  - Don't set state directly in component function. State can only be set in callbacks.
+  - Don't set state directly in component function. State can only be set in callbacks. The same applies to the value in `useRef`.
 - `useEffect` without dependency array runs on every component function call. But `useEffect` with empty dependency array `[]` runs only on component mounting.
 - Forget clean up in `useEffect`.
 - Closure trap (stale closure). Closure can capture a state. If the state changes, the closure still captures the old state. The modern solution is [`useEffectEvent`](https://react.dev/reference/react/useEffectEvent). The old workaround is `useRef`.
   - Note: simply adding state to dependency array may cause unwanted effect cleanup (for `setTimeout`, it can mess up timing, because change of dependency clears and re-adds timeout).
 - `useEffect` firstly runs in next iteration of event loop, after browser renders[^react_rendering] the web page. Doing initialization in `useEffect` is not early enough and may cause visual flicker. Use `useLayoutEffect` for early initialization.
+- Two effects trigger each other indefinitely. First effect changes dependency of second effect, second effect changes dependency of first effect.
 - React server component security traps:
-  - The server functions are public Restful APIs. Should do input validation. Don't trust passed user id. Don't make return value contain secrets.
-  - Don't pass secret to client component. Note that the secret may be captured in server function closure [^server_action_closure_capture].
+  - The server functions are public Restful APIs. Should do input validation. Don't trust passed user ID. Don't make return value contain secrets.
+  - Don't pass secret to client component. Note that the secret may be captured in server function closure [^server_function_closure_capture].
+
+[^variable_amount_of_callbacks]: The `useCallback` is a hook that cannot be called multiple times in a component. If there are variable amounts of callbacks, you can `useMemo` a data structure that contains many callbacks. Or you can just `useMemo` the array of React elements. The React elements (e.g. `<MyComponent x={y}/>`) are just data, not actual DOM.
 
 [^js_string_primitive]: In JS, `string` is primitive type, not object type. In JS you don't need to worry about two strings with same content but different reference like in Java. However the `String` in JS is object and use refernce equality.
 
 [^react_rendering]: Word "render" has ambiguity. The render here means drawing contents on web page. The React component rendering means calling the component function.
 
-[^server_action_closure_capture]: Next.js encrypts captured values in server function closure, so this is mitigated. But the return value of server function is not encrypted. And the client component props are not encrypted.
+[^server_function_closure_capture]: Next.js encrypts captured values in server function closure, so this is mitigated. But the return value of server function is not encrypted. And the client component props are not encrypted.
 
 ## Git
 
@@ -581,6 +587,6 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Sorting number strings is different to sorting numbers. "10" is smaller than "9" in string comparision.
 - Configuration override. Many frameworks have configuration override mechanisms. Sometimes one configuration is correct but it still malfunctions, because another higher-priority configuraiton overrides it. An env var, a command-line argument or some config file in a faraway folder can override your config (it's framework-specific).
 - Duplicated configuration. When one place changes, another place must change accordingly. Forgeting changing one causes problem. It's recommended to make configurations have single-source-of-truth.
-
+- String concat hurts [greppability](https://morizbuesing.com/blog/greppability-code-metric/). For example if there are two Kafka topics `admin-access-log` `guest-access-log`, don't use `userType + "-access-log"` to get topic name. Make full name exist in code, otherwise it cannot be text-searched. For constants like port number, don't use addition.
 
 
