@@ -727,7 +727,7 @@ Innovation cannot be planned. Having diversity of ideas and constraints could he
 
 The book [_Seeing like a state_](https://en.wikipedia.org/wiki/Seeing_Like_a_State) describes that governments want to make things legible to manage, thus reducing complex reality to numbers and symbols. However, the illegible things (cannot be simply tracked by numbers) are also important. Goodhart law is caused by the legible number being different to the actual objective. 
 
-However, governments (and large coorporations) still highly focus on legible information because they also want to maintain authority and want to control things. The illegible things are percepted and controlled by actual executors that the upper authority doesn't fully trust. 
+However, governments (and large coorporations) still highly focus on legible information because they also want to maintain authority and want to control things. The illegible things are percepted and controlled by actual executors that the upper authority doesn't fully trust. And the simplified numbers are simple so it makes management "scalable".
 
 ## Breaking the rigid rule is inevitable
 

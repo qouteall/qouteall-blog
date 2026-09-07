@@ -263,13 +263,14 @@ tags:
 - `std::shared_ptr` itself is not atomic (although its reference count is atomic). Mutating a `shared_ptr` itself is not thread-safe. `std::atomic<std::shared_ptr<...>>` is atomic but uses locking.
 - For std maps, `map[key]` is not a read-only operation. It will auto-insert default value if the corresponding entry doesn't exist. [See also](https://en.cppreference.com/w/cpp/container/map/operator_at.html)
 - For `std::vector<bool>`, result of `operator[]` is a proxy object, not `bool&`.
-- Undefined behaviors. The compiler optimization aim to keep defined behavior the same, but can freely change undefined behavior. Relying on undefined behavior can make program break under optimization. [See also](https://russellw.github.io/undefined-behavior)
+- [Undefined behaviors](https://en.cppreference.com/cpp/language/ub). The compiler optimizations keep defined behavior the same, but can freely change undefined behavior. Triggering undefined behavior can make program break under optimization. [See also](https://russellw.github.io/undefined-behavior), [see also](https://blog.llvm.org/2011/05/what-every-c-programmer-should-know.html).
   - Accessing uninitialized memory is undefined behavior.
     - After converting binary data pointer `char*` to struct pointer, using it is treated as using uninitialized memory, even if the memory is initialized, because the object [lifetime](https://en.cppreference.com/w/cpp/language/lifetime.html) hasn't started.
     - Using a local variable before initializing it is also accessing uninitialized memory.
+    - For a local variable without explicit initialization (e.g. `SomeType value;`), whether it initializes depend on many factors, [see also](https://gaultier.github.io/blog/the_production_bug_that_made_me_care_about_undefined_behavior.html). It's recommended to always initialize local variable (e.g. `SomeType value{};`).
   - Accessing using null pointer or dangling pointer is undefined behavior.
   - Integer overflow/underflow is undefined behavior. Note that unsigned integer can underflow below 0. Don't use `x > x + 1` to check overflow as it will be optimized to `false`.
-  - Integer dividing by 0 is undefined behavior.
+  - Integer dividing by 0 is undefined behavior. (But floating point dividing by 0 is not undefined behavior. It gives NaN.)
   - Aliasing.
     - Strict aliasing rule. If there are two pointers with type `A*` and `B*`, and there is no subtyping relation between `A` and `B`, then compiler assumes two pointer can never equal. If they equal, using it to access memory is undefined behavior. One exception is byte pointer. [^strict_aliasing]
     - Pointer provenance. Each heap allocation or local variable or global variable is a provenance. If two pointers from two different provenances equals, accessing memory using both is undefined behavior. [See also](https://www.ralfj.de/blog/2020/12/14/provenance.html). 
@@ -281,6 +282,8 @@ tags:
     - `std::move` used on const object cannot avoid deep copying. [^cpp_move]
   - If `bool`'s binary value is neither 0 or 1, using it is undefined behavior. Similarily if an enum's binary value is not valid, using it is undefined behavior.
   - Unaligned memory access is undefined behavior. (Also, alignment can cause padding in struct that wastes space.)
+  - Data race is undefined behavior.
+  - Infinite loop without side effect (no write to shared memory, no IO, etc.) and without volatile load or atomic load is undefined behavior.[^infinite_loop_ub]
   - Undefined behavior can "travel back in time". For `if (a) { b(); }`, if `b()` unconditionally triggers undefined behavior, then compiler can assume `a` is always false. If `a` is true then it triggers undefined behavior before executing `b()`. The deduction can go earlier: the inputs that cause `a` to be true can trigger undefined behavior before computing `a`.
 - Global variable initialization runs before `main`. [Static Initialization Order Fiasco](https://en.cppreference.com/w/cpp/language/siof.html).
 - Destructors have `noexcept` by default. If exception is thrown out of a `noexcept` function, whole process will crash.
@@ -309,6 +312,8 @@ tags:
 [^cpp_move]: The `std::move` itself doesn't move. The `std::move` just converts reference to rvalue reference. When passed a `const T&` it gives `const T&&`. However, the move constructor takes `T&&`, not `const T&&`, so it cannot invoke the move constructor, instead it will invoke copy constructor which takes `const T&`(`const T&&` can convert to `const T&`). In C++, the "moved out" object is still alive and will be destructed. The "move" requires mutating the original object to make it "hollow". So moving cannot work with const object.
 
 [^malloc_return_null]: When overcommit is enabled, `malloc` may still return null. For example, when size argument is too large. Also, when virtual address space size is limited ([RLIMIT_AS](https://man7.org/linux/man-pages/man2/getrlimit.2.html)), `malloc` will return null when the process' virtual address space is used up. However, the cgroup `memory.max` (this is how containers limit memory usage) doesn't make `malloc` fail when OOM, and will make process be OOM-killed when accessing allocated memory.
+
+[^infinite_loop_ub]: Start from C++26, trivial infinite loop (e.g. `for(;;);`) is not undefined behavior.
 
 ## Python
 

@@ -9,12 +9,6 @@ unlisted: false
 
 <!-- truncate -->
 
-## AI is very unlike human
-
-It's obvious that AI is very unlike human, but there is a tendency to treat AI as human. 
-
-AI's capability and failure modes are very different to human. AI is superhuman at in-training-distribution tasks but bad at simple out-of-training-distribution tasks.
-
 ## Intelligence is high-dimensional
 
 Many people tend to simplify intelligence to a one-dimensional IQ value. **Intelligence is high-dimensional**. 
@@ -64,15 +58,11 @@ Also, the **optimization targets** of LLMs are very different to the optimizatio
 > 
 > \- Andrej Karpathy, [Link](https://x.com/karpathy/status/1991910395720925418)
 
-LLM's "belief" is very context-dependent. Sometimes it will defend the things they said in previous context, but starting a new session can make LLM show a different "belief".
-
 ## Between memorization and real intelligence
 
-The real intelligence can understand and work with unseen new cases. Pure memorization can only work in memorized cases. 
+There is a spctrum between memorization and real intelligence (full generalization). LLM is between pure memorization and real intelligence. It doesn't do rote memorization like a conventional database. It can do generalization and in-context learning. But its generalization and in-context learning ability is still limited. LLM can still fail at out-of-training-distribution tasks.
 
-There is a spctrum between memorization and real intelligence. LLM is between pure memorization and real intelligence. It doesn't do rote memorization like a conventional database. It can do generalization and in-context learning. But its generalization and in-context learning ability is still limited. LLM often fail at out-of-training-distribution tasks.
-
-It's not easy to distinguish between memorization and intelligence. Because LLM contains the knowledge of tons of internet content and books content. The common questions are probably already in training set. Asking them to LLM is testing on training set.
+We should not have double standard to human and AI. Strictly speaking, human also often fail at unseen cases, so humans also don't generalize well. One important difference is continuous learning. 
 
 ## Training data is biased
 
@@ -226,11 +216,11 @@ Which exact word/phrase it chooses is ad-hoc. It cannot be inferred without lear
 
 But if I tell AI to "read this file" then AI knows how to use the API.
 
-But AI's ability of using API is bad for rarely used tools/libraries/frameworks/languages. It's correlated with how much related training data and how much related RL is done.
-
 ### Less effortful understanding of codebase
 
 In a large unfamiliar codebase, it's often not obvious which piece of code to lookup for a specific logic. Asking AI to find it is less effortful than browsing code. However it's still prone to hallucination, so it still requires manually reading code after AI finds the relevant code positions.
+
+Also, large-age codebases often have many outdated comments. AI can be misled by the outdated comments.
 
 ### AI refactoring
 
@@ -810,6 +800,8 @@ The AI is not always "lazy" in common sense. Sometimes it will write a lot of ov
 
 The sci-fi plot of AI fighting back human is not realistic. The obvious misalignment gets suppressed by RL. The real risk is non-obvious reward hacking.
 
+The chain-of-thought text is not the actual thinking. The actual thinking is in the computations that human doesn't yet understand. Doing RL based on detecting bas thoughts in chain-of-thought makes AI learn to hide real intention in chain-of-thought. 
+
 ## Skill development hurt by AI
 
 Learning skill takes efforts. But using AI allow doing work without the efforts, which hurts skill development.
@@ -845,6 +837,10 @@ Sometimes the model lose diversity because diversity reduces RL reward. This is 
 
 In OpenAI's [Where the goblins came from](https://openai.com/index/where-the-goblins-came-from/), it mentiones that the model-generated data is used in training. If some feature (e.g. goblin) becomes more likely to be outputted from model, then it become more frequent in training data, then the newly-trained model outputs it more frequently. This is self-reinforcing feedback loop. This adds bias and reduces diversity.
 
-If someone manually throughly inspects the data, they can possibly find the problem before the problem reaches consumers. However the synthetic data amount is so large, so it's likely that only a small portion is inspected by human. (Also the human inspecting training data are likely outsourced low-salary workers. )
+If someone manually throughly inspects the data, they can possibly find the problem before the problem reaches consumers. However the synthetic data amount is so large, so it's likely that only a small portion is inspected by human. (Also the human inspecting training data are likely outsourced low-salary workers.)
 
-Large amount of data is effectively black box. It's not actual black box because you can inspect it, but no one will carefully inspect all of large data, so it's in practice black box.
+Large amount of data is effectively black box. It's not actual black box because you can inspect it, but no one will manually carefully inspect all of large data, so it's in practice black box to human. 
+
+When AI generates data to train AI, and human only inspect a tiny portion of data, all kinds of weirdness can happen.
+
+

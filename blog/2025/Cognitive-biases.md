@@ -18,9 +18,13 @@ slug: /Cognitive-biases
 
 Corresponding to diminishing marginal utility, the happiness of gaining \$200 is less than two times of happiness of gaining \$100. The perception of gain is convex.
 
+<details>
+
 ![](./cog_bias/Value_function.png)
 
 [Reference](https://en.wikipedia.org/wiki/Prospect_theory)
+
+</details>
 
 The same applies to pain. The pain of losing \$100 two times is higher than losing \$200 in one time.
 
@@ -258,6 +262,10 @@ Setting unrealistic high goals is sometimes a form of self-handicapping. But not
 
 Self-handicapping is also a way of **reducing responsibility**. This is common in large corporations and governments: intentionally create reasons of failure to reduce responsibility.
 
+Side note: It's common that people correlate results with capability. Self-handicapping is largely due to that. However, in real world, results are largely determined by luck and long-term attitude. The capability factor is very small in the long term.
+
+> I returned and saw under the sun, that the race is not to the swift, nor the battle to the strong, neither yet bread to the wise, nor yet riches to men of understanding, nor yet favor to men of skill; but time and chance happeneth to them all.
+
 ### Reverse psychology
 
 People tend to fight the things that oppose their desire. Examples:
@@ -397,6 +405,8 @@ An environment that doesn't tolerant failure makes people not correct mistakes a
 > \- Nikita Bier, [Link](https://x.com/nikitabier/status/1753915234794774978)
 
 Drip pricing: Only show extra price (e.g. service fee) when the customer has already decided to buy. The customer that already spent efforts in deciding tend to keep the decision.
+
+Sunk cost fallacy is not always a fallacy. There are cases where one insists investing a failed thing, then one day failure turns to success, due to unpredicted factors. If the potential return of success is high (positive Black Swan) then sunk cost can be accepted.
 
 ### Ostrich effect
 
@@ -739,7 +749,7 @@ Other examples of survivorship bias:
 - Social media has more negative news than positive news. Bad news travels fast.
 - The succeded research results are published and the failed attempts are hidden (P-hacking).
 - Only special and interesting events appear on news. The more representative common but not newsworthy events are overlooked.
-- If you analyzed 5 solutions then pickd one solution to present, people think you did little work because they don't see the discarded 4 solutions.
+- If you analyzed 5 solutions then picked one solution to present, people think you did little work because they don't see the discarded 4 solutions.
 
 A more generalized version of survivor bias is **selection bias**: When the sampling is not uniform enough and contains selection mechanism (not necessary 100% accurate selection), there will be bias in the result.
 
@@ -1116,7 +1126,6 @@ Flattering subconsciously increase favorability, even when knowing it's flatteri
 [Agent detection](https://en.wikipedia.org/wiki/Agent_detection). Thinking that things are intentionally caused by human or some "agent".
 
 For example, two pieces of software are incompatible. A person may think "the two software don't work together because there is a malicious person intentionally made them not working together". But actually it's due to two softwares using different "protocol" / "interface", not an intentional result.
-
 
 ## Efficient decision making
 
