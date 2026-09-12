@@ -572,6 +572,18 @@ AI-written document/comment may be technically right, but stress the unimportant
 
 Having no document is better than having wrong documents.
 
+### Greppability is even more important
+
+[Greppability is an underrated code metric](https://morizbuesing.com/blog/greppability-code-metric/). It's even more important because coding agents often use text search to navigate code, instead of using LSP.
+
+Related: [Grep beats LSP? Why coding agents ignore your fancier tools](https://www.agentconnect.md/blog/grep-beat-lsp-harness/)
+
+LSP is more fragile than grep. It's often that you cloned a repo then IDE gives error messages because you need to do some special configurations to make it recognize dependenceis (and the special things e.g. protocolbuffer code generation). But text search just works without configuraiton.
+
+Improving greppability requires **avoid making the name's meaning depend on context**. For example, `userName` field is more greppable than `user` field in `User` type. If the field is `name` then AI has to grep `name` which finds many irrelevant things.
+
+Another is to avoid using string concat for const strings like table name and kafka topic name.
+
 ## Verification is less fun than generation?
 
 Work involves two parts: generation (e.g. draw things, write code), verification (e.g. evaluate whether drawing is good, test whether code works). Before AI, both parts are done by human. But when using AI, human don't do generation and only do verification, at the same time having less direct control of result.

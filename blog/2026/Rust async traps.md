@@ -408,6 +408,8 @@ In Tokio, the async file IOs internally use `spawn_blocking` (it doesn't use tru
 
 ## See also
 
+[A Design Space Exploration of Async/Await](https://cel.cs.brown.edu/blog/design-space-async-await/)
+
 [Why async Rust?](https://without.boats/blog/why-async-rust/)
 
 [Async Rust can be a pleasure to work with (without `Send + Sync + 'static`)](https://emschwartz.me/async-rust-can-be-a-pleasure-to-work-with-without-send-sync-static/)

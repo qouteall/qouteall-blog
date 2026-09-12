@@ -21,10 +21,10 @@ tags:
   - Some of the above behave differently when layout axis flips (e.g. `writing-mode: vertical-rl`). [See also](https://drafts.csswg.org/css-writing-modes-4/#abstract-box)
 - Margin collapse.
   - Two vertically touching siblings can overlap vertial margin. Child vertical margin can "leak" outside of parent.
-  - Margin collapse doesn't happen when `border` or `padding` spcified. Don't try to debug margin collapse by coloring border. Debug it using browser's devtools.
-  - Margin collapse can be avoided by block formatting context (BFC). `display: flow-root` creates a BFC. (There are other ways to create BFC, like `overflow: hidden`, `overflow: auto`, `overflow: scroll`, `display: table`, but with side effects)
+  - Margin collapse doesn't happen when `border` or `padding` spcified. Don't try to debug margin collapse by coloring border. Debug it using browser's devtools. 
+  - Margin collpse doesn't happen in flexbox or grid.
+  - Block formatting context (BFC) avoids child margin from leaking out of parent. `display: flow-root` creates a BFC. (Things like `overflow: hidden`, `overflow: auto`, `overflow: scroll`, `display: table` also create BFC but with side effects).[^margin_collapse_sibling] 
   - Related: margin can be negative. Negative margin can make elements overlap and make child leak outside of parent. BFC doesn't prevent negative margin from working.
-  - Related: if you accidentally have BFC (e.g. caused by `overflow: hidden`) but still want margin collapse, use [owl selector](https://alistapart.com/article/axiomatic-css-and-lobotomized-owls/) on parent to simulate margin collapse: `.container > *+* { margin-top: 1rem; }` (the `*+*` applies all children except the first)
 - If a parent only contains floating children, the parent's height will collapse to 0, and the floating children will leak. Can be fixed by BFC.
 - If the parent's `display` is `flex` or `grid`, then the child's `float` has no effect
 - [Stacking context](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_positioned_layout/Stacking_context):
@@ -95,6 +95,8 @@ tags:
 - Shadow dom does some isolation, but some things are not isolated. CSS variables are shared with shadow dom. The size of `1rem` is always based on `font-size` of `<html>` even in shadow dom.
 - [XSS](https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/XSS) of `javascript:` URL. For `href` property, when it starts with `javascript:` followed by JS code, clicking it executes JS code. This needs to be sanitized when URL comes from user data.
 - Update rendering on every message wastes performance. Should update in `requestAnimationFrame`, [see also](https://kciter.so/posts/the-expensive-main-thread/en/#batching).
+
+[^margin_collapse_sibling]: If you make a child BFC, the margin collapse between siblings still remains. To prevent margin collapse between siblings, one way is to make container flexbox or grid.
 
 [^macos_scrollbar_space]: In macOS it can be configured to make scrollbar take space like in Windows.
 
@@ -169,9 +171,7 @@ tags:
 - These things can make different hardware have different floating point computation results:
   - Hardware FMA (fused multiply-add) support. `fma(a, b, c) = a * b + c` (in some places `a + b * c`). Most modern hardware make intermediary result in FMA have higher precision. Some old hardware or embedded processors don't do that and treat it as normal multiply and add.
   - Floating point has a [Subnormal range](https://en.wikipedia.org/wiki/Subnormal_number) to make very-close-to-zero numbers more accurate. Most mondern hardware can handle them, but some old hardware and embedded processors treat subnormals as zero.
-  - Rounding mode. The standard allows different rounding modes like round-to-nearest-ties-to-even (RNTE) or round-toward-zero (RTZ). 
-    - In X86 and ARM, rounding mode is thread-local mutable state can be set by special instructions. It's not recommended to touch the rounding mode as it can affect other code.
-    - In GPU, there is no mutable state for rounding mode. Rasterization often use RNTE rounding mode. In CUDA different rounding modes are associated by different instructions.
+  - Rounding mode. The standard allows different rounding modes like round-to-nearest-ties-to-even (RNTE) or round-toward-zero (RTZ). In X86 and ARM, rounding mode is thread-local mutable state can be set by special instructions. It's not recommended to touch the rounding mode as it can affect other code.
   - Math functions (e.g. sin, log) may be less accurate in some embedded hardware or old hardware.
   - Legacy X86 FPU (80-bit floating point registers and per-core rounding mode state).
   - ......
@@ -256,6 +256,7 @@ tags:
 - Storing a pointer to an element in `std::vector` and then grow the vector, vector may re-allocate content, making element pointer invalid. Same applies to other containers.
 - If a function accepts `std::string&`, and literal string (e.g. `"x"`) is passed as argument, the `std::string` object will be short-lived.
 - Directly pass-by-value can do implicit copy that hurts performance.
+  - There is [copy elision](https://en.cppreference.com/cpp/language/copy_elision) that helps in many cases. But copy elision doesn't work when passing local variable (even it's the last use of local variable). For example, if function `g` accepts arg by value, then `g(f())` can have copy elision, but `auto x = f(); g(x);` cannot elide copy to g's argument. It's recommended to make functions accept object by reference not value.
 - [Iterator invalidation](https://learnmoderncpp.com/2024/09/04/understanding-iterator-invalidation/). Modifying a container when looping on it.
 - `std::views::filter` malfunctions when element is mutated that predicate result changes in multi-pass iteration. [See also](https://github.com/CppCon/CppCon2024/blob/main/Presentations/Taming_the_Cpp_Filter_View.pdf), [See also](https://github.com/philsquared/cpponsea2025-slides/blob/main/Presentations/Faster_Safer_Better_Ranges.pdf)
 - `std::remove` doesn't remove but just rearrange elements. `erase` actually removes.
@@ -277,8 +278,8 @@ tags:
       - The [XOR linked list](https://en.wikipedia.org/wiki/XOR_linked_list) doesn't work with pointer provenance. 
       - Adding offset to pointer only works within one provenance.
   - `const` can mean both read-only and immutable:
-    - If the original declared object is not `const`, you can turn pointer to it as `const T*`, in this case `const` means read-only [^readonly]. You can change the object without triggering undefined behavior.
-    - If the original declared object is `const`, then it's deemed immutable. If you use `const_cast` to turn its pointer to `T*` then change content, it's undefined behavior. [^cpp_mutable]
+    - If the original object is `const` (e.g. `const SomeType someValue`, `new const SomeType()`), then it's deemed immutable. If you use `const_cast` to turn its pointer to `T*` then change content, it's undefined behavior. [^cpp_mutable]
+    - If the original object is not `const`, you can turn pointer to it as `const T*`, in this case `const` means read-only [^readonly]. You can change the object without triggering undefined behavior.
     - `std::move` used on const object cannot avoid deep copying. [^cpp_move]
   - If `bool`'s binary value is neither 0 or 1, using it is undefined behavior. Similarily if an enum's binary value is not valid, using it is undefined behavior.
   - Unaligned memory access is undefined behavior. (Also, alignment can cause padding in struct that wastes space.)
@@ -291,8 +292,9 @@ tags:
 - If polymorphism is involved, base class destructor should be `virtual`. Otherwise freeing base-class-typed pointer won't run subclass fields' destructor.
 - When using raw pointer instead of smart pointer, exception may cause delete to not run which causes memory leak.
 - In signal handler, don't do any IO or locking, don't `printf` or `malloc`.
-- Compare signed integer with unsigned integer. If `a` is signed -1, `b` is unsigned 0, then `a > b` is true, because it auto-converts `a` into unsigned integer.
+- Implicit conversion between signed and unsigned. If `a` is signed -1, `b` is unsigned 0, then `a > b` is true, because it auto-converts `a` into unsigned integer.
   - Note that `char` may be signed or unsigned, depending on platform. It's recommended to always use `signed char` or `unsigned char`, not `char`. [Apple ARM `char` is signed](https://developer.apple.com/documentation/xcode/writing-arm64-code-for-apple-platforms#Handle-data-types-and-data-alignment-properly), [gcc `char` is unsigned in Android, but signed in other platforms](https://stackoverflow.com/questions/2054939/is-char-signed-or-unsigned-by-default).
+- Floating point implicitly convert to integer.
 - If the same header file is included in two `.cpp` files with different macros, and the macro difference affect the content in `inline` thing or `template` thing or type definition, then it violates [ODR (one definiton rule)](https://en.cppreference.com/w/cpp/language/definition.html). There will be different compiled functions with the same symbol name, and linker nondeterministically chooses one.
 - The dynamic library can bundle its own allocator[^cpp_allocator]. One allocator's allocation should not be freed in another allocator. Passing container (e.g. `vector`) is only safe when allocator matches (and ABI matches). When passing `unique_ptr` across dynamic libraries, it's recommended to use custom deleter.
 - `malloc` may return null. When there is no OS overcommit, checking for null can gracefully handle out-of-memory. When overcommit is enabled (often enabled by default), `malloc` can succeed despite out-of-memory, then process get killed when accessing allocated memory. But it's still recommended to check for null (can abort on null), because it may still return null under overcommit[^malloc_return_null], and using null pointer is undefined behavior.
@@ -307,7 +309,7 @@ tags:
 
 [^readonly]: The read-only here is in-language constraint. It should not be confused with read-only memory which is actually immutable.
 
-[^cpp_mutable]: Exception: C++ has interior mutability. Changing `mutable` field of a `const` object is not undefined behavior. [See also](https://en.cppreference.com/w/cpp/language/cv.html).
+[^cpp_mutable]: Exception: C++ has interior mutability. Changing `mutable` field of a `const` object is not undefined behavior. [See also](https://en.cppreference.com/w/cpp/language/cv.html). Also, even for const objects, it's mutable in constructor. Const only applies after construction.
 
 [^cpp_move]: The `std::move` itself doesn't move. The `std::move` just converts reference to rvalue reference. When passed a `const T&` it gives `const T&&`. However, the move constructor takes `T&&`, not `const T&&`, so it cannot invoke the move constructor, instead it will invoke copy constructor which takes `const T&`(`const T&&` can convert to `const T&`). In C++, the "moved out" object is still alive and will be destructed. The "move" requires mutating the original object to make it "hollow". So moving cannot work with const object.
 
@@ -346,6 +348,7 @@ tags:
 - MySQL (InnoDB) can do implicit conversion by default. `select '123abc' + 1;` gives 124.
 - [MySQL (InnoDB) gap lock may cause deadlock](./About%20circular%20reference#mysql-gap-lock-deadlock).
 - In MySQL, you can select a column and group by another column. It gives nondeterministic result. (this is disabled start from MySQL 5.7.5, [see also](https://dev.mysql.com/doc/refman/8.4/en/sql-mode.html#sqlmode_only_full_group_by)) 
+- MySQL client charset can be different to server charset. Sometimes client charset default to Latin1 even if server charset default to UTF-8. Use `show variables like 'character_set%';` to check.
 - Multi-column index `(x, y)` cannot be used when only filtering on `y`. (Except when there are very few different `x` values, database can do a skip scan that uses the index.) Similarily `like 'abc%'` can use index but `like '%abc'` cannot.
 - In SQLite, when table is not `strict`, values are dynamically-typed, but it has "type affinity" that does implicit conversion [^sqlite_implicit_conversion] It's recommended to always use `strict` table.
 - SQLite by default does not do vacuum. The file size only increases and won't shrink. To make it shrink you need to either manually `vacuum;` or enable `auto_vacuum`.
@@ -475,11 +478,10 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Elasticsearch terms aggregation result is inaccurate on large datasets. Increasing `shard_size` can alleviate but increase resource usage. Composite aggregation is more accurate.
 - When building HTML, use an template engine that escapes text to avoid [XSS attack](https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/XSS).
 - When using broadcast to update in-memory state:
-  - The Redis pub/sub may lose message if listener temporarily disconnects. Use Redis streams to avoid losing message. Initialize in-memory state before start listenening.
-  - If you use Kafka for broadcasting (using randomly-generated consumer group id), there is a race condition that the new consumer group's initial offset initializes late, so it may miss an initial update message. (New consumer offset initializes on first poll asynchroniously by default. Note that `seekToEnd` is also asynchronous). Solution is to synchronously get end offsets (watermark offsets) then manually seek to the offset, then initialize in-memory state.
+  - The Redis pub/sub may lose message if listener temporarily disconnects. One solution is to use Redis streams to avoid losing message. Another is to add periodic polling update.
+  - If you use Kafka for broadcasting (using randomly-generated consumer group id), there is a race condition that the new consumer group's initial offset initializes later than initializing in-memory state, so it may miss an initial update message and in-memory state keeps being stale until next update.[^kafka_initial_offset]
 
-[^kafka_broadcast]: Using Kafka for message broadcast can avoid losing message in temporarily disconnect. Note that the recommended way of Kafka broadcasting is to use standalone consumer, manually manage offset, without using consumer group. A simple way of Kafka broadcasting is to randomly generate consumer group id, but it faces one race condition. The new consumer group's offset is initialized in its first poll asynchronously, not when subscribing. So there is a race condition where the initial offset is initialized too late so it misses one initial message. 
-
+[^kafka_initial_offset]: In Kafka, a new consumer's offset initializes on first poll asynchronously. There are many workarounds. One is to manually `poll` once then initialize the in-memory state. Another is to synchnnously get end offsets (watermark offsets) then manually seek to the offset, then initialize the in-memory state.
 
 ## React
 
@@ -506,7 +508,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 
 [^js_string_primitive]: In JS, `string` is primitive type, not object type. In JS you don't need to worry about two strings with same content but different reference like in Java. However the `String` in JS is object and use refernce equality.
 
-[^react_rendering]: Word "render" has ambiguity. The render here means drawing contents on web page. The React component rendering means calling the component function.
+[^react_rendering]: Word "render" has ambiguity. The render here means drawing contents on web page. The React component rendering corresponds to calling the component function.
 
 [^server_function_closure_capture]: Next.js encrypts captured values in server function closure, so this is mitigated. But the return value of server function is not encrypted. And the client component props are not encrypted.
 

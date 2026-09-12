@@ -710,9 +710,11 @@ Other kinds of arenas:
 
 - The containers including `Vec`, `HashMap` and `TreeMap` can be treated as arenas.
 - [slab](https://docs.rs/slab/0.4.12/slab/) array-based arena without generation integer.
-- [append_only_vec](https://docs.rs/append-only-vec/latest/append_only_vec/index.html). Its insertion only requires immutable borrow, because insertion doesn't move other elements, unlike `Vec`. This feature can workaround contagious borrow issue. It uses [segmented array](https://danielchasehooper.com/posts/segment_array/) data structure. It doesn't allow removing element or directly mutating element. (a similar one is [boxcar](https://docs.rs/boxcar/latest/boxcar/index.html))
+- [append_only_vec](https://docs.rs/append-only-vec/latest/append_only_vec/index.html). Its insertion only requires immutable borrow, because insertion doesn't move other elements, unlike `Vec`. This feature can workaround contagious borrow issue. It uses [segmented array](https://danielchasehooper.com/posts/segment_array/) data structure. It doesn't allow removing element or directly mutating element. (a similar one is [boxcar](https://docs.rs/boxcar/latest/boxcar/index.html)) [^append_only_map]
 - [generational_box](https://docs.rs/generational-box/0.7.0/generational_box/)
 - [bevy_ecs](https://docs.rs/bevy_ecs/latest/bevy_ecs/)
+
+[^append_only_map]: [once_map](https://docs.rs/once_map/latest/once_map/index.html) is a "hash map equivalent of append_only_vec". once_map internally is normal hashmap(s) within lock (or `RefCell`). The once_map internally uses normal hash map that can move elements, so it requires value type to be [`StableDeref`](https://docs.rs/stable_deref_trait/1.2.1/stable_deref_trait/trait.StableDeref.html) to have stable pointee address. The `Box`, `String`, `Rc` etc. are `StableDeref`. Also, all concurrent maps (e.g. [papaya](https://docs.rs/papaya/latest/papaya/)) allow inserting using immutable borrow of container.
 
 The important things about arena:
 
@@ -743,8 +745,10 @@ There is an ergonomic issue when using arena. The object handle is just an ID. T
 
 But it's not easy to access the arena in handle `Debug::fmt`. You cannot access the arena from just handle. Possible solutions:
 
-- Create extra "handle with context" type for debug logging.
+- Create extra "handle with context" type for debug logging. [^debug_with_context]
 - Put arena reference to thread local variable. The [scoped_tls](https://docs.rs/scoped-tls/latest/scoped_tls/) crate can help. This requires arena to have interior mutability. This solution is recommended for only append-only arenas. [^arena_tls_debug]
+
+[^debug_with_context]: There is [debug_with_context](https://crates.io/crates/debug_with_context) library but requires unstable feature, and it's GPL-3.0.
 
 [^arena_tls_debug]: The solution of putting arena into TLS then read TLS in `Debug::fmt` is [used by Rust compiler](https://github.com/rust-lang/rust/blob/e22c616e4e87914135c1db261a03e0437255335e/compiler/rustc_interface/src/callbacks.rs#L76). Note that Rust compiler's most arenas are append-only (similar to [bumpalo](https://docs.rs/bumpalo/latest/bumpalo/) and [append_only_vec](https://docs.rs/append-only-vec/latest/append_only_vec/index.html)). The interior mutability of append-only arena is safe (free of `RefCell` borrow conflict). But `RefCell`-based interior mutability is much more risky. For them, if `Debug::fmt` borrows arena, then doing debug logging when mutably borrowing arena will cause `RefCell` borrow error.
 
@@ -1128,9 +1132,11 @@ Examples:
 - [The Concurrency Trap: How An Atomic Counter Stalled A Pipeline](https://www.conviva.ai/resource/the-concurrency-trap-how-an-atomic-counter-stalled-a-pipeline/)
 - [How a Single Line of Code Made a 24-core Server Slower Than a Laptop](https://pkolaczk.github.io/server-slower-than-a-laptop/)
 
+`Arc` is lock-free, but lock-free doesn't equal fast. Lock-free can be slow under contention. Scalable multi-threading requires mimimize sharing of mutable data.
+
 Using `Arc` wrongly may result in slower performance than using GC languages. In GC languages, reading an on-heap reference often only involve a simple memory read [^gc_load_barrier], without atomic read-modify-write operation.
 
-[^gc_load_barrier]: Some GC (e.g. ZGC) use load barrier. But that load barrier doesn't involve atomic read-modify-write operation so it's faster than cloning `Arc`.
+[^gc_load_barrier]: Some GC (e.g. ZGC) use load barrier. But that load barrier doesn't involve atomic read-modify-write operation in common path so it's faster than cloning `Arc`.
 
 Atomic reference counting is still fast if not contended (when mostly only one thread change reference count). Atomic reference counting is faster on Apple silicon than Intel CPUs. [^apple_silicon_reference_counting]
 
@@ -1142,8 +1148,7 @@ But don't worry too much about `Arc`. In most normal applications, `Arc` itself 
 
 If `Arc` clone/dropping do become bottleneck, possible solutions:
 
-- For frequent short-term reads to mutable data, use [arc_swap](https://docs.rs/arc-swap/latest/arc_swap/). Mutation requires recreating the whole data structure, and atomically change the root pointer, with delayed dropping mechanism (arc_swap uses hazard pointer).
-  - Other solutions of delayed dropping that avoids overhead of atomic reference counting: [sdd](https://crates.io/crates/sdd), [crossbeam_epoch](https://docs.rs/crossbeam-epoch/latest/crossbeam_epoch/)
+- For frequent short-term reads to mutable data, use [arc_swap](https://docs.rs/arc-swap/latest/arc_swap/). Mutation requires recreating the whole data structure, and atomically change the root pointer. (arc_swap uses hazard pointer. one similar thing is [sdd](https://crates.io/crates/sdd), which uses epoch-based delayed dropping.)
 - Deep cloning data instead of sharing `Arc`.
 - If the data is global sigleton, can just put it to global `static` (use `OnceLock` for delayed initialization). For short-running programs like CLI, leaking it is fine.
 - [trc](https://docs.rs/trc/1.2.4/trc/) and [hybrid_rc](https://docs.rs/hybrid-rc/latest/hybrid_rc/). Use per-thread non-atomic counter together with atomic counter.
@@ -1347,6 +1352,16 @@ There is a "make illegal state unrepresentable" principle: prevent the invalid d
 This restriction is related to panic unwinding. Before the "temporary void" becomes valid again, panic unwinding can cause function to exit early and never fill the void. [See also](https://smallcultfollowing.com/babysteps/blog/2024/05/02/unwind-considered-harmful/).
 
 Note that the restriction only applies to borrowed data. A local variable that's not borrowed can be temporary moved-out then re-assigned.
+
+Rust doesn't allow turning a borrow into ownership. The vec indexing (e.g. `vec[0]`) uses `Index` and `IndexMut` trait which returns borrow. So you cannot consume a vec then get ownership of first element directly:
+
+```rust
+let vec: Vec<String> = vec!["x".to_string()];  
+let first: String = vec[0];  
+println!("{:?}", first);
+```
+
+It errors `cannot move out of index of Vec<String>`. One workaround is `vec.into_iter().next().unwrap()`.
 
 ## `Send` and `Sync`
 
@@ -1586,7 +1601,7 @@ Rust's enforcing of UTF-8 may improve security but may also reduce security:
 - [CVE-2024-56732](https://www.sentinelone.com/vulnerability-database/cve-2024-56732/) is triggered when non-UTF-8 string data. It's in C++. This can be avoided if the outer string source validates UTF-8. This is the case where Rust's design can improve security.
 - Rust `str` enforces UTF-8 so Rust code trust `str` to be UTF-8 and don't do internal validation. In Rust, using unsafe to **create a `str` containing invalid UTF-8 is undefined behavior and can cause security risk**. [CVE-2026-0810](https://rustsec.org/advisories/RUSTSEC-2025-0140.html) is caused by it. [^rust_cve]
 
-[^rust_cve]: In Rust, the bar of a CVE is lower, because a potentia way ofl misusing a library that cause safety issue is a CVE, even if there is no software that actually misuse it. But in C/C++, a potential way to misuse a lirbary is not CVE, only a real security vulnerability is CVE. [See also](https://www.reddit.com/r/rust/comments/1u6km19/comment/ory2fey/).
+[^rust_cve]: In Rust, the bar of a CVE is lower, because a potential way of misusing a library that cause safety issue is a CVE, even if there is no software that actually misuses it. But in C/C++, a potential way to misuse a lirbary is not CVE, only a real security vulnerability is CVE. [See also](https://www.reddit.com/r/rust/comments/1u6km19/comment/ory2fey/).
 
 Note that Rust only care about UTF-8 code point validity, not grapheme cluster validity.
 
@@ -1603,7 +1618,7 @@ The `as_deref` turns `Option<String>` into `Option<&str>`. The `as_str` turns `S
 - Borrowing that cross function boundary is contagious. Just borrowing a wheel of car indirectly borrows the whole car.
 - Contagious borrow between branches. If the output of a branch indirect borrows matched value, then that borrow contaminates another branch.
 - Lifetime annotation is contagious. If a type has a lifetime parameter, then every type that holds it must also have lifetime parameter. Every function that use them also need lifetime parameter (except when lifetime elision works). Adding/removing lifetime parameter to a type may require big refactoring. (AI can help with this kind of refactoring.)
-- `async` is contagious. `async` function can call normal function. Normal function cannot easily call `async` function (it's possible to call by blocking, but faces async-sync-async sandwitch issue). Many non-blocking functions tend to become async because they may call async function.
+- `async` is contagious. `async` function can directly call normal function (but with the trap of blocking scheduler thread). Normal function cannot directly call `async` function (but it's possible to call by [`block_on`](https://docs.rs/futures/latest/futures/executor/fn.block_on.html)).
 - Being not `Sync`/`Send` is contagious. A struct that indirectly owns a non-`Sync` data is not `Sync`. A struct that indirectly owns a non-`Send` data is not `Send`. A reference to non-`Sync` data is not `Send`.
 - Error passing is contagious. If panic is not acceptable, then all functions that indirectly call a fallible function must return `Result`. 
   - Related: NaN is contagious in floating point computation.

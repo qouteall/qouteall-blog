@@ -782,7 +782,12 @@ Stock market pricing is often short-termism, which often cause company decision-
 - Sometimes the investors care too much about short-term shareholder return and don't understand value of long-term investment (e.g. product quality, company reputation, research).
 - Sometimes the investors care too much about short-term price trend. When there is a bubble, company tend to do irrational investment to prop the bubble. The story behind bubble only pays off after long time, but it's not rational long-termism.
 
+## Most essential work is not "core"
 
+- In the chip, the transistors that actually do compute (addition, multiplication, etc.) only consume a tiny portion of power. Most power is used for storing data, moving data and controlling what to compute.
+- In workplace, the efforts spending in actual work is small. Most efforts are in communication and debating of what to work on.
+- In AI / data science work, cleaning data often has more impact to results than designing a new fancy algorithm. No matter how advanced algorithm is, garbage-in-garbage-out applies.
+- For many kinds of commodity, the main cost comes from shipping and warehousing in the whole supply chain, not the production itself.
 
 ## Related
 
