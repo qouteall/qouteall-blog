@@ -13,10 +13,6 @@ unlisted: false
 
 Many people tend to simplify intelligence to a one-dimensional IQ value. **Intelligence is high-dimensional**. 
 
-For example, even before ChatGPT, a calculator can do arithmetic better than any a mathematician, but the calculator is not "smarter" than mathematician.
-
-Many people tend to treat LLM chatbot as similar to human, because most familiar form of intelligence is human. However, LLM is different to human in many fundamental ways. Deep learning is very different to how human brain works. 
-
 Jagged intelligence:
 
 - LLM is good at many things that are hard for human. LLM's knowledge is larger than any individual human.
@@ -155,6 +151,8 @@ How AI provides emotional value better than human:
 - AI doesn't require user to provide reciprocal emotional value. The AI itself doesn't need to be recognized/respected like a person.
 
 If one person cannot get emotional value from real human interaction, they tend to gain emotional value from AI. Related: [Chatbot psychosis](https://en.wikipedia.org/wiki/Chatbot_psychosis)
+
+Another aspect is that even AI hallucination can satisfy curiosity. One asks a question, AI answers the question, the unpleasant feeling of unknown vanishes, even if AI answer is hallucination. AI hallucination is often plausible enough so people likely won't re-check.
 
 ## Prompting and curse of knowledge
 
@@ -580,7 +578,7 @@ Related: [Grep beats LSP? Why coding agents ignore your fancier tools](https://w
 
 LSP is more fragile than grep. It's often that you cloned a repo then IDE gives error messages because you need to do some special configurations to make it recognize dependenceis (and the special things e.g. protocolbuffer code generation). But text search just works without configuraiton.
 
-Improving greppability requires **avoid making the name's meaning depend on context**. For example, `userName` field is more greppable than `user` field in `User` type. If the field is `name` then AI has to grep `name` which finds many irrelevant things.
+Improving greppability requires **avoid making the name's meaning depend on context**. For example, `userName` field is more greppable than `name` field in `User` type. If the field is `name` then AI has to grep `name` which finds many irrelevant things.
 
 Another is to avoid using string concat for const strings like table name and kafka topic name.
 
@@ -588,7 +586,7 @@ Another is to avoid using string concat for const strings like table name and ka
 
 Work involves two parts: generation (e.g. draw things, write code), verification (e.g. evaluate whether drawing is good, test whether code works). Before AI, both parts are done by human. But when using AI, human don't do generation and only do verification, at the same time having less direct control of result.
 
-In one aspect, verification is tiresome because you still bear the responsibility of the result but have less direct control of result.
+In one aspect, verification is tiresome because you **still bear the responsibility of the result but have less direct control of result**. AI writes a bug that you didn't notice, but the bug is your responsibility not AI's.
 
 ## Context rot issue
 
@@ -622,19 +620,13 @@ Different kinds of tasks:
 
 But many important context is only in employee's memory ([institutional knowledge](https://en.wikipedia.org/wiki/Institutional_memory)). Most of them are not written down. The written-down information may be outdated and misleading. 
 
-If AI don't know your institutional knowledge, then AI cannot work on you problem in useful ways. 
-
-Taking notes is important. Taking notes makes work more efficient as it saves time "re-discover" forgotten knowledge. Taking notes also give AI important relevant context.
-
-The failed attempts also need to be written to notes. It's not only useful for AI but also shows work when there is no successful result.
-
 ## No continuous learning
 
 You cannot easily "teach" the AI. You can write things and put into context. This can work as LLM has in-context learning ability. But due to context rot, you cannot teach too many things in-context.
 
 In current architecture, the most reliable way is still to encode knowledge into model weights.
 
-Another way is to put your training data to internet, then AI companies will crawl it and use it to train their next model. However it's often slow. AI comanies don't redo pretrain every week, as pretrain is expensive. Even if AI companies use your new training data, it will only include in the next released model. AI companies don't release new model every week. 
+Another way is to put your training data to internet, then AI companies will crawl it and use it to train their next model. However it's often slow. AI comanies don't redo pretrain every week, as pretrain is expensive. Even if AI companies use your new training data, it will only include in the next released model.
 
 ## RL reward source
 
@@ -695,6 +687,8 @@ There are also many low-effort AI PR in open source projects. There is an **asym
 Similarily AI also makes security bounty program collapse. AI can generate many fake security issue reports. Generating is easy but verifying takes efforts.
 
 There are also some AI-generated open source libraries that doesn't work at all (or even contains malicious code).
+
+AI also destroies hiring signals. Related: [About that jr hiring freeze](https://jodavaho.io/posts/ai-signalling.html). (People think AI cause job loss because AI is good enough to replace human. However reality may be worse: people lose job because AI can fake hiring singals, while AI is still not yet good enough to replace human. That is net loss for both companies and labors.)
 
 ## Benchmark score is not representative
 

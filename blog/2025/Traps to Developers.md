@@ -22,7 +22,7 @@ tags:
 - Margin collapse.
   - Two vertically touching siblings can overlap vertial margin. Child vertical margin can "leak" outside of parent.
   - Margin collapse doesn't happen when `border` or `padding` spcified. Don't try to debug margin collapse by coloring border. Debug it using browser's devtools. 
-  - Margin collpse doesn't happen in flexbox or grid.
+  - Margin collpse doesn't happen in flexbox or grid. (If you want margin collapse in flexbox, use `gap` instead.)
   - Block formatting context (BFC) avoids child margin from leaking out of parent. `display: flow-root` creates a BFC. (Things like `overflow: hidden`, `overflow: auto`, `overflow: scroll`, `display: table` also create BFC but with side effects).[^margin_collapse_sibling] 
   - Related: margin can be negative. Negative margin can make elements overlap and make child leak outside of parent. BFC doesn't prevent negative margin from working.
 - If a parent only contains floating children, the parent's height will collapse to 0, and the floating children will leak. Can be fixed by BFC.
@@ -266,17 +266,15 @@ tags:
 - For `std::vector<bool>`, result of `operator[]` is a proxy object, not `bool&`.
 - [Undefined behaviors](https://en.cppreference.com/cpp/language/ub). The compiler optimizations keep defined behavior the same, but can freely change undefined behavior. Triggering undefined behavior can make program break under optimization. [See also](https://russellw.github.io/undefined-behavior), [see also](https://blog.llvm.org/2011/05/what-every-c-programmer-should-know.html).
   - Accessing uninitialized memory is undefined behavior.
-    - After converting binary data pointer `char*` to struct pointer, using it is treated as using uninitialized memory, even if the memory is initialized, because the object [lifetime](https://en.cppreference.com/w/cpp/language/lifetime.html) hasn't started.
+    - After converting binary data byte pointer to struct pointer, using it is treated as using uninitialized memory, even if the memory is initialized, because the object [lifetime](https://en.cppreference.com/w/cpp/language/lifetime.html) hasn't started.[^cpp_lifetime]
     - Using a local variable before initializing it is also accessing uninitialized memory.
     - For a local variable without explicit initialization (e.g. `SomeType value;`), whether it initializes depend on many factors, [see also](https://gaultier.github.io/blog/the_production_bug_that_made_me_care_about_undefined_behavior.html). It's recommended to always initialize local variable (e.g. `SomeType value{};`).
   - Accessing using null pointer or dangling pointer is undefined behavior.
   - Integer overflow/underflow is undefined behavior. Note that unsigned integer can underflow below 0. Don't use `x > x + 1` to check overflow as it will be optimized to `false`.
-  - Integer dividing by 0 is undefined behavior. (But floating point dividing by 0 is not undefined behavior. It gives NaN.)
+  - Integer dividing by 0 is undefined behavior. (But floating point dividing by 0 is not undefined behavior. It gives ±Infinity or NaN.)
   - Aliasing.
-    - Strict aliasing rule. If there are two pointers with type `A*` and `B*`, and there is no subtyping relation between `A` and `B`, then compiler assumes two pointer can never equal. If they equal, using it to access memory is undefined behavior. One exception is byte pointer. [^strict_aliasing]
-    - Pointer provenance. Each heap allocation or local variable or global variable is a provenance. If two pointers from two different provenances equals, accessing memory using both is undefined behavior. [See also](https://www.ralfj.de/blog/2020/12/14/provenance.html). 
-      - The [XOR linked list](https://en.wikipedia.org/wiki/XOR_linked_list) doesn't work with pointer provenance. 
-      - Adding offset to pointer only works within one provenance.
+    - Strict aliasing rule. If there are two pointers with type `A*` and `B*`, and there is no subtyping relation between `A` and `B`, then compiler assumes two pointer can never equal. If they equal, and both pointers are used for accessing memory, then it's undefined behavior. One exception is byte pointer. [^strict_aliasing]
+    - Pointer provenance. Each heap allocation or local variable or global variable is a provenance. If two pointers from two different provenances equals, and both pointers are used for accessing memory, then it's undefined behavior. [See also](https://www.ralfj.de/blog/2020/12/14/provenance.html). [^pointer_provenance]
   - `const` can mean both read-only and immutable:
     - If the original object is `const` (e.g. `const SomeType someValue`, `new const SomeType()`), then it's deemed immutable. If you use `const_cast` to turn its pointer to `T*` then change content, it's undefined behavior. [^cpp_mutable]
     - If the original object is not `const`, you can turn pointer to it as `const T*`, in this case `const` means read-only [^readonly]. You can change the object without triggering undefined behavior.
@@ -294,7 +292,8 @@ tags:
 - In signal handler, don't do any IO or locking, don't `printf` or `malloc`.
 - Implicit conversion between signed and unsigned. If `a` is signed -1, `b` is unsigned 0, then `a > b` is true, because it auto-converts `a` into unsigned integer.
   - Note that `char` may be signed or unsigned, depending on platform. It's recommended to always use `signed char` or `unsigned char`, not `char`. [Apple ARM `char` is signed](https://developer.apple.com/documentation/xcode/writing-arm64-code-for-apple-platforms#Handle-data-types-and-data-alignment-properly), [gcc `char` is unsigned in Android, but signed in other platforms](https://stackoverflow.com/questions/2054939/is-char-signed-or-unsigned-by-default).
-- Floating point implicitly convert to integer.
+- Floating point number can implicitly convert to integer.
+- The constructor that takes only one argument enables implicit conversion, except when that constructor is `explicit`.
 - If the same header file is included in two `.cpp` files with different macros, and the macro difference affect the content in `inline` thing or `template` thing or type definition, then it violates [ODR (one definiton rule)](https://en.cppreference.com/w/cpp/language/definition.html). There will be different compiled functions with the same symbol name, and linker nondeterministically chooses one.
 - The dynamic library can bundle its own allocator[^cpp_allocator]. One allocator's allocation should not be freed in another allocator. Passing container (e.g. `vector`) is only safe when allocator matches (and ABI matches). When passing `unique_ptr` across dynamic libraries, it's recommended to use custom deleter.
 - `malloc` may return null. When there is no OS overcommit, checking for null can gracefully handle out-of-memory. When overcommit is enabled (often enabled by default), `malloc` can succeed despite out-of-memory, then process get killed when accessing allocated memory. But it's still recommended to check for null (can abort on null), because it may still return null under overcommit[^malloc_return_null], and using null pointer is undefined behavior.
@@ -303,9 +302,13 @@ tags:
 - Don't use `=` to compare equality.
 - Don't forget `break` in switch, unless you want fallthrough.
 
+[^cpp_lifetime]: Some exceptions: If the byte pointer comes from `malloc` then it's fine. If the object lifetime was started before (byte pointer was converted from valid object pointer), it's also fine. Explicitly calling `std::start_lifetime_as` will start lifetime, which is also fine. But the recommended way is to not do pointer convertion. The recommended way is to have local variable then memcpy into local variable, e.g. `T x; memcpy(&x, byte_pointer, size);`.
+
+[^pointer_provenance]: It's ok to have two provenances' pointers equal, as long as you don't use both for memory access. For example, you can have the pointer-to-after-last-element-in-array, that pointer can equal to another pointer in another provenance, but using that pointer for comparision only is fine. Also, pointer provenance doesn't separately on fields within one allocation, and doesn't separate on different elements in one array. The [XOR linked list](https://en.wikipedia.org/wiki/XOR_linked_list) doesn't work with pointer provenance and should not be used (but if pointers are replaced by arena indexes, XOR linked list can work).
+
 [^cpp_allocator]: The "allocator" here doesn't mean std allocator type. It means the allocator backing `malloc` and `free`, managing its own heap. For example, a dynamic library can static link a piece of jemalloc. And two such different jemalloc can co-exist in a process, and also co-exist with glibc allocator. Each allocator has its own machine code and static data.
 
-[^strict_aliasing]: Using pointer type to hold integer is fine as long as you don't use it to access memory. Also, [Linus is against strict aliasing rule](https://lkml.org/lkml/2018/6/5/769). The Linux kernel disables strict aliasing rule and makes integer overflow defined behavior.
+[^strict_aliasing]: Using pointer type to hold integer is fine as long as you don't use it to access memory. Also, [Linus is against strict aliasing rule](https://lkml.org/lkml/2018/6/5/769). The Linux kernel disables strict aliasing rule and makes integer overflow defined behavior. About byte pointer: turning object pointer into byte pointer then use byte pointer to access memory is fine. But converting byte pointer to object pointer is not fine (exception: converting object pointer to byte pointer then back to object pointer is fine).
 
 [^readonly]: The read-only here is in-language constraint. It should not be confused with read-only memory which is actually immutable.
 
@@ -459,6 +462,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
   - If `/aaa/bbb` is a symbolic link to a folder, `rm /aaa/bbb` removes the symbolic link, but `rm /aaa/bbb/` may remove files in pointed folder.
   - For `mv x.txt /aaa/bbb`, if `/aaa/bbb` is a folder it will move file into the folder without changing name, but if `/aaa/bbb` doesn't exist it will rename file name to `bbb`.
 - After a process exits, the same PID can be used by another process.
+- When parent process dies, child process doesn't automatically die. This is different to terminal behavior. In terminal, closing terminal or doing Ctrl-C kills subprocesses because terminal kills the process group.
 
 
 ## Backend-related
@@ -490,7 +494,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
   - The closure functions that are created directly in component function are also always-new. Use `useCallback` to fix. [^variable_amount_of_callbacks]
   - If an always-new thing is put into `useEffect` dependency array, the effect will run on every component function call. See also [Cloudflare indicent 2025 Sept-12](https://blog.cloudflare.com/deep-dive-into-cloudflares-sept-12-dashboard-and-api-outage/). 
   - Don't forget to include dependencies in the dependency array. And the dependencies also need to be memoed.
-  - (If you are using [React compiler](https://react.dev/learn/react-compiler/introduction), no need to consider the above in most cases.)
+  - (If you are using [React compiler](https://react.dev/learn/react-compiler/introduction), no need to do explicit memoization in most cases.)
 - About state:
   - State objects themselves should be immutable. Don't directly set fields of state objects. Always recreate whole object.
   - Don't set state directly in component function. State can only be set in callbacks. The same applies to the value in `useRef`.

@@ -161,7 +161,9 @@ Material consumption can give short-term satisfaction, but cannot give long-term
 
 **Means-end inversion**: one originally want money (means) to improve life quality (end). However, the process of making money can sacrifice life quality. Examples: investing all money and leave little for consumption, or choosing a high-paying job with no work-life balance (golden handcuffs).
 
-> We al­ready walked too far, down to we had for­got­ten why em­barked.
+> We al­ready walked too far, down to we had for­got­ten why em­barked. [^walk_too_far_source]
+
+[^walk_too_far_source]: This quote is often attributed to Kahlil Gibran, but the actual source is likely not that, [see also](https://www.sohu.com/a/347656962_260616).
 
 > A man on a thousand mile walk has to forget his goal and say to himself every morning, "Today I'm going to cover twenty-five miles and then rest up and sleep."
 > 
@@ -1419,11 +1421,17 @@ These factors affect mental energy:
 
 Mental resting is different to body resting. Intense thinking when lying on the bed even consumes mental energy. Mental resting involves focusing on simple things with low cognitive demand.
 
+For normal people, doing a task consumes willpower. But if one loves doing the task, then one gains willpower instead of consuming when doing the task. It's a big advantage.
+
+The small frictions can keep consuming willpower. A small friction can be not small if it's fequently perceptable.
+
+> It isn’t the mountains ahead that wear you out, it’s the pebble in your shoe. [^sand_shoe_source]
+
+[^sand_shoe_source]: This quote is often attributed to Muhammad Ali, but the actual source is likely not that, [see also](https://quoteinvestigator.com/2013/06/23/sand-in-shoe/).
+
 > Before you try to increase your willpower, try to decrease the friction in your environment.
 > 
 > \- James Clear, [Link](https://x.com/JamesClear/status/1883877771618738682)
-
-For normal people, doing a task consumes willpower. But if one loves doing the task, then one gains willpower instead of consuming when doing the task. It's a big advantage.
 
 ## Memory distortion
 
