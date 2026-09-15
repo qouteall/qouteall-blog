@@ -149,7 +149,7 @@ tags:
 
 [^scalar_value]: The U+XXXX notation (XXXX is a hex value) represents a code point. In UTF-8, code point and scalar value are the same thing. But in UTF-16, it's not simple. You can understand scalar value as "real code point" that has semantic meaning. The "fake code point" is surrogate code point (U+D800 to U+DFFF). One surrogate code point itself has no semantic meaning. Two surrogate code units form a 4-byte scalar value, called surrogate pair. Note that a surrogate pair can both be seen as one code point or two code points. Because that UTF-8 is widely used, it's often that "code point" means scalar value ("real code point").
 
-[^string_encoding]: The encoding in API is not necessarily the actual in-memory representation. For example, Java has an optimization that use Latin-1 encoding (1 byte per code point) for in-memory string if possible.
+[^string_encoding]: The encoding in API is not necessarily the actual in-memory representation. For example, Java has an optimization that use Latin-1 encoding (1 byte per character) for in-memory string if possible.
 
 ## Floating point
 
@@ -166,11 +166,11 @@ tags:
   If a JSON contains an integer larger than that, and JS deserializes it using `JSON.parse`, the number in result will be likely inaccurate. The workaround is to use other ways of deserializing JSON or use string for large integer. [^safe_int_timestamp]
   
 - Floating-point is 2-based. It cannot accurately represent most decimals. 0.1+0.2 gets 0.30000000000000004 .[^excel_money]
-- Associativity law and distribution law doesn't strictly hold because of precision loss. See also: [Defeating Nondeterminism in LLM Inference](https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference/), [Taming Floating-Point Sums](https://orlp.net/blog/taming-float-sums/)
+- Associativity law and distribution law doesn't strictly hold because of precision loss. See also: [Defeating Nondeterminism in LLM Inference](https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference/), [Taming Floating-Point Sums](https://orlp.net/blog/taming-float-sums/) [^algebraic_float]
 - Division is much slower than multiplication (except when divisor is constant, compiler optimizes it into multiplying reciprocal). Multiplying reciprocal is much faster. This also applies to integers.
 - These things can make different hardware have different floating point computation results:
   - Hardware FMA (fused multiply-add) support. `fma(a, b, c) = a * b + c` (in some places `a + b * c`). Most modern hardware make intermediary result in FMA have higher precision. Some old hardware or embedded processors don't do that and treat it as normal multiply and add.
-  - Floating point has a [Subnormal range](https://en.wikipedia.org/wiki/Subnormal_number) to make very-close-to-zero numbers more accurate. Most mondern hardware can handle them, but some old hardware and embedded processors treat subnormals as zero.
+  - Floating point has a [Subnormal range](https://en.wikipedia.org/wiki/Subnormal_number) to make very-close-to-zero numbers more accurate. Some old hardware and embedded processors treat subnormals as zero. (Even in the processors that support subnormal, computing may be slow on subnormal, [see also](https://stackoverflow.com/questions/54937154/why-are-denormal-floating-point-values-slower-to-handle/54938328#54938328))
   - Rounding mode. The standard allows different rounding modes like round-to-nearest-ties-to-even (RNTE) or round-toward-zero (RTZ). In X86 and ARM, rounding mode is thread-local mutable state can be set by special instructions. It's not recommended to touch the rounding mode as it can affect other code.
   - Math functions (e.g. sin, log) may be less accurate in some embedded hardware or old hardware.
   - Legacy X86 FPU (80-bit floating point registers and per-core rounding mode state).
@@ -183,6 +183,8 @@ tags:
 [^excel_money]: It's recommended to NOT use floating point to store money value. Note that Microsoft Excel uses floating point to represent number, and many financial data are processed in Excel. Excel has rounding so that 0.30000000000000004 is displayed as 0.3 . Only use Excel for finance if you don't require high precision. Doing rough financial analyzing in Excel is fine.
 
 [^epsilon]: That method is not good for large-magnitude numbers. For large numbers, the tolerance should be higher: `abs(a - b) <= max(relative_epsilon * max(abs(a), abs(b)), absolute_epsilon)`. Also note that equality-by-epsilon is not transitive. There are cases where A is close to B, B is close to C, but A is not close to C. Grid-based equality comparision is transitive. [Related](https://lisyarus.github.io/blog/posts/its-ok-to-compare-floating-points-for-equality.html).
+
+[^algebraic_float]: The fact that floating point doesn't satisfy associativity hinders optimizations. If you want to enable these optimization in Rust, use [`algebraic_*`](https://doc.rust-lang.org/std/primitive.f32.html#algebraic-operators) operators. In C/C++ it requires compiler-specific options. See also [Beware of fast-math](https://simonbyrne.github.io/notes/fastmath/). When these optimizations are enabled, computing Nan or Infinity can lead to wrong results.
 
 ## Time
 
@@ -266,7 +268,7 @@ tags:
 - For `std::vector<bool>`, result of `operator[]` is a proxy object, not `bool&`.
 - [Undefined behaviors](https://en.cppreference.com/cpp/language/ub). The compiler optimizations keep defined behavior the same, but can freely change undefined behavior. Triggering undefined behavior can make program break under optimization. [See also](https://russellw.github.io/undefined-behavior), [see also](https://blog.llvm.org/2011/05/what-every-c-programmer-should-know.html).
   - Accessing uninitialized memory is undefined behavior.
-    - After converting binary data byte pointer to struct pointer, using it is treated as using uninitialized memory, even if the memory is initialized, because the object [lifetime](https://en.cppreference.com/w/cpp/language/lifetime.html) hasn't started.[^cpp_lifetime]
+    - After converting binary data byte pointer to struct pointer, using it is treated as using uninitialized memory, even if the memory is initialized, because the object [lifetime](https://en.cppreference.com/w/cpp/language/lifetime.html) hasn't started[^cpp_lifetime] (and it also violates strict aliasing rule).
     - Using a local variable before initializing it is also accessing uninitialized memory.
     - For a local variable without explicit initialization (e.g. `SomeType value;`), whether it initializes depend on many factors, [see also](https://gaultier.github.io/blog/the_production_bug_that_made_me_care_about_undefined_behavior.html). It's recommended to always initialize local variable (e.g. `SomeType value{};`).
   - Accessing using null pointer or dangling pointer is undefined behavior.
@@ -308,7 +310,7 @@ tags:
 
 [^cpp_allocator]: The "allocator" here doesn't mean std allocator type. It means the allocator backing `malloc` and `free`, managing its own heap. For example, a dynamic library can static link a piece of jemalloc. And two such different jemalloc can co-exist in a process, and also co-exist with glibc allocator. Each allocator has its own machine code and static data.
 
-[^strict_aliasing]: Using pointer type to hold integer is fine as long as you don't use it to access memory. Also, [Linus is against strict aliasing rule](https://lkml.org/lkml/2018/6/5/769). The Linux kernel disables strict aliasing rule and makes integer overflow defined behavior. About byte pointer: turning object pointer into byte pointer then use byte pointer to access memory is fine. But converting byte pointer to object pointer is not fine (exception: converting object pointer to byte pointer then back to object pointer is fine).
+[^strict_aliasing]: Using pointer type to hold integer is fine as long as you don't use it to access memory. About byte pointer: turning object pointer into byte pointer then use byte pointer to access memory is fine. But converting byte pointer to object pointer is not fine (exception: converting object pointer to byte pointer then back to object pointer is fine).
 
 [^readonly]: The read-only here is in-language constraint. It should not be confused with read-only memory which is actually immutable.
 
@@ -346,7 +348,7 @@ tags:
   - Using multiple joins may cause overcounting. [See also](https://kb.databasedesignbook.com/posts/sql-joins/#understanding-the-problem-of-overcounting).
   - Using `distinct` to "fix" join often gives worse performance. [See also](https://www.red-gate.com/simple-talk/databases/sql-server/t-sql-programming-sql-server/dont-use-distinct-as-a-join-fixer/)
   - I recommend using subquery instead of join if appropriate, because join is "global" but subquery is "local".
-- In MySQL (InnoDB), the `utf8` charset doesn't allow 4-byte UTF-8 code point. Use `character set utf8mb4`.
+- In MySQL (InnoDB), the `utf8` charset doesn't allow 4-byte UTF-8 scalar value. Use `character set utf8mb4`.
 - MySQL (InnoDB) default to case-insensitive.
 - MySQL (InnoDB) can do implicit conversion by default. `select '123abc' + 1;` gives 124.
 - [MySQL (InnoDB) gap lock may cause deadlock](./About%20circular%20reference#mysql-gap-lock-deadlock).
@@ -367,6 +369,7 @@ tags:
 - In PostgreSQL, incrementally updating a large `jsonb` is slow, as it internally recreates whole `jsonb` data.
 - Storing UUID as string in database wastes performance. It's recommended to use database's built-in UUID type.
   - Also, in some places UUID text doesn't have hyphen (e.g. `6cdd4753e57047259dd7024cb27b4c4f` instead of `6cdd4753-e570-4725-9dd7-024cb27b4c4f`). Need to consider it when parsing and comparing UUID.
+- Don't treat auto-increment ID as "row number". Auto-increment id is not always contiguous. And auto-increment id order is not always same as transaction commit order (a transaction can allocate auto-increment id early but commit late). And the auto-increment id of firstly-inserted row is not always 1.
 - Whole-table locks that can make the service temporarily unusable:
   - `mysqldump` used without `--single-transaction` cause whole-table read lock.
   - In PostgreSQL, `create unique index` or `alter table ... add foreign key` cause whole-table read-lock. To avoid that, use `create unique index concurrently` to add unique index. For foreign key, use `alter table ... add foreign key ... not valid;` then `alter table ... validate constraint ...`.
@@ -563,7 +566,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - PostgreSQL linguistic sorting (collation) depends on glibc by default. Upgrading glibc may cause index corruption due to changing of linguistic order. [See also](https://wiki.postgresql.org/wiki/Locale_data_changes). Related: [Docker Postgres Image issue](https://x.com/gwenshap/status/1990942970682749183)
 - Text notation of floating-point number is locale-dependent. `1,234.56` in US correspond to `1.234,56` in Germany.
 - CSV normally use `,` as spearator. But in Germany locale separator is `;`.
-- [Han unification](https://en.wikipedia.org/wiki/Han_unification). The same code point may appear differently in different locales. Usually a font will contain variants for different locales. Correct localization requires choosing the correct font variant. [HTML code](https://github.com/qouteall/qouteall-blog/blob/main/blog/2025/unicode-unification-example.html) ![](unicode_unification_example.png)
+- [Han unification](https://en.wikipedia.org/wiki/Han_unification). The same scalar value may appear differently in different locales. Usually a font will contain variants for different locales. Correct localization requires choosing the correct font variant. [HTML code](https://github.com/qouteall/qouteall-blog/blob/main/blog/2025/unicode-unification-example.html) ![](unicode_unification_example.png)
 
 ## Regular expression
 

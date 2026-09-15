@@ -159,15 +159,21 @@ Reference: [Time perception - Wikipedia](https://en.wikipedia.org/wiki/Time_perc
 
 Material consumption can give short-term satisfaction, but cannot give long-term well-being (paradox of materialism). Long-term well being can better be achieved by sustainable consumption with temperance.
 
-**Means-end inversion**: one originally want money (means) to improve life quality (end). However, the process of making money can sacrifice life quality. Examples: investing all money and leave little for consumption, or choosing a high-paying job with no work-life balance (golden handcuffs).
+One implication of hedonic treadmill: if every friction and difficulty in life is removed (e.g. by future AI), the enjoyment will only be transient.
 
-> We al­ready walked too far, down to we had for­got­ten why em­barked. [^walk_too_far_source]
+> If we strip away all the layers of onion, we are not left with a Platonic ideal onion, we're left with nothing. Removing every chore, task, craft, friction from life does not leave an ideal perfect life, it leaves nothing.
+> 
+> \- jodrellblank, [Link](https://news.ycombinator.com/item?id=49672960)
 
-[^walk_too_far_source]: This quote is often attributed to Kahlil Gibran, but the actual source is likely not that, [see also](https://www.sohu.com/a/347656962_260616).
+**Means-end inversion**: one originally want money (means) to improve life quality (end). However, the process of making money can sacrifice life quality. Examples: investing all money and leave little for consumption, or choosing a high-paying job with no work-life balance.
 
 > A man on a thousand mile walk has to forget his goal and say to himself every morning, "Today I'm going to cover twenty-five miles and then rest up and sleep."
 > 
 > \- Leo Tolstoy, War and Peace
+
+> We al­ready walked too far, down to we had for­got­ten why em­barked. [^walk_too_far_source]
+
+[^walk_too_far_source]: This quote is often attributed to Kahlil Gibran, but the actual source is likely not that, [see also](https://www.sohu.com/a/347656962_260616).
 
 ## Self-serving and self-justification
 
@@ -267,6 +273,8 @@ Self-handicapping is also a way of **reducing responsibility**. This is common i
 Side note: It's common that people correlate results with capability. Self-handicapping is largely due to that. However, in real world, results are largely determined by luck and long-term attitude. The capability factor is very small in the long term.
 
 > I returned and saw under the sun, that the race is not to the swift, nor the battle to the strong, neither yet bread to the wise, nor yet riches to men of understanding, nor yet favor to men of skill; but time and chance happeneth to them all.
+> 
+> \- Ecclesiastes
 
 ### Reverse psychology
 
@@ -677,7 +685,7 @@ People may idealize the things that they are not familiar with:
 
 - People may idealize their partner, until living with the parter for some time.
 - "The grass is greener on the other side" (**Greener grass syndrome**).
-- Assuming that another career/lifestyle/country (that you are not familar with) is better than the current one.
+- Assuming that another career/lifestyle/country (that you are not familiar with) is better than the current one.
 
 > Marriage is like a cage; one sees the birds outside desperate to get in, and those inside equally desperate to get out.
 > 
@@ -1040,6 +1048,8 @@ The same effect happens in other forms:
 > Obama’s mistake illustrates the illusion of local causal chains \- that is, confusing catalysts for causes and assuming that one can know which catalyst will produce which effect.
 > 
 > \-  The Black Swan of Cairo; How Suppressing Volatility Makes the World Less Predictable and More Dangerous
+
+There is a tendency to teach by warning about other prople's dangerous behaviors. However, **warning may be treated as cursing**. When the incident happens, they may blame the one warning(cursing).
 
 ### Scarcity heuristic
 
