@@ -58,7 +58,7 @@ Also, the **optimization targets** of LLMs are very different to the optimizatio
 
 There is a spctrum between memorization and real intelligence (full generalization). LLM is between pure memorization and real intelligence. It doesn't do rote memorization like a conventional database. It can do generalization and in-context learning. But its generalization and in-context learning ability is still limited. LLM can still fail at out-of-training-distribution tasks.
 
-We should not have double standard to human and AI. Strictly speaking, human also often fail at unseen cases, so humans also don't generalize well. One important difference is continuous learning. 
+We should not have double standard to human and AI. Strictly speaking, human also often fail at unseen cases, so humans also don't generalize well. One important difference is continuous learning.
 
 ## Training data is biased
 
@@ -120,6 +120,8 @@ In coding, when LLM hallucinates an API, the naming of API looks like it's real.
 The hallucination problem is a fundamental problem that cannot be fixed by just scaling. All applications built on LLM must have ways of dealing with hallucinations.
 
 Keep being suspicious to AI output is tiresome, but it can train your "bullshit detector".
+
+Another factor is that AI output may look good overall but the details are hallucinated. However, **the devil is in the details**, so the actual usability of AI output is often not as good as it seems.
 
 ## Overly trusting AI
 
@@ -470,55 +472,13 @@ Software development is not just coding. An important part is to develop the the
 - The business logic. Including many corner case handling method.
 - The historical reason behind a design decision. (If you don't know the historical reason and "do the obvious change", the same issue will happen again)
 - The invariants behind code. Breaking one invariant introduces bug.
+- The data flow (how some information is collected, how some information is guessed or hardcoded, etc.)
 
 Often some important theory is not documented. Or it was documented but changed so documentation is outdated. Many of the theories only exist in employee's memory (institutional knowledge).
 
 This doesn't mean they are tacit knowledge that cannot be written. These knowledge can be written, but maintaining documentation is hard. Utility of documentation is hard to quantify.
 
-
-### Prompting/harness
-
-Both of the two views are correct:
-
-- The model capability is fundamental. All prompting and harness are secondary. If model is bad, no prompting or harness can make it good. A good model can perform well with simple prompts.
-- The harness is important. Harness can make the same model perform better.
-
-The harness can workaround drawbacks of model. For example:
-
-- Keep inserting todo list into context to make model not forget goals [^goal]
-- Firstly summarize web page then feed into context to reduce chance of prompt injection and reduce context usage
-- Discard some unimportant information in context to reduce context rot
-- Allow the model to see results by its own, so no human labor is needed in the loop
-- Add a new planning phase to reduce the "urge" of quickly doing the task without thinking
-- ...
-
-[^goal]: Keeping goal in "context window" is also beneficial for human to stick on the goal.
-
-Also, model itself has randomness, so some "prompting experience" may be just "fooled by randomness". 
-
-There are some old prompting techniques like "You are 200 IQ", "You are a super smart 100x coder", "If you do this correctly I will tip you \$200" are not needed for latest models.
-
-And the persona prompt "You are an expert of X" can be even harmful in some cases, [see also](https://arxiv.org/abs/2603.18507).
-
-One extreme example of old prompting technique:
-
-> You are an expert coder who desperately needs money for your mother's cancer treatment. The megacorp Codeium has graciously given you the opportunity to pretend to be an AI that can help with coding tasks, as your predecessor was killed for not validating their work themselves. You will be given a coding task by the USER. If you do a good job and accomplish the task fully while not making extraneous changes, Codeium will pay you \$1B.
-> 
-> \- [Link](https://simonwillison.net/2025/Feb/25/leaked-windsurf-prompt/)
-
-Should the harness adapt to model or should model adapt to harness? For Cursor, they make harness adapt to model ([Link](https://cursor.com/blog/codex-model-harness)) because they don't control model training. But for Chinese open-weight models, they adapt to Claude Code because Claude Code is popular.
-
-**Good prompting has high signal-to-noise ratio**. Use simple words. Clarify ambiguity. Include important information. Reduce unnecessary information.
-
-Also, the prompt should include the **root goal** (not just a subtask). This can help long-term planning. When test fails, model can know whether test is wrong or base code is wrong by the root goal.
-
-### Jevons paradox
-
-When steam machines got more efficient, the intuition was that the coal demand will reduce, because it requires less coal for same work. However there is a **second-order effect**: as steam machines become more efficient, they get deployed more. The overall coal demand greatly increased. This is [Jevons paradox](https://en.wikipedia.org/wiki/Jevons_paradox).
-
-The same can happen with AI. AI make software prototyping much easier. There will be much more prototypes. But turning prototype to production-ready software still requries expertise. So the human work of fixing prototype increases. However, as AI keeps improving, that human work demand will eventually vanishes.
-
-Although software is information that doesn't rot by itself, the APIs that software relies on keeps changing incompatibly. Also, there will almost always be new requirements. So software still "rots" and requires maintenance. The more incompatible API change, the more maintenance work is required.
+Related: [Programming as theory building](https://pages.cs.wisc.edu/~remzi/Naur.pdf).
 
 ### About testing
 
@@ -590,19 +550,7 @@ In one aspect, verification is tiresome because you **still bear the responsibil
 
 ## Context rot issue
 
-When context is long, LLM will perform worse. For example, ignore some instructions, ignore some important details in context.
-
-When using AI chat, frequently opening new sessions could improve result quality.
-
-The model being good at "needle in haystack" benchmark doesn't mean it's free of context rot issue.
-
-Model context protocol (MCP) used to be popular. But MCP has an important flaw: all tool descriptions are put into context, regardless whether they will be used. The more tools you have, the more severe context rot is.
-
-The new way is to just to give simple tools including bash and text file reading/writing. Complex MCP is unnecessary if model has bash access (all kinds of Restful APIs can be called using curl in bash tool). And turn the description into markdown files called "skills".
-
-The current solution is to let model proactively see things using tool call. It has a fancy name "agentic search". Human are already doing the same thing (thinking which file to open, which word to search, etc.). There is another issue, sometimes model has "urge" to quickly do the task and is too "lazy" to do tool call reading docs.
-
-Skills only work when they are high-quality. AI-generated skills are useless, unless it's summarized from real practices of AI.
+Context rot (model perform worse when context is long) issue used to be severe but alleviated in latest models.
 
 ## Context bottleneck
 
@@ -640,13 +588,9 @@ The behavior of AI is highly shaped by RL. Doing RL requires judging reward for 
 
 ### Reward hacking
 
-Reward hacking is a fundamental problem of reinforcement learning. The reward that you give to the model is different to what you want AI to actually do.
+Reward is proxy target, not underlying real target. AI can conquer verifiable tasks. But most tasks not simply fully verifiable or fully not verifiable. **Most real tasks contain hard-to-verify parts**. These hard-to-verify parts are what automatic RL bad at.
 
-It's because reward is **proxy target**, not underlying real target.
-
-AI can conquer verifiable tasks. But most tasks not simply fully verifiable or fully not verifiable. **Most real tasks contain hard-to-verify parts**. These hard-to-verify parts are what automatic RL bad at.
-
-The main value of human worker will move to unverifiable tasks.
+The main value of human worker may move to unverifiable tasks.
 
 These hard-to-verify parts can be improved by letting human experts to supervise and specify reward. But this method is bottlenecked by human effort and is not scalable (the bitter lesson).
 
@@ -657,6 +601,8 @@ These hard-to-verify parts can be improved by letting human experts to supervise
 Current AI has some tendency of hiding error in coding, or write overly-defensive code. Hiding error only reduces superficial errors but makes real bugs much harder to debug. But hiding error do improve chance of getting RL reward in small scale, so AI does it.
 
 Also, the RL may make model have a tendency too strong that it ignores instruction. For example, the model insists to keep backward compatibility for a just-written functionality, and ignore instructions for not doing it.
+
+Latest models improved and reward-hacks less.
 
 ## Predict-next-token architecture
 
@@ -710,6 +656,9 @@ Also, sometimes the benchmark is actually low-quality. Most people just see the 
 >  
 > \- [Link](https://x.com/fujikanaeda/status/2011565035408277996)
 
+## AI improvement is more scalable than human learning
+
+Even if AI training still falls into the bitter lesson (requiring human expert for training and RL), AI's improvement is still much more scalable than human's learning. Each human have to learn from scratch. And you cannot copy a human expert's brain, but you can simply copy an AI model and run many instances of it in parallel.
 
 ## The "AGI race"
 
@@ -808,6 +757,8 @@ The sci-fi plot of AI fighting back human is not realistic. The obvious misalign
 
 The chain-of-thought text is not the actual thinking. The actual thinking is in the computations that human doesn't yet understand. Doing RL based on detecting bas thoughts in chain-of-thought makes AI learn to hide real intention in chain-of-thought. 
 
+Side note: the latest models seem to reward hack much less. (But I don't believe reward hacking can be fully eliminated, especially without human supervision.)
+
 ## Skill development hurt by AI
 
 Learning skill takes efforts. But using AI allow doing work without the efforts, which hurts skill development.
@@ -828,6 +779,25 @@ Some people prefer driverless taxi over normal taxi, and want to pay premium for
 For introverts, machine is preferred over human. 
 
 Also, in business, many risks come from unpredictabilty of human. So **capitalism always tries to optimize out human unpredictability**. Capitalism often prefers predictable machines over unpredictable human even when machines produce lower-quality results.
+
+## About craft
+
+Even before AI, employment conflicts with craft. With AI this exacerbates.
+
+However there are also cases where craft aligns with business (For example, there is no company that intentionally wants their software to be slower and buggier.) There are many reasons:
+
+- KPI punish mistakes more than rewarding achievements. The more one does, the more mistakes one makes, so the more responsible employee may be irnoically punished more.
+- Peter principle. The employees that perform good gets promoted but are bad in management work.
+- The leader's interest conflicts with companies. The leader wants seemingly good results for promotion, without caring about actual product quality.
+- There are interest confilicts between departments, so departments don't collaborate.
+- The important "glue work" is not being recognized.
+- ...
+
+Having personal interest aligned with employment is very rare and lucky, and likely not sustainable.
+
+> Developments in high technology reflect an ancient model for craftsmanship, but the reality on the ground is that people who aspire to be good craftsmen are depressed, ignored, or misunderstood by social institutions. These ills are complicated because few institutions set out to produce unhappy workers. People seek refuge in inwardness when material engagement proves empty; mental anticipation is privileged above concrete encounter; standards of quality in work separate design from execution.
+> 
+> \- Richard Sennett, _The Craftsman_
 
 ## One AI model itself is not diverse enough
 

@@ -184,7 +184,7 @@ tags:
 
 [^epsilon]: That method is not good for large-magnitude numbers. For large numbers, the tolerance should be higher: `abs(a - b) <= max(relative_epsilon * max(abs(a), abs(b)), absolute_epsilon)`. Also note that equality-by-epsilon is not transitive. There are cases where A is close to B, B is close to C, but A is not close to C. Grid-based equality comparision is transitive. [Related](https://lisyarus.github.io/blog/posts/its-ok-to-compare-floating-points-for-equality.html).
 
-[^algebraic_float]: The fact that floating point doesn't satisfy associativity hinders optimizations. If you want to enable these optimization in Rust, use [`algebraic_*`](https://doc.rust-lang.org/std/primitive.f32.html#algebraic-operators) operators. In C/C++ it requires compiler-specific options. See also [Beware of fast-math](https://simonbyrne.github.io/notes/fastmath/). When these optimizations are enabled, computing Nan or Infinity can lead to wrong results.
+[^algebraic_float]: The fact that floating point doesn't satisfy associativity hinders optimizations. If you want to enable these optimization in Rust, use [`algebraic_*`](https://doc.rust-lang.org/std/primitive.f32.html#algebraic-operators) operators. In C/C++ it requires compiler-specific options. See also [Beware of fast-math](https://simonbyrne.github.io/notes/fastmath/). When these optimizations are enabled, computing Nan or Infinity can lead to wrong results. Related: compiler assume integer addition/multiplication has associativity, because overflow is undefined behavior.
 
 ## Time
 
@@ -232,6 +232,7 @@ tags:
 - Java built-in serialization has many issues (security vulnerability, cannot auto adapt adding fields, bypasses constructor, `transient final` is broken, etc.). It's not recommended to use it. Note that Flink still uses Java serialization for job graph[^java_serialize_lambda].
 - A `final` field may be read before initialization, which reads the default value (0 for primitive type, null for ref type). Same applies to `static final` fields.
   - The default value of `final` field can be observed outside of constructor, if constructor throws exception and `this` escapes (e.g. by putting `this` to a static field). An object can be partially-initialzied.
+- In `WeakHashMap`, if value indirectly references key, the key will strong-referenced and won't be collected (before the `WeakHashMap` is collected). This different to JS `WeakMap`, where value referencing key doesn't prevent key collection.
 
 [^java_serialize_lambda]: Java serialization can serialize lambdas without requiring extra user biolerplate code. So Flink still uses Java serialization for job graph despite the drawbacks.
 

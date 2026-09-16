@@ -729,11 +729,18 @@ The book [_Seeing like a state_](https://en.wikipedia.org/wiki/Seeing_Like_a_Sta
 
 However, governments (and large coorporations) still highly focus on legible information because they also want to maintain authority and want to control things. The illegible things are percepted and controlled by actual executors that the upper authority doesn't fully trust. And the simplified numbers are simple so it makes management "scalable".
 
-## Breaking the rigid rule is inevitable
+## The rule and the execution
 
-In reality there are often rules being broken, and it's tacitly permitted. Because rigid rules cannot adapt to complex changing reality requirements. The actually executed unspoken rule is uncertain but flexible.
+It commonly seen that rules control execution. But in reality it's often that the actual execution defines the real rule. The rigid rule defined by authority cannot adapt to complex and variable reality that executor faces. So enforcing the explicit rigid rule is often actually "bad" for both authority and executor. 
 
-Software is also a kind of "rule". Software itself is rigid, but the actual user requirement is often changing, so a working software often face endless new requirements (but many requirements are fake).
+Allowing tacit rule both helps executor to get more freedom to do actual work. For authority, there is optionality: if result is good, it's tacitly allowed because it benefits both. If result is bad, the responsibility is in executor not authority, because executor is the one violating the rule.
+
+As previously mentioned, the real rule has self-reinforcing feedback loop. 
+
+- If one rule is broken but not being punished, when people observe this, more people will break the rule. The rule de-facto breks.
+- If one does something outside of rule but gets good result, and the management tacitly allows, then the rule de-facto forms.
+
+(Similar principle also applies in software: [Hyrum's law](https://www.hyrumslaw.com/).)
 
 ## The flip side of advanced technologies
 
