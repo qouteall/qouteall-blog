@@ -94,7 +94,7 @@ tags:
 - Trailing slash in URL. If current URL is `https://xxx.com/aaa/bbb`, then `<img src="image.png">` use image `https://xxx.com/aaa/image.png`. But if current URL is `https://xxx.com/aaa/bbb/` (with trailing slash), then image path is `https://xxx.com/aaa/bbb/image.png`
 - Shadow dom does some isolation, but some things are not isolated. CSS variables are shared with shadow dom. The size of `1rem` is always based on `font-size` of `<html>` even in shadow dom.
 - [XSS](https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/XSS) of `javascript:` URL. For `href` property, when it starts with `javascript:` followed by JS code, clicking it executes JS code. This needs to be sanitized when URL comes from user data.
-- Update rendering on every message wastes performance. Should update in `requestAnimationFrame`, [see also](https://kciter.so/posts/the-expensive-main-thread/en/#batching).
+- It's possible to receive multiple update messages between two frames. Not batching can re-draw canvas (or re-generate svg) multiple times between two frames, which hurts performance. It's recommended to do batching by flag and `requestAnimationFrame`, [see also](https://kciter.so/posts/the-expensive-main-thread/en/#batching).
 
 [^margin_collapse_sibling]: If you make a child BFC, the margin collapse between siblings still remains. To prevent margin collapse between siblings, one way is to make container flexbox or grid.
 
@@ -232,9 +232,11 @@ tags:
 - Java built-in serialization has many issues (security vulnerability, cannot auto adapt adding fields, bypasses constructor, `transient final` is broken, etc.). It's not recommended to use it. Note that Flink still uses Java serialization for job graph[^java_serialize_lambda].
 - A `final` field may be read before initialization, which reads the default value (0 for primitive type, null for ref type). Same applies to `static final` fields.
   - The default value of `final` field can be observed outside of constructor, if constructor throws exception and `this` escapes (e.g. by putting `this` to a static field). An object can be partially-initialzied.
-- In `WeakHashMap`, if value indirectly references key, the key will strong-referenced and won't be collected (before the `WeakHashMap` is collected). This different to JS `WeakMap`, where value referencing key doesn't prevent key collection.
+- In `WeakHashMap`, if value strong-references key (directly or indirectly), the key will strong-referenced and won't be auto-removed. This different to JS `WeakMap`, where value referencing key doesn't prevent key collection.[^weak_hash_map]
 
 [^java_serialize_lambda]: Java serialization can serialize lambdas without requiring extra user biolerplate code. So Flink still uses Java serialization for job graph despite the drawbacks.
+
+[^weak_hash_map]: JS `WeakMap` uses ephemeron mechanism. When the GC scans entries in `WeakMap`, it only scans value if key object is scanned. The JVM GC doesn't have such feature. In `WeakHashMap` the GC will unconditionally scan the value. One related trap: when using `Cleaner`, the registered cleanup callback should not (directly or indirectly) capture the target object.
 
 ## Golang
 
@@ -434,6 +436,7 @@ tags:
 - Creating file doesn't auto create parent folder. It will fail if parent folder doesn't exist. You need to manually create parent folder.
 - In C/C++ and Java, literal number starting with 0 will be treated as octal number. (`0123` is 83)
 - In Java and Python, there are two kinds of threads: daemon and non-daemon. When main function exits, the program will still be running when a non-daemon thread is running. The thread pool threads are non-daemon by default.
+- Using `+` to concat $n$ strings may be $O(n^2)$ because of copying and re-allocating temporary strings. Use mutable string buffer.
 
 
 ## Transitive dependency conflict
@@ -556,6 +559,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
   - Auto certificate renewal may silently stop working. [Example](https://github.com/bazelbuild/bazel/issues/28101#issuecomment-3693346788)
 - DNS caching. Changings related to DNS can take long time to take effect.
 - Many TCP connetions in TIME_WAIT state can use up ephemeral port space, then new TCP connection cannot start. See also: [Bluesky incident](https://pckt.blog/b/jcalabro/april-2026-outage-post-mortem-219ebg2), [Thoughts on the Bluesky public incident write-up](https://surfingcomplexity.blog/2026/04/12/thoughts-on-the-bluesky-public-incident-write-up/)
+- Domain name trailing dot. `example.com` and `example.com.` refers the the same domain name in most cases.
 
 [^keepalive]: Note that [HTTP/1.0 Keep-Alive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Keep-Alive) is different to TCP keepalive.
 
@@ -584,6 +588,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Windows limits command length to 32767 WTF-16 code units. [See also](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)
 - In Windows the default stack size of main thread is 1MB, but in Linux and macOS it's often 8MB. It's easier to stack overflow in Windows by default.
 - Windows limits path length to be 260 WTF-16 code units by default.
+- [Windows file short name](https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file#short-vs-long-names). For example, `C:\PROGRA~1` can refer to `C:\Program Files`.
 
 ## Other
 
@@ -603,5 +608,4 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Configuration override. Many frameworks have configuration override mechanisms. Sometimes one configuration is correct but it still malfunctions, because another higher-priority configuraiton overrides it. An env var, a command-line argument or some config file in a faraway folder can override your config (it's framework-specific).
 - Duplicated configuration. When one place changes, another place must change accordingly. Forgeting changing one causes problem. It's recommended to make configurations have single-source-of-truth.
 - String concat hurts [greppability](https://morizbuesing.com/blog/greppability-code-metric/). For example if there are two Kafka topics `admin-access-log` `guest-access-log`, don't use `userType + "-access-log"` to get topic name. Make full name exist in code, otherwise it cannot be text-searched. For constants like port number, don't use addition.
-
 

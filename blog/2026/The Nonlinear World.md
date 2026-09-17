@@ -191,6 +191,10 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: Being too early is not good. The market may take longer time than expected to price in the new status.
 
+- First-order effect: High-liquidity asset is better than low-liquidity assets.
+
+  Second-order effect: Normal people tend to do impulsive trading to high-liquidity assets (e.g. stocks). Impulsive trading often results worse than simply holding. For low-liquidity assets (e.g. real estate) normal people tend to hold.
+
 ### In Health and Biology
 
 - First-order effect: Antibiotics cure bacterial infections.
@@ -346,6 +350,10 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 - First-order effect: Trying to achieve perfection will make one do better.
 
   Second-order effect: Perfection can be the enemy of good. (e.g. trying to buy at the lowest point makes one not buy in the bottom range)
+
+- First-order effect: When waiting on one thing to finish, switch to do another work can improve efficiency.
+
+  Second-order effect: Frequent switchings cause distraction, which may cause one to forget the context, or make more mistakes (brain is not computer). Focusing on one task and patiently waiting can be more efficient overall.
 
 ### In Cybersecurity
 
@@ -538,7 +546,7 @@ The **"competition"** between self-reinforcing feedback loops and self-balancing
 | Scaling of production       | Amortize cost                                                                              | Harder to manage; Diminishing marginal return; Higher risk                         |
 | Virus spread                | The more it infects, the quicker it spreads                                                | Immunity; Societal countermeasures; Medication; Natural selection                  |
 | Spread of information       | The more people know it, the quicker it spreads; Fad following; Algorithmic recommendation | Saturation of acceptors; Lose of interest                                          |
-| Scaling in AI               | Scaling gives better performance                                                           | Higher cost in training and inference; Dinimishing marginal utility                |
+
 
 Note that nonlinear systems are complex. They are more than just two kinds of feedback loops.
 
