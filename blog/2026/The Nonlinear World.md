@@ -21,10 +21,6 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   
   Second-order effect: Misinformation and low-quality contents are also more accessible. Discerning true and useful information is the new problem. Addictive contents are also more accessible, distracting learning.
 
-- First-order effect: Hiring a new UI designer can improve the UI of the product.
-
-  Second-order effect: The new UI designer may redesign the UI to justify their value. The users that get used to old UI may be frustrated by the new unfamiliar UI. The new UI may sacrifice usability for aesthetics.
-
 - First-order effect: Increasing the sensitivity of alarm improves security because it can catch more anomalies.
 
   Second-order effect: Increasing alarm sensitivity also increases false alarms. Cry wolf syndrome. People are tired of false alarms and care less about alarms.
@@ -535,18 +531,15 @@ The force behind a self-balancing feedback loop may drive self-reinforcing feedb
 
 The **"competition"** between self-reinforcing feedback loops and self-balancing feedback loops:
 
-|                             | Self-reinforcing                                                                           | Self-balancing                                                                     |
-| --------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
-| Population growth           | Exponential growth                                                                         | Limited food supply, living resources and jobs; Higher competition                 |
-| Asset price grow            | Trend following investments; Fear of missing out; Overconfidence; Leverage                 | Long force depletes; Short potential accumulates                                   |
-| Asset price drop            | Panic; Margin call                                                                         | Short force depletes; Long potential accumulates                                   |
-| Debt growth and inflation   | Economy growth; Higher confidence                                                          | Cost of excess invstment and debt; Monetary tightening for keeping currency credit |
-| Debt collapse and deflation | Cadcade credit collapse during financial crisis; Lose of confidence                        | Countermeasures for crisis; Fiscal and monetary stimulus                           |
-| Monopoly                    | Matthew effect; Economies of scale; Brand recognition                                      | Antitrust; Safety concerns; Innovator's dillema; Bureaucracy within large company  |
-| Scaling of production       | Amortize cost                                                                              | Harder to manage; Diminishing marginal return; Higher risk                         |
-| Virus spread                | The more it infects, the quicker it spreads                                                | Immunity; Societal countermeasures; Medication; Natural selection                  |
-| Spread of information       | The more people know it, the quicker it spreads; Fad following; Algorithmic recommendation | Saturation of acceptors; Lose of interest                                          |
-
+|                           | Self-reinforcing                                                           | Self-balancing                                                                     |
+| ------------------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Population growth         | Exponential growth                                                         | Limited food supply, living resources and jobs; Higher competition                 |
+| Asset price grow          | Trend following investments; Fear of missing out; Overconfidence; Leverage | Long force depletes; Short potential accumulates                                   |
+| Asset price drop          | Panic; Margin call                                                         | Short force depletes; Long potential accumulates                                   |
+| Debt growth and inflation | Economy growth; Higher confidence                                          | Cost of excess invstment and debt; Monetary tightening for keeping currency credit |
+| Monopoly                  | Matthew effect; Economies of scale; Brand recognition                      | Antitrust; Safety concerns; Innovator's dillema; Bureaucracy within large company  |
+| Scaling of production     | Amortize cost                                                              | Harder to manage; Diminishing marginal return; Higher risk                         |
+| Virus spread              | The more it infects, the quicker it spreads                                | Immunity; Societal countermeasures; Medication; Natural selection                  |
 
 Note that nonlinear systems are complex. They are more than just two kinds of feedback loops.
 
@@ -783,6 +776,8 @@ However, the reward value is a proxy to the actual objective that human wants AI
 It's fundamental that it can only be alleviated but cannot be fully prevented. Also, scaling may make the problem worse (smarter AI is more smart in reward hacking). Reward hacking may be a core reason that AI cannot replace some human jobs.
 
 There is a [paperclip maximizer](https://en.wikipedia.org/wiki/Instrumental_convergence#Paperclip_maximizer) story where AI focuses on producing paperclips as much as it can so it harms humanity. But I think in that story the AI is more likely to hack the "paperclip counter", which is the easiest way to maximize its reward.
+
+The formal verification of program also face similar problem. The math proof itself can be perfect, but in real-world cases the proved property may not align with the actual property that you want.
 
 ## Short-termism and long-termism
 

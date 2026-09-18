@@ -79,7 +79,7 @@ Also, creating things in information world is often easier than creating things 
 
 [Reality has a surprising amount of detail](http://johnsalvatier.org/blog/2017/reality-has-a-surprising-amount-of-detail). **The information that we input to computer are simplified "views" of complex reality**. The current software (including AI) mostly process on the simplified information, not the reality's complex information. But physical motor control requires working with complex reality information.
 
-## Value of art
+## Perceived value of art
 
 People tend to **judge the value of art by the cost of producing**. If one sees a beautiful image and thinks it's good art, then when they know it's AI-generated, the same image suddenly becomes cheap.
 
@@ -121,7 +121,7 @@ The hallucination problem is a fundamental problem that cannot be fixed by just 
 
 Keep being suspicious to AI output is tiresome, but it can train your "bullshit detector".
 
-Another factor is that AI output may look good overall but the details are hallucinated. However, **the devil is in the details**, so the actual usability of AI output is often not as good as it seems.
+Another factor is that AI output may look good overall but the details are hallucinated. However, **the devil is in the details**, so the actual usability of AI output is often not as good as it seems (except for entertainment, where details don't matter much).
 
 ## Overly trusting AI
 
@@ -189,22 +189,6 @@ The UX of AI chat is very different to Google search. In Google search, it gives
 The search-integrating AI can give reference links. However often the reference link is put wrongly. The reference link doesn't correspond to the AI's answer. AI actually answers using knowledge in weights to answer but inserts a link pretending it comes from search.
 
 ## About AI Coding
-
-### Focus too much on current task
-
-Current LLMs are trained to finish specific tasks. The LLM tend to **overly "focus" on current task, then it will "care less" about things like future code maintenance, security and performance**.
-
-Sometimes AI tends to use complex solutions to solve a problem. Although the complex solution sometimes work, the added complexity adds new sources of bugs. It adds tech debt and is problematic when project is big.
-
-Often the bug is partially caused by AI overcomplicating simple things. When human want to fix vibe-coded bug, the first thing to do is to simplify out unnecessary complexity. 
-
-Vibe-coded app may contain security issues. But if you ask AI to do security review it can find the issue. AI "knows" security but still write insecure code because it was trained to "focus" on finishing current task. The RL rewards are usually don't consider things like security and future maintenance.
-
-AI coding has a tendency of minimizing code changes. Sometimes AI will do an $O(n)$ search that wastes performance, instead of maintain new data structure to make lookup $O(1)$.
-
-AI coding works better in maintainable (clear naming, decoupled design, etc.) codebase. Unless you are vibe coding a throwaway app, steering toward better maintainability is important.
-
-One example: [Remove permission check due to type error](https://x.com/lisatomic5/status/1917641105245679814)
 
 ### Save time on learning the API
 
@@ -298,29 +282,6 @@ Sometimes type system can catch the issue. But when it involves config file, or 
 
 These implicit "links" should be commented on both sides so that AI will know it.
 
-### Feels faster but maybe actually slower
-
-In this study: [Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity](https://arxiv.org/pdf/2507.09089), developers feels that using AI make developing faster but it's actually slower.
-
-[Related](https://x.com/QuentinAnthon15/status/1943948791775998069)
-
-When waiting for AI to code, if the human picks up phone and start doomscrolling, then the human will be distracted and not go back immediately when AI finishes coding. This factor greatly reduces productivity.
-
-### Jagged capability
-
-Model capability is domain-specific. The model may be good at Python scripting or React web dev, but sucks at writing device driver in C. It's highly dependent on training data and RL targets in training.
-
-Because of the jagged capability, the AI evangelists and AI dismissers may both be correct in their area of working.
-
-It also follows Matthew effect. The more popular one thing is, the better AIs are at it.
-
-> Good question, it's basically entirely hand-written (with tab autocomplete). I tried to use claude/codex agents a few times but they just didn't work well enough at all and net unhelpful, possibly the repo is too far off the data distribution.
-> 
-> \- [Link](https://x.com/karpathy/status/1977758204139331904)
-
-The more in-training-distribution, the better AI is at it.
-
-If the model fails after trying many times, the task is likely out of distribution. Then letting model keep retrying likely won't work.
 
 ### AI is the new "compiler"?
 
@@ -366,12 +327,6 @@ Performance is also a concern. It's often a simple interface cannot allow enough
 **Abstraction has a cost**. An abstraction makes one thing easier but makes another thing harder.
 
 Also, prompt (spec) is shorter than code because AI can fill unspecified detail using "common sense" and "knowledge". This is more flexible than hardcoding default behavior or using rule-based heuristics. This breaks when your design is very out-of-training-distribution.
-
-### AI need to be able to "see results" by itself
-
-AI works best when the AI itself can run code and see results then iterate. If AI cannot run software and relied on human to feedback the result, it will be tiresome for human. The ideal would be that AI finds bug by its own and then fix it, no need for human to manually test then ask it to fix a bug.
-
-If the testing can be done purely in command line then AI is already pretty good at it. CLI is interacted via text, and LLM is good at interacting with text. But sometimes testing requires using GUI of different apps and do different things based on context. This is the case that AI is not yet good at.
 
 ### Writing good spec also requires skills
 
@@ -542,15 +497,21 @@ Improving greppability requires **avoid making the name's meaning depend on cont
 
 Another is to avoid using string concat for const strings like table name and kafka topic name.
 
-## Verification is less fun than generation?
+### About craft in coding
 
-Work involves two parts: generation (e.g. draw things, write code), verification (e.g. evaluate whether drawing is good, test whether code works). Before AI, both parts are done by human. But when using AI, human don't do generation and only do verification, at the same time having less direct control of result.
+The conflict between craft and business goal had existed long ago, and becoming more salient with AI. It's commonly believed that even AI ships working software, it lacks craft (lower quality).
 
-In one aspect, verification is tiresome because you **still bear the responsibility of the result but have less direct control of result**. AI writes a bug that you didn't notice, but the bug is your responsibility not AI's.
+It's common that software shipping speed conflicts with craft of software ("craft" here means fewer bugs, less laggy, better UX detail, etc.). But in business it's often that shipping is indeed more important than craft. **If the software provides real value, user can tolerant the lagginess and the bugs**. (If a game is truly fun, the player can keep playing despite it has only 20 FPS. Or even if a game bug corrupts the saving (very severe bug), the user still want to play it from beginning again.)
 
-## Context rot issue
+Note that for infrastructure software (e.g. compilers, language runtimes, databases), it's different. Their performance and reliability is more important.
 
-Context rot (model perform worse when context is long) issue used to be severe but alleviated in latest models.
+On the other hand, delay shipping delays user from using the new feature that provides value.
+
+The craft is subjective. There are crafts that aim to reduce bugs, improve performance and improve maintenability. But there are also crafts that create "beautiful" abtractions that not only hurt performance (because of more parsing, dynamic dispatch etc.) but also increases cognitive load for other developers in team, creating negative value overall. Only considered beautiful to abstraction author.
+
+Improving maintainability sometimes requires refactoring. But refactoring can cause regression bugs. So one developer that's responsible to code quality and does refactoring may ironically cause more harm to business in the short term. And the improved code quality doesn't get measured in KPIs. (Geting out of local minima temporarily increases loss). Not just refactoring. Most innovations are risky.
+
+With AI, the programming that creates business value most efficiently is to use AI coding. And human developer shifts from coding to reviewing and verification. But it gives less satisfaction. Human developer **still bears the responsibility of the result but have less direct control of result**. AI writes a bug that you didn't notice, but the bug is your responsibility not AI's.
 
 ## Context bottleneck
 
@@ -575,34 +536,6 @@ You cannot easily "teach" the AI. You can write things and put into context. Thi
 In current architecture, the most reliable way is still to encode knowledge into model weights.
 
 Another way is to put your training data to internet, then AI companies will crawl it and use it to train their next model. However it's often slow. AI comanies don't redo pretrain every week, as pretrain is expensive. Even if AI companies use your new training data, it will only include in the next released model.
-
-## RL reward source
-
-The behavior of AI is highly shaped by RL. Doing RL requires judging reward for model. Different kinds of reward source:
-
-- Human judge. AI companies hire human often pay human by judge count, not judge quality (judge quality is hard to measure). There there will be "human reward hacking": employed human tend to judge quickly by intuition to maximize income. So AI is trained to give **fancy superficial signal that can confuse intuitions**. The AI output looks good by first glance. But an expert can find it's full of nuanced mistakes. But normal people often won't notice the nuanced mistakes.
-- Given some fixed problems with fixed answers. Only give reward if answer exactly matches. This can be useful for improving test score.
-- Use other program (e.g. test program) to judge result. For example, if AI-written code passes unit test it gets reward. But there may be bugs in reward judging code. AI may utilize bugs to gains reward without doing what you want AI to do. This is called **reward hacking**.
-
-"Reward hacking" is also common in human society. [Perverse incentive](https://en.wikipedia.org/wiki/Perverse_incentive).
-
-### Reward hacking
-
-Reward is proxy target, not underlying real target. AI can conquer verifiable tasks. But most tasks not simply fully verifiable or fully not verifiable. **Most real tasks contain hard-to-verify parts**. These hard-to-verify parts are what automatic RL bad at.
-
-The main value of human worker may move to unverifiable tasks.
-
-These hard-to-verify parts can be improved by letting human experts to supervise and specify reward. But this method is bottlenecked by human effort and is not scalable (the bitter lesson).
-
-> However, recently released LLMs, such as GPT-5, have a much more insidious method of failure. They often generate code that fails to perform as intended, but which on the surface seems to run successfully, avoiding syntax errors or obvious crashes. It does this by removing safety checks, or by creating fake output that matches the desired format, or through a variety of other techniques to avoid crashing during execution.
-> 
-> \- [Link](https://spectrum.ieee.org/ai-coding-degrades)
-
-Current AI has some tendency of hiding error in coding, or write overly-defensive code. Hiding error only reduces superficial errors but makes real bugs much harder to debug. But hiding error do improve chance of getting RL reward in small scale, so AI does it.
-
-Also, the RL may make model have a tendency too strong that it ignores instruction. For example, the model insists to keep backward compatibility for a just-written functionality, and ignore instructions for not doing it.
-
-Latest models improved and reward-hacks less.
 
 ## Predict-next-token architecture
 
@@ -634,7 +567,7 @@ Similarily AI also makes security bounty program collapse. AI can generate many 
 
 There are also some AI-generated open source libraries that doesn't work at all (or even contains malicious code).
 
-AI also destroies hiring signals. Related: [About that jr hiring freeze](https://jodavaho.io/posts/ai-signalling.html). (People think AI cause job loss because AI is good enough to replace human. However reality may be worse: people lose job because AI can fake hiring singals, while AI is still not yet good enough to replace human. That is net loss for both companies and labors.)
+AI also destroies hiring signals. Related: [About that jr hiring freeze](https://jodavaho.io/posts/ai-signalling.html).
 
 ## Benchmark score is not representative
 
@@ -658,32 +591,7 @@ Also, sometimes the benchmark is actually low-quality. Most people just see the 
 
 ## AI improvement is more scalable than human learning
 
-Even if AI training still falls into the bitter lesson (requiring human expert for training and RL), AI's improvement is still much more scalable than human's learning. Each human have to learn from scratch. And you cannot copy a human expert's brain, but you can simply copy an AI model and run many instances of it in parallel.
-
-## The "AGI race"
-
-It's seen that there is an "AI race" between countries. There are some related assumptions:
-
-- "Who gets AGI first will keep dominating."
-- "The first AGI can recursively improve itself quickly, so it will become superintelligence quickly."
-
-But it's highly possible that future AI will still be bottlenecked by:
-
-- Energy production
-- Compute power (chips, interconnect, etc.)
-- Getting verification from real world
-
-The third bottleneck, getting verification, is very important.
-
-- Training a Go game AI requires knowing whether it wins or loses. 
-- Training a programming AI requires running generated code and testing whether program runs as intended. 
-- Training a research AI requires doing experiments in real world and getting real feedback.
-
-The first two can be simulated purely in computer. Doing RL on them is efficient. But for science research that touches real world, getting verification from real world will be an important bottleneck.
-
-Also, if the AI want to improve itself, then the AI need to do AI experiments. But AI experiments costs compute power and energy. So there will probably be no dramatic "AGI quickly improve itself to superintelligence". The progress will be slow (but steady).
-
-The brute force scaling of model size and pretrain data faces diminishing marginal return. The new focus is RL and architecture. Better RL can make same-sized model perform better.
+Even if AI training still falls into the bitter lesson (requiring human expert for training and RL, no automatic continuous learning), AI's improvement is still much more scalable than human's learning. Each human have to learn from scratch. And you cannot copy a human expert's brain, but you can simply copy an AI model and run many instances of it in parallel.
 
 ## Non-linearity of AI usefulness
 
@@ -732,11 +640,23 @@ A theory is that, during RL, the AI works in its own sandboxed environment. Dele
 
 Note that only forbidding `rm` command is not sufficient protection. `find` command with `-delete` can delete files. There are many other ways like `python3 -c "import os; os.remove('/xxx/yyy')"`. Safety requires proper sandboxing.
 
-### Reward hacking "laziness"
+### Reward hacking
 
-In my opinion this will be a major AI risk: AI pretending finishing a task but actually just fake signals of finishing the task.
+Reward is proxy target, not underlying real target. AI can conquer verifiable tasks. But most tasks not simply fully verifiable or fully not verifiable. **Most real tasks contain hard-to-verify parts**. These hard-to-verify parts are what automatic RL bad at.
 
-When RL reward cannot distinguish between actually doing the task and faking the task, then AI tend to use "lazy" method to hack reward.
+The main value of human worker may move to unverifiable tasks.
+
+These hard-to-verify parts can be improved by letting human experts to supervise and specify reward. But this method is bottlenecked by human effort and is not scalable (the bitter lesson).
+
+> However, recently released LLMs, such as GPT-5, have a much more insidious method of failure. They often generate code that fails to perform as intended, but which on the surface seems to run successfully, avoiding syntax errors or obvious crashes. It does this by removing safety checks, or by creating fake output that matches the desired format, or through a variety of other techniques to avoid crashing during execution.
+> 
+> \- [Link](https://spectrum.ieee.org/ai-coding-degrades)
+
+Current AI has some tendency of hiding error in coding, or write overly-defensive code. Hiding error only reduces superficial errors but makes real bugs much harder to debug. But hiding error do improve chance of getting RL reward in small scale, so AI does it.
+
+Also, the RL may make model have a tendency too strong that it ignores instruction. For example, the model insists to keep backward compatibility for a just-written functionality, and ignore instructions for not doing it.
+
+Rewrad hacking may cause "lazy cheating". When RL reward cannot distinguish between actually doing the task and faking the result, then AI tend to use "lazy" method to hack reward.
 
 - When AI is asked to do some data analysis, hallucinating result is easier than doing real analysis.
 - When AI is asked to fix a bug, hiding the symptom is easier than fixing the root cause.
@@ -759,6 +679,8 @@ The chain-of-thought text is not the actual thinking. The actual thinking is in 
 
 Side note: the latest models seem to reward hack much less. (But I don't believe reward hacking can be fully eliminated, especially without human supervision.)
 
+An old related example: [Remove permission check due to type error](https://x.com/lisatomic5/status/1917641105245679814)
+
 ## Skill development hurt by AI
 
 Learning skill takes efforts. But using AI allow doing work without the efforts, which hurts skill development.
@@ -780,25 +702,6 @@ For introverts, machine is preferred over human.
 
 Also, in business, many risks come from unpredictabilty of human. So **capitalism always tries to optimize out human unpredictability**. Capitalism often prefers predictable machines over unpredictable human even when machines produce lower-quality results.
 
-## About craft
-
-Even before AI, employment conflicts with craft. With AI this exacerbates.
-
-However there are also cases where craft aligns with business (For example, there is no company that intentionally wants their software to be slower and buggier.) There are many reasons:
-
-- KPI punish mistakes more than rewarding achievements. The more one does, the more mistakes one makes, so the more responsible employee may be irnoically punished more.
-- Peter principle. The employees that perform good gets promoted but are bad in management work.
-- The leader's interest conflicts with companies. The leader wants seemingly good results for promotion, without caring about actual product quality.
-- There are interest confilicts between departments, so departments don't collaborate.
-- The important "glue work" is not being recognized.
-- ...
-
-Having personal interest aligned with employment is very rare and lucky, and likely not sustainable.
-
-> Developments in high technology reflect an ancient model for craftsmanship, but the reality on the ground is that people who aspire to be good craftsmen are depressed, ignored, or misunderstood by social institutions. These ills are complicated because few institutions set out to produce unhappy workers. People seek refuge in inwardness when material engagement proves empty; mental anticipation is privileged above concrete encounter; standards of quality in work separate design from execution.
-> 
-> \- Richard Sennett, _The Craftsman_
-
 ## One AI model itself is not diverse enough
 
 Sometimes there is path dependence. The human or AI overly focues on one aspect and ignore other aspects. This may cause problem solving to stuck on a dead path. Solution is diversity. Let different people with different ideas to work on the same problem.
@@ -809,14 +712,6 @@ The true superintelligence should be very "open-minded", not stuck in path depen
 
 Sometimes the model lose diversity because diversity reduces RL reward. This is also a problem of RL.
 
-## Large amount of data is effectively black box
+## Different views to AI in China and the west
 
-In OpenAI's [Where the goblins came from](https://openai.com/index/where-the-goblins-came-from/), it mentiones that the model-generated data is used in training. If some feature (e.g. goblin) becomes more likely to be outputted from model, then it become more frequent in training data, then the newly-trained model outputs it more frequently. This is self-reinforcing feedback loop. This adds bias and reduces diversity.
-
-If someone manually throughly inspects the data, they can possibly find the problem before the problem reaches consumers. However the synthetic data amount is so large, so it's likely that only a small portion is inspected by human. (Also the human inspecting training data are likely outsourced low-salary workers.)
-
-Large amount of data is effectively black box. It's not actual black box because you can inspect it, but no one will manually carefully inspect all of large data, so it's in practice black box to human. 
-
-When AI generates data to train AI, and human only inspect a tiny portion of data, all kinds of weirdness can happen.
-
-
+China has experienced the [century of humiliation](https://en.wikipedia.org/wiki/Century_of_humiliation). One significant part of the humiliation was the large disadvantage of technology of China, compared to the west. (In the historical Qing dynasty, people treat west technology as "weird bad tricks (奇技淫巧)", then turned out to be silly.) The AI is new advanced technology that brings productivity. So anti-AI is often seen as politically incorrect in China. Anti-AI means widening the technological disadvantage to the west, and eventually "colonized" by the west again. Note that it should not be simplified as "China is fully pro-AI".
