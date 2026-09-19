@@ -711,7 +711,3 @@ One AI model itself is not diverse enough. The decoding itself has randomness. A
 The true superintelligence should be very "open-minded", not stuck in path dependence, and be very diverse in ideas.
 
 Sometimes the model lose diversity because diversity reduces RL reward. This is also a problem of RL.
-
-## Different views to AI in China and the west
-
-China has experienced the [century of humiliation](https://en.wikipedia.org/wiki/Century_of_humiliation). One significant part of the humiliation was the large disadvantage of technology of China, compared to the west. (In the historical Qing dynasty, people treat west technology as "weird bad tricks (奇技淫巧)", then turned out to be silly.) The AI is new advanced technology that brings productivity. So anti-AI is often seen as politically incorrect in China. Anti-AI means widening the technological disadvantage to the west, and eventually "colonized" by the west again. Note that it should not be simplified as "China is fully pro-AI".
