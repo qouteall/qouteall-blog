@@ -513,6 +513,20 @@ Improving maintainability sometimes requires refactoring. But refactoring can ca
 
 With AI, the programming that creates business value most efficiently is to use AI coding. And human developer shifts from coding to reviewing and verification. But it gives less satisfaction. Human developer **still bears the responsibility of the result but have less direct control of result**. AI writes a bug that you didn't notice, but the bug is your responsibility not AI's.
 
+### About formal verification
+
+In theory, formal verification is good because it can prove that code is correct. And it's true that RL makes AI very good at writing proof programs. 
+
+But in practice, you still have to translate the requirement of software to formal theorems (set the target to prove, the target theory is written in code not natural language). The translation from requirement to theorem can be wrong. The proof itself is perfectly correct, but it proves the wrong property.
+
+Actually there are different cases:
+
+- Implementation is complex, but requirement is simple to describe formally. For example, "no out-of-bound array access" or "list is sorted" is easy to describe formally. This is where formal verification is most useful.
+- Implementation is easy, but requirement is hard to describe formally. For example, business logic CRUD apps, if requirement is certain (including edge cases) then writing code is the easy part. But it's not easy to translate business requirement to formal theorems authentically.
+  - But often parts of requirements are constraints. The constraints are relatively easier to translate to theorem. But **there are often many different ways to satisfy a constraint** (under-specified), and AI may choose a surprising one.
+
+In some cases specifying target theorem requires re-specifying the implementation detail within the theorem.
+
 ## Context bottleneck
 
 **Most knowledge work is bottlenecked in finding useful information in the sea of information**, rather than raw reasoning. High signal-to-noise ratio context is important.

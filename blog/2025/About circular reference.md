@@ -263,9 +263,41 @@ func goroutineB(m *sync.Mutex, c chan string) {
 
 ![](circular/deadlock_channel_lock.png)
 
-## Select leak
+## Unbuffered channel + consumer exit cause leak
 
-For example, do some work with timeout, using channel and select:
+For example, there is an unbuffered channel, and a poducer, and a consumer. The consumer exits. Then producer waits when producing. Leaks goroutine. This is an example from Go blog [Goroutine Leak Profiles](https://go.dev/blog/goroutine-leak-profiles)
+
+```go
+type result struct {
+    res workResult
+    err error
+}
+
+func processWorkItems(ws []workItem) ([]workResult, error) {
+    // Process work items in parallel, aggregating results in ch.
+    ch := make(chan result)
+    for _, w := range ws {
+        go func() {
+            res, err := processWorkItem(w)
+            ch <- result{res, err}
+        }()
+    }
+
+    // Collect the results from ch, or return an error if one is found.
+    var results []workResult
+    for range len(ws) {
+        r := <-ch
+        if r.err != nil {
+            // This early return may cause goroutine leaks.
+            return nil, r.err
+        }
+        results = append(results, r.res)
+    }
+    return results, nil
+}
+```
+
+Another example: do some work with timeout, using channel and select:
 
 ```go
 func doWorkWithTimeout(timeout time.Duration) (string, error) {
@@ -283,11 +315,13 @@ func doWorkWithTimeout(timeout time.Duration) (string, error) {
 }
 ```
 
-`select` will finish if either case gives a result. If it timeouts, `select` will finish by second case and never consume from `ch`. So the `ch <- result` will hang forever, causing **goroutine leak**. This can be fixed by making `ch` buffered.
+`select` will finish if either case gives a result. If it timeouts, `select` will finish by second case and never consume from `ch`. So the `ch <- result` will hang forever, causing goroutine leak. This can be fixed by making `ch` buffered.
 
-Many memory leaks in Golang are caused by goroutine leak. Goroutine leak will also cause its task to never finish which can cause other bugs. If something waits for a leaked goroutine it will deadlock.
+(Select also has traps in async Rust, but in a different mechanism (cancellation).)
 
-Select also has traps in async Rust, but in a different mechanism (cancellation).
+Strictly speaking, goroutine leak is not deadlock, but it's very similar to deadlock. Many memory leaks in Golang are caused by goroutine leak.
+
+Rust has an advantage. Rust channels are immune to missing-consumer halt. Rust's channels are separated to sender (tx) and receiver (rx). When there is no receiver, sending tiggers error. When there is no producer, consumer errors when buffer is empty. So the Rust equivalent of previous 2 examples don't cause thread leak / async task leak. (Golang uses GC so it cannot track whether there is consumer deterministically.)
 
 ## Priority inversion
 

@@ -246,7 +246,7 @@ tags:
 - About `nil`:
   - There are nil slice and empty slice (the two are different). There are also nil map and empty map. The nil map can be read like an empty map, but nil map cannot be modified. (There is no nil string, only empty string.)
   - Interface `nil` weird behavior. Interface pointer is a fat pointer containing type info and data pointer. If the data pointer is null but type info is not null, then it will not equal `nil`.
-  - Receiving from or sending to `nil` channel blocks forever.
+  - Receiving from or sending to `nil` channel hangs forever.
 - Before Go 1.22, [loop variable capture issue](https://go.dev/blog/loopvar-preview).
 - Different kinds of timeout. [The complete guide to Go net/http timeouts](https://blog.cloudflare.com/the-complete-guide-to-golang-net-http-timeouts/)
 - Having interior pointer to an object keeps the whole object alive. This may cause memory leak.
@@ -254,6 +254,7 @@ tags:
 - For `WaitGroup`, `Add` must be called before `Wait`. Don't `Add` in a new goroutine (unless with proper synchronization).
 - `sync.Mutex` should be passed by pointer not value. Same applies to `sync.WaitGroup` `sync.Cond` `net.Conn` etc. But slices, maps and channels can be passed by value.
 - When using `go func() {...}`, should carefully avoid capturing outside `err` variable. Capturing outside `err` will cause data race. [See also](https://www.uber.com/us/en/blog/data-race-patterns-in-go/)
+- If channel consumer exits, producing to channel will hang, causing goroutine leak. (Golang channels are unbuffered by default. If consumer exits producer will hang. Even if buffered, producer still hangs when buffer is full.) Debug using [Goroutine leak profiler](https://go.dev/blog/goroutine-leak-profiles).
 
 
 ## C/C++
@@ -273,7 +274,7 @@ tags:
   - Accessing uninitialized memory is undefined behavior.
     - After converting binary data byte pointer to struct pointer, using it is treated as using uninitialized memory, even if the memory is initialized, because the object [lifetime](https://en.cppreference.com/w/cpp/language/lifetime.html) hasn't started[^cpp_lifetime] (and it also violates strict aliasing rule).
     - Using a local variable before initializing it is also accessing uninitialized memory.
-    - For a local variable without explicit initialization (e.g. `SomeType value;`), whether it initializes depend on many factors, [see also](https://gaultier.github.io/blog/the_production_bug_that_made_me_care_about_undefined_behavior.html). It's recommended to always initialize local variable (e.g. `SomeType value{};`).
+    - (Before C++26) For a local variable without explicit initialization (e.g. `SomeType value;`), whether it initializes depend on many factors, [see also](https://gaultier.github.io/blog/the_production_bug_that_made_me_care_about_undefined_behavior.html). It's recommended to always initialize local variable (e.g. `SomeType value{};`). ([In C++ 26 it changed](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2024/p2795r5.html))
   - Accessing using null pointer or dangling pointer is undefined behavior.
   - Integer overflow/underflow is undefined behavior. Note that unsigned integer can underflow below 0. Don't use `x > x + 1` to check overflow as it will be optimized to `false`.
   - Integer dividing by 0 is undefined behavior. (But floating point dividing by 0 is not undefined behavior. It gives ±Infinity or NaN.)
@@ -332,6 +333,7 @@ tags:
 - In conditons, these things are "falsy": 0, `None`, empty string, empty container. Be careful if 0 or empty container represents valid value. Also it can be controlled by implementing `__bool__` method.
 - GIL (global interpreter lock) doesn't protect against on-disk data race. Two concurrent threads reading and writing same file may cause data race in file. GIL releases during IO.
 - ABI incompatibility. Python version doesn't follow semantic versioning. The native library that works with Python 3.13.x is likely incompatible with Python 3.14.x. Also, the debug version has different ABI to non-debug version. The free-threaded version has different ABI to non-free-threaded version.
+- asyncio uses weak references to hold tasks. If a task is not referenced it could be silently killed.
 
 ## Rust
 

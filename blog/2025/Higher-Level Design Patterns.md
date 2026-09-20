@@ -27,17 +27,17 @@ It involves two different aspects:
 
 The benefit of turning computation (logic and action) into data:
 
-- Closure (lambda expression, function value). A function along with captured data. It allows [reusing a piece of code along with captured data](./About%20Code%20Reuse,%20Polymorphism%20and%20Abstraction#code-reuse-mechanisms). It can help abstraction: separate the generation of computation (create function values) and execution of computation (executing function). (It's related to partial computation and multi-stage computation)
-- Composition. The computation that's turned to data can be more easily composed. Functional programming encourages having simple building blocks and compose them into complex logic.
+- Better code reuse and composition. Closure (lambda expression, function value) allows [reusing a piece of code along with captured data](./About%20Code%20Reuse,%20Polymorphism%20and%20Abstraction#code-reuse-mechanisms). It can help abstraction: separate the generation of computation (create function values) and execution of computation (executing function). (It's related to partial computation and multi-stage computation) The computation that's turned to data can be more easily composed. Functional programming encourages having simple building blocks and compose them into complex logic.
 - Flexibility. The computation that's turned to data can be changed and rebuilt dynamically.
+- Optimization. By turning actions into data, it can be rewritten according to rules to optimize. One example: [Semantics for 2D Rasterization](https://arxiv.org/abs/2603.23696)
 
 The benefit of turning execution state into explicit data:
 
-- Inspection: Explicit execution state is easier to inspect and display  (the machine code can be optimized, and it's platform-depenent, so machine code execution position and runtime stack are harder to inspect and manipulate than explicit data)
-- Serialization: Explicit execution state can be serialized and deserialized, thus be stored to database and sent across network. (Example: Restate)
-- Suspension: Explicit execution state allows temporarily suspending execution and resume it later. Suspending thread is harder and less efficient [^suspending_thread].
-- Modification: Explicit execution state can be modified. It makes cancellation and rollback easier. (Modifying execution stack and execution state is harder, and it's not supported by many mainstream languages.)
-- Forking: Allows forking control flow, which can be useful in some kinds of simulations.
+- Inspection. Explicit execution state is easier to inspect and display  (the machine code can be optimized, and it's platform-depenent, so machine code execution position and runtime stack are harder to inspect and manipulate than explicit data)
+- Serialization. Explicit execution state can be serialized and deserialized, thus be stored to database and sent across network. (Example: Restate)
+- Suspension. Explicit execution state allows temporarily suspending execution and resume it later. Suspending thread is harder and less efficient [^suspending_thread].
+- Modification. Explicit execution state can be modified. It makes cancellation and rollback easier. (Modifying execution stack and execution state is harder, and it's not supported by many mainstream languages.)
+- Forking. Allows forking control flow, which can be useful in some kinds of simulations.
 
 Modern CPUs often have a [microcode](https://en.wikipedia.org/wiki/Microcode) system, allowing complex hardware control logic to be represented in data.
 
@@ -173,38 +173,9 @@ In CRDT, the operator of combining mutation $*$:
 
 Examples of CRDT:
 
-#### CRDT: Last write wins
-
-For example, in multiplayer game, there is a door. The door's state can be open or close (a boolean). 
-
-Each operation is a tuple `(timestamp, doorState)`. Combination is max-by-timestamp (for two operations, pick the higher-timestamp ones).
-
-Consdering that multiple players can do operation in exactly the same timestamp, so we add player ID as **tie-breaker**. The operation now become `(timestamp, playerId, doorState)`. Combination max-by the tuple of `(timestamp, playerId)`. If `timestamp` equals, larger `playerId` wins.
-
-Note that typical multiplayer game implementation doesn't use CRDT. The server holds source-of-truth game state. Clients send actions to servers. The server validates actions, change game state and broadcast to all clients.
-
-#### CRDT: Lower depth wins
-
-Drawing solid triangles to framebuffer can also be seen as CRDT. 
-
-The whole framebuffer can be seen as an operation. Each pixel in framebuffer has a depth value. Combining two framebuffer takes lowest-depth one for two pixels in the same position.
-
-(Two framebuffers may have same depth on same pixel with different color. We can use unique triangle ID as tie-breaker.)
-
-Note that actual rasterization in GPU works by having one centralized framebuffer, not using CRDT.
-
-#### CRDT: Collaborative text editing
-
-In a collaborative text editing system, each character has an ID. It supports two kinds of operations: 
-
-- Insertion. `insertAfter(charId, timestamp, userId, charToInsert, newCharId)` inserts a new character after the character with id `charId`. The `newCharId` is unique globally.
-- Deletion `delete(charId)` only marks invisible flag of character (keep the tombstone)
-
-There is a "root character" in the beginning of document. It's invisible and cannot delete.
-
-For two insertions after the same character, the tie-breaker is `(timestamp, userId)`. Higher timestamp ones appear first. For the same timestamp, higher user id ones appear first.
-
-It forms a tree. Each character is a node, containing visibility boolean flag. Each `insertAfter` operation is an edge pointing to new character. The document is formed by traversing the tree in depth-first order (edges ordered by tie-breaker) while hiding invisible characters. [^text_edit_optimization] [^operational_transformation]
+- Last write wins. For example, in multiplayer game, there is a door. The door can be open or close (a boolean). Each operation is a tuple `(timestamp, doorState)`. Combination is max-by-timestamp. (Two players can do operation in exactly same timestamp, so add player ID as tie-breaker)
+- Lower depth wins. Drawing solid triangles to framebuffer can also be seen as CRDT. The whole framebuffer can be seen as an operation. Each pixel in framebuffer has a depth value. Combining two framebuffer takes lowest-depth one for two pixels in the same position. (Note that it's a conceptual view, not like how GPU actually works)
+- Collaborative text editing. Each character has an ID. Supports insertion `insertAfter(charId, timestamp, userId, charToInsert, newCharId)` and deletion  `delete(charId)` (deletion just marks character invisible). There is a "root character" in the beginning of document. It forms a tree. Each character is a node, containing visibility boolean flag. Each `insertAfter` operation is an edge pointing to new character. The document is formed by traversing the tree in depth-first order (edges ordered by tie-breaker) while hiding invisible characters. [^text_edit_optimization] [^operational_transformation]
 
 [^text_edit_optimization]: There are optimizations. To avoid storing unique ID for each character, it can store many immutable text blocks, and use `(textBlockId, offsetInTextBlock)` as character ID. Consecutive insertions and deletions can be merged. The tree keeps growing, and need to be merged. The exact implementation is complex.
 
@@ -236,20 +207,20 @@ Deferred (async) compuation vs immediate compuation:
 Adding a "middle-stage" can simplify computation, improve generalization and improve compatibility. For example, compiler generate cross-platform IR then translate IR to machine code:
 
 - The LLVM IR makes supporting a new architecture easier. 
-- In CUDA, old GPU can run (some) newly-added CUDA feature after driver and compiler update. (On the contrary, if CPU adds new SIMD instruction, old device cannot run it and softwares need to adapt.)
+- In CUDA, old GPU can run (some) newly-added CUDA feature after driver and compiler update. (On the contrary, if CPU adds new SIMD instruction, old device cannot run it. Software has to do feature detection and branching, or just give up supporting old devices.)
 
 ### Program lifecycle
 
 A computation, an optimization, or a safety check can be done in:
 
-- Pre-compile stage. (Code generation, IDE linting, etc.)
+- Pre-compile stage. (Code generation, static analysis, etc.)
 - Compile stage. (Compile-time computation, macros, dependent type theorem proving, etc.)
-- Runtime stage. (Runtime check, JIT compilation, etc.)
-- After first run. (Offline profile-guided optimization, etc.)
+- Runtime stage. (Runtime check, JIT compilation, interpreter, etc.)
+- After running. (Offline profile-guided optimization, etc.)
 
 Most computations that are done at compile time can be done at runtime (with extra performance cost). But if you want to avoid the performance cost by doing it in compile time, it becomes harder.
 
-Rust and C++ has **Statics-Dynamics Biformity** ([see also](https://hirrolot.github.io/posts/why-static-languages-suffer-from-complexity#)): most runtime computation methods cannot be easily used in compile-time. Using compile-time mechanisms often require data to be encoded in types, which then require type gymnastics.
+Static languages often have statics-dynamics biformity ([see also](https://hirrolot.github.io/posts/why-static-languages-suffer-from-complexity#)): most runtime computation methods cannot be easily used at compile-time. Using compile-time mechanisms often require data to be encoded in types, which then require type gymnastics. (C++ now has compile-time reflection that covers the biformity. Rust is working on adding compile-time reflection.)
 
 The ways that solve (or partially solve) the biformity between compile-time and runtime computation:
 
@@ -261,7 +232,7 @@ The ways that solve (or partially solve) the biformity between compile-time and 
 
 Related: 
 
-- [Symbolic execution](https://en.wikipedia.org/wiki/Symbolic_execution)
+- [Symbolic execution](https://en.wikipedia.org/wiki/Symbolic_execution), [eBPF verifier](https://docs.kernel.org/bpf/verifier.html)
 - [Program search using superposition](https://gist.github.com/VictorTaelin/d5c318348aaee7033eb3d18b0b0ace34)
 
 ### Batched computation, amortize latency
@@ -272,7 +243,7 @@ Amortizing here means reducing latency per computation or latency per data.
 
 For database operations, batching operations can reduce the total amount of network requests. There are almost-fixed costs of each network request, such as latency and context switch. Batching can reduce amount of network requests, so the almost-fixed costs can be amortized.
 
-For the procedural code that does DB accesses, making insertions and updates batched is easy as the app usually don't use results of insertions and updates. However making queries batched is harder, as it need to firstly collect queries (without immediately getting query result), then do batched query.
+Batching can improve performance not only in database requests. All kinds of communication, including memory access, may benefit from batching. Sometimes batching can amortize data structure bookkeeping cost.
 
 ### Responsibility can be moved, but essential complexity conserves
 

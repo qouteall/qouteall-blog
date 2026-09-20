@@ -1419,6 +1419,8 @@ The "lifetime" in Rust has nuanced distinction between the real "lifetime" of da
 
 The actual meaning of Rust "lifetime" is that: if I get access to that data, it constraints that the data stays valid in the scope.
 
+(There are ideas in using path generic to replace lifetime generic, [see also](https://cfallin.org/blog/2024/06/12/rust-path-generics/).)
+
 ## Side effect of extracting and inlining variable
 
 In C and GC languages:
