@@ -225,6 +225,7 @@ tags:
 - When debugging, debugger will call `.toString()` to local variables. Some class' `.toString()` has side effect, which cause the code to run differently under debugger. This can be disabled in IDE.
 - Before [Java24](https://openjdk.org/jeps/491) virtual thread can be "pinned" when blocking on `synchronized` lock, which may cause deadlock. It's recommended to upgrade to Java 24 if you use virtual thread.
 - `finalize()` running too slow blocks GC and cause memory leak. Exceptions out of `finalize()` are not logged. A dead object can resurrect itself in `finalize()`. It's recommended to use [`Cleaner`](https://docs.oracle.com/javase/9/docs/api/java/lang/ref/Cleaner.html) rather than overriding `finalize`.
+  - When using `Cleaner`, the registered cleanup callback should not (directly or indirectly) capture the target object.
 - `SimpleDateFormat` is not thread-safe.
 - `OmitStackTraceInFastThrow` optimization causes exception to have no stacktrace. [See also](https://stackoverflow.com/questions/58696093/when-does-jvm-start-to-omit-stack-traces). The first few exceptions have stacktrace, so the stacktrace may be in early logs.
 - JVM has its own DNS cache in memory. It's independent to the operating system's DNS cache.
@@ -236,7 +237,7 @@ tags:
 
 [^java_serialize_lambda]: Java serialization can serialize lambdas without requiring extra user biolerplate code. So Flink still uses Java serialization for job graph despite the drawbacks.
 
-[^weak_hash_map]: JS `WeakMap` uses ephemeron mechanism. When the GC scans entries in `WeakMap`, it only scans value if key object is scanned. The JVM GC doesn't have such feature. In `WeakHashMap` the GC will unconditionally scan the value. One related trap: when using `Cleaner`, the registered cleanup callback should not (directly or indirectly) capture the target object.
+[^weak_hash_map]: JS `WeakMap` uses ephemeron mechanism. When the GC scans entries in `WeakMap`, it only scans value if key object is scanned. The JVM GC doesn't have such feature. In `WeakHashMap` the GC will unconditionally scan the value.
 
 ## Golang
 
@@ -333,7 +334,7 @@ tags:
 - In conditons, these things are "falsy": 0, `None`, empty string, empty container. Be careful if 0 or empty container represents valid value. Also it can be controlled by implementing `__bool__` method.
 - GIL (global interpreter lock) doesn't protect against on-disk data race. Two concurrent threads reading and writing same file may cause data race in file. GIL releases during IO.
 - ABI incompatibility. Python version doesn't follow semantic versioning. The native library that works with Python 3.13.x is likely incompatible with Python 3.14.x. Also, the debug version has different ABI to non-debug version. The free-threaded version has different ABI to non-free-threaded version.
-- asyncio uses weak references to hold tasks. If a task is not referenced it could be silently killed.
+- asyncio uses weak references to hold tasks. If a task is not referenced elsewhere it could be silently killed.
 
 ## Rust
 
@@ -490,11 +491,12 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Elasticsearch doesn't allow removing mapping in an index. Dynamic mapping can auto-add mappings that you cannot remove, and it's enabled by default. 
 - Elasticsearch terms aggregation result is inaccurate on large datasets. Increasing `shard_size` can alleviate but increase resource usage. Composite aggregation is more accurate.
 - When building HTML, use an template engine that escapes text to avoid [XSS attack](https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/XSS).
+- The database may become offline at any time. 
 - When using broadcast to update in-memory state:
   - The Redis pub/sub may lose message if listener temporarily disconnects. One solution is to use Redis streams to avoid losing message. Another is to add periodic polling update.
   - If you use Kafka for broadcasting (using randomly-generated consumer group id), there is a race condition that the new consumer group's initial offset initializes later than initializing in-memory state, so it may miss an initial update message and in-memory state keeps being stale until next update.[^kafka_initial_offset]
 
-[^kafka_initial_offset]: In Kafka, a new consumer's offset initializes on first poll asynchronously. There are many workarounds. One is to manually `poll` once then initialize the in-memory state. Another is to synchnnously get end offsets (watermark offsets) then manually seek to the offset, then initialize the in-memory state.
+[^kafka_initial_offset]: In Kafka, a new consumer's offset initializes on first poll **asynchronously**. One workaround is to use `auto.offset.reset=earliest`, then add version check to avoid useless updates when consuming old messages. Another workaround is to synchnnously get end offsets (watermark offsets) then manually seek to the offset, then initialize the in-memory state. Another workaround is to just use periodic polling for update, and kafka message just triggers extra immeidate polling.
 
 ## React
 

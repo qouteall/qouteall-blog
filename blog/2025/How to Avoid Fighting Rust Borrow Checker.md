@@ -47,14 +47,13 @@ The solutions in borrow-checker-unfriendly cases (will elaborate below):
   - No need to put one object's all data into one struct. Can separate to different places.
 - Do split borrow in outer scope, and pass related fields separately.
 - **Defer mutation**. Turn mutation as commands and execute later.
-- **Avoid in-place mutation**. Mutate-by-recreate. Use `Arc` to share immutable data. Use persistent data structure.
+- Avoid in-place mutation. Mutate-by-recreate. Use `Arc` to share immutable data. Use persistent data structure.
 - For circular reference:
-  - For graph data structure, use ID/handle and arena.
-  - For callbacks, replace capturing with arguments, or use event handling to replace callback.
+  - For graph data structure, use arena.
+  - For callbacks, replace capturing with arguments, or defer the action using queue/channel.
 - Borrow as temporary as possible. For example, replace container for-loop `for x in &vec {}` with raw index loop.
-- Refactor data structure to avoid contagious borrow.
-- Reference counting and interior mutability. `Arc<QCell<T>>`, `Arc<RwLock<T>>`, etc. (only use when really necessary)
-- `unsafe` and raw pointer (only use when really necessary) 
+- Split a struct to avoid contagious borrow.
+- Use `Arc<Mutex<>>` only when you really needs locking.
 
 ## Contagious borrow issue
 
@@ -605,45 +604,9 @@ fn main() {
 
 That method is useful when callback needs to share mutable data, not just for circular reference.
 
-### Avoid callback. Defer event handling. Event-as-data.
+### Defer the action. Use queue/channel
 
-Apply the previous deferred mutation and mutation-as-data idea. Don't immediately call callback when event happens. Store events as data and put to a queue. 
-
-The event should use ID/handle to refer to data, without indirectly borrowing the mutable data. The event then can be notified to the components that subscribe to specific event channels. Event can be handled in a top-down manner, following ownership tree.
-
-Incomplete code example:
-
-```rust
-enum Event {  
-    ButtonClicked { button_id: Uuid },  
-    // ...  
-}  
-  
-struct ParentComponent {
-    id: Uuid,
-    button: ChildButton,  
-    counter: u32,  
-}  
-struct ChildButton {  
-    id: Uuid,  
-}  
-  
-impl ParentComponent {  
-    fn handle_event(&mut self, event: Event) -> bool {  
-        match event {  
-            Event::ButtonClicked { button_id } if button_id == self.button.id => {
-                self.counter += 1;  
-                true  
-            }  
-            _ => false,  
-        }  
-    }  
-}
-
-... // many code omitted
-```
-
-In backend applications, it's common to use external message broker (e.g. Kafka) to pass message. Using them also requires turning event into data.
+It's similar to the previous mentioned deferred mutation. Instead of directly do the action in callback, turn the pending action into data, then the callback just puts the data into a queue/channel. This can also improve decoupling.
 
 ## Other circular references
 
@@ -929,12 +892,13 @@ Interior mutability allows you to mutate something from an immutable reference t
 Ways of interior mutability:
 
 - `Cell<T>`. It's suitable for simple copy-able types like integer. [^cell_clone]
-- `RefCell<T>`, suitable for data structure that does incremental mutation, in single-threaded cases. It has internal counters tracking how many immutable borrow and mutable borrow currently exist. If it detects violation of mutable borrow exclusiveness, `.borrow()` or `.borrow_mut()` will panic.It can cause crash if there is nested borrow that involves mutation.
+- `RefCell<T>`, suitable for data structure that does incremental mutation, in single-threaded cases. It has internal counters tracking how many immutable borrow and mutable borrow currently exist. If it detects violation of mutable borrow exclusiveness, `.borrow()` or `.borrow_mut()` will panic. It can cause crash if there is nested borrow that involves mutation.
 - `Mutex<T>` `RwLock<T>`, for locking in multi-threaded case. Its functionality is similar to `RefCell`. Note that unnecessary locking can cost performance, and has risk of deadlock. It's not recommended to overuse `Arc<Mutex<T>>` just because it can satisfy the borrow checker.
 - [`QCell<T>`](https://docs.rs/qcell/latest/qcell/). Elaborated below.
 - Atomic types such as `AtomicU32`
 - `UnsafeCell<T>`
-- Lazily-initialized `OnceCell<T>`
+- Lazily-initialized `OnceCell<T>` `OnceLock<T>`
+- Channels, concurrent hash maps
 - ......
 
 [^cell_clone]: One may intuitively think that clone is similar to copy, so `Cell<T>` should also be safe when `T` just satisfies `Clone`. However it's not safe when it creates self-reference then clear itself in `clone`. [See also](https://users.rust-lang.org/t/why-does-cell-require-copy-instead-of-clone/5769/9).
@@ -1411,7 +1375,7 @@ In Rust `'static` just mean its lifetime is not limited to a specific scope. It 
 
 The "lifetime" in Rust has nuanced distinction between the real "lifetime" of data:
 
-- The lifetime is just a constraint. Lifetime of a borrow can be shortened. Shortening lifetime makes constraint looser. Expanding lifetime is makes constraint stricter.
+- The lifetime is just a constraint. Given a borrow, its lifetime can be shortened. Shortening lifetime makes constraint looser. Expanding lifetime is makes constraint stricter.
 - The lifetime constraints when the data dies, but doesn't constraint when the data is crated. You can leak some data and get a `'static` borrow to it. The `'static` means the whole program's lifetime, but the data is not created right after program launches. 
   
   Similarily, all data from one bump allocator have the same "lifetime", even though some of them is created earlier than others.

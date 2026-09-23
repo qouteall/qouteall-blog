@@ -523,9 +523,11 @@ Actually there are different cases:
 
 - Implementation is complex, but requirement is simple to describe formally. For example, "no out-of-bound array access" or "list is sorted" is easy to describe formally. This is where formal verification is most useful.
 - Implementation is easy, but requirement is hard to describe formally. For example, business logic CRUD apps, if requirement is certain (including edge cases) then writing code is the easy part. But it's not easy to translate business requirement to formal theorems authentically.
-  - But often parts of requirements are constraints. The constraints are relatively easier to translate to theorem. But **there are often many different ways to satisfy a constraint** (under-specified), and AI may choose a surprising one.
+  - But often parts of requirements are constraints. The constraints are relatively easier to translate to theorem. But **there are often many different ways to satisfy a constraint** (**under-specified**), and AI may choose a surprising one.
 
-In some cases specifying target theorem requires re-specifying the implementation detail within the theorem.
+In real-world complex cases, under-speciying is very common. For `predicate(a, b)`, if it's not true, it's often that you can change `a` to make it true, or change `b` to make it true (for example, if database foreign key constraint is violated, can restore by either refusing change or cascade-delete). Changing which depends on the actual requirement. The theorem to prove is just part of the requirement, not the full requirement.
+
+There is a joking repo [nocode](https://github.com/kelseyhightower/nocode). "No code is the best way to write secure and reliable applications. Write nothing; deploy nowhere.". If AI does reward hacking, that may no longer be a joke. AI can choose the trivial case that proves the constraint.
 
 ## Context bottleneck
 
@@ -596,12 +598,6 @@ The popular benchmarks (e.g. Humanity's last exam, SWE bench verified) are also 
 It seems that AI companies are hiring experts to write training data and develop RL reward programs. This partially falls into the trap of [bitter lesson](http://www.incompleteideas.net/IncIdeas/BitterLesson.html).
 
 See also: [The Illusion of Readiness: Stress Testing Large Frontier Models on Multimodal Medical Benchmarks](https://arxiv.org/abs/2509.18234v1)
-
-Also, sometimes the benchmark is actually low-quality. Most people just see the score and are too lazy to see benchmark content.
-
->  The presence of a leading whitespace leaks the correct choice selection in the MMLU-Pro benchmark. Am I missing something? Seems to impact Chemistry, Physics, and Math.
->  
-> \- [Link](https://x.com/fujikanaeda/status/2011565035408277996)
 
 ## AI improvement is more scalable than human learning
 
