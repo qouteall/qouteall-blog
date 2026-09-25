@@ -424,7 +424,7 @@ tags:
 - Confusing default value with missing value. For example, if the balence field is primitive integer, 0 can represent both "balance value not initialized" or "balance is really 0". In C and Python, 0 is treated as false in `if`. Also empty string and null string.
   - The same thing also applies to primitive values in protocolbuffer. To discriminate, field must be marked `optional` and app code must call generated `has*` method to check.
 - When using profiler: the profiler may by default only include CPU time which excludes waiting time. If your app spends 90% time waiting (e.g. wait on database), the flamegraph may not include that 90% which is misleading.
-- When getting files in a folder, the order is not deterministic (may depend on inode order). It may behave differently on different machines even with same files. It's recommended to sort by filename then process. 
+- When listing files in a folder, the order is not deterministic (may depend on inode order). It may behave differently on different machines even with same files. It's recommended to sort by filename then process. 
   - Note that `ls` by default sorts results. Use `ls -f` to see raw file order.
 - The order in hash map is also non-deterministic (unless using linked hash map).
 - The `..` in file path could allow [directory traversal attack](https://en.wikipedia.org/wiki/Directory_traversal_attack).

@@ -53,7 +53,7 @@ The solutions in borrow-checker-unfriendly cases (will elaborate below):
   - For callbacks, replace capturing with arguments, or defer the action using queue/channel.
 - Borrow as temporary as possible. For example, replace container for-loop `for x in &vec {}` with raw index loop.
 - Split a struct to avoid contagious borrow.
-- Use `Arc<Mutex<>>` only when you really needs locking.
+- Use `Rc<RefCell<>>` `Arc<Mutex<>>` only when really necessary. And borrow(lock) as short as possible.
 
 ## Contagious borrow issue
 
@@ -672,17 +672,19 @@ Note that `SlotMap` is not efficient when there are many unused empty space betw
 Other kinds of arenas:
 
 - The containers including `Vec`, `HashMap` and `TreeMap` can be treated as arenas.
-- [slab](https://docs.rs/slab/0.4.12/slab/) array-based arena without generation integer.
-- [append_only_vec](https://docs.rs/append-only-vec/latest/append_only_vec/index.html). Its insertion only requires immutable borrow, because insertion doesn't move other elements, unlike `Vec`. This feature can workaround contagious borrow issue. It uses [segmented array](https://danielchasehooper.com/posts/segment_array/) data structure. It doesn't allow removing element or directly mutating element. (a similar one is [boxcar](https://docs.rs/boxcar/latest/boxcar/index.html)) [^append_only_map]
+- [slab](https://docs.rs/slab/0.4.12/slab/) array-based arena `Slab` without generation integer.
+- [append_only_vec](https://docs.rs/append-only-vec/latest/append_only_vec/index.html). The `AppendOnlyVec` insertion only requires immutable borrow, because insertion doesn't move other elements, unlike `Vec`. This feature can workaround contagious borrow issue. It uses [segmented array](https://danielchasehooper.com/posts/segment_array/) data structure. It doesn't allow removing element or directly mutating element. (a similar one is [boxcar](https://docs.rs/boxcar/latest/boxcar/index.html)) [^append_only_map]
 - [generational_box](https://docs.rs/generational-box/0.7.0/generational_box/)
 - [bevy_ecs](https://docs.rs/bevy_ecs/latest/bevy_ecs/)
 
 [^append_only_map]: [once_map](https://docs.rs/once_map/latest/once_map/index.html) is a "hash map equivalent of append_only_vec". once_map internally is normal hashmap(s) within lock (or `RefCell`). The once_map internally uses normal hash map that can move elements, so it requires value type to be [`StableDeref`](https://docs.rs/stable_deref_trait/1.2.1/stable_deref_trait/trait.StableDeref.html) to have stable pointee address. The `Box`, `String`, `Rc` etc. are `StableDeref`. Also, all concurrent maps (e.g. [papaya](https://docs.rs/papaya/latest/papaya/)) allow inserting using immutable borrow of container.
 
+For arenas like `Slab` and `AppendOnlyVec`, the handle is integer `usize`. It's recommended to create wrapper types to `usize` for storing handle. It adds semantic information to types and reduces chance of cross-type misuse.
+
 The important things about arena:
 
 - The borrow checker **no longer ensure the ID/handle points to a living object**. Each data access to arena may fail. There is equivalent of "use after free".
-- **Arenas still suffer from contagious borrow issue**. Mutably borrowing one element in arena mutably borrows whole arena. The previously mentioned solutions (deferred mutation, shallow clone, manual container loop, persistent data structure, etc.) may be needed.
+- **Arenas still suffer from contagious borrow issue** (except for `AppendOnlyVec` etc.). Mutably borrowing one element in arena mutably borrows whole arena. The previously mentioned solutions (deferred mutation, shallow clone, manual container loop, persistent data structure, etc.) may be needed.
 
 Some may think "using arena cannot protect you from equivalent of 'use after free' so it doesn't solve problem". But arena can greatly improve determinism of bugs, making debugging much easier. A randomly-occuring memory safety [Heisenbug](https://en.wikipedia.org/wiki/Heisenbug) may no longer trigger when you enable sanitizer, as sanitizer can change timing and memory layout.
 
@@ -694,7 +696,7 @@ For tree structure, if the tree is managed by pointer, then dropping a deep tree
 
 #### About linked list
 
-In Rust, writing a pointer-based linked list is hard. Writing zero-cost pointer-based doubly-linked list in safe Rust is impossible.
+In Rust, writing a pointer-based linked list is hard ([see also](https://rust-unofficial.github.io/too-many-lists/)). Writing zero-cost pointer-based doubly-linked list in safe Rust is impossible.
 
 But that only applies to pointer-based linked list. The conventional pointer-based linked list often has bad cache locality (because it uses global allocator, nodes may scatter in memory space).
 
@@ -824,11 +826,9 @@ Because after re-allocating the slice, the old slice still exists in memory (not
 
 Golang also doesn't have sum type, so there is no equivalent to enum memory layout change in the previous Rust example.
 
-Also, Golang's doesn't allow taking interior pointer to map entry value, but Rust allows. Rust's interior pointer is more powerful than Golang's.
+Also, Golang doesn't allow taking interior pointer to map entry value, but Rust allows. Rust's interior pointer is more powerful than Golang's.
 
-In Java, there is no interior pointer. So no memory safety issue caused by interior pointer.
-
-But in Java there is one thing logically similar to interior pointer: `Iterator`. Mutating a container can cause iterator invalidation:
+In Java, there is no interior pointer. But in Java there is one thing logically similar to interior pointer: `Iterator`. Mutating a container can cause iterator invalidation:
 
 ```java
 public class Main {  
@@ -1333,12 +1333,12 @@ To understand `Send` and `Sync` you need to un-learn the concepts in OOP languag
 
 `Send` and `Sync` actually test on interior mutability. The underlying logic is not simple:
 
-- If the data structure is fully tree-shaped, no sharing is possible. Each object is owned by exactly one thread. So it's thread-safe. But this brekas when `Rc` makes data not tree-shaped. Two `Rc` structs can internally reference one object, but from the "outside" one `Rc` is just one struct that fits in tree-shaped ownership.
+- If the data structure is fully tree-shaped, no sharing is possible. Each object is owned by exactly one thread. So it's thread-safe. But this breaks when `Rc` makes data not tree-shaped. Two `Rc` structs can internally reference one object, but from the "outside" one `Rc` is just one struct that fits in tree-shaped ownership.
 - Even if there is sharing, only immutable borrow can be shared. If the shared data is actually immutable, then it's thread-safe. But this breaks with interior mutability. With interior mutability, it can be mutated via immutable borrow.
 
 The `HashMap` has no interior mutability by itself. So the tree-shaped ownership and mutable borrow exclusiveness already prevents data race of it.
 
-If there is no interior mutability (`Rc` uses interior mutability), then all data are thread safe, `Send` and `Sync` is not needed. The `Send` and `Sync` is used for checking the exceptions caused by interior mutability.
+If there is no interior mutability (`Rc` uses interior mutability for counter), then all data are thread safe, `Send` and `Sync` is not needed. The `Send` and `Sync` is used for checking the exceptions caused by interior mutability.
 
 Then why there are two traits `Send` and `Sync`, rather than only one trait? Because transfering ownership betwene threads is differnet to sharing between different threads. `RefCell` owns the data and can be transferred to another thread, but multiple threads sharing one `RefCell` is unsafe because `RefCell` doesn't do synchronization, so `RefCell` is `Send` but not `Sync`.
 

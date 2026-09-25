@@ -321,6 +321,8 @@ func doWorkWithTimeout(timeout time.Duration) (string, error) {
 
 Strictly speaking, goroutine leak is not deadlock, but it's very similar to deadlock. Many memory leaks in Golang are caused by goroutine leak.
 
+Both examples only trigger problem on error (exceptional) case. Testing in normal case doesn't reveal the problem.
+
 Rust has an advantage. Rust channels are immune to missing-consumer halt. Rust's channels are separated to sender (tx) and receiver (rx). When there is no receiver, sending tiggers error. When there is no producer, consumer errors when buffer is empty. So the Rust equivalent of previous 2 examples don't cause thread leak / async task leak. (Golang uses GC so it cannot track whether there is consumer deterministically.)
 
 ## Priority inversion
@@ -465,7 +467,7 @@ Reference counting leaks memory if there exists a cycle of strong references.
 
 The common solution is to use weak reference counting to cut cycle, as developers know the reference structure and know where cycles can form.
 
-### Memory leak even when using GC
+### Memory leak even when having GC
 
 Tracing GC can handle the unreachable cycle. However it's still possible to leak memory in GC, by keeping the unused data reachable from GC roots. Examples:
 
@@ -476,11 +478,13 @@ Tracing GC can handle the unreachable cycle. However it's still possible to leak
 
 These memory leaks are often related to containers and lambda capture.
 
-With GC it's still possible to leak non-heap resources, like file handles, TCP connections, memory manged by native code, etc.
+With GC it's still possible to leak resources not controlled by GC, like file handles, TCP connections, memory manged by native code, etc.
+
+Note that the threads (goroutines, async tasks, etc.) contains GC roots. Deadlock or thread leak causes memory leak under GC.
 
 Rice's theorem tells that it's impossible to reliably tell whether program will use a piece of data (unless in trivial case). If an object is unreachable from GC roots, then it obviously won't be used. But if some data won't be used, it may be still referenced. This is the case that tracing GC cannot handle.
 
-Also, in JavaScript, a closure can keep the whole "enviornment" alive. A closure can keep alive the things that it doesn't capture. This creates more chances of memory leak than other GC languages. [Related](https://x.com/robpalmer2/status/2017877412608987362)
+Also, in JavaScript, a closure keeps the whole "enviornment" alive. A closure can keep alive the things that it doesn't capture. This creates more chances of memory leak than other GC languages. [Related](https://x.com/robpalmer2/status/2017877412608987362)
 
 ## Observer circular dependency
 
@@ -535,7 +539,7 @@ function SomeComponent() {
 }
 ```
 
-React effect triggers in next iteration of event loop so it won't directly dead recursion, but it will keep doing re-render which costs performance.
+React effect triggers in next iteration of event loop so it won't directly dead recursion, but it will keep doing component re-render which costs performance.
 
 ## Ordering breaks cycle
 
@@ -590,7 +594,7 @@ SQL databases can reliably detect deadlock. In SQL, a transaction keeps acquirin
 
 In normal programs, detecting deadlocks caused by only locks is easy. Because it can track what threads holds a lock. Then it knows a lock's release depends on which thread's progress. It only needs to track program's current behavior, and don't need to predict program's future behavior.
 
-But for non-lock waiting, detecting deadlock is not that easy. If a thread waits on a channel to consume, you need to know which thread may produce to that channel. Sometimes a thread can reference a channel but won't produce to it. Knowing it accurately requires analyzing the program's behavior **in the future**. If the analysis is rough, it will give many false positives. Analyzing accurately will encounter limitation of Rice's theorem (explained below).
+But for non-lock waiting, detecting deadlock is not that easy. If a thread waits on a channel to consume, you need to know which thread will produce to that channel. Sometimes a thread can reference a channel but won't produce to it. Knowing it accurately requires analyzing the program's behavior **in the future**. If the analysis is conservative, the deadlock detection will be unreliable. Analyzing accurately will encounter limitation of Rice's theorem (explained below).
 
 ## How free-threading Python handles container locking
 
@@ -868,7 +872,7 @@ In C, writing two mutually-recursive functions requires separately declare the t
 
 Zig comptime evaluation is lazy. Two generic types can use each other without making compiler stuck in dead recursion. Just using a generic type doesn't necessarily trigger evaluation of type definition (unless the type's size/layout/other information is needed).
 
-Note that when there is non-local information propagation in graph, then a finite amount of stages will be not enough. It requires a variable amount of stages to iteratively propagate the information across graph.
+Note that when the algorithm requires non-local information propagation in graph, and the information only propagates through edges (not simple global broadcast), then a finite amount of stages is not enough. It requires a variable amount of stages to iteratively propagate the information across graph.
 
 ## Rust auto trait inference cycle
 

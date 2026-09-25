@@ -261,7 +261,6 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   The minority swing voters may have big impact on policies.
 
-
 ### In Psychology
 
 - First-order effect: Suppressing own emotion helps overcoming that emotion.
@@ -673,15 +672,7 @@ Diversification is also a way to handle risks. Note that diversification only wo
 - In many cases, you cannot correct a system's mistake in normal ways, because the system is trapped in a local optimum. Trying to correct mistake in normal state only makes it worse. But **when an incident comes, it gives enough pressure to move it out of local optimum** and then have chance of improvement.
 - ...
 
-### In software: untested error handling likely won't work
 
-Distributed system has **failover** functionality: when one node fails, another node takes the responsibility. However, if you haven't tested failover, it likely won't work as intended:
-
-> Another impactful incident for Actions occurred on March 5. Automated failover has been progressively rolling out across our Redis infrastructure, and on this day, a failover occurred for a Redis cluster used by Actions job orchestration. The failover performed as expected, but a **latent configuration issue** meant the failover left the cluster in a state with no writable primary. With writes failing and failover not available as a mitigation, we had to correct the state manually to mitigate.
-> 
-> \- [Addressing GitHub’s recent availability issues](https://github.blog/news-insights/company-news/addressing-githubs-recent-availability-issues-2/)
-
-It also applies to other kinds of error handling.
 
 ### Diversity and "blind sopts"
 
@@ -803,3 +794,4 @@ Stock market pricing is often short-termism, which often cause company decision-
 
 Many ideas in this article are learnt from N. N. Taleb's books: _The Black Swan_, _Antifragile_.
 
+See also: [How Complex Systems Fail](https://how.complexsystems.fail/)
