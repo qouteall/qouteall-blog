@@ -1375,7 +1375,7 @@ In Rust `'static` just mean its lifetime is not limited to a specific scope. It 
 
 The "lifetime" in Rust has nuanced distinction between the real "lifetime" of data:
 
-- The lifetime is just a constraint. Given a borrow, its lifetime can be shortened. Shortening lifetime makes constraint looser. Expanding lifetime is makes constraint stricter.
+- The lifetime is type-level guarantee. Given a borrow, its lifetime can be shortened. After shortening, the guarantee still holds. But expanding lifetime is not ok.
 - The lifetime constraints when the data dies, but doesn't constraint when the data is crated. You can leak some data and get a `'static` borrow to it. The `'static` means the whole program's lifetime, but the data is not created right after program launches. 
   
   Similarily, all data from one bump allocator have the same "lifetime", even though some of them is created earlier than others.
@@ -1383,7 +1383,7 @@ The "lifetime" in Rust has nuanced distinction between the real "lifetime" of da
 
 The actual meaning of Rust "lifetime" is that: if I get access to that data, it constraints that the data stays valid in the scope.
 
-(There are ideas in using path generic to replace lifetime generic, [see also](https://cfallin.org/blog/2024/06/12/rust-path-generics/).)
+(There are ideas in using path generic to replace lifetime generic, [see also](https://cfallin.org/blog/2024/06/12/rust-path-generics/), [see also](https://smallcultfollowing.com/babysteps/blog/2024/03/04/borrow-checking-without-lifetimes/).)
 
 ## Side effect of extracting and inlining variable
 

@@ -718,7 +718,7 @@ Having ideas is easy and cheap. If you search the internet carefully you are lik
 > 
 > \- Hiten Shah, [Link](https://x.com/hnshah/status/1998474486149165231)
 
-Dunning-Kruger effect also applies to idea generation. An unexperienced one tend to think that their ideas are all good. But an experienced one sees that most ideas fails. Incompetent leaders often criticize experienced workers being not "creative" enough.
+Dunning-Kruger effect also applies to idea generation. An unexperienced one tend to think that their ideas are all good. But an experienced one sees that most ideas fails. 
 
 About analogy: Analogies are useful for explaining things to others, but not good for accurate thinking. It makes one ignore the nuance difference between the analog and the real thing.
 
@@ -881,7 +881,7 @@ When an event has occured frequently, people tend to believe that it will occur 
 Examples:
 
 - When tossing coin, if head appear frequently, people tend to think tail will appear frequently. (If the coin is fair and tosses are statistically independent, this is false. If the coin is biased, it's also false.)
-- When a stock goes down for a long time, people tend to think it will be more likely to rise.
+- When a stock is going down, people tend to think the more it goes down the more it's likely to grow.
 
 One related topic is the **law of large numbers**: if there are enough samples of a random event, the average of the results will converge. The law of large numbers focus on the total average, and does not consider exact order. 
 

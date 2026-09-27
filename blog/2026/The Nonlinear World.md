@@ -171,9 +171,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: Increasing interest rate curbs inflation, because it reduces money supply.
 
-  Second-order effect: Many inflations are caused by reduced supply of goods. Higher interest rate may cause high-debt companies may collapse, reducing productivity in the short term. In the long term, increasing interest rate reduces productivity investment. These can boost inflation. 
-  
-  For USD, as USD is global currency, expectation of increasing interest can cause foreign investments to be liquidated back to America.
+  Second-order effect: Many inflations are caused by reduced supply. But interest rate mainly takes effect on demand side. Higher interest rate may cause high-debt companies to collapse, reducing productivity in the short term. Increasing interest rate reduces productivity investment, which can boost inflation.
 
 - First-order effect: When uncertainty increases, money moves from risky assets (e.g. stock) to gold, because gold is safer.
 
@@ -223,10 +221,6 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   - Expensive medication costs money
   - ...
 
-- First-order effect: Sugar-free drinks are healthy because they have zero calories.
-
-  Second-order effect: The artificial sweeteners can disrupt the gut microbiome, which can cause inflammation and other issues. Also, there is Brain-Calorie disconnect. The brain anticipates consuming calories but there is no actual calorie, so one may become more hungry and eats more real calories later.
-
 ### In Organization
 
 - First-order effect: Upper management sets very high goals to subordinates. This pushes subordinates to work hard.
@@ -260,6 +254,10 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   Second-order effect: The loyal supporters are loyal, so increasing or decreasing rewarding to them doesn't change their stance. On contrary, rewarding swing voters has larger utility for the politician. So the politician may reward the swing voters in expense of loyal supporters. This is unsistainable in the long run, but effective in the short run.
 
   The minority swing voters may have big impact on policies.
+
+- First-order effect: The more people discussing the decision, the more opinions are collected, the better decision-making will be.
+
+  Second-order effect: Most decisions are tradeoffs that cannot please everyone. The more people discussing, the more likely the decision gets pushback, then the decision cannot be made. Also, the more people involved, the more likely the secret gets leaked. Most important decisions are made in small private meetings.
 
 ### In Psychology
 

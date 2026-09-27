@@ -11,7 +11,7 @@ tags:
 
 ## HTML and CSS
 
-- `min-width` is `auto` by default. Inside flexbox or grid, `min-width: auto` often makes min width determined by content. It overrides effects of `flex-shrink`, `width: 0` and `max-width: 100%`, etc. It's recommended to set `min-width: 0`. Same for `min-height`. [See also](https://developer.mozilla.org/en-US/docs/Web/CSS/min-width)
+- `min-width` is `auto` by default. Inside flexbox or grid, `min-width: auto` often makes min width determined by content. `min-width` has higher priority than `flex-shrink`, `width`, `max-width`, etc. It's recommended to set `min-width: 0`. Same for `min-height`. [See also](https://developer.mozilla.org/en-US/docs/Web/CSS/min-width)
 - Horizontal and vertical are different in CSS:
   - Normally `width: auto` tries fill available space in parent. But `height: auto` normally tries to just expand to fit content.
   - For inline elements, inline-block elements and float elements, `width: auto` does not try to expand.
@@ -543,7 +543,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - macOS auto adds `.DS_Store` files into every folder. It's recommended to add `**/.DS_Store` into `.gitignore`.
 - Renaming file that only changes letter case won't be tracked by git in Windows and macOS (because file name is case-insensitive). Renaming using `git mv` works normally.
 - Git merge is not commutative or associative. Different merging order may give different results.
-- When switching branch, Git doesn't auto update submodules by default. 
+- When switching branch, Git doesn't auto update submodules by default. (Can make it auto-update by `git config --global submodule.recurse true`)
 
 ## Networking
 
