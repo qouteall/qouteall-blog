@@ -382,7 +382,7 @@ In Golang you can only use one official goroutine scheduler. In Rust, although T
 
 ## Thread-per-core async runtimes
 
-Tokio uses work stealing. One async task submitted in one thread can run in another thread, so `tokio::spawn` requires future to be `Send`. There are thread-per-core async runtimes (e.g. [monoio](https://github.com/bytedance/monoio), [glommio](https://github.com/DataDog/glommio)). Thread-per-core async runtimes don't require `Send`. 
+Tokio uses work stealing. One async task submitted in one thread can run in another thread, so `tokio::spawn` requires future to be `Send`. There are thread-per-core async runtimes (e.g. [monoio](https://github.com/bytedance/monoio), [glommio](https://github.com/DataDog/glommio), [compio](https://github.com/compio-rs/compio)). Thread-per-core async runtimes don't require `Send`. 
 
 Thread-per-core runtimes often relies on the kernel to distribute work between threads evenly. Linux has a mechanism of distributing networking work by hash of local ip+local port+remote ip+remote port, [see also](https://lwn.net/Articles/542629/). If there are many different clients and all requests are processed quickly, then work can be distributed to threads evenly, and thread-per-core can be more efficient than work stealing. But if a small amount of remote ip+remote port combinations have request that requires fat-tailed large processing work, then work distribution will not be even and thread-per-core will be not efficient. Work stealing is more adaptive in that fail-tail workloads.
 

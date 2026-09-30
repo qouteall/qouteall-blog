@@ -189,8 +189,8 @@ tags:
 ## Time
 
 - [Leap second](https://en.wikipedia.org/wiki/Leap_second). Unix timestamp is "transparent" to leap second. Converting between Unix timestamp and UTC time assumes leap second doesn't exist. It's used with leap smear: make the time "stretch" or "squeeze" near a leap second to "hide" existence of leap second.
-- Time zone. UTC and Unix timestamp is globally uniform. But human-readable time is time-zone-dependent. It's recommended to store timestamp in database and convert to human-readable time in UI, instead of storing human-readable time in database.
-- Daylight Saving Time (DST): In some regions people adjust clock forward by one hour in warm seasons. When DST ends, 1:00 AM to 2:00 AM [^dst_end] will run twice, so converting human-readable time in this range to timestamp is ambiguous. [Python has `fold` to address this ambiguity](https://peps.python.org/pep-0495/).
+- Time zone. UTC and Unix timestamp is globally uniform. But human-readable time is time-zone-dependent. It's recommended to store UTC timestamp in database and convert to human-readable time in UI, instead of storing human-readable time in database.
+- Daylight Saving Time (DST): In some regions people adjust clock forward by one hour in warm seasons. When DST ends, 1:00 AM to 2:00 AM (in some regions 2:00 AM to 3:00 AM) will run twice, so converting human-readable time in this range to timestamp is ambiguous. [Python has `fold` to address this ambiguity](https://peps.python.org/pep-0495/).
 - NTP sync may cause time to "jump backward" or "jump forward".
 - It's recommended to configure the server's time zone as UTC. Different nodes having different time zones will cause trouble in distributed system. After changing system time zone, the database may need to be reconfigured or restarted.
 - There are two clocks: hardware clock and system clock. The hardware clock itself doesn't care about time zone. Linux treats it as UTC by default. Windows treats it as local time by default.
@@ -199,13 +199,13 @@ tags:
 - About `M` and `m` in date format: in Java date format, `M` is month, `m` is minute. But in Python `datetime`, `m` is month, `M` is minute. 
 - In Java `Date` and JS `Date`, month number starts by 0, but day number starts by 1.
 - In DuckDB, when importing a CSV, it guesses date format based on samples by default. There is ambiguity between `DD-MM-YYYY` and `MM-DD-YYYY`. If all day numbers \<\= 12, DuckDB may guess wrong. [See also](https://duckdb.org/docs/stable/data/csv/auto_detection#dates-and-timestamps)
-- The result of MySQL `timestamp` value and PostgreSQL `timesamp with time zone` (`timestamptz`) depends on session time zone. Session time zone can be changed via SQL (`set time_zone = ...` in MySQL and `set time zone ...` in PostgreSQL). When using connection pooling, the effect of changing session time zone may interfere other places. [^sql_time_zone]
-- MySQL `timestamp` is 32-bit. It cannot represent time after 2038-01-19 03:14:07.
-
-
-[^dst_end]: In some regions it's 2:00 AM to 3:00 AM.
-
-[^sql_time_zone]: It's recommended to avoid using these timezone-related types and avoid changing session time zone. Use timezone-independent types (`datetime` in MySQL and `timestamp without time zone` in PostgreSQL, or`bigint` in both databases) in UTC in database, then convert to local time in UI.
+- Storing in SQL databases:
+  - In PostgreSQL, `timestamp with time zone` (`timestamptz`) is recommended. Although it has "with time zone", it actually doesn't store the time zone. It stores timestamp in UTC. In SQL console, its shown value is auto-converted to session time zone. 
+    - Avoid using any zone-less time values on `timestamptz`, such as `'2026-09-30 14:00:00'`, or java `LocalDateTime`. It may wrongly assume time zone is session time zone (or JVM default time zone).
+    - Don't compare `timestamp with time zone` with `timestamp`.
+  - In MySQL, it's recommended to store UTC time as `datetime`, or timestamp as `bigint`. 
+    - The MySQL `timestamp` is 32-bit and cannot represent time after 2038-01-19 03:14:07.
+  - Simply storing UTC timestamp in `bigint` avoids all implicit time zone conversion traps, and works across databases.
 
 ## Java
 
@@ -241,7 +241,7 @@ tags:
 
 ## Golang
 
-- `append()` reuses memory region if capacity allows. Appending to a subslice can overwrite parent if they share memory region.
+- `append()` reuses memory region if capacity allows. If a slice is shared, two places appening it may cause unwanted overwritten (or data race).
 - `defer` executes when the function returns, not when the lexical scope exits.
 - `defer` capture mutable variable's latest value.
 - About `nil`:
@@ -424,23 +424,31 @@ tags:
 - Confusing default value with missing value. For example, if the balence field is primitive integer, 0 can represent both "balance value not initialized" or "balance is really 0". In C and Python, 0 is treated as false in `if`. Also empty string and null string.
   - The same thing also applies to primitive values in protocolbuffer. To discriminate, field must be marked `optional` and app code must call generated `has*` method to check.
 - When using profiler: the profiler may by default only include CPU time which excludes waiting time. If your app spends 90% time waiting (e.g. wait on database), the flamegraph may not include that 90% which is misleading.
-- When listing files in a folder, the order is not deterministic (may depend on inode order). It may behave differently on different machines even with same files. It's recommended to sort by filename then process. 
-  - Note that `ls` by default sorts results. Use `ls -f` to see raw file order.
-- The order in hash map is also non-deterministic (unless using linked hash map).
-- The `..` in file path could allow [directory traversal attack](https://en.wikipedia.org/wiki/Directory_traversal_attack).
-  - For upload API, it's recommended to make server generate file name (e.g. use uuid as filename), instead of letting client pass filename.
+- The order in hash map is non-deterministic (unless using linked hash map).
 - IO buffering. 
   - If you don't flush, it may delay actual write. 
-    - A CLI program that don't flush stdout works fine when directly running in terminal, but it delays output when used with pipe `|`.
+    - A CLI program that don't flush stdout works fine when directly running in terminal, but delays output when used with pipe `|`.
   - If program is force-killed (e.g. `kill -9`) some of its last log may not be written to log file because it's buffered.
-  - Successfully writing file doesn't necessarily mean actually writing to disk. If there is power loss, write may be lost. [See also](https://man7.org/linux/man-pages/man2/close.2.html)
+  - Successfully writing file just ensures it's visible to other processes. The write may be lost under power loss. It's recommended to use transactional database (e.g. sqlite) for durability.
 - Modulo of negative numbers. In Python,  `a % b` is `a - (floor(a / b) * b)`. But in C/C++/Java/C#/JS/Rust/Golang, `a % b` is `a - (roundTowardZero(a / b) * b)`. If `a` is negative then the behavior will be weird.
 - Retrying without limit or requesting without timeout can leak resources.
-- Creating file doesn't auto create parent folder. It will fail if parent folder doesn't exist. You need to manually create parent folder.
 - In C/C++ and Java, literal number starting with 0 will be treated as octal number. (`0123` is 83)
 - In Java and Python, there are two kinds of threads: daemon and non-daemon. When main function exits, the program will still be running when a non-daemon thread is running. The thread pool threads are non-daemon by default.
 - Using `+` to concat $n$ strings may be $O(n^2)$ because of copying and re-allocating temporary strings. Use mutable string buffer.
 
+## File-related
+
+ - When listing files in a folder, the order is not deterministic (may depend on inode order). It may behave differently on different machines even with same files. It's recommended to sort by filename then process. 
+  - Note that `ls` by default sorts results. Use `ls -f` to see raw file order.
+- The `..` in file path could allow [directory traversal attack](https://en.wikipedia.org/wiki/Directory_traversal_attack).
+  - For upload Restful API, it's recommended to make server generate file name (e.g. use UUID as filename), instead of letting client pass filename.
+- Creating file doesn't auto create parent folder. It will fail if parent folder doesn't exist. You need to manually create parent folder.
+- Leaving half-written file when program is killed. It's recommended to write file by writing to temp file then rename to target location. 
+- In Linux file names are case-sensitive, different to Windows and macOS.
+- In Linux, file name can contain `\n` `\r` `'` `"`, and file name can be invalid UTF-8.
+- Path trailing slash:
+  - If `/aaa/bbb` is a symbolic link to a folder, `rm /aaa/bbb` removes the symbolic link, but `rm /aaa/bbb/` may remove files in pointed folder.
+  - For `mv x.txt /aaa/bbb`, if `/aaa/bbb` is a folder it will move file into the folder without changing name, but if `/aaa/bbb` doesn't exist it will rename file name to `bbb`.
 
 ## Transitive dependency conflict
 
@@ -464,13 +472,8 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Bash has caching between command name and file path of executable. If you move one file in `$PATH` then invoking it in command gives ENOENT. Refresh cache using `hash -r`
 - Using a variable unquoted will make spaces separate it into different arguments. Also it will make its line breaks treated as space.
 - `set -e` can make the script exit immediately when a sub-command fails, but it doesn't work inside function whose result is condition-checked (e.g. the left side of `||`, `&&`, condition of `if`). [See also](https://stratus3d.com/blog/2019/11/29/bash-errexit-inconsistency/)
-- File name can contain `\n` `\r` `'` `"`. File name can be invalid UTF-8.
 - Symbolic link can point to parent, forming cycle.
-- In Linux file names are case-sensitive, different to Windows and macOS.
 - glibc compatibility issue. A program that's build in a new Linux distribution dynamically links with a new version of glibc, then it may be incompatible with old versions of glibc in old systems. Can be workarounded by using containers.
-- Path trailing slash:
-  - If `/aaa/bbb` is a symbolic link to a folder, `rm /aaa/bbb` removes the symbolic link, but `rm /aaa/bbb/` may remove files in pointed folder.
-  - For `mv x.txt /aaa/bbb`, if `/aaa/bbb` is a folder it will move file into the folder without changing name, but if `/aaa/bbb` doesn't exist it will rename file name to `bbb`.
 - After a process exits, the same PID can be used by another process.
 - When parent process dies, child process doesn't automatically die. This is different to terminal behavior. In terminal, closing terminal or doing Ctrl-C kills subprocesses because terminal kills the process group.
 

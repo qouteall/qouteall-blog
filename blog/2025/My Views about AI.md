@@ -309,6 +309,8 @@ The saying of "not using AI is same as programming in assembly when C comes out"
 
 The "low code" programming involves programming by configuring on GUI, without touching text code. The low code platform still uses rigid rules and hardcoded defaults, which corresponds to the left column in table.
 
+The tasks that are tedious to human is also tedious to LLM. LLM has higher tolerance to tedium than human, but the more tedious the more likely LLM makes mistake in it. So letting LLM directly output assembly is inefficient. The abstractions that help human also help LLMs.
+
 ### Why boilerplate code exists
 
 If we rely on AI to generate most boilerplate code, why do these boilerplate exist in the first place? Does it mean the abstractions are still too rudimentary?

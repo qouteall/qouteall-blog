@@ -319,7 +319,9 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   - Believing too much on a piece of knowledge makes one stuck in **confirmation bias** and stay furthur from truth. 
   - Knowing more about possible risks make one hesitate in making decisions, reducing agency. Often the innovation can only be done by the people not knowing the risks.
   
-  Green lumber fallacy. Deep understanding is often not required for real-world success. The idiom "knowledge is power" is not always true. **The true knowledge includes when to not use knowledge**.
+  Deep understanding is often not required for real-world success (green lumber fallacy[^green_lumber_fallacy]). The idiom "knowledge is power" is not always true. **The true knowledge includes when to not use knowledge**.
+
+  There are many cases where the problem is solved (or alleviated) by just trial-and-error, without understanding the problem.
 
 - First-order effect: Punishing mistakes will force people to make fewer mistakes.
 
@@ -347,6 +349,8 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 - First-order effect: When waiting on one thing to finish, switch to do another work can improve efficiency.
 
   Second-order effect: Frequent switchings cause distraction, which may cause one to forget the context, or make more mistakes (brain is not computer). Focusing on one task and patiently waiting can be more efficient overall.
+
+[^green_lumber_fallacy]: Green lumber fallacy: one trader mistakenly thought "green lumber" means wood in green color, but green lumber actually means freshly-cut wood. But the trader still succeeded in trading green lumber. The market is highly random and anti-inductive. It's often that luck overrides understanding. And deep understanding may even be harmful because it stengthens confirmation bias.
 
 ### In Cybersecurity
 
