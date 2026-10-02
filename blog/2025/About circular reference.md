@@ -245,6 +245,8 @@ The reading and writing to subprocess should use different goroutine.
 
 ## Channel+Lock deadlock
 
+Someone may want to simply fix data race by doing everythinng under lock. However, doing channel operation under lock can create deadlocks.
+
 Example:
 
 ```go
@@ -262,6 +264,8 @@ func goroutineB(m *sync.Mutex, c chan string) {
 ```
 
 ![](circular/deadlock_channel_lock.png)
+
+The recommended solution is to not produce/consume from channel when locking. Or fully get rid of shared mutable data, so locking is not needed.
 
 ## Unbuffered channel + consumer exit cause leak
 
@@ -318,6 +322,8 @@ func doWorkWithTimeout(timeout time.Duration) (string, error) {
 `select` will finish if either case gives a result. If it timeouts, `select` will finish by second case and never consume from `ch`. So the `ch <- result` will hang forever, causing goroutine leak. This can be fixed by making `ch` buffered.
 
 (Select also has traps in async Rust, but in a different mechanism (cancellation).)
+
+One solution is to make the channel buffered. But it still leaks when buffer is full. You either ensure that the amount of data never reach buffer capacity, or use other signals (e.g. context) to make consumer tell producer to exit. Or simply make consumer never early-exit.
 
 Strictly speaking, goroutine leak is not deadlock, but it's very similar to deadlock. Many memory leaks in Golang are caused by goroutine leak.
 
@@ -453,9 +459,7 @@ It's caused by having a future that's holding lock, and the future is abandoned 
 
 It's different to normal cancellation, where the future is dropped when cancelled.
 
-Specifically, it's caused by a trap related to `tokio::select`. If a future borrow is passed to to `tokio::select`, the future will be firstly polled once. But then if the select goes into another branch, the future will be temporarily abandoned in scope (will not be polled but not dropped). Although the future will be dropped after exiting scope, the temporary abandon makes it temporarily not runnable, and exiting scope depends on another future to acquire lock, then it deadlocks.
-
-See: [Futurelock](https://rfd.shared.oxide.computer/rfd/0609)
+See: [Futurelock](https://rfd.shared.oxide.computer/rfd/0609), [my explanation](./../2026/Rust%20async%20traps#futurelock)
 
 ## Circular reference counting leak
 

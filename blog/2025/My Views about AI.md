@@ -723,3 +723,10 @@ One AI model itself is not diverse enough. The decoding itself has randomness. A
 The true superintelligence should be very "open-minded", not stuck in path dependence, and be very diverse in ideas.
 
 Sometimes the model lose diversity because diversity reduces RL reward. This is also a problem of RL.
+
+## AI re-shapes human language
+
+There is a phenemon that when a human reads too many AI-generated text, the human's writing may start to have "AI smells" (e.g. "it's not X, it's Y"). Because natural language is bottom-up. We learn the language by observing the language usage in contexts. Reading too many AI text makes one more familiar with phrases that AI likes to use.
+
+Another possible reason that the phrases that AI like to use come from RLHF, which means that human also prefer these phrases.
+

@@ -199,7 +199,7 @@ tags:
 - About `M` and `m` in date format: in Java date format, `M` is month, `m` is minute. But in Python `datetime`, `m` is month, `M` is minute. 
 - In Java `Date` and JS `Date`, month number starts by 0, but day number starts by 1.
 - In DuckDB, when importing a CSV, it guesses date format based on samples by default. There is ambiguity between `DD-MM-YYYY` and `MM-DD-YYYY`. If all day numbers \<\= 12, DuckDB may guess wrong. [See also](https://duckdb.org/docs/stable/data/csv/auto_detection#dates-and-timestamps)
-- Storing in SQL databases:
+- Storing time in SQL databases:
   - In PostgreSQL, `timestamp with time zone` (`timestamptz`) is recommended. Although it has "with time zone", it actually doesn't store the time zone. It stores timestamp in UTC. In SQL console, its shown value is auto-converted to session time zone. 
     - Avoid using any zone-less time values on `timestamptz`, such as `'2026-09-30 14:00:00'`, or java `LocalDateTime`. It may wrongly assume time zone is session time zone (or JVM default time zone).
     - Don't compare `timestamp with time zone` with `timestamp`.

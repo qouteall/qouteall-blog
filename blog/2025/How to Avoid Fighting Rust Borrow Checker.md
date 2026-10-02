@@ -1202,15 +1202,13 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
 - Handle panic unwinding. If unsafe code turn data into temporarily-invalid state, you need to make it valid again during unwinding. [See also](https://doc.rust-lang.org/nomicon/unwinding.html). [Related](https://smallcultfollowing.com/babysteps/blog/2024/05/02/unwind-considered-harmful/)
   - In Rust, future can poison. This is different to lock poison. When an async function panics, the future should go into "poison state", all internal data should be dropped, then polling it again should panic. This needs to be considered when manually implementing `Future` trait.
 - Reading/writing to mutable data that's shared between threads need to use atomic, or volatile access ([`read_volatile`](https://doc.rust-lang.org/std/ptr/fn.read_volatile.html), [`write_volatile`](https://doc.rust-lang.org/beta/std/ptr/fn.write_volatile.html)), or use other synchronization (like locking). If not, optimizer may wrongly merge and reorder reads/writes. In MMIO (memory-mapped IO), all memory accesses should use volatile access. Note that volatile accesses themselves don't establish memory order (unlike Java/C# `volatile`).
-- If the binary data violates the type's constraint, it's undefined behavior. For example, `bool`'s binary data can only be 0 or 1. Making it 2 is undefined behavior. Creating a `str` whose binary data is not valid UTF-8 is also undefined behavior.
+- If the binary data violates the type's constraint, it's undefined behavior. For example, `bool`'s binary data can only be 0 or 1. Making it 2 then using it is undefined behavior. Creating and using a `str` whose binary data is not valid UTF-8 is also undefined behavior.
 - If you want to `mem::transmute`, it's recommended to use [zerocopy](https://docs.rs/zerocopy/latest/zerocopy/) which has compile-time checks to ensure memory layout are the same.
 - ......
 
 [^llvm_constraint]: When there is some other constraint, a byte can have less than 258 possible values in LLVM.
 
 [^miri_pointer_provenance]: When running in tools like [Miri](https://github.com/rust-lang/miri), the pointer provenance will be accurately tracked at runtime. In Miri, accessing memory using a pointer with no provenance triggers error. But in LLVM optimization, it only does static analyze to code, and it cannot always analyze full pointer provenance information, especially when it involves FFI (foreign function interface). When LLVM cannot analyze provenance, related optimizations will not be applied. You don't need to care about pointer provenance issues related to FFI.
-
-[^exposed_provenance]: The exposed provenance may be a new provenance or an existing provenance. The LLVM optimizer doesn't always know. When it doesn't know, the provenance-based optimizations will not be done.
 
 Modern compilers tries to optimize as much as possible. **To optimize as much as possible, the compiler makes assumptions as much as possible. Breaking any of these assumption can lead to wrong optimization.** That's why it's so complex. See also: [C Is Not a Low-level Language](https://queue.acm.org/detail.cfm?id=3212479)
 

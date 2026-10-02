@@ -333,9 +333,11 @@ How to reduce future size:
 
 See also [Async fn doubles argument size](https://github.com/rust-lang/rust/issues/62958)
 
-## No parallelism without `spawn`
+## No implicit parallelism
 
-Example
+The async is about "waiting multiple things at same time", but by default not "run your code". The IO tasks can run in parallel but your Rust code by default isn't executed in parallel. The `tokio::spawn` enables parallelism.
+
+For example, the async stream by default give no parallelism:
 
 ```rust
 #[tokio::main]  
@@ -371,8 +373,6 @@ Testing port: 3 ThreadId(1)
 Testing port: 4 ThreadId(1)
 ...
 ```
-
-All of them execute on main thread. There is no parallelism. The parallelism can be enabled by using `tokio::spawn`. But without `tokio::spawn` it has no parallelism by default.
 
 ## Mixing multiple async runtimes is hard
 

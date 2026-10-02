@@ -690,6 +690,8 @@ Bitcoin can only process 3 to 7 on-chain transactions per second, and it takes a
 
 There are faster decentralized cryptocurrency protocol designs. But doing big upgrade to Bitcoin protocol is nearly impossible because it requires consensus of major players ([block size war](https://vitalik.eth.limo/general/2024/05/31/blocksize.html)), and there are interest conflicts. But banks and exchange centers can upgrade its software without most customer's aggrement.
 
+It's a common belief that planned economy is inefficient. But within each cooperation, the resources are often allocated by top-down planning, which is "planned economy". It depends on the scale. Centralization is still the most efficient in the small scale, but not in the large scale. The larger the scale is, the harder it is to understand and control the system, and the more costly a wrong decision is.
+
 ## Contrarian strategy
 
 - The seemingly good opportunities are often highly-competitive and not worth joining. Being the upstream or downstream of a highly-competitive field could be better ("Picks and Shovels" strategy).
