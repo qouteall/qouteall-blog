@@ -1202,7 +1202,7 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
 - Handle panic unwinding. If unsafe code turn data into temporarily-invalid state, you need to make it valid again during unwinding. [See also](https://doc.rust-lang.org/nomicon/unwinding.html). [Related](https://smallcultfollowing.com/babysteps/blog/2024/05/02/unwind-considered-harmful/)
   - In Rust, future can poison. This is different to lock poison. When an async function panics, the future should go into "poison state", all internal data should be dropped, then polling it again should panic. This needs to be considered when manually implementing `Future` trait.
 - Reading/writing to mutable data that's shared between threads need to use atomic, or volatile access ([`read_volatile`](https://doc.rust-lang.org/std/ptr/fn.read_volatile.html), [`write_volatile`](https://doc.rust-lang.org/beta/std/ptr/fn.write_volatile.html)), or use other synchronization (like locking). If not, optimizer may wrongly merge and reorder reads/writes. In MMIO (memory-mapped IO), all memory accesses should use volatile access. Note that volatile accesses themselves don't establish memory order (unlike Java/C# `volatile`).
-- If the binary data violates the type's constraint, it's undefined behavior. For example, `bool`'s binary data can only be 0 or 1. Making it 2 then using it is undefined behavior. Creating and using a `str` whose binary data is not valid UTF-8 is also undefined behavior.
+- If the binary data violates the type's constraint, it's undefined behavior. For example, `bool`'s binary data can only be 0 or 1. Making it 2 is undefined behavior. Creating a `str` whose binary data is not valid UTF-8 is also undefined behavior.
 - If you want to `mem::transmute`, it's recommended to use [zerocopy](https://docs.rs/zerocopy/latest/zerocopy/) which has compile-time checks to ensure memory layout are the same.
 - ......
 
@@ -1424,50 +1424,6 @@ In other languages, if a local variable is only used once, it's often ok to inli
 
 Also note that if the local variable name is `_`, then it doesn't prolong lifetime.
 
-### Reborrow
-
-Normally mutable borrow `&mut T` can only be moved and cannot be copied. 
-
-But **reborrow** is a feature that sometimes allow you to use a mutable borrow multiple times. Reborrow is very common in real-world Rust code. [Reborrow is not explicitly documented](https://github.com/rust-lang/reference/issues/788). [See also](https://haibane-tenshi.github.io/rust-reborrowing/)
-
-Example:
-
-```rust
-fn mutate(i: &mut u32) -> &mut u32 {  
-    *i += 1;  
-    i  
-}  
-fn mutate_twice(i: &mut u32) -> &mut u32 {  
-    mutate(i);  
-    mutate(i)  
-}
-```
-
-That works. Rust will implicitly treat the first `mutate(i)` as `mutate(&mut *i)` so that `i` is not moved into and become usable again.
-
-But extracting the second `i` into a local variable early make it not compile:
-
-```rust
-fn mutate_twice(i: &mut u32) -> &mut u32 {  
-    let j: &mut u32 = i;  
-    mutate(i);  
-    mutate(j)  
-}
-```
-
-```
-7  | fn mutate_twice(i: &mut u32) -> &mut u32 {
-   |                    - let's call the lifetime of this reference `'1`
-8  |     let j: &mut u32 = i;
-   |                       - first mutable borrow occurs here
-9  |     mutate(i);
-   |            ^ second mutable borrow occurs here
-10 |     mutate(j)
-   |     --------- returning this value requires that `*i` is borrowed for `'1`
-```
-
-Reborrow shows that you actually can have two mutable borrows to same object at the same time, but at most one can be "active" at a time. The others have to be "temporarily inactive".
-
 ### Move cloned data into closure
 
 `tokio::spawn` require future to be standalone and doesn't borrow other things (`'static`). 
@@ -1520,6 +1476,119 @@ async fn main() {
 
 The new local variable `let data2 = data.clone();` is necessary. When there are many such things, it can be cumbersome to write and read. [There is a proposal on improving syntax ergonomic of it.](https://rust-lang.github.io/rust-project-goals/2024h2/ergonomic-rc.html)
 
+### Reborrow
+
+Normally mutable borrow `&mut T` can only be moved and cannot be copied. 
+
+But **reborrow** is a feature that sometimes allow you to use a mutable borrow multiple times. Reborrow is very common in real-world Rust code. [Reborrow is not explicitly documented](https://github.com/rust-lang/reference/issues/788). [See also](https://haibane-tenshi.github.io/rust-reborrowing/)
+
+Example:
+
+```rust
+fn mutate(i: &mut u32) -> &mut u32 {  
+    *i += 1;  
+    i  
+}  
+fn mutate_twice(i: &mut u32) -> &mut u32 {  
+    mutate(i);  
+    mutate(i)  
+}
+```
+
+That works. Rust will implicitly treat the first `mutate(i)` as `mutate(&mut *i)` so that `i` is not moved into and become usable again.
+
+But extracting the second `i` into a local variable early make it not compile:
+
+```rust
+fn mutate_twice(i: &mut u32) -> &mut u32 {  
+    let j: &mut u32 = i;  
+    mutate(i);  
+    mutate(j)  
+}
+```
+
+```
+7  | fn mutate_twice(i: &mut u32) -> &mut u32 {
+   |                    - let's call the lifetime of this reference `'1`
+8  |     let j: &mut u32 = i;
+   |                       - first mutable borrow occurs here
+9  |     mutate(i);
+   |            ^ second mutable borrow occurs here
+10 |     mutate(j)
+   |     --------- returning this value requires that `*i` is borrowed for `'1`
+```
+
+Reborrow shows that you actually can have two mutable borrows to same object at the same time, but at most one can be "active" at a time. The others have to be "temporarily inactive".
+
+### Two-phase borrow
+
+This
+
+```rust
+let mut b: Vec<i32> = vec![1, 2, 3];  
+b[b.len() - 1] = 4;
+```
+
+cannot compile:
+
+```
+error[E0502]: cannot borrow `b` as immutable because it is also borrowed as mutable
+  |
+3 |     b[b.len() - 1] = 4;
+  |     --^-----------
+  |     |||
+  |     ||immutable borrow occurs here
+  |     |mutable borrow later used here
+  |     mutable borrow occurs here
+  |
+help: try adding a local storing this...
+  |
+3 |     b[b.len() - 1] = 4;
+  |       ^^^^^^^
+help: ...and then using that local here
+  |
+3 |     b[b.len() - 1] = 4;
+  |      ^^^^^^^^^^^^^
+```
+
+Firstly, let's desugar the `b[b.len() - 1] = 4;`. The `b[...]` actually executes [`IndexMut::index_mut`](https://doc.rust-lang.org/std/ops/trait.IndexMut.html#tymethod.index_mut) to get a mutable borrow of element. The `b.len()` is actually `Vec::len(&b)`. The desugared version:
+
+```rust
+let mut b: Vec<i32> = vec![1, 2, 3];
+let borrow: &mut i32 = <Vec<i32> as IndexMut<usize>>::index_mut(
+    &mut b,
+    Vec::len(&b) - 1
+);
+*borrow = 4;
+```
+
+It has `&mut b` and `&b`. Due to Rust's [evaluation oder](https://doc.rust-lang.org/reference/expressions.html#r-expr.operand-order.operands-before-primary), the evaluation order has to be same as argument order. It firstly evaluates `&mut b` which mutably-borrows b, then evaluates `&b`, which conflicts with the exclusive mutable borrow.
+
+If you change the execution order to make it evaluate `b.len() - 1` first, then it compiles:
+
+```rust
+let mut b: Vec<i32> = vec![1, 2, 3];
+let index = b.len() - 1;
+b[index] = 4; // it compiles
+```
+
+If you encounter similar problems, just extracting variable can workaround.
+
+But that's not the full story. According to the previous finding, this should not compile, but it compiles:
+
+```rust
+let mut a: Vec<usize> = vec![1, 2, 3];
+a.push(a.len()); // it actually compiles
+```
+
+But the desugared version `Vec::push(&mut a, Vec::len(&a));` doesn't compile.
+
+Turns out that there is a hidden mechanism called **two-phase borrow**. Its internal mechanism is not simple. It splits mutable borrow into two phases. In the first phase, the mutable borrow is not activated, and behave like an immutable borrow, so other immutable borrows could co-exist with it. In the second phase, when there is no other borrows to same object, the mutable borrow is activated and becomes "real".
+
+Currently, Rust's two-phase borrow is not general and only works in specific cases like `a.push(a.len())`. It doesn't yet work with `IndexMut` or explicit mutable borrow (`&mut ...`). [See also](https://github.com/rust-lang/rust/issues/49434).
+
+The reborrow and two-phase-borrow have one thing in common: temporarily making a mutable borrow "inactive" to reduce unnecessary conflict. As previously metioned, "having mutable borrow" and "using mutable borrow" are two different things. The real unsafe thing is the second's conflict (using two mutable borrow of same object concurrently). But Rust tracks on the first (track "having mutable borrow"). The reborrow and two-phase-borrow add special rules to make it closer to tracking "using" instead of tracking "having".
+
 ## Nuance of "immutable"
 
 There are 3 kinds of "immutable":
@@ -1563,7 +1632,7 @@ In C++ and Golang, strings are just binary data with no encoding constraint. Rus
 Rust's enforcing of UTF-8 may improve security but may also reduce security:
 
 - [CVE-2024-56732](https://www.sentinelone.com/vulnerability-database/cve-2024-56732/) is triggered when non-UTF-8 string data. It's in C++. This can be avoided if the outer string source validates UTF-8. This is the case where Rust's design can improve security.
-- Rust `str` enforces UTF-8 so Rust code trust `str` to be UTF-8 and don't do internal validation. In Rust, using unsafe to **create a `str` containing invalid UTF-8 is undefined behavior and can cause security risk**. [CVE-2026-0810](https://rustsec.org/advisories/RUSTSEC-2025-0140.html) is caused by it. [^rust_cve]
+- Rust `str` enforces UTF-8 so Rust code trust `str` to be UTF-8 and don't do internal validation. In Rust, using unsafe to create a `str` containing invalid UTF-8 is undefined behavior and can cause security risk. [CVE-2026-0810](https://rustsec.org/advisories/RUSTSEC-2025-0140.html) is caused by it. [^rust_cve]
 
 [^rust_cve]: In Rust, the bar of a CVE is lower, because a potential way of misusing a library that cause safety issue is a CVE, even if there is no software that actually misuses it. But in C/C++, a potential way to misuse a lirbary is not CVE, only a real security vulnerability is CVE. [See also](https://www.reddit.com/r/rust/comments/1u6km19/comment/ory2fey/).
 
@@ -1637,7 +1706,7 @@ All of the above contagious effect has "escape hatch" that's invisible in types:
 
 [^about_arm_memory_tagging]: [ARM memory tagging](https://developer.arm.com/documentation/108035/0100/Introduction-to-the-Memory-Tagging-Extension) is a low-cost way of checking memory safety issue at runtime, similar to address sanitizer, useful for debugging and security alerting. But ARM memory tagging is not a sound security defense, because it has 1/16 chance of missing memory-unsafe access. If the process auto-restarts after crashing, attacker can retry the attack, eventually hitting the 1/16 probability. [Fil-C](https://github.com/pizlonator/fil-c) can catch memory safety issue in 100% chance, so it's a better security defense. Also [Apple Memory Integrity Enforcement](https://security.apple.com/blog/memory-integrity-enforcement/).
 
-[^gc_memory_safety]: Golang is not memory-safe under data race. [See also](https://www.ralfj.de/blog/2025/07/24/memory-safety.html). Golang is less safe than other GC languages (Java, C#, etc.), because in these languages data race won't break memory safety. But Golang is much safer than C/C++. When race detector is not enabled, Golang map has a writing flag that can unreliably detect races, so map data race often result in crashes. A data race memory safety issue in Golang requires parallel execution with specific timing, so it's very hard to exploit it as remote code execution. On contrary, many C/C++ memory safety issues can be triggered deterministically (a specific packet or file can trigger), without multithreading timing requirement, so it's easier to exploit them as remote code execution. A memory safety issue doesn't naturally become remote code execution. It requires many detailed coincidences to corrupt memory in very specific ways to execute attacker-controlled code, often require deep understanding of memory layouts and allocator behaviors.
+[^gc_memory_safety]: Golang is not memory-safe under data race. [See also](https://www.ralfj.de/blog/2025/07/24/memory-safety.html). Golang is less safe than other GC languages (Java, C#, etc.), because in these languages data race won't break memory safety. But Golang is much safer than C/C++. When race detector is not enabled, Golang map has a writing flag that can unreliably detect races, so map data race often result in crashes. A data race memory safety issue in Golang requires parallel execution with specific timing, so it's very hard to exploit it as remote code execution. On contrary, many C/C++ memory safety issues can be triggered deterministically (a specific packet or file can trigger), without multithreading timing requirement, so it's easier to exploit them as remote code execution. A memory safety issue doesn't naturally become remote code execution. It requires corrupting memory in very specific ways to execute attacker-controlled code, often requiring deep understanding of memory layouts, instruction layouts and allocator behaviors.
 
 [^go_gc]: Golang GC is non-moving. Most other mainstream GC (e.g. Hotsopt JVM's, CLR's) are moving.
 

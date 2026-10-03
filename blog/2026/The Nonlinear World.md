@@ -255,9 +255,17 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   The minority swing voters may have big impact on policies.
 
-- First-order effect: The more people discussing the decision, the more opinions are collected, the better decision-making will be.
+- First-order effect: Widsom of the crowd. The more people discussing the decision, the better decision-making will be.
 
   Second-order effect: Most decisions are tradeoffs that cannot please everyone. The more people discussing, the more likely the decision gets pushback, then the decision cannot be made. Also, the more people involved, the more likely the secret gets leaked. Most important decisions are made in small private meetings.
+
+- First-order effect: The more penality enforced to subordinate when an incident comes, the less likely incident happens.
+
+  Second-order effect: 
+  
+  - There is information gap between subordinate and upper authority. The fear of punishment may cause subordinates to focus on hiding the "bad news", instead of solving problems.
+  - The subordinate may waste too much resources to reduce incident to the extreme, when it's no longer economical.
+  - The subordinate may "extend the mistake" and make it "too big to fail" to gain leverage in bargaining with upper authority.
 
 ### In Psychology
 
@@ -325,11 +333,8 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: Punishing mistakes will force people to make fewer mistakes.
 
-  Second-order effect: 
+  Second-order effect: It cause one to be scared of practicing, thus gain less experience. Lacking of experience makes one more likely to make mistakes.
   
-  - For personal punishment: It cause one to be scared of practicing, thus gain less experience. Lacking of experience makes one more likely to make mistakes.
-  - For punishment to decision-makers in organizations: After executing a decision, if the result is not good, the decision-maker tend to put tons of resources to make the bad decision look good, which is inefficient and harmful. According to sunk cost fallacy, the more resources put into the wrong decision, the less likely decision is reverted. Also, one way to evade punishment is to expand the scheme and make more decision-makers to make the same mistake.
-
 - First-order effect: Making software react faster improves user experience.
 
   Second-order effect: If it's an AI application, the user tend to think fast AI is dumber than slow AI.
