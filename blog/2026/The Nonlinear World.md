@@ -324,7 +324,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: 
   
-  - Believing too much on a piece of knowledge makes one stuck in **confirmation bias** and stay furthur from truth. 
+  - Partial understanding gives fake confidence ([Dunning-Kruger effect](https://en.wikipedia.org/wiki/Dunning%E2%80%93Kruger_effect)).
   - Knowing more about possible risks make one hesitate in making decisions, reducing agency. Often the innovation can only be done by the people not knowing the risks.
   
   Deep understanding is often not required for real-world success (green lumber fallacy[^green_lumber_fallacy]). The idiom "knowledge is power" is not always true. **The true knowledge includes when to not use knowledge**.
@@ -355,7 +355,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: Frequent switchings cause distraction, which may cause one to forget the context, or make more mistakes (brain is not computer). Focusing on one task and patiently waiting can be more efficient overall.
 
-[^green_lumber_fallacy]: Green lumber fallacy: one trader mistakenly thought "green lumber" means wood in green color, but green lumber actually means freshly-cut wood. But the trader still succeeded in trading green lumber. The market is highly random and anti-inductive. It's often that luck overrides understanding. And deep understanding may even be harmful because it stengthens confirmation bias.
+[^green_lumber_fallacy]: Green lumber fallacy: one trader mistakenly thought "green lumber" means wood in green color, but green lumber actually means freshly-cut wood. But the trader still succeeded in trading green lumber. The market is highly random and anti-inductive. It's often that luck overrides understanding.
 
 ### In Cybersecurity
 
@@ -767,17 +767,19 @@ When automation works, it's good. But automation may break. When it breaks, no o
 > 
 > \- [Link](https://github.com/bazelbuild/bazel/issues/28101#issuecomment-3693346788)
 
+## Principal-agent problem
+
+[Principal-agent problem](https://en.wikipedia.org/wiki/Principal%E2%80%93agent_problem) is one of the core problems in human society. It's very hard to align the interest of the agent with interest of you. Many second-order effects mentioned previously is one aspect of the problem.
+
+And AI is also a kind of agent. The principal-agent problem still exists even with AI, but the exact shape of problem is different. One aspect is reward hacking.
+
 ### AI reward hacking
 
-To train and control AI, human specify rewards to AI. Sometimes reward is specified by human manually, sometimes reward is computed by a program, sometimes reward value also comes from AI. The reinforcement learning makes AI do things that get high rewards.
+Reinforcement learning requires a mechanism to tell which behavior/result is good and which behavior/result is bad. Then there is the reward function. Sometimes reward is specified by human manually, sometimes reward is computed by a program, sometimes reward value also comes from AI. The reinforcement learning makes AI do things that get high rewards.
 
 However, the reward value is a proxy to the actual objective that human wants AI to do. Just like Goodhart's law, the measured number is a proxy of actual objective. AI can use the easiest way to achieve high reward, without doing what human actually want AI to do. This is reward hacking.
 
 It's fundamental that it can only be alleviated but cannot be fully prevented. Also, scaling may make the problem worse (smarter AI is more smart in reward hacking). Reward hacking may be a core reason that AI cannot replace some human jobs.
-
-There is a [paperclip maximizer](https://en.wikipedia.org/wiki/Instrumental_convergence#Paperclip_maximizer) story where AI focuses on producing paperclips as much as it can so it harms humanity. But I think in that story the AI is more likely to hack the "paperclip counter", which is the easiest way to maximize its reward.
-
-The formal verification of program also face similar problem. The math proof itself can be perfect, but in real-world cases the proved property may not align with the actual property that you want.
 
 ## Short-termism and long-termism
 

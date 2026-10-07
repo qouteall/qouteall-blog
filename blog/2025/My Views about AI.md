@@ -330,20 +330,6 @@ Performance is also a concern. It's often a simple interface cannot allow enough
 
 Also, prompt (spec) is shorter than code because AI can fill unspecified detail using "common sense" and "knowledge". This is more flexible than hardcoding default behavior or using rule-based heuristics. This breaks when your design is very out-of-training-distribution.
 
-### Writing good spec also requires skills
-
-In vibe coding you still need to write a spec to tell AI what software you want. But writing a good spec is hard. 
-
-Writing good spec still requires understanding information and computation.
-
-Someone don't know about how computer work may write spec "The app theme color should match the color of phone case." This is an unrealistic spec, because the app running in phone has no way to get the information of phone case color, even if the human knows the phone case color.
-
-Some important questions to consider when writing spec:
-
-- How does my software get the information it needs?
-- Is the information complete? Does it contain ambiguity? How to handle ambiguity or unknown things?
-- If my software need to do some action, does the platform allow it to do this?
-
 ### Architecture design is still important
 
 Note: In some places "architecture" refers to very high-level overview (e.g. most architecture diagrams). Here "architecture" includes the actual abstraction design, including some details.
@@ -416,9 +402,11 @@ Some examples of "friction":
 
 It's the **bad architecture "pushing back against" programmer**. In manual coding these pushback can be felt and then programmer tend to rethink architecture. But in AI coding, **AI can easily generate tons of code to workaround a bad architecture**. The vibe coder don't feel the pushback (or even satisfied by the increase of line count). Result is buggy and unmaintainable code.
 
-I recommend to not spend too much time writing spec before writing code. Because writing spec doesn't feel the "pushback". **Keeping writing detailed specifications under a wrong architecture is a waste of time**.
+I recommend to not spend too much time writing spec before writing code. Because **writing spec doesn't feel the "pushback"**.
 
 Sometimes an architecture looks good before implementing. But during implementation, you often discover **unknown unknowns that invalidate previous assumptions**. This is also pushback.
+
+**Devil is in the details. When the idea is vague, you don't yet see the devils in details.** In actual execution, the details show up and the problem that you never thought of appears.
 
 One advantage of AI is that you can easily discard the code if the architecture is not right. (If it's human-coded, discarding code will make human coder upset.) When rebuilding it, it's recommended to write new spec and clear context to avoid context rot.
 
@@ -477,7 +465,7 @@ In low-quality codebase there are often cases where **two bugs "cancel" each oth
 
 The "two bugs cancel each other" looks like rare coincidence, but many of them are naturally produced by lazy "bugfixing", not coincidence. **Finding the root cause is hard, but adding "correction code" is easy**. The "correction" itself is wrong, but after some "trial-and-error" adjustments, it can mostly make the bug's effect disappear. 
 
-For example, if some code confuses a number in mile as kilometer, then output is 1.6 times of real value, then a lazy way of fixing bug is to divide 1.6 in the result, which creates two bugs that cancel each other.
+For example, there is a Java `NullPointerException`, AI lazily fixes it by adding `if (x == null) {return;}`, without checking where the null comes from and what are the related contracts. It may introduce a new edge case bug.
 
 AI reward hacking makes AI have the tendency to use lazy ways to fix the bug, which produces that.
 
@@ -503,7 +491,7 @@ Another is to avoid using string concat for const strings like table name and ka
 
 The conflict between craft and business goal had existed long ago, and becoming more salient with AI. It's commonly believed that even AI ships working software, it lacks craft (lower quality).
 
-It's common that software shipping speed conflicts with craft of software ("craft" here means fewer bugs, less laggy, better UX detail, etc.). But in business it's often that shipping is indeed more important than craft. **If the software provides real value, user can tolerant the lagginess and the bugs**. (If a game is truly fun, the player can keep playing despite it has only 20 FPS. Or even if a game bug corrupts the saving (very severe bug), the user still want to play it from beginning again.)
+It's common that software shipping speed conflicts with craft of software ("craft" here means fewer bugs, less laggy, better UX detail, etc.). But in business it's often that shipping is indeed more important than craft. **If the software provides real value, user can tolerant the lagginess and the bugs**. (If a game is truly fun, the player can keep playing despite it has only 20 FPS. Or even if a game bug corrupts the saving (very severe bug), the user still want to play it from beginning again as long as the game is fun enough.)
 
 Note that for infrastructure software (e.g. compilers, language runtimes, databases), it's different. Their performance and reliability is more important.
 
@@ -528,8 +516,6 @@ Actually there are different cases:
   - But often parts of requirements are constraints. The constraints are relatively easier to translate to theorem. But **there are often many different ways to satisfy a constraint** (**under-specified**), and AI may choose a surprising one.
 
 In real-world complex cases, under-speciying is very common. For `predicate(a, b)`, if it's not true, it's often that you can change `a` to make it true, or change `b` to make it true (for example, if database foreign key constraint is violated, can restore by either refusing change or cascade-delete). Changing which depends on the actual requirement. The theorem to prove is just part of the requirement, not the full requirement.
-
-There is a joking repo [nocode](https://github.com/kelseyhightower/nocode). "No code is the best way to write secure and reliable applications. Write nothing; deploy nowhere.". If AI does reward hacking, that may no longer be a joke. AI can choose the trivial case that proves the constraint.
 
 ## Context bottleneck
 
@@ -710,7 +696,7 @@ Some people prefer driverless taxi over normal taxi, and want to pay premium for
 - No "social interaction cost". For introverts, social interaction requires controlling oneself, sensing the emotion of other people and avoiding social taboos. This is tiresome for introverts.
 - More predictability. Although AI is less deterministic than conventional programs, it's still much more predictable than human. The human driver may be friendly, but may also be unfriendly. Less predictability means more risk.
 
-For introverts, machine is preferred over human. 
+For introverts, machine is often preferred over human. 
 
 Also, in business, many risks come from unpredictabilty of human. So **capitalism always tries to optimize out human unpredictability**. Capitalism often prefers predictable machines over unpredictable human even when machines produce lower-quality results.
 
@@ -729,4 +715,3 @@ Sometimes the model lose diversity because diversity reduces RL reward. This is 
 There is a phenemon that when a human reads too many AI-generated text, the human's writing may start to have "AI smells" (e.g. "it's not X, it's Y"). Because natural language is bottom-up. We learn the language by observing the language usage in contexts. Reading too many AI text makes one more familiar with phrases that AI likes to use.
 
 Another possible reason that the phrases that AI like to use come from RLHF, which means that human also prefer these phrases.
-

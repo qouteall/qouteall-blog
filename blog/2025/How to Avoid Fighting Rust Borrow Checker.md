@@ -1646,6 +1646,12 @@ About nullable string comparision: In Java you can directly `Objects.equals`. In
 
 The `as_deref` turns `Option<String>` into `Option<&str>`. The `as_str` turns `String` into `&str`. Rust has deref auto conversion that can auto convert `&String` to `&str`, but that auto conversion sometimes doesn't work with generics, so some `as_deref` `as_str` is required.
 
+## Flip side of limitations
+
+It's true that Rust limits expressiveness compared to other languages. However, the limitations often may "force" developer to refactor code to make it simpler. For example, mutability may cause borrow checker issue, then developer rewrites it to functional-style immutable data transform, then it satisfies borrow checker and has a side effect of becoming more maintainable (mutation is often a source of complexity).
+
+But it doesn't always happen. There are also cases where developer lazily workaround by using `Arc<Mutex<>>` unnecessarily, making code less maintainable, slower and more prone to deadlock.
+
 ## Summarize the contagious things
 
 - Borrowing that cross function boundary is contagious. Just borrowing a wheel of car indirectly borrows the whole car.
@@ -1701,6 +1707,8 @@ All of the above contagious effect has "escape hatch" that's invisible in types:
 - "Memory safety can only be achieved by Rust." No. Most GC languages are memory-safe. [^gc_memory_safety] Memory safety of existing C/C++ applications can be achieved via [Fil-C](https://github.com/pizlonator/fil-c).
 - "Manual memory management is always faster than tracing GC." No. Moving GCs [^go_gc] have better throughput in allocation and deallocation [^gc_throughput] [^fragmentation]. In manual memory management, freeing a large structure may cause big lag. Using `Arc` involves atomic operations which may become bottleneck when contended. 
 - "The old C/C++ codebases are already battle-tested, so there is no value in rewriting them in Rust." No. If they won't ever add any new feature and don't do any large refactoring, only accepting small bug fixes, then they would indeed become more stable and safe over time. However, if they adds new feature or do large refactoring, then new memory/thread safety issues could emerge.
+- "AI can scan for memory/thread safety issue in C/C++ codebases now. So Rust's safety guarantee is useless." No. AI scanning is more expensive and slower than running compiler. AI scan has false positives (find fake issue) and false negatives (miss real issue). Although Rust also has false positive (safe code rejected by borrow check), it's in deterministic forms and can be stably workarounded, but AI false positive is not deterministic. Each hallucinations is different but all look plausible. And AI makes more mistakes in more complex codebases, but Rust compiler behaves deterministically regardless of codebase complexity.
+  - That said, AI checking doesn't conflict with Rust. AI can also check for bugs in Rust code.
 
 [^unsafe]: A wrong `unsafe` code in Rust can make memory/thread safety issue trigger in safe code. The impact of `unsafe` code is not limited to `unsafe` code.
 
