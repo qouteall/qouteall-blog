@@ -287,7 +287,7 @@ tags:
     - If the original object is not `const`, you can turn pointer to it as `const T*`, in this case `const` means read-only [^readonly]. You can change the object without triggering undefined behavior.
     - `std::move` used on const object cannot avoid deep copying. [^cpp_move]
   - If `bool`'s binary value is neither 0 or 1, using it is undefined behavior. Similarily if an enum's binary value is not valid, using it is undefined behavior.
-  - Unaligned memory access is undefined behavior. (Also, alignment can cause padding in struct that wastes space.)
+  - Unaligned memory access is undefined behavior.
   - Data race is undefined behavior.
   - Infinite loop without side effect (no write to shared memory, no IO, etc.) and without volatile load or atomic load is undefined behavior.[^infinite_loop_ub]
   - Undefined behavior can "travel back in time". For `if (a) { b(); }`, if `b()` unconditionally triggers undefined behavior, then compiler can assume `a` is always false. If `a` is true then it triggers undefined behavior before executing `b()`. The deduction can go earlier: the inputs that cause `a` to be true can trigger undefined behavior before computing `a`.
@@ -306,6 +306,9 @@ tags:
 - `malloc` may return null. When there is no OS overcommit, checking for null can gracefully handle out-of-memory. When overcommit is enabled (often enabled by default), `malloc` can succeed despite out-of-memory, then process get killed when accessing allocated memory. But it's still recommended to check for null (can abort on null), because it may still return null under overcommit[^malloc_return_null], and using null pointer is undefined behavior.
   - In C++, the equivalence of `malloc` returning null in `new` is `std::bad_alloc` exception. When exception is disabled, use `new (std::nothrow) TheType`, which may give null.
 - C++ namespace pollution. It's not recommended to use `using namespace std;`. Including a header or `using` a namespace may change function overloading behavior.
+- Alignment can cause padding in struct.
+  - The padding may waste space. Reordering fields may save space.
+  - Initializing a struct's fields doesn't reset the padding bytes. The padding bytes may contain the values of previous data in same address. If struct has padding, don't use `memcmp` to compare equality. Need to compare each field.
 - Don't use `=` to compare equality.
 - Don't forget `break` in switch, unless you want fallthrough.
 

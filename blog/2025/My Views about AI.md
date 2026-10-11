@@ -305,7 +305,7 @@ But AI coding is a **completely different paradigm** than existing abstraction l
 
 A vague prompt itself doesn't contain enough information to produce code. But LLM has "common sense" that fill these gaps. The "common sense" is implicit, nondeterministic and not explainable. It depends on training data and RL and many random factors.
 
-The saying of "not using AI is same as programming in assembly when C comes out" is misleading.
+About the meaning of "deterministic": given a specific AI model, you can make the output deterministic (temperature 0, etc.). Then it's technically deterministic because given same input there is only one possible output. But it's still not "determnistic" in human understanding sense. You can understand compiler behavior as rules, but the same doesn't apply to LLMs.
 
 The "low code" programming involves programming by configuring on GUI, without touching text code. The low code platform still uses rigid rules and hardcoded defaults, which corresponds to the left column in table.
 
@@ -487,17 +487,21 @@ Improving greppability requires **avoid making the name's meaning depend on cont
 
 Another is to avoid using string concat for const strings like table name and kafka topic name.
 
+### "Learning" from AI's mistakes
+
+When AI makes a mistake, someone may think that it's just the model being not capable enough. But you can also try to think what leads to AI making the mistake. Then you may find that prompt is ambiguous, or some naming in code is misleading, some nuance is not explicitly told in doc, etc. Then you can improve on that by improving documents/comments/prompt wording/etc.
+
 ### About craft in coding
 
 The conflict between craft and business goal had existed long ago, and becoming more salient with AI. It's commonly believed that even AI ships working software, it lacks craft (lower quality).
 
-It's common that software shipping speed conflicts with craft of software ("craft" here means fewer bugs, less laggy, better UX detail, etc.). But in business it's often that shipping is indeed more important than craft. **If the software provides real value, user can tolerant the lagginess and the bugs**. (If a game is truly fun, the player can keep playing despite it has only 20 FPS. Or even if a game bug corrupts the saving (very severe bug), the user still want to play it from beginning again as long as the game is fun enough.)
+It's common that software shipping speed conflicts with craft of software ("craft" here means fewer bugs, less laggy, better UX detail, etc.). But in business it's often that shipping is indeed more important than craft. **If the software provides real value, user can tolerant the lagginess and the bugs**. (If a game is truly fun, the player can keep playing despite it has only 20 FPS. Or even if a game bug corrupts the saving (very severe bug), the user still want to play it from beginning again as long as the game is fun enough.) That logic has a limit, if it's too buggy that core functionality doesn't work then it has no business value.
 
 Note that for infrastructure software (e.g. compilers, language runtimes, databases), it's different. Their performance and reliability is more important.
 
 On the other hand, delay shipping delays user from using the new feature that provides value.
 
-The craft is subjective. There are crafts that aim to reduce bugs, improve performance and improve maintenability. But there are also crafts that create "beautiful" abtractions that not only hurt performance (because of more parsing, dynamic dispatch etc.) but also increases cognitive load for other developers in team, creating negative value overall. Only considered beautiful to abstraction author.
+Someone treat coding as art. But the aesthetic of code is subjective. If the art aim to improve maintainability then it's good. But there are also coding art that create "beautiful" abtractions that not only hurt performance (because of more parsing, dynamic dispatch etc.) but also increases cognitive load for other developers in team, creating negative value overall. Only considered beautiful to abstraction author.
 
 Improving maintainability sometimes requires refactoring. But refactoring can cause regression bugs. So one developer that's responsible to code quality and does refactoring may ironically cause more harm to business in the short term. And the improved code quality doesn't get measured in KPIs. (Geting out of local minima temporarily increases loss). Not just refactoring. Most innovations are risky.
 

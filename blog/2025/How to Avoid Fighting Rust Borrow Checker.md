@@ -608,6 +608,16 @@ That method is useful when callback needs to share mutable data, not just for ci
 
 It's similar to the previous mentioned deferred mutation. Instead of directly do the action in callback, turn the pending action into data, then the callback just puts the data into a queue/channel. This can also improve decoupling.
 
+### Turn sharing into replication
+
+Another workaround is to turn sharing of mutable data to replication of mutable data.
+
+For example, in the previously mentioned parent-child-callback-parent cycle, the callback needs to use parent data so it references parent. We can store redundant parent data within callback. Then callback no longer need to reference parent. But when parent data changes, parent need to proactively apply same changes to callback's redundant data. This is a kind of inversion of control. And the callback will be not just a function but a custom type.
+
+In other cases, it can transform the data during replication, which can help abstraction (creating a view of mutable data).
+
+But replication increases "bug surface". For example, if there is a new way of changing, but developer forgets to add sync code, then it will have a bug.
+
 ## Other circular references
 
 Grouping two things together can create circular reference:
@@ -1369,6 +1379,70 @@ In Rust `'static` just mean its lifetime is not limited to a specific scope. It 
 
 [^about_bottom_type]: Some may intuitively think `'static` is top type (like `any` in TypeScript and `Object` in Java) because it's the most "general". However, in Rust, lifetime is constraint, so the most general one is no constraint, and the most specific one is the hardest constraint. The relation is inverted. In Rust narrowing lifetime is safe but expanding lifetime is not safe, similar to java converting any type to `Object` is safe but converting `Object` to another type doesn't necessarily work.
 
+### Early unlock by `drop(guard)` doesn't work well with `Send` inference
+
+It's common to use normal locking in async code. `tokio::spawn` requires future to be `Send`, which means the lock guard cannot be held across an await point.
+
+There is a pattern of early-unlocking by `std::mem::drop(guard)`. In some cases, early-unlocking avoids you to give extra scope to locking thus make control flow simpler. However the Rust future `Send` inference may not work with that.
+
+Example:
+
+```rust
+use std::sync::{Arc, Mutex};
+
+#[derive(Default)]
+struct LockedData {
+    x: u32,
+    y: Vec<String>
+}
+
+async fn should_be_send_sync(lock: Arc<Mutex<LockedData>>) {
+    let guard = lock.lock().unwrap();
+    let x: u32 = guard.x;
+    drop(guard);
+
+    do_something_with_x(x).await;
+}
+
+async fn do_something_with_x(x: u32) {
+    // ...
+}
+
+#[tokio::main]
+async fn main() {
+    let lock = Arc::new(Mutex::new(Default::default()));
+    tokio::spawn(should_be_send_sync(lock));
+}
+```
+
+Although the `guard` is actually not used across await point, Rust compiler still treats the guard as in future, then the future is not `Send`: 
+
+```
+error: future cannot be sent between threads safely
+    |
+ 25 |     tokio::spawn(should_be_send_sync(lock));
+    |                  ^^^^^^^^^^^^^^^^^^^^^^^^^ future returned by `should_be_send_sync` is not `Send`
+...
+```
+
+[Related issue](https://github.com/rust-lang/rust/issues/116680)
+
+The workaround is to make the locking scope explicit:
+
+```rust
+async fn should_be_send_sync(lock: Arc<Mutex<LockedData>>) {
+    let x = {
+        let guard = lock.lock().unwrap();
+        let x: u32 = guard.x;
+        x
+    };
+
+    do_something_with_x(x).await;
+}
+```
+
+Although less convenient, it has a good side effect that the locking scope is more clear.
+
 ## "Lifetime" is not "lifetime"
 
 The "lifetime" in Rust has nuanced distinction between the real "lifetime" of data:
@@ -1653,6 +1727,10 @@ The `as_deref` turns `Option<String>` into `Option<&str>`. The `as_str` turns `S
 It's true that Rust limits expressiveness compared to other languages. However, the limitations often may "force" developer to refactor code to make it simpler. For example, mutability may cause borrow checker issue, then developer rewrites it to functional-style immutable data transform, then it satisfies borrow checker and has a side effect of becoming more maintainable (mutation is often a source of complexity).
 
 But it doesn't always happen. There are also cases where developer lazily workaround by using `Arc<Mutex<>>` unnecessarily, making code less maintainable, slower and more prone to deadlock.
+
+## Don't focus too much on compiler suggestions
+
+The compiler suggestions come from **local heuristics**. It's based on local information, so it can be globally wrong. Sometiems you follow compiler's suggestion then there will be other kinds of more weird compile errors.
 
 ## Summarize the contagious things
 
