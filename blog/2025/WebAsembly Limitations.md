@@ -378,11 +378,20 @@ The JS ecosystem cares about code size. Because improving page load speed requir
 
 The average user can accept taking 2 minutes to install a native app, but cannot accept taking 20 seconds to load a web page. So the native ecosystem doesn't care much about code size or lazy loading. The Wasm toolchain are often based on native toolchains. The tooling for reducing code size and lazy loading for Wasm is far less mature than JS.
 
-Also, C++ and Rust duplicatedly generate code for different generic instantiation (called monomorphization). `Vec<u32>` uses different Wasm code than `Vec<String>` and `Vec<MyType>`. (In Rust, the commonly used `serde`  can take a lot of binary size, [see also](https://nickb.dev/blog/the-dark-side-of-inlining-and-monomorphization/)) This bloats binary size compared to JS. Modern linkers can do identical code folding (ICF) which can alleviate this issue.
+Also, C++ and Rust duplicatedly generate code for different generic instantiation (called monomorphization). `Vec<u32>` uses different Wasm code than `Vec<String>` and `Vec<MyType>`. Another factor is macros. In Rust, the commonly used `serde`  can take a lot of binary size, [see also](https://nickb.dev/blog/the-dark-side-of-inlining-and-monomorphization/). This bloats binary size compared to JS. Modern linkers can do identical code folding (ICF) which can alleviate this issue. In JS, there is no macro or generic monomorphization. JS libraries often uses dynamic dispatch, which saves code than static dispatch.
 
-In debug mode, debugging info also takes a lot of space in Wasm binary.
+Another factor is that browser has many built-in JS APIs, for things like string operations, regex, datetime, JSON serialization, etc. But the equivalent C++/Rust program compiled to Wasm need to embed a std lib within the Wasm binary, which also takes space. Memory allocator code also takes space. One example is that Rust `regex` crate adds 500 KiB size because it includes unicode table ([see also](https://book.leptos.dev/deployment/binary_size.html#things-to-avoid)), but the JS regex is built-in.
 
-If the web page shows a progress bar during loading, the user can become more patient, then the problem is partially solved.
+Another factor that compiler optimization tend to do inlining. JS runtime JIT also does inlining, but it only inlines hot code. In native languages, there is profile-guided optimization (PGO), but not widely used because of inconvenience. Without profiling, compiler may inline cold code, which unnecessarily increases binary size.
+
+(In debug mode, debugging info also takes a lot of space in Wasm binary.)
+
+Summarize Wasm size bloat factors: 
+
+- Tooling for minimization and lazy loading is immature compared to JS
+- Generic monomorphization, macros, and the preference of static dispatch, while JS prefers dynamic dispatch
+- Wasm binary includes stdlib and allocator, while equivalent things in JS is browser built-in
+- Inlining without profiling
 
 ## Debugging Wasm running in Chrome
 
@@ -499,3 +508,18 @@ Also, JS has no share-memory parallelism. Moving a byte buffer between web worke
 When trying to optimize the performance of an existing JS (or TS) web app, don't directly refactor it to Wasm. Wasm-JS data passing cost may make it slower overall. Profile before optimization. It's often possible to optimize a lot to the existing JS app. Also, you can shift some client-side compute work to server-side.
 
 Related: There is V8 bytecode. V8 bytecode is a compact binary representation of JS code. V8 bytecode is dynamically-typed (typing information still requires runtime statistics). and the format is not stable across V8 versions.
+
+### How Rust web framework Topcoat avoids WebAssembly
+
+There are Rust web frontend frameworks like Dioxus, Yew, Leptos, etc. They all use WebAssembly in frontend. But a new web framework [Topcoat](https://github.com/tokio-rs/topcoat) avoids WebAssembly while still allows client-side reactivity similar to React. 
+
+Topcoat translates a subset of Rust into JS. See also [topcoat runtime](https://docs.rs/topcoat/latest/topcoat/runtime/index.html). That Rust subset includes things like numbers, boolean, strings, arrays (`Vec`, slices). It's still limited. For example the Rust `HashMap` is not in that subset. And there is difference of strings between Rust and JS: Rust uses UTF-8 and JS uses WTF-16 in string APIs. The topcoat runtime has to bridge the gap and similate the UTF-8 string using JS string.
+
+It's obviously much more limiting than other web frameworks that run real Rust via WebAssembly. You cannot use many Rust library functions and community crates on client side. (That Rust subset includes if, loops and array, so it's Turing-complete, just inconvenient compared to real Rust.)
+
+The benefit is that it reduced bundle size, so the web page loads faster. And it avoids the performance loss caused by passing data between JS and Wasm.
+
+The limitations of client side Rust subset will be a problem if you need complex logic to run in client. But Topcoat's philosophy is to move most logic to server side, only leaving "lean" logic on client. This is similar philosophy as [HTMX](https://htmx.org/). 
+
+For most web UIs, pure client-side interactivity is actually not needed, because most interactions have to go though server. For example, if the dropdown has only 3 options, just putting options into HTML is simplest. If the dropdown loads something from server after being clicked, then it must go though server, so writing the dropdown render logic on server side is simpler. The server-centric approach obviously don't fit complex client interactions (e.g. games, figma, spreadsheets), but most web UI don't need complex client interactions. And these web apps don't require much compute because the heavy task is moved to server. So maybe Wasm is not needed for most web apps.
+

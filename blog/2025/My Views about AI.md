@@ -521,6 +521,23 @@ Actually there are different cases:
 
 In real-world complex cases, under-speciying is very common. For `predicate(a, b)`, if it's not true, it's often that you can change `a` to make it true, or change `b` to make it true (for example, if database foreign key constraint is violated, can restore by either refusing change or cascade-delete). Changing which depends on the actual requirement. The theorem to prove is just part of the requirement, not the full requirement.
 
+### Code rots when meaning drifts from name
+
+Naming in code is hard. It's often that when adding a new feature, the name of new types/functions are kind of accurate in the beginning. However, as new features get added or adjusted, the name starts to become misleading. This is also a kind of "code rot".
+
+When the name becomes misleading, it's often not easy to do the rename:
+
+- Renaming may cause large merge conflicts. 
+- Some name may be used in reflection or JSON serialization, so simply renaming may cause regression. 
+- The name may be used in multiple repositories, not updating them in sync causes compile error and CI break.
+- ...
+
+So the misleading names often exist for long time.
+
+The misleading names make LLM more likely to make mistakes, unless you explicitly tell LLM about that in comments or prompts etc. If it's only mentioned in one markdown doc, LLM may not look at that doc. It's worth repeating it all over the places.
+
+If you don't find and document about the misleading names, the code rots and becomes harder to maintain over time.
+
 ## Context bottleneck
 
 **Most knowledge work is bottlenecked in finding useful information in the sea of information**, rather than raw reasoning. High signal-to-noise ratio context is important.
