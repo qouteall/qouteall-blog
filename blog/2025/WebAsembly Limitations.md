@@ -16,33 +16,33 @@ Background:
 - It can be run in browser. 
 - Although its name has "Web", it's is not just for Web. It can be used outside of browser.
 - Although its name has "Assembly", it has features (e.g. [GC](https://github.com/WebAssembly/gc)) that are in a higher abstraction layer than native assembly, similar to JVM bytecode.
-- Wasm and JS are executed by the same engine in browsers. In Chrome, V8 executes both JS and Wasm. Wasm GC use the same GC as JS.
+- Wasm and JS are executed by the same engine[^engine] in browsers. In Chrome, V8 executes both JS and Wasm. Wasm GC use the same GC as JS.
 
 This article focuses on in-browser Wasm.
 
-## Wasm runtime data
+[^engine]: The phrase "JS runtime" has ambiguity. Here I use "JS engine" to refer to the JS VMs including V8, SpiderMonkey and JavaScriptCore. The "JS runtime" often refers to node.js and bun, while bun is a toolchain that uses JavaScriptCore to run JS, bun itself doesn't run JS. The "Wasm runtime" here refers to things that execute Wasm, including V8 and including Wasmtime etc..
 
-The data that Wasm program works on:
+## Wasm's differnce to native
 
-- Runtime-managed stack. It has local variables, function arguments, return code addresses, etc. It's managed by the runtime. It's not in linear memory.
-- Linear memory. 
-  - A linear memory is an array of bytes. Can be read/written by address (address can be seen as index in array). 
-  - A linear memory's size can grow. But currently a linear memory's size cannot shrink.
-  - A linear memory can be shared by multiple Wasm instances, see multi-threading section below.
-  - (Wasm supports having multiple linear memories, but most apps just use one linear memory.)
-- Table. Each table is a (growable) array that can hold:
-  - Wasm Function references.
-  - JS values or other external things.
-  - Wasm Exception references.
-  - Wasm GC value references.
-- Heap. Holds GC values. It's the same heap that JS uses. Explained later.
-- Globals. A global can hold a number (`i32`, `i64`, `f32`, `f64`), an `i128` or a reference (including function reference, GC value reference, extern value reference, etc.).
+Wasm has a linear memory. The lineary is conceptually an array of bytes, similar to the native memory. The address (pointer) is index into the linear memory. The linary memory can grow but cannot shrink.
+
+Within one browser tab, there can be multiple Wasm instances and multiple Wasm linear memories. But native apps has only one memory space per process.
+
+Wasm has no "native function pointer". There is Wasm table. The Wasm table can hold Wasm function references (the table can also hold JS things, or Wasm GC values, or Wasm exception references, etc.). The native function pointer becomes index into table in Wasm. Indirect call is given an index and execute the Wasm function reference in given index in table. This design improves safety (some native app security vulnerabilities are caused by corrupted function pointer or corrupted return code address).
+
+Wasm has a heap. It's the same heap that JS uses. And that heap can hold Wasm GC values[^wasm_heap].
+
+[^wasm_heap]: Specifically, in the browser, the Wasm linear memory, `WebAssembly.Module`, `WebAssembly.Instance` are all objects in the heap. Unloading a Wasm module is just to not reference it and let GC collect it.
+
+Wasm also have things called "globals". A global can hold a number (`i32`, `i64`, `f32`, `f64`), an `i128` or a reference (including function reference, GC value reference, extern value reference, etc.).
+
+In native apps, there is a stack holding local variables and return machine code addresses. In Wasm, that main stack is managed by the Wasm runtime, not in linear memory. To make on-stack values have addresses, shadow stack is introduced (elaborated below).
 
 The linear memory doesn't hold these things:
 
 - Linear memory doesn't hold the main stack (but holds shadow stack). The main stack is managed by runtime and cannot be read/written by address.
-- The linear memory doesn't hold function references. Wasm function references cannot be converted to and from integers. This design can improve safety. Wasm function reference can be put in table (or in global or in main stack). Function pointer becomes integer index corresponding to a function reference in table.
-- The linear memory don't hold the globals. C/C++/Rust globals are placed in linear memory to have addresses.
+- The linear memory doesn't hold function references. Wasm function references cannot be converted to and from integers. 
+- The linear memory don't hold the Wasm globals. C/C++/Rust globals are placed in linear memory to have addresses.
 
 ## Stack is not in linear memory
 
@@ -139,9 +139,11 @@ It doesn't support some memory layout optimizations:
 - Cannot add custom fields at the head of an array object. (C# supports it)
 - Doesn't allow compact sum type memory layout.
 
-Wasm GC data modelling is very similar to Java's data modelling (Java doesn't support value type or interior pointer), but is very different to C#'s and Golang's (no value type, no interior pointer).
+Wasm GC data modelling is very similar to Java's (Java doesn't support value type[^java_value_type] or interior pointer), but is very different to C#'s and Golang's (no value type, no interior pointer).
 
 See also: [C# Wasm GC issue](https://github.com/dotnet/runtime/issues/94420), [Golang Wasm GC issue](https://github.com/golang/go/issues/63904)
+
+[^java_value_type]: Java is adding value type, [see also](https://openjdk.org/projects/valhalla/value-objects).
 
 ## Multi-threading
 
@@ -193,7 +195,7 @@ The web threads (main thread and web workers) don't share mutable data (except `
 - The immutable things, like `WebAssembly.Module`, when sent to another web worker, the underlying data will be shared by browser (saves copy cost).
 - The API of sending message allows passing a transfer array. If an `ArrayBuffer` is included in transfer array, then current thread's `ArrayBuffer` will detach with its binary data. This moves ownership of underlying binary data and can save copying cost.
 
-The JS runtimes and browser DOM things are all implemented for single-threaded execution. They don't support sharing across threads.
+The JS engines and browser DOM things are all implemented for single-threaded execution. They don't support sharing across threads.
 
 WebAssembly multithreading relies on web workers and `SharedArrayBuffer`.
 
@@ -251,7 +253,7 @@ The current workaround is to notify the web workers to make them proactively loa
 
 There is [shared-everything threads proposal](https://github.com/WebAssembly/shared-everything-threads) that aim to fix that.
 
-Why don't Wasm multithreading design true sharing initially? Because the major JS runtimes are designed for single-threaded execution. Making the JS runtimes adapt to multi-threading is hard. Multi-threading introduces data race risk. But JS runtime cannot simply add locking here and there because it may hurt performance or cause deadlock. WebAssembly uses the same runtime as JS so the same limitation applies. Supporting `SharedArrayBuffer` doesn't require changing JS runtimes' single-threaded architecture so it's implemented first. 
+Why don't Wasm multithreading design true sharing initially? Because the major JS engines are designed for single-threaded execution. Making the JS engines adapt to multi-threading is hard. Multi-threading introduces data race risk. But JS engine cannot simply add locking here and there because it may hurt performance or cause deadlock. WebAssembly uses the same runtime as JS so the same limitation applies. Supporting `SharedArrayBuffer` doesn't require changing JS engines' single-threaded architecture so it's implemented first. 
 
 ### Mismatch between web worker and native threads
 
@@ -259,15 +261,15 @@ Web workers are very different to native threads. Web worker runs in a browser-m
 
 It's possible to simulate native threads using web workers. Send one message to a web worker. The whole thread runs in a message callback. It only finish processing message when corresponding "thread" exits.
 
-However, if you want to send JS things (like `OffscreenCanvas`) to the "thread", you cannot put the JS object into linear memory so it can only be sent via web worker message. There is another limitation: **web worker cannot receive new message before finishing current message callback**. But in native thread abstraction, it can only finish after thread exits. There is a mismatch. One workaround is to use JS Promise integration to pause Wasm "thread" execution.
+However, if you want to send JS things (like `OffscreenCanvas`) to the "thread", you cannot put the JS object into linear memory so it can only be sent via web worker message. There is another limitation: **web worker cannot receive new message before finishing current message callback**. But in native thread abstraction, it can only finish after thread exits. There is a mismatch.
 
-Also, the callback from JS to Wasm will be blocked. Many usages of web APIs require callbacks, such as `setTimeout` [`requestAnimationFrame`](https://developer.mozilla.org/en-US/docs/Web/API/DedicatedWorkerGlobalScope/requestAnimationFrame). If the "thread" keeps running, it occupies web worker event loop, then these callbacks cannot run. One workaround is to make the "thread" periodically "yield" itself using JS promise integration.
+Also, the callback from JS to Wasm will be blocked. Many usages of web APIs require callbacks, such as `setTimeout` [`requestAnimationFrame`](https://developer.mozilla.org/en-US/docs/Web/API/DedicatedWorkerGlobalScope/requestAnimationFrame). If the "thread" keeps running, it occupies web worker event loop, then these callbacks cannot run.
 
 Also, after spawning a web worker (`new Worker(...)`), the new web worker only starts running after the spawning code finishes its current event processing. So you cannot spawn a "thread" then immediately join[^thread_join] it. It will deadlock. One workaround is to let another web worker to indirectly create new web worker. [See also](https://emscripten.org/docs/porting/pthreads.html#special-considerations), [See also](https://pistonite.github.io/wasm-bindgen-spawn/)
 
 [^thread_join]: Joining a thread means waiting the thread to finish.
 
-Simulating native thread using web worker works fine for pure computing threads that don't use most web APIs (getting time is fine). But when interacting with web APIs, there is "**impedance mismatch**": many workarounds are required, and it introduces new problems (reentrancy).
+These problems can be workarounded by makeing Wasm thread "yield" using JS Promise integration. However, there is another problem: Reentrancy.
 
 ### Problems of JS Promise integration: Reentrancy
 
@@ -325,7 +327,7 @@ Similarily passing a string in Wasm linear memory to JS is also not easy.
 
 Passing strings between Wasm and JS can be a performance bottleneck. **If your application involve frequent Wasm-JS data passing, then replacing JS by Wasm may actually reduce performance**. It can be fast when Wasm code works on byte buffer, then pass to JS then directly to web API. But passing data into JS objects is slow.
 
-Modern Wasm/JS runtime (including V8) can JIT and inline the cross calling between Wasm and JS. But the copying cost still cannot be optimized out.
+Modern Wasm/JS engine (including V8) can JIT and inline the cross calling between Wasm and JS. But the copying cost still cannot be optimized out.
 
 There are [Wasm-JS string builtins](https://webassembly.github.io/spec/js-api/index.html#builtins-js-string) that aim to reduce the cost of string passing between Wasm and JS.
 
@@ -372,26 +374,20 @@ See also: [Is Memory64 actually worth using?](https://spidermonkey.dev/blog/2025
 
 ## About binary size
 
-The WebAssembly code format itself is deisgned with size optimization in mind (e.g. use variable-sized integer, function name is optional). But the common Wasm apps often have large binary size. This slows down page loading.
+The WebAssembly code format itself is deisgned with size optimization in mind (e.g. use variable-sized integer, use index rather than name to reference function). It's often that Wasm web apps have large wasm binary size. This slows down page loading.
 
-The JS ecosystem cares about code size. Because improving page load speed requires reducing code size. The JS ecosystem has mature tooling about dead code elimination (tree shaking), JS minimization and JS lazy loading. Currently JS ecosystem has code size advantage.
+Reasons:
 
-The average user can accept taking 2 minutes to install a native app, but cannot accept taking 20 seconds to load a web page. So the native ecosystem doesn't care much about code size or lazy loading. The Wasm toolchain are often based on native toolchains. The tooling for reducing code size and lazy loading for Wasm is far less mature than JS.
+- Lazy loading. JS ecosystem has mature code splitting and lazy loading toolchains. But Wasm toolchains don't have direct support of auto code splitting and auto lazy loading. (Because Wasm toolchains are based on native toolchains, and native apps rarely need lazy loading).
+- Generic monomorphization. C++ and Rust handle generics by codegen for each instance. `Vec<u32>` uses different Wasm code than `Vec<String>` and `Vec<MyType>`. This bloats binary size. On contrary, JS is dynamic, no duplicate code due to generic.
+  - Modern linkers can do identical code folding (ICF) which can alleviate some duplicate code caused by monomorphization.
+- Static dispatch and macros. The native languages (C/C++/Rust) favor static dispatch and macros, which also bloats code size. While JS is dynamic.
+  - In Rust, the commonly used `serde`  can take a lot of binary size, due to both generic monomorphization and macros, [see also](https://nickb.dev/blog/the-dark-side-of-inlining-and-monomorphization/).
+- Embedding stdlib and other libraries. Browser provides many built-in JS APIs for string operations, regex, datetime, JSON serialization, etc. And JS allocation is done by JS engine. But the equivalent C++/Rust program compiled to Wasm need to embed a std lib within the Wasm binary, and an allocator, and third-party libraries.
+  - One example is that Rust `regex` crate adds 500 KiB size because it includes unicode table ([see also](https://book.leptos.dev/deployment/binary_size.html#things-to-avoid)), but the JS regex is built-in.
+- Compiler optimizaion (inlining etc.). The compiler optimization doesn't know which code is hot by default (there is profile-guided optimization (PGO), but not widely used due to inconvenience). Many compiler optimizations trade off code size for performance. Examples: inlining and loop unroll. Sometimes the cold code (rarely-executed code) is optimized and bloated.
+  - The JS engine also does optimizations, but on runtime JIT-ed machine code. The JS source code doesn't get inlined or loop-unrolled.
 
-Also, C++ and Rust duplicatedly generate code for different generic instantiation (called monomorphization). `Vec<u32>` uses different Wasm code than `Vec<String>` and `Vec<MyType>`. Another factor is macros. In Rust, the commonly used `serde`  can take a lot of binary size, [see also](https://nickb.dev/blog/the-dark-side-of-inlining-and-monomorphization/). This bloats binary size compared to JS. Modern linkers can do identical code folding (ICF) which can alleviate this issue. In JS, there is no macro or generic monomorphization. JS libraries often uses dynamic dispatch, which saves code than static dispatch.
-
-Another factor is that browser has many built-in JS APIs, for things like string operations, regex, datetime, JSON serialization, etc. But the equivalent C++/Rust program compiled to Wasm need to embed a std lib within the Wasm binary, which also takes space. Memory allocator code also takes space. One example is that Rust `regex` crate adds 500 KiB size because it includes unicode table ([see also](https://book.leptos.dev/deployment/binary_size.html#things-to-avoid)), but the JS regex is built-in.
-
-Another factor that compiler optimization tend to do inlining. JS runtime JIT also does inlining, but it only inlines hot code. In native languages, there is profile-guided optimization (PGO), but not widely used because of inconvenience. Without profiling, compiler may inline cold code, which unnecessarily increases binary size.
-
-(In debug mode, debugging info also takes a lot of space in Wasm binary.)
-
-Summarize Wasm size bloat factors: 
-
-- Tooling for minimization and lazy loading is immature compared to JS
-- Generic monomorphization, macros, and the preference of static dispatch, while JS prefers dynamic dispatch
-- Wasm binary includes stdlib and allocator, while equivalent things in JS is browser built-in
-- Inlining without profiling
 
 ## Debugging Wasm running in Chrome
 
@@ -428,7 +424,7 @@ if (index < simpleByteArray.length) {
 ...
 ```
 
-The `|0` is for converting value to 32-bit integer, helping JS runtime to optimize it into integer operation (JS is dynamic, without that the JITed code may do other things). The `localJunk` is to prevent these read opearations from being optimized out.
+The `|0` is for converting value to 32-bit integer, helping JS engine to optimize it into integer operation (JS is dynamic, without that the JITed code may do other things). The `localJunk` is to prevent these read opearations from being optimized out.
 
 - The attacker firstly execute that code many times with in-bound `index` to "train" branch predictor. 
 - Then the attacker accesses many other different memory locations to invalidate the cache.
@@ -438,7 +434,7 @@ The `|0` is for converting value to 32-bit integer, helping JS runtime to optimi
   - One specific memory region in `probeTable` will be loaded into cache. Accessing that region will be faster.
   - CPU found that branch prediction is wrong and rolls back, but doesn't rollback side effect on cache.
 - The attacker measures memory read latency in `probeTable`. Which place access faster correspond to the value of secret.
-- To accurately measure memory access latency, `performance.now()` is not accurate enough. It needs to use a multi-threaded counter timer: One thread (web worker) keeps increasing a shared counter in a loop. The attacking thread reads that counter to get "time". The cross-thread counter sharing requires `SharedArrayBuffer`. Although it cannot measure time in standard units (e.g. nanosecond), it's can distinguish latency difference between fast cache access and slow RAM access.
+- It needs to accurately measure memory access latency. Modern browsers nerfed `performance.now()` accuracy. Another solution is multi-threaded counter timer: One thread (web worker) keeps increasing a shared counter in a loop. The attacking thread reads that counter to get "time". The cross-thread counter sharing requires `SharedArrayBuffer`. Although it cannot measure time in standard units (e.g. nanosecond), it's can distinguish latency difference between fast cache access and slow RAM access.
 
 The same thing can also be done via equivalent Wasm code using `SharedArrayBuffer`.
 
@@ -460,7 +456,7 @@ There are other sandboxed execution solutions:
 
 [^java]: Java allows loading new class at runtime. It can be used for making a plugin system. But it's not sandboxed. Dynamically loading class is similar to dynamic linking. The newly-loaded classes runs in the same JVM, having the same permission of accessing files and networking like host process. 
 
-These things also have VMs:
+These things also have "VM"s:
 
 - Font standard TrueType has its own VM and bytecode format. [See also](https://learn.microsoft.com/en-us/typography/opentype/spec/tt_instructions). It runs in browsers and almost all modern GUI.
 - PDF allows embedding JavaScript. (PDF also can embed TrueType which runs TrueType VM.)
@@ -487,7 +483,7 @@ The proposal [ShadowRealm API](https://github.com/tc39/proposal-shadowrealm) wil
 
 See also: [How to build a plugin system on the web and also sleep well at night](https://www.figma.com/blog/how-we-built-the-figma-plugin-system/), [An update on plugin security](https://www.figma.com/blog/an-update-on-plugin-security/), [Realms-shim Security Updates](https://agoric.com/blog/technology/realms-shim-security-updates)
 
-### The limits of JS runtime performance optimization
+### The limits of JS engine performance optimization
 
 There is really a lot of efforts put in optimizing JS. ARM specially adds an instruction for optimizing JS:
 
@@ -499,9 +495,9 @@ There is really a lot of efforts put in optimizing JS. ARM specially adds an ins
 > 
 > \- [Armv8-A architecture: 2016 additions](https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/armv8-a-architecture-2016-additions)
 
-The JS runtimes (like V8) do complex optimizations. After these efforts, JS do run faster. But it has a limit. No matter how much efforts are put into JS runtime optimization, it cannot be as fast as C.
+The JS engines (like V8) do complex optimizations. After these efforts, JS do run faster. But it has a limit. No matter how much efforts are put into JS engine optimization, it cannot be as fast as C.
 
-Because the JS runtime optimization must keep compatibility of JS semantics. JS is dynamic and has a lot of flexibility. **Flexibility costs performance**. JS runtime often use runtime statistics to find unused flexibility and optimize accordingly. But statistics cannot be really sure, so JS runtime still have to "prepare" for flexibility. The runtime statistics and "prepare for flexibility" all costs performance, in a way that cannot be optimized without changing code format and execution model.
+Because the JS engine optimization must keep compatibility of JS semantics. JS is dynamic and has a lot of flexibility. **Flexibility costs performance**. JS engine often use runtime statistics to find unused flexibility and optimize accordingly. But statistics cannot be really sure, so JS engine still have to "prepare" for flexibility. The runtime statistics and "prepare for flexibility" all costs performance, in a way that cannot be optimized without changing code format and execution model.
 
 Also, JS has no share-memory parallelism. Moving a byte buffer between web worker involve no copy, but many other cross-worker communication require copy.
 
@@ -513,13 +509,13 @@ Related: There is V8 bytecode. V8 bytecode is a compact binary representation of
 
 There are Rust web frontend frameworks like Dioxus, Yew, Leptos, etc. They all use WebAssembly in frontend. But a new web framework [Topcoat](https://github.com/tokio-rs/topcoat) avoids WebAssembly while still allows client-side reactivity similar to React. 
 
-Topcoat translates a subset of Rust into JS. See also [topcoat runtime](https://docs.rs/topcoat/latest/topcoat/runtime/index.html). That Rust subset includes things like numbers, boolean, strings, arrays (`Vec`, slices). It's still limited. For example the Rust `HashMap` is not in that subset. And there is difference of strings between Rust and JS: Rust uses UTF-8 and JS uses WTF-16 in string APIs. The topcoat runtime has to bridge the gap and similate the UTF-8 string using JS string.
+Topcoat translates a subset of Rust into JS. See also [topcoat runtime](https://docs.rs/topcoat/latest/topcoat/runtime/index.html). That Rust subset includes things like numbers, boolean, strings, arrays (`Vec`, slices). It's still limited. For example the Rust `HashMap` is not in that subset. And there is difference of strings between Rust and JS: Rust uses UTF-8 and JS uses WTF-16 in string APIs. The topcoat runtime has to bridge the gap and simulate the UTF-8 string using JS string.
 
 It's obviously much more limiting than other web frameworks that run real Rust via WebAssembly. You cannot use many Rust library functions and community crates on client side. (That Rust subset includes if, loops and array, so it's Turing-complete, just inconvenient compared to real Rust.)
 
 The benefit is that it reduced bundle size, so the web page loads faster. And it avoids the performance loss caused by passing data between JS and Wasm.
 
-The limitations of client side Rust subset will be a problem if you need complex logic to run in client. But Topcoat's philosophy is to move most logic to server side, only leaving "lean" logic on client. This is similar philosophy as [HTMX](https://htmx.org/). 
+The limitations of client side Rust subset will be a problem if you need complex logic to run in client. But Topcoat's philosophy is to move most logic to server side, only leaving simple logic on client. This is similar philosophy as [HTMX](https://htmx.org/). 
 
-For most web UIs, pure client-side interactivity is actually not needed, because most interactions have to go though server. For example, if the dropdown has only 3 options, just putting options into HTML is simplest. If the dropdown loads something from server after being clicked, then it must go though server, so writing the dropdown render logic on server side is simpler. The server-centric approach obviously don't fit complex client interactions (e.g. games, figma, spreadsheets), but most web UI don't need complex client interactions. And these web apps don't require much compute because the heavy task is moved to server. So maybe Wasm is not needed for most web apps.
+For most web UIs, pure client-side interactivity is actually not needed, because most interactions have to go though server. For example, if the dropdown has only 3 options, just putting options into HTML is simplest. If the dropdown loads something from server after being clicked, then it must go though server, so writing the dropdown render logic on server side is simpler. The server-centric approach obviously don't fit complex client interactions (e.g. games, Figma, spreadsheets), but most web UIs don't need complex client interactions. And these web apps don't require much compute because the heavy task is moved to server. So maybe Wasm is not needed for most web apps.
 

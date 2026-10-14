@@ -89,6 +89,8 @@ However, many old people don't recognize AI and often treat AI output as real go
 
 Similar to art, people's judgements to "fancy writing" has changed. Before ChatGPT, a long article with fancy writing style often means author has high writing skill and puts efforts into writing. But now it's "AI smell".
 
+Someone may think "AI makes making images/videos easy, so creativity is more important". But creativity has less economic value now because AI is good at copying creative ideas while bypassing copyright.
+
 ## Not just "mimic pattern in training data"
 
 It's a myth that LLM only "mimic patterns in training data". This is true for autoregressive pretrained LLMs. But with RL (reinforcement learning) it can "predict which thing gives higher reward". RL can make the model's capability go much beyond original training data.
@@ -196,9 +198,9 @@ A lot of time in programming is spent on knowing how to use an "API". The "API" 
 
 The design of API has a lot of ad-hoc idiosyncracies. For example, adding one thing can be named "insert", "create", "add", "put", "new", "register", "spawn", etc. Also, reading a file could be `open`, `files.open`, `os.open`, `fs::open`, `openFile`, `files.read`, `readFile`, `new FileInputStream`, `ifstream` etc. Many other such examples.
 
-Which exact word/phrase it chooses is ad-hoc. It cannot be inferred without learning. Having to learn these ad-hoc API design is an obstacle in programming that's not fun. And it's different in each language/framework. Knowing the API of reading file in Python doesn't save you from learning the same API in Java.
+Which exact word/phrase it chooses is ad-hoc. It cannot be inferred without learning. Having to learn these ad-hoc API design is an obstacle in programming that's not fun. And it's different in each language/framework. Knowing the API of reading file in Python doesn't save you from learning the same API in Java. But if I tell AI to "read this file" then AI knows how to use the API.
 
-But if I tell AI to "read this file" then AI knows how to use the API.
+AI has devalued the skill of being familiar with a set of API.
 
 ### Less effortful understanding of codebase
 
@@ -664,8 +666,6 @@ Note that only forbidding `rm` command is not sufficient protection. `find` comm
 Reward is proxy target, not underlying real target. AI can conquer verifiable tasks. But most tasks not simply fully verifiable or fully not verifiable. **Most real tasks contain hard-to-verify parts**. These hard-to-verify parts are what automatic RL bad at.
 
 The main value of human worker may move to unverifiable tasks.
-
-These hard-to-verify parts can be improved by letting human experts to supervise and specify reward. But this method is bottlenecked by human effort and is not scalable (the bitter lesson).
 
 > However, recently released LLMs, such as GPT-5, have a much more insidious method of failure. They often generate code that fails to perform as intended, but which on the surface seems to run successfully, avoiding syntax errors or obvious crashes. It does this by removing safety checks, or by creating fake output that matches the desired format, or through a variety of other techniques to avoid crashing during execution.
 > 
