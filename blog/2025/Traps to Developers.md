@@ -85,6 +85,7 @@ tags:
   - Parent `visibility: hidden` doesn't enforce all children to be hidden. If child has `visibility: visible` it will still be shown. This don't apply to `opacity: 0` or `display: none`.
   - An element with `opacity: 0` can still be interacted (e.g. click button). This doesn't apply to `display: none` or `visibility: hidden`.
   - `display: none` removes element from layout. This doesn't apply to `visibility: hidden` or `opacity: 0`.
+- There are [pseudo elements](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Pseudo-elements). They are not in DOM tree but can show things.
 - Font size and line height. See [Deep dive CSS: font metrics, line-height and vertical-align](https://iamvdo.me/en/blog/css-font-metrics-line-height-and-vertical-align)
 - The `<!DOCTYPE html>` in the beginning of html is important. Without it, browsers will use "quirks mode" which make many behaviors different. [See also](https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Quirks_mode_and_standards_mode)
 - [Cumulative Layout Shift](https://web.dev/articles/cls). 
@@ -550,7 +551,21 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - macOS auto adds `.DS_Store` files into every folder. It's recommended to add `**/.DS_Store` into `.gitignore`.
 - Renaming file that only changes letter case won't be tracked by git in Windows and macOS (because file name is case-insensitive). Renaming using `git mv` works normally.
 - Git merge is not commutative or associative. Different merging order may give different results.
-- When switching branch, Git doesn't auto update submodules by default. (Can make it auto-update by `git config --global submodule.recurse true`)
+- About submodules:
+  - A submodule's core is a gitlink, the gitlink stores a commit hash. (gitlink is not file, but it can be changed and the change can be commited like file. Checking out another commit in module is similar to "editing gitlink file".)
+  - The submodule also appear as a folder, but the folder content may deviate from commit pointed by the gitlink. 
+    - For example, cloning by default don't update modules, then the submodule folder is empty, deviating to the commit hash stored in gitlink.
+    - After merging or switching branch, the commit hash in gitlink can change, but the files in submodule folder doesn't change automatically by default.
+    - To update, use `git submodule update --init --recursive`
+  - You can make the submodule gitlink point to your private commit, then push parent repo. Other developers then cannot update the submodule, because content pointed by gitlink is not on server.
+  - After changing `.gitmodules` config file, the submodules don't auto update by default.
+  - Inconsistency between `.gitmodules` config file and submodule git repo config.
+  - About the config `submodule.recurse`: it makes submodules auto update after switching branch. But it doesn't auto update submodules after merging, or after cloning. And if it's enabled, pushing in parent implicitly pushes in submodules.
+  - In a shallow submodule, the `remote.origin.fetch` will hardcode the branch name, which breaks when branch name changes. Need to manually change fetch refspec (e.g. `git -C path/to/submodule config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"`)
+  - In a shallow submodule, pushing may fail because the remote server may now know about some history commits, and the shallow clone contains no such history.
+  - The submodules are in detached HEAD mode by default, which means it's not in a specific branch. New commits based on detached HEAD is not referenced by any branch and may be lost. Switch to a real branch before committing in submodule. Note that after updating submodule it becomes detached HEAD again.
+
+
 
 ## Networking
 

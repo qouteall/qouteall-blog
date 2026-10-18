@@ -186,7 +186,7 @@ One example:
 
 You ask someone a question, they secretly lookup answer on internet, then answer you without mentioning the sources, they will look smart. The same applies to LLM. **LLM looks smarter than it actually is because it doesn't do attribution**.
 
-The UX of AI chat is very different to Google search. In Google search, it gives you website links. The website may contain the answer that you want or it may not. Even if it contains the answer, it may be in the middle of page. You have to browse a lot of content and filter for the answer. It takes efforts. (But the efforts put in filtering website informaiton can train information collection skills.) But it's clear to user that answer comes from website, not Google itself. In AI chat, the AI directly gives you the answer. AI chat is definitely more convenient and requires less mental efforts. AI hides the fact that its knowledge come from elsewhere. 
+The UX of AI chat is very different to Google search. In Google search, it gives you website links. The website may contain the answer that you want or it may not. Even if it contains the answer, it may be in the middle of page. You have to browse a lot of content and filter for the answer. It takes efforts. (But the efforts put in filtering website information can train information collection skills.) But it's clear to user that answer comes from website, not Google itself. In AI chat, the AI directly gives you the answer. AI chat is definitely more convenient and requires less mental efforts. AI hides the fact that its knowledge come from elsewhere. 
 
 The search-integrating AI can give reference links. However often the reference link is put wrongly. The reference link doesn't correspond to the AI's answer. AI actually answers using knowledge in weights to answer but inserts a link pretending it comes from search.
 
@@ -297,17 +297,15 @@ But AI coding is a **completely different paradigm** than existing abstraction l
 
 | Existing abstraction levels                                                          | AI                                                                                                |
 | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| Deterministic, using rigid rules.                                                    | Not deterministic, using black-box deep learning.                                                 |
+| Using rigid rules. Mostly reliable.                                                  | Using black-box deep learning.                                                                    |
 | Designed top-down by programmers.                                                    | Trained bottom-up by training data and RL.                                                        |
 | Code contains enough information for software module to run. [^enough_information]   | Vague prompt doesn't contain enough information. Requires AI to make detail decisions.            |
 | Use hardcoded defaults to handle unspecified details. It's not flexible or adaptive. | Can use "common sense" and patterns learnt from training to fill the gaps of unspecified details. |
-| Follows instructions according to its rigid rules reliably.                          | Sometimes ignore some instructions, especially when having context rot.                           |
+| Developer often don't need to check assembly because it's reliable.                  | Developer still often need to read code because AI is not yet very reliable.                      |
 
 [^enough_information]: Note that it focuses just one software module. The code can call external API, or dynamic link another program in system, or download plugin from internet, so one piece of code doesn't contain enough information for whole system to run, because it interacts with environment. But in conventional programming, the code provides enough information for one software module itself to run.
 
 A vague prompt itself doesn't contain enough information to produce code. But LLM has "common sense" that fill these gaps. The "common sense" is implicit, nondeterministic and not explainable. It depends on training data and RL and many random factors.
-
-About the meaning of "deterministic": given a specific AI model, you can make the output deterministic (temperature 0, etc.). Then it's technically deterministic because given same input there is only one possible output. But it's still not "determnistic" in human understanding sense. You can understand compiler behavior as rules, but the same doesn't apply to LLMs.
 
 The "low code" programming involves programming by configuring on GUI, without touching text code. The low code platform still uses rigid rules and hardcoded defaults, which corresponds to the left column in table.
 
@@ -390,7 +388,7 @@ The high-level design includes:
 
 [^real_requirement]: Figuring out the real user requirement is obvious important, because doing it wrong cause wasted work. However, sometimes no one can figure out real requirement before actually using the software in real environments. Also, doing strict validation to requirement hinders innovation. So sometimes doing quick iteration is better than spending efforts validating requirement.
 
-[^complexity_distribution]: Some software features are isolated and don't add much complexity. But some features interact with almost all other features. These features add a lot essential complexity. Note 80/20 rule: 80% complexity come from 20% features, and 80% users use 20% features. If the complexity-introducing feature requirement can be satisfied by other less complex features, it's often not worth implementing.
+[^complexity_distribution]: Some software features are isolated and don't add much complexity. But some features interact with almost all other features. These features add a lot essential complexity. Note 80/20 rule: 80% complexity come from 20% features, and 80% users use 20% features. If the complexity-introducing feature requirement can be satisfied by other less complex features, it's often not worth implementing. Related: [Wicked features](https://www.seangoedecke.com/wicked-features/)
 
 In pre-AI coding, the architectual design and coding are often interleaved: firstly do architectual design, then write some actual code, then discover some architectual problem during coding or debugging, then rethink architecture.
 
@@ -497,17 +495,21 @@ When AI makes a mistake, someone may think that it's just the model being not ca
 
 The conflict between craft and business goal had existed long ago, and becoming more salient with AI. It's commonly believed that even AI ships working software, it lacks craft (lower quality).
 
-It's common that software shipping speed conflicts with craft of software ("craft" here means fewer bugs, less laggy, better UX detail, etc.). But in business it's often that shipping is indeed more important than craft. **If the software provides real value, user can tolerant the lagginess and the bugs**. (If a game is truly fun, the player can keep playing despite it has only 20 FPS. Or even if a game bug corrupts the saving (very severe bug), the user still want to play it from beginning again as long as the game is fun enough.) That logic has a limit, if it's too buggy that core functionality doesn't work then it has no business value.
+It's common that software shipping speed conflicts with craft of software ("craft" here means fewer bugs, less laggy, better UX detail, etc.). But in business it's often that shipping is indeed more important than craft. **If the software provides real value, user can tolerant the lagginess and the bugs**. (If a game is truly fun, the player can keep playing despite it has only 20 FPS. Or even if a game bug corrupts the saving (very severe bug), the player still want to play it from beginning again as long as the game is fun enough.) That logic has a limit, if it's too buggy that core functionality doesn't work then it has no business value.
 
 Note that for infrastructure software (e.g. compilers, language runtimes, databases), it's different. Their performance and reliability is more important.
 
 On the other hand, delay shipping delays user from using the new feature that provides value.
 
-Someone treat coding as art. But the aesthetic of code is subjective. If the art aim to improve maintainability then it's good. But there are also coding art that create "beautiful" abtractions that not only hurt performance (because of more parsing, dynamic dispatch etc.) but also increases cognitive load for other developers in team, creating negative value overall. Only considered beautiful to abstraction author.
+Someone treat coding as art. But the aesthetic of code is subjective. If the art aim to improve maintainability then it's good. But there are also coding art that create "beautiful" abtractions that not only hurt performance (because of more parsing, dynamic dispatch etc.) but also increases cognitive load for other developers in team, creating negative value overall. Only considered beautiful to abstraction author. 
+
+And the "maintainability" is also subjective. Someone thinks Zig's everything-explicit style is more maintainable than Rust's implicit dropping, someone think Rust is more maintainable than Zig because you won't leak by forgetting freeing.
 
 Improving maintainability sometimes requires refactoring. But refactoring can cause regression bugs. So one developer that's responsible to code quality and does refactoring may ironically cause more harm to business in the short term. And the improved code quality doesn't get measured in KPIs. (Geting out of local minima temporarily increases loss). Not just refactoring. Most innovations are risky.
 
 With AI, the programming that creates business value most efficiently is to use AI coding. And human developer shifts from coding to reviewing and verification. But it gives less satisfaction. Human developer **still bears the responsibility of the result but have less direct control of result**. AI writes a bug that you didn't notice, but the bug is your responsibility not AI's.
+
+The fact that developer having no direct control to the code also means the details (including naming) may reflect developer intention less, and "the feeling of controlling code" vanishes.
 
 ### About formal verification
 
@@ -519,7 +521,7 @@ Actually there are different cases:
 
 - Implementation is complex, but requirement is simple to describe formally. For example, "no out-of-bound array access" or "list is sorted" is easy to describe formally. This is where formal verification is most useful.
 - Implementation is easy, but requirement is hard to describe formally. For example, business logic CRUD apps, if requirement is certain (including edge cases) then writing code is the easy part. But it's not easy to translate business requirement to formal theorems authentically.
-  - But often parts of requirements are constraints. The constraints are relatively easier to translate to theorem. But **there are often many different ways to satisfy a constraint** (**under-specified**), and AI may choose a surprising one.
+  - But often parts of requirements are constraints. The constraints are relatively easier to translate to theorem. But **there are often many different ways to satisfy a constraint** (constraint is **under-specified**), and AI may choose a surprising one.
 
 In real-world complex cases, under-speciying is very common. For `predicate(a, b)`, if it's not true, it's often that you can change `a` to make it true, or change `b` to make it true (for example, if database foreign key constraint is violated, can restore by either refusing change or cascade-delete). Changing which depends on the actual requirement. The theorem to prove is just part of the requirement, not the full requirement.
 
@@ -698,8 +700,6 @@ The chain-of-thought text is not the actual thinking. The actual thinking is in 
 
 Side note: the latest models seem to reward hack much less. (But I don't believe reward hacking can be fully eliminated, especially without human supervision.)
 
-An old related example: [Remove permission check due to type error](https://x.com/lisatomic5/status/1917641105245679814)
-
 ## Skill development hurt by AI
 
 Learning skill takes efforts. But using AI allow doing work without the efforts, which hurts skill development.
@@ -733,6 +733,6 @@ Sometimes the model lose diversity because diversity reduces RL reward. This is 
 
 ## AI re-shapes human language
 
-There is a phenemon that when a human reads too many AI-generated text, the human's writing may start to have "AI smells" (e.g. "it's not X, it's Y"). Because natural language is bottom-up. We learn the language by observing the language usage in contexts. Reading too many AI text makes one more familiar with phrases that AI likes to use.
+There is a phenemon that when a human reads too many AI-generated text, the human's writing may start to have "AI smells" (e.g. "it's not X, it's Y", "load bearing"). Because natural language is bottom-up. We learn the language by observing the language usage in contexts. Reading too many AI text makes one more familiar with phrases that AI likes to use.
 
 Another possible reason that the phrases that AI like to use come from RLHF, which means that human also prefer these phrases.

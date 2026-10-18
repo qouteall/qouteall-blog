@@ -716,11 +716,13 @@ In many cases, the real-world feedback invalidates assumptions in the plan. Then
 
 Success usually requires a lot of trial and error. Be more forgiving to the many failures in the process of trial and error. (It's also hard to do.)
 
+Innovation cannot be planned. Having diversity of ideas and constraints could help innovation.
+
 > A complex system that works is invariably found to have evolved from a simple system that worked. A complex system designed from scratch never works and cannot be patched up to make it work. You have to start over with a working simple system.
 > 
 > \- Systemantics: How Systems Work and Especially How They Fail
 
-Innovation cannot be planned. Having diversity of ideas and constraints could help innovation.
+Real development often works incrementally. Without the foundtion, a too advanced "grand plan" fails.
 
 ## Top-down control doesn't work well
 
