@@ -722,7 +722,7 @@ Innovation cannot be planned. Having diversity of ideas and constraints could he
 > 
 > \- Systemantics: How Systems Work and Especially How They Fail
 
-Real development often works incrementally. Without the foundtion, a too advanced "grand plan" fails.
+Real development often works incrementally. Without the foundation, a too advanced "grand plan" fails.
 
 ## Top-down control doesn't work well
 

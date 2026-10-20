@@ -311,6 +311,7 @@ tags:
 - Alignment can cause padding in struct.
   - The padding may waste space. Reordering fields may save space.
   - Initializing a struct's fields doesn't reset the padding bytes. The padding bytes may contain the values of previous data in same address. If struct has padding, don't use `memcmp` to compare equality. Need to compare each field.
+- Macro is not [hygienic](https://en.wikipedia.org/wiki/Hygienic_macro). A macro-defined local variable could duplicate name with an outside local varaible. If a macro uses a global variable, the use-site local variable with same name could shadow it.
 - Don't use `=` to compare equality.
 - Don't forget `break` in switch, unless you want fallthrough.
 
@@ -555,8 +556,8 @@ Indirectly use different versions of the same package (diamond dependency issue)
   - A submodule's core is a gitlink, the gitlink stores a commit hash. (gitlink is not file, but it can be changed and the change can be commited like file. Checking out another commit in module is similar to "editing gitlink file".)
   - The submodule also appear as a folder, but the folder content may deviate from commit pointed by the gitlink. 
     - For example, cloning by default don't update modules, then the submodule folder is empty, deviating to the commit hash stored in gitlink.
-    - After merging or switching branch, the commit hash in gitlink can change, but the files in submodule folder doesn't change automatically by default.
-    - To update, use `git submodule update --init --recursive`
+    - After switching branch (or merging upstream), the commit hash in gitlink can change, but the on-disk submodule commit hash doesn't change automatically by default, then there is "fake change" of submodule gitlink. Don't accidentally commit them.
+    - To update the on-disk submodule, use `git submodule update --init --recursive`
   - You can make the submodule gitlink point to your private commit, then push parent repo. Other developers then cannot update the submodule, because content pointed by gitlink is not on server.
   - After changing `.gitmodules` config file, the submodules don't auto update by default.
   - Inconsistency between `.gitmodules` config file and submodule git repo config.

@@ -307,6 +307,8 @@ But AI coding is a **completely different paradigm** than existing abstraction l
 
 A vague prompt itself doesn't contain enough information to produce code. But LLM has "common sense" that fill these gaps. The "common sense" is implicit, nondeterministic and not explainable. It depends on training data and RL and many random factors.
 
+Human developer trust compiler in most cases and don't need to read the assembly (or JVM bytecode etc.). But in AI coding, the AI is not yet fully trustworthy for long-term maintainability etc., so the human developer that cares about maintainability still need to read AI-generated code. The reliability is the main difference.
+
 The "low code" programming involves programming by configuring on GUI, without touching text code. The low code platform still uses rigid rules and hardcoded defaults, which corresponds to the left column in table.
 
 The tasks that are tedious to human is also tedious to LLM. LLM has higher tolerance to tedium than human, but the more tedious the more likely LLM makes mistake in it. So letting LLM directly output assembly is inefficient. The abstractions that help human also help LLMs.
@@ -491,26 +493,6 @@ Another is to avoid using string concat for const strings like table name and ka
 
 When AI makes a mistake, someone may think that it's just the model being not capable enough. But you can also try to think what leads to AI making the mistake. Then you may find that prompt is ambiguous, or some naming in code is misleading, some nuance is not explicitly told in doc, etc. Then you can improve on that by improving documents/comments/prompt wording/etc.
 
-### About craft in coding
-
-The conflict between craft and business goal had existed long ago, and becoming more salient with AI. It's commonly believed that even AI ships working software, it lacks craft (lower quality).
-
-It's common that software shipping speed conflicts with craft of software ("craft" here means fewer bugs, less laggy, better UX detail, etc.). But in business it's often that shipping is indeed more important than craft. **If the software provides real value, user can tolerant the lagginess and the bugs**. (If a game is truly fun, the player can keep playing despite it has only 20 FPS. Or even if a game bug corrupts the saving (very severe bug), the player still want to play it from beginning again as long as the game is fun enough.) That logic has a limit, if it's too buggy that core functionality doesn't work then it has no business value.
-
-Note that for infrastructure software (e.g. compilers, language runtimes, databases), it's different. Their performance and reliability is more important.
-
-On the other hand, delay shipping delays user from using the new feature that provides value.
-
-Someone treat coding as art. But the aesthetic of code is subjective. If the art aim to improve maintainability then it's good. But there are also coding art that create "beautiful" abtractions that not only hurt performance (because of more parsing, dynamic dispatch etc.) but also increases cognitive load for other developers in team, creating negative value overall. Only considered beautiful to abstraction author. 
-
-And the "maintainability" is also subjective. Someone thinks Zig's everything-explicit style is more maintainable than Rust's implicit dropping, someone think Rust is more maintainable than Zig because you won't leak by forgetting freeing.
-
-Improving maintainability sometimes requires refactoring. But refactoring can cause regression bugs. So one developer that's responsible to code quality and does refactoring may ironically cause more harm to business in the short term. And the improved code quality doesn't get measured in KPIs. (Geting out of local minima temporarily increases loss). Not just refactoring. Most innovations are risky.
-
-With AI, the programming that creates business value most efficiently is to use AI coding. And human developer shifts from coding to reviewing and verification. But it gives less satisfaction. Human developer **still bears the responsibility of the result but have less direct control of result**. AI writes a bug that you didn't notice, but the bug is your responsibility not AI's.
-
-The fact that developer having no direct control to the code also means the details (including naming) may reflect developer intention less, and "the feeling of controlling code" vanishes.
-
 ### About formal verification
 
 In theory, formal verification is good because it can prove that code is correct. And it's true that RL makes AI very good at writing proof programs. 
@@ -541,6 +523,32 @@ So the misleading names often exist for long time.
 The misleading names make LLM more likely to make mistakes, unless you explicitly tell LLM about that in comments or prompts etc. If it's only mentioned in one markdown doc, LLM may not look at that doc. It's worth repeating it all over the places.
 
 If you don't find and document about the misleading names, the code rots and becomes harder to maintain over time.
+
+### About Conway's law and Amadahl's law
+
+[Conway's law](https://en.wikipedia.org/wiki/Conway%27s_law):
+
+> Organizations which design systems (...) are constrained to produce designs which are copies of the communication structures of these organizations.
+
+For example, if a company has two software products with differnt styles, and the two products have overlapping functionalities, then it shows that the two products are produced by two separate departments.
+
+It may be due to internal fight between departments. But more often it's just due to communication cost and misaligned incentive, not active fight.
+
+The Conway's law can even exist within one software product. Different modules in one software use different styles, and re-invent wheels instead of sharing utils. Even different AI agents managed by one programmer re-invent wheels within one codebase. 
+
+One related law is [Amdahl's law](https://en.wikipedia.org/wiki/Amdahl%27s_law). When applied to parallelism, it tells that when you keep increasing parallelism, eventually the communication cost domniates, and increasing parallelism won't help or even hurts. Communication and shared understanding is always important, even more important now.
+
+### "Less is more" still applies to AI coding
+
+AI makes it much easier to add new features. But features are not always a positive thing.
+
+- It increases essential complexity when multiple features interact.
+- If the feature has internal complex logic, the user may not understand the internal logic and don't know how to correctly use the feature. Sometimes making the feature "dumber" helps both UX and code maintainability.
+- Some rearely-used feature actually "hurt" the commonly-used feature. It may occupy UI space and make it harder to click the commonly-used feature, or a rarely-used feature is easy to be wrongly triggered.
+- Some features have performance impact even when user is not using the feature.
+- ......
+
+The taste still matters.
 
 ## Context bottleneck
 
@@ -736,3 +744,7 @@ Sometimes the model lose diversity because diversity reduces RL reward. This is 
 There is a phenemon that when a human reads too many AI-generated text, the human's writing may start to have "AI smells" (e.g. "it's not X, it's Y", "load bearing"). Because natural language is bottom-up. We learn the language by observing the language usage in contexts. Reading too many AI text makes one more familiar with phrases that AI likes to use.
 
 Another possible reason that the phrases that AI like to use come from RLHF, which means that human also prefer these phrases.
+
+## "AI knows more than you" is not a reason to stop learning
+
+There is a distinction between the memorized knowledge and the knowledge that you can easily query (from AI or searching etc.). One reason is the unknown-unknown. If you don't know relevant background knowledge, you don't even know the correct thing to search/ask. Another reason is that memorization provides "raw material" for "linking" between ideas. Learning is not a competition with AI. Actually AI helps learning. AI hallucination can even train bullshit detection skill.
