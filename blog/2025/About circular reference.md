@@ -159,7 +159,7 @@ Note that Golang channel buffer must have a constant size limit. There are packa
 
 Different choices of channel buffer:
 
-- Use fixed-size buffer. When channel is full, producer blocks, this gives **back pressure**. It can avoid out-of-memory or disk full. It's often better for stability (only block producer rather than letting whole system crash).
+- Use fixed-size buffer. When channel is full, producer blocks, this gives back pressure to producer. But if the pending requests accumulate, there will be more and more goroutines, then it still has OOM risk, unless there are other mechanisms (e.g. fail request if channel buffer is full).
 - Use unbounded buffer:
   - If buffer is in-memory, it can **out-of-memory if big burst occurs**.
   - Use disk-backed event queue, such as Kafka. Disk can hold more data than memory, but it's still finite. Kafka discards messages according to retention policy. If disk space is used up, there may be other issues (e.g. database may fail to write).

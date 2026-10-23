@@ -41,11 +41,10 @@ The most fighting with borrow checker happens in the **borrow-check-unfriendly c
 
 The solutions in borrow-checker-unfriendly cases (will elaborate below):
 
-- **Data-oriented design. Un-learn OOP.**
-  - Avoid unnecessary getter and setter.
-  - Use ID/handle to replace reference. Use arena to hold data.
+- **Data-oriented design.**
   - No need to put one object's all data into one struct. Can separate to different places.
-- Do split borrow in outer scope, and pass related fields separately.
+  - Consider directly accessing fields instead of having getter/setters. Direct field access enables split borrowing.
+  - Use ID/handle to replace reference. Use arena to hold data.
 - **Defer mutation**. Turn mutation as commands and execute later.
 - Avoid in-place mutation. Mutate-by-recreate. Use `Arc` to share immutable data. Use persistent data structure.
 - For circular reference:
@@ -152,7 +151,7 @@ The deeper cause is that:
 Summarize solutions (workarounds) of contagious borrow issue (elaborated below):
 
 - **Remove unnecessary getters and setters**.
-  - Just simply make fields public (or in-crate public). This enables split borrow in outer code. If you want encapsulation, use ID/handle to replace borrow of mutable data (elaborated below).
+  - Consider just making fields public (or in-crate public). This enables split borrow in outer code. If you want encapsulation, use ID/handle to replace borrow of mutable data (elaborated below).
   - The getter that returns cloned/copied value is fine.
   - If data is immutable, getter is also fine.
 - Reorganize code and data structure. [^refactor]
@@ -301,6 +300,43 @@ Contagious borrow can also happen in containers. If you borrow one element of a 
 - For `BTreeMap`, the standard library doesn't provide a way. [^btreemap_split_borrow]
 
 [^btreemap_split_borrow]: Standard library has [`split_off`](https://doc.rust-lang.org/std/collections/struct.BTreeMap.html#method.split_off) that mutates the container. [multi_mut](https://crates.io/crates/multi_mut) provides a solution of split borrow of `BTreeMap`.
+
+### Split borrow in guards
+
+Example ([source](https://lwn.net/Articles/1096028/)):
+
+```rust
+struct RenderState {
+    cache: HashMap<String, Arc<String>>,
+    template: String,
+}
+
+fn render_page(state: &Mutex<RenderState>, name: &str) -> Arc<String> {
+    let mut state: MutexGuard<'_, RenderState> = state.lock().unwrap();
+    let entry = state.cache.entry(name.to_string());
+    entry
+        .or_insert_with(|| Arc::new(state.template.replace("$name", name)))
+        .clone()
+}
+```
+
+It mutates the two fields in `RenderState`. If the guard is replaced by a mutable borrow, split borring could work. But split borrowing doesn't dirctly work with guard-like objects. So it cannot compile.
+
+The `state.template` is actually `state.deref_mut().template`, and `state.cache` is `state.deref_mut().cache`. The two calls of `state.deref_mut()` are not recognized as same "place", so it's cannot trigger split borrow,
+
+One workaround is to firstly get a local mutable borrow. Then split borrow works:
+
+```rust
+fn render_page(state: &Mutex<RenderState>, name: &str) -> Arc<String> {
+    let mut state: MutexGuard<'_, RenderState> = state.lock().unwrap();
+    // Have an explicit mutable borrow, so split borrowing works.
+    let state_deref: &mut RenderState = state.deref_mut();
+    let entry = state_deref.cache.entry(name.to_string());
+    entry
+        .or_insert_with(|| Arc::new(state_deref.template.replace("$name", name)))
+        .clone()
+}
+```
 
 ## Avoid iterator. Manually manage index (key) in loop
 
@@ -497,8 +533,6 @@ fn get_cached_result(cache: &mut HashMap<i32, String>, key: i32) -> &String {
 }
 ```
 
-(The `entry` API was specifically designed to workaround this borrow checker limitation.)
-
 Another workaround is to wrap map value in `Arc` (or `Rc`) then clone the `Arc` when accessing.
 
 That issue can also be workarounded by cloning value in map.
@@ -624,7 +658,7 @@ Grouping two things together can create circular reference:
 
 ![](./circular/grouping_cycle.drawio.png)
 
-Putting two things into one struct can create new circular reference, which is unfriendly to borrow checker. No need to put one object's all data into one struct. Unlearn OOP. One conceptual object no need to correspond to one struct. One object's data can be scattered in many arenas.
+Putting two things into one struct can create new circular reference, which is unfriendly to borrow checker. No need to put one object's all data into one struct. Un-learn OOP. One conceptual object doesn't need to correspond to one struct. One object's data can be scattered in many places.
 
 In OOP languages, it's a common pattern that parent references child, and child references parent. It's convenient because you can access parent data in child's method, without passing parent as argument. In Rust that should either be replaced by arena, or refactor to avoid child referencing parent.
 
@@ -1158,7 +1192,7 @@ No matter what the definition of "GC" is, reference counting is different from t
 
 [bumpalo](https://docs.rs/bumpalo/latest/bumpalo/) provides bump allocator. In bump allocator, allocation is fast because it usually just increase an integer. It supports quickly freeing the whole arena, but doesn't support freeing individual objects.
 
-It's usually faster than normal memory allocators. Normal memory allocator will do a lot of bookkeeping work for each allocation and free. Each individual memory region can free separately, these regions can be reused for later allocation, these information need to be recorded and updated.
+It's usually faster than normal memory allocators. Normal memory allocator will do a lot of bookkeeping work for each allocation and free. Each individual memory region can free separately, these regions can be reused for later allocation, these information need to be recorded and updated. (Related: [Increasing Compiler Speed by 77% (2013)](https://digitalmars.com/articles/b87.html#:~:text=DMD%20just%20malloc%20's%20away,%20and%20never%20free%20's))
 
 Bump allocator frees memory in batched and deferred way. As it cannot free individual objects, it may temporarily consume more memory. 
 
@@ -1186,6 +1220,8 @@ Adding or removing lifetime for one thing may involve editing tons of related co
 It's recommended to have separated bump allocator in each thread locally. The `Bump` is not `Sync` and cannot be shared between threads.
 
 Note that bumpalo by default don't run `drop` to improve performance. Use `bumpalo::boxed::Box<T>` for things that require invoking `drop`.
+
+
 
 ## Using unsafe
 
@@ -1596,6 +1632,56 @@ fn mutate_twice(i: &mut u32) -> &mut u32 {
 
 Reborrow shows that you actually can have two mutable borrows to same object at the same time, but at most one can be "active" at a time. The others have to be "temporarily inactive".
 
+The reborrow works for bare `&mut T` but doesn't work in other cases, such as `Option<&mut T>`:
+
+```rust
+fn f1(output_buffer: Option<&mut String>) {
+    // ......
+}
+
+fn f2(output_buffer: Option<&mut String>) {
+    f1(output_buffer);
+    f1(output_buffer);
+}
+```
+
+Compile error "use of moved value: `output_buffer`". 
+
+One workaround is to use pattern match to make it explicit reborrow:
+
+```rust
+fn f1(output_buffer: Option<&mut String>) {
+    // ......
+}
+
+fn f2(mut output_buffer: Option<&mut String>) {
+    f1(match &mut output_buffer {
+        None => None,
+        Some(r) => Some(&mut **r),
+        // type of r is &mut &mut String
+    });
+    f1(match &mut output_buffer {
+        None => None,
+        Some(r) => Some(&mut **r),
+    });
+}
+```
+
+(Actually just writing `Some(r) => Some(r)` is ok, compiler will do auto convert)
+
+For `Option` specifically, there is a util method `as_deref_mut()` to make it concise:
+
+```rust
+fn f1(output_buffer: Option<&mut String>) {
+    // ......
+}
+
+fn f2(mut output_buffer: Option<&mut String>) {
+    f1(output_buffer.as_deref_mut());
+    f1(output_buffer.as_deref_mut());
+}
+```
+
 ### Two-phase borrow
 
 This
@@ -1648,7 +1734,7 @@ let index = b.len() - 1;
 b[index] = 4; // it compiles
 ```
 
-If you encounter similar problems, just extracting variable can workaround.
+If you encounter similar problems, just extracting variable can workaround. (For that specific case, can use `*b.last_mut().unwrap() = 4;` to avoid the local variable.)
 
 But that's not the full story. According to the previous finding, this should not compile, but it compiles:
 
@@ -1680,7 +1766,7 @@ Examples:
 - Java `final` reference ensures reference itself is immutable. If pointed object is mutable then its's immutable-ref-to-mutable-obj.
 - Java `Collections.unmodifiableList()` gives read-only view.
 - Read-copy-write (RCU) is mutable-ref-to-immutable-obj.
-- Rust `let x: T` makes `x` fully immutable[^immutable]. Immutability applies to whole ownership tree. If a `Vec` is immutable, its elements are also immutable.
+- Rust `let x: T` makes `x` treated as fully immutable (inter mutability can work when it's "treated immutable"). Immutability applies to whole ownership tree. If a `Vec` is immutable, its elements are also immutable.
 - Rust `let mut x: &T` makes `x` a mutable-ref-to-immutable-obj.
 - Rust `let x: &mut T` makes `x` an immutable-ref-to-mutable-obj.
 - Rust `let x: &mut &[u8]` makes `x` an immutable-ref-to-mutable-slice-ref-to-immutable-binary-data:
@@ -1691,7 +1777,6 @@ Examples:
   - The unintuitive point is that in `&mut &` it looks like "mut" is close to the left `&`, furthur to the right `&`, but the `mut` actually applies to the right `&`.
 - Git release tag is mutable-ref-to-immutable-obj. The Git commit with specific hash is immutable. But Git allows removing a release tag and create a new same-named release tag to another commit (this can be disabled).
 
-[^immutable]: It's actually "treated as immutable". It can be actually mutable when interior mutability is involved.
 
 ## String types
 
@@ -1703,7 +1788,7 @@ In GC languages, strings are simple. There is often one commonly-used immutable 
 - `OsString` / `OsStr`. These exist because Rust string enforces UTF-8 encoding, but operating systems APIs can use non-UTF-8 string. In Linux, file name can be invalid UTF-8. In Windows APIs, strings use encoding similar to UTF-16 but allows invalid surrogates (technically called WTF-16).
 - `CString` / `CStr`. C-style null-terminated string. Used for interop with C library.
 
-In C++ and Golang, strings are just binary data with no encoding constraint. Rust enforces UTF-8 and makes it more complex.
+In C++ and Golang, strings are just binary data with no encoding constraint. Rust enforces UTF-8 and makes it more complex. But the benefit is that whole Rust ecosystem agrees on UTF-8 (in C++/Golang the string can technically store UTF-16 or other encoding).
 
 Rust's enforcing of UTF-8 may improve security but may also reduce security:
 
@@ -1764,7 +1849,7 @@ All of the above contagious effect has "escape hatch" that's invisible in types:
 | "mut" effect                      | Interior mutability [^cell_invisible]    |
 | "Result" effect                   | Panic                                    |
 
-[^cell_invisible]: Although interior mutability has visible `Cell` things in types, the cell can be hidden in another type, then the interior mutability becomes invisible in types (Except using the unstable trait [`Freeze`](https://doc.rust-lang.org/std/marker/trait.Freeze.html)).
+[^cell_invisible]: Although interior mutability has visible `Cell`/`Mutex`/etc. things in types, the cell/lock/etc. can be hidden in another type, then the interior mutability becomes invisible in types (Except using the unstable trait [`Freeze`](https://doc.rust-lang.org/std/marker/trait.Freeze.html)).
 
 ## Some arguments
 
