@@ -479,6 +479,7 @@ Tracing GC can handle the unreachable cycle. However it's still possible to leak
 - Registers a global callback. Forget to unregister callback when it's no longer useful. All data captured by callback will not be collected.
 - There is a large tree structure. Every child in tree references parent (circular reference). When you only need one node of tree, the whole tree is kept reachable.
 - Golang allows interior pointer. Having an interior pointer keeps the whole object alive. Keeping a small slice within a large slice can leak memory.
+- Leaked threads/goroutines leaks memory. They are GC roots.
 
 These memory leaks are often related to containers and lambda capture.
 
@@ -488,7 +489,68 @@ Note that the threads (goroutines, async tasks, etc.) contains GC roots. Deadloc
 
 Rice's theorem tells that it's impossible to reliably tell whether program will use a piece of data (unless in trivial case). If an object is unreachable from GC roots, then it obviously won't be used. But if some data won't be used, it may be still referenced. This is the case that tracing GC cannot handle.
 
-Also, in JavaScript, a closure keeps the whole "enviornment" alive. A closure can keep alive the things that it doesn't capture. This creates more chances of memory leak than other GC languages. [Related](https://x.com/robpalmer2/status/2017877412608987362)
+Also, in JavaScript, a closure keeps the whole "enviornment" alive. A closure can keep alive the things that it doesn't capture. This creates more chances of memory leak than other GC languages:
+
+### JS memory leak due to closure capturing more than necessary
+
+In JS, the closure captures the whole environment, not just the used variables. For this example:
+
+```js
+function heavyTask() {
+  const massiveData = new Array(1000000);
+
+  return () => {
+    console.log("Task executed");
+  }; // this closure keeps strong reference to massiveData
+}
+
+const runTask = heavyTask();
+// if runTask is reachable, the massiveData won't be collected by GC
+```
+
+Although the closure doesn't use `massiveData`, the JS engine still make the closure strong-reference the `massiveData`. This may cause unintentional memory leaks.
+
+One related post by Jarred Sumner ([Link](https://x.com/jarredsumner/status/2017825694731145388)):
+
+> Here's a 1 GB memory reduction for very long Claude Code sessions
+> 
+> Before: `() => controller.abort()`
+> Fix: `controller.abort.bind(controller)`
+> 
+> ```
+> // Avoid creating a closure over `this`, `init`, or `options` to prevent memory leaks.
+> // An arrow function like `() => controller.abort()` captures the surrounding scope,
+> // which includes the request body and other large objects. When the user passes a
+> // long-lived AbortSignal, the listener prevents those objects from being GC'd for
+> // the lifetime of the signal. Using `.bind()` only retains a reference to the
+> // controller itself.
+> ```
+
+([Related](https://x.com/robpalmer2/status/2017877412608987362))
+
+The same memory leak doesn't exist in other languges including Python, Java, C#, etc. It's JS-specific.
+
+Then why does JS engine do that? The JS engine can definitely analyze the source code of closure to see that it doesn't capture a variable in environment. However there is `eval` that can use the environment's variable without explicitly mentioning it. Example:
+
+```js
+function outer() {
+  const massiveData = new Array(1000000).fill(0);
+
+  return (source) => {
+    return eval(source);
+  };
+}
+
+const closure = outer();
+
+console.log(closure("massiveData.length"));
+```
+
+It prints `1000000`. The closure uses the `massiveData` without explicitly mentioning `massiveData`.
+
+But technically the JS engine can check whether function body AST contains `eval` call then do special treatment[^indirect_eval]. So there is no language feature that fundamentally prevent JS engines from doing that memory leak fix. It's just a problem of current implementations. Maybe future versions of JS engines will fix that.
+
+[^indirect_eval]: What if the `eval` function reference is put to some global variable, then the closure can use `eval` without explicitly mentioning `eval`? In JS the `eval` is not a simple function. It `eval` is indirectly called without explicitly mentioning `eval` it will use global scope as environment, so not directly mentioning `eval` in closure cannot dynamically access closure environment.
 
 ## Observer circular dependency
 
