@@ -554,10 +554,8 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Git merge is not commutative or associative. Different merging order may give different results.
 - About submodules:
   - A submodule's core is a gitlink, the gitlink stores a commit hash. (gitlink is not file, but it can be changed and the change can be commited like file. Checking out another commit in module is similar to "editing gitlink file".)
-  - The submodule also appear as a folder, but the folder content may deviate from commit pointed by the gitlink. 
-    - For example, cloning by default don't update modules, then the submodule folder is empty, deviating to the commit hash stored in gitlink.
-    - After switching branch (or merging upstream), the commit hash in gitlink can change, but the on-disk submodule commit hash doesn't change automatically by default, then there is "fake change" of submodule gitlink. Don't accidentally commit them.
-    - To update the on-disk submodule, use `git submodule update --init --recursive`
+  - Cloning by default doesn't clone submodules. The submodules will appear as empty folder, but the gitlink is valid.
+  - After switching branch (or merging upstream), the commited gitlink can change, but the local gitlink doesn't auto update by default (submodule is similar independent git repo). Then there is "fake change" of submodule gitlink. Don't accidentally commit the fake changes. Use `git submodule update --init --recursive` to update submodules.
   - You can make the submodule gitlink point to your private commit, then push parent repo. Other developers then cannot update the submodule, because content pointed by gitlink is not on server.
   - After changing `.gitmodules` config file, the submodules don't auto update by default.
   - Inconsistency between `.gitmodules` config file and submodule git repo config.
@@ -608,6 +606,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - A separate regular expression validation can be out-of-sync with actual data format. [Crowdstrike incident](https://www.crowdstrike.com/wp-content/uploads/2024/08/Channel-File-291-Incident-Root-Cause-Analysis-08.06.2024.pdf) was caused by a wrong separate regular expression validation. It's recommended to **avoid separate regular expression validation. Reuse parsing code for validation**. See also: [Parse, don't validate](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/)
 - Email validation is not easy. [See also](https://stackoverflow.com/questions/201323/how-can-i-validate-an-email-address-using-a-regular-expression)
 - Backtracking performance issue. See also: [Cloudflare indicent 2019 July-2](https://blog.cloudflare.com/details-of-the-cloudflare-outage-on-july-2-2019/), [Stack Exchange incident 2016 July-20](https://stackstatus.tumblr.com/post/147710624694/outage-postmortem-july-20-2016)
+- Double escape. To match literal `\`, use regexp `\\`. And writing the string literal of that regexp in language is `"\\\\"`.
 
 ## Microsoft-related
 

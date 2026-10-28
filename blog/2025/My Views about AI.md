@@ -550,6 +550,28 @@ AI makes it much easier to add new features. But features are not always a posit
 
 The taste still matters.
 
+### AI can "hack" performance optimization
+
+If you have a benchmark, then ask AI to optimize the performance while passing the test, AI can often give seemingly impressive results. However, **it's often that the benchmark is not representative to real-world workload**, and the optimzied version is actually slower in real-world workload. This is also a kind of reward hacking.
+
+See also: [The benchmarkpocalypse](https://danluu.com/benchpocalypse/), [BBTree actually slower in some cases](https://news.ycombinator.com/item?id=50235122)
+
+Note that human can also make the same mistake. Writing a good benchmark that's representative to real-world workload is hard.
+
+### AI can both harden security and write insecure code
+
+Sometimes security vulnerability comes from not having knowledge. For example some programmer may not know the feature of `..` in file path and just concat file path then introduce directory traversal vulnerability. AI knows that knowlege and can easily find the problem. There are many other examples where finding vulnerability requires knowledge, and no individual human has more knowledge than AI, so AI is very good at that part.
+
+But AI can also write insecure code if you keep pushing AI to just write working code instead of caring security. There is often a tradeoff between security and convenience. If you just push the AI to finish the work, then AI often chooses convenience and ignore security.
+
+### Reverse engineering implications
+
+All code that runs on user's computer can be reverse-engineered. This is similar principle that YouTube cannot fully prevent downloading video. If you want the video to display on user's screen, the information of video has to transmit to user's computer. If you want your code to run on user's device, then the information of your code has to be deciphered by user's CPU. No matter how much obfuscation is used, the CPU has to be able to run it, so the information is retained and can be reverse-engineered. AI just lowers the cost of reverse engineering.
+
+The important logic should only be run on server side. The server side is free from reverse engineering unless the server is hacked.
+
+For games, just allowing reverse engineering may be better overall because letting users to mod the game improves the playability of the game.
+
 ## Context bottleneck
 
 **Most knowledge work is bottlenecked in finding useful information in the sea of information**, rather than raw reasoning. High signal-to-noise ratio context is important.

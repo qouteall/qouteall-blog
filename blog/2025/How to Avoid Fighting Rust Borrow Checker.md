@@ -396,7 +396,7 @@ while let Some(current_key) = curr_key_opt {
 
 Note that it requires copying/cloning the key, and stop borrowing element before mutating.
 
-That way doesn't work for `HashMap`. `HashMap` doesn't preserver order and doesn't allow getting the next key. But that way can work on [indexmap](https://docs.rs/indexmap/latest/indexmap/index.html)'s `IndexMap`, which allows getting key by integer index (it internally uses array, so removing or adding in the middle is not fast).
+That way doesn't work for `HashMap`. `HashMap` doesn't preserver order and doesn't allow getting the next key. There are some hash maps that keeps order:  [indexmap](https://docs.rs/indexmap/latest/indexmap/index.html), which uses an array to hold elements internally, and [hashlink](https://crates.io/crates/hashlink), which uses link internally.
 
 ## Just (shallow) clone the data
 
@@ -910,9 +910,7 @@ There are design ideas of separting the mutation that change memory layout and t
 
 ### Having the borrow vs using the borrow
 
-When you **have** two mutable borrows to same object and you **use** both, it can be unsafe (invalidate interior pointer, data race, etc.). However, if you have two mutable borrows but only use one at once, then it's safe. The reborrow (mentioned below) does that.
-
-Rust "confuses" having borrow and using borrow (except in reborrow). Tracking that in type system needs to encode information that "this borrow exists but it is temporarily unusable in a specific lifetime", which would introduce complexity. Rust design chooses to simplify it by assuming all borrows may be used.
+When you **have** two mutable borrows to same object and you **use** both, it can be unsafe (invalidate interior pointer, data race, etc.). However, if you have two mutable borrows but only use one at once, and the two mutable borrows points to stable memory layout, then it's safe. The reborrow (mentioned below) does that.
 
 ### Benefits of mutable borrow exclusiveness
 
@@ -1233,7 +1231,8 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
   - A `&mut` should not overlap with any other borrows. Including temporary borrows. Note that `obj.method()` can implicity create borrow to `obj`.
   - An exception is interior mutability. Immutable borrow to `UnsafeCell` can overlap with mutable borrow within `UnsafeCell`. However, for content within `UnsafeCell` the previous rule still holds.
   - Violating that rule cause undefined behavior(UB) and can cause wrong optimization. Rust adds `noalias` attribute for mutable borrows into LLVM IR. LLVM will heavily optimize based on `noalias`. [See also](https://doc.rust-lang.org/nomicon/aliasing.html)
-  - Raw pointer `*mut T` `*const T` has no such restriction. But using raw pointer to read/write memory when an overalapping mutable borrow exists is undefined behavior.
+  - Raw pointer `*mut T` `*const T` has no such restriction. But using raw pointer to read/write memory when an overalapping active mutable borrow exists is undefined behavior.
+    - Reborrowing makes parent borrow temporarily inactive. And you can manually consume a mutable borrow.
   - [Related1](https://chadaustin.me/2024/10/intrusive-linked-list-in-rust/), [Related2](https://web.archive.org/web/20230307172822/https://zackoverflow.dev/writing/unsafe-rust-vs-zig/)
   - Also, the type that has self-reference should be `!Unpin`. If `T` is `!Unpin` then `&mut T` has no `noalias`. (However, there is still [potential unsoundness related to self-reference](https://github.com/rust-lang/rust/issues/63818))
 - Converting a `&T` to `*mut T` then mutate pointed data is undefined behavior, unless within `UnsafeCell`. In release mode, `&T` has LLVM `readonly` attribute which can enable some optimizations, but if `T` contains `UnsafeCell` then compiler won't add `readonly`.
@@ -1630,7 +1629,7 @@ fn mutate_twice(i: &mut u32) -> &mut u32 {
    |     --------- returning this value requires that `*i` is borrowed for `'1`
 ```
 
-Reborrow shows that you actually can have two mutable borrows to same object at the same time, but at most one can be "active" at a time. The others have to be "temporarily inactive".
+Reborrow shows that you actually can have two mutable borrows to same object at the same time, but at most one can be "active" at a time. The others have to be "temporarily inactive". There is no problem of invalidating memory layout, because holding a mutable borrow of child prevents parent's mutation.
 
 The reborrow works for bare `&mut T` but doesn't work in other cases, such as `Option<&mut T>`:
 
@@ -1749,7 +1748,7 @@ Turns out that there is a hidden mechanism called **two-phase borrow**. Its inte
 
 Currently, Rust's two-phase borrow is not general and only works in specific cases like `a.push(a.len())`. It doesn't yet work with `IndexMut` or explicit mutable borrow (`&mut ...`). [See also](https://github.com/rust-lang/rust/issues/49434).
 
-The reborrow and two-phase-borrow have one thing in common: temporarily making a mutable borrow "inactive" to reduce unnecessary conflict. As previously metioned, "having mutable borrow" and "using mutable borrow" are two different things. The real unsafe thing is the second's conflict (using two mutable borrow of same object concurrently). But Rust tracks on the first (track "having mutable borrow"). The reborrow and two-phase-borrow add special rules to make it closer to tracking "using" instead of tracking "having".
+The reborrow and two-phase-borrow have one thing in common: temporarily making a mutable borrow "inactive" to reduce unnecessary conflict.
 
 ## Nuance of "immutable"
 
@@ -1881,11 +1880,11 @@ All of the above contagious effect has "escape hatch" that's invisible in types:
 
 [^gc_memory_safety]: Golang is not memory-safe under data race. [See also](https://www.ralfj.de/blog/2025/07/24/memory-safety.html). Golang is less safe than other GC languages (Java, C#, etc.), because in these languages data race won't break memory safety. But Golang is much safer than C/C++. When race detector is not enabled, Golang map has a writing flag that can unreliably detect races, so map data race often result in crashes. A data race memory safety issue in Golang requires parallel execution with specific timing, so it's very hard to exploit it as remote code execution. On contrary, many C/C++ memory safety issues can be triggered deterministically (a specific packet or file can trigger), without multithreading timing requirement, so it's easier to exploit them as remote code execution. A memory safety issue doesn't naturally become remote code execution. It requires corrupting memory in very specific ways to execute attacker-controlled code, often requiring deep understanding of memory layouts, instruction layouts and allocator behaviors.
 
-[^go_gc]: Golang GC is non-moving. Most other mainstream GC (e.g. Hotsopt JVM's, CLR's) are moving. Golang GC has lower collection throughput. But when memory is enough, Golang removes deallocation cost from user program thread, while Rust deallocating memory takes time in user program thread.
+[^go_gc]: Golang GC is non-moving. Most other mainstream GC (e.g. Hotsopt JVM's, CLR's) are moving. Golang GC has lower collection throughput. But when memory is enough, Golang removes deallocation cost from user program thread, while Rust deallocating memory takes time in user program thread (in Rust it can be workarounded by sending a large data structure to another thread to free).
 
 [^fragmentation]: It's commonly told that moving GC has another benefit: handling memory fragmentation. When not using moving GC, fragmentation can still be alleviated by better allocation strategy (similar size-class allocate together). Fragmentation is also alleviated by virtual memory (memory fragmentation in page level don't waste physical memory). Also, RAM is cheaper now, so fragmentation cost is more affordable. **Fragmentation is not a problem now** (except for some rare cases). Moving GC can theoretically improve cache locality by avoiding fragmentation, but manual memory management can improve cache locality by reusing just-freed memory region. Fragmentation wastes memory but moving GC require larger free memory to achieve high thoughput.
 
-[^gc_throughput]: In Rust, bump allocator can also achieve high throughput of allocation and deallocation. But using bump allocator requires extra work (contagious lifetime annotations). The conventional "malloc/free" allocators often has lower throughput than an optimized moving GC because they need to do more bookkeeping per malloc/free. Note that moving GC require much more free memory to achieve high throughput. Without enough free memory, moving GC will cause big lag. Related: [ESBuild prototype in Go faster than Rust](https://news.ycombinator.com/item?id=22336284).
+[^gc_throughput]: In Rust, bump allocator can also achieve high throughput of allocation and deallocation. But using bump allocator requires extra work (contagious lifetime annotations). The conventional "malloc/free" allocators often has lower throughput than an optimized moving GC because they need to do more bookkeeping per malloc/free. Related: [ESBuild prototype in Go faster than Rust](https://news.ycombinator.com/item?id=22336284). Note that GC require much more free memory to achieve high throughput. Without enough free memory, GC will frequently trigger and frequently block allocation, which causes big lag.
 
 ## The yields of paying "Rust cost"
 
