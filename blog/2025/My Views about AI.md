@@ -572,6 +572,10 @@ The important logic should only be run on server side. The server side is free f
 
 For games, just allowing reverse engineering may be better overall because letting users to mod the game improves the playability of the game.
 
+### Hazard of "default value"
+
+It's common that AI writes "defensive" code. The AI code tries hard to avoid crashing. When some operation failed, it often not give explicit error but create a default value as result instead. The insidious part is that in many simple cases, the default value works. The default value is only incorrect in some complex cases. It creates correctness hazard and debugging hazard.
+
 ## Context bottleneck
 
 **Most knowledge work is bottlenecked in finding useful information in the sea of information**, rather than raw reasoning. High signal-to-noise ratio context is important.

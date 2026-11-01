@@ -1234,7 +1234,8 @@ Writing unsafe Rust correctly is hard. Here are some traps in unsafe:
   - Raw pointer `*mut T` `*const T` has no such restriction. But using raw pointer to read/write memory when an overalapping active mutable borrow exists is undefined behavior.
     - Reborrowing makes parent borrow temporarily inactive. And you can manually consume a mutable borrow.
   - [Related1](https://chadaustin.me/2024/10/intrusive-linked-list-in-rust/), [Related2](https://web.archive.org/web/20230307172822/https://zackoverflow.dev/writing/unsafe-rust-vs-zig/)
-  - Also, the type that has self-reference should be `!Unpin`. If `T` is `!Unpin` then `&mut T` has no `noalias`. (However, there is still [potential unsoundness related to self-reference](https://github.com/rust-lang/rust/issues/63818))
+  - Also, the type that has self-reference should be `!Unpin`. If `T` is `!Unpin` then `&mut T` has no `noalias`.
+  - An exception is [`UnsafePinned`](https://doc.rust-lang.org/nightly/std/pin/struct.UnsafePinned.html).
 - Converting a `&T` to `*mut T` then mutate pointed data is undefined behavior, unless within `UnsafeCell`. In release mode, `&T` has LLVM `readonly` attribute which can enable some optimizations, but if `T` contains `UnsafeCell` then compiler won't add `readonly`.
 - [Pointer provenance](https://doc.rust-lang.org/std/ptr/index.html#provenance).
   - For to-heap pointers, different heap allocations are different provenances. Different local variables and global variables are different provenances. If two pointers with two different provenances are equal, it is undefined behavior.

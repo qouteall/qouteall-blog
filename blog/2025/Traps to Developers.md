@@ -185,7 +185,7 @@ tags:
 
 [^epsilon]: That method is not good for large-magnitude numbers. For large numbers, the tolerance should be higher: `abs(a - b) <= max(relative_epsilon * max(abs(a), abs(b)), absolute_epsilon)`. Also note that equality-by-epsilon is not transitive. There are cases where A is close to B, B is close to C, but A is not close to C. Grid-based equality comparision is transitive. [Related](https://lisyarus.github.io/blog/posts/its-ok-to-compare-floating-points-for-equality.html).
 
-[^algebraic_float]: The fact that floating point doesn't satisfy associativity hinders optimizations. If you want to enable these optimization in Rust, use [`algebraic_*`](https://doc.rust-lang.org/std/primitive.f32.html#algebraic-operators) operators. In C/C++ it requires compiler-specific options. See also [Beware of fast-math](https://simonbyrne.github.io/notes/fastmath/). When these optimizations are enabled, computing Nan or Infinity can lead to wrong results. Related: compiler assume integer addition/multiplication has associativity, because overflow is undefined behavior.
+[^algebraic_float]: The fact that floating point doesn't satisfy associativity hinders optimizations. If you want to enable these optimization in Rust, use [`algebraic_*`](https://doc.rust-lang.org/std/primitive.f32.html#algebraic-operators) operators. In C/C++ it requires compiler-specific options. See also [Beware of fast-math](https://simonbyrne.github.io/notes/fastmath/). When these optimizations are enabled, computing Nan or Infinity can lead to wrong results. Related: compiler assume integer addition/multiplication has associativity. For signed integer, overflow/underflow breaks the rules, but overflow/underflow is undefined behavior, so compiler assumes the rule still holds. For unsigned integer, associativity/distributivity holds because of the ring property.
 
 ## Time
 
@@ -234,7 +234,7 @@ tags:
 - Java built-in serialization has many issues (security vulnerability, cannot auto adapt adding fields, bypasses constructor, `transient final` is broken, etc.). It's not recommended to use it. Note that Flink still uses Java serialization for job graph[^java_serialize_lambda].
 - A `final` field may be read before initialization, which reads the default value (0 for primitive type, null for ref type). Same applies to `static final` fields.
   - The default value of `final` field can be observed outside of constructor, if constructor throws exception and `this` escapes (e.g. by putting `this` to a static field). An object can be partially-initialzied.
-- In `WeakHashMap`, if value strong-references key (directly or indirectly), the key will strong-referenced and won't be auto-removed. This different to JS `WeakMap`, where value referencing key doesn't prevent key collection.[^weak_hash_map]
+- In `WeakHashMap`, if value strong-references key (directly or indirectly), the key is treated strong-referenced and won't be auto-removed. This different to JS `WeakMap`, where value referencing key doesn't prevent key collection.[^weak_hash_map]
 
 [^java_serialize_lambda]: Java serialization can serialize lambdas without requiring extra user biolerplate code. So Flink still uses Java serialization for job graph despite the drawbacks.
 
@@ -278,7 +278,7 @@ tags:
     - Using a local variable before initializing it is also accessing uninitialized memory.
     - (Before C++26) For a local variable without explicit initialization (e.g. `SomeType value;`), whether it initializes depend on many factors, [see also](https://gaultier.github.io/blog/the_production_bug_that_made_me_care_about_undefined_behavior.html). It's recommended to always initialize local variable (e.g. `SomeType value{};`). ([In C++ 26 it changed](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2024/p2795r5.html))
   - Accessing using null pointer or dangling pointer is undefined behavior.
-  - Integer overflow/underflow is undefined behavior. Note that unsigned integer can underflow below 0. Don't use `x > x + 1` to check overflow as it will be optimized to `false`.
+  - Signed integer overflow/underflow is undefined behavior. If `x` is signed integer, don't use `x > x + 1` to check overflow as it will be optimized to `false`. (But unsigned integer overflow/underflow is not undefined behavior.)
   - Integer dividing by 0 is undefined behavior. (But floating point dividing by 0 is not undefined behavior. It gives ±Infinity or NaN.)
   - Aliasing.
     - Strict aliasing rule. If there are two pointers with type `A*` and `B*`, and there is no subtyping relation between `A` and `B`, then compiler assumes two pointer can never equal. If they equal, and both pointers are used for accessing memory, then it's undefined behavior. One exception is byte pointer. [^strict_aliasing]
@@ -300,6 +300,8 @@ tags:
 - In signal handler, don't do any IO or locking, don't `printf` or `malloc`.
 - Implicit conversion between signed and unsigned. If `a` is signed -1, `b` is unsigned 0, then `a > b` is true, because it auto-converts `a` into unsigned integer.
   - Note that `char` may be signed or unsigned, depending on platform. It's recommended to always use `signed char` or `unsigned char`, not `char`. [Apple ARM `char` is signed](https://developer.apple.com/documentation/xcode/writing-arm64-code-for-apple-platforms#Handle-data-types-and-data-alignment-properly), [gcc `char` is unsigned in Android, but signed in other platforms](https://stackoverflow.com/questions/2054939/is-char-signed-or-unsigned-by-default).
+  - Multiplying `unsigned short` involves implicitly converting to `signed int` (32-bit) before multiplication. So for `unsgined short x = 65535;`, `x * x` will still tigger undedefined behavior, despite unsigned integer overflow is not undefined behavior. Safe way is `((unsigned int) x) * x`.
+- In Windows 64-bit platform, `long` is 32-bit, and `long long` is 64-bit. In other 64-bit platforms, `long` and `long long` are 64-bit.
 - Floating point number can implicitly convert to integer.
 - The constructor that takes only one argument enables implicit conversion, except when that constructor is `explicit`.
 - If the same header file is included in two `.cpp` files with different macros, and the macro difference affect the content in `inline` thing or `template` thing or type definition, then it violates [ODR (one definiton rule)](https://en.cppreference.com/w/cpp/language/definition.html). There will be different compiled functions with the same symbol name, and linker nondeterministically chooses one.
@@ -444,12 +446,12 @@ tags:
 
 ## File-related
 
- - When listing files in a folder, the order is not deterministic (may depend on inode order). It may behave differently on different machines even with same files. It's recommended to sort by filename then process. 
+ - When list files in a folder programatically, the result order is not deterministic (may depend on inode order). It may behave differently on different machines even with same files. It's recommended to sort by filename then process if order matters.
   - Note that `ls` by default sorts results. Use `ls -f` to see raw file order.
 - The `..` in file path could allow [directory traversal attack](https://en.wikipedia.org/wiki/Directory_traversal_attack).
   - For upload Restful API, it's recommended to make server generate file name (e.g. use UUID as filename), instead of letting client pass filename.
 - Creating file doesn't auto create parent folder. It will fail if parent folder doesn't exist. You need to manually create parent folder.
-- Leaving half-written file when program is killed. It's recommended to write file by writing to temp file then rename to target location. 
+- Leaving half-written file after program crashes. It's recommended to write file by writing to temp file then rename to target location. 
 - In Linux file names are case-sensitive, different to Windows and macOS.
 - In Linux, file name can contain `\n` `\r` `'` `"`, and file name can be invalid UTF-8.
 - Path trailing slash:
@@ -464,10 +466,12 @@ Indirectly use different versions of the same package (diamond dependency issue)
   - Shading can make two versions of the same package co-exist by renaming.
 - In JS, mainstream package managers allow two versions of same package to co-exist. Their `let`, `const` global variables and classes will separately co-exist. But other global variables are shared.
   - If two versions of React are used together, it may give "invalid hook call" error.
-  - If two versions of a React component library use together, it may have context-related issues.
+  - If two versions of a React component library are used together, it may have context-related issues.
 - Python doesn't allow two versions of same package to co-exist. (Sometimes this creates "dependency hell".)
 - In C/C++ it may give "duplicate symbol" error in static linking.
-- Rust allows two different major versions of same crate to co-exist. It de-duplicates according to semantic versioning ([See also](https://doc.rust-lang.org/cargo/reference/semver.html), [See also](https://effective-rust.com/dep-graph.html)). Their global variables also separately co-exist. [Having two major versions of Tokio causes problem](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/alan_creates_a_hanging_alarm.html#addendum-multiple-tokio-major-versions).
+- Rust allows two different major versions[^rust_semver_dedup] of same crate to co-exist. It de-duplicates according to semantic versioning ([See also](https://doc.rust-lang.org/cargo/reference/semver.html), [See also](https://effective-rust.com/dep-graph.html)). Their global variables also separately co-exist. [Having two major versions of Tokio causes problem](https://rust-lang.github.io/wg-async/vision/submitted_stories/status_quo/alan_creates_a_hanging_alarm.html#addendum-multiple-tokio-major-versions).
+
+[^rust_semver_dedup]: An exception is that, if major versions are all zero, then same minor version dedups. The 0.1 don't dedup with 0.2, but 0.1.1 and 0.1.2 can.
 
 ## Linux and bash
 
@@ -545,6 +549,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
   - You can also use `git rm --cached` to exclude them without deleting locally. However, after excluding and pushing, when another coworker pulls, these files will be deleted (not just excluded).
 - Reverting a merge doesn't fully cancel the side effect of the merge. If you merge B to A and then revert, then merging B to A again has no effect. One solution is to revert the revert of merge.
   - A cleaner way to cancel a merge, instead of reverting merge, is to 1. backup the branch, 2. hard reset to commit before merge, 3. cherry pick commits after merge, 4. force push.
+- The `git merge upstream main` is often a mistake but may happen to work (it merges both `upstream/HEAD` and local `main` into current branch). The correct one is `git merge upstream/main`. 
 - In GitHub, if you accidentally commited secret (e.g. API key) and pushed to public, even if you override it using force push, GitHub will still keep that secret public. [See also](https://trufflesecurity.com/blog/guest-post-how-i-scanned-all-of-github-s-oops-commits-for-leaked-secrets), [Example activity tab](https://github.com/SharonBrizinov/test-oops-commit/compare/e6533c7bd729957b2eb31e88065c5158d1317c5e...9eedfa00983b7269a75d76ec5e008565c2eff2ef)
 - In GitHub, if there is a private repo A and you forked it as B (also private), then when A becomes public, the private repo B's content is also publicly accessible, even after deleting B. [See also](https://trufflesecurity.com/blog/anyone-can-access-deleted-and-private-repo-data-github).
 - GitHub by default allows deleting a release tag, and adding a new tag with same name, pointing to another commit. It's not recommended to do that. It breaks build system caching. It can be disabled in rulesets configuration.
