@@ -281,7 +281,7 @@ tags:
   - Signed integer overflow/underflow is undefined behavior. If `x` is signed integer, don't use `x > x + 1` to check overflow as it will be optimized to `false`. (But unsigned integer overflow/underflow is not undefined behavior.)
   - Integer dividing by 0 is undefined behavior. (But floating point dividing by 0 is not undefined behavior. It gives ±Infinity or NaN.)
   - Aliasing.
-    - Strict aliasing rule. If there are two pointers with type `A*` and `B*`, and there is no subtyping relation between `A` and `B`, then compiler assumes two pointer can never equal. If they equal, and both pointers are used for accessing memory, then it's undefined behavior. One exception is byte pointer. [^strict_aliasing]
+    - Strict aliasing rule. If there are two pointers with type `A*` and `B*`, and there is no subtyping relation between `A` and `B`, then if the two pointers equal, and both pointers are used for accessing memory, then it's undefined behavior. One exception is byte pointer. [^strict_aliasing]
     - Pointer provenance. Each heap allocation or local variable or global variable is a provenance. If two pointers from two different provenances equals, and both pointers are used for accessing memory, then it's undefined behavior. [See also](https://www.ralfj.de/blog/2020/12/14/provenance.html). [^pointer_provenance]
   - `const` can mean both read-only and immutable:
     - If the original object is `const` (e.g. `const SomeType someValue`, `new const SomeType()`), then it's deemed immutable. If you use `const_cast` to turn its pointer to `T*` then change content, it's undefined behavior. [^cpp_mutable]
@@ -300,10 +300,11 @@ tags:
 - In signal handler, don't do any IO or locking, don't `printf` or `malloc`.
 - Implicit conversion between signed and unsigned. If `a` is signed -1, `b` is unsigned 0, then `a > b` is true, because it auto-converts `a` into unsigned integer.
   - Note that `char` may be signed or unsigned, depending on platform. It's recommended to always use `signed char` or `unsigned char`, not `char`. [Apple ARM `char` is signed](https://developer.apple.com/documentation/xcode/writing-arm64-code-for-apple-platforms#Handle-data-types-and-data-alignment-properly), [gcc `char` is unsigned in Android, but signed in other platforms](https://stackoverflow.com/questions/2054939/is-char-signed-or-unsigned-by-default).
-  - Multiplying `unsigned short` involves implicitly converting to `signed int` (32-bit) before multiplication. So for `unsgined short x = 65535;`, `x * x` will still tigger undedefined behavior, despite unsigned integer overflow is not undefined behavior. Safe way is `((unsigned int) x) * x`.
+  - Multiplying `unsigned short` involves implicitly converting to `signed int` (32-bit) before multiplication. So for `unsigned short x = 65535;`, `x * x` will still tigger undedefined behavior, despite unsigned integer overflow is not undefined behavior. Safe way is `((unsigned int) x) * x`.
 - In Windows 64-bit platform, `long` is 32-bit, and `long long` is 64-bit. In other 64-bit platforms, `long` and `long long` are 64-bit.
 - Floating point number can implicitly convert to integer.
 - The constructor that takes only one argument enables implicit conversion, except when that constructor is `explicit`.
+- Constructor field initialization order is same as field declaration order. In `class MyType { int a; int b; MyType(): b(1), a(b + 1) {} }` the constructor will trigger undefined behavior because it firstly initializes `a` using `b + 1` before initializing `b`.
 - If the same header file is included in two `.cpp` files with different macros, and the macro difference affect the content in `inline` thing or `template` thing or type definition, then it violates [ODR (one definiton rule)](https://en.cppreference.com/w/cpp/language/definition.html). There will be different compiled functions with the same symbol name, and linker nondeterministically chooses one.
 - The dynamic library can bundle its own allocator[^cpp_allocator]. One allocator's allocation should not be freed in another allocator. Passing container (e.g. `vector`) is only safe when allocator matches (and ABI matches). When passing `unique_ptr` across dynamic libraries, it's recommended to use custom deleter.
 - `malloc` may return null. When there is no OS overcommit, checking for null can gracefully handle out-of-memory. When overcommit is enabled (often enabled by default), `malloc` can succeed despite out-of-memory, then process get killed when accessing allocated memory. The same also happens in containers.
@@ -312,10 +313,12 @@ tags:
 - C++ namespace pollution. It's not recommended to use `using namespace std;`. Including a header or `using` a namespace may change function overloading behavior.
 - Alignment can cause padding in struct.
   - The padding may waste space. Reordering fields may save space.
-  - Initializing a struct's fields doesn't reset the padding bytes. The padding bytes may contain the values of previous data in same address. If struct has padding, don't use `memcmp` to compare equality. Need to compare each field.
+  - Initializing a struct's fields doesn't reset the padding bytes. The padding bytes may contain the values of previous data in same address. If struct has padding, don't use `memcmp` to compare equality. Need to compare each field.[^padding_uninit]
 - Macro is not [hygienic](https://en.wikipedia.org/wiki/Hygienic_macro). A macro-defined local variable could duplicate name with an outside local varaible. If a macro uses a global variable, the use-site local variable with same name could shadow it.
 - Don't use `=` to compare equality.
 - Don't forget `break` in switch, unless you want fallthrough.
+
+[^padding_uninit]: The padding bytes can be uninitialized, but reading them via a byte pointer doesn't trigger undefined behavior.
 
 [^cpp_lifetime]: Some exceptions: If the byte pointer comes from `malloc` then it's fine. If the object lifetime was started before (byte pointer was converted from valid object pointer), it's also fine. Explicitly calling `std::start_lifetime_as` will start lifetime, which is also fine. But the recommended way is to not do pointer convertion. The recommended way is to have local variable then memcpy into local variable, e.g. `T x; memcpy(&x, byte_pointer, size);`.
 
@@ -443,6 +446,7 @@ tags:
 - In C/C++ and Java, literal number starting with 0 will be treated as octal number. (`0123` is 83)
 - In Java and Python, there are two kinds of threads: daemon and non-daemon. When main function exits, the program will still be running when a non-daemon thread is running. The thread pool threads are non-daemon by default.
 - Using `+` to concat $n$ strings may be $O(n^2)$ because of copying and re-allocating temporary strings. Use mutable string buffer.
+- Forget to check return value, proceed when failed.
 
 ## File-related
 
@@ -508,6 +512,9 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - When using broadcast to update in-memory state:
   - The Redis pub/sub may lose message if listener temporarily disconnects. One solution is to use Redis streams to avoid losing message. Another is to add periodic polling update.
   - If you use Kafka for broadcasting (using randomly-generated consumer group id), there is a race condition that the new consumer group's initial offset initializes later than initializing in-memory state, so it may miss an initial update message and in-memory state keeps being stale until next update.[^kafka_initial_offset]
+- About logging:
+  - Having false error logging in normal state. When investigating, the "normal" error log will be misleading.
+  - Log spam cause old useful logs to be deleted due to log rolling size limit.
 
 [^kafka_initial_offset]: In Kafka, a new consumer's offset initializes on first poll **asynchronously**. One workaround is to use `auto.offset.reset=earliest`, then add version check to avoid useless updates when consuming old messages. Another workaround is to synchnnously get end offsets (watermark offsets) then manually seek to the offset, then initialize the in-memory state. Another workaround is to just use periodic polling for update, and kafka message just triggers extra immeidate polling.
 
@@ -558,7 +565,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - Renaming file that only changes letter case won't be tracked by git in Windows and macOS (because file name is case-insensitive). Renaming using `git mv` works normally.
 - Git merge is not commutative or associative. Different merging order may give different results.
 - About submodules:
-  - A submodule's core is a gitlink, the gitlink stores a commit hash. (gitlink is not file, but it can be changed and the change can be commited like file. Checking out another commit in module is similar to "editing gitlink file".)
+  - A submodule's core is a gitlink, the gitlink stores a commit hash. (gitlink is not file, but it can be changed and the change can be commited like file. Checking out another commit within submodule repo is similar to "editing gitlink".)
   - Cloning by default doesn't clone submodules. The submodules will appear as empty folder, but the gitlink is valid.
   - After switching branch (or merging upstream), the commited gitlink can change, but the local gitlink doesn't auto update by default (submodule is similar independent git repo). Then there is "fake change" of submodule gitlink. Don't accidentally commit the fake changes. Use `git submodule update --init --recursive` to update submodules.
   - You can make the submodule gitlink point to your private commit, then push parent repo. Other developers then cannot update the submodule, because content pointed by gitlink is not on server.

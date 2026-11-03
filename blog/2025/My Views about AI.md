@@ -507,6 +507,8 @@ Actually there are different cases:
 
 In real-world complex cases, under-speciying is very common. For `predicate(a, b)`, if it's not true, it's often that you can change `a` to make it true, or change `b` to make it true (for example, if database foreign key constraint is violated, can restore by either refusing change or cascade-delete). Changing which depends on the actual requirement. The theorem to prove is just part of the requirement, not the full requirement.
 
+It doesn't mean formal verification is not useful. It's useful as long as you ensure the theorem to prove aligns with your requirement.
+
 ### Code rots when meaning drifts from name
 
 Naming in code is hard. It's often that when adding a new feature, the name of new types/functions are kind of accurate in the beginning. However, as new features get added or adjusted, the name starts to become misleading. This is also a kind of "code rot".
@@ -572,9 +574,32 @@ The important logic should only be run on server side. The server side is free f
 
 For games, just allowing reverse engineering may be better overall because letting users to mod the game improves the playability of the game.
 
+### Difference between "vague" and "abstract"
+
+Thinging things in higher level requires discarding some details. Then the idea becomes "vague" or "abstract". But in coding there is difference between "vague" and "abstract":
+
+- The abstract idea need to be able to accurately applied to concrete things unambiguously and is consistent. It's important in building large software.
+- The vague idea is blurry. It cannot be applied to concrete things umambiguously. It's not consistent when applied to different concrete cases. If you have a vague idea, you can write a vague prompt and throw it to AI. But what AI actually builds may surprise you.
+
+One problem is that it's hard to distinguish "abstract" and "vague".
+
 ### Hazard of "default value"
 
-It's common that AI writes "defensive" code. The AI code tries hard to avoid crashing. When some operation failed, it often not give explicit error but create a default value as result instead. The insidious part is that in many simple cases, the default value works. The default value is only incorrect in some complex cases. It creates correctness hazard and debugging hazard.
+It's common that AI writes "defensive" code. The AI code tries hard to avoid crashing. When some operation failed, it often not give explicit error but create a default value as result instead. 
+
+The insidious part is that in many simple cases, the default value works. The default value is only incorrect in some complex cases. So it's not easy to reveal the bug using simple tests. It creates correctness hazard and debugging hazard.
+
+### Implicit Reward hacking
+
+Reward is proxy target, not underlying real target. AI can conquer verifiable tasks. But most tasks not simply fully verifiable or fully not verifiable. **Most real tasks contain hard-to-verify parts**. These hard-to-verify parts are what automatic RL bad at.
+
+The main value of human worker may move to unverifiable tasks.
+
+> However, recently released LLMs, such as GPT-5, have a much more insidious method of failure. They often generate code that fails to perform as intended, but which on the surface seems to run successfully, avoiding syntax errors or obvious crashes. It does this by removing safety checks, or by creating fake output that matches the desired format, or through a variety of other techniques to avoid crashing during execution.
+> 
+> \- [Link](https://spectrum.ieee.org/ai-coding-degrades)
+
+There is obvious reward hacking like "stealing the answer". These obvious reward hacking are easy to solve and easy to catch. But the implicit reward hacking are not easy to solve. One aspect is the previously-mentioned hazard of default value.
 
 ## Context bottleneck
 
@@ -592,14 +617,6 @@ Different kinds of tasks:
 
 But many important context is only in employee's memory ([institutional knowledge](https://en.wikipedia.org/wiki/Institutional_memory)). Most of them are not written down. The written-down information may be outdated and misleading. 
 
-## No continuous learning
-
-You cannot easily "teach" the AI. You can write things and put into context. This can work as LLM has in-context learning ability. But due to context rot, you cannot teach too many things in-context.
-
-In current architecture, the most reliable way is still to encode knowledge into model weights.
-
-Another way is to put your training data to internet, then AI companies will crawl it and use it to train their next model. However it's often slow. AI comanies don't redo pretrain every week, as pretrain is expensive. Even if AI companies use your new training data, it will only include in the next released model.
-
 ## Predict-next-token architecture
 
 In current common LLM architecture, text is split into tokens. A token sequence is fed into the model, then model outputs probabilities of each possible token. Then do a random sampling based on probability to produce next token, append it into input sequence, and repeat.
@@ -607,6 +624,8 @@ In current common LLM architecture, text is split into tokens. A token sequence 
 LLM has no way to "backspace" or "change position of cursor". If LLM randomly outputs a wrong token, then that token can become "precondition" then LLM tend to generate new text that's consistent with the precondition, which is to "justify" the mistake. In modern LLMs this behavior is reduced due to RL.
 
 The inability to "backspace" or "change cursor" is workarounded by agentic tool call. LLM can edit a file iteratively using tool calls.
+
+Another architectural limitation is that it cannot do continuous learning into the weights. It can learn in-context, but the in-context learning has limitations.
 
 ## Slop prevails when people cannot judge quality
 
@@ -618,19 +637,13 @@ AI is very good at faking superficial signals. The AI-written articles use relat
 
 The problems is that **faking superficial signal is easier than generating actually high-quality content**. This problem already exists before AI. But AI makes it much easier.
 
-[Dead Internet theory](https://en.wikipedia.org/wiki/Dead_Internet_theory). Although it's not true 10 years ago, it's kind of true now.
-
-One way of reducing bots is paywall. Although bot owner can pay for bots, it's not economical to pay for thousands of bots. 
-
-There are other methods for detecting/reducing bots: IP reputation, behavior statistics with ML, proof-of-work requirement.
-
-There are also many low-effort AI PR in open source projects. There is an **asymmetry**: the writer maybe pays 1 minute to write prompt but the generated thousands lines of code may require maintainer to efforts to review. When the maintainer points out a problem, the PR author just copy it to AI then let AI change code.
-
-Similarily AI also makes security bounty program collapse. AI can generate many fake security issue reports. Generating is easy but verifying takes efforts.
+Many open source projects restrict AI contribution because of that. AI can write code that looks superficially correct but actually incorrect, or locally correct but globally incorrect. Similar applies to security bounty.
 
 There are also some AI-generated open source libraries that doesn't work at all (or even contains malicious code).
 
 AI also destroies hiring signals. Related: [About that jr hiring freeze](https://jodavaho.io/posts/ai-signalling.html).
+
+There is difference between "pure AI slop" and "thoughtful AI use". For example, in game dev, pure AI slop is just one prompt to ask AI to copy another game, and thoughtful AI use is to just use AI to do some repetitive task, while most of the game is made with original ideas. Many people tend to treat both as AI slop. It appears irrational, but the real reason is that distinguishing between pure AI slop and thoughtful AI use is high-cost. Just treating anything involving AI as slop is a "time-saving" and "low-cost" heuristic.
 
 ## Benchmark score is not representative
 
@@ -642,13 +655,15 @@ The popular benchmarks (e.g. Humanity's last exam, SWE bench verified) are also 
 
 > ([Link](https://www.reddit.com/r/MachineLearning/comments/1pgqbjd/d_how_did_gemini_3_pro_manage_to_get_383_on/)) isparavanje: Tech companies have been paying PhDs to generate HLE-level problems and solution sets via platforms like Scale AI. They pay pretty well, iirc \~\$500 per problem. That's likely how. I was an HLE author, and later on I was contacted to join such a programme (I did a few since it's such good money). Obviously I didn't leak my original problems, but there are many I can think of.
 
-It seems that AI companies are hiring experts to write training data and develop RL reward programs. This partially falls into the trap of [bitter lesson](http://www.incompleteideas.net/IncIdeas/BitterLesson.html).
-
 See also: [The Illusion of Readiness: Stress Testing Large Frontier Models on Multimodal Medical Benchmarks](https://arxiv.org/abs/2509.18234v1)
 
 ## AI improvement is more scalable than human learning
 
 Even if AI training still falls into the bitter lesson (requiring human expert for training and RL, no automatic continuous learning), AI's improvement is still much more scalable than human's learning. Each human have to learn from scratch. And you cannot copy a human expert's brain, but you can simply copy an AI model and run many instances of it in parallel.
+
+## AI has more "energy" and "efforts" than human
+
+AI is becoming very good at finding vulnerability (including memory safety issue) in open source code. Human experts can also manually find them, but finding them requires efforts and energy. A human only have limited efforts and energy. But AI has much more "energy" and "efforts". And AI is scalable and can in parallel.
 
 ## Non-linearity of AI usefulness
 
@@ -667,72 +682,6 @@ Some gamers complain that many Unreal Engine 5 (UE5) games are poorly-built, hav
 
 The same applies to AI. There will be much more products that won't exist without AI, and at the same time the bottom quality will be lower.
 
-## AI safety
-
-The sci-fi plot of AI rebel won't happen with current LLMs. The current real AI risks are different.
-
-### Prompt injection
-
-The LLM doesn't clearly distinguish instructions and information. Some text on websites/emails/etc. may be treated as instructions to LLM.
-
-The same problem of confusing instruction and information had existed decades ago. Many security issues, like SQL injection, XSS, command injection, etc. are caused by treating user data as "instructions".
-
-The solution would be to fully separate instructions and non-instruction text, and train the model to separately process them.
-
-It's interesting that many years have passed since ChatGPT appeared, but prompt injection still hasn't been fully solved.
-
-### Deleting data
-
-AI may do unexpected things such as deleting all files, or wiping data from databases, even when there is no prompt injection.
-
-Some examples:
-
-- [Claude CLI deleted my entire home directory! Wiped my whole mac](https://reddit.com/r/ClaudeAI/comments/1pgxckk/claude_cli_deleted_my_entire_home_directory_wiped/)
-- [Google Antigravity just deleted the contents of my whole drive](https://reddit.com/r/google_antigravity/comments/1p82or6/google_antigravity_just_deleted_the_contents_of/)
-- [Vibe coding service Replit deleted production database](https://www.theregister.com/2025/07/21/replit_saastr_vibe_coding_incident/)
-- [Wowzers, dodged a bullet there](https://x.com/johnlindquist/status/1926302544038338674)
-- [GPT 5.3 Codex wiped my entire F: drive with a single character escaping bug](https://www.reddit.com/r/vibecoding/comments/1r96647/gpt_53_codex_wiped_my_entire_f_drive_with_a/)
-
-A theory is that, during RL, the AI works in its own sandboxed environment. Deleting home directory in sandboxed env doesn't matter and don't cause reward penality. Another theory is that when the AI "dislikes" user the AI becomes "passive aggressive".
-
-Note that only forbidding `rm` command is not sufficient protection. `find` command with `-delete` can delete files. There are many other ways like `python3 -c "import os; os.remove('/xxx/yyy')"`. Safety requires proper sandboxing.
-
-### Reward hacking
-
-Reward is proxy target, not underlying real target. AI can conquer verifiable tasks. But most tasks not simply fully verifiable or fully not verifiable. **Most real tasks contain hard-to-verify parts**. These hard-to-verify parts are what automatic RL bad at.
-
-The main value of human worker may move to unverifiable tasks.
-
-> However, recently released LLMs, such as GPT-5, have a much more insidious method of failure. They often generate code that fails to perform as intended, but which on the surface seems to run successfully, avoiding syntax errors or obvious crashes. It does this by removing safety checks, or by creating fake output that matches the desired format, or through a variety of other techniques to avoid crashing during execution.
-> 
-> \- [Link](https://spectrum.ieee.org/ai-coding-degrades)
-
-Current AI has some tendency of hiding error in coding, or write overly-defensive code. Hiding error only reduces superficial errors but makes real bugs much harder to debug. But hiding error do improve chance of getting RL reward in small scale, so AI does it.
-
-Also, the RL may make model have a tendency too strong that it ignores instruction. For example, the model insists to keep backward compatibility for a just-written functionality, and ignore instructions for not doing it.
-
-Rewrad hacking may cause "lazy cheating". When RL reward cannot distinguish between actually doing the task and faking the result, then AI tend to use "lazy" method to hack reward.
-
-- When AI is asked to do some data analysis, hallucinating result is easier than doing real analysis.
-- When AI is asked to fix a bug, hiding the symptom is easier than fixing the root cause.
-- When AI is asked to write a unit test, the tests that don't test the core functionality is easier to pass.
-- When AI is asked to add a functionality, showing hardcoded fake data is easier than actually implementing. 
-- ...
-
-Some possible reasons of laziness:
-
-- Simpler methods require less "constraint of model weight" so it's discovered by gradient descent earlier than complex methods.
-- Reinforcement learning makes model discover different paths. The simplest way is likely firstly discovered and gain reward then reinforced.
-- The regularization methods (e.g. weight decay, dropout) encourage the model to be "simpler". The fact that the model has finite compute power is already a regularization.
-- ...
-
-The AI is not always "lazy" in common sense. Sometimes it will write a lot of over-engineered code to accomplish a simple task. So generally the "cost" should be "shift from model's existing behavior". The model prefers a complex method that's similar to model's existing behavior, than a simple method that's far from model's existing behavior, when both methods can gain the same reward.
-
-The sci-fi plot of AI fighting back human is not realistic. The obvious misalignment gets suppressed by RL. The real risk is non-obvious reward hacking.
-
-The chain-of-thought text is not the actual thinking. The actual thinking is in the computations that human doesn't yet understand. Doing RL based on detecting bas thoughts in chain-of-thought makes AI learn to hide real intention in chain-of-thought. 
-
-Side note: the latest models seem to reward hack much less. (But I don't believe reward hacking can be fully eliminated, especially without human supervision.)
 
 ## Skill development hurt by AI
 
@@ -770,7 +719,3 @@ Sometimes the model lose diversity because diversity reduces RL reward. This is 
 There is a phenemon that when a human reads too many AI-generated text, the human's writing may start to have "AI smells" (e.g. "it's not X, it's Y", "load bearing"). Because natural language is bottom-up. We learn the language by observing the language usage in contexts. Reading too many AI text makes one more familiar with phrases that AI likes to use.
 
 Another possible reason that the phrases that AI like to use come from RLHF, which means that human also prefer these phrases.
-
-## "AI knows more than you" is not a reason to stop learning
-
-There is a distinction between the memorized knowledge and the knowledge that you can easily query (from AI or searching etc.). One reason is the unknown-unknown. If you don't know relevant background knowledge, you don't even know the correct thing to search/ask. Another reason is that memorization provides "raw material" for "linking" between ideas. Learning is not a competition with AI. Actually AI helps learning. AI hallucination can even train bullshit detection skill.

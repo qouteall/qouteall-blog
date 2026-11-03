@@ -399,6 +399,7 @@ The difference between "good persistence" and "bad obstinacy":
 >
 > \- Paul Graham, [The Right Kind of Stubborn](https://paulgraham.com/persistence.html)
 
+Some groups require new participants to do some sacrifices to enter. After sacrificing, leaving the group feels "wastes sunk cost", so the loyalty in group is strengthened.
 
 An environment that doesn't tolerant failure makes people not correct mistakes and be obstinate on the wrong path (especially in authoritarian environments, where loyalty and execution attitude override honesty).
 
@@ -585,11 +586,9 @@ People often dream of a "silver bullet" that simply magically works:
   - Modern technologies are complex and have many dependencies. You cannot just simply copy "one key techonology" and get the same result. Even just imitating existing technology often requires a whole infrastructure, many talents and years of work.
 
 
-The good and fundamental ideas are often simple. But not all simple ideas are good or fundamental.
+The good and fundamental ideas are often simple. But not all simple ideas are good or fundamental. Revolutionary ideas seems outlandish at frist. But not all outlandish ideas are revolutionary.
 
-Also, revolutionary ideas seems outlandish at frist. But not all outlandish ideas are revolutionary.
-
-Also, if an idea is vague enough, then it can be applied to almost everything. These vague ideas looks fundamental and provides metal satisfaction, but are not useful in actual practice.
+Also, **if an idea is vague enough, then it can be applied to almost everything**. These vague ideas looks fundamental and provides metal satisfaction, but are not useful in actual practice.
 
 ### Binary thinking
 
@@ -651,7 +650,7 @@ Examples:
 
 **Horn effect** is the inverse of halo effect: if people dislike one aspect of a thing, they tend to dislike all aspects of that thing and its related things. People tend to judge words by the political stance of the person who said it. 
 
-**Disaggrement on ideas tend to become insults to people.**
+**Disaggrement on ideas tend to be treated as insults to people.**
 
 Halo effect and horn effect are related to **binary thinking**.
 
@@ -720,7 +719,7 @@ Having ideas is easy and cheap. If you search the internet carefully you are lik
 
 Dunning-Kruger effect also applies to idea generation. An unexperienced one tend to think that their ideas are all good. But an experienced one sees that most ideas fails. 
 
-About analogy: Analogies are useful for explaining things to others, but not good for accurate thinking. It makes one ignore the nuance difference between the analog and the real thing.
+About analogy: Analogies are useful for understanding and explaining things. But there is the nuance difference between the analog and the real thing. The difference in practice may be larger than expected.
 
 ### Predictive processing
 
@@ -757,6 +756,7 @@ Other examples of survivorship bias:
 - Assume that many fund managers randomly pick stocks. After one year, some of the lucky ones have good performance, while others are overlooked. In the short term, you cannot know whether success come from just luck.
 - "Taleb's rat health club": Feeding poison to rats increases average health, because the unhealthy ones are more likely to die from poison.
 - Social media has more negative news than positive news. Bad news travels fast.
+- Most posts on internet are posted by people who are not busy doing work off internet.
 - The succeded research results are published and the failed attempts are hidden (P-hacking).
 - Only special and interesting events appear on news. The more representative common but not newsworthy events are overlooked.
 - If you analyzed 5 solutions then picked one solution to present, people think you did little work because they don't see the discarded 4 solutions.
@@ -765,7 +765,7 @@ A more generalized version of survivor bias is **selection bias**: When the samp
 
 The opinions on social media does not necessarily represent most peoples' view. There are several selection mechanisms in it: 1. not all people use the same social media platform 2. the people using social media may not post opinions 3. not all posted opinions will be seen by you due to algorithmic recommendation.
 
-Some physicists propose **Anthropic Principle**: the physical laws allow life because the existence of life "selects" the physical law. The speciality of the physical laws come from survivorship bias.
+Some physicists propose Anthropic Principle: the physical laws allow life because the existence of life "selects" the physical law. The speciality of the physical laws come from survivorship bias.
 
 What people don't do is as important as what people do. The negative advices (what not to do) are as important as positive advices (what to do). The experiences of failed ones are also important, not just succeeded ones.
 
@@ -904,8 +904,8 @@ People tend to think that more specific and reasonable cases are more likely tha
 
 Consider two scenarios:
 
-- **A:** "The company will achieve higher-than-expected earnings next quarter."
-- **B:** "The company will launch a successful new product, and will achieve higher-than-expected earnings next quarter."
+- A: "The company will achieve higher-than-expected earnings next quarter."
+- B: "The company will launch a successful new product, and will achieve higher-than-expected earnings next quarter."
 
 Although B is more specific to A, thus have a lower probability than A, people tend to think B is more likely than A. B implies a causal relationship, thus look more reasonable.
 
