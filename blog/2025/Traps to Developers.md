@@ -246,7 +246,7 @@ tags:
 - `defer` executes when the function returns, not when the lexical scope exits.
 - `defer` capture mutable variable's latest value.
 - About `nil`:
-  - There are nil slice and empty slice (the two are different). There are also nil map and empty map. The nil map can be read like an empty map, but nil map cannot be modified. (There is no nil string, only empty string.)
+  - There are nil slice and empty slice (the two are different). There are also nil map and empty map. The nil map can be read like an empty map, but nil map cannot be mutated. (There is no nil string, only empty string.)
   - Interface `nil` weird behavior. Interface pointer is a fat pointer containing type info and data pointer. If the data pointer is null but type info is not null, then it will not equal `nil`.
   - Receiving from or sending to `nil` channel hangs forever.
 - Before Go 1.22, [loop variable capture issue](https://go.dev/blog/loopvar-preview).
@@ -257,6 +257,7 @@ tags:
 - `sync.Mutex` should be passed by pointer not value. Same applies to `sync.WaitGroup` `sync.Cond` `net.Conn` etc. But slices, maps and channels can be passed by value.
 - When using `go func() {...}`, should carefully avoid capturing outside `err` variable. Capturing outside `err` will cause data race. [See also](https://www.uber.com/us/en/blog/data-race-patterns-in-go/)
 - If channel consumer exits, producing to channel will hang, causing goroutine leak. (Golang channels are unbuffered by default. If consumer exits producer will hang. Even if buffered, producer still hangs when buffer is full.) Debug using [Goroutine leak profiler](https://go.dev/blog/goroutine-leak-profiles).
+- V1 JSON deserialization field matching is case-insensitive. The [v2 JSON API](https://go.dev/blog/jsonv2) is different.
 
 
 ## C/C++
@@ -434,6 +435,8 @@ tags:
 - Assertion should not be used for validating external data. Validating external data should use proper error handling. Assertion should check internal invariants.
 - Confusing default value with missing value. For example, if the balence field is primitive integer, 0 can represent both "balance value not initialized" or "balance is really 0". In C and Python, 0 is treated as false in `if`. Also empty string and null string.
   - The same thing also applies to primitive values in protocolbuffer. To discriminate, field must be marked `optional` and app code must call generated `has*` method to check.
+- Using a valid value as "sentinel value".
+  - One example: musl `crypt()` return "\*" on failure, but the "\*" is also used to represent "locked user", thus causes vulnerability, [see also](https://sshhole.com/). It's recommended to not use valid value to represent error.
 - When using profiler: the profiler may by default only include CPU time which excludes waiting time. If your app spends 90% time waiting (e.g. wait on database), the flamegraph may not include that 90% which is misleading.
 - The order in hash map is non-deterministic (unless using linked hash map).
 - IO buffering. 
@@ -460,7 +463,7 @@ tags:
 - In Linux, file name can contain `\n` `\r` `'` `"`, and file name can be invalid UTF-8.
 - Path trailing slash:
   - If `/aaa/bbb` is a symbolic link to a folder, `rm /aaa/bbb` removes the symbolic link, but `rm /aaa/bbb/` may remove files in pointed folder.
-  - For `mv x.txt /aaa/bbb`, if `/aaa/bbb` is a folder it will move file into the folder without changing name, but if `/aaa/bbb` doesn't exist it will rename file name to `bbb`.
+  - For `mv x.txt /aaa/bbb`, if `/aaa/bbb` is a folder it will move file into the folder without changing name, but if `/aaa/bbb` doesn't exist it will rename file name to `bbb`. `mv x.txt /aaa/bbb/` ensures no renaming and fails when folder doesn't exist.
 
 ## Transitive dependency conflict
 
@@ -484,7 +487,9 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - There is a capability system for executables, apart from file permission sytem. Use `getcap` to see capability.
 - Unset variables. If `DIR` is unset, `rm -rf "$DIR/"` becomes `rm -rf "/"`. Using `set -u` can make bash error when encountering unset variable. 
 - Bash has caching between command name and file path of executable. If you move one file in `$PATH` then invoking it in command gives ENOENT. Refresh cache using `hash -r`
-- Using a variable unquoted will make spaces separate it into different arguments. Also it will make its line breaks treated as space.
+- Using a variable unquoted will make spaces separate it into different arguments. For example, if `DIR=/my experiment/`, `rm -rf $DIR` becomes `rm -rf /my experiment/` which will remove `/my` and `experiment/`, not `/my experiment` folder. Safe way is `rm -rf -- "$DIR"`.
+  - Also it will make its line breaks treated as space.
+- Confusion between option and file name. For `FILE=-rf`, `rm "$FILE"` becomes `rm -rf`. Safer way is `rm -- "$FILE"`.
 - `set -e` can make the script exit immediately when a sub-command fails, but it doesn't work inside function whose result is condition-checked (e.g. the left side of `||`, `&&`, condition of `if`). [See also](https://stratus3d.com/blog/2019/11/29/bash-errexit-inconsistency/)
 - Symbolic link can point to parent, forming cycle.
 - glibc compatibility issue. A program that's build in a new Linux distribution dynamically links with a new version of glibc, then it may be incompatible with old versions of glibc in old systems. Can be workarounded by using containers.
@@ -597,6 +602,7 @@ Indirectly use different versions of the same package (diamond dependency issue)
 - DNS caching. Changings related to DNS can take long time to take effect.
 - Many TCP connetions in TIME_WAIT state can use up ephemeral port space, then new TCP connection cannot start. See also: [Bluesky incident](https://pckt.blog/b/jcalabro/april-2026-outage-post-mortem-219ebg2), [Thoughts on the Bluesky public incident write-up](https://surfingcomplexity.blog/2026/04/12/thoughts-on-the-bluesky-public-incident-write-up/)
 - Domain name trailing dot. `example.com` and `example.com.` refers the the same domain name in most cases.
+- URL-encoding multi-representation. For example, `/%61dmin/` is equivalent to `/admin/`. Checking URL prefix using `url.pathname.startsWith("/admin/")` is unsafe.
 
 [^keepalive]: Note that [HTTP/1.0 Keep-Alive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Keep-Alive) is different to TCP keepalive.
 

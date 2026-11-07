@@ -88,6 +88,8 @@ When one already have nothing, the expectation is low and loss aversion is low, 
 
 Donating for long time then stop will likely get hatred, because previous donations raised expectation, and loss of stopped donation has larger mental impact than satisfaction of receiving donation.
 
+About AI: For most people, AI's potential upside is limited (do things faster easier, entertain AI-generated videos, etc.), but AI's potential downside is large (lose job permanently, mathematician get scooped by AI, etc.). AI hasn't shown any "positive miracle" like curing cancer. The perceived impact of AI skews to negative side from personal perspective. So being anti-AI is valid and natural. (But it's hard to predict the future. The real outcome of AI is likely to be out of expectation.)
+
 ### "Better safe than sorry" assumption
 
 It's an extension to loss aversion. When seeing an unwanted behavior of others, people tend to assume it's malice, according to "better safe than sorry":
@@ -117,6 +119,12 @@ Murphy's law: "Anything that can go wrong will go wrong". It feels true because 
 Believing a false conspiracy theory often can effectively reduce risk. Conspiracy theories have real utility according to the "better safe than sorry" principle. A little cynicism can help reducing risks.
 
 Cynicism has many other "utilities": criticizing governance gives feeling of "fighting the injustice", signals emphathy, signals "courage", stengthens social tie, evades responsibility of self failure, relieves pressure by verbal attacking, etc. Also, there is greener grass syndrome (thinking another country is better than current country) that creates hope. Sometimes cynicism is addictive when browsing social media. **A little cynicism is protective but addictive cynicism is harmful**.
+
+Conspiracy theory has "optimistic" aspects: as long as the hidden enemy is defeated, the problem will be solved. But the problem is often actually more fundamental.
+
+> When you’re young, you look at television and think, There’s a conspiracy. The networks have conspired to dumb us down. But when you get a little older, you realize that’s not true. The networks are in business to give people exactly what they want. That’s a far more depressing thought. Conspiracy is optimistic! You can shoot the bastards! We can have a revolution! But the networks are really in business to give people what they want. It’s the truth.
+> 
+> \- Steve Jobs
 
 ### Perception of risk
 

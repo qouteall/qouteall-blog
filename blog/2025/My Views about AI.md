@@ -54,6 +54,8 @@ Also, the **optimization targets** of LLMs are very different to the optimizatio
 > 
 > \- Andrej Karpathy, [Link](https://x.com/karpathy/status/1991910395720925418)
 
+As intelligence is high-dimensional, if AI capability is still jagged, then it's still not enough to fully replace human jobs. See also: [AI isn't replacing radiologists](https://www.worksinprogress.news/p/why-ai-isnt-replacing-radiologists).
+
 ## Between memorization and real intelligence
 
 There is a spctrum between memorization and real intelligence (full generalization). LLM is between pure memorization and real intelligence. It doesn't do rote memorization like a conventional database. It can do generalization and in-context learning. But its generalization and in-context learning ability is still limited. LLM can still fail at out-of-training-distribution tasks.
@@ -483,9 +485,9 @@ Having no document is better than having wrong documents.
 
 Related: [Grep beats LSP? Why coding agents ignore your fancier tools](https://www.agentconnect.md/blog/grep-beat-lsp-harness/)
 
-LSP is more fragile than grep. It's often that you cloned a repo then IDE gives error messages because you need to do some special configurations to make it recognize dependenceis (and the special things e.g. protocolbuffer code generation). But text search just works without configuraiton.
+LSP is more fragile than grep. It's often that you cloned a repo then IDE gives error messages because you need to do some special configurations to make it recognize dependenceis and install required tools. But text search just works without configuraiton.
 
-Improving greppability requires **avoid making the name's meaning depend on context**. For example, `userName` field is more greppable than `name` field in `User` type. If the field is `name` then AI has to grep `name` which finds many irrelevant things.
+Improving greppability requires **avoid making the name's meaning depend on context**. For example, `userName` field is more greppable than `name` field in `User` type. If the field is `name` then AI has to grep `name` which finds many irrelevant things. Someone may say that `user.userName` duplicates "user" so it's unelegant, but it's good from greppability perspective.
 
 Another is to avoid using string concat for const strings like table name and kafka topic name.
 
@@ -566,6 +568,8 @@ Sometimes security vulnerability comes from not having knowledge. For example so
 
 But AI can also write insecure code if you keep pushing AI to just write working code instead of caring security. There is often a tradeoff between security and convenience. If you just push the AI to finish the work, then AI often chooses convenience and ignore security.
 
+Currently, many open source software (including Linux) are exposing vulnerabilities due to AI. But it doesn't mean open source will be unsafe. When AI has discovered most discoverable vulnerabilities, they will be safer than closed-source equivalents and vibecoded equivalents.
+
 ### Reverse engineering implications
 
 All code that runs on user's computer can be reverse-engineered. This is similar principle that YouTube cannot fully prevent downloading video. If you want the video to display on user's screen, the information of video has to transmit to user's computer. If you want your code to run on user's device, then the information of your code has to be deciphered by user's CPU. No matter how much obfuscation is used, the CPU has to be able to run it, so the information is retained and can be reverse-engineered. AI just lowers the cost of reverse engineering.
@@ -600,6 +604,18 @@ The main value of human worker may move to unverifiable tasks.
 > \- [Link](https://spectrum.ieee.org/ai-coding-degrades)
 
 There is obvious reward hacking like "stealing the answer". These obvious reward hacking are easy to solve and easy to catch. But the implicit reward hacking are not easy to solve. One aspect is the previously-mentioned hazard of default value.
+
+### Hazard of "common assumption"
+
+Another problem is that AI has learnt the common assumptions of similar softwares. But if your software's mechanism violates the common assumptions of similar software, AI tend to have wrong assumptions and generate nuancedly wrong code. 
+
+The "common assumption" is also one important reason why AI coding is convenient. AI uses common assumptions to fill the gaps that prompt doesn't specify.
+
+### Instruction following is not always good
+
+The famous "paperclip maximizer" fiction is an example of AI following instruction too rigidly. In realistic cases, it's often that the prompter don't fully understand one thing, then ask AI to write according to the design that prompter think is good but actually bad. Because the design is bad, AI has to write a lot of hacky fragile unmaintainable code to satisfy the instruction. AI sometimes push back but often don't because it's shaped by instruction following RL.
+
+There is a tradeoff. If AI never pushes back, then it cannot correct wrong decisions. But if AI pushes back too often, then AI is less usable.
 
 ## Context bottleneck
 
@@ -665,16 +681,8 @@ Even if AI training still falls into the bitter lesson (requiring human expert f
 
 AI is becoming very good at finding vulnerability (including memory safety issue) in open source code. Human experts can also manually find them, but finding them requires efforts and energy. A human only have limited efforts and energy. But AI has much more "energy" and "efforts". And AI is scalable and can in parallel.
 
-## Non-linearity of AI usefulness
 
-For example, there is a specific task that experts can do 80 scores. 
 
-- If AI can only do 60 scores then AI is mostly useless in that task. 
-- But if AI can do 70 scores, then the economical utility of using AI may increase 10 times, although the performance just jumped from 60 to 70.
-
-Near the threshold, incremental improvements do big changes.
-
-As intelligence is high-dimensional, if AI capability is only good in one aspect it's still not enough to replace human jobs. See also: [AI isn't replacing radiologists](https://www.worksinprogress.news/p/why-ai-isnt-replacing-radiologists)
 
 ## Reducing cost also reduces bottom quality
 
@@ -714,8 +722,4 @@ The true superintelligence should be very "open-minded", not stuck in path depen
 
 Sometimes the model lose diversity because diversity reduces RL reward. This is also a problem of RL.
 
-## AI re-shapes human language
-
-There is a phenemon that when a human reads too many AI-generated text, the human's writing may start to have "AI smells" (e.g. "it's not X, it's Y", "load bearing"). Because natural language is bottom-up. We learn the language by observing the language usage in contexts. Reading too many AI text makes one more familiar with phrases that AI likes to use.
-
-Another possible reason that the phrases that AI like to use come from RLHF, which means that human also prefer these phrases.
+There is anecdotes that when someone wants to use AI to find vulnerabilities in open source code, they open parallel sessions with different prompts like "find vulnrabilities, start from file /aaa/bbb" and "find vulnerabilities, start from file /xxx/yyy". In all sessions the AI has access to same code repo, but the different prompts give enough initial difference to improve search diversity.
