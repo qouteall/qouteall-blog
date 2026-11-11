@@ -119,7 +119,7 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   - A lot of great talents require more resource investment to show ability, but they may lose the ruthless competition because they initially don't win and can never obtain enough resource. [^qianlima]
   - Talent is high-dimensional. It filters out the talents whose ability is out of testing range. The currently seemingly useless ability may be important in the future.
 
-- First-order effect: Copyright law protects artists because it makes consumers pay artists.
+- First-order effect: Copyright law protects artists.
 
   Second-order effect: The publishers and distribution channels form monopoly naturally. There is no "free market" for artists. Artists have to commission copyright to publishers and distributors. Artists only get a small share of profits, and lose freedom of usage of the artwork.
 
@@ -143,9 +143,9 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Using AI can also be seen as a kind of outsourcing.
 
-- First-order effect: To reduce excess inventory, the price should drop to increase sale.
+- First-order effect: Reducing price increases sale.
 
-  Second-order effect: For things that have investment properties (Veblen good), increasing price could help reducing inventory.
+  Second-order effect: For things that have investment properties (Veblen good), increasing price could increase sale.
 
 [^qianlima]: Related: [Qianlima](https://en.wikipedia.org/wiki/Qianlima) (千里马). The high-capacity horse require more food to show its capacity. But without showing its capacity it can never get enough food supply. 
 

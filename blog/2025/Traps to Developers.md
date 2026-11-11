@@ -435,8 +435,8 @@ tags:
 - Assertion should not be used for validating external data. Validating external data should use proper error handling. Assertion should check internal invariants.
 - Confusing default value with missing value. For example, if the balence field is primitive integer, 0 can represent both "balance value not initialized" or "balance is really 0". In C and Python, 0 is treated as false in `if`. Also empty string and null string.
   - The same thing also applies to primitive values in protocolbuffer. To discriminate, field must be marked `optional` and app code must call generated `has*` method to check.
-- Using a valid value as "sentinel value".
-  - One example: musl `crypt()` return "\*" on failure, but the "\*" is also used to represent "locked user", thus causes vulnerability, [see also](https://sshhole.com/). It's recommended to not use valid value to represent error.
+- Using a valid value as "sentinel value", confuse between "failed" and "not present".
+  - One example: musl `crypt()` return "\*" on failure, but the "\*" can also represent "no password hash", thus causes vulnerability, [see also](https://sshhole.com/).
 - When using profiler: the profiler may by default only include CPU time which excludes waiting time. If your app spends 90% time waiting (e.g. wait on database), the flamegraph may not include that 90% which is misleading.
 - The order in hash map is non-deterministic (unless using linked hash map).
 - IO buffering. 
