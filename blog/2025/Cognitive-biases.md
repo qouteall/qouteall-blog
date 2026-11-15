@@ -1433,7 +1433,7 @@ These factors affect mental energy:
 - Body conditions (like blood sugar level [^blood_sugar_level]) affects mental energy.
 - Exercising self-control can strengthen mental energy, similar to muscular strength.
 - Lingering emotion (e.g. **keep ruminating past mistakes**) costs mental energy.
-- "Context switch" costs mental energy. One example is to do work while listening in a metting. The brain has to frequently switching between doing work and understanding content in meeting. It costs mental energy.
+- "Context switch" costs mental energy. One example is to do work while listening in a meeting. The brain has to frequently switching between doing work and understanding content in meeting. It costs mental energy.
 
 [^blood_sugar_level]: Related: Using GLP-1 may cause one harder to focus and pay attention due to reduced blood sugar level and other factors. However, GLP-1 can improve brain fog related to inflammation. The overall effect is complex.
 
@@ -1473,7 +1473,7 @@ Taking notes is one way to mitigate the unreliable memory issue.
 
 People usually remember the "special" things well. This is an information compression mechanism that filters out the unimportant details.
 
-**Peak-end rule**: People judge an experience largely based on how they felt at its peak (its most intense point) and at its end. The most efficient way to improve user experience is to improve the experience in the peak and in the end.
+**Peak-end rule**: People judge an experience largely based on how they felt at its peak (its most intense point) and at its end.
 
 **Serial position effect**: people tend to recall the first and last items best, and the middle items worst. Interestingly, the same effect also applies to LLMs, called "lost in the middle".
 
@@ -1599,7 +1599,7 @@ People wants attention from others. Having attention from others is useful: it i
 >
 > \- [Paying attention](https://karthikecon.github.io/karthiksrinivasan.org/paying_attention.pdf) by Karthik Srinivasan
 
-However, **popularity on internet has low correlation with efforts in posting**. You could pay a lot of efforts in making content that you think is good, but it's cold on internet. You could randomly post some silly thing then it goes popular unpredictably. This randomness may cause addition similar to gambling.
+However, **popularity on internet has low correlation with efforts in posting**. You could pay a lot of efforts in making content that you think is good, but it's cold on internet. You could randomly post some silly thing then it goes popular unpredictably. This randomness may cause addiction similar to gambling.
 
 As previously mentioned, the nuanced content is harder to understand so they are not popular on internet. 
 
@@ -1636,7 +1636,7 @@ When friends and partners complain to you, they often just want emotional suppor
 
 ## Responsibilty evasion
 
-Many previously mentioned cognitive biases has implicit purpose of responsibility evasion;
+Many previously mentioned cognitive biases has implicit purpose of responsibility evasion:
 
 - Self handicapping. When one fails, one can blame to self handicapping.
 - Herd mentality. When one follows the group, then the group fails, the responsibility is diluted to the whole group.

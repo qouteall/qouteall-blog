@@ -260,6 +260,8 @@ AI allows generating personal software for each user's specific requests. Howeve
 > 
 > \- [Link](https://x.com/mscccc/status/2006749724632822178)
 
+AI can easily rewrite a legacy codebase. But the legacy is battle-tested, the new rewritten one isn't. There may be some "tacit contract" that was broken in the rewrite. The AI doesn't know these "tacit contracts". So deploying the rewritten version faces risk. But as long as the organization can accept the short-term loss and fix the things constantly, it will be fine. It requires long-termism.
+
 ### Confusing different things with similar wording
 
 This issue is commonly encountered in AI coding. For example, `index` can mean the index in different things in different context. LLM may confuse the same word in different context. The naming should be more informative, such as `xxx_index`, `yyy_index_in_zzz`. All context-dependent things should include context in name or comments nearby. (Related: [tensor shape suffix](https://medium.com/@NoamShazeer/shape-suffixes-good-coding-style-f836e72e24fd))
@@ -450,13 +452,7 @@ Generally, testing corner case is often much harder than writing code for handli
 Good tests are hard to write.
 
 
-### LLM is a measure on API intuitiveness and document quality
-
-If you designed some API, wrote some doc, then let LLM write code using it. If LLM makes a mistake using it, then it likely means that either 1. API design is unintuitive 2. the API doc doesn't mention an important detail.
-
-### Leave tech debt for future AI to solve?
-
-Some argue that AI is improving fast that future AI will be able to refactor out the tech debt caused by today's AI. However, solving tech debt is much harder than creating tech debt. 
+### About bugfix
 
 In low-quality codebase there are often cases where **two bugs "cancel" each other**. Fixing one bug can actually "break" things. 
 
@@ -469,9 +465,11 @@ In low-quality codebase there are often cases where **two bugs "cancel" each oth
 
 The "two bugs cancel each other" looks like rare coincidence, but many of them are naturally produced by lazy "bugfixing", not coincidence. **Finding the root cause is hard, but adding "correction code" is easy**. The "correction" itself is wrong, but after some "trial-and-error" adjustments, it can mostly make the bug's effect disappear. 
 
-For example, there is a Java `NullPointerException`, AI lazily fixes it by adding `if (x == null) {return;}`, without checking where the null comes from and what are the related contracts. It may introduce a new edge case bug.
+For example, there is a Java `NullPointerException`, AI may lazily fix it by adding `if (x == null) {return;}`, without checking where the null comes from and what are the related contracts. It may introduce a new edge case bug.
 
-AI reward hacking makes AI have the tendency to use lazy ways to fix the bug, which produces that.
+Debugging requires overcoming laziness and overconfidence. When you have a hypothesis, normal people would be lazy and confident so they tend to think the hypothesis is true, then do code changes to "fix". But the hypothesis may actually be not true. The real root cause may be in a place that you never thought of. This problem applies to both human and AI. Don't let AI fix a bug too eagerly. Ask AI to validate/refute hypothesis before fixing (also be wary of hallucinations).
+
+The good practice is [try to fix it one level deeper](https://matklad.github.io/2024/09/06/fix-one-level-deeper.html). Even if the root cause is confirmed, there is often multiple ways to fix. Fixing in a deeper and more fundamental way is better for maintainability. Fixing it in shallow way cause "two bugs cancel each other" tech debt.
 
 ### Some documents/comments are negative-value
 
@@ -495,11 +493,13 @@ Another is to avoid using string concat for const strings like table name and ka
 
 When AI makes a mistake, someone may think that it's just the model being not capable enough. But you can also try to think what leads to AI making the mistake. Then you may find that prompt is ambiguous, or some naming in code is misleading, some nuance is not explicitly told in doc, etc. Then you can improve on that by improving documents/comments/prompt wording/etc.
 
+LLM performance in a codebase is actually a measure of code quality and doc quality. The high-quality code and doc helps both human and LLM. However, current LLM is not yet AGI, and letting agent run without supervision hurts code/doc quality gradually.
+
 ### About formal verification
 
 In theory, formal verification is good because it can prove that code is correct. And it's true that RL makes AI very good at writing proof programs. 
 
-But in practice, you still have to translate the requirement of software to formal theorems (set the target to prove, the target theory is written in code not natural language). The translation from requirement to theorem can be wrong. The proof itself is perfectly correct, but it proves the wrong property.
+But in practice, you still have to translate the requirement of software to formal theorems (set the target to prove, the target theory is written in code not natural language). The translation from requirement to theorem can be wrong. The proof itself is perfectly correct, but it proves the wrong theorem.
 
 Actually there are different cases:
 
@@ -510,6 +510,8 @@ Actually there are different cases:
 In real-world complex cases, under-speciying is very common. For `predicate(a, b)`, if it's not true, it's often that you can change `a` to make it true, or change `b` to make it true (for example, if database foreign key constraint is violated, can restore by either refusing change or cascade-delete). Changing which depends on the actual requirement. The theorem to prove is just part of the requirement, not the full requirement.
 
 It doesn't mean formal verification is not useful. It's useful as long as you ensure the theorem to prove aligns with your requirement.
+
+Another fallacy is that, when turning real-world requirement into theory, it often has to make some assumption on the envoronment (including other software modules). But the assumption may turn out to be false in some edge cases.
 
 ### Code rots when meaning drifts from name
 
@@ -524,9 +526,11 @@ When the name becomes misleading, it's often not easy to do the rename:
 
 So the misleading names often exist for long time.
 
-The misleading names make LLM more likely to make mistakes, unless you explicitly tell LLM about that in comments or prompts etc. If it's only mentioned in one markdown doc, LLM may not look at that doc. It's worth repeating it all over the places.
+The misleading names make LLM more likely to make mistakes, unless you explicitly tell LLM about that in docs or prompts etc.
 
 If you don't find and document about the misleading names, the code rots and becomes harder to maintain over time.
+
+Naming is actually a [hard problem](https://martinfowler.com/bliki/TwoHardThings.html).
 
 ### About Conway's law and Amadahl's law
 
@@ -561,6 +565,8 @@ If you have a benchmark, then ask AI to optimize the performance while passing t
 See also: [The benchmarkpocalypse](https://danluu.com/benchpocalypse/), [BBTree actually slower in some cases](https://news.ycombinator.com/item?id=50235122)
 
 Note that human can also make the same mistake. Writing a good benchmark that's representative to real-world workload is hard.
+
+Related: [Always Measure One Level Deeper](https://cacm.acm.org/research/always-measure-one-level-deeper/)
 
 ### AI can both harden security and write insecure code
 
@@ -681,8 +687,7 @@ Even if AI training still falls into the bitter lesson (requiring human expert f
 
 AI is becoming very good at finding vulnerability (including memory safety issue) in open source code. Human experts can also manually find them, but finding them requires efforts and energy. A human only have limited efforts and energy. But AI has much more "energy" and "efforts". And AI is scalable and can in parallel.
 
-
-
+AI can overcome human biological limitations of efforts. After all, human weren't a species specifically designed for knowledge work, but LLM is.
 
 ## Reducing cost also reduces bottom quality
 

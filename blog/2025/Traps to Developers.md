@@ -267,7 +267,6 @@ tags:
 - Directly pass-by-value can do implicit copy that hurts performance.
   - There is [copy elision](https://en.cppreference.com/cpp/language/copy_elision) that helps in many cases. But copy elision doesn't work when passing local variable (even it's the last use of local variable). For example, if function `g` accepts arg by value, then `g(f())` can have copy elision, but `auto x = f(); g(x);` cannot elide copy to g's argument. It's recommended to make functions accept object by reference not value.
 - [Iterator invalidation](https://learnmoderncpp.com/2024/09/04/understanding-iterator-invalidation/). Modifying a container when looping on it.
-- `std::views::filter` malfunctions when element is mutated that predicate result changes in multi-pass iteration. [See also](https://github.com/CppCon/CppCon2024/blob/main/Presentations/Taming_the_Cpp_Filter_View.pdf), [See also](https://github.com/philsquared/cpponsea2025-slides/blob/main/Presentations/Faster_Safer_Better_Ranges.pdf)
 - `std::remove` doesn't remove but just rearrange elements. `erase` actually removes.
 - Destructing a deep tree structure can stack overflow. Solution is to replace recursion with loop in destructor.
 - `std::shared_ptr` itself is not atomic (although its reference count is atomic). Mutating a `shared_ptr` itself is not thread-safe. `std::atomic<std::shared_ptr<...>>` is atomic but uses locking.
@@ -292,6 +291,11 @@ tags:
   - Unaligned memory access is undefined behavior.
   - Data race is undefined behavior.
   - Infinite loop without side effect (no write to shared memory, no IO, etc.) and without volatile load or atomic load is undefined behavior.[^infinite_loop_ub]
+  - Using std wrongly can cause undefined behavior. 
+    - The comparator passed to `std::sort` must satisfy [strict weak ordering](https://en.cppreference.com/cpp/concepts/strict_weak_order), otherwise it triggers undefined behavior. 
+    - For map and set containers, mutating key object is undefined behavior, unless the mutation doesn't affect equality or order/hashcode.
+    - For `std::find_if`, the predicate should not mutate the element, unless the mutation doesn't affect predicate results. Same applies to `std::views::filter`.  [Related](https://github.com/CppCon/CppCon2024/blob/main/Presentations/Taming_the_Cpp_Filter_View.pdf), [Related](https://github.com/philsquared/cpponsea2025-slides/blob/main/Presentations/Faster_Safer_Better_Ranges.pdf)
+    - ......
   - Undefined behavior can "travel back in time". For `if (a) { b(); }`, if `b()` unconditionally triggers undefined behavior, then compiler can assume `a` is always false. If `a` is true then it triggers undefined behavior before executing `b()`. The deduction can go earlier: the inputs that cause `a` to be true can trigger undefined behavior before computing `a`.
 - Global variable initialization runs before `main`. [Static Initialization Order Fiasco](https://en.cppreference.com/w/cpp/language/siof.html).
 - Destructors have `noexcept` by default. If exception is thrown out of a `noexcept` function, whole process will crash.
@@ -308,8 +312,7 @@ tags:
 - Constructor field initialization order is same as field declaration order. In `class MyType { int a; int b; MyType(): b(1), a(b + 1) {} }` the constructor will trigger undefined behavior because it firstly initializes `a` using `b + 1` before initializing `b`.
 - If the same header file is included in two `.cpp` files with different macros, and the macro difference affect the content in `inline` thing or `template` thing or type definition, then it violates [ODR (one definiton rule)](https://en.cppreference.com/w/cpp/language/definition.html). There will be different compiled functions with the same symbol name, and linker nondeterministically chooses one.
 - The dynamic library can bundle its own allocator[^cpp_allocator]. One allocator's allocation should not be freed in another allocator. Passing container (e.g. `vector`) is only safe when allocator matches (and ABI matches). When passing `unique_ptr` across dynamic libraries, it's recommended to use custom deleter.
-- `malloc` may return null. When there is no OS overcommit, checking for null can gracefully handle out-of-memory. When overcommit is enabled (often enabled by default), `malloc` can succeed despite out-of-memory, then process get killed when accessing allocated memory. The same also happens in containers.
-  - But it's still recommended to check for null (can abort on null), because it may still return null under overcommit[^malloc_return_null], and using null pointer is undefined behavior.
+- `malloc` may return null. When there is no OS overcommit, checking for null can gracefully handle out-of-memory. When overcommit is enabled (often enabled by default), `malloc` can succeed despite out-of-memory, then process get killed when accessing allocated memory. The same also happens in Linux containers. But under overcommit `malloc` can still return null[^malloc_return_null].
   - In C++, the equivalence of `malloc` returning null in `new` is `std::bad_alloc` exception. When exception is disabled, use `new (std::nothrow) TheType`, which may give null.
 - C++ namespace pollution. It's not recommended to use `using namespace std;`. Including a header or `using` a namespace may change function overloading behavior.
 - Alignment can cause padding in struct.
