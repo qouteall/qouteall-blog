@@ -431,6 +431,8 @@ This doesn't mean they are tacit knowledge that cannot be written. These knowled
 
 Related: [Programming as theory building](https://pages.cs.wisc.edu/~remzi/Naur.pdf).
 
+However, fully understanding large codebase is practically impossible. And sometimes even if you think you understand one part, you then find that the understanding was actually insufficient after investigating an issue. Without the full understanding, the code can still be written, but it will be work less well and have to be more "conservative" when interacting with other parts of codebase (conservative means more "distrust" edge case error handling, and things like "defensive copy", or remking similar mechanisms, etc.). This is exactly the same things that LLMs like to do because LLMs starts editing a large codebase without having full understanding of whole codebase. 
+
 ### About testing
 
 Good tests can catch AI-written bugs and help AI finish work by itself.
@@ -485,6 +487,12 @@ Related: [Grep beats LSP? Why coding agents ignore your fancier tools](https://w
 
 LSP is more fragile than grep. It's often that you cloned a repo then IDE gives error messages because you need to do some special configurations to make it recognize dependenceis and install required tools. But text search just works without configuraiton.
 
+Also LSP tool calls have more format requirements so making correct tool call is harder than than grep.
+
+And grep has an advantage that it includes contents in literal strings. But LSP often don't parse into literal strings. So grep can discover usage sites that work via reflection/metaprogramming/etc.
+
+Sometimes even if grep returns unrelated results with same name, it may still be useful for AI to understand the codebase.
+
 Improving greppability requires **avoid making the name's meaning depend on context**. For example, `userName` field is more greppable than `name` field in `User` type. If the field is `name` then AI has to grep `name` which finds many irrelevant things. Someone may say that `user.userName` duplicates "user" so it's unelegant, but it's good from greppability perspective.
 
 Another is to avoid using string concat for const strings like table name and kafka topic name.
@@ -532,6 +540,8 @@ If you don't find and document about the misleading names, the code rots and bec
 
 Naming is actually a [hard problem](https://martinfowler.com/bliki/TwoHardThings.html).
 
+Sometimes LLM will do "clever code reuse". A type or function or mechanism for one purpose can be reused for another different purpose. But "clever" often contradicts with maintainability. After the "clever code reuse" the name will be different to actual purpose, which is misleading and could be source of future bugs.
+
 ### About Conway's law and Amadahl's law
 
 [Conway's law](https://en.wikipedia.org/wiki/Conway%27s_law):
@@ -556,7 +566,7 @@ AI makes it much easier to add new features. But features are not always a posit
 - Some features have performance impact even when user is not using the feature.
 - ......
 
-The taste still matters.
+It's common that AI auto-adds a feature that's not mentioned in prompt, or AI suggests a good-to-have feature then human approves adding it. But the features also increase complexity and hurt maintainability, also create sources of bugs. Good product requires feature abstinence.
 
 ### AI can "hack" performance optimization
 
@@ -593,11 +603,13 @@ Thinging things in higher level requires discarding some details. Then the idea 
 
 One problem is that it's hard to distinguish "abstract" and "vague".
 
-### Hazard of "default value"
+### Hazard of "default value" and "fail-open"
 
 It's common that AI writes "defensive" code. The AI code tries hard to avoid crashing. When some operation failed, it often not give explicit error but create a default value as result instead. 
 
 The insidious part is that in many simple cases, the default value works. The default value is only incorrect in some complex cases. So it's not easy to reveal the bug using simple tests. It creates correctness hazard and debugging hazard.
+
+But from user's perspective, the user dislikes program crashing or showing errors. It's often that make the program keep running (fail-open) gives better impression than crashing or visible malfunctioning (fail-closed). If the program seems running but does wrong things, users sometimes don't notice. The optimizing for user impression (impression, not actual usability) conflicts with correctness and security.
 
 ### Implicit Reward hacking
 
@@ -622,6 +634,14 @@ The "common assumption" is also one important reason why AI coding is convenient
 The famous "paperclip maximizer" fiction is an example of AI following instruction too rigidly. In realistic cases, it's often that the prompter don't fully understand one thing, then ask AI to write according to the design that prompter think is good but actually bad. Because the design is bad, AI has to write a lot of hacky fragile unmaintainable code to satisfy the instruction. AI sometimes push back but often don't because it's shaped by instruction following RL.
 
 There is a tradeoff. If AI never pushes back, then it cannot correct wrong decisions. But if AI pushes back too often, then AI is less usable.
+
+### AI is good at finding edge cases
+
+AI is good (probably superhuman) at finding edge cases. It's good for finding bugs. But not good when writing code. Often there are some very low-stake edge cases that don't worth to be handled. Handling them hurts maintainability.
+
+Sometimes, when the amout of edge case is too high, it's worth questioning whether the design is bad.
+
+Also there are low-stake edge cases. Low-stake edge cases means that even if software malfunctions in that case, it's mostly ok. For a low-probability edge case, it's high-stake (e.g. lose important data in the edge case), then it should be handled even if it's low-probability.
 
 ## Context bottleneck
 
@@ -728,3 +748,14 @@ The true superintelligence should be very "open-minded", not stuck in path depen
 Sometimes the model lose diversity because diversity reduces RL reward. This is also a problem of RL.
 
 There is anecdotes that when someone wants to use AI to find vulnerabilities in open source code, they open parallel sessions with different prompts like "find vulnrabilities, start from file /aaa/bbb" and "find vulnerabilities, start from file /xxx/yyy". In all sessions the AI has access to same code repo, but the different prompts give enough initial difference to improve search diversity.
+
+## The AI risk on mental aspects
+
+There are many sci-fi movies thinking that AI risk is AI fighting back human. Another think that AI risk is in unemployment. But there is also the risk on mental aspects. Someone mathematician may have spent years of efforts for a hard problem, but that problem is easily achieved by AI. This will cause depression. For artists and programmers, many skills devalued due to AI. If the ego depends on value of skill, then AI hurts ego a lot. If one still works on something, there is the anxiety that tomorrow's improved AI will do the same thing easily.
+
+One purpose of anti-AI sentiment is to handle the mental impacts. There are valid reasons to be anti-AI (e.g. use training data without attribution, fake superficial signal with low internal quality, finalcial bubble). Being semi-anti-AI is fine, but being fully anti-AI is similar to [ostrich effect](https://en.wikipedia.org/wiki/Ostrich_effect), which may be dangerous, because AI is indeed useful in some aspects, and AI is still improving.
+
+What about "if you cannot defeat AI, join AI"? But forcing to work on a thing that one don't like cannot solve mental problem.
+
+One suggestion is to get off internet and go out for a walk. The digital things (code, images, math, etc.) are transformed by AI, but the physical things is still untouched by AI (except data center buldout). After all, human are physical-world-native, not information-world-native.
+

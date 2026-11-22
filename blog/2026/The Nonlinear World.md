@@ -221,6 +221,10 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
   - Expensive medication costs money
   - ...
 
+- First-order effect: Antioxidants are good for health.
+
+  Second-order effect: Antioxidants can [cancel the benefit of exercise](https://pubmed.ncbi.nlm.nih.gov/19433800/).
+
 ### In Organization
 
 - First-order effect: Upper management sets very high goals to subordinates. This pushes subordinates to work hard.
@@ -259,13 +263,17 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: Most decisions are tradeoffs that cannot please everyone. The more people discussing, the more likely the decision gets pushback, then the decision cannot be made. Also, the more people involved, the more likely the secret gets leaked. Most important decisions are made in small private meetings.
 
-- First-order effect: The more penality enforced to subordinate when an incident comes, the less likely incident happens.
+- First-order effect: Punishing subordinate for incidents pushes them to reduce incidents.
 
   Second-order effect: 
   
   - There is information gap between subordinate and upper authority. The fear of punishment may cause subordinates to focus on hiding the "bad news", instead of solving problems.
   - The subordinate may waste too much resources to reduce incident to the extreme, when it's no longer economical.
-  - The subordinate may "extend the mistake" and make it "too big to fail" to gain leverage in bargaining with upper authority.
+  - The subordinate may "extend the mistake" and make it "too big to fail" to gain reverse leverage in bargaining with upper authority.
+
+- First-order effect: Reducing "jerks" and keeping "nice" people in workplace helps collaboration.
+
+  Second-order effect: There are two kinds of "jerks". One kind is truly abusive, but there is another kind: the people that deeply care about the work and has high quality standards. The second kind tend to have conflicts with people who don't care about work much. Suppressing the second kind is bad for organization as a whole.
 
 ### In Psychology
 
@@ -349,11 +357,11 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
 - First-order effect: Trying to achieve perfection will make one do better.
 
-  Second-order effect: Perfection can be the enemy of good. (e.g. trying to buy at the lowest point makes one not buy in the bottom range)
+  Second-order effect: Perfection can be the enemy of good. (e.g. trying to buy at the lowest point may make one not buy in the bottom range)
 
 - First-order effect: When waiting on one thing to finish, switch to do another work can improve efficiency.
 
-  Second-order effect: Frequent switchings cause distraction, which may cause one to forget the context, or make more mistakes (brain is not computer). Focusing on one task and patiently waiting can be more efficient overall.
+  Second-order effect: Frequent switchings cause distraction, which may cause one to forget the context, or make more mistakes. Focusing on one task and patiently waiting can be more efficient overall.
 
 [^green_lumber_fallacy]: Green lumber fallacy: one trader mistakenly thought "green lumber" means wood in green color, but green lumber actually means freshly-cut wood. But the trader still succeeded in trading green lumber. The market is highly random and anti-inductive. It's often that luck overrides understanding.
 
@@ -423,6 +431,19 @@ Note: **"X may backfire" should not be simplified to "X is bad".**
 
   Second-order effect: Developers tend to write low-quality test to increase test coverage (Goodhart's law). The low-quality tests are worse than useless because their failures are likely false-positive.
 
+- First-order effect: Optimizing to makes software faster is good.
+
+  Second-order effect:
+
+  - Optimizing one aspect may make other aspects overloaded (e.g. increasing parallelism can cause OOM).
+  - Optimization may reduce maintainability, making it harder to add new features.
+  - Optimizing one scenario may make it slower in another scenario.
+  - Optimization may cause new security vulnerability.
+  - ......
+
+- First-order effect: When training LLM, filtering only high-quality data for training is best, because of garbage-in-garbage-out principle.
+
+  Second-order effect: Data diversity is also important. HIgh-standard filtering reduces data diversity and thus may hurt LLM performance.
 
 ## Feedback loops
 

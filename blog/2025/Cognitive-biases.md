@@ -276,7 +276,7 @@ When one succeedes despite self-handicapping, it shows great capability. But if 
 
 Setting unrealistic high goals is sometimes a form of self-handicapping. But not always.
 
-Self-handicapping is also a way of **reducing responsibility**. This is common in large corporations and governments: intentionally create reasons of failure to reduce responsibility.
+Self-handicapping is also a way of **reducing responsibility**: intentionally create reasons of failure to reduce responsibility.
 
 Side note: It's common that people correlate results with capability. Self-handicapping is largely due to that. However, in real world, results are largely determined by luck and long-term attitude. The capability factor is very small in the long term.
 
