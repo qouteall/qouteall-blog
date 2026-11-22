@@ -753,9 +753,15 @@ There is anecdotes that when someone wants to use AI to find vulnerabilities in 
 
 There are many sci-fi movies thinking that AI risk is AI fighting back human. Another think that AI risk is in unemployment. But there is also the risk on mental aspects. Someone mathematician may have spent years of efforts for a hard problem, but that problem is easily achieved by AI. This will cause depression. For artists and programmers, many skills devalued due to AI. If the ego depends on value of skill, then AI hurts ego a lot. If one still works on something, there is the anxiety that tomorrow's improved AI will do the same thing easily.
 
-One purpose of anti-AI sentiment is to handle the mental impacts. There are valid reasons to be anti-AI (e.g. use training data without attribution, fake superficial signal with low internal quality, finalcial bubble). Being semi-anti-AI is fine, but being fully anti-AI is similar to [ostrich effect](https://en.wikipedia.org/wiki/Ostrich_effect), which may be dangerous, because AI is indeed useful in some aspects, and AI is still improving.
+One purpose of anti-AI sentiment is to handle the mental impacts. There are valid reasons to be anti-AI (e.g. use training data without attribution, fake superficial signal with low internal quality, finalcial bubble). Being anti-AI is fine. But denying AI capability (e.g. "AI is just slop generator") is similar to [ostrich effect](https://en.wikipedia.org/wiki/Ostrich_effect), which may be dangerous.
 
-What about "if you cannot defeat AI, join AI"? But forcing to work on a thing that one don't like cannot solve mental problem.
+Of course, current AI is still not AGI, and there are many things that human skill is still needed. However, AI is still improving and it's hard to predict when will it really hit a wall. So there is always anxiety of effort devaluation: "what I spend efforts to do today will be easily be done by tomorrow AI". This is even true when working on AI-related products.
 
-One suggestion is to get off internet and go out for a walk. The digital things (code, images, math, etc.) are transformed by AI, but the physical things is still untouched by AI (except data center buldout). After all, human are physical-world-native, not information-world-native.
+There are some ways to shift mindsets:
+
+- Be less ambitious and relax. Stop trying to prove "you are valuable". Just appreciate what you already have. Think about death all the time ([memento mori](https://dailystoic.com/what-is-memento-mori/)). Use internet less and touch physical world more.
+- Be much more ambitious. Current AI is still not AGI, and human + AI is better than AI alone, so there are a lot of ambitious things to do. Be busy doing ambitious things to stop worrying about future.
+- Re-establish value from internal motivation. Treat what you do as an art form. Even if AI could do it faster, your own work contains special values that AI products don't have.
+- ......
+
 
