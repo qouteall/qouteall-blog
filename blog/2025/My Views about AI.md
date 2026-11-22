@@ -757,11 +757,9 @@ One purpose of anti-AI sentiment is to handle the mental impacts. There are vali
 
 Of course, current AI is still not AGI, and there are many things that human skill is still needed. However, AI is still improving and it's hard to predict when will it really hit a wall. So there is always anxiety of effort devaluation: "what I spend efforts to do today will be easily be done by tomorrow AI". This is even true when working on AI-related products.
 
-There are some ways to shift mindsets:
+The middle-level ambition is problematic. You need to be either less ambitious or much more ambitious:
 
-- Be less ambitious and relax. Stop trying to prove "you are valuable". Just appreciate what you already have. Think about death all the time ([memento mori](https://dailystoic.com/what-is-memento-mori/)). Use internet less and touch physical world more.
-- Be much more ambitious. Current AI is still not AGI, and human + AI is better than AI alone, so there are a lot of ambitious things to do. Be busy doing ambitious things to stop worrying about future.
-- Re-establish value from internal motivation. Treat what you do as an art form. Even if AI could do it faster, your own work contains special values that AI products don't have.
-- ......
+- Be less ambitious: Stop trying to prove "I am valuable". Accept ego adjustments. Just seek internal motivations to do some hobby activities, no need to compare with AI.
+- Be much more ambitious: Current AI is still not AGI, and human + AI is better than AI alone, so there are a lot of ambitious things to do. If one thing is conquered by AI, just make the goal much more ambitious than that. Be busy doing ambitious things to stop worrying.
 
 
